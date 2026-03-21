@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API = axios.create({ baseURL: '' });
+const API = axios.create({ baseURL: 'https://styleguru.onrender.com' });
 
 // Auto-attach token to every request
 API.interceptors.request.use((config) => {
