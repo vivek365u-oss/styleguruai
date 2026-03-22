@@ -25,7 +25,7 @@ SECRET_KEY = "styleguru-secret-key-change-in-production-2024"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 
-UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR = Path("/tmp/uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
