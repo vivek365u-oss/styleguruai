@@ -1,41 +1,47 @@
-import { useState, useRef } from 'react';
-import { analyzeImage } from '../api/styleApi';
+import { useState, useRef, useContext } from 'react';
+import { analyzeImage, analyzeImageFemale, analyzeImageSeasonal } from '../api/styleApi';
+import { ThemeContext } from '../App';
 
-function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSelected }) {
+function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSelected, onGenderChange }) {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const [preview, setPreview] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [gender, setGender] = useState('male');
+  const [mode, setMode] = useState('normal');
+  const [season, setSeason] = useState('summer');
   const fileInputRef = useRef(null);
+
+  const handleGenderChange = (newGender) => {
+    setGender(newGender);
+    if (onGenderChange) onGenderChange(newGender);
+  };
 
   const handleFile = async (file) => {
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
-      onError('Sirf JPG, PNG, ya WebP image upload karo.');
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      onError('Image bahut badi hai. Maximum 10MB upload karo.');
-      return;
-    }
-
+    if (!validTypes.includes(file.type)) { onError('Sirf JPG, PNG, ya WebP image upload karo.'); return; }
+    if (file.size > 10 * 1024 * 1024) { onError('Image bahut badi hai. Maximum 10MB upload karo.'); return; }
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreview(e.target.result);
-      onImageSelected(e.target.result);
-    };
+    reader.onload = (e) => { setPreview(e.target.result); onImageSelected(e.target.result); };
     reader.readAsDataURL(file);
-
     onLoadingStart();
     try {
-      const res = await analyzeImage(file, setUploadProgress);
-      onAnalysisComplete(res.data);
+      let res;
+      if (mode === 'seasonal') {
+        res = await analyzeImageSeasonal(file, season, setUploadProgress);
+        onAnalysisComplete({ ...res.data, gender: 'seasonal' });
+      } else if (gender === 'female') {
+        res = await analyzeImageFemale(file, setUploadProgress);
+        onAnalysisComplete({ ...res.data, gender: 'female' });
+      } else {
+        res = await analyzeImage(file, setUploadProgress);
+        onAnalysisComplete({ ...res.data, gender: 'male' });
+      }
     } catch (err) {
       const detail = err.response?.data?.detail;
-      if (typeof detail === 'object') {
-        onError(detail.message || 'Analysis fail hui.');
-      } else {
-        onError(detail || 'Server se connect nahi ho pa raha. Backend chal raha hai?');
-      }
+      if (typeof detail === 'object') onError(detail.message || 'Analysis fail hui.');
+      else onError(detail || 'Server se connect nahi ho pa raha. Backend chal raha hai?');
     }
   };
 
@@ -45,31 +51,136 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0]);
   };
 
+  const seasons = [
+    { id: 'summer', label: 'Summer', emoji: '☀️', desc: 'March-June' },
+    { id: 'monsoon', label: 'Monsoon', emoji: '🌧️', desc: 'July-Sept' },
+    { id: 'winter', label: 'Winter', emoji: '❄️', desc: 'Oct-Feb' },
+    { id: 'festive', label: 'Festive', emoji: '🎉', desc: 'Diwali/Eid' },
+    { id: 'college', label: 'College', emoji: '🎓', desc: 'Campus Wear' },
+  ];
+
   return (
     <div className="mt-4">
 
       {/* Hero */}
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-purple-500/20 border border-purple-500/30 rounded-full px-4 py-2 mb-4">
+      <div className="text-center mb-8">
+        <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 mb-4 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
           <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></span>
-          <span className="text-purple-300 text-sm font-medium">AI-Powered • 95%+ Accuracy</span>
+          <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>AI-Powered • 95%+ Accuracy</span>
         </div>
-        <h2 className="text-4xl md:text-5xl font-black text-white mb-3 leading-tight">
+        <h2 className={`text-3xl md:text-5xl font-black mb-3 leading-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
           Apna Perfect
-          <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"> Style </span>
+          <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent"> Style </span>
           Discover Karo
         </h2>
-        <p className="text-white/50 text-lg max-w-xl mx-auto">
-          Ek selfie upload karo — hum tumhare skin tone ke hisaab se best colors aur outfits suggest karenge
+        <p className={`text-lg max-w-xl mx-auto ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
+          Selfie upload karo — skin tone ke hisaab se personalized fashion recommendations pao
         </p>
+      </div>
+
+      {/* Mode Selector */}
+      <div className="flex justify-center mb-6">
+        <div className={`rounded-2xl p-1.5 flex gap-1 border ${isDark ? 'bg-white/10 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
+          <button
+            onClick={() => setMode('normal')}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${
+              mode === 'normal'
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            <span>👔</span> Normal
+          </button>
+          <button
+            onClick={() => setMode('seasonal')}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${
+              mode === 'seasonal'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg'
+                : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            <span>🌍</span> Seasonal
+          </button>
+        </div>
+      </div>
+
+      {/* Normal Mode — Gender Toggle */}
+      {mode === 'normal' && (
+        <div className="flex justify-center mb-6">
+          <div className={`rounded-2xl p-1.5 flex gap-1 border ${isDark ? 'bg-white/10 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
+            <button
+              onClick={() => handleGenderChange('male')}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
+                gender === 'male'
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/30'
+                  : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'
+              }`}
+            >
+              <span>👨</span> Male
+            </button>
+            <button
+              onClick={() => handleGenderChange('female')}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
+                gender === 'female'
+                  ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/30'
+                  : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'
+              }`}
+            >
+              <span>👩</span> Female
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Seasonal Mode — Season Selector */}
+      {mode === 'seasonal' && (
+        <div className="mb-6">
+          <p className={`text-sm text-center mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Season choose karo:</p>
+          <div className="flex justify-center gap-3 flex-wrap">
+            {seasons.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setSeason(s.id)}
+                className={`flex flex-col items-center gap-1 px-4 py-3 rounded-2xl border font-medium text-sm transition-all duration-300 hover:scale-105 ${
+                  season === s.id
+                    ? 'bg-amber-500/30 border-amber-500/50 text-amber-600 shadow-lg shadow-amber-500/20'
+                    : isDark
+                      ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:bg-white/10'
+                      : 'bg-white border-gray-200 text-gray-500 hover:text-gray-800 hover:border-amber-300 shadow-sm'
+                }`}
+              >
+                <span className="text-2xl">{s.emoji}</span>
+                <span className="font-bold">{s.label}</span>
+                <span className="text-xs opacity-70">{s.desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Mode Info */}
+      <div className="text-center mb-6 text-sm font-medium">
+        {mode === 'seasonal' ? (
+          <span className={isDark ? 'text-amber-300' : 'text-amber-600'}>
+            {seasons.find(s => s.id === season)?.emoji} {seasons.find(s => s.id === season)?.label} ke liye special recommendations milenge!
+          </span>
+        ) : gender === 'female' ? (
+          <span className={isDark ? 'text-pink-300' : 'text-pink-600'}>👗 Female mode: Dresses, Sarees, Suits, Makeup suggestions milenge!</span>
+        ) : (
+          <span className={isDark ? 'text-blue-300' : 'text-blue-600'}>👔 Male mode: Shirts, Pants, Ethnic wear suggestions milenge!</span>
+        )}
       </div>
 
       {/* Upload Box */}
       <div
-        className={`relative border-2 border-dashed rounded-3xl p-12 text-center cursor-pointer transition-all duration-300 ${
+        className={`relative border-2 border-dashed rounded-3xl p-6 md:p-12 text-center cursor-pointer transition-all duration-300 ${
           dragActive
             ? 'border-purple-400 bg-purple-500/10 scale-[1.01]'
-            : 'border-white/20 bg-white/5 hover:border-purple-400/50 hover:bg-white/10'
+            : mode === 'seasonal'
+              ? isDark ? 'border-amber-500/30 bg-amber-500/5 hover:border-amber-400/50 hover:bg-amber-500/10' : 'border-amber-300 bg-amber-50 hover:border-amber-400 hover:bg-amber-100'
+              : gender === 'female'
+                ? isDark ? 'border-pink-500/30 bg-pink-500/5 hover:border-pink-400/50 hover:bg-pink-500/10' : 'border-pink-300 bg-pink-50 hover:border-pink-400 hover:bg-pink-100'
+                : isDark ? 'border-white/20 bg-white/5 hover:border-purple-400/50 hover:bg-white/10' : 'border-gray-300 bg-white hover:border-purple-400 hover:bg-purple-50 shadow-sm'
         }`}
         onClick={() => fileInputRef.current?.click()}
         onDrop={handleDrop}
@@ -86,25 +197,39 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
 
         {preview ? (
           <div className="flex flex-col items-center">
-            <img src={preview} alt="Preview" className="w-40 h-40 object-cover rounded-2xl shadow-2xl shadow-purple-500/20 mb-4 border-2 border-purple-500/30" />
-            <p className="text-purple-300 animate-pulse">Analyzing tumhari photo...</p>
+            <img src={preview} alt="Preview" className="w-40 h-40 object-cover rounded-2xl shadow-2xl mb-4 border-2 border-purple-500/30" />
+            <p className={`animate-pulse ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>Analyzing tumhari photo...</p>
             {uploadProgress > 0 && uploadProgress < 100 && (
-              <div className="mt-3 w-48 bg-white/10 rounded-full h-1.5">
+              <div className={`mt-3 w-48 rounded-full h-1.5 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
                 <div className="bg-purple-500 h-1.5 rounded-full transition-all" style={{ width: `${uploadProgress}%` }}></div>
               </div>
             )}
           </div>
         ) : (
           <>
-            <div className="w-20 h-20 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10">
-              <span className="text-4xl">📸</span>
+            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border ${
+              mode === 'seasonal'
+                ? isDark ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-white/10' : 'bg-amber-100 border-amber-200'
+                : gender === 'female'
+                  ? isDark ? 'bg-gradient-to-br from-pink-500/20 to-rose-500/20 border-white/10' : 'bg-pink-100 border-pink-200'
+                  : isDark ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-white/10' : 'bg-purple-100 border-purple-200'
+            }`}>
+              <span className="text-4xl">
+                {mode === 'seasonal' ? seasons.find(s => s.id === season)?.emoji : gender === 'female' ? '👩' : '🤳'}
+              </span>
             </div>
-            <p className="text-white text-xl font-bold mb-2">Selfie Drop Karo Yahan</p>
-            <p className="text-white/40 mb-6">ya click karke browse karo</p>
-            <span className="inline-block px-8 py-3.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-2xl shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 transition-all">
+            <p className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>Selfie Drop Karo Yahan</p>
+            <p className={`mb-6 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>ya click karke browse karo</p>
+            <span className={`inline-block px-8 py-3.5 text-white font-bold rounded-2xl shadow-lg transition-all hover:scale-105 ${
+              mode === 'seasonal'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-amber-500/30'
+                : gender === 'female'
+                  ? 'bg-gradient-to-r from-pink-500 to-rose-500 shadow-pink-500/30'
+                  : 'bg-gradient-to-r from-purple-500 to-pink-500 shadow-purple-500/30'
+            }`}>
               📁 Photo Choose Karo
             </span>
-            <p className="text-white/25 text-xs mt-4">JPG, PNG, WebP • Max 10MB • Photo store nahi hoti</p>
+            <p className={`text-xs mt-4 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>JPG, PNG, WebP • Max 10MB • Photo store nahi hoti</p>
           </>
         )}
       </div>
@@ -112,23 +237,23 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       {/* Tips */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
         {[
-          { emoji: '☀️', title: 'Natural Light', desc: 'Window ke paas selfie lo — best results', color: 'yellow' },
-          { emoji: '🤳', title: 'Seedha Dekho', desc: 'Camera ko directly face karo', color: 'blue' },
-          { emoji: '😊', title: 'Chehra Clear Ho', desc: 'Sunglasses ya mask mat pehno', color: 'green' },
+          { emoji: '☀️', title: 'Natural Light', desc: 'Window ke paas selfie lo — best results' },
+          { emoji: '🤳', title: 'Seedha Dekho', desc: 'Camera ko directly face karo' },
+          { emoji: '😊', title: 'Chehra Clear Ho', desc: 'Sunglasses ya mask mat pehno' },
         ].map((tip, i) => (
-          <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-3 hover:bg-white/10 transition">
+          <div key={i} className={`rounded-2xl p-4 flex items-center gap-3 transition border ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-gray-200 hover:border-purple-200 shadow-sm'}`}>
             <span className="text-2xl">{tip.emoji}</span>
             <div>
-              <p className="text-white font-semibold text-sm">{tip.title}</p>
-              <p className="text-white/40 text-xs">{tip.desc}</p>
+              <p className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{tip.title}</p>
+              <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{tip.desc}</p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Sample skin tones */}
-      <div className="mt-8 bg-white/5 border border-white/10 rounded-2xl p-5">
-        <p className="text-white/50 text-xs text-center mb-3">Hum in sabhi skin tones ke liye kaam karte hain 🇮🇳</p>
+      {/* Skin Tones */}
+      <div className={`mt-6 rounded-2xl p-5 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+        <p className={`text-xs text-center mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Hum in sabhi skin tones ke liye kaam karte hain 🇮🇳</p>
         <div className="flex justify-center gap-3 flex-wrap">
           {[
             { name: 'Fair', color: '#F5DEB3' },
@@ -140,7 +265,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           ].map((tone) => (
             <div key={tone.name} className="flex flex-col items-center gap-1">
               <div className="w-8 h-8 rounded-full border-2 border-white/20 shadow-lg" style={{ backgroundColor: tone.color }}></div>
-              <span className="text-white/40 text-xs">{tone.name}</span>
+              <span className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{tone.name}</span>
             </div>
           ))}
         </div>
