@@ -2,16 +2,18 @@ import os
 import uuid
 import time
 import traceback
+import numpy as np
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional
+
+import firebase_admin
+from firebase_admin import credentials, auth as firebase_auth
 
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
-from passlib.context import CryptContext
+from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 
 from image_processor import ImageProcessor
@@ -19,106 +21,42 @@ from skin_tone_classifier import SkinToneClassifier
 from recommendation_engine import RecommendationEngine
 
 # ============================================
+# FIREBASE INIT
+# ============================================
+cred = credentials.Certificate("firebase-credentials.json")
+firebase_admin.initialize_app(cred)
+
+# ============================================
 # CONFIG
 # ============================================
-SECRET_KEY = "styleguru-secret-key-change-in-production-2024"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
-
 UPLOAD_DIR = Path("/tmp/uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
-
-# ============================================
-# FAKE DATABASE (for MVP — replace with real DB later)
-# ============================================
-fake_users_db = {
-    "demo@styleguru.com": {
-        "email": "demo@styleguru.com",
-        "full_name": "Demo User",
-        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",  # "secret"
-        "analysis_history": []
-    }
-}
-
-# ============================================
-# MODELS
-# ============================================
-class UserRegister(BaseModel):
-    email: str
-    full_name: str
-    password: str
-
-class UserLogin(BaseModel):
-    email: str
-    password: str
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-    user_name: str
-    email: str
-
-class TokenData(BaseModel):
-    email: Optional[str] = None
+MAX_FILE_SIZE = 10 * 1024 * 1024
 
 # ============================================
 # AUTH SETUP
 # ============================================
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-def get_user(email: str):
-    return fake_users_db.get(email)
-
-def authenticate_user(email: str, password: str):
-    user = get_user(email)
-    if not user:
-        return False
-    if not verify_password(password, user["hashed_password"]):
-        return False
-    return user
-
 async def get_current_user(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Login expired ya invalid hai. Dobara login karo.",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if email is None:
-            raise credentials_exception
-        token_data = TokenData(email=email)
-    except JWTError:
-        raise credentials_exception
-    user = get_user(token_data.email)
-    if user is None:
-        raise credentials_exception
-    return user
+        decoded = firebase_auth.verify_id_token(token)
+        uid = decoded["uid"]
+        email = decoded.get("email", "")
+        name = decoded.get("name", email)
+        return {"uid": uid, "email": email, "full_name": name}
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Login expired ya invalid hai. Dobara login karo.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 # ============================================
 # APP INIT
 # ============================================
-app = FastAPI(
-    title="StyleGuru API",
-    description="AI-powered fashion recommendation based on skin tone",
-    version="1.0.0"
-)
+app = FastAPI(title="StyleGuru API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -133,237 +71,215 @@ skin_classifier = SkinToneClassifier()
 recommendation_engine = RecommendationEngine()
 
 # ============================================
-# ROUTES — AUTH
+# HELPER — SMART DOMINANT COLOR EXTRACTION
+# Background remove karke sirf kapde ka color detect karo
 # ============================================
+def extract_dominant_outfit_color(image: np.ndarray) -> dict:
+    import cv2
 
-@app.post("/auth/register", response_model=Token)
-async def register(user_data: UserRegister):
-    """Register a new user"""
+    small = cv2.resize(image, (300, 300))
+    rgb = cv2.cvtColor(small, cv2.COLOR_BGR2RGB)
 
-    # Check if email already exists
-    if user_data.email in fake_users_db:
-        raise HTTPException(
-            status_code=400,
-            detail="Yeh email already registered hai. Login karo ya doosra email use karo."
-        )
+    sh, sw = small.shape[:2]
 
-    # Validate email format
-    if "@" not in user_data.email or "." not in user_data.email:
-        raise HTTPException(status_code=400, detail="Valid email address dalo.")
+    # Center crop — background mostly edges pe hota hai
+    margin_h = int(sh * 0.20)
+    margin_w = int(sw * 0.20)
+    center_region = rgb[margin_h:sh-margin_h, margin_w:sw-margin_w]
 
-    # Validate password length
-    if len(user_data.password) < 6:
-        raise HTTPException(status_code=400, detail="Password kam se kam 6 characters ka hona chahiye.")
+    pixels = center_region.reshape(-1, 3).astype(np.float32)
 
-    # Validate name
-    if len(user_data.full_name.strip()) < 2:
-        raise HTTPException(status_code=400, detail="Apna poora naam dalo.")
+    r_ch = pixels[:, 0]
+    g_ch = pixels[:, 1]
+    b_ch = pixels[:, 2]
 
-    # Save user
-    hashed_password = get_password_hash(user_data.password)
-    fake_users_db[user_data.email] = {
-        "email": user_data.email,
-        "full_name": user_data.full_name,
-        "hashed_password": hashed_password,
-        "analysis_history": []
-    }
+    brightness = np.mean(pixels, axis=1)
+    max_rgb = np.max(pixels, axis=1)
+    min_rgb = np.min(pixels, axis=1)
+    saturation = (max_rgb - min_rgb) / (max_rgb + 1e-6)
+    channel_diff = max_rgb - min_rgb
 
-    # Create token
-    access_token = create_access_token(
-        data={"sub": user_data.email},
-        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    # Background conditions: white walls, grey walls, beige backgrounds
+    is_background = (
+        (brightness > 215) |
+        (brightness < 10) |
+        ((saturation < 0.12) & (brightness > 170)) |
+        ((channel_diff < 25) & (brightness > 160))
     )
 
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user_name": user_data.full_name,
-        "email": user_data.email
-    }
+    fabric_pixels = pixels[~is_background]
 
+    if len(fabric_pixels) < 100:
+        is_background_relaxed = (brightness > 230) | (brightness < 5)
+        fabric_pixels = pixels[~is_background_relaxed]
 
-@app.post("/auth/login", response_model=Token)
-async def login(user_data: UserLogin):
-    """Login with email and password"""
-    user = authenticate_user(user_data.email, user_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=401,
-            detail="Email ya password galat hai. Dobara try karo."
+    if len(fabric_pixels) < 50:
+        fabric_pixels = pixels
+
+    # K-means with more clusters
+    k = min(8, len(fabric_pixels) // 10, len(fabric_pixels))
+    k = max(3, k)
+
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.5)
+
+    try:
+        _, labels, centers = cv2.kmeans(
+            fabric_pixels, k, None, criteria, 15, cv2.KMEANS_PP_CENTERS
         )
+    except:
+        avg = np.mean(fabric_pixels, axis=0)
+        r, g, b = int(avg[0]), int(avg[1]), int(avg[2])
+        centers = np.array([[r, g, b]])
+        labels = np.zeros(len(fabric_pixels), dtype=np.int32)
 
-    access_token = create_access_token(
-        data={"sub": user_data.email},
-        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    )
+    counts = np.bincount(labels.flatten(), minlength=len(centers))
 
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user_name": user["full_name"],
-        "email": user_data.email
+    # Best cluster — count + saturation bonus
+    best_idx = 0
+    best_score = -1
+
+    for i, center in enumerate(centers):
+        cr, cg, cb = center[0], center[1], center[2]
+        brightness_c = (cr + cg + cb) / 3
+        max_c = max(cr, cg, cb)
+        min_c = min(cr, cg, cb)
+        sat = (max_c - min_c) / (max_c + 1e-6)
+
+        # Skip backgrounds
+        if brightness_c > 210 and sat < 0.15:
+            continue
+        if brightness_c < 12:
+            continue
+
+        count_weight = counts[i] / len(fabric_pixels)
+        sat_bonus = sat * 0.4
+        score = count_weight + sat_bonus
+
+        if score > best_score:
+            best_score = score
+            best_idx = i
+
+    dominant = centers[best_idx]
+    r, g, b = int(dominant[0]), int(dominant[1]), int(dominant[2])
+
+    named_colors = {
+        "White": (255, 255, 255), "Off White": (245, 245, 235), "Cream": (255, 253, 208),
+        "Black": (0, 0, 0), "Dark Grey": (64, 64, 64), "Grey": (128, 128, 128),
+        "Light Grey": (192, 192, 192), "Navy Blue": (0, 0, 128), "Royal Blue": (65, 105, 225),
+        "Sky Blue": (135, 206, 235), "Cobalt Blue": (0, 71, 171), "Teal": (0, 128, 128),
+        "Red": (220, 20, 60), "Maroon": (128, 0, 0), "Burgundy": (114, 47, 55),
+        "Pink": (255, 105, 180), "Hot Pink": (255, 20, 147), "Pastel Pink": (255, 209, 220),
+        "Purple": (128, 0, 128), "Lavender": (230, 230, 250), "Green": (0, 128, 0),
+        "Forest Green": (34, 139, 34), "Olive Green": (85, 107, 47), "Mint Green": (152, 255, 152),
+        "Emerald": (80, 200, 120), "Yellow": (255, 215, 0), "Mustard": (255, 219, 88),
+        "Orange": (255, 165, 0), "Coral": (255, 127, 80), "Peach": (255, 218, 185),
+        "Brown": (139, 69, 19), "Chocolate": (123, 63, 0), "Tan": (210, 180, 140),
+        "Beige": (245, 245, 220), "Khaki": (195, 176, 145), "Camel": (193, 154, 107),
+        "Rust": (183, 65, 14), "Gold": (255, 215, 0), "Silver": (192, 192, 192),
     }
 
+    min_dist = float('inf')
+    closest_name = "Unknown"
+    for name, (cr, cg, cb) in named_colors.items():
+        dist = ((r-cr)**2 + (g-cg)**2 + (b-cb)**2) ** 0.5
+        if dist < min_dist:
+            min_dist = dist
+            closest_name = name
 
+    return {"r": r, "g": g, "b": b, "hex": f"#{r:02x}{g:02x}{b:02x}", "name": closest_name}
+
+# ============================================
+# HELPER — CORE IMAGE PROCESSING
+# ============================================
+async def process_image_core(file: UploadFile):
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Koi file upload nahi hui.")
+    file_ext = Path(file.filename).suffix.lower()
+    if file_ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Sirf JPG, PNG, ya WebP file upload karo.")
+    file_content = await file.read()
+    if len(file_content) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="File bahut badi hai. Maximum 10MB.")
+    if len(file_content) == 0:
+        raise HTTPException(status_code=400, detail="Empty file upload hui hai.")
+    unique_filename = f"{uuid.uuid4()}{file_ext}"
+    temp_path = UPLOAD_DIR / unique_filename
+    with open(temp_path, "wb") as f:
+        f.write(file_content)
+    try:
+        image = image_processor.load_image(str(temp_path))
+        pre_quality = image_processor.analyze_photo_quality(image, face=None)
+        if not pre_quality.is_acceptable and pre_quality.quality_score < 30:
+            raise HTTPException(status_code=422, detail={
+                "error": "photo_quality_issue",
+                "quality_score": pre_quality.quality_score,
+                "message": pre_quality.specific_message,
+                "can_retry": True
+            })
+        face = image_processor.detect_face(image)
+        if face is None:
+            raise HTTPException(status_code=422, detail={
+                "error": "no_face_detected",
+                "message": "⚠️ Tumhare photo mein chehra detect nahi hua.\n\n✅ Fix: Seedha camera ko dekho, acha lighting rakho.",
+                "can_retry": True
+            })
+        face_validation = image_processor.validate_face_for_skin_analysis(image, face)
+        if not face_validation["valid"]:
+            raise HTTPException(status_code=422, detail={
+                "error": "invalid_face",
+                "message": face_validation["reason"],
+                "can_retry": True
+            })
+        full_quality = image_processor.analyze_photo_quality(image, face=face)
+        skin_color = image_processor.extract_skin_color(image, face)
+        skin_tone = skin_classifier.classify(skin_color["r"], skin_color["g"], skin_color["b"])
+        color_season = skin_classifier.get_season(skin_tone)
+        return image, face, full_quality, skin_color, skin_tone, color_season
+    finally:
+        try:
+            if temp_path.exists():
+                os.remove(temp_path)
+        except Exception:
+            pass
+
+# ============================================
+# HEALTH CHECK
+# ============================================
+@app.get("/")
+async def root():
+    return {"status": "running", "app": "StyleGuru API", "version": "1.0.0", "message": "Welcome to StyleGuru!"}
+
+# ============================================
+# AUTH ROUTES
+# ============================================
 @app.get("/auth/me")
 async def get_me(current_user: dict = Depends(get_current_user)):
-    """Get current logged in user info"""
     return {
         "email": current_user["email"],
         "full_name": current_user["full_name"],
-        "total_analyses": len(current_user.get("analysis_history", []))
+        "uid": current_user["uid"]
     }
-
 
 @app.get("/auth/history")
 async def get_history(current_user: dict = Depends(get_current_user)):
-    """Get user's past analysis history"""
-    history = current_user.get("analysis_history", [])
-    return {
-        "total": len(history),
-        "history": history[-10:]  # Last 10 analyses
-    }
-
+    return {"message": "History Firestore mein saved hai", "uid": current_user["uid"]}
 
 # ============================================
-# ROUTES — HEALTH CHECK
+# MALE ANALYZE
 # ============================================
-
-@app.get("/")
-async def root():
-    return {
-        "status": "running",
-        "app": "StyleGuru API",
-        "version": "1.0.0",
-        "message": "Welcome to StyleGuru!"
-    }
-
-
-# ============================================
-# ROUTES — MAIN ANALYSIS
-# ============================================
-
 @app.post("/api/analyze")
 async def analyze_image(
     file: UploadFile = File(...),
-    current_user: dict = Depends(get_current_user)  # LOGIN REQUIRED
+    current_user: dict = Depends(get_current_user)
 ):
-    """
-    Main endpoint: Upload selfie → get fashion recommendations
-    Requires login token in header.
-    """
     start_time = time.time()
-    temp_path = None
-
     try:
-        # === VALIDATE FILE ===
-        if not file.filename:
-            raise HTTPException(status_code=400, detail="Koi file upload nahi hui.")
-
-        file_ext = Path(file.filename).suffix.lower()
-        if file_ext not in ALLOWED_EXTENSIONS:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Sirf JPG, PNG, ya WebP file upload karo. Tumne upload kiya: {file_ext}"
-            )
-
-        file_content = await file.read()
-
-        if len(file_content) > MAX_FILE_SIZE:
-            raise HTTPException(
-                status_code=400,
-                detail="File bahut badi hai. Maximum 10MB ki photo upload karo."
-            )
-
-        if len(file_content) == 0:
-            raise HTTPException(status_code=400, detail="Empty file upload hui hai.")
-
-        # === SAVE TEMPORARILY ===
-        unique_filename = f"{uuid.uuid4()}{file_ext}"
-        temp_path = UPLOAD_DIR / unique_filename
-        with open(temp_path, "wb") as f:
-            f.write(file_content)
-
-        # === LOAD IMAGE ===
-        image = image_processor.load_image(str(temp_path))
-
-        # === STEP 1: QUICK QUALITY CHECK (before face detection) ===
-        pre_quality = image_processor.analyze_photo_quality(image, face=None)
-
-        # If image has serious issues even before face detection, stop early
-        if not pre_quality.is_acceptable and pre_quality.quality_score < 30:
-            raise HTTPException(
-                status_code=422,
-                detail={
-                    "error": "photo_quality_issue",
-                    "quality_score": pre_quality.quality_score,
-                    "message": pre_quality.specific_message,
-                    "problems": pre_quality.problems,
-                    "can_retry": True
-                }
-            )
-
-        # === STEP 2: DETECT FACE ===
-        face = image_processor.detect_face(image)
-
-        if face is None:
-            # Do quality check to give specific reason why face wasn't found
-            raise HTTPException(
-                status_code=422,
-                detail={
-                    "error": "no_face_detected",
-                    "quality_score": pre_quality.quality_score,
-                    "message": "⚠️ Tumhare photo mein chehra detect nahi hua.\n\n" +
-                               (pre_quality.specific_message if pre_quality.problems or pre_quality.warnings
-                                else "✅ Fix: Seedha camera ko dekho, acha lighting rakho, aur chehra clearly visible ho."),
-                    "can_retry": True
-                }
-            )
-
-        # === STEP 3: FULL QUALITY CHECK (with face info) ===
-        full_quality = image_processor.analyze_photo_quality(image, face=face)
-
-        # If quality is too bad even with face found, ask to retry
-        if not full_quality.is_acceptable and full_quality.quality_score < 40:
-            raise HTTPException(
-                status_code=422,
-                detail={
-                    "error": "photo_quality_issue",
-                    "quality_score": full_quality.quality_score,
-                    "message": full_quality.specific_message,
-                    "problems": full_quality.problems,
-                    "warnings": full_quality.warnings,
-                    "can_retry": True
-                }
-            )
-
-        # === STEP 4: EXTRACT SKIN COLOR ===
-        skin_color = image_processor.extract_skin_color(image, face)
-
-        # === STEP 5: CLASSIFY SKIN TONE ===
-        skin_tone = skin_classifier.classify(
-            skin_color["r"], skin_color["g"], skin_color["b"]
-        )
-        color_season = skin_classifier.get_season(skin_tone)
-
-        # === STEP 6: GENERATE RECOMMENDATIONS ===
+        image, face, full_quality, skin_color, skin_tone, color_season = await process_image_core(file)
         recommendations = recommendation_engine.get_recommendations(skin_tone)
-
         processing_time = round(time.time() - start_time, 2)
-
-        # === STEP 7: SAVE TO HISTORY ===
-        history_entry = {
-            "date": datetime.utcnow().isoformat(),
-            "skin_tone": skin_tone.category,
-            "undertone": skin_tone.subcategory,
-            "color_season": color_season,
-            "quality_score": full_quality.quality_score
-        }
-        current_user["analysis_history"].append(history_entry)
-
-        # === BUILD RESPONSE ===
-        response = {
+        return JSONResponse(content={
             "success": True,
+            "gender": "male",
             "processing_time_seconds": processing_time,
             "photo_quality": {
                 "score": full_quality.quality_score,
@@ -371,10 +287,7 @@ async def analyze_image(
                 "warnings": full_quality.warnings
             },
             "analysis": {
-                "skin_color": {
-                    "rgb": {"r": skin_color["r"], "g": skin_color["g"], "b": skin_color["b"]},
-                    "hex": skin_color["hex"]
-                },
+                "skin_color": {"rgb": {"r": skin_color["r"], "g": skin_color["g"], "b": skin_color["b"]}, "hex": skin_color["hex"]},
                 "skin_tone": {
                     "category": skin_tone.category,
                     "undertone": skin_tone.subcategory,
@@ -387,63 +300,207 @@ async def analyze_image(
             },
             "recommendations": {
                 "summary": recommendations.summary,
-                "best_shirt_colors": [
-                    {"name": c["name"], "hex": c["hex"], "reason": c["reason"]}
-                    for c in recommendations.best_shirt_colors
-                ],
-                "best_pant_colors": [
-                    {"name": c["name"], "hex": c["hex"], "reason": c["reason"]}
-                    for c in recommendations.best_pant_colors
-                ],
-                "accent_colors": [
-                    {"name": c["name"], "hex": c["hex"], "reason": c["reason"]}
-                    for c in recommendations.accent_colors
-                ],
-                "colors_to_avoid": [
-                    {"name": c["name"], "hex": c["hex"], "reason": c["reason"]}
-                    for c in recommendations.colors_to_avoid
-                ],
+                "best_shirt_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recommendations.best_shirt_colors],
+                "best_pant_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recommendations.best_pant_colors],
+                "accent_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recommendations.accent_colors],
+                "colors_to_avoid": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recommendations.colors_to_avoid],
                 "outfit_combinations": recommendations.outfit_combos,
                 "style_tips": recommendations.style_tips,
                 "occasion_advice": recommendations.occasion_advice,
-                "ethnic_wear": recommendations.ethnic_suggestions
+                "ethnic_wear": recommendations.ethnic_suggestions,
             }
-        }
-
-        return JSONResponse(content=response)
-
+        })
     except HTTPException:
         raise
     except Exception as e:
         print(f"ERROR: {str(e)}")
         print(traceback.format_exc())
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": "server_error",
-                "message": "Kuch galat ho gaya. Dobara try karo.",
-                "can_retry": True
+        raise HTTPException(status_code=500, detail={"error": "server_error", "message": "Kuch galat ho gaya."})
+
+# ============================================
+# FEMALE ANALYZE
+# ============================================
+@app.post("/api/analyze/female")
+async def analyze_image_female(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    start_time = time.time()
+    try:
+        image, face, full_quality, skin_color, skin_tone, color_season = await process_image_core(file)
+        recommendations = recommendation_engine.get_female_recommendations(skin_tone)
+        processing_time = round(time.time() - start_time, 2)
+        return JSONResponse(content={
+            "success": True,
+            "gender": "female",
+            "processing_time_seconds": processing_time,
+            "photo_quality": {
+                "score": full_quality.quality_score,
+                "message": full_quality.specific_message,
+                "warnings": full_quality.warnings
+            },
+            "analysis": {
+                "skin_color": {"rgb": {"r": skin_color["r"], "g": skin_color["g"], "b": skin_color["b"]}, "hex": skin_color["hex"]},
+                "skin_tone": {
+                    "category": skin_tone.category,
+                    "undertone": skin_tone.subcategory,
+                    "description": skin_tone.description,
+                    "brightness_score": skin_tone.brightness_score,
+                    "color_season": color_season,
+                    "confidence": skin_tone.confidence
+                },
+                "face_detected": face
+            },
+            "recommendations": {
+                "summary": recommendations.get("summary", ""),
+                "best_dress_colors": recommendations.get("best_dress_colors", []),
+                "best_top_colors": recommendations.get("best_top_colors", []),
+                "best_pant_colors": recommendations.get("best_pant_colors", []),
+                "saree_suggestions": recommendations.get("saree_suggestions", []),
+                "makeup_suggestions": recommendations.get("makeup_suggestions", []),
+                "accessories": recommendations.get("accessories", []),
+                "outfit_combos": recommendations.get("outfit_combos", []),
+                "colors_to_avoid": recommendations.get("colors_to_avoid", []),
+                "style_tips": recommendations.get("style_tips", []),
+                "occasion_advice": recommendations.get("occasion_advice", {}),
+                "ethnic_wear": recommendations.get("saree_suggestions", []),
             }
-        )
+        })
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"ERROR: {str(e)}")
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail={"error": "server_error", "message": "Kuch galat ho gaya."})
+
+# ============================================
+# SEASONAL ANALYZE
+# ============================================
+@app.post("/api/analyze/seasonal")
+async def analyze_seasonal(
+    file: UploadFile = File(...),
+    season: str = "summer",
+    current_user: dict = Depends(get_current_user)
+):
+    start_time = time.time()
+    try:
+        image, face, full_quality, skin_color, skin_tone, color_season = await process_image_core(file)
+        seasonal_recs = recommendation_engine.get_seasonal_recommendations(skin_tone, season)
+        processing_time = round(time.time() - start_time, 2)
+        return JSONResponse(content={
+            "success": True,
+            "gender": "seasonal",
+            "season": season,
+            "processing_time_seconds": processing_time,
+            "photo_quality": {
+                "score": full_quality.quality_score,
+                "message": full_quality.specific_message,
+                "warnings": full_quality.warnings
+            },
+            "analysis": {
+                "skin_color": {"rgb": {"r": skin_color["r"], "g": skin_color["g"], "b": skin_color["b"]}, "hex": skin_color["hex"]},
+                "skin_tone": {
+                    "category": skin_tone.category,
+                    "undertone": skin_tone.subcategory,
+                    "description": skin_tone.description,
+                    "brightness_score": skin_tone.brightness_score,
+                    "color_season": color_season,
+                    "confidence": skin_tone.confidence
+                },
+                "face_detected": face
+            },
+            "recommendations": seasonal_recs
+        })
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"ERROR: {str(e)}")
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail={"error": "server_error", "message": "Kuch galat ho gaya."})
+
+# ============================================
+# OUTFIT CHECKER
+# ============================================
+@app.post("/api/outfit/check")
+async def check_outfit_compatibility(
+    selfie: UploadFile = File(...),
+    outfit: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    start_time = time.time()
+    selfie_path = None
+    outfit_path = None
+    try:
+        selfie_ext = Path(selfie.filename).suffix.lower()
+        if selfie_ext not in ALLOWED_EXTENSIONS:
+            raise HTTPException(status_code=400, detail="Selfie: Sirf JPG, PNG, WebP upload karo.")
+        selfie_content = await selfie.read()
+        selfie_path = UPLOAD_DIR / f"{uuid.uuid4()}{selfie_ext}"
+        with open(selfie_path, "wb") as f:
+            f.write(selfie_content)
+        selfie_image = image_processor.load_image(str(selfie_path))
+        face = image_processor.detect_face(selfie_image)
+        if face is None:
+            raise HTTPException(status_code=422, detail={
+                "error": "no_face_detected",
+                "message": "⚠️ Selfie mein chehra detect nahi hua.\n\n✅ Fix: Clear selfie upload karo.",
+                "can_retry": True
+            })
+        skin_color = image_processor.extract_skin_color(selfie_image, face)
+        skin_tone = skin_classifier.classify(skin_color["r"], skin_color["g"], skin_color["b"])
+
+        outfit_ext = Path(outfit.filename).suffix.lower()
+        if outfit_ext not in ALLOWED_EXTENSIONS:
+            raise HTTPException(status_code=400, detail="Outfit: Sirf JPG, PNG, WebP upload karo.")
+        outfit_content = await outfit.read()
+        outfit_path = UPLOAD_DIR / f"{uuid.uuid4()}{outfit_ext}"
+        with open(outfit_path, "wb") as f:
+            f.write(outfit_content)
+        outfit_image = image_processor.load_image(str(outfit_path))
+
+        # Smart color extraction — background ignore, kapde ka color detect
+        outfit_color = extract_dominant_outfit_color(outfit_image)
+        result = recommendation_engine.check_outfit_compatibility(skin_tone, outfit_color)
+
+        processing_time = round(time.time() - start_time, 2)
+        return JSONResponse(content={
+            "success": True,
+            "processing_time_seconds": processing_time,
+            "skin_analysis": {
+                "skin_tone": skin_tone.category,
+                "undertone": skin_tone.subcategory,
+                "skin_color_hex": skin_color["hex"],
+                "confidence": skin_tone.confidence,
+            },
+            "outfit_analysis": {
+                "dominant_color_hex": outfit_color["hex"],
+                "dominant_color_rgb": {"r": outfit_color["r"], "g": outfit_color["g"], "b": outfit_color["b"]},
+                "color_name": outfit_color["name"],
+            },
+            "compatibility": result,
+        })
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"ERROR outfit check: {str(e)}")
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail={"error": "server_error", "message": "Kuch galat ho gaya."})
     finally:
-        if temp_path and temp_path.exists():
-            try:
-                os.remove(temp_path)
-            except:
-                pass
-
+        for path in [selfie_path, outfit_path]:
+            if path and Path(path).exists():
+                try:
+                    os.remove(path)
+                except Exception:
+                    pass
 
 # ============================================
-# TEST ROUTE (no login needed)
+# TEST ROUTE
 # ============================================
-
 @app.get("/api/test/{skin_tone}")
-async def test_recommendations(skin_tone: str):
-    """Test endpoint — no login needed"""
+async def test_recommendations(skin_tone: str, undertone: str = "warm"):
     valid_tones = ["fair", "light", "medium", "olive", "brown", "dark"]
     if skin_tone not in valid_tones:
         raise HTTPException(status_code=400, detail=f"Valid options: {', '.join(valid_tones)}")
-
     test_rgb = {
         "fair": (220, 190, 160), "light": (195, 155, 120),
         "medium": (175, 140, 105), "olive": (155, 120, 85),
@@ -451,18 +508,22 @@ async def test_recommendations(skin_tone: str):
     }
     r, g, b = test_rgb[skin_tone]
     result = skin_classifier.classify(r, g, b)
+    result.subcategory = undertone
     recs = recommendation_engine.get_recommendations(result)
-
     return {
         "success": True,
         "skin_tone": skin_tone,
-        "undertone": result.subcategory,
+        "undertone": undertone,
         "summary": recs.summary,
-        "best_shirt_colors": [
-            {"name": c["name"], "hex": c["hex"]} for c in recs.best_shirt_colors[:5]
-        ]
+        "best_shirt_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.best_shirt_colors],
+        "best_pant_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.best_pant_colors],
+        "colors_to_avoid": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.colors_to_avoid],
+        "outfit_combinations": recs.outfit_combos,
+        "style_tips": recs.style_tips,
+        "occasion_advice": recs.occasion_advice,
+        "ethnic_wear": recs.ethnic_suggestions,
+        "accent_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.accent_colors],
     }
-
 
 # ============================================
 # RUN
@@ -471,5 +532,4 @@ if __name__ == "__main__":
     import uvicorn
     print("\n🚀 StyleGuru API starting...")
     print("📖 API Docs: http://localhost:8000/docs")
-    print("🔗 Test: http://localhost:8000/api/test/medium\n")
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
