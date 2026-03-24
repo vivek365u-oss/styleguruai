@@ -23,8 +23,14 @@ from recommendation_engine import RecommendationEngine
 # ============================================
 # FIREBASE INIT
 # ============================================
-cred = credentials.Certificate("firebase-credentials.json")
-firebase_admin.initialize_app(cred)
+if not firebase_admin._apps:
+    firebase_creds_json = os.environ.get("FIREBASE_CREDENTIALS_JSON")
+    if firebase_creds_json:
+        import json
+        cred = credentials.Certificate(json.loads(firebase_creds_json))
+    else:
+        cred = credentials.Certificate("firebase-credentials.json")
+    firebase_admin.initialize_app(cred)
 
 # ============================================
 # CONFIG
@@ -530,6 +536,6 @@ async def test_recommendations(skin_tone: str, undertone: str = "warm"):
 # ============================================
 if __name__ == "__main__":
     import uvicorn
-    print("\n🚀 StyleGuru API starting...")
-    print("📖 API Docs: http://localhost:8000/docs")
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    print("\nStyleGuru API starting...")
+    print("API Docs: http://localhost:8000/docs")
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)

@@ -4,7 +4,7 @@ export { auth };
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, limit } from 'firebase/firestore';
 
-const API = axios.create({ baseURL: 'http://localhost:8000' });
+const API = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000' });
 
 // Auto-attach Firebase token to every request
 API.interceptors.request.use(async (config) => {
