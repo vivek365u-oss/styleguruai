@@ -3,12 +3,14 @@ import { auth, logout } from './api/styleApi';
 import { onAuthStateChanged } from 'firebase/auth';
 import AuthPage from './components/AuthPage';
 import Dashboard from './components/Dashboard';
+import LandingPage from './components/LandingPage';
 
 export const ThemeContext = createContext();
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showAuth, setShowAuth] = useState(false);
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('tonefit_theme');
     if (saved) return saved;
@@ -65,7 +67,9 @@ function App() {
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <div className="min-h-screen">
-        {!user ? (
+        {!user && !showAuth ? (
+          <LandingPage onGetStarted={() => setShowAuth(true)} />
+        ) : !user ? (
           <AuthPage onLoginSuccess={setUser} />
         ) : (
           <Dashboard user={user} onLogout={handleLogout} />
