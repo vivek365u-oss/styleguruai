@@ -69,6 +69,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "https://styleguruai-nine.vercel.app",
+        "https://styleguruai.in",
+        "https://www.styleguruai.in",
     ],
     allow_credentials=True,
     allow_methods=["*"],
