@@ -92,6 +92,8 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
 
   const shirtCategory = isFemale ? "dress" : isSeasonal ? "top" : "shirt";
   const pantCategory = isFemale ? "bottom" : "pant";
+
+  const outfits = isSeasonal
     ? (recommendations.male_outfits || [])
     : isFemale
     ? (recommendations.outfit_combos || [])
