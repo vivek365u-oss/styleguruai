@@ -4,6 +4,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import AuthPage from './components/AuthPage';
 import Dashboard from './components/Dashboard';
 import LandingPage from './components/LandingPage';
+import { LanguageProvider } from './i18n/LanguageContext';
 
 export const ThemeContext = createContext();
 
@@ -65,17 +66,19 @@ function App() {
   }
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <div className="min-h-screen">
-        {!user && !showAuth ? (
-          <LandingPage onGetStarted={() => setShowAuth(true)} />
-        ) : !user ? (
-          <AuthPage onLoginSuccess={setUser} />
-        ) : (
-          <Dashboard user={user} onLogout={handleLogout} />
-        )}
-      </div>
-    </ThemeContext.Provider>
+    <LanguageProvider>
+      <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <div className="min-h-screen">
+          {!user && !showAuth ? (
+            <LandingPage onGetStarted={() => setShowAuth(true)} />
+          ) : !user ? (
+            <AuthPage onLoginSuccess={setUser} />
+          ) : (
+            <Dashboard user={user} onLogout={handleLogout} />
+          )}
+        </div>
+      </ThemeContext.Provider>
+    </LanguageProvider>
   );
 }
 

@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { registerUser, loginUser, saveAuth, googleLogin } from '../api/styleApi';
+import { useLanguage } from '../i18n/LanguageContext';
 
 function AuthPage({ onLoginSuccess }) {
+  const { t } = useLanguage();
   const [mode, setMode] = useState('login');
   const [form, setForm] = useState({ email: '', password: '', full_name: '' });
   const [loading, setLoading] = useState(false);
@@ -22,11 +24,11 @@ function AuthPage({ onLoginSuccess }) {
       saveAuth(res.data);
       onLoginSuccess({ name: res.data.user_name, email: res.data.email });
     } catch (err) {
-      const msg = err.code === 'auth/user-not-found' ? 'No account found with this email.'
-        : err.code === 'auth/wrong-password' ? 'Incorrect password.'
-        : err.code === 'auth/email-already-in-use' ? 'This email is already registered.'
-        : err.code === 'auth/weak-password' ? 'Password must be at least 6 characters.'
-        : err.response?.data?.detail || 'Something went wrong. Please try again.';
+      const msg = err.code === 'auth/user-not-found' ? t('noAccount')
+        : err.code === 'auth/wrong-password' ? t('wrongPassword')
+        : err.code === 'auth/email-already-in-use' ? t('emailInUse')
+        : err.code === 'auth/weak-password' ? t('weakPassword')
+        : err.response?.data?.detail || t('somethingWrong');
       setError(msg);
     } finally {
       setLoading(false);
@@ -41,7 +43,7 @@ function AuthPage({ onLoginSuccess }) {
       saveAuth({ user_name: user.name, email: user.email });
       onLoginSuccess({ name: user.name, email: user.email });
     } catch (err) {
-      setError('Google login failed. Please try again.');
+      setError(t('googleFailed'));
     } finally {
       setGoogleLoading(false);
     }
@@ -64,7 +66,7 @@ function AuthPage({ onLoginSuccess }) {
             <span className="text-white font-black text-2xl tracking-tight">SG</span>
           </div>
           <h1 className="text-4xl font-black text-white tracking-tight">StyleGuru</h1>
-          <p className="text-purple-300 mt-1 text-sm">AI-Powered Fashion for All Skin Tones</p>
+          <p className="text-purple-300 mt-1 text-sm">{t('tagline')}</p>
         </div>
 
         {/* Card */}
@@ -107,13 +109,13 @@ function AuthPage({ onLoginSuccess }) {
                 <path fill="none" d="M0 0h48v48H0z"/>
               </svg>
             )}
-            {googleLoading ? 'Signing in...' : 'Continue with Google'}
+            {googleLoading ? 'Signing in...' : t('googleLogin')}
           </button>
 
           {/* Divider */}
           <div className="flex items-center gap-3 mb-4">
             <div className="flex-1 h-px bg-white/20"></div>
-            <span className="text-white/40 text-xs">or with email</span>
+            <span className="text-white/40 text-xs">{t('orEmail')}</span>
             <div className="flex-1 h-px bg-white/20"></div>
           </div>
 
@@ -124,7 +126,7 @@ function AuthPage({ onLoginSuccess }) {
                 <label className="text-white/70 text-xs font-medium mb-1.5 block">Full Name</label>
                 <input
                   name="full_name"
-                  placeholder="Your name"
+                  placeholder={t('namePlaceholder')}
                   value={form.full_name}
                   onChange={handle}
                   className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-purple-400 focus:bg-white/15 transition"
@@ -178,14 +180,14 @@ function AuthPage({ onLoginSuccess }) {
                   </svg>
                   Processing...
                 </span>
-              ) : mode === 'login' ? '🚀 Login' : '✨ Create Account'}
+              ) : mode === 'login' ? `🚀 ${t('loginBtn')}` : `✨ ${t('registerBtn')}`}
             </button>
           </div>
         </div>
 
         {/* Footer */}
         <p className="text-center text-white/30 text-xs mt-6">
-          Made with 💜 for India • Your photos are never stored
+          {t('footer')}
         </p>
       </div>
     </div>

@@ -4,6 +4,7 @@ import UploadSection from './UploadSection';
 import ResultsDisplay from './ResultsDisplay';
 import HistoryPanel from './HistoryPanel';
 import { ThemeContext } from '../App';
+import { useLanguage } from '../i18n/LanguageContext';
 
 function LoadingScreen() {
   const { theme } = useContext(ThemeContext);
@@ -48,6 +49,7 @@ function LoadingScreen() {
 
 function Dashboard({ user, onLogout }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const { t, language, changeLanguage } = useLanguage();
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -190,7 +192,7 @@ function Dashboard({ user, onLogout }) {
                 <p className={`text-lg font-medium mb-2 ${isDark ? 'text-red-300' : 'text-red-600'}`}>Oops!</p>
                 <p className={`whitespace-pre-line text-sm max-w-md mx-auto ${isDark ? 'text-red-400/80' : 'text-red-500'}`}>{error}</p>
                 <button onClick={handleReset} className={`mt-6 px-6 py-3 rounded-xl transition font-medium border ${isDark ? 'bg-red-500/20 hover:bg-red-500/30 text-red-300 border-red-500/20' : 'bg-red-100 hover:bg-red-200 text-red-600 border-red-200'}`}>
-                  Try Again
+                  {t('tryAgain')}
                 </button>
               </div>
             )}
@@ -207,13 +209,35 @@ function Dashboard({ user, onLogout }) {
             <div className={`rounded-3xl p-8 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-purple-100 shadow-xl shadow-purple-100/30 backdrop-blur-sm'}`}>
               <h2 className={`text-2xl font-black mb-8 ${isDark ? 'text-white' : 'text-gray-900'}`}>⚙️ Settings</h2>
 
+              {/* Language Toggle */}
+              <div className={`flex items-center justify-between p-5 rounded-2xl border mb-4 ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50/60 border-purple-100'}`}>
+                <div>
+                  <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>🌐 {t('languageLabel')}</p>
+                  <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('language')}</p>
+                </div>
+                <div className={`flex rounded-xl p-1 gap-1 ${isDark ? 'bg-white/10' : 'bg-white border border-purple-100'}`}>
+                  <button
+                    onClick={() => changeLanguage('hinglish')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'hinglish' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}
+                  >
+                    🇮🇳 Hinglish
+                  </button>
+                  <button
+                    onClick={() => changeLanguage('en')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'en' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}
+                  >
+                    🇬🇧 English
+                  </button>
+                </div>
+              </div>
+
               {/* Theme Toggle */}
               <div className={`flex items-center justify-between p-5 rounded-2xl border mb-4 ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50/60 border-purple-100'}`}>
                 <div>
                   <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>
                     {isDark ? '🌙 Dark Mode' : '☀️ Light Mode'}
                   </p>
-                  <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Switch theme</p>
+                  <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('switchTheme')}</p>
                 </div>
                 <button
                   onClick={toggleTheme}
@@ -226,7 +250,7 @@ function Dashboard({ user, onLogout }) {
               {/* System Theme Info */}
               <div className={`p-4 rounded-2xl border mb-4 ${isDark ? 'bg-purple-500/10 border-purple-500/20' : 'bg-purple-50 border-purple-100'}`}>
                 <p className={`text-xs ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>
-                  💡 Also switches automatically based on your system theme!
+                  💡 {t('systemTheme')}
                 </p>
               </div>
 

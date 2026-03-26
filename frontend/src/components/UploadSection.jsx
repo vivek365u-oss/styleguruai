@@ -1,9 +1,11 @@
 import { useState, useRef, useContext } from 'react';
 import { analyzeImage, analyzeImageFemale, analyzeImageSeasonal } from '../api/styleApi';
 import { ThemeContext } from '../App';
+import { useLanguage } from '../i18n/LanguageContext';
 
 function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSelected, onGenderChange }) {
   const { theme } = useContext(ThemeContext);
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
   const [preview, setPreview] = useState(null);
   const [dragActive, setDragActive] = useState(false);
@@ -74,7 +76,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           Style
         </h2>
         <p className={`text-lg max-w-xl mx-auto ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
-          Upload a selfie — get personalized fashion recommendations based on your skin tone
+          {t('uploadSubtitle')}
         </p>
       </div>
 
@@ -160,7 +162,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
               </button>
             </div>
           </div>
-          <p className={`text-sm text-center mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Choose a season:</p>
+          <p className={`text-sm text-center mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{t('chooseSeason')}</p>
           <div className="flex justify-center gap-3 flex-wrap">
             {seasons.map((s) => (
               <button
@@ -223,7 +225,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
         {preview ? (
           <div className="flex flex-col items-center">
             <img src={preview} alt="Preview" className="w-40 h-40 object-cover rounded-2xl shadow-2xl mb-4 border-2 border-purple-500/30" />
-            <p className={`animate-pulse ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>Analyzing your photo...</p>
+            <p className={`animate-pulse ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{t('analyzingPhoto')}</p>
             {uploadProgress > 0 && uploadProgress < 100 && (
               <div className={`mt-3 w-48 rounded-full h-1.5 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
                 <div className="bg-purple-500 h-1.5 rounded-full transition-all" style={{ width: `${uploadProgress}%` }}></div>
@@ -243,8 +245,8 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                 {mode === 'seasonal' ? seasons.find(s => s.id === season)?.emoji : gender === 'female' ? '👩' : '🤳'}
               </span>
             </div>
-            <p className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>Drop Your Selfie Here</p>
-            <p className={`mb-6 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>or click to browse</p>
+            <p className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('dropSelfie')}</p>
+            <p className={`mb-6 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('orBrowse')}</p>
             <span className={`inline-block px-8 py-3.5 text-white font-bold rounded-2xl shadow-lg transition-all hover:scale-105 ${
               mode === 'seasonal'
                 ? 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-amber-500/30'
@@ -252,9 +254,9 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                   ? 'bg-gradient-to-r from-pink-500 to-rose-500 shadow-pink-500/30'
                   : 'bg-gradient-to-r from-purple-500 to-pink-500 shadow-purple-500/30'
             }`}>
-              📁 Choose Photo
+              📁 {t('choosePhoto')}
             </span>
-            <p className={`text-xs mt-4 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>JPG, PNG, WebP • Max 10MB • Photos are never stored</p>
+            <p className={`text-xs mt-4 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>{t('photoNote')}</p>
           </>
         )}
       </div>
@@ -262,9 +264,9 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       {/* Tips */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
         {[
-          { emoji: '☀️', title: 'Natural Light', desc: 'Take selfie near a window — best results' },
-          { emoji: '🤳', title: 'Face Forward', desc: 'Look directly at the camera' },
-          { emoji: '😊', title: 'Clear Face', desc: 'Remove sunglasses or mask' },
+          { emoji: '☀️', title: t('naturalLight'), desc: t('naturalLightDesc') },
+          { emoji: '🤳', title: t('faceForward'), desc: t('faceForwardDesc') },
+          { emoji: '😊', title: t('clearFace'), desc: t('clearFaceDesc') },
         ].map((tip, i) => (
           <div key={i} className={`rounded-2xl p-4 flex items-center gap-3 transition border ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-slate-100 border-purple-200 hover:border-purple-400 shadow-sm'}`}>
             <span className="text-2xl">{tip.emoji}</span>
@@ -278,7 +280,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
 
       {/* Skin Tones */}
       <div className={`mt-6 rounded-2xl p-5 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-purple-200 shadow-sm'}`}>
-        <p className={`text-xs text-center mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>We support all skin tones 🌍</p>
+        <p className={`text-xs text-center mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{t('skinTones')}</p>
         <div className="flex justify-center gap-3 flex-wrap">
           {[
             { name: 'Fair', color: '#F5DEB3' },

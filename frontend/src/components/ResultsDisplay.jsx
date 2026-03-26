@@ -1,6 +1,7 @@
 // ============================================================
 // StyleGuru — Production Grade Results Display
 // ============================================================
+import { useLanguage } from '../i18n/LanguageContext';
 
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   const isFemale = gender === "female";
@@ -150,6 +151,7 @@ function OutfitCard({ combo, index }) {
 }
 
 function ResultsDisplay({ data, uploadedImage, onReset }) {
+  const { t } = useLanguage();
   const { analysis, recommendations, photo_quality } = data;
   const isFemale = data.gender === "female";
   const isSeasonal = data.gender === "seasonal";
@@ -191,7 +193,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
       
       <div className="flex justify-between items-center flex-wrap gap-2">
   <button onClick={onReset} className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-xl transition-all text-sm border border-white/10">
-    ← New Photo
+    {t('newPhoto')}
   </button>
         <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-full px-4 py-2">
           <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -244,7 +246,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           </div>
         </div>
         <div className="relative mt-6 bg-white/5 rounded-2xl p-5 border border-white/10">
-          <div className="absolute -top-3 left-6 bg-purple-500 text-white text-xs px-3 py-1 rounded-full font-semibold">Style Summary</div>
+          <div className="absolute -top-3 left-6 bg-purple-500 text-white text-xs px-3 py-1 rounded-full font-semibold">{t('styleSummary')}</div>
           <p className="text-white/70 leading-relaxed text-sm mt-1">{recommendations.summary || recommendations.description}</p>
         </div>
       </div>
@@ -270,7 +272,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
               </div>
             </div>
             <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-              <p className="text-white font-bold text-sm mb-2">💡 Season Style Tips:</p>
+              <p className="text-white font-bold text-sm mb-2">💡 {t('seasonStyleTips')}</p>
               {(recommendations.outfit_tips || []).map((tip, i) => (
                 <div key={i} className="flex items-start gap-2 mb-1">
                   <span className="text-amber-400 flex-shrink-0">✦</span>
@@ -281,7 +283,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           </div>
 
           {(recommendations.seasonal_colors || []).length > 0 && (
-            <Section title="Season Best Colors" emoji="🎨" gradient>
+            <Section title={t('seasonBestColors')} emoji="🎨" gradient>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {recommendations.seasonal_colors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} gender={effectiveGender} />)}
               </div>
@@ -289,13 +291,13 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           )}
 
           {seasonalGender === 'female' ? (
-            <Section title="Season Outfit Ideas — Female" emoji="👗">
+            <Section title={t('seasonOutfitFemale')} emoji="👗">
               <div className="space-y-3">
                 {(recommendations.female_outfits || []).map((combo, i) => <OutfitCard key={i} combo={combo} index={i} />)}
               </div>
             </Section>
           ) : (
-            <Section title="Season Outfit Ideas — Male" emoji="👔">
+            <Section title={t('seasonOutfitMale')} emoji="👔">
               <div className="space-y-3">
                 {(recommendations.male_outfits || []).map((combo, i) => <OutfitCard key={i} combo={combo} index={i} />)}
               </div>
@@ -311,38 +313,38 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           {isFemale ? (
             <>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Section title="Best Dress Colors" emoji="👗" gradient>
+                <Section title={t('bestDressColors')} emoji="👗" gradient>
                   <div className="space-y-3">
                     {(recommendations.best_dress_colors || []).map((color, i) => <ColorSwatch key={i} color={color} category="dress" gender="female" />)}
                   </div>
                 </Section>
-                <Section title="Best Top Colors" emoji="👚" gradient>
+                <Section title={t('bestTopColors')} emoji="👚" gradient>
                   <div className="space-y-3">
                     {(recommendations.best_top_colors || []).map((color, i) => <ColorSwatch key={i} color={color} category="top" gender="female" />)}
                   </div>
                 </Section>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Section title="Best Kurti Colors" emoji="🥻" gradient>
+                <Section title={t('bestKurtiColors')} emoji="🥻" gradient>
                   <div className="space-y-3">
                     {(recommendations.best_kurti_colors || []).map((color, i) => <ColorSwatch key={i} color={color} category="kurti" gender="female" />)}
                   </div>
                 </Section>
-                <Section title="Best Lehenga Colors" emoji="✨" gradient>
+                <Section title={t('bestLehengaColors')} emoji="✨" gradient>
                   <div className="space-y-3">
                     {(recommendations.best_lehenga_colors || []).map((color, i) => <ColorSwatch key={i} color={color} category="lehenga" gender="female" />)}
                   </div>
                 </Section>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Section title="Best Bottom Colors" emoji="👖" gradient>
+                <Section title={t('bestBottomColors')} emoji="👖" gradient>
                   <div className="space-y-3">
                     {(recommendations.best_bottom_colors || recommendations.best_pant_colors || []).map((color, i) => <ColorSwatch key={i} color={color} category="bottom" gender="female" />)}
                   </div>
                 </Section>
                 <div className="bg-red-500/5 border border-red-500/20 rounded-3xl p-6">
                   <h3 className="text-red-300 font-black text-lg mb-5 flex items-center gap-2">
-                    <span className="text-2xl">🚫</span> Colors to Avoid
+                    <span className="text-2xl">🚫</span> {t('colorsToAvoid')}
                   </h3>
                   <div className="grid grid-cols-1 gap-3">
                     {avoidColors.map((color, i) => <ColorSwatch key={i} color={color} category="dress" gender="female" />)}
@@ -353,12 +355,12 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           ) : (
             <>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Section title="Best Shirt Colors" emoji="👔" gradient>
+                <Section title={t('bestShirtColors')} emoji="👔" gradient>
                   <div className="space-y-3">
                     {shirtColors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} gender={effectiveGender} />)}
                   </div>
                 </Section>
-                <Section title="Best Pant Colors" emoji="👖" gradient>
+                <Section title={t('bestPantColors')} emoji="👖" gradient>
                   <div className="space-y-3">
                     {pantColors.length > 0
                       ? pantColors.map((color, i) => <ColorSwatch key={i} color={color} category={pantCategory} gender={effectiveGender} />)
@@ -368,20 +370,20 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
               </div>
               <div className="bg-red-500/5 border border-red-500/20 rounded-3xl p-6">
                 <h3 className="text-red-300 font-black text-lg mb-5 flex items-center gap-2">
-                  <span className="text-2xl">🚫</span> Colors to Avoid
+                  <span className="text-2xl">🚫</span> {t('colorsToAvoid')}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {avoidColors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} gender={effectiveGender} />)}
                 </div>
               </div>
 
-              <Section title="Complete Outfit Ideas" emoji="🧥">
+              <Section title={t('completeOutfitIdeas')} emoji="🧥">
                 <div className="space-y-3">
                   {outfits.map((combo, i) => <OutfitCard key={i} combo={combo} index={i} />)}
                 </div>
               </Section>
 
-              <Section title="Style Tips Just For You" emoji="💡">
+              <Section title={t('styleTips')} emoji="💡">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {styleTips.map((tip, i) => (
                     <div key={i} className="flex items-start gap-3 bg-white/5 rounded-xl p-3 border border-white/10">
@@ -395,7 +397,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Section title="What to Wear & When?" emoji="📅">
+            <Section title={t('whatToWear')} emoji="📅">
               <div className="space-y-3">
                 {Object.keys(occasionAdvice).length > 0
                   ? Object.entries(occasionAdvice).map(([occasion, advice], i) => (
@@ -471,7 +473,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
               )}
 
               {accessories.length > 0 && (
-                <Section title="Accessories & Jewellery" emoji="👜">
+                <Section title={t('accessories')} emoji="👜">
                   <div className="space-y-4">
                     {accessories.map((item, i) => {
                       const typeLC = (item.type || '').toLowerCase();
@@ -504,7 +506,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           )}
 
           {!isFemale && accentColors.length > 0 && (
-            <Section title="Accessories For You" emoji="⌚">
+            <Section title={t('accessoriesFor')} emoji="⌚">
               <div className="space-y-4">
                 {accentColors.map((item, i) => {
                   const typeLC = (item.type || '').toLowerCase();
@@ -534,9 +536,9 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
       {/* CTA */}
       <div className="text-center py-6">
         <button onClick={onReset} className="inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-black rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all shadow-2xl shadow-purple-500/30 hover:scale-105 text-base">
-          🔄 Analyze New Photo
+          🔄 {t('analyzeNewPhoto')}
         </button>
-        <p className="text-white/25 text-xs mt-3">Each selfie gives better results!</p>
+        <p className="text-white/25 text-xs mt-3">{t('eachSelfie')}</p>
       </div>
     </div>
   );
