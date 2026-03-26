@@ -419,9 +419,9 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
 
           {!isFemale && accentColors.length > 0 && (
             <Section title="Accessories For You" emoji="⌚">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {accentColors.map((color, i) => {
-                  const typeLC = (color.type || '').toLowerCase();
+              <div className="space-y-4">
+                {accentColors.map((item, i) => {
+                  const typeLC = (item.type || '').toLowerCase();
                   const accCat = typeLC.includes('belt') ? 'belt'
                     : typeLC.includes('watch') ? 'watch'
                     : typeLC.includes('shoe') || typeLC.includes('footwear') ? 'shoes'
@@ -429,17 +429,13 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
                     : typeLC.includes('wallet') ? 'wallet'
                     : typeLC.includes('sunglass') ? 'sunglasses'
                     : 'accessories';
+                  const searchTerm = item.suggestion || item.name || item.type;
                   return (
-                    <div key={i} className="group bg-white/5 border border-white/10 rounded-2xl p-4 hover:bg-white/10 hover:border-purple-500/40 transition-all duration-300">
-                      <div className="flex items-center gap-4 mb-2">
-                        <div className="w-12 h-12 rounded-xl shadow-lg border border-white/20 flex-shrink-0" style={{ backgroundColor: color.hex }} />
-                        <div>
-                          <p className="text-white font-bold text-sm">{color.type}</p>
-                          <p className="text-white/60 text-xs">{color.name}</p>
-                          <p className="text-white/40 text-xs mt-0.5">{color.reason}</p>
-                        </div>
-                      </div>
-                      <ShoppingLinks colorName={color.name} category={accCat} gender="male" />
+                    <div key={i} className="bg-white/5 rounded-2xl p-4 border border-white/10 hover:border-purple-500/30 transition">
+                      <p className="text-purple-300 font-bold text-sm">{item.type}</p>
+                      <p className="text-white/60 text-xs mt-1">{item.name}</p>
+                      <p className="text-white/40 text-xs mt-0.5">{item.reason}</p>
+                      <ShoppingLinks colorName={searchTerm} category={accCat} gender="male" />
                     </div>
                   );
                 })}
