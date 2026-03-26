@@ -13,9 +13,10 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
     bottom: isFemale ? "women palazzo leggings" : "men trousers",
     accessories: isFemale ? "women jewellery accessories" : "men accessories belt watch",
     jewellery: "women jewellery gold silver",
-    handbag: "women handbag purse",
+    handbag: "women handbag purse clutch",
     footwear: isFemale ? "women heels sandals" : "men shoes",
     watch: isFemale ? "women watch" : "men watch",
+    dupatta: "women dupatta scarf stole",
     saree: "saree",
     kurti: "kurti",
     lehenga: "lehenga",
@@ -382,11 +383,19 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
                 <Section title="Accessories & Jewellery" emoji="👜">
                   <div className="space-y-4">
                     {accessories.map((item, i) => {
-                      const accCategory = item.type?.toLowerCase().includes('jewel') || item.type?.toLowerCase().includes('earring') || item.type?.toLowerCase().includes('necklace') || item.type?.toLowerCase().includes('bangle')
-                        ? 'jewellery' : item.type?.toLowerCase().includes('bag') || item.type?.toLowerCase().includes('handbag')
-                        ? 'handbag' : item.type?.toLowerCase().includes('footwear') || item.type?.toLowerCase().includes('shoe') || item.type?.toLowerCase().includes('heel')
-                        ? 'footwear' : item.type?.toLowerCase().includes('watch')
-                        ? 'watch' : 'accessories';
+                      const typeLC = (item.type || '').toLowerCase();
+                      const accCategory =
+                        typeLC.includes('jewel') || typeLC.includes('earring') || typeLC.includes('necklace') || typeLC.includes('bangle') || typeLC.includes('ring') || typeLC.includes('bracelet')
+                          ? 'jewellery'
+                          : typeLC.includes('bag') || typeLC.includes('purse') || typeLC.includes('clutch')
+                          ? 'handbag'
+                          : typeLC.includes('footwear') || typeLC.includes('shoe') || typeLC.includes('heel') || typeLC.includes('sandal') || typeLC.includes('flat')
+                          ? 'footwear'
+                          : typeLC.includes('watch')
+                          ? 'watch'
+                          : typeLC.includes('dupatta') || typeLC.includes('scarf') || typeLC.includes('stole')
+                          ? 'dupatta'
+                          : 'accessories';
                       const searchTerm = item.suggestion || item.colors || item.type;
                       return (
                         <div key={i} className="bg-white/5 rounded-2xl p-4 border border-white/10 hover:border-purple-500/30 transition">
