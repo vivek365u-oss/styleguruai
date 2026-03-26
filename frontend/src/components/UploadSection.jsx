@@ -64,7 +64,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
 
       {/* Hero */}
       <div className="text-center mb-8">
-        <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 mb-4 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200 shadow-sm'}`}>
+        <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 mb-4 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-100 border-purple-300 shadow-sm'}`}>
           <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></span>
           <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>AI-Powered • 95%+ Accuracy</span>
         </div>
@@ -205,7 +205,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
               ? isDark ? 'border-amber-500/30 bg-amber-500/5 hover:border-amber-400/50 hover:bg-amber-500/10' : 'border-amber-300 bg-amber-50 hover:border-amber-400 hover:bg-amber-100'
               : gender === 'female'
                 ? isDark ? 'border-pink-500/30 bg-pink-500/5 hover:border-pink-400/50 hover:bg-pink-500/10' : 'border-pink-300 bg-pink-50 hover:border-pink-400 hover:bg-pink-100'
-                : isDark ? 'border-white/20 bg-white/5 hover:border-purple-400/50 hover:bg-white/10' : 'border-purple-200 bg-white/80 hover:border-purple-400 hover:bg-purple-50/50 shadow-sm shadow-purple-100/50'
+                : isDark ? 'border-white/20 bg-white/5 hover:border-purple-400/50 hover:bg-white/10' : 'border-purple-300 bg-slate-100 hover:border-purple-500 hover:bg-purple-50 shadow-sm'
         }`}
         onClick={() => fileInputRef.current?.click()}
         onDrop={handleDrop}
@@ -266,7 +266,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           { emoji: '🤳', title: 'Face Forward', desc: 'Look directly at the camera' },
           { emoji: '😊', title: 'Clear Face', desc: 'Remove sunglasses or mask' },
         ].map((tip, i) => (
-          <div key={i} className={`rounded-2xl p-4 flex items-center gap-3 transition border ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white/80 border-purple-100 hover:border-purple-300 shadow-sm shadow-purple-50'}`}>
+          <div key={i} className={`rounded-2xl p-4 flex items-center gap-3 transition border ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-slate-100 border-purple-200 hover:border-purple-400 shadow-sm'}`}>
             <span className="text-2xl">{tip.emoji}</span>
             <div>
               <p className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{tip.title}</p>
@@ -277,7 +277,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       </div>
 
       {/* Skin Tones */}
-      <div className={`mt-6 rounded-2xl p-5 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-purple-100 shadow-sm shadow-purple-50'}`}>
+      <div className={`mt-6 rounded-2xl p-5 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-purple-200 shadow-sm'}`}>
         <p className={`text-xs text-center mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>We support all skin tones 🌍</p>
         <div className="flex justify-center gap-3 flex-wrap">
           {[

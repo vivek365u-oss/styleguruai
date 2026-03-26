@@ -72,19 +72,19 @@ function Dashboard({ user, onLogout }) {
   return (
     <div className={`min-h-screen ${isDark
       ? 'bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900'
-      : 'bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/20'}`}>
+      : 'bg-gradient-to-br from-slate-200 via-purple-100/50 to-slate-200'}`}>
 
       {/* Background blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-purple-500 opacity-5' : 'bg-purple-300 opacity-20'}`}></div>
-        <div className={`absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-pink-500 opacity-5' : 'bg-pink-300 opacity-15'}`}></div>
-        {!isDark && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full bg-violet-100/40 blur-3xl"></div>}
+        <div className={`absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-purple-500 opacity-5' : 'bg-purple-400 opacity-25'}`}></div>
+        <div className={`absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-pink-500 opacity-5' : 'bg-pink-400 opacity-20'}`}></div>
+        {!isDark && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full bg-violet-200/50 blur-3xl"></div>}
       </div>
 
       {/* Header */}
       <header className={`relative border-b sticky top-0 z-50 backdrop-blur-xl ${isDark
         ? 'border-white/10 bg-white/5'
-        : 'border-purple-100/80 bg-white/80 shadow-sm shadow-purple-100/50'}`}>
+        : 'border-purple-200 bg-slate-100/90 shadow-md shadow-purple-200/40'}`}>
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
 
           {/* Logo */}
@@ -99,7 +99,7 @@ function Dashboard({ user, onLogout }) {
           </div>
 
           {/* Nav Tabs */}
-          <div className={`hidden md:flex rounded-xl p-1 gap-1 ${isDark ? 'bg-white/10' : 'bg-purple-50 border border-purple-100'}`}>
+          <div className={`hidden md:flex rounded-xl p-1 gap-1 ${isDark ? 'bg-white/10' : 'bg-slate-200 border border-purple-200'}`}>
             {[
               { id: 'analyze', label: '📸 Analyze' },
               { id: 'outfit', label: '👔 Outfit Check' },
@@ -113,10 +113,10 @@ function Dashboard({ user, onLogout }) {
                   activeTab === tab.id
                     ? isDark
                       ? 'bg-white text-purple-900 shadow'
-                      : 'bg-white text-purple-700 shadow shadow-purple-200/60 border border-purple-100'
+                      : 'bg-white text-purple-700 shadow shadow-purple-300/60 border border-purple-200'
                     : isDark
                       ? 'text-white/60 hover:text-white'
-                      : 'text-purple-400 hover:text-purple-700'
+                      : 'text-purple-500 hover:text-purple-800'
                 }`}
               >
                 {tab.label}
@@ -145,7 +145,7 @@ function Dashboard({ user, onLogout }) {
       {/* Mobile Bottom Nav */}
       <div className={`md:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t px-4 py-2 ${isDark
         ? 'bg-slate-900/95 border-white/10'
-        : 'bg-white/90 border-purple-100 shadow-lg shadow-purple-100/30'}`}>
+        : 'bg-slate-100/95 border-purple-200 shadow-lg shadow-purple-200/30'}`}>
         <div className="flex justify-around">
           {[
             { id: 'analyze', label: 'Analyze', emoji: '📸' },
