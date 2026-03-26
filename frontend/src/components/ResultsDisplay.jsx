@@ -93,17 +93,15 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const shirtCategory = isFemale ? "dress" : isSeasonal ? "top" : "shirt";
   const pantCategory = isFemale ? "bottom" : "pant";
 
-  const outfits = isSeasonal
-    ? (recommendations.male_outfits || [])
-    : isFemale
-    ? (recommendations.outfit_combos || [])
-    : (recommendations.outfit_combinations || recommendations.outfit_combos || []);
+  let outfits = [];
+  if (isSeasonal) { outfits = recommendations.male_outfits || []; }
+  else if (isFemale) { outfits = recommendations.outfit_combos || []; }
+  else { outfits = recommendations.outfit_combinations || recommendations.outfit_combos || []; }
 
-  const shirtColors = isSeasonal
-    ? (recommendations.seasonal_colors || recommendations.base_shirt_colors || [])
-    : isFemale
-    ? (recommendations.best_dress_colors || recommendations.best_top_colors || [])
-    : (recommendations.best_shirt_colors || []);
+  let shirtColors = [];
+  if (isSeasonal) { shirtColors = recommendations.seasonal_colors || recommendations.base_shirt_colors || []; }
+  else if (isFemale) { shirtColors = recommendations.best_dress_colors || recommendations.best_top_colors || []; }
+  else { shirtColors = recommendations.best_shirt_colors || []; }
 
   const pantColors = recommendations.best_pant_colors || recommendations.base_pant_colors || [];
   const avoidColors = recommendations.colors_to_avoid || [];
