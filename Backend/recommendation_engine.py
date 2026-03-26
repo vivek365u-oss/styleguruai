@@ -577,19 +577,25 @@ class RecommendationEngine:
     def _get_female_accessories(self, category, undertone):
         if undertone == "warm":
             return [
-                {"type": "Jewellery Metal", "suggestion": "Gold jewellery", "reason": "Gold complements warm undertones beautifully"},
-                {"type": "Handbag", "colors": "Tan, camel, rust, mustard", "reason": "Warm earth tones for bags"},
-                {"type": "Footwear", "colors": "Tan heels, brown sandals, gold flats", "reason": "Warm neutrals work best"},
-                {"type": "Dupatta/Scarf", "colors": "Contrasting bold colors", "reason": "Use accessories to add color pop"},
-                {"type": "Bangles/Bracelets", "suggestion": "Gold, copper, wooden bangles", "reason": "Warm metals enhance warm undertones"},
+                {"type": "Jewellery Metal", "suggestion": "Gold jewellery — necklaces, earrings, bangles", "reason": "Gold complements warm undertones beautifully"},
+                {"type": "Earrings", "colors": "Gold jhumkas, pearl drops, coral studs", "reason": "Warm tones enhance your golden undertone"},
+                {"type": "Necklace", "colors": "Gold chain, kundan set, polki necklace", "reason": "Traditional gold work looks stunning"},
+                {"type": "Handbag", "colors": "Tan, camel, rust, mustard, cognac brown", "reason": "Warm earth tones for bags complement your skin"},
+                {"type": "Footwear", "colors": "Tan heels, brown sandals, gold flats, nude pumps", "reason": "Warm neutrals work best with your undertone"},
+                {"type": "Bangles/Bracelets", "suggestion": "Gold, copper, wooden bangles, glass bangles", "reason": "Warm metals enhance warm undertones"},
+                {"type": "Dupatta/Scarf", "colors": "Contrasting bold colors — teal, maroon, royal blue", "reason": "Use accessories to add a color pop"},
+                {"type": "Watch", "suggestion": "Gold or rose gold watch", "reason": "Warm metal tones complement your skin perfectly"},
             ]
         else:
             return [
-                {"type": "Jewellery Metal", "suggestion": "Silver jewellery", "reason": "Silver complements cool undertones perfectly"},
-                {"type": "Handbag", "colors": "Black, navy, burgundy, grey", "reason": "Cool neutrals for bags"},
-                {"type": "Footwear", "colors": "Black heels, silver flats, navy pumps", "reason": "Cool colors complement cool undertones"},
-                {"type": "Dupatta/Scarf", "colors": "Contrasting jewel tones", "reason": "Rich cool colors as accents"},
-                {"type": "Bangles/Bracelets", "suggestion": "Silver, platinum, white gold", "reason": "Cool metals enhance cool undertones"},
+                {"type": "Jewellery Metal", "suggestion": "Silver jewellery — necklaces, earrings, rings", "reason": "Silver complements cool undertones perfectly"},
+                {"type": "Earrings", "colors": "Silver hoops, diamond studs, amethyst drops", "reason": "Cool tones enhance your pink undertone"},
+                {"type": "Necklace", "colors": "Silver chain, oxidised set, blue sapphire pendant", "reason": "Cool metal jewellery looks elegant"},
+                {"type": "Handbag", "colors": "Black, navy, burgundy, grey, cobalt blue", "reason": "Cool neutrals for bags complement your skin"},
+                {"type": "Footwear", "colors": "Black heels, silver flats, navy pumps, grey sandals", "reason": "Cool colors complement cool undertones"},
+                {"type": "Bangles/Bracelets", "suggestion": "Silver, platinum, white gold, blue glass bangles", "reason": "Cool metals enhance cool undertones"},
+                {"type": "Dupatta/Scarf", "colors": "Contrasting jewel tones — emerald, royal blue, purple", "reason": "Rich cool colors as accents"},
+                {"type": "Watch", "suggestion": "Silver or white gold watch", "reason": "Cool metal tones complement your undertone"},
             ]
 
     def _get_female_outfit_combos(self, category, undertone):

@@ -2,12 +2,35 @@
 // StyleGuru — Production Grade Results Display
 // ============================================================
 
-function ShoppingLinks({ colorName, category = "shirt" }) {
-  const query = encodeURIComponent(`${colorName} ${category}`);
+function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
+  const isFemale = gender === "female";
+
+  const categoryMap = {
+    dress: isFemale ? "women dress" : "shirt",
+    shirt: isFemale ? "women top kurti" : "men shirt",
+    top: isFemale ? "women top" : "men shirt",
+    pant: isFemale ? "women palazzo leggings" : "men trousers",
+    bottom: isFemale ? "women palazzo leggings" : "men trousers",
+    accessories: isFemale ? "women jewellery accessories" : "men accessories belt watch",
+    jewellery: "women jewellery gold silver",
+    handbag: "women handbag purse",
+    footwear: isFemale ? "women heels sandals" : "men shoes",
+    watch: isFemale ? "women watch" : "men watch",
+    saree: "saree",
+    kurti: "kurti",
+    lehenga: "lehenga",
+  };
+
+  const searchCategory = categoryMap[category] || (isFemale ? "women fashion" : "men fashion");
+  const query = encodeURIComponent(`${colorName} ${searchCategory}`);
+  const myntraPath = isFemale
+    ? `women-${category === 'dress' ? 'dresses' : category === 'pant' || category === 'bottom' ? 'bottoms' : 'tops'}`
+    : `men-${category === 'pant' ? 'trousers' : 'shirts'}`;
+
   const links = [
     { name: "Amazon", url: `https://www.amazon.in/s?k=${query}`, icon: "🛒", bg: "bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300" },
     { name: "Flipkart", url: `https://www.flipkart.com/search?q=${query}`, icon: "🏪", bg: "bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300" },
-    { name: "Myntra", url: `https://www.myntra.com/${encodeURIComponent(colorName.toLowerCase())}-${category}`, icon: "👗", bg: "bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300" },
+    { name: "Myntra", url: `https://www.myntra.com/${myntraPath}?rawQuery=${encodeURIComponent(colorName)}`, icon: "👗", bg: "bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300" },
   ];
   return (
     <div className="flex gap-2 flex-wrap mt-2">
@@ -21,7 +44,7 @@ function ShoppingLinks({ colorName, category = "shirt" }) {
   );
 }
 
-function ColorSwatch({ color, showReason = true, category = "shirt" }) {
+function ColorSwatch({ color, showReason = true, category = "shirt", gender = "male" }) {
   return (
     <div className="group bg-white/5 border border-white/10 rounded-2xl p-4 hover:bg-white/10 hover:border-purple-500/40 transition-all duration-300 hover:scale-[1.01]">
       <div className="flex items-center gap-4">
@@ -32,7 +55,7 @@ function ColorSwatch({ color, showReason = true, category = "shirt" }) {
           {showReason && color.reason && <p className="text-white/50 text-xs mt-1 leading-relaxed">{color.reason}</p>}
         </div>
       </div>
-      <ShoppingLinks colorName={color.name} category={category} />
+      <ShoppingLinks colorName={color.name} category={category} gender={gender} />
     </div>
   );
 }
@@ -214,7 +237,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           {(recommendations.seasonal_colors || []).length > 0 && (
             <Section title="Season Best Colors" emoji="🎨" gradient>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {recommendations.seasonal_colors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} />)}
+                {recommendations.seasonal_colors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} gender={effectiveGender} />)}
               </div>
             </Section>
           )}
@@ -241,13 +264,13 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Section title={isFemale ? "Best Dress & Top Colors" : "Best Shirt Colors"} emoji={isFemale ? "👗" : "👔"} gradient>
               <div className="space-y-3">
-                {shirtColors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} />)}
+                {shirtColors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} gender={effectiveGender} />)}
               </div>
             </Section>
             <Section title="Best Pant Colors" emoji="👖" gradient>
               <div className="space-y-3">
                 {pantColors.length > 0
-                  ? pantColors.map((color, i) => <ColorSwatch key={i} color={color} category={pantCategory} />)
+                  ? pantColors.map((color, i) => <ColorSwatch key={i} color={color} category={pantCategory} gender={effectiveGender} />)
                   : <p className="text-white/40 text-sm">No pant colors available</p>}
               </div>
             </Section>
@@ -258,7 +281,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
               <span className="text-2xl">🚫</span> Colors to Avoid
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {avoidColors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} />)}
+              {avoidColors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} gender={effectiveGender} />)}
             </div>
           </div>
 
@@ -358,14 +381,22 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
               {accessories.length > 0 && (
                 <Section title="Accessories & Jewellery" emoji="👜">
                   <div className="space-y-4">
-                    {accessories.map((item, i) => (
-                      <div key={i} className="bg-white/5 rounded-2xl p-4 border border-white/10 hover:border-purple-500/30 transition">
-                        <p className="text-purple-300 font-bold text-sm">{item.type}</p>
-                        <p className="text-white/60 text-xs mt-1">{item.suggestion || item.colors}</p>
-                        <p className="text-white/40 text-xs mt-0.5">{item.reason}</p>
-                        <ShoppingLinks colorName={item.suggestion || item.colors || item.type} category="accessories" />
-                      </div>
-                    ))}
+                    {accessories.map((item, i) => {
+                      const accCategory = item.type?.toLowerCase().includes('jewel') || item.type?.toLowerCase().includes('earring') || item.type?.toLowerCase().includes('necklace') || item.type?.toLowerCase().includes('bangle')
+                        ? 'jewellery' : item.type?.toLowerCase().includes('bag') || item.type?.toLowerCase().includes('handbag')
+                        ? 'handbag' : item.type?.toLowerCase().includes('footwear') || item.type?.toLowerCase().includes('shoe') || item.type?.toLowerCase().includes('heel')
+                        ? 'footwear' : item.type?.toLowerCase().includes('watch')
+                        ? 'watch' : 'accessories';
+                      const searchTerm = item.suggestion || item.colors || item.type;
+                      return (
+                        <div key={i} className="bg-white/5 rounded-2xl p-4 border border-white/10 hover:border-purple-500/30 transition">
+                          <p className="text-purple-300 font-bold text-sm">{item.type}</p>
+                          <p className="text-white/60 text-xs mt-1">{item.suggestion || item.colors}</p>
+                          <p className="text-white/40 text-xs mt-0.5">{item.reason}</p>
+                          <ShoppingLinks colorName={searchTerm} category={accCategory} gender="female" />
+                        </div>
+                      );
+                    })}
                   </div>
                 </Section>
               )}
@@ -375,7 +406,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           {!isFemale && accentColors.length > 0 && (
             <Section title="Accessories Colors" emoji="⌚">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {accentColors.map((color, i) => <ColorSwatch key={i} color={color} category="accessories" />)}
+                {accentColors.map((color, i) => <ColorSwatch key={i} color={color} category="accessories" gender={effectiveGender} />)}
               </div>
             </Section>
           )}
