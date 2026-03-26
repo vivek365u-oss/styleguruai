@@ -90,7 +90,8 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
     olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A",
   };
 
-  const outfits = isSeasonal
+  const shirtCategory = isFemale ? "dress" : isSeasonal ? "top" : "shirt";
+  const pantCategory = isFemale ? "bottom" : "pant";
     ? (recommendations.male_outfits || [])
     : isFemale
     ? (recommendations.outfit_combos || [])
@@ -211,7 +212,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           {(recommendations.seasonal_colors || []).length > 0 && (
             <Section title="Season Best Colors" emoji="🎨" gradient>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {recommendations.seasonal_colors.map((color, i) => <ColorSwatch key={i} color={color} category="shirt" />)}
+                {recommendations.seasonal_colors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} />)}
               </div>
             </Section>
           )}
@@ -236,13 +237,13 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Section title={isFemale ? "Best Dress & Top Colors" : "Best Shirt Colors"} emoji={isFemale ? "👗" : "👔"} gradient>
               <div className="space-y-3">
-                {shirtColors.map((color, i) => <ColorSwatch key={i} color={color} category={isFemale ? "dress" : "shirt"} />)}
+                {shirtColors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} />)}
               </div>
             </Section>
             <Section title="Best Pant Colors" emoji="👖" gradient>
               <div className="space-y-3">
                 {pantColors.length > 0
-                  ? pantColors.map((color, i) => <ColorSwatch key={i} color={color} category="pant" />)
+                  ? pantColors.map((color, i) => <ColorSwatch key={i} color={color} category={pantCategory} />)
                   : <p className="text-white/40 text-sm">No pant colors available</p>}
               </div>
             </Section>
@@ -253,7 +254,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
               <span className="text-2xl">🚫</span> Colors to Avoid
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {avoidColors.map((color, i) => <ColorSwatch key={i} color={color} category="shirt" />)}
+              {avoidColors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} />)}
             </div>
           </div>
 
@@ -368,7 +369,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           )}
 
           {!isFemale && accentColors.length > 0 && (
-            <Section title="Accessories Ke Liye Colors" emoji="⌚">
+            <Section title="Accessories Colors" emoji="⌚">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {accentColors.map((color, i) => <ColorSwatch key={i} color={color} category="accessories" />)}
               </div>
