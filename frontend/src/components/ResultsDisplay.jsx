@@ -91,8 +91,9 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
     olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A",
   };
 
-  const shirtCategory = isFemale ? "dress" : (isSeasonal && seasonalGender === 'female') ? "dress" : isSeasonal ? "top" : "shirt";
-  const pantCategory = isFemale ? "bottom" : "pant";
+  const effectiveGender = isSeasonal ? seasonalGender : (isFemale ? 'female' : 'male');
+  const shirtCategory = effectiveGender === 'female' ? "dress" : "shirt";
+  const pantCategory = effectiveGender === 'female' ? "bottom" : "pant";
 
   let outfits = [];
   if (isSeasonal) { outfits = recommendations.male_outfits || []; }

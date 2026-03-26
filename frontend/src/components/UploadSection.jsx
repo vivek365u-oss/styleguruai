@@ -82,7 +82,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       <div className="flex justify-center mb-6">
         <div className={`rounded-2xl p-1.5 flex gap-1 border ${isDark ? 'bg-white/10 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
           <button
-            onClick={() => setMode('normal')}
+            onClick={() => { setMode('normal'); handleGenderChange('male'); }}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${
               mode === 'normal'
                 ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
@@ -92,7 +92,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
             <span>👔</span> Normal
           </button>
           <button
-            onClick={() => setMode('seasonal')}
+            onClick={() => { setMode('seasonal'); handleGenderChange('male'); }}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${
               mode === 'seasonal'
                 ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg'
