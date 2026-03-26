@@ -267,46 +267,92 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
       {/* ── NORMAL COLOR SECTIONS ── */}
       {!isSeasonal && (
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Section title={isFemale ? "Best Dress & Top Colors" : "Best Shirt Colors"} emoji={isFemale ? "👗" : "👔"} gradient>
-              <div className="space-y-3">
-                {shirtColors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} gender={effectiveGender} />)}
+          {/* Female — multiple clothing categories */}
+          {isFemale ? (
+            <>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Section title="Best Dress Colors" emoji="👗" gradient>
+                  <div className="space-y-3">
+                    {(recommendations.best_dress_colors || []).map((color, i) => <ColorSwatch key={i} color={color} category="dress" gender="female" />)}
+                  </div>
+                </Section>
+                <Section title="Best Top Colors" emoji="👚" gradient>
+                  <div className="space-y-3">
+                    {(recommendations.best_top_colors || []).map((color, i) => <ColorSwatch key={i} color={color} category="top" gender="female" />)}
+                  </div>
+                </Section>
               </div>
-            </Section>
-            <Section title="Best Pant Colors" emoji="👖" gradient>
-              <div className="space-y-3">
-                {pantColors.length > 0
-                  ? pantColors.map((color, i) => <ColorSwatch key={i} color={color} category={pantCategory} gender={effectiveGender} />)
-                  : <p className="text-white/40 text-sm">No pant colors available</p>}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Section title="Best Kurti Colors" emoji="🥻" gradient>
+                  <div className="space-y-3">
+                    {(recommendations.best_kurti_colors || []).map((color, i) => <ColorSwatch key={i} color={color} category="kurti" gender="female" />)}
+                  </div>
+                </Section>
+                <Section title="Best Lehenga Colors" emoji="✨" gradient>
+                  <div className="space-y-3">
+                    {(recommendations.best_lehenga_colors || []).map((color, i) => <ColorSwatch key={i} color={color} category="lehenga" gender="female" />)}
+                  </div>
+                </Section>
               </div>
-            </Section>
-          </div>
-
-          <div className="bg-red-500/5 border border-red-500/20 rounded-3xl p-6">
-            <h3 className="text-red-300 font-black text-lg mb-5 flex items-center gap-2">
-              <span className="text-2xl">🚫</span> Colors to Avoid
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {avoidColors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} gender={effectiveGender} />)}
-            </div>
-          </div>
-
-          <Section title="Complete Outfit Ideas" emoji="🧥">
-            <div className="space-y-3">
-              {outfits.map((combo, i) => <OutfitCard key={i} combo={combo} index={i} />)}
-            </div>
-          </Section>
-
-          <Section title="Style Tips Just For You" emoji="💡">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {styleTips.map((tip, i) => (
-                <div key={i} className="flex items-start gap-3 bg-white/5 rounded-xl p-3 border border-white/10">
-                  <span className="text-purple-400 text-lg flex-shrink-0">✦</span>
-                  <p className="text-white/70 text-sm leading-relaxed">{tip}</p>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Section title="Best Bottom Colors" emoji="👖" gradient>
+                  <div className="space-y-3">
+                    {(recommendations.best_bottom_colors || recommendations.best_pant_colors || []).map((color, i) => <ColorSwatch key={i} color={color} category="bottom" gender="female" />)}
+                  </div>
+                </Section>
+                <div className="bg-red-500/5 border border-red-500/20 rounded-3xl p-6">
+                  <h3 className="text-red-300 font-black text-lg mb-5 flex items-center gap-2">
+                    <span className="text-2xl">🚫</span> Colors to Avoid
+                  </h3>
+                  <div className="grid grid-cols-1 gap-3">
+                    {avoidColors.map((color, i) => <ColorSwatch key={i} color={color} category="dress" gender="female" />)}
+                  </div>
                 </div>
-              ))}
-            </div>
-          </Section>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Section title="Best Shirt Colors" emoji="👔" gradient>
+                  <div className="space-y-3">
+                    {shirtColors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} gender={effectiveGender} />)}
+                  </div>
+                </Section>
+                <Section title="Best Pant Colors" emoji="👖" gradient>
+                  <div className="space-y-3">
+                    {pantColors.length > 0
+                      ? pantColors.map((color, i) => <ColorSwatch key={i} color={color} category={pantCategory} gender={effectiveGender} />)
+                      : <p className="text-white/40 text-sm">No pant colors available</p>}
+                  </div>
+                </Section>
+              </div>
+              <div className="bg-red-500/5 border border-red-500/20 rounded-3xl p-6">
+                <h3 className="text-red-300 font-black text-lg mb-5 flex items-center gap-2">
+                  <span className="text-2xl">🚫</span> Colors to Avoid
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {avoidColors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} gender={effectiveGender} />)}
+                </div>
+              </div>
+
+              <Section title="Complete Outfit Ideas" emoji="🧥">
+                <div className="space-y-3">
+                  {outfits.map((combo, i) => <OutfitCard key={i} combo={combo} index={i} />)}
+                </div>
+              </Section>
+
+              <Section title="Style Tips Just For You" emoji="💡">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {styleTips.map((tip, i) => (
+                    <div key={i} className="flex items-start gap-3 bg-white/5 rounded-xl p-3 border border-white/10">
+                      <span className="text-purple-400 text-lg flex-shrink-0">✦</span>
+                      <p className="text-white/70 text-sm leading-relaxed">{tip}</p>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+            </>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Section title="What to Wear & When?" emoji="📅">

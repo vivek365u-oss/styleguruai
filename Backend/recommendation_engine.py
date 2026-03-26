@@ -418,6 +418,9 @@ class RecommendationEngine:
             "summary": self._get_female_summary(category, undertone),
             "best_dress_colors": self._get_dress_colors(category, undertone),
             "best_top_colors": self._get_top_colors(category, undertone),
+            "best_kurti_colors": self._get_kurti_colors(category, undertone),
+            "best_lehenga_colors": self._get_lehenga_colors(category, undertone),
+            "best_bottom_colors": self._get_female_bottom_colors(category, undertone),
             "best_pant_colors": self._get_pant_colors(category, undertone),
             "saree_suggestions": self._get_saree_suggestions(category, undertone),
             "makeup_suggestions": self._get_makeup_suggestions(category, undertone),
@@ -428,6 +431,84 @@ class RecommendationEngine:
             "occasion_advice": self._get_occasion_advice(category, undertone),
             "ethnic_wear": self._get_saree_suggestions(category, undertone),
         }
+
+    def _get_kurti_colors(self, category, undertone):
+        if category in ["fair", "light"]:
+            return [
+                {**self.COLORS["maroon"], "reason": "Deep maroon kurti looks stunning on fair skin"},
+                {**self.COLORS["navy_blue"], "reason": "Navy kurti is a classic choice"},
+                {**self.COLORS["forest_green"], "reason": "Rich green kurti looks elegant"},
+                {**self.COLORS["burgundy"], "reason": "Burgundy adds sophistication"},
+                {**self.COLORS["teal"], "reason": "Teal kurti pops beautifully"},
+            ]
+        elif category in ["medium", "olive"]:
+            return [
+                {**self.COLORS["white"], "reason": "White kurti looks fresh and clean"},
+                {**self.COLORS["coral"], "reason": "Coral kurti glows on medium skin"},
+                {**self.COLORS["sky_blue"], "reason": "Sky blue kurti looks breezy"},
+                {**self.COLORS["maroon"], "reason": "Maroon kurti is always flattering"},
+                {**self.COLORS["olive_green"], "reason": "Olive kurti suits your skin perfectly"},
+            ]
+        else:
+            return [
+                {**self.COLORS["white"], "reason": "White kurti creates maximum contrast"},
+                {**self.COLORS["bright_yellow"], "reason": "Yellow kurti looks vibrant and bold"},
+                {**self.COLORS["royal_blue"], "reason": "Royal blue kurti looks regal"},
+                {**self.COLORS["coral"], "reason": "Coral kurti glows against dark skin"},
+                {**self.COLORS["emerald"], "reason": "Emerald kurti looks stunning"},
+            ]
+
+    def _get_lehenga_colors(self, category, undertone):
+        if category in ["fair", "light"]:
+            return [
+                {**self.COLORS["maroon"], "reason": "Classic bridal maroon lehenga for fair skin"},
+                {**self.COLORS["navy_blue"], "reason": "Navy lehenga with gold work looks royal"},
+                {**self.COLORS["emerald"], "reason": "Emerald green lehenga is stunning"},
+                {**self.COLORS["burgundy"], "reason": "Burgundy lehenga looks rich and elegant"},
+                {**self.COLORS["mustard"], "reason": "Mustard lehenga is trendy and flattering"},
+            ]
+        elif category in ["medium", "olive"]:
+            return [
+                {**self.COLORS["coral"], "reason": "Coral lehenga glows on medium skin"},
+                {**self.COLORS["royal_blue"], "reason": "Royal blue lehenga looks stunning"},
+                {**self.COLORS["maroon"], "reason": "Classic maroon lehenga always works"},
+                {**self.COLORS["teal"], "reason": "Teal lehenga is unique and beautiful"},
+                {**self.COLORS["mustard"], "reason": "Mustard lehenga with mirror work is gorgeous"},
+            ]
+        else:
+            return [
+                {**self.COLORS["white"], "reason": "White lehenga looks absolutely regal"},
+                {**self.COLORS["bright_yellow"], "reason": "Yellow lehenga is bold and beautiful"},
+                {**self.COLORS["royal_blue"], "reason": "Royal blue lehenga looks powerful"},
+                {**self.COLORS["orange"], "reason": "Orange lehenga is vibrant and festive"},
+                {**self.COLORS["emerald"], "reason": "Emerald lehenga looks stunning"},
+            ]
+
+    def _get_female_bottom_colors(self, category, undertone):
+        universal = [
+            {**self.COLORS["black"], "reason": "Black palazzo/leggings — goes with everything"},
+            {**self.COLORS["navy_blue"], "reason": "Navy bottom — versatile and elegant"},
+            {**self.COLORS["charcoal"], "reason": "Charcoal grey — polished and professional"},
+        ]
+        if category in ["fair", "light"]:
+            specific = [
+                {**self.COLORS["beige"], "reason": "Beige palazzo looks soft and feminine"},
+                {**self.COLORS["olive_green"], "reason": "Olive palazzo is trendy"},
+                {**self.COLORS["lavender"], "reason": "Lavender skirt looks elegant"},
+            ]
+        elif category in ["medium", "olive"]:
+            specific = [
+                {**self.COLORS["white"], "reason": "White palazzo creates great contrast"},
+                {**self.COLORS["beige"], "reason": "Beige bottom is versatile"},
+                {**self.COLORS["rust"], "reason": "Rust skirt is trendy and flattering"},
+            ]
+        else:
+            specific = [
+                {**self.COLORS["white"], "reason": "White palazzo looks amazing"},
+                {**self.COLORS["cream"], "reason": "Cream bottom creates soft contrast"},
+                {**self.COLORS["mustard"], "reason": "Mustard skirt is bold and beautiful"},
+            ]
+        return universal + specific
 
     def _get_dress_colors(self, category, undertone):
         recommendations = {
