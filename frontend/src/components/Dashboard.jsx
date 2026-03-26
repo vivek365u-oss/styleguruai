@@ -72,18 +72,19 @@ function Dashboard({ user, onLogout }) {
   return (
     <div className={`min-h-screen ${isDark
       ? 'bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900'
-      : 'bg-gray-50'}`}>
+      : 'bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/20'}`}>
 
       {/* Background blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-purple-500 opacity-5' : 'bg-purple-200 opacity-40'}`}></div>
-        <div className={`absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-pink-500 opacity-5' : 'bg-pink-200 opacity-30'}`}></div>
+        <div className={`absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-purple-500 opacity-5' : 'bg-purple-300 opacity-20'}`}></div>
+        <div className={`absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-pink-500 opacity-5' : 'bg-pink-300 opacity-15'}`}></div>
+        {!isDark && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full bg-violet-100/40 blur-3xl"></div>}
       </div>
 
       {/* Header */}
       <header className={`relative border-b sticky top-0 z-50 backdrop-blur-xl ${isDark
         ? 'border-white/10 bg-white/5'
-        : 'border-gray-200 bg-white shadow-sm'}`}>
+        : 'border-purple-100/80 bg-white/80 shadow-sm shadow-purple-100/50'}`}>
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
 
           {/* Logo */}
@@ -98,7 +99,7 @@ function Dashboard({ user, onLogout }) {
           </div>
 
           {/* Nav Tabs */}
-          <div className={`hidden md:flex rounded-xl p-1 gap-1 ${isDark ? 'bg-white/10' : 'bg-gray-100 border border-gray-200'}`}>
+          <div className={`hidden md:flex rounded-xl p-1 gap-1 ${isDark ? 'bg-white/10' : 'bg-purple-50 border border-purple-100'}`}>
             {[
               { id: 'analyze', label: '📸 Analyze' },
               { id: 'outfit', label: '👔 Outfit Check' },
@@ -112,10 +113,10 @@ function Dashboard({ user, onLogout }) {
                   activeTab === tab.id
                     ? isDark
                       ? 'bg-white text-purple-900 shadow'
-                      : 'bg-white text-purple-700 shadow shadow-gray-200'
+                      : 'bg-white text-purple-700 shadow shadow-purple-200/60 border border-purple-100'
                     : isDark
                       ? 'text-white/60 hover:text-white'
-                      : 'text-gray-500 hover:text-gray-900'
+                      : 'text-purple-400 hover:text-purple-700'
                 }`}
               >
                 {tab.label}
@@ -133,7 +134,7 @@ function Dashboard({ user, onLogout }) {
               onClick={toggleTheme}
               className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${isDark
                 ? 'bg-white/10 hover:bg-white/20 text-yellow-300'
-                : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
+                : 'bg-purple-50 hover:bg-purple-100 text-purple-600 border border-purple-100'}`}
             >
               {isDark ? '☀️' : '🌙'}
             </button>
@@ -144,7 +145,7 @@ function Dashboard({ user, onLogout }) {
       {/* Mobile Bottom Nav */}
       <div className={`md:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t px-4 py-2 ${isDark
         ? 'bg-slate-900/95 border-white/10'
-        : 'bg-white border-gray-200 shadow-md'}`}>
+        : 'bg-white/90 border-purple-100 shadow-lg shadow-purple-100/30'}`}>
         <div className="flex justify-around">
           {[
             { id: 'analyze', label: 'Analyze', emoji: '📸' },
@@ -184,7 +185,7 @@ function Dashboard({ user, onLogout }) {
             )}
             {loading && <LoadingScreen />}
             {error && (
-              <div className={`mt-8 rounded-3xl p-8 text-center border ${isDark ? 'bg-red-500/10 border-red-500/30' : 'bg-red-50 border-red-200'}`}>
+              <div className={`mt-8 rounded-3xl p-8 text-center border ${isDark ? 'bg-red-500/10 border-red-500/30' : 'bg-red-50/80 border-red-200 shadow-sm shadow-red-100'}`}>
                 <div className="text-5xl mb-4">😕</div>
                 <p className={`text-lg font-medium mb-2 ${isDark ? 'text-red-300' : 'text-red-600'}`}>Oops!</p>
                 <p className={`whitespace-pre-line text-sm max-w-md mx-auto ${isDark ? 'text-red-400/80' : 'text-red-500'}`}>{error}</p>
@@ -203,11 +204,11 @@ function Dashboard({ user, onLogout }) {
         {/* Settings Tab */}
         {activeTab === 'settings' && (
           <div className="mt-8 max-w-md mx-auto">
-            <div className={`rounded-3xl p-8 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-xl'}`}>
+            <div className={`rounded-3xl p-8 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-purple-100 shadow-xl shadow-purple-100/30 backdrop-blur-sm'}`}>
               <h2 className={`text-2xl font-black mb-8 ${isDark ? 'text-white' : 'text-gray-900'}`}>⚙️ Settings</h2>
 
               {/* Theme Toggle */}
-              <div className={`flex items-center justify-between p-5 rounded-2xl border mb-4 ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
+              <div className={`flex items-center justify-between p-5 rounded-2xl border mb-4 ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50/60 border-purple-100'}`}>
                 <div>
                   <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>
                     {isDark ? '🌙 Dark Mode' : '☀️ Light Mode'}
@@ -230,7 +231,7 @@ function Dashboard({ user, onLogout }) {
               </div>
 
               {/* User Info */}
-              <div className={`p-5 rounded-2xl border mb-4 ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
+              <div className={`p-5 rounded-2xl border mb-4 ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50/60 border-purple-100'}`}>
                 <p className={`font-bold text-sm mb-1 ${isDark ? 'text-white' : 'text-gray-800'}`}>👤 Account</p>
                 <p className={`text-xs ${isDark ? 'text-white/60' : 'text-gray-700'}`}>{user.name}</p>
                 <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{user.email}</p>
