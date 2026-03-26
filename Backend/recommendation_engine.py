@@ -216,17 +216,21 @@ class RecommendationEngine:
     def _get_accent_colors(self, category, undertone):
         if undertone == "warm":
             return [
-                {**self.COLORS["rust"], "reason": "Warm metallic tone for accessories"},
-                {**self.COLORS["camel"], "reason": "Classic warm neutral for shoes/bags"},
-                {**self.COLORS["chocolate"], "reason": "Rich brown leather looks great"},
-                {**self.COLORS["mustard"], "reason": "Bold accent for bags or scarves"},
+                {"type": "Belt", "hex": "#B7410E", "name": "Rust Brown Belt", "reason": "Warm leather belt complements warm undertones — tan or cognac leather"},
+                {"type": "Watch", "hex": "#C19A6B", "name": "Gold/Bronze Watch", "reason": "Gold or bronze watch face looks great with warm skin"},
+                {"type": "Shoes", "hex": "#7B3F00", "name": "Chocolate Brown Shoes", "reason": "Rich brown leather shoes are your best footwear choice"},
+                {"type": "Bag/Backpack", "hex": "#C19A6B", "name": "Camel Bag", "reason": "Camel or tan bag adds a warm, stylish accent"},
+                {"type": "Wallet", "hex": "#D2B48C", "name": "Tan Leather Wallet", "reason": "Tan leather wallet is a classic warm-toned accessory"},
+                {"type": "Sunglasses", "hex": "#B7410E", "name": "Tortoise/Brown Frame", "reason": "Tortoiseshell or brown frames suit warm undertones perfectly"},
             ]
         else:
             return [
-                {**self.COLORS["charcoal"], "reason": "Cool neutral for accessories"},
-                {**self.COLORS["black"], "reason": "Classic cool accent"},
-                {**self.COLORS["navy_blue"], "reason": "Rich blue for bags or belts"},
-                {**self.COLORS["burgundy"], "reason": "Deep red accent adds sophistication"},
+                {"type": "Belt", "hex": "#36454F", "name": "Charcoal/Black Belt", "reason": "Cool-toned black or dark grey belt looks sharp"},
+                {"type": "Watch", "hex": "#C0C0C0", "name": "Silver Watch", "reason": "Silver or steel watch complements cool undertones beautifully"},
+                {"type": "Shoes", "hex": "#000000", "name": "Black Leather Shoes", "reason": "Classic black shoes are perfect for cool undertones"},
+                {"type": "Bag/Backpack", "hex": "#000080", "name": "Navy Bag", "reason": "Navy or black bag is a cool-toned power accessory"},
+                {"type": "Wallet", "hex": "#36454F", "name": "Dark Leather Wallet", "reason": "Black or dark grey leather wallet looks polished"},
+                {"type": "Sunglasses", "hex": "#000000", "name": "Black/Silver Frame", "reason": "Black or silver frames suit cool undertones perfectly"},
             ]
 
     def _get_avoid_colors(self, category, undertone):

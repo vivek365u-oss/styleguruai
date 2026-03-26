@@ -9,14 +9,19 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
     dress: isFemale ? "women dress" : "shirt",
     shirt: isFemale ? "women top kurti" : "men shirt",
     top: isFemale ? "women top" : "men shirt",
-    pant: isFemale ? "women palazzo leggings" : "men trousers",
-    bottom: isFemale ? "women palazzo leggings" : "men trousers",
-    accessories: isFemale ? "women jewellery accessories" : "men accessories belt watch",
+    pant: isFemale ? "women palazzo leggings" : "men trousers chinos",
+    bottom: isFemale ? "women palazzo leggings" : "men trousers chinos",
+    accessories: isFemale ? "women jewellery accessories" : "men accessories",
     jewellery: "women jewellery gold silver",
     handbag: "women handbag purse clutch",
-    footwear: isFemale ? "women heels sandals" : "men shoes",
+    footwear: isFemale ? "women heels sandals" : "men shoes formal",
     watch: isFemale ? "women watch" : "men watch",
     dupatta: "women dupatta scarf stole",
+    belt: "men leather belt",
+    shoes: isFemale ? "women heels sandals" : "men shoes formal sneakers",
+    bag: isFemale ? "women handbag" : "men bag backpack",
+    wallet: isFemale ? "women wallet purse" : "men leather wallet",
+    sunglasses: isFemale ? "women sunglasses" : "men sunglasses",
     saree: "saree",
     kurti: "kurti",
     lehenga: "lehenga",
@@ -413,9 +418,31 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           )}
 
           {!isFemale && accentColors.length > 0 && (
-            <Section title="Accessories Colors" emoji="⌚">
+            <Section title="Accessories For You" emoji="⌚">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {accentColors.map((color, i) => <ColorSwatch key={i} color={color} category="accessories" gender={effectiveGender} />)}
+                {accentColors.map((color, i) => {
+                  const typeLC = (color.type || '').toLowerCase();
+                  const accCat = typeLC.includes('belt') ? 'belt'
+                    : typeLC.includes('watch') ? 'watch'
+                    : typeLC.includes('shoe') || typeLC.includes('footwear') ? 'shoes'
+                    : typeLC.includes('bag') || typeLC.includes('backpack') ? 'bag'
+                    : typeLC.includes('wallet') ? 'wallet'
+                    : typeLC.includes('sunglass') ? 'sunglasses'
+                    : 'accessories';
+                  return (
+                    <div key={i} className="group bg-white/5 border border-white/10 rounded-2xl p-4 hover:bg-white/10 hover:border-purple-500/40 transition-all duration-300">
+                      <div className="flex items-center gap-4 mb-2">
+                        <div className="w-12 h-12 rounded-xl shadow-lg border border-white/20 flex-shrink-0" style={{ backgroundColor: color.hex }} />
+                        <div>
+                          <p className="text-white font-bold text-sm">{color.type}</p>
+                          <p className="text-white/60 text-xs">{color.name}</p>
+                          <p className="text-white/40 text-xs mt-0.5">{color.reason}</p>
+                        </div>
+                      </div>
+                      <ShoppingLinks colorName={color.name} category={accCat} gender="male" />
+                    </div>
+                  );
+                })}
               </div>
             </Section>
           )}
