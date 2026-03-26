@@ -84,13 +84,14 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const { analysis, recommendations, photo_quality } = data;
   const isFemale = data.gender === "female";
   const isSeasonal = data.gender === "seasonal";
+  const seasonalGender = data.seasonalGender || "male";
 
   const toneColors = {
     fair: "#F5DEB3", light: "#D2A679", medium: "#C68642",
     olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A",
   };
 
-  const shirtCategory = isFemale ? "dress" : isSeasonal ? "top" : "shirt";
+  const shirtCategory = isFemale ? "dress" : (isSeasonal && seasonalGender === 'female') ? "dress" : isSeasonal ? "top" : "shirt";
   const pantCategory = isFemale ? "bottom" : "pant";
 
   let outfits = [];
@@ -217,17 +218,19 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             </Section>
           )}
 
-          <Section title="Season Outfit Ideas — Male" emoji="👔">
-            <div className="space-y-3">
-              {(recommendations.male_outfits || []).map((combo, i) => <OutfitCard key={i} combo={combo} index={i} />)}
-            </div>
-          </Section>
-
-          <Section title="Season Outfit Ideas — Female" emoji="👗">
-            <div className="space-y-3">
-              {(recommendations.female_outfits || []).map((combo, i) => <OutfitCard key={i} combo={combo} index={i} />)}
-            </div>
-          </Section>
+          {seasonalGender === 'female' ? (
+            <Section title="Season Outfit Ideas — Female" emoji="👗">
+              <div className="space-y-3">
+                {(recommendations.female_outfits || []).map((combo, i) => <OutfitCard key={i} combo={combo} index={i} />)}
+              </div>
+            </Section>
+          ) : (
+            <Section title="Season Outfit Ideas — Male" emoji="👔">
+              <div className="space-y-3">
+                {(recommendations.male_outfits || []).map((combo, i) => <OutfitCard key={i} combo={combo} index={i} />)}
+              </div>
+            </Section>
+          )}
         </>
       )}
 

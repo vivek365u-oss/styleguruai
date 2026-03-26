@@ -30,7 +30,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       let res;
       if (mode === 'seasonal') {
         res = await analyzeImageSeasonal(file, season, setUploadProgress);
-        onAnalysisComplete({ ...res.data, gender: 'seasonal' });
+        onAnalysisComplete({ ...res.data, gender: 'seasonal', seasonalGender: gender });
       } else if (gender === 'female') {
         res = await analyzeImageFemale(file, setUploadProgress);
         onAnalysisComplete({ ...res.data, gender: 'female' });
@@ -135,6 +135,31 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       {/* Seasonal Mode — Season Selector */}
       {mode === 'seasonal' && (
         <div className="mb-6">
+          {/* Gender toggle for seasonal */}
+          <div className="flex justify-center mb-4">
+            <div className={`rounded-2xl p-1.5 flex gap-1 border ${isDark ? 'bg-white/10 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
+              <button
+                onClick={() => handleGenderChange('male')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
+                  gender === 'male'
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/30'
+                    : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'
+                }`}
+              >
+                <span>👨</span> Male
+              </button>
+              <button
+                onClick={() => handleGenderChange('female')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
+                  gender === 'female'
+                    ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/30'
+                    : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'
+                }`}
+              >
+                <span>👩</span> Female
+              </button>
+            </div>
+          </div>
           <p className={`text-sm text-center mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Choose a season:</p>
           <div className="flex justify-center gap-3 flex-wrap">
             {seasons.map((s) => (
@@ -162,7 +187,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       <div className="text-center mb-6 text-sm font-medium">
         {mode === 'seasonal' ? (
           <span className={isDark ? 'text-amber-300' : 'text-amber-600'}>
-            {seasons.find(s => s.id === season)?.emoji} Special recommendations for {seasons.find(s => s.id === season)?.label}!
+            {seasons.find(s => s.id === season)?.emoji} {gender === 'female' ? '👩 Female' : '👨 Male'} — Special recommendations for {seasons.find(s => s.id === season)?.label}!
           </span>
         ) : gender === 'female' ? (
           <span className={isDark ? 'text-pink-300' : 'text-pink-600'}>👗 Female mode: Dress, Saree, Suit & Makeup suggestions included!</span>
