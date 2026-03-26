@@ -1,6 +1,7 @@
 // ============================================================
 // StyleGuru — Production Grade Results Display
 // ============================================================
+import { AffiliateSection } from './AffiliateSection';
 
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   const isFemale = gender === "female";
@@ -90,7 +91,7 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   );
 }
 
-function ColorSwatch({ color, showReason = true, category = "shirt", gender = "male" }) {
+function ColorSwatch({ color, showReason = true, category = "shirt", gender = "male", showAffiliate = false }) {
   return (
     <div className="group bg-white/5 border border-white/10 rounded-2xl p-4 hover:bg-white/10 hover:border-purple-500/40 transition-all duration-300 hover:scale-[1.01]">
       <div className="flex items-center gap-4">
@@ -102,6 +103,9 @@ function ColorSwatch({ color, showReason = true, category = "shirt", gender = "m
         </div>
       </div>
       <ShoppingLinks colorName={color.name} category={category} gender={gender} />
+      {showAffiliate && (
+        <AffiliateSection colorName={color.name} category={category} gender={gender} />
+      )}
     </div>
   );
 }
@@ -313,7 +317,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Section title="Best Dress Colors" emoji="👗" gradient>
                   <div className="space-y-3">
-                    {(recommendations.best_dress_colors || []).map((color, i) => <ColorSwatch key={i} color={color} category="dress" gender="female" />)}
+                    {(recommendations.best_dress_colors || []).map((color, i) => <ColorSwatch key={i} color={color} category="dress" gender="female" showAffiliate={i < 2} />)}
                   </div>
                 </Section>
                 <Section title="Best Top Colors" emoji="👚" gradient>
@@ -355,7 +359,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Section title="Best Shirt Colors" emoji="👔" gradient>
                   <div className="space-y-3">
-                    {shirtColors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} gender={effectiveGender} />)}
+                    {shirtColors.map((color, i) => <ColorSwatch key={i} color={color} category={shirtCategory} gender={effectiveGender} showAffiliate={i < 2} />)}
                   </div>
                 </Section>
                 <Section title="Best Pant Colors" emoji="👖" gradient>
