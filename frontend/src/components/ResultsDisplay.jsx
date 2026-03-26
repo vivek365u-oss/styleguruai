@@ -4,40 +4,80 @@
 
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   const isFemale = gender === "female";
+  const colorLower = colorName.toLowerCase().replace(/\s+/g, '+');
 
   const categoryMap = {
-    dress: isFemale ? "women dress" : "shirt",
-    shirt: isFemale ? "women top kurti" : "men shirt",
-    top: isFemale ? "women top" : "men shirt",
-    pant: isFemale ? "women palazzo leggings" : "men trousers chinos",
-    bottom: isFemale ? "women palazzo leggings" : "men trousers chinos",
-    accessories: isFemale ? "women jewellery accessories" : "men accessories",
-    jewellery: "women jewellery gold silver",
-    handbag: "women handbag purse clutch",
-    footwear: isFemale ? "women heels sandals" : "men shoes formal",
-    watch: isFemale ? "women watch" : "men watch",
-    dupatta: "women dupatta scarf stole",
-    belt: "men leather belt",
-    shoes: isFemale ? "women heels sandals" : "men shoes formal sneakers",
-    bag: isFemale ? "women handbag" : "men bag backpack",
-    wallet: isFemale ? "women wallet purse" : "men leather wallet",
-    sunglasses: isFemale ? "women sunglasses" : "men sunglasses",
-    saree: "saree",
-    kurti: "kurti",
-    lehenga: "lehenga",
+    dress: isFemale ? "women+dress" : "shirt",
+    shirt: isFemale ? "women+top+kurti" : "men+formal+shirt",
+    top: isFemale ? "women+top" : "men+shirt",
+    pant: isFemale ? "women+palazzo+leggings" : "men+chinos+trousers",
+    bottom: isFemale ? "women+palazzo+leggings" : "men+chinos+trousers",
+    accessories: isFemale ? "women+jewellery+accessories" : "men+accessories",
+    jewellery: "women+jewellery+gold+silver",
+    handbag: "women+handbag+purse+clutch",
+    footwear: isFemale ? "women+heels+sandals" : "men+formal+shoes",
+    watch: isFemale ? "women+watch+fashion" : "men+watch+formal",
+    dupatta: "women+dupatta+scarf+stole",
+    belt: "men+leather+belt+formal",
+    shoes: isFemale ? "women+heels+sandals+block" : "men+formal+shoes+loafers",
+    bag: isFemale ? "women+handbag+tote" : "men+bag+backpack+office",
+    wallet: isFemale ? "women+wallet+purse" : "men+leather+wallet+slim",
+    sunglasses: isFemale ? "women+sunglasses+uv400" : "men+sunglasses+polarized",
+    kurti: "women+kurti+cotton+printed",
+    lehenga: "women+lehenga+choli+ethnic",
+    saree: "women+saree+silk+cotton",
   };
 
-  const searchCategory = categoryMap[category] || (isFemale ? "women fashion" : "men fashion");
-  const query = encodeURIComponent(`${colorName} ${searchCategory}`);
-  const myntraPath = isFemale
-    ? `women-${category === 'dress' ? 'dresses' : category === 'pant' || category === 'bottom' ? 'bottoms' : 'tops'}`
-    : `men-${category === 'pant' ? 'trousers' : 'shirts'}`;
+  const searchCat = categoryMap[category] || (isFemale ? "women+fashion" : "men+fashion");
+  const amazonQuery = `${colorLower}+${searchCat}`;
+  const flipkartQuery = `${colorLower} ${searchCat.replace(/\+/g, ' ')}`;
+
+  // Myntra direct category URLs
+  const myntraUrlMap = {
+    shirt: isFemale ? `https://www.myntra.com/tops?rawQuery=${colorLower}+top` : `https://www.myntra.com/shirts?rawQuery=${colorLower}+shirt`,
+    pant: isFemale ? `https://www.myntra.com/palazzos?rawQuery=${colorLower}` : `https://www.myntra.com/trousers?rawQuery=${colorLower}+trousers`,
+    bottom: isFemale ? `https://www.myntra.com/palazzos?rawQuery=${colorLower}` : `https://www.myntra.com/trousers?rawQuery=${colorLower}`,
+    dress: isFemale ? `https://www.myntra.com/dresses?rawQuery=${colorLower}+dress` : `https://www.myntra.com/shirts?rawQuery=${colorLower}`,
+    top: isFemale ? `https://www.myntra.com/tops?rawQuery=${colorLower}` : `https://www.myntra.com/shirts?rawQuery=${colorLower}`,
+    kurti: `https://www.myntra.com/kurtas?rawQuery=${colorLower}+kurti`,
+    lehenga: `https://www.myntra.com/lehenga-cholis?rawQuery=${colorLower}+lehenga`,
+    saree: `https://www.myntra.com/sarees?rawQuery=${colorLower}+saree`,
+    shoes: isFemale ? `https://www.myntra.com/heels?rawQuery=${colorLower}` : `https://www.myntra.com/formal-shoes?rawQuery=${colorLower}`,
+    footwear: isFemale ? `https://www.myntra.com/heels?rawQuery=${colorLower}` : `https://www.myntra.com/formal-shoes?rawQuery=${colorLower}`,
+    watch: isFemale ? `https://www.myntra.com/watches?rawQuery=${colorLower}+women` : `https://www.myntra.com/watches?rawQuery=${colorLower}+men`,
+    handbag: `https://www.myntra.com/handbags?rawQuery=${colorLower}`,
+    bag: isFemale ? `https://www.myntra.com/handbags?rawQuery=${colorLower}` : `https://www.myntra.com/backpacks?rawQuery=${colorLower}`,
+    belt: `https://www.myntra.com/belts?rawQuery=${colorLower}+men`,
+    wallet: isFemale ? `https://www.myntra.com/wallets?rawQuery=${colorLower}+women` : `https://www.myntra.com/wallets?rawQuery=${colorLower}+men`,
+    sunglasses: isFemale ? `https://www.myntra.com/sunglasses?rawQuery=${colorLower}+women` : `https://www.myntra.com/sunglasses?rawQuery=${colorLower}+men`,
+    jewellery: `https://www.myntra.com/jewellery?rawQuery=${colorLower}`,
+    dupatta: `https://www.myntra.com/dupattas?rawQuery=${colorLower}`,
+    accessories: isFemale ? `https://www.myntra.com/jewellery?rawQuery=${colorLower}` : `https://www.myntra.com/accessories?rawQuery=${colorLower}+men`,
+  };
+
+  const myntraUrl = myntraUrlMap[category] || `https://www.myntra.com/fashion?rawQuery=${colorLower}+${isFemale ? 'women' : 'men'}`;
 
   const links = [
-    { name: "Amazon", url: `https://www.amazon.in/s?k=${query}`, icon: "🛒", bg: "bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300" },
-    { name: "Flipkart", url: `https://www.flipkart.com/search?q=${query}`, icon: "🏪", bg: "bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300" },
-    { name: "Myntra", url: `https://www.myntra.com/${myntraPath}?rawQuery=${encodeURIComponent(colorName)}`, icon: "👗", bg: "bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300" },
+    {
+      name: "Amazon",
+      url: `https://www.amazon.in/s?k=${amazonQuery}&rh=n%3A1571271031&sort=review-rank`,
+      icon: "🛒",
+      bg: "bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300"
+    },
+    {
+      name: "Flipkart",
+      url: `https://www.flipkart.com/search?q=${encodeURIComponent(flipkartQuery)}&sort=popularity`,
+      icon: "🏪",
+      bg: "bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300"
+    },
+    {
+      name: "Myntra",
+      url: myntraUrl,
+      icon: "👗",
+      bg: "bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300"
+    },
   ];
+
   return (
     <div className="flex gap-2 flex-wrap mt-2">
       {links.map((link) => (
