@@ -10,11 +10,11 @@ function LoadingScreen() {
   const isDark = theme === 'dark';
   const [step, setStep] = useState(0);
   const steps = [
-    { emoji: '🔍', text: 'Photo scan ho rahi hai...', sub: 'Quality check kar rahe hain' },
-    { emoji: '👤', text: 'Chehra dhundh rahe hain...', sub: 'Face detection running' },
-    { emoji: '🎨', text: 'Skin tone analyze ho raha hai...', sub: 'ITA method + Lab color space' },
-    { emoji: '👔', text: 'Outfit recommendations ban rahi hain...', sub: '25+ fashion rules apply ho rahe hain' },
-    { emoji: '✨', text: 'Almost done...', sub: 'Tumhara personal style guide tayar ho raha hai' },
+    { emoji: '🔍', text: 'Scanning your photo...', sub: 'Checking quality' },
+    { emoji: '👤', text: 'Detecting face...', sub: 'Face detection running' },
+    { emoji: '🎨', text: 'Analyzing skin tone...', sub: 'ITA method + Lab color space' },
+    { emoji: '👔', text: 'Building outfit recommendations...', sub: 'Applying 25+ fashion rules' },
+    { emoji: '✨', text: 'Almost done...', sub: 'Preparing your personal style guide' },
   ];
 
   useEffect(() => {
@@ -189,7 +189,7 @@ function Dashboard({ user, onLogout }) {
                 <p className={`text-lg font-medium mb-2 ${isDark ? 'text-red-300' : 'text-red-600'}`}>Oops!</p>
                 <p className={`whitespace-pre-line text-sm max-w-md mx-auto ${isDark ? 'text-red-400/80' : 'text-red-500'}`}>{error}</p>
                 <button onClick={handleReset} className={`mt-6 px-6 py-3 rounded-xl transition font-medium border ${isDark ? 'bg-red-500/20 hover:bg-red-500/30 text-red-300 border-red-500/20' : 'bg-red-100 hover:bg-red-200 text-red-600 border-red-200'}`}>
-                  Dobara Try Karo
+                  Try Again
                 </button>
               </div>
             )}
@@ -212,7 +212,7 @@ function Dashboard({ user, onLogout }) {
                   <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>
                     {isDark ? '🌙 Dark Mode' : '☀️ Light Mode'}
                   </p>
-                  <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Theme switch karo</p>
+                  <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Switch theme</p>
                 </div>
                 <button
                   onClick={toggleTheme}
@@ -225,7 +225,7 @@ function Dashboard({ user, onLogout }) {
               {/* System Theme Info */}
               <div className={`p-4 rounded-2xl border mb-4 ${isDark ? 'bg-purple-500/10 border-purple-500/20' : 'bg-purple-50 border-purple-100'}`}>
                 <p className={`text-xs ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>
-                  💡 System theme ke hisaab se bhi automatically switch hoga!
+                  💡 Also switches automatically based on your system theme!
                 </p>
               </div>
 

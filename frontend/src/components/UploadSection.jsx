@@ -20,8 +20,8 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
 
   const handleFile = async (file) => {
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!validTypes.includes(file.type)) { onError('Sirf JPG, PNG, ya WebP image upload karo.'); return; }
-    if (file.size > 10 * 1024 * 1024) { onError('Image bahut badi hai. Maximum 10MB upload karo.'); return; }
+    if (!validTypes.includes(file.type)) { onError('Only JPG, PNG, or WebP images are allowed.'); return; }
+    if (file.size > 10 * 1024 * 1024) { onError('Image is too large. Maximum size is 10MB.'); return; }
     const reader = new FileReader();
     reader.onload = (e) => { setPreview(e.target.result); onImageSelected(e.target.result); };
     reader.readAsDataURL(file);
@@ -40,8 +40,8 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       }
     } catch (err) {
       const detail = err.response?.data?.detail;
-      if (typeof detail === 'object') onError(detail.message || 'Analysis fail hui.');
-      else onError(detail || 'Server se connect nahi ho pa raha. Backend chal raha hai?');
+      if (typeof detail === 'object') onError(detail.message || 'Analysis failed.');
+      else onError(detail || 'Could not connect to server. Is the backend running?');
     }
   };
 
@@ -69,12 +69,12 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>AI-Powered • 95%+ Accuracy</span>
         </div>
         <h2 className={`text-3xl md:text-5xl font-black mb-3 leading-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          Apna Perfect
-          <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent"> Style </span>
-          Discover Karo
+          Discover Your
+          <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent"> Perfect </span>
+          Style
         </h2>
         <p className={`text-lg max-w-xl mx-auto ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
-          Selfie upload karo — skin tone ke hisaab se personalized fashion recommendations pao
+          Upload a selfie — get personalized fashion recommendations based on your skin tone
         </p>
       </div>
 
@@ -135,7 +135,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       {/* Seasonal Mode — Season Selector */}
       {mode === 'seasonal' && (
         <div className="mb-6">
-          <p className={`text-sm text-center mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Season choose karo:</p>
+          <p className={`text-sm text-center mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Choose a season:</p>
           <div className="flex justify-center gap-3 flex-wrap">
             {seasons.map((s) => (
               <button
@@ -162,12 +162,12 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       <div className="text-center mb-6 text-sm font-medium">
         {mode === 'seasonal' ? (
           <span className={isDark ? 'text-amber-300' : 'text-amber-600'}>
-            {seasons.find(s => s.id === season)?.emoji} {seasons.find(s => s.id === season)?.label} ke liye special recommendations milenge!
+            {seasons.find(s => s.id === season)?.emoji} Special recommendations for {seasons.find(s => s.id === season)?.label}!
           </span>
         ) : gender === 'female' ? (
-          <span className={isDark ? 'text-pink-300' : 'text-pink-600'}>👗 Female mode: Dresses, Sarees, Suits, Makeup suggestions milenge!</span>
+          <span className={isDark ? 'text-pink-300' : 'text-pink-600'}>👗 Female mode: Dress, Saree, Suit & Makeup suggestions included!</span>
         ) : (
-          <span className={isDark ? 'text-blue-300' : 'text-blue-600'}>👔 Male mode: Shirts, Pants, Ethnic wear suggestions milenge!</span>
+          <span className={isDark ? 'text-blue-300' : 'text-blue-600'}>👔 Male mode: Shirt, Pant & Ethnic wear suggestions included!</span>
         )}
       </div>
 
@@ -198,7 +198,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
         {preview ? (
           <div className="flex flex-col items-center">
             <img src={preview} alt="Preview" className="w-40 h-40 object-cover rounded-2xl shadow-2xl mb-4 border-2 border-purple-500/30" />
-            <p className={`animate-pulse ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>Analyzing tumhari photo...</p>
+            <p className={`animate-pulse ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>Analyzing your photo...</p>
             {uploadProgress > 0 && uploadProgress < 100 && (
               <div className={`mt-3 w-48 rounded-full h-1.5 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
                 <div className="bg-purple-500 h-1.5 rounded-full transition-all" style={{ width: `${uploadProgress}%` }}></div>
@@ -218,8 +218,8 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                 {mode === 'seasonal' ? seasons.find(s => s.id === season)?.emoji : gender === 'female' ? '👩' : '🤳'}
               </span>
             </div>
-            <p className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>Selfie Drop Karo Yahan</p>
-            <p className={`mb-6 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>ya click karke browse karo</p>
+            <p className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>Drop Your Selfie Here</p>
+            <p className={`mb-6 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>or click to browse</p>
             <span className={`inline-block px-8 py-3.5 text-white font-bold rounded-2xl shadow-lg transition-all hover:scale-105 ${
               mode === 'seasonal'
                 ? 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-amber-500/30'
@@ -227,9 +227,9 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                   ? 'bg-gradient-to-r from-pink-500 to-rose-500 shadow-pink-500/30'
                   : 'bg-gradient-to-r from-purple-500 to-pink-500 shadow-purple-500/30'
             }`}>
-              📁 Photo Choose Karo
+              📁 Choose Photo
             </span>
-            <p className={`text-xs mt-4 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>JPG, PNG, WebP • Max 10MB • Photo store nahi hoti</p>
+            <p className={`text-xs mt-4 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>JPG, PNG, WebP • Max 10MB • Photos are never stored</p>
           </>
         )}
       </div>
@@ -237,9 +237,9 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       {/* Tips */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
         {[
-          { emoji: '☀️', title: 'Natural Light', desc: 'Window ke paas selfie lo — best results' },
-          { emoji: '🤳', title: 'Seedha Dekho', desc: 'Camera ko directly face karo' },
-          { emoji: '😊', title: 'Chehra Clear Ho', desc: 'Sunglasses ya mask mat pehno' },
+          { emoji: '☀️', title: 'Natural Light', desc: 'Take selfie near a window — best results' },
+          { emoji: '🤳', title: 'Face Forward', desc: 'Look directly at the camera' },
+          { emoji: '😊', title: 'Clear Face', desc: 'Remove sunglasses or mask' },
         ].map((tip, i) => (
           <div key={i} className={`rounded-2xl p-4 flex items-center gap-3 transition border ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-gray-200 hover:border-purple-200 shadow-sm'}`}>
             <span className="text-2xl">{tip.emoji}</span>
@@ -253,7 +253,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
 
       {/* Skin Tones */}
       <div className={`mt-6 rounded-2xl p-5 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-        <p className={`text-xs text-center mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Hum in sabhi skin tones ke liye kaam karte hain 🇮🇳</p>
+        <p className={`text-xs text-center mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>We support all skin tones 🌍</p>
         <div className="flex justify-center gap-3 flex-wrap">
           {[
             { name: 'Fair', color: '#F5DEB3' },

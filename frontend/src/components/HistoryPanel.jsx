@@ -18,7 +18,7 @@ function HistoryPanel() {
       const res = await getHistory();
       setHistory(res.data.history || []);
     } catch (err) {
-      setError('History load nahi hui. Dobara try karo.');
+      setError('Failed to load history. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -30,7 +30,7 @@ function HistoryPanel() {
       const res = await testTone(item.skin_tone, item.undertone);
       setSelectedItem({ ...item, recommendations: res.data });
     } catch (err) {
-      setError('Details load nahi hui.');
+      setError('Failed to load details.');
     } finally {
       setDetailLoading(false);
     }
@@ -50,7 +50,7 @@ function HistoryPanel() {
     return (
       <div className="mt-8 text-center">
         <div className="w-10 h-10 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-        <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-400'}`}>History load ho rahi hai...</p>
+        <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Loading history...</p>
       </div>
     );
   }
@@ -69,8 +69,8 @@ function HistoryPanel() {
         <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
           <span className="text-4xl">📋</span>
         </div>
-        <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>Abhi Koi History Nahi</h3>
-        <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Pehli selfie analyze karo — phir history yahan dikhegi!</p>
+        <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>No History Yet</h3>
+        <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Analyze your first selfie — history will appear here!</p>
       </div>
     );
   }
@@ -83,7 +83,7 @@ function HistoryPanel() {
           onClick={() => setSelectedItem(null)}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all text-sm border ${isDark ? 'bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border-white/10' : 'bg-gray-100 hover:bg-gray-200 text-gray-600 border-gray-200'}`}
         >
-          ← History pe Wapas Jao
+          ← Back to History
         </button>
 
         <div className={`bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-3xl p-6`}>
@@ -158,7 +158,7 @@ function HistoryPanel() {
     <div className="mt-4">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>Tumhari History</h2>
+          <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>Your History</h2>
           <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Total {history.length} analyses</p>
         </div>
         <div className="bg-purple-500/20 border border-purple-500/30 rounded-xl px-3 py-2">
@@ -200,7 +200,7 @@ function HistoryPanel() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className={`rounded-2xl p-8 text-center ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
             <div className="w-10 h-10 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-            <p className={isDark ? 'text-white' : 'text-gray-800'}>Details load ho rahi hain...</p>
+            <p className={isDark ? 'text-white' : 'text-gray-800'}>Loading details...</p>
           </div>
         </div>
       )}

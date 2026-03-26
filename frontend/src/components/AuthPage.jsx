@@ -12,8 +12,8 @@ function AuthPage({ onLoginSuccess }) {
 
   const submit = async () => {
     setError('');
-    if (!form.email || !form.password) return setError('Email aur password dono bharo.');
-    if (mode === 'register' && !form.full_name) return setError('Apna naam bhi dalo.');
+    if (!form.email || !form.password) return setError('Please enter both email and password.');
+    if (mode === 'register' && !form.full_name) return setError('Please enter your full name.');
     setLoading(true);
     try {
       const res = mode === 'login'
@@ -22,11 +22,11 @@ function AuthPage({ onLoginSuccess }) {
       saveAuth(res.data);
       onLoginSuccess({ name: res.data.user_name, email: res.data.email });
     } catch (err) {
-      const msg = err.code === 'auth/user-not-found' ? 'Email registered nahi hai.'
-        : err.code === 'auth/wrong-password' ? 'Password galat hai.'
-        : err.code === 'auth/email-already-in-use' ? 'Yeh email already registered hai.'
-        : err.code === 'auth/weak-password' ? 'Password kam se kam 6 characters ka hona chahiye.'
-        : err.response?.data?.detail || 'Kuch galat hua. Dobara try karo.';
+      const msg = err.code === 'auth/user-not-found' ? 'No account found with this email.'
+        : err.code === 'auth/wrong-password' ? 'Incorrect password.'
+        : err.code === 'auth/email-already-in-use' ? 'This email is already registered.'
+        : err.code === 'auth/weak-password' ? 'Password must be at least 6 characters.'
+        : err.response?.data?.detail || 'Something went wrong. Please try again.';
       setError(msg);
     } finally {
       setLoading(false);
@@ -41,7 +41,7 @@ function AuthPage({ onLoginSuccess }) {
       saveAuth({ user_name: user.name, email: user.email });
       onLoginSuccess({ name: user.name, email: user.email });
     } catch (err) {
-      setError('Google login mein problem aayi. Dobara try karo.');
+      setError('Google login failed. Please try again.');
     } finally {
       setGoogleLoading(false);
     }
@@ -64,7 +64,7 @@ function AuthPage({ onLoginSuccess }) {
             <span className="text-white font-black text-2xl tracking-tight">SG</span>
           </div>
           <h1 className="text-4xl font-black text-white tracking-tight">StyleGuru</h1>
-          <p className="text-purple-300 mt-1 text-sm">AI-Powered Fashion for Indian Skin Tones</p>
+          <p className="text-purple-300 mt-1 text-sm">AI-Powered Fashion for All Skin Tones</p>
         </div>
 
         {/* Card */}
@@ -107,13 +107,13 @@ function AuthPage({ onLoginSuccess }) {
                 <path fill="none" d="M0 0h48v48H0z"/>
               </svg>
             )}
-            {googleLoading ? 'Signing in...' : 'Google se Login karo'}
+            {googleLoading ? 'Signing in...' : 'Continue with Google'}
           </button>
 
           {/* Divider */}
           <div className="flex items-center gap-3 mb-4">
             <div className="flex-1 h-px bg-white/20"></div>
-            <span className="text-white/40 text-xs">ya email se</span>
+            <span className="text-white/40 text-xs">or with email</span>
             <div className="flex-1 h-px bg-white/20"></div>
           </div>
 
@@ -124,7 +124,7 @@ function AuthPage({ onLoginSuccess }) {
                 <label className="text-white/70 text-xs font-medium mb-1.5 block">Full Name</label>
                 <input
                   name="full_name"
-                  placeholder="Apna naam likho"
+                  placeholder="Your name"
                   value={form.full_name}
                   onChange={handle}
                   className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-purple-400 focus:bg-white/15 transition"
@@ -178,7 +178,7 @@ function AuthPage({ onLoginSuccess }) {
                   </svg>
                   Processing...
                 </span>
-              ) : mode === 'login' ? '🚀 Login Karo' : '✨ Account Banao'}
+              ) : mode === 'login' ? '🚀 Login' : '✨ Create Account'}
             </button>
           </div>
         </div>

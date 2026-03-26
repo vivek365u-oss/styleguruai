@@ -119,7 +119,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
       
       <div className="flex justify-between items-center flex-wrap gap-2">
   <button onClick={onReset} className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-xl transition-all text-sm border border-white/10">
-    ← Nayi Photo
+    ← New Photo
   </button>
         <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-full px-4 py-2">
           <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -250,7 +250,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
 
           <div className="bg-red-500/5 border border-red-500/20 rounded-3xl p-6">
             <h3 className="text-red-300 font-black text-lg mb-5 flex items-center gap-2">
-              <span className="text-2xl">🚫</span> Yeh Colors Avoid Karo
+              <span className="text-2xl">🚫</span> Colors to Avoid
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {avoidColors.map((color, i) => <ColorSwatch key={i} color={color} category="shirt" />)}
@@ -263,7 +263,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             </div>
           </Section>
 
-          <Section title="Style Tips Sirf Tumhare Liye" emoji="💡">
+          <Section title="Style Tips Just For You" emoji="💡">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {styleTips.map((tip, i) => (
                 <div key={i} className="flex items-start gap-3 bg-white/5 rounded-xl p-3 border border-white/10">
@@ -275,7 +275,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           </Section>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Section title="Kya Pehno Kab?" emoji="📅">
+            <Section title="What to Wear & When?" emoji="📅">
               <div className="space-y-3">
                 {Object.keys(occasionAdvice).length > 0
                   ? Object.entries(occasionAdvice).map(([occasion, advice], i) => (
@@ -380,9 +380,9 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
       {/* CTA */}
       <div className="text-center py-6">
         <button onClick={onReset} className="inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-black rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all shadow-2xl shadow-purple-500/30 hover:scale-105 text-base">
-          🔄 Nayi Photo Analyze Karo
+          🔄 Analyze New Photo
         </button>
-        <p className="text-white/25 text-xs mt-3">Har selfie mein better results aate hain!</p>
+        <p className="text-white/25 text-xs mt-3">Each selfie gives better results!</p>
       </div>
     </div>
   );

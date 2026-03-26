@@ -168,19 +168,19 @@ class ImageProcessor:
         if face_ratio < 0.02:
             return {
                 "valid": False,
-                "reason": "⚠️ Yeh koi face nahi hai ya bahut chota hai.\n\n✅ Fix: Apni selfie upload karo — charts ya documents nahi."
+                "reason": "⚠️ No face detected or face is too small.\n\n✅ Fix: Please upload a selfie — not charts or documents."
             }
 
         aspect_ratio = w / h
         if aspect_ratio < 0.4 or aspect_ratio > 2.5:
             return {
                 "valid": False,
-                "reason": "⚠️ Detected region human face nahi lagta.\n\n✅ Fix: Seedha apni selfie upload karo."
+                "reason": "⚠️ The detected region does not look like a human face.\n\n✅ Fix: Please upload a clear selfie."
             }
 
         face_region = image[y:y+h, x:x+w]
         if face_region.size == 0:
-            return {"valid": False, "reason": "⚠️ Face region empty hai."}
+            return {"valid": False, "reason": "⚠️ Face region is empty."}
 
         hsv = cv2.cvtColor(face_region, cv2.COLOR_BGR2HSV)
         lower_skin1 = np.array([0, 20, 50], dtype=np.uint8)
@@ -198,7 +198,7 @@ class ImageProcessor:
         if skin_ratio < 0.12:
             return {
                 "valid": False,
-                "reason": "⚠️ Yeh photo kisi insaan ki nahi lagti.\n\n✅ Fix: Apni clear selfie upload karo. Charts, documents ya objects upload mat karo."
+                "reason": "⚠️ This photo does not appear to be a person.\n\n✅ Fix: Please upload a clear selfie. Do not upload charts, documents, or objects."
             }
 
         face_bgr = face_region.reshape(-1, 3).astype(np.float32)
@@ -208,7 +208,7 @@ class ImageProcessor:
         if r_mean < b_mean:
             return {
                 "valid": False,
-                "reason": "⚠️ Yeh insaan ka chehra nahi lagta.\n\n✅ Fix: Apni selfie upload karo."
+                "reason": "⚠️ This does not appear to be a human face.\n\n✅ Fix: Please upload your selfie."
             }
 
         gray = cv2.cvtColor(face_region, cv2.COLOR_BGR2GRAY)
@@ -216,7 +216,7 @@ class ImageProcessor:
         if brightness_std > 90:
             return {
                 "valid": False,
-                "reason": "⚠️ Yeh photo chart ya document lagta hai.\n\n✅ Fix: Apni natural selfie upload karo."
+                "reason": "⚠️ This photo looks like a chart or document.\n\n✅ Fix: Please upload a natural selfie."
             }
 
         return {
@@ -250,29 +250,29 @@ class ImageProcessor:
         if avg_brightness < 60:
             result.problems.append({
                 "type": "too_dark", "severity": "high",
-                "message": "Tumhari photo bahut dark hai",
-                "fix": "Kisi window ke paas jaao ya light on karo"
+                "message": "Your photo is too dark",
+                "fix": "Move near a window or turn on a light"
             })
             result.quality_score -= 40
         elif avg_brightness < 90:
             result.warnings.append({
                 "type": "slightly_dark",
-                "message": "Photo thodi dark hai",
-                "fix": "Thodi aur light mein jaoge toh better results milenge"
+                "message": "Photo is slightly dark",
+                "fix": "Better lighting will improve results"
             })
             result.quality_score -= 15
         elif avg_brightness > 230:
             result.problems.append({
                 "type": "overexposed", "severity": "high",
-                "message": "Photo bahut zyada bright hai",
-                "fix": "Direct sunlight se door raho, shade mein selfie lo"
+                "message": "Photo is too bright / overexposed",
+                "fix": "Avoid direct sunlight, take selfie in shade"
             })
             result.quality_score -= 35
         elif avg_brightness > 200:
             result.warnings.append({
                 "type": "slightly_bright",
-                "message": "Photo thodi zyada bright hai",
-                "fix": "Shade mein jaoge toh better results milenge"
+                "message": "Photo is slightly too bright",
+                "fix": "Moving to shade will improve results"
             })
             result.quality_score -= 10
 
@@ -282,15 +282,15 @@ class ImageProcessor:
         if laplacian_var < 50:
             result.problems.append({
                 "type": "very_blurry", "severity": "high",
-                "message": "Photo bahut blurry hai",
-                "fix": "Phone ko stable rakh aur clearly focus karke selfie lo"
+                "message": "Photo is very blurry",
+                "fix": "Keep your phone steady and focus clearly before taking the selfie"
             })
             result.quality_score -= 45
         elif laplacian_var < 100:
             result.warnings.append({
                 "type": "slightly_blurry",
-                "message": "Photo thodi blurry hai",
-                "fix": "Phone ko thoda still rakh ke selfie lo"
+                "message": "Photo is slightly blurry",
+                "fix": "Hold your phone still while taking the selfie"
             })
             result.quality_score -= 15
 
@@ -301,15 +301,15 @@ class ImageProcessor:
         if face_ratio < 0.04:
             result.problems.append({
                 "type": "face_too_small", "severity": "high",
-                "message": "Tumhara chehra photo mein bahut chota dikh raha hai",
-                "fix": "Phone ko apne chehere ke paas laao"
+                "message": "Your face appears too small in the photo",
+                "fix": "Move your phone closer to your face"
             })
             result.quality_score -= 35
         elif face_ratio < 0.08:
             result.warnings.append({
                 "type": "face_small",
-                "message": "Chehra thoda chota hai",
-                "fix": "Thoda aur paas se selfie loge toh better hoga"
+                "message": "Face is a bit small",
+                "fix": "A closer selfie will give better results"
             })
             result.quality_score -= 10
 
@@ -327,15 +327,15 @@ class ImageProcessor:
             darker_side = "left" if left_brightness < right_brightness else "right"
             result.problems.append({
                 "type": "heavy_shadow", "severity": "high",
-                "message": f"Chehere ke {darker_side} taraf bahut shadow hai",
-                "fix": "Light seedha saamne se aani chahiye"
+                "message": f"Heavy shadow on the {darker_side} side of your face",
+                "fix": "Light should come from directly in front of you"
             })
             result.quality_score -= 30
         elif diff > 35:
             result.warnings.append({
                 "type": "mild_shadow",
-                "message": "Ek taraf thoda shadow hai",
-                "fix": "Light source ko seedha apne saamne rakhoge toh better results milenge"
+                "message": "Slight shadow on one side of your face",
+                "fix": "Position your light source directly in front for better results"
             })
             result.quality_score -= 12
 
@@ -345,15 +345,15 @@ class ImageProcessor:
         if aspect_ratio < 0.6:
             result.problems.append({
                 "type": "face_angled", "severity": "medium",
-                "message": "Tumhara chehra side se dikh raha hai",
-                "fix": "Camera ko seedha apne saamne rakho"
+                "message": "Your face is turned to the side",
+                "fix": "Face the camera directly"
             })
             result.quality_score -= 25
         elif aspect_ratio < 0.7:
             result.warnings.append({
                 "type": "slight_angle",
-                "message": "Chehra thoda side mein hai",
-                "fix": "Camera ko directly dekho"
+                "message": "Face is slightly turned",
+                "fix": "Look directly at the camera"
             })
             result.quality_score -= 10
 
@@ -376,15 +376,15 @@ class ImageProcessor:
         if skin_ratio < 0.25:
             result.problems.append({
                 "type": "low_skin_visibility", "severity": "medium",
-                "message": "Chehra kuch cheez se dhaka hua lag raha hai",
-                "fix": "Sunglasses ya mask hata do"
+                "message": "Your face appears to be partially covered",
+                "fix": "Remove sunglasses or mask"
             })
             result.quality_score -= 30
         elif skin_ratio < 0.40:
             result.warnings.append({
                 "type": "partial_coverage",
-                "message": "Chehra poori tarah visible nahi hai",
-                "fix": "Baalon ko side mein kar lo"
+                "message": "Face is not fully visible",
+                "fix": "Move your hair away from your face"
             })
             result.quality_score -= 10
 
@@ -392,7 +392,7 @@ class ImageProcessor:
         if len(problems) == 1:
             p = problems[0]
             return f"⚠️ {p['message']}.\n\n✅ Fix: {p['fix']}"
-        msg = f"⚠️ {len(problems)} problems mili hain:\n\n"
+        msg = f"⚠️ {len(problems)} issues found:\n\n"
         for i, p in enumerate(problems, 1):
             msg += f"{i}. {p['message']}\n   → Fix: {p['fix']}\n\n"
         return msg.strip()
@@ -401,7 +401,7 @@ class ImageProcessor:
         if len(warnings) == 1:
             w = warnings[0]
             return f"💡 {w['message']}. {w['fix']}"
-        msg = "💡 Kuch minor issues hain:\n\n"
+        msg = "💡 Some minor issues:\n\n"
         for w in warnings:
             msg += f"• {w['message']} → {w['fix']}\n"
         return msg.strip()

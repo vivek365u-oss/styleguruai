@@ -31,15 +31,15 @@ function OutfitChecker() {
   };
 
   const handleCheck = async () => {
-    if (!selfieFile || !outfitFile) { setError('Dono photos upload karo!'); return; }
+    if (!selfieFile || !outfitFile) { setError('Please upload both photos!'); return; }
     setLoading(true); setError(null); setResult(null);
     try {
       const res = await checkOutfitCompatibility(selfieFile, outfitFile);
       setResult(res.data);
     } catch (err) {
       const detail = err.response?.data?.detail;
-      if (typeof detail === 'object') setError(detail.message || 'Analysis fail hui.');
-      else setError(detail || 'Kuch galat ho gaya.');
+      if (typeof detail === 'object') setError(detail.message || 'Analysis failed.');
+      else setError(detail || 'Something went wrong.');
     } finally {
       setLoading(false);
     }
@@ -68,11 +68,11 @@ function OutfitChecker() {
           <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>AI Outfit Compatibility Checker</span>
         </div>
         <h2 className={`text-3xl md:text-4xl font-black mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          Kya Yeh Outfit
-          <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent"> Tumpe Acha Lagega?</span>
+          Will This Outfit
+          <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent"> Look Good On You?</span>
         </h2>
         <p className={`text-base max-w-lg mx-auto ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
-          Apni selfie + kapde ki photo upload karo — AI check karega compatibility!
+          Upload your selfie + outfit photo — AI will check the compatibility!
         </p>
       </div>
 
@@ -96,8 +96,8 @@ function OutfitChecker() {
                   <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 ${isDark ? 'bg-blue-500/20' : 'bg-blue-100'}`}>
                     <span className="text-3xl">🤳</span>
                   </div>
-                  <p className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-800'}`}>Apni Selfie</p>
-                  <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Clear face wali photo</p>
+                  <p className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-800'}`}>Your Selfie</p>
+                  <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Clear face photo</p>
                   <p className={`text-xs mt-2 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>JPG, PNG, WebP</p>
                 </>
               )}
@@ -120,8 +120,8 @@ function OutfitChecker() {
                   <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 ${isDark ? 'bg-pink-500/20' : 'bg-pink-100'}`}>
                     <span className="text-3xl">👗</span>
                   </div>
-                  <p className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-800'}`}>Kapde Ki Photo</p>
-                  <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Jo outfit check karni hai</p>
+                  <p className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-800'}`}>Outfit Photo</p>
+                  <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>The outfit you want to check</p>
                   <p className={`text-xs mt-2 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>JPG, PNG, WebP</p>
                 </>
               )}
@@ -145,16 +145,16 @@ function OutfitChecker() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                 </svg>
-                AI Check Kar Raha Hai...
+                AI Checking...
               </span>
-            ) : '🔍 Check Karo — Acha Lagega?'}
+            ) : '🔍 Check Compatibility'}
           </button>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className={`rounded-2xl p-4 border ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-200'}`}>
               <p className={`font-bold text-sm mb-2 ${isDark ? 'text-blue-300' : 'text-blue-600'}`}>🤳 Selfie Tips:</p>
               <ul className="space-y-1">
-                {['Clear face wali photo', 'Good lighting mein', 'Sunglasses mat pehno'].map((t, i) => (
+                {['Clear face photo', 'Good lighting', 'No sunglasses'].map((t, i) => (
                   <li key={i} className={`text-xs flex items-center gap-2 ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
                     <span className="text-blue-400">•</span>{t}
                   </li>
@@ -164,7 +164,7 @@ function OutfitChecker() {
             <div className={`rounded-2xl p-4 border ${isDark ? 'bg-pink-500/10 border-pink-500/20' : 'bg-pink-50 border-pink-200'}`}>
               <p className={`font-bold text-sm mb-2 ${isDark ? 'text-pink-300' : 'text-pink-600'}`}>👗 Outfit Tips:</p>
               <ul className="space-y-1">
-                {['Plain background pe photo lo', 'Poora kapda dikhe', 'Clear aur bright photo'].map((t, i) => (
+                {['Plain background', 'Full outfit visible', 'Clear and bright photo'].map((t, i) => (
                   <li key={i} className={`text-xs flex items-center gap-2 ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
                     <span className="text-pink-400">•</span>{t}
                   </li>
@@ -184,7 +184,7 @@ function OutfitChecker() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className={`rounded-3xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-              <p className={`text-xs uppercase tracking-widest mb-3 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Tumhari Skin Tone</p>
+              <p className={`text-xs uppercase tracking-widest mb-3 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Your Skin Tone</p>
               <div className="flex items-center gap-3">
                 <img src={selfiePreview} alt="selfie" className="w-16 h-16 object-cover rounded-xl border border-white/20" />
                 <div>
@@ -240,7 +240,7 @@ function OutfitChecker() {
             onClick={handleReset}
             className="w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-black rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg hover:scale-[1.02] text-base"
           >
-            🔄 Dobara Check Karo
+            🔄 Check Again
           </button>
         </div>
       )}

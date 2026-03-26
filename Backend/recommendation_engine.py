@@ -663,16 +663,16 @@ class RecommendationEngine:
         seasonal_data = {
             "summer": {
                 "title": "☀️ Summer Collection",
-                "description": "Garmi mein cool aur stylish rehne ke liye",
+                "description": "Stay cool and stylish in the summer heat",
                 "fabrics": ["Cotton", "Linen", "Chambray", "Seersucker"],
                 "avoid_fabrics": ["Polyester", "Wool", "Heavy denim"],
                 "colors_boost": ["sky_blue", "white", "mint_green", "cream", "powder_blue"],
                 "colors_reduce": ["black", "maroon", "chocolate"],
                 "outfit_tips": [
-                    "Light colors prefer karo — heat absorb kam hogi",
-                    "Loose fit kapde pehno — air circulation better hogi",
-                    "Cotton fabric best hai — sweat absorb karta hai",
-                    "Light colored shoes pehno — leather avoid karo",
+                    "Prefer light colors — they absorb less heat",
+                    "Wear loose-fit clothes — better air circulation",
+                    "Cotton fabric is best — absorbs sweat well",
+                    "Wear light-colored shoes — avoid leather in heat",
                 ],
                 "male_outfits": [
                     {"top": "White linen shirt", "bottom": "Beige chinos", "shoes": "White canvas sneakers", "occasion": "Office/College", "vibe": "Cool & Professional"},
@@ -689,17 +689,17 @@ class RecommendationEngine:
             },
             "monsoon": {
                 "title": "🌧️ Monsoon Collection",
-                "description": "Baarish mein stylish aur practical rehne ke liye",
+                "description": "Stay stylish and practical during the rainy season",
                 "fabrics": ["Quick-dry polyester", "Nylon", "Synthetic blends"],
                 "avoid_fabrics": ["White cotton", "Silk", "Suede", "Light linen"],
                 "colors_boost": ["navy_blue", "maroon", "forest_green", "charcoal", "teal"],
                 "colors_reduce": ["white", "cream", "beige"],
                 "outfit_tips": [
-                    "Dark colors prefer karo — gande nahi dikhenge",
-                    "Quick-dry fabric pehno — jaldi sukhta hai",
-                    "Waterproof footwear use karo",
-                    "White avoid karo — wet hone par transparent ho jata hai",
-                    "Extra pair of clothes bag mein rakho",
+                    "Prefer dark colors — they hide dirt and stains better",
+                    "Wear quick-dry fabric — dries faster when wet",
+                    "Use waterproof footwear",
+                    "Avoid white — it becomes transparent when wet",
+                    "Keep an extra pair of clothes in your bag",
                 ],
                 "male_outfits": [
                     {"top": "Navy blue polo", "bottom": "Dark jeans", "shoes": "Waterproof loafers", "occasion": "Office/College", "vibe": "Practical & Smart"},
@@ -716,17 +716,17 @@ class RecommendationEngine:
             },
             "winter": {
                 "title": "❄️ Winter Collection",
-                "description": "Thandi mein warm aur stylish rehne ke liye",
+                "description": "Stay warm and stylish in the cold weather",
                 "fabrics": ["Wool", "Cashmere", "Fleece", "Velvet", "Corduroy"],
                 "avoid_fabrics": ["Thin cotton", "Linen", "Light synthetic"],
                 "colors_boost": ["maroon", "navy_blue", "forest_green", "charcoal", "burgundy", "rust"],
                 "colors_reduce": ["white", "cream", "pastel_blue"],
                 "outfit_tips": [
-                    "Rich deep colors sabse zyada flattering lagte hain sardi mein",
-                    "Layering karo — multiple light layers ek heavy layer se better hoti hai",
-                    "Scarf aur jacket outfit complete karta hai",
-                    "Boots pehno — stylish aur warm dono",
-                    "Dark solid colors prefer karo for a sleek look",
+                    "Rich deep colors are most flattering in winter",
+                    "Layer up — multiple light layers are better than one heavy layer",
+                    "A scarf and jacket complete any winter outfit",
+                    "Wear boots — stylish and warm",
+                    "Prefer dark solid colors for a sleek look",
                 ],
                 "male_outfits": [
                     {"top": "Maroon sweater + white shirt", "bottom": "Dark jeans", "shoes": "Brown leather boots", "occasion": "Office/College", "vibe": "Warm & Classic"},
@@ -743,16 +743,16 @@ class RecommendationEngine:
             },
             "festive": {
                 "title": "🎉 Festive Collection",
-                "description": "Diwali, Eid, Christmas aur baaki festivals ke liye",
+                "description": "Perfect looks for Diwali, Eid, Christmas and all festivals",
                 "fabrics": ["Silk", "Brocade", "Velvet", "Chanderi", "Georgette"],
                 "avoid_fabrics": ["Plain cotton", "Denim", "Sports fabric"],
                 "colors_boost": ["maroon", "navy_blue", "royal_blue", "emerald", "mustard", "orange"],
                 "colors_reduce": ["gray", "tan", "khaki"],
                 "outfit_tips": [
-                    "Rich fabrics choose karo — silk, brocade, velvet",
-                    "Deep jewel tones best lagte hain festive occasions mein",
-                    "Gold aur silver accessories add karo",
-                    "Traditional + modern fusion try karo",
+                    "Choose rich fabrics — silk, brocade, velvet",
+                    "Deep jewel tones look best for festive occasions",
+                    "Add gold and silver accessories",
+                    "Try traditional + modern fusion looks",
                 ],
                 "male_outfits": [
                     {"top": "Silk kurta (maroon/navy)", "bottom": "White churidar", "shoes": "Mojari/Jutti", "occasion": "Diwali/Eid", "vibe": "Traditional & Elegant"},
@@ -769,17 +769,17 @@ class RecommendationEngine:
             },
             "college": {
                 "title": "🎓 College Wear",
-                "description": "Campus pe trendy aur comfortable rehne ke liye",
+                "description": "Stay trendy and comfortable on campus",
                 "fabrics": ["Cotton", "Denim", "Jersey", "Casual blends"],
                 "avoid_fabrics": ["Formal wool", "Silk", "Heavy fabrics"],
                 "colors_boost": ["navy_blue", "white", "sky_blue", "olive_green", "maroon"],
                 "colors_reduce": ["formal_grey", "black_formal"],
                 "outfit_tips": [
-                    "Comfort + style balance karo",
-                    "Versatile pieces choose karo — classroom se canteen tak",
-                    "Good fitting jeans investment hai",
-                    "White sneakers sabse versatile footwear hai",
-                    "Backpack ke saath casual aur smart dono dikhte ho",
+                    "Balance comfort and style",
+                    "Choose versatile pieces — from classroom to canteen",
+                    "Good fitting jeans are a worthy investment",
+                    "White sneakers are the most versatile footwear",
+                    "A backpack makes you look both casual and smart",
                 ],
                 "male_outfits": [
                     {"top": "Graphic t-shirt", "bottom": "Slim jeans", "shoes": "White sneakers", "occasion": "Regular college day", "vibe": "Casual & Trendy"},
@@ -970,27 +970,27 @@ class RecommendationEngine:
         # MESSAGES
         # ============================================
         if rating == "excellent":
-            message = f"🌟 Kamaal! {outfit_name} tumhari {category} skin ke saath PERFECT match hai! Zaroor pehno!"
+            message = f"🌟 Perfect! {outfit_name} is an EXCELLENT match for your {category} skin tone!"
         elif rating == "great":
-            message = f"✅ Bahut accha choice! {outfit_name} tumhare upar kaafi flattering lagega!"
+            message = f"✅ Great choice! {outfit_name} will look very flattering on you!"
         elif rating == "good":
-            message = f"👍 Accha hai! {outfit_name} tumhare upar decent lagega. Better options bhi hain."
+            message = f"👍 Good choice! {outfit_name} will look decent on you. There are better options too."
         elif rating == "okay":
-            message = f"⚠️ Average match. {outfit_name} chalega, lekin tumhare best colors alag hain."
+            message = f"⚠️ Average match. {outfit_name} will work, but your best colors are different."
         elif rating == "poor":
-            message = f"❌ Yeh color tumhari skin tone ke saath zyada match nahi karta."
+            message = f"❌ This color doesn't match well with your skin tone."
         else:
-            message = f"🚫 Avoid karo. {outfit_name} tumhari skin tone ko wash out kar sakta hai."
+            message = f"🚫 Avoid this. {outfit_name} may wash out your skin tone."
 
         # ============================================
         # UNDERTONE TIP
         # ============================================
         if undertone_score >= 12:
-            undertone_tip = f"✨ Bonus: Yeh color tumhare {undertone} undertone ke saath harmonize karta hai!"
+            undertone_tip = f"✨ Bonus: This color harmonizes beautifully with your {undertone} undertone!"
         elif undertone_score == 10:
-            undertone_tip = f"💡 Yeh neutral color hai — {undertone} undertone ke saath theek kaam karega."
+            undertone_tip = f"💡 This is a neutral color — it works well with your {undertone} undertone."
         else:
-            undertone_tip = f"💡 Tip: Tumhare {undertone} undertone ke saath {'warm (orange/red/yellow tones)' if skin_is_warm else 'cool (blue/purple/green tones)'} colors better lagte hain."
+            undertone_tip = f"💡 Tip: {'Warm (orange/red/yellow tones)' if skin_is_warm else 'Cool (blue/purple/green tones)'} colors work better with your {undertone} undertone."
 
         # Better alternatives
         better_alternatives = [

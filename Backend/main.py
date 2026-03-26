@@ -55,7 +55,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Login expired ya invalid hai. Dobara login karo.",
+            detail="Session expired or invalid. Please login again.",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -83,7 +83,7 @@ recommendation_engine = RecommendationEngine()
 
 # ============================================
 # HELPER — SMART DOMINANT COLOR EXTRACTION
-# Background remove karke sirf kapde ka color detect karo
+# Ignore background, detect outfit color only
 # ============================================
 def extract_dominant_outfit_color(image: np.ndarray) -> dict:
     import cv2
@@ -93,7 +93,7 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
 
     sh, sw = small.shape[:2]
 
-    # Center crop — background mostly edges pe hota hai
+    # Center crop — background is mostly on the edges
     margin_h = int(sh * 0.20)
     margin_w = int(sw * 0.20)
     center_region = rgb[margin_h:sh-margin_h, margin_w:sw-margin_w]
@@ -204,15 +204,15 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
 # ============================================
 async def process_image_core(file: UploadFile):
     if not file.filename:
-        raise HTTPException(status_code=400, detail="Koi file upload nahi hui.")
+        raise HTTPException(status_code=400, detail="No file was uploaded.")
     file_ext = Path(file.filename).suffix.lower()
     if file_ext not in ALLOWED_EXTENSIONS:
-        raise HTTPException(status_code=400, detail="Sirf JPG, PNG, ya WebP file upload karo.")
+        raise HTTPException(status_code=400, detail="Only JPG, PNG, or WebP files are allowed.")
     file_content = await file.read()
     if len(file_content) > MAX_FILE_SIZE:
-        raise HTTPException(status_code=400, detail="File bahut badi hai. Maximum 10MB.")
+        raise HTTPException(status_code=400, detail="File is too large. Maximum size is 10MB.")
     if len(file_content) == 0:
-        raise HTTPException(status_code=400, detail="Empty file upload hui hai.")
+        raise HTTPException(status_code=400, detail="The uploaded file is empty.")
     unique_filename = f"{uuid.uuid4()}{file_ext}"
     temp_path = UPLOAD_DIR / unique_filename
     with open(temp_path, "wb") as f:
@@ -231,7 +231,7 @@ async def process_image_core(file: UploadFile):
         if face is None:
             raise HTTPException(status_code=422, detail={
                 "error": "no_face_detected",
-                "message": "⚠️ Tumhare photo mein chehra detect nahi hua.\n\n✅ Fix: Seedha camera ko dekho, acha lighting rakho.",
+                "message": "⚠️ No face detected in your photo.\n\n✅ Fix: Look directly at the camera with good lighting.",
                 "can_retry": True
             })
         face_validation = image_processor.validate_face_for_skin_analysis(image, face)
@@ -273,7 +273,7 @@ async def get_me(current_user: dict = Depends(get_current_user)):
 
 @app.get("/auth/history")
 async def get_history(current_user: dict = Depends(get_current_user)):
-    return {"message": "History Firestore mein saved hai", "uid": current_user["uid"]}
+    return {"message": "History is saved in Firestore", "uid": current_user["uid"]}
 
 # ============================================
 # MALE ANALYZE
@@ -326,7 +326,7 @@ async def analyze_image(
     except Exception as e:
         print(f"ERROR: {str(e)}")
         print(traceback.format_exc())
-        raise HTTPException(status_code=500, detail={"error": "server_error", "message": "Kuch galat ho gaya."})
+        raise HTTPException(status_code=500, detail={"error": "server_error", "message": "Something went wrong. Please try again."})
 
 # ============================================
 # FEMALE ANALYZE
@@ -382,7 +382,7 @@ async def analyze_image_female(
     except Exception as e:
         print(f"ERROR: {str(e)}")
         print(traceback.format_exc())
-        raise HTTPException(status_code=500, detail={"error": "server_error", "message": "Kuch galat ho gaya."})
+        raise HTTPException(status_code=500, detail={"error": "server_error", "message": "Something went wrong. Please try again."})
 
 # ============================================
 # SEASONAL ANALYZE
@@ -427,7 +427,7 @@ async def analyze_seasonal(
     except Exception as e:
         print(f"ERROR: {str(e)}")
         print(traceback.format_exc())
-        raise HTTPException(status_code=500, detail={"error": "server_error", "message": "Kuch galat ho gaya."})
+        raise HTTPException(status_code=500, detail={"error": "server_error", "message": "Something went wrong. Please try again."})
 
 # ============================================
 # OUTFIT CHECKER
@@ -444,7 +444,7 @@ async def check_outfit_compatibility(
     try:
         selfie_ext = Path(selfie.filename).suffix.lower()
         if selfie_ext not in ALLOWED_EXTENSIONS:
-            raise HTTPException(status_code=400, detail="Selfie: Sirf JPG, PNG, WebP upload karo.")
+            raise HTTPException(status_code=400, detail="Selfie: Only JPG, PNG, or WebP files are allowed.")
         selfie_content = await selfie.read()
         selfie_path = UPLOAD_DIR / f"{uuid.uuid4()}{selfie_ext}"
         with open(selfie_path, "wb") as f:
@@ -454,7 +454,7 @@ async def check_outfit_compatibility(
         if face is None:
             raise HTTPException(status_code=422, detail={
                 "error": "no_face_detected",
-                "message": "⚠️ Selfie mein chehra detect nahi hua.\n\n✅ Fix: Clear selfie upload karo.",
+                "message": "⚠️ No face detected in your selfie.\n\n✅ Fix: Please upload a clear selfie.",
                 "can_retry": True
             })
         skin_color = image_processor.extract_skin_color(selfie_image, face)
@@ -462,7 +462,7 @@ async def check_outfit_compatibility(
 
         outfit_ext = Path(outfit.filename).suffix.lower()
         if outfit_ext not in ALLOWED_EXTENSIONS:
-            raise HTTPException(status_code=400, detail="Outfit: Sirf JPG, PNG, WebP upload karo.")
+            raise HTTPException(status_code=400, detail="Outfit: Only JPG, PNG, or WebP files are allowed.")
         outfit_content = await outfit.read()
         outfit_path = UPLOAD_DIR / f"{uuid.uuid4()}{outfit_ext}"
         with open(outfit_path, "wb") as f:
@@ -495,7 +495,7 @@ async def check_outfit_compatibility(
     except Exception as e:
         print(f"ERROR outfit check: {str(e)}")
         print(traceback.format_exc())
-        raise HTTPException(status_code=500, detail={"error": "server_error", "message": "Kuch galat ho gaya."})
+        raise HTTPException(status_code=500, detail={"error": "server_error", "message": "Something went wrong. Please try again."})
     finally:
         for path in [selfie_path, outfit_path]:
             if path and Path(path).exists():
