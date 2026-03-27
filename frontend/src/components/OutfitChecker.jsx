@@ -22,10 +22,10 @@ function OutfitShopCard({ color, isDark }) {
   const myntraPriceParam = budget?.max ? `&p=price%5B0%5D%3D0%20TO%20${budget.max}` : '';
 
   const links = [
-    { name: 'Amazon',   icon: '🛒', bg: 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300', url: `https://www.amazon.in/s?k=${encodeURIComponent(colorDisplay + ' oversized tshirt polo trending')}&rh=n%3A1968024031${amzPriceParam}&sort=review-rank&tag=${AMAZON_TAG}` },
-    { name: 'Flipkart', icon: '🏪', bg: 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300',     url: `https://www.flipkart.com/search?q=${encodeURIComponent(colorDisplay + ' oversized tshirt trending')}&sort=popularity${fkPriceParam}` },
-    { name: 'Myntra',   icon: '👗', bg: 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300',     url: `https://www.myntra.com/tshirts?rawQuery=${colorLower}+oversized+trending${myntraPriceParam}` },
-    { name: 'Meesho',   icon: '🛍️', bg: 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300', url: `https://meesho.com/search?q=${encodeURIComponent(colorDisplay + ' oversized tshirt trending')}` },
+    { name: 'Amazon',   icon: '🛒', bg: 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300', url: `https://www.amazon.in/s?k=${encodeURIComponent(colorDisplay + ' men tshirt polo shirt')}&rh=n%3A1968024031${amzPriceParam}&sort=review-rank&tag=${AMAZON_TAG}` },
+    { name: 'Flipkart', icon: '🏪', bg: 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300',     url: `https://www.flipkart.com/men-tshirts?q=${encodeURIComponent(colorDisplay)}&sort=popularity${fkPriceParam}` },
+    { name: 'Myntra',   icon: '👗', bg: 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300',     url: `https://www.myntra.com/tshirts?rawQuery=${colorLower}+men${myntraPriceParam}` },
+    { name: 'Meesho',   icon: '🛍️', bg: 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300', url: `https://meesho.com/search?q=${encodeURIComponent(colorDisplay + ' men tshirt shirt')}` },
   ];
 
   const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
