@@ -38,10 +38,82 @@ function LoadingScreen() {
   );
 }
 
+function ColorContrastChecker({ isDark }) {
+  const [color1, setColor1] = useState('#6d28d9');
+  const [color2, setColor2] = useState('#f9a8d4');
+  const [open, setOpen] = useState(false);
+
+  const hexToRgb = (hex) => {
+    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    return [r,g,b];
+  };
+  const luminance = ([r,g,b]) => {
+    const [rs,gs,bs] = [r,g,b].map(c => { const s = c/255; return s <= 0.03928 ? s/12.92 : Math.pow((s+0.055)/1.055,2.4); });
+    return 0.2126*rs + 0.7152*gs + 0.0722*bs;
+  };
+  const contrast = () => {
+    const l1 = luminance(hexToRgb(color1)), l2 = luminance(hexToRgb(color2));
+    const ratio = (Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05);
+    return ratio.toFixed(1);
+  };
+  const ratio = parseFloat(contrast());
+  const grade = ratio >= 7 ? { label: 'AAA ✓', color: 'text-green-400' } : ratio >= 4.5 ? { label: 'AA ✓', color: 'text-green-400' } : ratio >= 3 ? { label: 'AA Large ⚠️', color: 'text-yellow-400' } : { label: 'Fail ✗', color: 'text-red-400' };
+  const verdict = ratio >= 4.5 ? '✅ Great combo!' : ratio >= 3 ? '⚠️ Okay for large text' : '❌ Poor contrast';
+
+  return (
+    <div className={`rounded-2xl border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center gap-3 p-4">
+        <span className="text-2xl">🎨</span>
+        <div className="flex-1 text-left">
+          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>Color Contrast Checker</p>
+          <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Check if 2 colors look good together</p>
+        </div>
+        <span className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{open ? '▲' : '▼'}</span>
+      </button>
+      {open && (
+        <div className={`px-4 pb-4 border-t ${isDark ? 'border-white/5' : 'border-gray-100'}`}>
+          <div className="flex gap-3 mt-3 mb-3">
+            <div className="flex-1">
+              <p className={`text-xs mb-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Color 1</p>
+              <div className="flex items-center gap-2">
+                <input type="color" value={color1} onChange={e => setColor1(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent" />
+                <span className={`text-xs font-mono ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{color1}</span>
+              </div>
+            </div>
+            <div className="flex-1">
+              <p className={`text-xs mb-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Color 2</p>
+              <div className="flex items-center gap-2">
+                <input type="color" value={color2} onChange={e => setColor2(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent" />
+                <span className={`text-xs font-mono ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{color2}</span>
+              </div>
+            </div>
+          </div>
+          {/* Preview */}
+          <div className="rounded-xl p-4 mb-3 flex items-center justify-center text-sm font-bold" style={{ backgroundColor: color1, color: color2 }}>
+            Sample Text Preview
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Contrast Ratio</p>
+              <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-800'}`}>{ratio}:1</p>
+            </div>
+            <div className="text-right">
+              <p className={`font-bold text-sm ${grade.color}`}>{grade.label}</p>
+              <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{verdict}</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
+  const analysisCount = parseInt(localStorage.getItem('sg_analysis_count') || '0');
+  const savedCount = (() => { try { return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]').length; } catch { return 0; } })();
   const toneColors = { fair: "#F5DEB3", light: "#D2A679", medium: "#C68642", olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A" };
   const quickCards = [
     { icon: '🎨', label: 'Best Colors', tab: 'analyze' },
@@ -89,6 +161,23 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
       >
         ✨ Analyze Your Style
       </button>
+
+      {/* Stats Row */}
+      {analysisCount > 0 && (
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: 'Analyses', value: analysisCount, emoji: '📸' },
+            { label: 'Saved Colors', value: savedCount, emoji: '❤️' },
+            { label: 'Style Score', value: '92', emoji: '💯' },
+          ].map((stat) => (
+            <div key={stat.label} className={`rounded-2xl p-3 border text-center ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+              <p className="text-xl mb-1">{stat.emoji}</p>
+              <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-800'}`}>{stat.value}</p>
+              <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{stat.label}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Daily Style Tip */}
       <div className={`rounded-2xl p-4 border flex items-start gap-3 ${isDark ? 'bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-700/30' : 'bg-purple-50 border-purple-200'}`}>
@@ -165,6 +254,9 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
         </div>
         <span className="text-white/30 text-lg">→</span>
       </div>
+
+      {/* Color Contrast Checker */}
+      <ColorContrastChecker isDark={isDark} />
     </div>
   );
 }
@@ -234,8 +326,10 @@ function Dashboard({ user, onLogout }) {
     const enriched = { ...data, gender: data.gender || currentGender };
     setResults(enriched);
     setLoading(false);
-    // Save last analysis to localStorage (summary + full data)
+    // Save last analysis + increment count
     try {
+      const count = parseInt(localStorage.getItem('sg_analysis_count') || '0') + 1;
+      localStorage.setItem('sg_analysis_count', count.toString());
       localStorage.setItem('sg_last_analysis', JSON.stringify({
         skinTone: enriched.analysis?.skin_tone?.category,
         undertone: enriched.analysis?.skin_tone?.undertone,

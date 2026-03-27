@@ -278,6 +278,40 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       </section>
 
+      {/* Blog Section */}
+      <section className="relative z-10 px-6 md:px-12 py-16 max-w-7xl mx-auto">
+        <div className="text-center mb-10">
+          <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-4">Fashion Blog</div>
+          <h2 className="text-3xl md:text-4xl font-bold">
+            Style Tips & <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Fashion Guides</span>
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { slug: 'skin-tone-colors', title: 'Best Colors for Your Skin Tone', excerpt: 'Discover which colors complement your skin tone — from fair to dark, find your perfect palette.', emoji: '🎨', date: 'Jan 15, 2025' },
+            { slug: 'outfit-guide', title: 'How to Choose the Perfect Outfit', excerpt: 'Master outfit selection based on occasion, color coordination, and seasonal trends.', emoji: '👔', date: 'Jan 20, 2025' },
+            { slug: 'ai-fashion', title: 'How AI is Changing Fashion', excerpt: 'Explore how AI is revolutionizing fashion with personalized styling and smart recommendations.', emoji: '🤖', date: 'Jan 25, 2025' },
+          ].map((post) => (
+            <a
+              key={post.slug}
+              href={`/blog/${post.slug}`}
+              className="group bg-gray-900/60 border border-gray-800 rounded-2xl p-6 hover:border-purple-600/60 hover:bg-gray-900/80 transition-all duration-300 backdrop-blur-sm hover:shadow-lg hover:shadow-purple-900/20 hover:-translate-y-1 flex flex-col"
+            >
+              <div className="text-3xl mb-3">{post.emoji}</div>
+              <p className="text-purple-400 text-xs mb-2">{post.date}</p>
+              <h3 className="text-white font-bold text-base mb-2 group-hover:text-purple-300 transition-colors">{post.title}</h3>
+              <p className="text-gray-400 text-sm leading-relaxed flex-1">{post.excerpt}</p>
+              <p className="text-purple-400 text-xs mt-4 font-semibold group-hover:text-purple-300">Read More →</p>
+            </a>
+          ))}
+        </div>
+        <div className="text-center mt-8">
+          <a href="/blog" className="inline-block border border-purple-600/60 hover:border-purple-400 hover:bg-purple-900/20 transition-all px-8 py-3 rounded-full text-sm font-semibold text-white">
+            View All Articles →
+          </a>
+        </div>
+      </section>
+
       <Footer />
     </div>
   );
