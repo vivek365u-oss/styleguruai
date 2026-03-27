@@ -108,6 +108,57 @@ function ColorContrastChecker({ isDark }) {
   );
 }
 
+// ── Trending Card with Shop Modal ───────────────────────────
+function TrendingCard({ item, isDark, AMAZON_TAG }) {
+  const [open, setOpen] = useState(false);
+  const kw = encodeURIComponent(item.category);
+  const amzUrl = `https://www.amazon.in/s?k=${kw}&rh=n%3A1968024031&sort=review-rank&tag=${AMAZON_TAG}`;
+
+  const shopOptions = [
+    { name: '🛒 Amazon', url: amzUrl, bg: 'bg-orange-500/20 border-orange-500/30 text-orange-300 hover:bg-orange-500/40' },
+    { name: '🏪 Flipkart', url: item.flipkartUrl, bg: 'bg-blue-500/20 border-blue-500/30 text-blue-300 hover:bg-blue-500/40' },
+    { name: '👗 Myntra', url: item.myntraUrl, bg: 'bg-pink-500/20 border-pink-500/30 text-pink-300 hover:bg-pink-500/40' },
+    { name: '🛍️ Meesho', url: `https://meesho.com/search?q=${encodeURIComponent(item.meeshoQ)}`, bg: 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/40' },
+  ];
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className={`w-full flex flex-col items-center gap-2 border rounded-2xl p-3 transition-all active:scale-95 ${
+          open
+            ? 'border-purple-500/60 bg-purple-500/10'
+            : isDark ? 'bg-white/5 border-white/10 hover:border-purple-500/40 hover:bg-white/10' : 'bg-white border-purple-100 hover:border-purple-400 shadow-sm'
+        }`}
+      >
+        <span className="text-3xl">{item.emoji}</span>
+        <span className={`text-xs font-semibold text-center leading-tight ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{item.label}</span>
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.gender === 'male' ? 'text-blue-400 bg-blue-500/10' : 'text-pink-400 bg-pink-500/10'}`}>{item.tag}</span>
+      </button>
+
+      {/* Shop options dropdown */}
+      {open && (
+        <div className={`absolute top-full left-0 right-0 mt-1 z-50 rounded-2xl border p-3 space-y-1.5 shadow-2xl ${isDark ? 'bg-slate-900 border-white/20' : 'bg-white border-gray-200 shadow-lg'}`}>
+          <p className={`text-xs font-bold mb-2 ${isDark ? 'text-white/50' : 'text-gray-400'}`}>Shop on:</p>
+          {shopOptions.map(opt => (
+            <a
+              key={opt.name}
+              href={opt.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all hover:scale-[1.02] ${opt.bg}`}
+            >
+              {opt.name}
+            </a>
+          ))}
+          <button onClick={() => setOpen(false)} className={`w-full text-xs mt-1 ${isDark ? 'text-white/20 hover:text-white/50' : 'text-gray-300 hover:text-gray-500'}`}>✕ Close</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
@@ -122,12 +173,14 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
     { icon: '🌍', label: 'Seasonal', tab: 'analyze' },
   ];
   const trendingStyles = [
-    { emoji: '👕', label: 'Oversized Tee', tag: 'Trending' },
-    { emoji: '👖', label: 'Cargo Pants', tag: 'Hot' },
-    { emoji: '💃', label: 'Coord Sets', tag: 'New' },
-    { emoji: '🥻', label: 'Ethnic Fusion', tag: 'Popular' },
-    { emoji: '🧥', label: 'Hoodies', tag: 'Trending' },
-    { emoji: '👗', label: 'Maxi Dress', tag: 'Hot' },
+    // Men trending 2025
+    { emoji: '👕', label: 'Oversized Tee', tag: '🔥 Men', gender: 'male', category: 'oversized tshirt streetwear', myntraUrl: 'https://www.myntra.com/tshirts?rawQuery=oversized+tshirt+men', flipkartUrl: 'https://www.flipkart.com/men-tshirts?q=oversized+tshirt&sort=popularity', meeshoQ: 'men oversized tshirt' },
+    { emoji: '🪖', label: 'Cargo Pants', tag: '🔥 Men', gender: 'male', category: 'cargo pants men streetwear', myntraUrl: 'https://www.myntra.com/cargos?rawQuery=cargo+pants+men', flipkartUrl: 'https://www.flipkart.com/men-jeans?q=cargo+pants&sort=popularity', meeshoQ: 'men cargo pants' },
+    { emoji: '🎽', label: 'Co-ord Set', tag: '🔥 Men', gender: 'male', category: 'men coord set matching', myntraUrl: 'https://www.myntra.com/co-ords?rawQuery=men+coord+set', flipkartUrl: 'https://www.flipkart.com/men-clothing?q=coord+set+men&sort=popularity', meeshoQ: 'men coord set' },
+    // Women trending 2025
+    { emoji: '✨', label: 'Coord Set', tag: '🔥 Women', gender: 'female', category: 'women coord set two piece', myntraUrl: 'https://www.myntra.com/co-ords?rawQuery=women+coord+set', flipkartUrl: 'https://www.flipkart.com/women-western-wear?q=coord+set+women&sort=popularity', meeshoQ: 'women coord set' },
+    { emoji: '👗', label: 'Maxi Dress', tag: '🔥 Women', gender: 'female', category: 'women maxi dress trending', myntraUrl: 'https://www.myntra.com/dresses?rawQuery=women+maxi+dress', flipkartUrl: 'https://www.flipkart.com/women-western-wear?q=maxi+dress&sort=popularity', meeshoQ: 'women maxi dress' },
+    { emoji: '🥻', label: 'Kurti Set', tag: '🔥 Women', gender: 'female', category: 'women kurti set with pants', myntraUrl: 'https://www.myntra.com/kurta-sets?rawQuery=kurti+set+women', flipkartUrl: 'https://www.flipkart.com/women-kurtas-and-suits?q=kurti+set&sort=popularity', meeshoQ: 'women kurti set' },
   ];
   const DAILY_TIPS = [
     { emoji: '🎨', tip: 'Navy blue suits warm undertones perfectly — try it for your next outfit!' },
@@ -230,15 +283,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
         <p className={`text-xs font-semibold uppercase tracking-wide mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Trending Now 🔥</p>
         <div className="grid grid-cols-3 gap-3">
           {trendingStyles.map((s) => (
-            <button
-              key={s.label}
-              onClick={onAnalyze}
-              className={`flex flex-col items-center gap-2 border rounded-2xl p-3 transition-all active:scale-95 ${isDark ? 'bg-white/5 border-white/10 hover:border-purple-500/40 hover:bg-white/10' : 'bg-white border-purple-100 hover:border-purple-400 shadow-sm'}`}
-            >
-              <span className="text-3xl">{s.emoji}</span>
-              <span className={`text-xs font-semibold text-center leading-tight ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{s.label}</span>
-              <span className="text-purple-400 text-[10px] font-bold bg-purple-500/10 px-2 py-0.5 rounded-full">{s.tag}</span>
-            </button>
+            <TrendingCard key={s.label} item={s} isDark={isDark} AMAZON_TAG="styleguruai-21" />
           ))}
         </div>
       </div>
