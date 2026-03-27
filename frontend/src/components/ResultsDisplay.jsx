@@ -484,7 +484,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 }
 
 // ── Outfits Tab ──────────────────────────────────────────────
-function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, styleTips, occasionAdvice, ethnicWear, sareeSuggestions, isDark }) {
+function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, styleTips, occasionAdvice, ethnicWear, sareeSuggestions, isDark, bodyTypeTips = [], bodyType = null }) {
   let outfits = [];
   if (isSeasonal) outfits = seasonalGender === 'female' ? (recommendations.female_outfits || []) : (recommendations.male_outfits || []);
   else if (isFemale) outfits = recommendations.outfit_combos || [];
@@ -539,6 +539,23 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
       )}
 
       {/* Ethnic wear */}
+      {/* Body Type Tips */}
+      {bodyTypeTips.length > 0 && (
+        <div>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>
+            👤 {bodyType === 'slim' ? 'Slim Body' : bodyType === 'athletic' ? 'Athletic Body' : bodyType === 'plus' ? 'Plus Size' : 'Body Type'} Tips
+          </p>
+          <div className={`rounded-2xl p-4 space-y-2 border ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-200'}`}>
+            {bodyTypeTips.map((tip, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <span className="text-blue-400 flex-shrink-0">✦</span>
+                <p className={`text-sm ${isDark ? 'text-blue-100/70' : 'text-blue-800'}`}>{tip}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {ethnicWear.length > 0 && (
         <div>
           <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🪷 Ethnic Wear</p>
@@ -734,6 +751,15 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const isFemale = data.gender === "female";
   const isSeasonal = data.gender === "seasonal";
   const seasonalGender = data.seasonalGender || "male";
+  const bodyType = data.bodyType || null;
+
+  const BODY_TYPE_TIPS = {
+    slim:     ['Layering adds visual bulk — try oversized tees over shirts', 'Horizontal stripes and bold patterns work great for you', 'Baggy jeans and cargo pants suit your frame perfectly'],
+    athletic: ['V-neck tees highlight your shoulders beautifully', 'Slim-fit or straight-cut pants balance your proportions', 'Polo shirts and fitted tees are your best friends'],
+    average:  ['You can wear almost any silhouette — experiment freely', 'Both oversized and fitted styles suit you well', 'Monochromatic outfits create a sleek, elongated look'],
+    plus:     ['Dark colors and vertical patterns create a slimming effect', 'Well-fitted clothes look better than very loose or very tight', 'High-waist bottoms define your waist beautifully'],
+  };
+  const bodyTypeTips = bodyType ? BODY_TYPE_TIPS[bodyType] || [] : [];
   const effectiveGender = isSeasonal ? seasonalGender : (isFemale ? 'female' : 'male');
   const shirtCategory = effectiveGender === 'female' ? "dress" : "shirt";
   const pantCategory = effectiveGender === 'female' ? "bottom" : "pant";
@@ -849,6 +875,8 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             ethnicWear={ethnicWear}
             sareeSuggestions={sareeSuggestions}
             isDark={isDark}
+            bodyTypeTips={bodyTypeTips}
+            bodyType={bodyType}
           />
         )}
         {activeTab === 'accessories' && (

@@ -31,6 +31,16 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
         { label: '⚖️ Neutral (mix of both)', value: 'neutral' },
       ]
     },
+    {
+      q: 'What is your body type?',
+      key: 'bodyType',
+      options: [
+        { label: '🏃 Slim / Lean', value: 'slim' },
+        { label: '💪 Athletic / Muscular', value: 'athletic' },
+        { label: '⚖️ Average / Regular', value: 'average' },
+        { label: '🌸 Plus Size / Curvy', value: 'plus' },
+      ]
+    },
   ];
 
   // Static recommendation map
@@ -55,6 +65,13 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
            neutral: { summary: 'Your dark neutral skin is breathtaking in any bright, saturated color.', best_shirt_colors: [{name:'Bright Red',hex:'#FF0000',reason:'Powerful contrast'},{name:'Royal Blue',hex:'#4169E1',reason:'Regal look'},{name:'Pure White',hex:'#FFFFFF',reason:'Timeless elegance'}], best_pant_colors: [{name:'Black',hex:'#000000',reason:'Classic'},{name:'White',hex:'#FFFFFF',reason:'Bold contrast'}], colors_to_avoid: [{name:'Very Dark Colors',hex:'#1A1A1A',reason:'Reduces definition'}], style_tips: ['Any bright color looks spectacular on you','White is your most powerful statement color'], outfit_combinations: [{shirt:'Bright red tee',pant:'Black pants',shoes:'White sneakers',occasion:'Casual'}], occasion_advice: {Office:'Royal blue shirt + black pants',Casual:'Pure white tee + dark jeans'}, ethnic_wear: ['Bright red or royal blue kurta with gold or silver accessories'] } },
   };
 
+  const BODY_TYPE_TIPS = {
+    slim:     ['Layering adds visual bulk — try oversized tees over shirts', 'Horizontal stripes and bold patterns work great for you', 'Baggy jeans and cargo pants suit your frame perfectly', 'Avoid very tight fitted clothes — go for relaxed fits'],
+    athletic: ['V-neck tees highlight your shoulders beautifully', 'Slim-fit or straight-cut pants balance your proportions', 'Avoid overly baggy clothes — they hide your physique', 'Polo shirts and fitted tees are your best friends'],
+    average:  ['You can wear almost any silhouette — experiment freely', 'Straight-cut and regular-fit clothes work best', 'Monochromatic outfits create a sleek, elongated look', 'Both oversized and fitted styles suit you well'],
+    plus:     ['Dark colors and vertical patterns create a slimming effect', 'Well-fitted clothes look better than very loose or very tight', 'A-line dresses and flowy tops are universally flattering', 'High-waist bottoms define your waist beautifully'],
+  };
+
   const handleAnswer = (key, value) => {
     const newAnswers = { ...answers, [key]: value };
     setAnswers(newAnswers);
@@ -64,9 +81,12 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
       // Generate result
       const tone = newAnswers.tone || 'medium';
       const undertone = newAnswers.undertone || 'neutral';
+      const bodyType = newAnswers.bodyType || 'average';
       const rec = RECS[tone]?.[undertone] || RECS[tone]?.neutral || RECS.medium.neutral;
+      const bodyTips = BODY_TYPE_TIPS[bodyType] || BODY_TYPE_TIPS.average;
       const mockResult = {
         gender,
+        bodyType,
         analysis: {
           skin_color: { hex: '#C68642', rgb: { r: 198, g: 134, b: 66 } },
           skin_tone: { category: tone, undertone, color_season: undertone === 'warm' ? 'Autumn' : undertone === 'cool' ? 'Winter' : 'Spring', confidence: 'medium', description: rec.summary },
@@ -76,7 +96,7 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
           best_shirt_colors: rec.best_shirt_colors,
           best_pant_colors: rec.best_pant_colors,
           colors_to_avoid: rec.colors_to_avoid,
-          style_tips: rec.style_tips,
+          style_tips: [...rec.style_tips, ...bodyTips],
           outfit_combinations: rec.outfit_combinations,
           occasion_advice: rec.occasion_advice,
           ethnic_wear: rec.ethnic_wear,
@@ -144,6 +164,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   const [gender, setGender] = useState('male');
   const [mode, setMode] = useState('normal');
   const [season, setSeason] = useState('summer');
+  const [bodyType, setBodyType] = useState('average');
   const fileInputRef = useRef(null);
 
   const handleGenderChange = (newGender) => {
@@ -163,13 +184,13 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       let res;
       if (mode === 'seasonal') {
         res = await analyzeImageSeasonal(file, season, setUploadProgress);
-        onAnalysisComplete({ ...res.data, gender: 'seasonal', seasonalGender: gender });
+        onAnalysisComplete({ ...res.data, gender: 'seasonal', seasonalGender: gender, bodyType });
       } else if (gender === 'female') {
         res = await analyzeImageFemale(file, setUploadProgress);
-        onAnalysisComplete({ ...res.data, gender: 'female' });
+        onAnalysisComplete({ ...res.data, gender: 'female', bodyType });
       } else {
         res = await analyzeImage(file, setUploadProgress);
-        onAnalysisComplete({ ...res.data, gender: 'male' });
+        onAnalysisComplete({ ...res.data, gender: 'male', bodyType });
       }
     } catch (err) {
       const detail = err.response?.data?.detail;
@@ -317,7 +338,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       )}
 
       {/* Mode Info */}
-      <div className="text-center mb-6 text-sm font-medium">
+      <div className="text-center mb-4 text-sm font-medium">
         {mode === 'seasonal' ? (
           <span className={isDark ? 'text-amber-300' : 'text-amber-600'}>
             {seasons.find(s => s.id === season)?.emoji} {gender === 'female' ? '👩 Female' : '👨 Male'} — Special recommendations for {seasons.find(s => s.id === season)?.label}!
@@ -327,6 +348,32 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
         ) : (
           <span className={isDark ? 'text-blue-300' : 'text-blue-600'}>👔 Male mode: Shirt, Pant & Ethnic wear suggestions included!</span>
         )}
+      </div>
+
+      {/* Body Type Selector */}
+      <div className="mb-5">
+        <p className={`text-xs text-center mb-2 font-semibold uppercase tracking-wide ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Your Body Type (optional)</p>
+        <div className="flex justify-center gap-2 flex-wrap">
+          {[
+            { value: 'slim', label: '🏃 Slim', desc: 'Lean' },
+            { value: 'athletic', label: '💪 Athletic', desc: 'Muscular' },
+            { value: 'average', label: '⚖️ Average', desc: 'Regular' },
+            { value: 'plus', label: '🌸 Plus', desc: 'Curvy' },
+          ].map((bt) => (
+            <button
+              key={bt.value}
+              onClick={() => setBodyType(bt.value)}
+              className={`flex flex-col items-center px-4 py-2 rounded-xl border text-xs font-bold transition-all ${
+                bodyType === bt.value
+                  ? 'bg-purple-500/30 border-purple-400 text-purple-200'
+                  : isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70' : 'bg-white border-gray-200 text-gray-400 hover:border-purple-300 shadow-sm'
+              }`}
+            >
+              <span>{bt.label}</span>
+              <span className="text-[10px] opacity-60">{bt.desc}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Upload Box */}
