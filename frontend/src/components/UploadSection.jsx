@@ -166,6 +166,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   const [season, setSeason] = useState('summer');
   const [bodyType, setBodyType] = useState('average');
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
 
   const handleGenderChange = (newGender) => {
     setGender(newGender);
@@ -399,6 +400,15 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
           className="hidden"
         />
+        {/* Camera input — opens front camera directly on mobile */}
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          capture="user"
+          onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+          className="hidden"
+        />
 
         {preview ? (
           <div className="flex flex-col items-center">
@@ -434,6 +444,21 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
             }`}>
               📁 {t('choosePhoto')}
             </span>
+            {/* Camera button for mobile */}
+            <div className="flex gap-3 justify-center mt-3">
+              <button
+                onClick={(e) => { e.stopPropagation(); cameraInputRef.current?.click(); }}
+                className="flex items-center gap-1.5 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-xl text-purple-300 text-xs font-semibold hover:bg-purple-500/30 transition"
+              >
+                📷 Camera
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                className="flex items-center gap-1.5 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white/50 text-xs font-semibold hover:bg-white/10 transition"
+              >
+                🖼️ Gallery
+              </button>
+            </div>
             <p className={`text-xs mt-4 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>{t('photoNote')}</p>
           </>
         )}

@@ -1,3 +1,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Mobile Experience Improvements ── */
+
+/* Smooth tab transitions */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tab-content { animation: fadeSlideIn 0.18s ease-out; }
+
+/* Touch feedback */
+button:active, a:active { transform: scale(0.97); transition: transform 0.08s ease; }
+button, a { -webkit-tap-highlight-color: transparent; }
+
+/* Smooth scroll */
+html { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+
+/* Scrollbar hide */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}

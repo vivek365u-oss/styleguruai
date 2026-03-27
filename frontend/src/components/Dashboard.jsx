@@ -463,6 +463,7 @@ function Dashboard({ user, onLogout }) {
       </header>
 
       <main className="relative z-10 max-w-lg mx-auto px-4 pt-4 pb-24">
+        <div className="tab-content" key={activeTab}>
         {activeTab === 'home' && (
           <HomeScreen
             user={user}
@@ -502,6 +503,7 @@ function Dashboard({ user, onLogout }) {
         {activeTab === 'outfit' && <OutfitChecker />}
         {activeTab === 'history' && <HistoryPanel />}
         {activeTab === 'settings' && <SettingsScreen user={user} onLogout={onLogout} />}
+        </div>
       </main>
 
       <nav className={`fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t ${theme === 'dark' ? 'bg-[#050816]/95 border-white/10' : 'bg-slate-100/95 border-purple-200 shadow-lg'}`}>

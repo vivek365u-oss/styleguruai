@@ -851,8 +851,18 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         ))}
       </div>
 
-      {/* Tab content */}
-      <div>
+      {/* Tab content — swipe support */}
+      <div
+        className="tab-content"
+        onTouchStart={(e) => { window._touchStartX = e.touches[0].clientX; }}
+        onTouchEnd={(e) => {
+          const diff = window._touchStartX - e.changedTouches[0].clientX;
+          const tabOrder = ['colors', 'outfits', 'accessories', 'saved'];
+          const idx = tabOrder.indexOf(activeTab);
+          if (diff > 50 && idx < tabOrder.length - 1) setActiveTab(tabOrder[idx + 1]);
+          if (diff < -50 && idx > 0) setActiveTab(tabOrder[idx - 1]);
+        }}
+      >
         {activeTab === 'colors' && (
           <ColorsTab
             recommendations={recommendations}
