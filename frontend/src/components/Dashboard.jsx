@@ -38,7 +38,7 @@ function LoadingScreen() {
   );
 }
 
-function HomeScreen({ user, onAnalyze, onTabChange }) {
+function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
@@ -76,7 +76,13 @@ function HomeScreen({ user, onAnalyze, onTabChange }) {
       {/* Recent Analysis */}
       {lastAnalysis && (
         <div
-          onClick={onAnalyze}
+          onClick={() => {
+            if (lastAnalysis.fullData) {
+              onShowResult(lastAnalysis.fullData);
+            } else {
+              onAnalyze();
+            }
+          }}
           className={`cursor-pointer rounded-2xl p-4 border flex items-center gap-4 transition-all hover:border-purple-500/50 ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}
         >
           <div className="w-12 h-12 rounded-xl flex-shrink-0 border border-white/20" style={{ backgroundColor: toneColors[lastAnalysis.skinTone] || '#C68642' }} />
@@ -202,13 +208,14 @@ function Dashboard({ user, onLogout }) {
     const enriched = { ...data, gender: data.gender || currentGender };
     setResults(enriched);
     setLoading(false);
-    // Save last analysis summary to localStorage
+    // Save last analysis to localStorage (summary + full data)
     try {
       localStorage.setItem('sg_last_analysis', JSON.stringify({
         skinTone: enriched.analysis?.skin_tone?.category,
         undertone: enriched.analysis?.skin_tone?.undertone,
         season: enriched.analysis?.skin_tone?.color_season,
         date: new Date().toLocaleDateString('en-IN'),
+        fullData: enriched,
       }));
     } catch {}
   };
@@ -255,7 +262,15 @@ function Dashboard({ user, onLogout }) {
 
       <main className="relative z-10 max-w-lg mx-auto px-4 pt-4 pb-24">
         {activeTab === 'home' && (
-          <HomeScreen user={user} onAnalyze={() => setActiveTab('analyze')} onTabChange={handleTabChange} />
+          <HomeScreen
+            user={user}
+            onAnalyze={() => setActiveTab('analyze')}
+            onTabChange={handleTabChange}
+            onShowResult={(data) => {
+              setResults(data);
+              setActiveTab('analyze');
+            }}
+          />
         )}
         {activeTab === 'analyze' && (
           <>
