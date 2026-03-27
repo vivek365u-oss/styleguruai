@@ -438,7 +438,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   ];
 
   return (
-    <div className="space-y-4 pb-4">
+    <div className="space-y-4 pb-4 bg-[#050816] rounded-3xl p-3 text-white">
       {/* Photo quality warning */}
       {photo_quality?.warnings?.length > 0 && (
         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3">
