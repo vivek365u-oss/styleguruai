@@ -298,6 +298,33 @@ function SettingsScreen({ user, onLogout }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t, language, changeLanguage } = useLanguage();
   const isDark = theme === 'dark';
+  const [notifStatus, setNotifStatus] = useState(() => {
+    if (typeof Notification === 'undefined') return 'unsupported';
+    return Notification.permission;
+  });
+
+  const requestNotification = async () => {
+    if (typeof Notification === 'undefined') return;
+    try {
+      const permission = await Notification.requestPermission();
+      setNotifStatus(permission);
+      if (permission === 'granted') {
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+          const reg = await navigator.serviceWorker.register('/sw.js');
+          // Show welcome notification
+          reg.showNotification('StyleGuru AI 🎨', {
+            body: 'Notifications enabled! We\'ll send you daily style tips.',
+            icon: '/favicon.svg',
+            badge: '/favicon.svg',
+          });
+        }
+        localStorage.setItem('sg_notif', 'granted');
+      }
+    } catch (e) {
+      console.log('Notification error:', e);
+    }
+  };
   return (
     <div className="space-y-4 pt-2">
       <h2 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>⚙️ Settings</h2>
@@ -334,6 +361,28 @@ function SettingsScreen({ user, onLogout }) {
         <button onClick={toggleTheme} className="relative w-14 h-7 rounded-full bg-purple-500 transition-all">
           <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-all duration-300 ${isDark ? 'left-8' : 'left-1'}`} />
         </button>
+      </div>
+
+      {/* Push Notifications */}
+      <div className={`rounded-2xl p-4 flex items-center justify-between border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
+        <div>
+          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>🔔 Notifications</p>
+          <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
+            {notifStatus === 'granted' ? 'Enabled ✓' : notifStatus === 'denied' ? 'Blocked in browser' : 'Daily style tips'}
+          </p>
+        </div>
+        {notifStatus === 'granted' ? (
+          <span className="text-green-400 text-xs font-bold bg-green-500/10 border border-green-500/20 px-3 py-1.5 rounded-full">✓ On</span>
+        ) : notifStatus === 'denied' ? (
+          <span className="text-red-400 text-xs font-bold">Blocked</span>
+        ) : (
+          <button
+            onClick={requestNotification}
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:from-purple-500 hover:to-pink-500 transition"
+          >
+            Enable
+          </button>
+        )}
       </div>
 
       {/* Logout */}
