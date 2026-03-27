@@ -58,9 +58,29 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
 // ── Color Card (compact, tap to expand) ─────────────────────
 function ColorCard({ color, category, gender, isDark }) {
   const [expanded, setExpanded] = useState(false);
-  const cardCls = isDark
-    ? 'bg-white/5 border border-white/10'
-    : 'bg-white border border-gray-200 shadow-sm';
+  const [saved, setSaved] = useState(() => {
+    try {
+      const s = JSON.parse(localStorage.getItem('sg_saved_colors') || '[]');
+      return s.some(c => c.hex === color.hex);
+    } catch { return false; }
+  });
+
+  const toggleSave = (e) => {
+    e.stopPropagation();
+    try {
+      const s = JSON.parse(localStorage.getItem('sg_saved_colors') || '[]');
+      let updated;
+      if (saved) {
+        updated = s.filter(c => c.hex !== color.hex);
+      } else {
+        updated = [...s, { name: color.name, hex: color.hex, category, gender }];
+      }
+      localStorage.setItem('sg_saved_colors', JSON.stringify(updated));
+      setSaved(!saved);
+    } catch {}
+  };
+
+  const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
   const nameCls = isDark ? 'text-white' : 'text-gray-800';
   const hexCls  = isDark ? 'text-white/30' : 'text-gray-400';
   const chevronCls = isDark ? 'text-white/30' : 'text-gray-400';
@@ -69,16 +89,20 @@ function ColorCard({ color, category, gender, isDark }) {
   const reasonCls = isDark ? 'text-white/50' : 'text-gray-500';
 
   return (
-    <div
-      className={`${cardCls} rounded-2xl overflow-hidden transition-all duration-300 hover:border-purple-500/40`}
-      onClick={() => setExpanded(e => !e)}
-    >
+    <div className={`${cardCls} rounded-2xl overflow-hidden transition-all duration-300 hover:border-purple-500/40`} onClick={() => setExpanded(e => !e)}>
       <div className="flex items-center gap-3 p-3 cursor-pointer">
         <div className={`w-12 h-12 rounded-xl flex-shrink-0 shadow-lg border ${hexBorderCls}`} style={{ backgroundColor: color.hex }} />
         <div className="flex-1 min-w-0">
           <p className={`${nameCls} font-bold text-sm truncate`}>{color.name}</p>
           <p className={`${hexCls} text-xs font-mono`}>{color.hex}</p>
         </div>
+        <button
+          onClick={toggleSave}
+          className={`text-lg transition-transform hover:scale-125 ${saved ? 'text-pink-400' : isDark ? 'text-white/20 hover:text-pink-400' : 'text-gray-300 hover:text-pink-400'}`}
+          title={saved ? 'Remove from saved' : 'Save color'}
+        >
+          {saved ? '❤️' : '🤍'}
+        </button>
         <span className={`${chevronCls} text-xs transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}>▼</span>
       </div>
       {expanded && (
@@ -129,6 +153,16 @@ function OutfitCard({ combo, index, isDark }) {
   );
 }
 
+// ── Celebrity Skin Match ─────────────────────────────────────
+const CELEBRITY_MAP = {
+  fair:    { name: 'Alia Bhatt', emoji: '⭐', tip: 'Pastels, blush pink, lavender, navy' },
+  light:   { name: 'Katrina Kaif', emoji: '⭐', tip: 'Coral, peach, sky blue, mint green' },
+  medium:  { name: 'Deepika Padukone', emoji: '⭐', tip: 'Terracotta, rust, teal, mustard' },
+  olive:   { name: 'Priyanka Chopra', emoji: '⭐', tip: 'Olive, burnt orange, forest green' },
+  brown:   { name: 'Bipasha Basu', emoji: '⭐', tip: 'Cobalt blue, fuchsia, gold, white' },
+  dark:    { name: 'Nandita Das', emoji: '⭐', tip: 'Bright jewel tones, white, gold, red' },
+};
+
 // ── Profile Hero Card ────────────────────────────────────────
 function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSeasonal, isDark }) {
   const toneColors = { fair: "#F5DEB3", light: "#D2A679", medium: "#C68642", olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A" };
@@ -141,6 +175,21 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
   const imgBorderCls = isDark ? 'border-white/20' : 'border-gray-200';
   const summaryBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200';
   const summaryCls = isDark ? 'text-white/60' : 'text-gray-500';
+
+  const celeb = CELEBRITY_MAP[analysis.skin_tone.category];
+
+  // Style Score — based on confidence + quality
+  const styleScore = analysis.skin_tone.confidence === 'high' ? 92 : 75;
+
+  // WhatsApp share
+  const handleWhatsAppShare = () => {
+    const skinTone = analysis.skin_tone.category;
+    const undertone = analysis.skin_tone.undertone;
+    const season = analysis.skin_tone.color_season;
+    const celebName = celeb?.name || '';
+    const msg = `✨ My StyleGuru AI Style Profile!\n\n🎨 Skin Tone: ${skinTone} (${undertone} undertone)\n🍂 Color Season: ${season}\n⭐ Celebrity Match: ${celebName}\n💯 Style Score: ${styleScore}/100\n\nGet your FREE AI style analysis 👇\nhttps://www.styleguruai.in`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  };
 
   return (
     <div className={`relative overflow-hidden ${wrapperCls} rounded-2xl p-4`}>
@@ -168,11 +217,45 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
           </div>
         </div>
       </div>
+
+      {/* Style Score */}
+      <div className={`mt-3 rounded-xl p-3 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
+        <div className="flex items-center justify-between mb-1.5">
+          <p className={`text-xs font-bold ${isDark ? 'text-white/70' : 'text-gray-700'}`}>💯 Style Score</p>
+          <span className="text-purple-400 font-black text-sm">{styleScore}/100</span>
+        </div>
+        <div className={`h-2 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
+          <div className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-1000" style={{ width: `${styleScore}%` }} />
+        </div>
+      </div>
+
+      {/* Celebrity Match */}
+      {celeb && (
+        <div className={`mt-2 rounded-xl p-3 border flex items-center gap-3 ${isDark ? 'bg-amber-500/10 border-amber-500/20' : 'bg-amber-50 border-amber-200'}`}>
+          <span className="text-2xl">⭐</span>
+          <div className="flex-1">
+            <p className={`text-xs font-bold ${isDark ? 'text-amber-200' : 'text-amber-800'}`}>Celebrity Skin Match</p>
+            <p className={`text-sm font-black ${isDark ? 'text-white' : 'text-gray-800'}`}>{celeb.name}</p>
+            <p className={`text-xs ${isDark ? 'text-amber-100/60' : 'text-amber-700'}`}>{celeb.tip}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Summary */}
       {(recommendations.summary || recommendations.description) && (
-        <div className={`mt-3 ${summaryBgCls} rounded-xl p-3`}>
+        <div className={`mt-2 ${summaryBgCls} rounded-xl p-3`}>
           <p className={`${summaryCls} text-xs leading-relaxed`}>{recommendations.summary || recommendations.description}</p>
         </div>
       )}
+
+      {/* WhatsApp Share */}
+      <button
+        onClick={handleWhatsAppShare}
+        className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-xl text-green-400 font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+      >
+        <span>📱</span>
+        <span>Share on WhatsApp</span>
+      </button>
     </div>
   );
 }
@@ -456,6 +539,55 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }
   );
 }
 
+// ── Saved Colors Tab ─────────────────────────────────────────
+function SavedColorsTab({ isDark }) {
+  const [saved, setSaved] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]'); } catch { return []; }
+  });
+
+  const remove = (hex) => {
+    const updated = saved.filter(c => c.hex !== hex);
+    localStorage.setItem('sg_saved_colors', JSON.stringify(updated));
+    setSaved(updated);
+  };
+
+  const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
+  const nameCls = isDark ? 'text-white' : 'text-gray-800';
+  const hexCls = isDark ? 'text-white/30' : 'text-gray-400';
+
+  if (saved.length === 0) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-4xl mb-3">🤍</p>
+        <p className={`font-bold text-sm ${isDark ? 'text-white/60' : 'text-gray-500'}`}>No saved colors yet</p>
+        <p className={`text-xs mt-1 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Tap 🤍 on any color to save it</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className={`text-xs font-semibold uppercase tracking-wide ${isDark ? 'text-white/50' : 'text-gray-500'}`}>❤️ Your Saved Colors ({saved.length})</p>
+      {saved.map((color, i) => (
+        <div key={i} className={`${cardCls} rounded-2xl p-3 flex items-center gap-3`}>
+          <div className="w-12 h-12 rounded-xl flex-shrink-0 shadow-lg border border-white/10" style={{ backgroundColor: color.hex }} />
+          <div className="flex-1 min-w-0">
+            <p className={`${nameCls} font-bold text-sm`}>{color.name}</p>
+            <p className={`${hexCls} text-xs font-mono`}>{color.hex}</p>
+          </div>
+          <button onClick={() => remove(color.hex)} className="text-red-400/60 hover:text-red-400 text-lg transition-colors">✕</button>
+        </div>
+      ))}
+      <button
+        onClick={() => { localStorage.removeItem('sg_saved_colors'); setSaved([]); }}
+        className={`w-full py-2 text-xs font-semibold rounded-xl border transition ${isDark ? 'border-white/10 text-white/30 hover:text-red-400 hover:border-red-500/30' : 'border-gray-200 text-gray-400 hover:text-red-500'}`}
+      >
+        Clear All
+      </button>
+    </div>
+  );
+}
+
 // ── Main ResultsDisplay ──────────────────────────────────────
 function ResultsDisplay({ data, uploadedImage, onReset }) {
   const { t } = useLanguage();
@@ -479,6 +611,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
     { id: 'colors',      label: 'Colors',      emoji: '🎨' },
     { id: 'outfits',     label: 'Outfits',     emoji: '👔' },
     { id: 'accessories', label: 'Accessories', emoji: '✨' },
+    { id: 'saved',       label: 'Saved',       emoji: '❤️' },
   ];
 
   const tabBarBg = isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200';
@@ -486,6 +619,22 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
 
   return (
     <div className="space-y-4 pb-4 bg-transparent">
+      {/* Festival Mode Banner */}
+      {(() => {
+        const month = new Date().getMonth() + 1;
+        const isFestive = [10, 11, 12, 1].includes(month);
+        if (!isFestive) return null;
+        const festivals = { 10: '🪔 Diwali', 11: '🎉 Wedding Season', 12: '🎄 Christmas', 1: '🎊 New Year' };
+        return (
+          <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-xl p-3 flex items-center gap-3">
+            <span className="text-2xl">{festivals[month]?.split(' ')[0]}</span>
+            <div>
+              <p className={`text-xs font-bold ${isDark ? 'text-amber-200' : 'text-amber-800'}`}>{festivals[month]} Special!</p>
+              <p className={`text-xs ${isDark ? 'text-amber-100/60' : 'text-amber-700'}`}>Check Outfits tab for festive recommendations</p>
+            </div>
+          </div>
+        );
+      })()}
       {/* Photo quality warning */}
       {photo_quality?.warnings?.length > 0 && (
         <div className={`rounded-xl p-3 border ${isDark ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-yellow-50 border-yellow-300'}`}>
@@ -555,6 +704,9 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             makeupSuggestions={makeupSuggestions}
             isDark={isDark}
           />
+        )}
+        {activeTab === 'saved' && (
+          <SavedColorsTab isDark={isDark} />
         )}
       </div>
 
