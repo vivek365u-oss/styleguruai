@@ -337,6 +337,53 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
   );
 }
 
+// ── Complete the Look ────────────────────────────────────────
+function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
+  const AMAZON_TAG = 'styleguruai-21';
+  const isFemale = gender === 'female';
+  const pant = pantColors?.[0];
+  if (!shirtColor) return null;
+
+  const items = [
+    { label: isFemale ? '👚 Top' : '👕 T-Shirt', color: shirtColor, cat: isFemale ? 'top' : 'shirt' },
+    pant ? { label: isFemale ? '👖 Bottom' : '👖 Cargo/Jogger', color: pant, cat: isFemale ? 'bottom' : 'pant' } : null,
+    { label: isFemale ? '👟 Sneakers' : '👟 Sneakers', color: { name: 'White', hex: '#FFFFFF' }, cat: 'shoes' },
+  ].filter(Boolean);
+
+  const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
+  const labelCls = isDark ? 'text-white/50' : 'text-gray-500';
+  const nameCls = isDark ? 'text-white' : 'text-gray-800';
+
+  return (
+    <div className={`${cardCls} rounded-2xl p-4`}>
+      <p className={`text-xs font-bold uppercase tracking-wide mb-3 ${labelCls}`}>✨ Complete the Look</p>
+      <div className="flex gap-2 mb-3">
+        {items.map((item, i) => (
+          <div key={i} className="flex-1 text-center">
+            <div className="w-10 h-10 rounded-xl mx-auto mb-1 border border-white/20 shadow" style={{ backgroundColor: item.color.hex }} />
+            <p className={`text-xs font-semibold ${nameCls}`}>{item.label}</p>
+            <p className={`text-xs ${labelCls} truncate`}>{item.color.name}</p>
+          </div>
+        ))}
+      </div>
+      {/* Shop the full look */}
+      <div className="flex gap-1.5 flex-wrap">
+        {[
+          { name: '🛒 Amazon', url: `https://www.amazon.in/s?k=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit set'))}&rh=n%3A1968024031&sort=review-rank&tag=${AMAZON_TAG}`, bg: 'bg-orange-500/20 border-orange-500/30 text-orange-300' },
+          { name: '🏪 Flipkart', url: `https://www.flipkart.com/${isFemale ? 'women-western-wear' : 'men-clothing'}?q=${encodeURIComponent(shirtColor.name)}&sort=popularity`, bg: 'bg-blue-500/20 border-blue-500/30 text-blue-300' },
+          { name: '👗 Myntra', url: `https://www.myntra.com/${isFemale ? 'co-ords' : 'tshirts'}?rawQuery=${encodeURIComponent(shirtColor.name.toLowerCase())}+${isFemale ? 'coord+set' : 'men'}`, bg: 'bg-pink-500/20 border-pink-500/30 text-pink-300' },
+          { name: '🛍️ Meesho', url: `https://meesho.com/search?q=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit'))}`, bg: 'bg-purple-500/20 border-purple-500/30 text-purple-300' },
+        ].map(link => (
+          <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer"
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}>
+            {link.name}
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Colors Tab ───────────────────────────────────────────────
 function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shirtCategory, pantCategory, isDark }) {
   const avoidColors = recommendations.colors_to_avoid || [];
@@ -419,6 +466,11 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
             {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} />)}
           </div>
         </div>
+      )}
+
+      {/* Complete the Look */}
+      {shirtColors.length > 0 && (
+        <CompleteTheLook shirtColor={shirtColors[0]} pantColors={pantColors} isDark={isDark} gender="male" />
       )}
     </div>
   );

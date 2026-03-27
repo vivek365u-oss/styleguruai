@@ -3,6 +3,137 @@ import { analyzeImage, analyzeImageFemale, analyzeImageSeasonal } from '../api/s
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
 
+// ── Skin Tone Quiz ────────────────────────────────────────────
+function SkinToneQuiz({ isDark, onResult, gender }) {
+  const [open, setOpen] = useState(false);
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState({});
+
+  const questions = [
+    {
+      q: 'What is your skin tone?',
+      key: 'tone',
+      options: [
+        { label: 'Fair / Very Light', value: 'fair', color: '#F5DEB3' },
+        { label: 'Light', value: 'light', color: '#D2A679' },
+        { label: 'Medium / Wheatish', value: 'medium', color: '#C68642' },
+        { label: 'Olive / Dusky', value: 'olive', color: '#A0724A' },
+        { label: 'Brown / Dark Brown', value: 'brown', color: '#7B4F2E' },
+        { label: 'Very Dark', value: 'dark', color: '#4A2C0A' },
+      ]
+    },
+    {
+      q: 'What is your undertone?',
+      key: 'undertone',
+      options: [
+        { label: '🌞 Warm (yellowish/golden veins)', value: 'warm' },
+        { label: '❄️ Cool (bluish/purple veins)', value: 'cool' },
+        { label: '⚖️ Neutral (mix of both)', value: 'neutral' },
+      ]
+    },
+  ];
+
+  // Static recommendation map
+  const RECS = {
+    fair:   { warm: { summary: 'Your fair warm skin glows in coral, peach, warm beige, and camel tones.', best_shirt_colors: [{name:'Coral',hex:'#FF7F50',reason:'Adds warmth'},{name:'Peach',hex:'#FFCBA4',reason:'Soft and flattering'},{name:'Warm Beige',hex:'#F5DEB3',reason:'Natural match'}], best_pant_colors: [{name:'Camel',hex:'#C19A6B',reason:'Earthy warmth'},{name:'Olive',hex:'#808000',reason:'Contrast'}], colors_to_avoid: [{name:'Neon Yellow',hex:'#FFFF00',reason:'Washes out'}], style_tips: ['Wear warm neutrals near your face','Avoid stark white — try off-white instead'], outfit_combinations: [{shirt:'Coral tee',pant:'Camel chinos',shoes:'White sneakers',occasion:'Casual'}], occasion_advice: {Office:'Warm beige shirt + navy pants',Casual:'Peach tee + white jeans'}, ethnic_wear: ['Ivory kurta with gold embroidery suits you perfectly'] },
+           cool: { summary: 'Your fair cool skin shines in lavender, navy, rose pink, and icy blues.', best_shirt_colors: [{name:'Lavender',hex:'#E6E6FA',reason:'Cool tone match'},{name:'Navy Blue',hex:'#000080',reason:'Classic contrast'},{name:'Rose Pink',hex:'#FF007F',reason:'Vibrant pop'}], best_pant_colors: [{name:'Charcoal',hex:'#36454F',reason:'Cool neutral'},{name:'Navy',hex:'#000080',reason:'Timeless'}], colors_to_avoid: [{name:'Orange',hex:'#FFA500',reason:'Clashes with cool tone'}], style_tips: ['Blues and purples are your power colors','Silver jewellery over gold'], outfit_combinations: [{shirt:'Lavender shirt',pant:'Charcoal pants',shoes:'White sneakers',occasion:'Smart Casual'}], occasion_advice: {Office:'Navy shirt + grey pants',Casual:'Lavender tee + white jeans'}, ethnic_wear: ['Pastel blue or lilac kurta with silver work'] },
+           neutral: { summary: 'Your fair neutral skin is versatile — both warm and cool tones work beautifully.', best_shirt_colors: [{name:'Dusty Rose',hex:'#DCAE96',reason:'Universally flattering'},{name:'Sage Green',hex:'#B2AC88',reason:'Soft and fresh'},{name:'Sky Blue',hex:'#87CEEB',reason:'Crisp and clean'}], best_pant_colors: [{name:'Beige',hex:'#F5F5DC',reason:'Neutral base'},{name:'Light Grey',hex:'#D3D3D3',reason:'Versatile'}], colors_to_avoid: [{name:'Muddy Brown',hex:'#8B4513',reason:'Dulls complexion'}], style_tips: ['You can wear almost any color','Experiment with both warm and cool palettes'], outfit_combinations: [{shirt:'Sage green tee',pant:'Beige chinos',shoes:'White sneakers',occasion:'Casual'}], occasion_advice: {Office:'Dusty rose shirt + grey pants',Casual:'Sky blue tee + white jeans'}, ethnic_wear: ['Mint or dusty rose kurta works beautifully'] } },
+    light:  { warm: { summary: 'Your light warm skin looks stunning in terracotta, mustard, warm orange, and earthy tones.', best_shirt_colors: [{name:'Terracotta',hex:'#E2725B',reason:'Earthy warmth'},{name:'Mustard',hex:'#FFDB58',reason:'Warm glow'},{name:'Burnt Orange',hex:'#CC5500',reason:'Bold contrast'}], best_pant_colors: [{name:'Khaki',hex:'#C3B091',reason:'Earthy base'},{name:'Dark Brown',hex:'#654321',reason:'Rich contrast'}], colors_to_avoid: [{name:'Pale Yellow',hex:'#FFFFE0',reason:'Too close to skin'}], style_tips: ['Earth tones are your best friends','Try rust and terracotta for festive looks'], outfit_combinations: [{shirt:'Mustard polo',pant:'Khaki chinos',shoes:'Brown loafers',occasion:'Smart Casual'}], occasion_advice: {Office:'Terracotta shirt + dark pants',Casual:'Mustard tee + jeans'}, ethnic_wear: ['Rust or mustard kurta with copper accessories'] },
+           cool: { summary: 'Your light cool skin glows in teal, cobalt blue, emerald, and berry tones.', best_shirt_colors: [{name:'Teal',hex:'#008080',reason:'Cool complement'},{name:'Cobalt Blue',hex:'#0047AB',reason:'Striking contrast'},{name:'Berry',hex:'#8E4585',reason:'Rich depth'}], best_pant_colors: [{name:'Navy',hex:'#000080',reason:'Classic'},{name:'Charcoal',hex:'#36454F',reason:'Sophisticated'}], colors_to_avoid: [{name:'Warm Orange',hex:'#FF8C00',reason:'Clashes with cool tone'}], style_tips: ['Jewel tones make you pop','Blue is your signature color'], outfit_combinations: [{shirt:'Teal shirt',pant:'Navy pants',shoes:'White sneakers',occasion:'Smart Casual'}], occasion_advice: {Office:'Cobalt blue shirt + charcoal pants',Casual:'Teal tee + dark jeans'}, ethnic_wear: ['Deep teal or cobalt kurta with silver work'] },
+           neutral: { summary: 'Your light neutral skin suits a wide range — from warm earth tones to cool jewel tones.', best_shirt_colors: [{name:'Olive Green',hex:'#808000',reason:'Versatile earth tone'},{name:'Dusty Blue',hex:'#6699CC',reason:'Soft cool tone'},{name:'Warm Taupe',hex:'#8B7355',reason:'Neutral base'}], best_pant_colors: [{name:'Khaki',hex:'#C3B091',reason:'Earthy'},{name:'Navy',hex:'#000080',reason:'Classic'}], colors_to_avoid: [{name:'Neon Green',hex:'#39FF14',reason:'Too harsh'}], style_tips: ['Mix warm and cool tones freely','Olive and dusty blue are your power colors'], outfit_combinations: [{shirt:'Olive tee',pant:'Khaki pants',shoes:'White sneakers',occasion:'Casual'}], occasion_advice: {Office:'Dusty blue shirt + navy pants',Casual:'Olive tee + khaki jeans'}, ethnic_wear: ['Olive or dusty blue kurta with gold accessories'] } },
+    medium: { warm: { summary: 'Your medium warm skin radiates in rust, forest green, teal, and warm gold tones.', best_shirt_colors: [{name:'Rust',hex:'#B7410E',reason:'Earthy warmth'},{name:'Forest Green',hex:'#228B22',reason:'Rich contrast'},{name:'Warm Gold',hex:'#FFD700',reason:'Radiant glow'}], best_pant_colors: [{name:'Dark Brown',hex:'#654321',reason:'Earthy depth'},{name:'Olive',hex:'#808000',reason:'Natural match'}], colors_to_avoid: [{name:'Pale Beige',hex:'#F5F5DC',reason:'Washes out'}], style_tips: ['Earthy and jewel tones are your power palette','Gold accessories enhance your glow'], outfit_combinations: [{shirt:'Rust polo',pant:'Dark brown chinos',shoes:'Tan loafers',occasion:'Smart Casual'}], occasion_advice: {Office:'Forest green shirt + dark pants',Casual:'Rust tee + olive jeans'}, ethnic_wear: ['Rust or forest green kurta with gold embroidery'] },
+           cool: { summary: 'Your medium cool skin shines in royal blue, deep purple, magenta, and cool emerald.', best_shirt_colors: [{name:'Royal Blue',hex:'#4169E1',reason:'Striking contrast'},{name:'Deep Purple',hex:'#800080',reason:'Rich depth'},{name:'Magenta',hex:'#FF00FF',reason:'Bold pop'}], best_pant_colors: [{name:'Charcoal',hex:'#36454F',reason:'Cool neutral'},{name:'Black',hex:'#000000',reason:'Classic contrast'}], colors_to_avoid: [{name:'Warm Brown',hex:'#8B4513',reason:'Clashes with cool tone'}], style_tips: ['Bold jewel tones are your signature','Silver and platinum jewellery suits you best'], outfit_combinations: [{shirt:'Royal blue shirt',pant:'Charcoal pants',shoes:'Black sneakers',occasion:'Smart Casual'}], occasion_advice: {Office:'Deep purple shirt + black pants',Casual:'Royal blue tee + dark jeans'}, ethnic_wear: ['Royal blue or deep purple kurta with silver work'] },
+           neutral: { summary: 'Your medium neutral skin is incredibly versatile — most colors work beautifully.', best_shirt_colors: [{name:'Teal',hex:'#008080',reason:'Universally flattering'},{name:'Burgundy',hex:'#800020',reason:'Rich depth'},{name:'Olive',hex:'#808000',reason:'Earthy warmth'}], best_pant_colors: [{name:'Navy',hex:'#000080',reason:'Classic'},{name:'Dark Brown',hex:'#654321',reason:'Earthy'}], colors_to_avoid: [{name:'Pale Pink',hex:'#FFB6C1',reason:'Too light for your tone'}], style_tips: ['You can pull off almost any color','Teal and burgundy are your standout shades'], outfit_combinations: [{shirt:'Teal shirt',pant:'Navy pants',shoes:'White sneakers',occasion:'Smart Casual'}], occasion_advice: {Office:'Burgundy shirt + dark pants',Casual:'Teal tee + navy jeans'}, ethnic_wear: ['Teal or burgundy kurta with gold or silver accessories'] } },
+    olive:  { warm: { summary: 'Your olive warm skin glows in burnt orange, deep teal, warm brown, and gold.', best_shirt_colors: [{name:'Burnt Orange',hex:'#CC5500',reason:'Earthy warmth'},{name:'Deep Teal',hex:'#003333',reason:'Rich contrast'},{name:'Warm Gold',hex:'#FFD700',reason:'Radiant'}], best_pant_colors: [{name:'Dark Brown',hex:'#654321',reason:'Natural match'},{name:'Olive',hex:'#808000',reason:'Tonal look'}], colors_to_avoid: [{name:'Pale Yellow',hex:'#FFFFE0',reason:'Washes out'}], style_tips: ['Deep earthy tones are your power palette','Gold jewellery enhances your natural glow'], outfit_combinations: [{shirt:'Burnt orange tee',pant:'Dark brown chinos',shoes:'Tan sneakers',occasion:'Casual'}], occasion_advice: {Office:'Deep teal shirt + dark pants',Casual:'Burnt orange tee + olive jeans'}, ethnic_wear: ['Burnt orange or deep teal kurta with gold work'] },
+           cool: { summary: 'Your olive cool skin shines in cobalt blue, deep purple, emerald, and cool burgundy.', best_shirt_colors: [{name:'Cobalt Blue',hex:'#0047AB',reason:'Striking contrast'},{name:'Emerald',hex:'#50C878',reason:'Rich jewel tone'},{name:'Cool Burgundy',hex:'#800020',reason:'Deep sophistication'}], best_pant_colors: [{name:'Black',hex:'#000000',reason:'Classic'},{name:'Charcoal',hex:'#36454F',reason:'Cool neutral'}], colors_to_avoid: [{name:'Warm Orange',hex:'#FF8C00',reason:'Clashes'}], style_tips: ['Jewel tones make your skin radiate','Deep colors are your signature'], outfit_combinations: [{shirt:'Cobalt blue shirt',pant:'Black pants',shoes:'White sneakers',occasion:'Smart Casual'}], occasion_advice: {Office:'Emerald shirt + charcoal pants',Casual:'Cobalt tee + black jeans'}, ethnic_wear: ['Cobalt blue or emerald kurta with silver accessories'] },
+           neutral: { summary: 'Your olive neutral skin suits rich, saturated colors beautifully.', best_shirt_colors: [{name:'Forest Green',hex:'#228B22',reason:'Natural harmony'},{name:'Deep Navy',hex:'#000080',reason:'Classic contrast'},{name:'Rust',hex:'#B7410E',reason:'Earthy warmth'}], best_pant_colors: [{name:'Dark Brown',hex:'#654321',reason:'Earthy'},{name:'Charcoal',hex:'#36454F',reason:'Neutral'}], colors_to_avoid: [{name:'Pale Beige',hex:'#F5F5DC',reason:'Too light'}], style_tips: ['Rich saturated colors are your best bet','Avoid very light or washed-out tones'], outfit_combinations: [{shirt:'Forest green tee',pant:'Dark brown chinos',shoes:'Tan sneakers',occasion:'Casual'}], occasion_advice: {Office:'Deep navy shirt + charcoal pants',Casual:'Forest green tee + dark jeans'}, ethnic_wear: ['Forest green or rust kurta with gold accessories'] } },
+    brown:  { warm: { summary: 'Your brown warm skin radiates in cobalt blue, fuchsia, gold, and bright white.', best_shirt_colors: [{name:'Cobalt Blue',hex:'#0047AB',reason:'Stunning contrast'},{name:'Fuchsia',hex:'#FF00FF',reason:'Bold and vibrant'},{name:'Bright White',hex:'#FFFFFF',reason:'Classic contrast'}], best_pant_colors: [{name:'Black',hex:'#000000',reason:'Classic'},{name:'Deep Navy',hex:'#000080',reason:'Rich contrast'}], colors_to_avoid: [{name:'Dark Brown',hex:'#654321',reason:'Too similar to skin'}], style_tips: ['Bold bright colors make you shine','White is your most powerful neutral'], outfit_combinations: [{shirt:'Cobalt blue shirt',pant:'Black pants',shoes:'White sneakers',occasion:'Smart Casual'}], occasion_advice: {Office:'Fuchsia shirt + black pants',Casual:'Cobalt tee + dark jeans'}, ethnic_wear: ['Cobalt blue or fuchsia kurta with gold accessories'] },
+           cool: { summary: 'Your brown cool skin glows in royal purple, electric blue, hot pink, and silver.', best_shirt_colors: [{name:'Royal Purple',hex:'#7851A9',reason:'Regal contrast'},{name:'Electric Blue',hex:'#7DF9FF',reason:'Vibrant pop'},{name:'Hot Pink',hex:'#FF69B4',reason:'Bold statement'}], best_pant_colors: [{name:'Black',hex:'#000000',reason:'Classic'},{name:'Charcoal',hex:'#36454F',reason:'Cool neutral'}], colors_to_avoid: [{name:'Warm Brown',hex:'#8B4513',reason:'Too similar'}], style_tips: ['Bold jewel tones are your signature','Silver jewellery over gold'], outfit_combinations: [{shirt:'Royal purple shirt',pant:'Black pants',shoes:'White sneakers',occasion:'Smart Casual'}], occasion_advice: {Office:'Electric blue shirt + charcoal pants',Casual:'Hot pink tee + black jeans'}, ethnic_wear: ['Royal purple or electric blue kurta with silver work'] },
+           neutral: { summary: 'Your brown neutral skin suits both warm and cool bold colors beautifully.', best_shirt_colors: [{name:'Emerald Green',hex:'#50C878',reason:'Rich contrast'},{name:'Bright Orange',hex:'#FF4500',reason:'Warm vibrancy'},{name:'Ivory White',hex:'#FFFFF0',reason:'Clean contrast'}], best_pant_colors: [{name:'Black',hex:'#000000',reason:'Classic'},{name:'Deep Navy',hex:'#000080',reason:'Rich'}], colors_to_avoid: [{name:'Muddy Brown',hex:'#8B4513',reason:'Blends in'}], style_tips: ['Bright and bold colors celebrate your skin tone','Ivory and white are your best neutrals'], outfit_combinations: [{shirt:'Emerald green tee',pant:'Black pants',shoes:'White sneakers',occasion:'Casual'}], occasion_advice: {Office:'Ivory shirt + black pants',Casual:'Emerald tee + dark jeans'}, ethnic_wear: ['Emerald green or bright orange kurta with gold accessories'] } },
+    dark:   { warm: { summary: 'Your dark warm skin is stunning in vivid orange, bright yellow, gold, and warm white.', best_shirt_colors: [{name:'Vivid Orange',hex:'#FF4500',reason:'Spectacular contrast'},{name:'Bright Yellow',hex:'#FFD700',reason:'Radiant warmth'},{name:'Warm White',hex:'#FAF0E6',reason:'Classic elegance'}], best_pant_colors: [{name:'Black',hex:'#000000',reason:'Classic'},{name:'Deep Brown',hex:'#3D1C02',reason:'Tonal depth'}], colors_to_avoid: [{name:'Very Dark Navy',hex:'#000033',reason:'Reduces visibility'}], style_tips: ['Bright and warm colors celebrate your richness','Gold jewellery is your best accessory'], outfit_combinations: [{shirt:'Vivid orange tee',pant:'Black pants',shoes:'White sneakers',occasion:'Casual'}], occasion_advice: {Office:'Warm white shirt + black pants',Casual:'Bright yellow tee + dark jeans'}, ethnic_wear: ['Gold or vivid orange kurta with heavy gold accessories'] },
+           cool: { summary: 'Your dark cool skin radiates in electric blue, hot pink, bright green, and silver white.', best_shirt_colors: [{name:'Electric Blue',hex:'#7DF9FF',reason:'Stunning contrast'},{name:'Hot Pink',hex:'#FF69B4',reason:'Bold vibrancy'},{name:'Bright Green',hex:'#00FF00',reason:'Vivid pop'}], best_pant_colors: [{name:'Black',hex:'#000000',reason:'Classic'},{name:'White',hex:'#FFFFFF',reason:'Striking contrast'}], colors_to_avoid: [{name:'Very Dark Purple',hex:'#1A0033',reason:'Too dark'}], style_tips: ['Bright cool tones make you radiate','White and silver are your power neutrals'], outfit_combinations: [{shirt:'Electric blue shirt',pant:'White pants',shoes:'White sneakers',occasion:'Smart Casual'}], occasion_advice: {Office:'Hot pink shirt + black pants',Casual:'Electric blue tee + white jeans'}, ethnic_wear: ['Electric blue or hot pink kurta with silver accessories'] },
+           neutral: { summary: 'Your dark neutral skin is breathtaking in any bright, saturated color.', best_shirt_colors: [{name:'Bright Red',hex:'#FF0000',reason:'Powerful contrast'},{name:'Royal Blue',hex:'#4169E1',reason:'Regal look'},{name:'Pure White',hex:'#FFFFFF',reason:'Timeless elegance'}], best_pant_colors: [{name:'Black',hex:'#000000',reason:'Classic'},{name:'White',hex:'#FFFFFF',reason:'Bold contrast'}], colors_to_avoid: [{name:'Very Dark Colors',hex:'#1A1A1A',reason:'Reduces definition'}], style_tips: ['Any bright color looks spectacular on you','White is your most powerful statement color'], outfit_combinations: [{shirt:'Bright red tee',pant:'Black pants',shoes:'White sneakers',occasion:'Casual'}], occasion_advice: {Office:'Royal blue shirt + black pants',Casual:'Pure white tee + dark jeans'}, ethnic_wear: ['Bright red or royal blue kurta with gold or silver accessories'] } },
+  };
+
+  const handleAnswer = (key, value) => {
+    const newAnswers = { ...answers, [key]: value };
+    setAnswers(newAnswers);
+    if (step < questions.length - 1) {
+      setStep(s => s + 1);
+    } else {
+      // Generate result
+      const tone = newAnswers.tone || 'medium';
+      const undertone = newAnswers.undertone || 'neutral';
+      const rec = RECS[tone]?.[undertone] || RECS[tone]?.neutral || RECS.medium.neutral;
+      const mockResult = {
+        gender,
+        analysis: {
+          skin_color: { hex: '#C68642', rgb: { r: 198, g: 134, b: 66 } },
+          skin_tone: { category: tone, undertone, color_season: undertone === 'warm' ? 'Autumn' : undertone === 'cool' ? 'Winter' : 'Spring', confidence: 'medium', description: rec.summary },
+        },
+        recommendations: {
+          summary: rec.summary,
+          best_shirt_colors: rec.best_shirt_colors,
+          best_pant_colors: rec.best_pant_colors,
+          colors_to_avoid: rec.colors_to_avoid,
+          style_tips: rec.style_tips,
+          outfit_combinations: rec.outfit_combinations,
+          occasion_advice: rec.occasion_advice,
+          ethnic_wear: rec.ethnic_wear,
+          accent_colors: [],
+        },
+        photo_quality: { warnings: [] },
+      };
+      onResult(mockResult);
+      setOpen(false);
+    }
+  };
+
+  const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
+  const headingCls = isDark ? 'text-white' : 'text-gray-800';
+  const subCls = isDark ? 'text-white/50' : 'text-gray-500';
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className={`w-full flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-semibold transition-all hover:border-purple-500/50 ${isDark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white' : 'bg-white border-gray-200 text-gray-500 hover:text-gray-800 shadow-sm'}`}
+      >
+        <span>🎯</span>
+        <span>No photo? Take Skin Tone Quiz</span>
+      </button>
+    );
+  }
+
+  const q = questions[step];
+  return (
+    <div className={`${cardCls} rounded-2xl p-4`}>
+      <div className="flex items-center justify-between mb-4">
+        <p className={`font-black text-sm ${headingCls}`}>🎯 Skin Tone Quiz</p>
+        <div className="flex gap-1">
+          {questions.map((_, i) => (
+            <div key={i} className={`w-6 h-1.5 rounded-full transition-all ${i <= step ? 'bg-purple-500' : isDark ? 'bg-white/20' : 'bg-gray-200'}`} />
+          ))}
+        </div>
+      </div>
+      <p className={`text-sm font-semibold mb-3 ${headingCls}`}>{q.q}</p>
+      <div className="space-y-2">
+        {q.options.map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => handleAnswer(q.key, opt.value)}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all hover:border-purple-500/50 hover:scale-[1.01] ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-gray-50 border-gray-200 hover:bg-purple-50'}`}
+          >
+            {opt.color && <div className="w-8 h-8 rounded-lg flex-shrink-0 border border-white/20" style={{ backgroundColor: opt.color }} />}
+            <span className={`text-sm font-medium ${headingCls}`}>{opt.label}</span>
+          </button>
+        ))}
+      </div>
+      <button onClick={() => { setOpen(false); setStep(0); setAnswers({}); }} className={`mt-3 text-xs ${subCls} hover:text-purple-400 transition`}>✕ Cancel</button>
+    </div>
+  );
+}
+
 function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSelected, onGenderChange }) {
   const { theme } = useContext(ThemeContext);
   const { t } = useLanguage();
@@ -297,6 +428,9 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           ))}
         </div>
       </div>
+
+      {/* Skin Tone Quiz */}
+      <SkinToneQuiz isDark={isDark} onResult={onAnalysisComplete} gender={gender} />
     </div>
   );
 }
