@@ -349,6 +349,38 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       </section>
 
+      {/* Testimonials */}
+      <section className="relative z-10 px-6 md:px-12 py-16 max-w-7xl mx-auto">
+        <div className="text-center mb-10">
+          <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-4">Reviews</div>
+          <h2 className="text-3xl md:text-4xl font-bold text-white">What Users <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Are Saying</span></h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { name: 'Priya S.', location: 'Mumbai', skin: 'Medium Warm', review: 'Finally an app that understands Indian skin tones! The color recommendations are spot on. I wore the suggested teal kurta to a wedding and got so many compliments.', rating: 5, emoji: '🥻' },
+            { name: 'Rahul K.', location: 'Delhi', skin: 'Wheatish', review: 'The outfit checker feature is amazing. I uploaded my shirt and it told me exactly which pants would look good. Saved me from a fashion disaster!', rating: 5, emoji: '👔' },
+            { name: 'Ananya M.', location: 'Bangalore', skin: 'Fair Cool', review: 'I never knew my undertone was cool until StyleGuru AI told me. Now I understand why navy and purple always looked better on me than orange. Game changer!', rating: 5, emoji: '✨' },
+            { name: 'Vikram T.', location: 'Chennai', skin: 'Dark Warm', review: 'As someone with dark skin, I always struggled to find colors that suited me. This app recommended cobalt blue and white — and wow, the difference is incredible!', rating: 5, emoji: '🎨' },
+            { name: 'Sneha R.', location: 'Pune', skin: 'Olive Neutral', review: 'The lehenga color recommendations for my sister\'s wedding were perfect. I went with the suggested deep burgundy and everyone loved it. Highly recommend!', rating: 5, emoji: '💃' },
+            { name: 'Arjun P.', location: 'Hyderabad', skin: 'Light Warm', review: 'The body type tips combined with skin tone recommendations are super helpful. I\'m slim and the app suggested horizontal stripes — looks great on me!', rating: 5, emoji: '👕' },
+          ].map((t, i) => (
+            <div key={i} className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6 hover:border-purple-600/40 transition-all backdrop-blur-sm">
+              <div className="flex items-center gap-1 mb-3">
+                {[...Array(t.rating)].map((_, j) => <span key={j} className="text-yellow-400 text-sm">⭐</span>)}
+              </div>
+              <p className="text-gray-300 text-sm leading-relaxed mb-4">"{t.review}"</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-lg">{t.emoji}</div>
+                <div>
+                  <p className="text-white font-bold text-sm">{t.name}</p>
+                  <p className="text-gray-500 text-xs">{t.location} · {t.skin} skin</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section className="relative z-10 px-6 md:px-12 py-16 max-w-4xl mx-auto">
         <div className="text-center mb-10">
