@@ -38,7 +38,7 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
 
   const links = [
     { name: 'Amazon',   url: `https://www.amazon.in/s?k=${encodeURIComponent(cfg.amzKw)}&rh=n%3A${cfg.amzNode}&sort=review-rank&tag=${AMAZON_TAG}`, icon: '🛒', bg: 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' },
-    { name: 'Flipkart', url: `https://www.flipkart.com/${cfg.fkCat}?q=${encodeURIComponent(colorDisplay)}&sort=popularity`, icon: '🏪', bg: 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' },
+    { name: 'Flipkart', url: `https://www.flipkart.com/search?q=${encodeURIComponent(colorDisplay + ' ' + (cfg.fkCat || '').replace(/-/g, ' '))}&sort=popularity`, icon: '🏪', bg: 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' },
     { name: 'Myntra',   url: cfg.myntra, icon: '👗', bg: 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' },
     { name: 'Meesho',   url: `https://meesho.com/search?q=${encodeURIComponent(cfg.meesho)}`, icon: '🛍️', bg: 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' },
   ];
@@ -323,11 +323,11 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
       {ethnicWear.length > 0 && (
         <div>
           <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🪷 Ethnic Wear</p>
-          <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl p-4 space-y-2">
+          <div className={`rounded-2xl p-4 space-y-2 border ${isDark ? 'bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20' : 'bg-amber-50 border-amber-200'}`}>
             {ethnicWear.map((s, i) => (
               <div key={i} className="flex items-start gap-2">
-                <span className="text-amber-400 flex-shrink-0">★</span>
-                <p className="text-amber-100/70 text-sm">{typeof s === "string" ? s : `${s.type}: ${s.colors} — ${s.occasion}`}</p>
+                <span className="text-amber-500 flex-shrink-0">★</span>
+                <p className={`text-sm ${isDark ? 'text-amber-100/70' : 'text-amber-800'}`}>{typeof s === "string" ? s : `${s.type}: ${s.colors} — ${s.occasion}`}</p>
               </div>
             ))}
           </div>
