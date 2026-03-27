@@ -58,6 +58,8 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
 
   const myntraUrl = myntraUrlMap[category] || `https://www.myntra.com/fashion?rawQuery=${colorLower}+${isFemale ? 'women' : 'men'}`;
 
+  const meeshoQuery = `${colorLower} ${searchCat.replace(/\+/g, ' ')}`;
+
   const links = [
     {
       name: "Amazon",
@@ -76,6 +78,12 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
       url: myntraUrl,
       icon: "👗",
       bg: "bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300"
+    },
+    {
+      name: "Meesho",
+      url: `https://meesho.com/search?q=${encodeURIComponent(meeshoQuery)}`,
+      icon: "🛍️",
+      bg: "bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300"
     },
   ];
 
