@@ -243,18 +243,6 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
         </div>
       </div>
 
-      <div
-        onClick={() => onTabChange('outfit')}
-        className="cursor-pointer bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-blue-700/30 rounded-2xl p-4 flex items-center gap-4 hover:border-blue-500/50 transition-all"
-      >
-        <span className="text-4xl">👔</span>
-        <div className="flex-1">
-          <p className="text-white font-bold text-sm">Outfit Compatibility Check</p>
-          <p className="text-white/40 text-xs mt-0.5">Upload selfie + outfit → AI checks if it suits you</p>
-        </div>
-        <span className="text-white/30 text-lg">→</span>
-      </div>
-
       {/* Color Contrast Checker */}
       <ColorContrastChecker isDark={isDark} />
     </div>
