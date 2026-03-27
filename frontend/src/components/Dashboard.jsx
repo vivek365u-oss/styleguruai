@@ -6,180 +6,252 @@ import HistoryPanel from './HistoryPanel';
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
 
+// ── Loading Screen ──────────────────────────────────────────
 function LoadingScreen() {
-  const { theme } = useContext(ThemeContext);
-  const isDark = theme === 'dark';
   const [step, setStep] = useState(0);
   const steps = [
-    { emoji: '🔍', text: 'Scanning your photo...', sub: 'Checking quality' },
+    { emoji: '🔍', text: 'Scanning photo...', sub: 'Checking quality' },
     { emoji: '👤', text: 'Detecting face...', sub: 'Face detection running' },
-    { emoji: '🎨', text: 'Analyzing skin tone...', sub: 'ITA method + Lab color space' },
-    { emoji: '👔', text: 'Building outfit recommendations...', sub: 'Applying 25+ fashion rules' },
-    { emoji: '✨', text: 'Almost done...', sub: 'Preparing your personal style guide' },
+    { emoji: '🎨', text: 'Analyzing skin tone...', sub: 'ITA + Lab color space' },
+    { emoji: '👔', text: 'Building recommendations...', sub: '25+ fashion rules' },
+    { emoji: '✨', text: 'Almost done...', sub: 'Preparing your style guide' },
   ];
-
   useEffect(() => {
-    const interval = setInterval(() => {
-      setStep((prev) => (prev < steps.length - 1 ? prev + 1 : prev));
-    }, 900);
+    const interval = setInterval(() => setStep(p => p < steps.length - 1 ? p + 1 : p), 900);
     return () => clearInterval(interval);
   }, []);
-
   return (
-    <div className="mt-16 text-center">
-      <div className="relative w-28 h-28 mx-auto mb-8">
-        <div className="absolute inset-0 rounded-full border-4 border-purple-500/20"></div>
-        <div className="absolute inset-0 rounded-full border-4 border-purple-500 border-t-transparent animate-spin"></div>
-        <div className="absolute inset-2 rounded-full border-2 border-pink-500/30 border-b-transparent animate-spin"
-          style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
-        <div className="absolute inset-0 flex items-center justify-center text-4xl">
-          {steps[step].emoji}
-        </div>
+    <div className="flex flex-col items-center justify-center min-h-[60vh]">
+      <div className="relative w-24 h-24 b-6">
+        <div className="absolute inset-0 rounded-full border-4 border-purple-500/20" />
+        <div className="absolute inset-0 rounded-full border-4 border-purple-500 border-t-transparent animate-spin" />
+        <dder-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+        <div className="absolute inset-0 flex items-center justify-center text-3xl">{steps[step].emoji}</div>
       </div>
-      <h3 className={`text-xl font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-800'}`}>{steps[step].text}</h3>
-      <p className={`text-sm ${isDark ? 'text-purple-300/70' : 'text-purple-600'}`}>{steps[step].sub}</p>
-      <div className="flex justify-center gap-2 mt-6">
+      <p className="text-white font-bold text-lg mb-1">{steps[step].text}</p>
+      <p className="text-purple-300/70 text-sm">{steps[step].sub}</p>
+      <div className="flex gap-2 mt-5">
         {steps.map((_, i) => (
-          <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${i <= step ? 'bg-purple-500 w-6' : isDark ? 'bg-white/20 w-2' : 'bg-gray-200 w-2'}`} />
+          <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${i <= step ? 'bg-purple-500 w-6' : 'bg-white/20 w-2'}`} />
         ))}
       </div>
     </div>
   );
 }
 
-function Dashboard({ user, onLogout }) {
-  const { theme, toggleTheme } = useContext(ThemeContext);
-  const { t, language, changeLanguage } = useLanguage();
-  const [results, setResults] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [activeTab, setActiveTab] = useState('analyze');
-  const [currentGender, setCurrentGender] = useState('male');
-
-  const handleReset = () => {
-    setResults(null);
-    setError(null);
-    setUploadedImage(null);
-  };
-
-  const handleAnalysisComplete = (data) => {
-    const enrichedData = { ...data, gender: data.gender || currentGender };
-    setResults(enrichedData);
-    setLoading(false);
-  };
-
-  const isDark = theme === 'dark';
-
+// ── Home Screen ─────────────────────────────────────────────
+function HomeScreen({ user, onAnalyze, onTabChange }) {
+  const quickCards = [
+    { icon: '🎨', label: 'Best Colors', tab: 'analyze' },
+    { icon: '👔', label: 'Outfit Ideas', tab: 'analyze' },
+    { icon: '✨', label: 'Accessories', tab: 'analyze' },
+    { icon: '🌍', label: 'Seasonal', tab: 'analyze' },
+  ];
+  const trendingStyles = [
+    { emoji: '👕', label: 'Oversized Tee', tag: 'Trending' },
+    { emoji: '👖', label: 'Cargo Pants', tag: 'Hot' },
+    { emoji: '💃', label: 'Coord Sets', tag: 'New' },
+    { emoji: '🥻', label: 'Ethnic Fusion', tag: 'Popular' },
+    { emoji: '🧥', label: 'Hoodies', tag: 'Trending' },
+    { emoji: '👗', label: 'Maxi Dress', tag: 'Hot' },
+  ];
+  const firstName = user?.name?.split(' ')[0] || 'there';
   return (
-    <div className={`min-h-screen ${isDark
-      ? 'bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900'
-      : 'bg-gradient-to-br from-slate-200 via-purple-100/50 to-slate-200'}`}>
-
-      {/* Background blobs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-purple-500 opacity-5' : 'bg-purple-400 opacity-25'}`}></div>
-        <div className={`absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl ${isDark ? 'bg-pink-500 opacity-5' : 'bg-pink-400 opacity-20'}`}></div>
-        {!isDark && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full bg-violet-200/50 blur-3xl"></div>}
+    <div className="pb-4 space-y-6">
+      {/* Greeting */}
+      <div className="pt-2">
+        <p className="text-white/50 text-sm">Good day,</p>
+        <h2 className="text-white text-2xl font-black">Hey {firstName} 👋</h2>
+        <p className="text-white/40 text-xs mt-1">Discover your perfect style with AI</p>
       </div>
 
-      {/* Header */}
-      <header className={`relative border-b sticky top-0 z-50 backdrop-blur-xl ${isDark
-        ? 'border-white/10 bg-white/5'
-        : 'border-purple-200 bg-slate-100/90 shadow-md shadow-purple-200/40'}`}>
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      {/* CTA */}
+      <button
+        onClick={onAnalyze}
+ale-[1.02] active:scale-[0.98]"
+        style={{ animation: 'glow 3s ease-in-out infinite' }}
+      >
+        ✨ Analyze Your Style
+      </button>
 
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
-              <span className="text-white font-black text-sm tracking-tight">SG</span>
-            </div>
-            <div>
-              <h1 className={`font-black text-xl tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>StyleGuru</h1>
-              <p className={`text-xs font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>AI Fashion Advisor</p>
-            </div>
-          </div>
-
-          {/* Nav Tabs */}
-          <div className={`hidden md:flex rounded-xl p-1 gap-1 ${isDark ? 'bg-white/10' : 'bg-slate-200 border border-purple-200'}`}>
-            {[
-              { id: 'analyze', label: '📸 Analyze' },
-              { id: 'outfit', label: '👔 Outfit Check' },
-              { id: 'history', label: '📋 History' },
-              { id: 'settings', label: '⚙️ Settings' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => { setActiveTab(tab.id); handleReset(); }}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeTab === tab.id
-                    ? isDark
-                      ? 'bg-white text-purple-900 shadow'
-                      : 'bg-white text-purple-700 shadow shadow-purple-300/60 border border-purple-200'
-                    : isDark
-                      ? 'text-white/60 hover:text-white'
-                      : 'text-purple-500 hover:text-purple-800'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* User Menu */}
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:block text-right">
-              <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-800'}`}>{user.name}</p>
-              <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{user.email}</p>
-            </div>
+      {/* Quick Cards */}
+      <div>
+        <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-3">Explore</p>
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+          {quickCards.map((c) => (
             <button
-              onClick={toggleTheme}
-              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${isDark
-                ? 'bg-white/10 hover:bg-white/20 text-yellow-300'
-                : 'bg-purple-50 hover:bg-purple-100 text-purple-600 border border-purple-100'}`}
+              key={c.label}
+              onClick={() => onTabChange(c.tab)}
+="flex-shrink-0 flex flex-col items-center gap-2 bg-white/5 border border-white/10 hover:border-purple-500/50 rounded-2xl px-5 py-4 transition-all hover:bg-white/10 min-w-[90px]"
             >
-              {isDark ? '☀️' : '🌙'}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Mobile Bottom Nav */}
-      <div className={`md:hidden fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t px-4 py-2 ${isDark
-        ? 'bg-slate-900/95 border-white/10'
-        : 'bg-slate-100/95 border-purple-200 shadow-lg shadow-purple-200/30'}`}>
-        <div className="flex justify-around">
-          {[
-            { id: 'analyze', label: 'Analyze', emoji: '📸' },
-            { id: 'outfit', label: 'Outfit', emoji: '👔' },
-            { id: 'history', label: 'History', emoji: '📋' },
-            { id: 'settings', label: 'Settings', emoji: '⚙️' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => { setActiveTab(tab.id); handleReset(); }}
-              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
-                activeTab === tab.id
-                  ? 'text-purple-500'
-                  : isDark ? 'text-white/40 hover:text-white' : 'text-gray-400 hover:text-gray-700'
-              }`}
-            >
-              <span className="text-xl">{tab.emoji}</span>
-              <span className="text-xs font-medium">{tab.label}</span>
+              <span className="text-2xl">{c.icon}</span>
+              <span className="text-white/70 text-xs font-medium text-center">{c.label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Main Content */}
-      <main className="relative max-w-5xl mx-auto px-4 py-8 pb-24 md:pb-8">
+      {/* Trending Styles */}
+      <div>
+        <p classNapercase tracking-wide mb-3">Trending Now 🔥</p>
+        <div className="grid grid-cols-3 gap-3">
+          {trendingStyles.map((s) => (
+            <button
+              key={s.label}
+              onClick={onAnalyze}
+              className="flex flex-col items-center gap-2 bg-white/5 border border-white/10 hover:border-purple-500/40 rounded-2xl p-3 transition-all hover:bg-white/10 active:scale-95"
+            >
+              <span className="text-3xl">{s.emoji}</span>
+              80 text-xs font-semibold text-center leading-tight">{s.label}</span>
+              <span className="text-purple-400 text-[10px] font-bold bg-purple-500/10 px-2 py-0.5 rounded-full">{s.tag}</span>
+            </button>
+          ))}
+        </div>
+      </div>
 
+      {/* Quick Outfit Check */}
+      <div
+        onClick={() => onTabChange('outfit')}
+        className="cursor-pointer bg-g-500/50 transition-all"
+      >
+        <span className="text-4xl">👔</span>
+        <div className="flex-1">
+          <p className="text-white font-bold text-sm">Outfit Compatibility Check</p>
+          <p className="text-white/40 text-xs mt-0.5">Upload selfie + outfit → AI checks if it suits you</p>
+        </div>
+        <span className="text-white/30 text-lg">→</span>
+      </div>
+    </div>
+  );
+}
+
+// ── Settings Screen ──────────────────────────────────────────
+function SettingsScreen({ u{
+  const { theme, toggleTheme } = useContext(ThemeContext);
+  const { t, language, changeLanguage } = useLanguage();
+  const isDark = theme === 'dark';
+  return (
+    <div className="space-y-4 pt-2">
+      <h2 className="text-white text-xl font-black">⚙️ Settings</h2>
+
+      {/* User Info */}
+      <div className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 border border-purple-700/30 rounded-2xl p-4 flex items-center gap-4">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-lg">
+          {user?.name?.[0]?.toUpperCase() || 'U'}
+        </div>
+        <div>
+          <p className="text-white font-bold text-sm">{user?.name}</p>
+          <p className="text-white/40 text-xs">{user?.email}</p>
+        </div>
+      </div>
+
+      {/* Language */}
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+        <div>
+          <p className="text-white font-bold t-sm">🌐 Language</p>
+          <p className="text-white/40 text-xs mt-0.5">App language</p>
+        </div>
+        <div className="flex bg-white/10 rounded-xl p-1 gap-1">
+          <button onClick={() => changeLanguage('hinglish')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'hinglish' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : 'text-white/50 hover:text-white'}`}>🇮🇳</button>
+          <button onClick={() => changeLanguage('en')} classNam py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'en' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : 'text-white/50 hover:text-white'}`}>🇬🇧</button>
+        </div>
+      </div>
+
+      {/* Theme */}
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+        <div>
+          <p className="text-white font-bold text-sm">{isDark ? '🌙 Dark Mode' : '☀️ Light Mode'}</p>
+          <p className="text-white/40 text-xs mt-0.5">Switch theme</p>
+        </div>
+        <button onClick={toggleTheme} className="relative w-14 h-7 rounded-full bg-purple-500 transition-all">
+          <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-all duration-300 ${isDark ? 'left-8' : 'left-1'}`} />
+        </button>
+      </div>
+
+      {/* Logout */}
+      <button onClick={onLogout} className="w-full py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-2xl border border-red-500/20 transition">
+  🚪 Logout
+      </button>
+    </div>
+  );
+}
+
+// ── Main Dashboard ───────────────────────────────────────────
+function Dashboard({ user, onLogout }) {
+  const { theme, toggleTheme } = useContext(ThemeContext);
+  const { t } = useLanguage();
+  const [results, setResults] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [activeTab, setActiveTab] = useState('home');
+  const [currentGender, setCurrentGender] = useState('male');
+
+  const handleReset = () => { setResults(null); setError(null); setUploadedImage(null); };
+  const handleAnalysisComplete = (data) => { setResults({ ...data, gender: data.gender || currentGender }); setLoading(false); };
+
+  const navItems = [
+    { id: 'home',    emoji: '🏠', label: 'Home' },
+    { id: 'analyze', emoji: '📸', label: 'Analyze' },
+    { id: 'outfit',  emoji: '👔', label: 'Outfit' },
+    { id: 'history', emoji: '📋', label: 'History' },
+    { id: 'sets',emoji: '⚙️', label: 'Profile' },
+  ];
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab !== 'analyze') handleReset();
+  };
+
+  return (
+    <div className="min-h-screen bg-[#050816] text-white" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
+      {/* Glow blobs */}
+      <div className="fixed top-[-200px] left-[-200px] w-[500px] h-[500px] rounded-full bg-purple-700/20 blur-[120px] pointer-events-none z-0" />
+      <div className="fixed bottom-[-200px] right-[-200px] w-[500px] h-[500px] rounded-full bg-pink-700/20 blur-[120px] pointer-events-none z-0" />
+
+      <style>{`
+        @keyframes glow { 0%,100%{box-shadow:0 0 20px rgba(168,85,247,0.4)} 50%{box-shadow:0 0 35px rgba(236,72,153,0.7)} }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+
+      {/* Top Header */}
+      <header className="050816]/80 backdrop-blur-xl sticky top-0">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm font-black">S</div>
+          <span className="font-black text-base bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">StyleGuru AI</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {results && activeTab === 'analyze' && (
+            <button onClick={handleReset} className="text-xs text-purple-400 border border-purple-500/30 px-3 py-1.5 rounded-full hover:bg-purple-500/10 transition">
+              ← New
+            </button>
+          )}
+          <button onClick={toggleTheme} className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-sm">
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="relative z-10 max-w-lg mx-auto px-4 pt-4 pb-24">
+
+        {/* HOME */}
+        {activeTab === 'home' && (
+          <HomeScreen
+            user={user}
+            onAnalyze={() => setActiveTab('analyze')}
+            onTabChange={handleTabChange}
+          />
+        )}
+
+        {/* ANALYZE */}
         {activeTab === 'analyze' && (
           <>
             {!results && !loading && (
               <UploadSection
                 onLoadingStart={() => { setLoading(true); setError(null); }}
-                onAnalysisComplete={handleAnalysisComplete}
+                onAnComplete={handleAnalysisComplete}
                 onError={(msg) => { setError(msg); setLoading(false); }}
                 onImageSelected={setUploadedImage}
                 onGenderChange={setCurrentGender}
@@ -187,11 +259,11 @@ function Dashboard({ user, onLogout }) {
             )}
             {loading && <LoadingScreen />}
             {error && (
-              <div className={`mt-8 rounded-3xl p-8 text-center border ${isDark ? 'bg-red-500/10 border-red-500/30' : 'bg-red-50/80 border-red-200 shadow-sm shadow-red-100'}`}>
-                <div className="text-5xl mb-4">😕</div>
-                <p className={`text-lg font-medium mb-2 ${isDark ? 'text-red-300' : 'text-red-600'}`}>Oops!</p>
-                <p className={`whitespace-pre-line text-sm max-w-md mx-auto ${isDark ? 'text-red-400/80' : 'text-red-500'}`}>{error}</p>
-                <button onClick={handleReset} className={`mt-6 px-6 py-3 rounded-xl transition font-medium border ${isDark ? 'bg-red-500/20 hover:bg-red-500/30 text-red-300 border-red-500/20' : 'bg-red-100 hover:bg-red-200 text-red-600 border-red-200'}`}>
+              <div className="mt-8 rounded-2xl p-6 text-center border bg-red-500/10 border-red-500/30">
+                <div className="text-4xl mb-3">😕</div>
+                <p classNamemedium mb-1">Oops!</p>
+                <p className="text-red-400/80 text-sm whitespace-pre-line">{error}</p>
+                <button onClick={handleReset} className="mt-4 px-5 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/20 text-sm font-medium transition">
                   {t('tryAgain')}
                 </button>
               </div>
@@ -200,80 +272,39 @@ function Dashboard({ user, onLogout }) {
           </>
         )}
 
+        {/* OUTFIT */}
         {activeTab === 'outfit' && <OutfitChecker />}
-        {activeTab === 'history' && <HistoryPanel />}
 
-        {/* Settings Tab */}
-        {activeTab === 'settings' && (
-          <div className="mt-8 max-w-md mx-auto">
-            <div className={`rounded-3xl p-8 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/80 border-purple-100 shadow-xl shadow-purple-100/30 backdrop-blur-sm'}`}>
-              <h2 className={`text-2xl font-black mb-8 ${isDark ? 'text-white' : 'text-gray-900'}`}>⚙️ Settings</h2>
-
-              {/* Language Toggle */}
-              <div className={`flex items-center justify-between p-5 rounded-2xl border mb-4 ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50/60 border-purple-100'}`}>
-                <div>
-                  <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>🌐 {t('languageLabel')}</p>
-                  <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('language')}</p>
-                </div>
-                <div className={`flex rounded-xl p-1 gap-1 ${isDark ? 'bg-white/10' : 'bg-white border border-purple-100'}`}>
-                  <button
-                    onClick={() => changeLanguage('hinglish')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'hinglish' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}
-                  >
-                    🇮🇳 Hinglish
-                  </button>
-                  <button
-                    onClick={() => changeLanguage('en')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'en' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}
-                  >
-                    🇬🇧 English
-                  </button>
-                </div>
-              </div>
-
-              {/* Theme Toggle */}
-              <div className={`flex items-center justify-between p-5 rounded-2xl border mb-4 ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50/60 border-purple-100'}`}>
-                <div>
-                  <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>
-                    {isDark ? '🌙 Dark Mode' : '☀️ Light Mode'}
-                  </p>
-                  <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('switchTheme')}</p>
-                </div>
-                <button
-                  onClick={toggleTheme}
-                  className={`relative w-14 h-7 rounded-full transition-all duration-300 bg-purple-500`}
-                >
-                  <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-all duration-300 ${isDark ? 'left-8' : 'left-1'}`}></div>
-                </button>
-              </div>
-
-              {/* System Theme Info */}
-              <div className={`p-4 rounded-2xl border mb-4 ${isDark ? 'bg-purple-500/10 border-purple-500/20' : 'bg-purple-50 border-purple-100'}`}>
-                <p className={`text-xs ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>
-                  💡 {t('systemTheme')}
-                </p>
-              </div>
-
-              {/* User Info */}
-              <div className={`p-5 rounded-2xl border mb-4 ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50/60 border-purple-100'}`}>
-                <p className={`font-bold text-sm mb-1 ${isDark ? 'text-white' : 'text-gray-800'}`}>👤 Account</p>
-                <p className={`text-xs ${isDark ? 'text-white/60' : 'text-gray-700'}`}>{user.name}</p>
-                <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{user.email}</p>
-              </div>
-
-              {/* Logout */}
-              <button
-                onClick={onLogout}
-                className="w-full py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-bold rounded-2xl border border-red-500/20 transition"
-              >
-                🚪 Logout
-              </button>
-            </div>
-          </div>
-        )}
-      </main>
+        {/* HISTORY */}
+        {activeTab === 'h''}`}>{item.emoji}</span>
+              <span className={`text-[10px] font-semibold ${activeTab === item.id ? 'text-purple-400' : 'text-white/30'}`}>{item.label}</span>
+              {activeTab === item.id && <div className="w-1 h-1 rounded-full bg-purple-400" />}
+            </button>
+          ))}
+        </div>
+      </nav>
     </div>
   );
 }
 
 export default Dashboard;
+ px-2 py-2">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => handleTabChange(item.id)}
+              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${
+                activeTab === item.id
+                  ? 'text-purple-400'
+                  : 'text-white/30 hover:text-white/60'
+              }`}
+            >
+              <span className={`text-xl transition-transform ${activeTab === item.id ? 'scale-110' : istory' && <HistoryPanel />}
+
+        {/* SETTINGS / PROFILE */}
+        {activeTab === 'settings' && <SettingsScreen user={user} onLogout={onLogout} />}
+      </main>
+
+      {/* Fixed Bottom Nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#050816]/95 backdrop-blur-xl border-t border-white/10">
+        <div className="max-w-lg mx-auto flex justify-around
