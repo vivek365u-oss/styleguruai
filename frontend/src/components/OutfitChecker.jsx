@@ -3,6 +3,76 @@ import { checkOutfitCompatibility } from '../api/styleApi';
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
 
+// ── Outfit Shop Card — same style as analyze results ─────────
+function OutfitShopCard({ color, isDark }) {
+  const [budget, setBudget] = useState(null);
+  const AMAZON_TAG = 'styleguruai-21';
+  const colorDisplay = color.name.toLowerCase();
+  const colorLower = colorDisplay.replace(/\s+/g, '+');
+
+  const budgets = [
+    { label: '₹500', max: 500 },
+    { label: '₹1000', max: 1000 },
+    { label: '₹2000', max: 2000 },
+    { label: 'Any', max: null },
+  ];
+
+  const amzPriceParam = budget?.max ? `%2Cp_36%3A-${budget.max * 100}` : '';
+  const fkPriceParam = budget?.max ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budget.max}` : '';
+  const myntraPriceParam = budget?.max ? `&p=price%5B0%5D%3D0%20TO%20${budget.max}` : '';
+
+  const links = [
+    { name: 'Amazon',   icon: '🛒', bg: 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300', url: `https://www.amazon.in/s?k=${encodeURIComponent(colorDisplay + ' shirt top')}&rh=n%3A1968024031${amzPriceParam}&sort=review-rank&tag=${AMAZON_TAG}` },
+    { name: 'Flipkart', icon: '🏪', bg: 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300',     url: `https://www.flipkart.com/search?q=${encodeURIComponent(colorDisplay + ' shirt top')}&sort=popularity${fkPriceParam}` },
+    { name: 'Myntra',   icon: '👗', bg: 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300',     url: `https://www.myntra.com/shirts?rawQuery=${colorLower}+shirt${myntraPriceParam}` },
+    { name: 'Meesho',   icon: '🛍️', bg: 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300', url: `https://meesho.com/search?q=${encodeURIComponent(colorDisplay + ' shirt top')}` },
+  ];
+
+  const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
+  const nameCls = isDark ? 'text-white' : 'text-gray-800';
+  const reasonCls = isDark ? 'text-white/40' : 'text-gray-500';
+
+  return (
+    <div className={`${cardCls} rounded-2xl p-3`}>
+      {/* Color info */}
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-12 h-12 rounded-xl flex-shrink-0 shadow-lg border border-white/10" style={{ backgroundColor: color.hex }} />
+        <div className="flex-1">
+          <p className={`font-bold text-sm ${nameCls}`}>{color.name}</p>
+          <p className={`text-xs ${reasonCls}`}>{color.reason}</p>
+        </div>
+      </div>
+
+      {/* Budget filter */}
+      <div className="flex gap-1.5 flex-wrap mb-2">
+        {budgets.map((b) => (
+          <button
+            key={b.label}
+            onClick={() => setBudget(b.label === 'Any' ? null : b)}
+            className={`px-2 py-0.5 rounded-full text-xs font-bold border transition-all ${
+              (b.label === 'Any' && !budget) || budget?.label === b.label
+                ? 'bg-purple-500/40 border-purple-400 text-purple-200'
+                : isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70' : 'bg-gray-100 border-gray-200 text-gray-400 hover:text-gray-700'
+            }`}
+          >
+            {b.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Shop links */}
+      <div className="flex gap-1.5 flex-wrap">
+        {links.map((link) => (
+          <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer"
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}>
+            <span>{link.icon}</span><span>{link.name}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function OutfitChecker() {
   const { theme } = useContext(ThemeContext);
   const { t } = useLanguage();
@@ -225,37 +295,9 @@ function OutfitChecker() {
             <div className={`rounded-3xl p-5 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
               <h3 className={`font-black text-base mb-4 ${isDark ? 'text-white' : 'text-gray-800'}`}>💡 Better Alternatives — Shop Now</h3>
               <div className="space-y-4">
-                {compatibility.better_alternatives.slice(0, 3).map((color, i) => {
-                  const AMAZON_TAG = 'styleguruai-21';
-                  const colorKw = encodeURIComponent(color.name.toLowerCase());
-                  // Detect outfit type from uploaded outfit color name — shirt/top/dress
-                  const outfitColorName = (result?.outfit_analysis?.color_name || '').toLowerCase();
-                  // We don't have gender from API, so show both shirt + pant options
-                  const shopLinks = [
-                    { name: '🛒 Amazon', url: `https://www.amazon.in/s?k=${colorKw}+shirt+top&rh=n%3A1968024031&sort=review-rank&tag=${AMAZON_TAG}`, bg: 'bg-orange-500/20 border-orange-500/30 text-orange-300' },
-                    { name: '🏪 Flipkart', url: `https://www.flipkart.com/search?q=${colorKw}+shirt&sort=popularity`, bg: 'bg-blue-500/20 border-blue-500/30 text-blue-300' },
-                    { name: '👗 Myntra', url: `https://www.myntra.com/shirts?rawQuery=${colorKw}+shirt`, bg: 'bg-pink-500/20 border-pink-500/30 text-pink-300' },
-                  ];
-                  return (
-                    <div key={i} className={`rounded-2xl p-3 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 rounded-xl flex-shrink-0 border border-white/20 shadow-md" style={{ backgroundColor: color.hex }} />
-                        <div className="flex-1">
-                          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{color.name}</p>
-                          <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{color.reason}</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-1.5 flex-wrap">
-                        {shopLinks.map(link => (
-                          <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer"
-                            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}>
-                            {link.name}
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
+                {compatibility.better_alternatives.slice(0, 3).map((color, i) => (
+                  <OutfitShopCard key={i} color={color} isDark={isDark} />
+                ))}
               </div>
             </div>
           )}
