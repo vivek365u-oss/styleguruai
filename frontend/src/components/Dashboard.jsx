@@ -125,36 +125,44 @@ function SettingsScreen({ user, onLogout }) {
   const isDark = theme === 'dark';
   return (
     <div className="space-y-4 pt-2">
-      <h2 className="text-white text-xl font-black">⚙️ Settings</h2>
-      <div className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 border border-purple-700/30 rounded-2xl p-4 flex items-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-lg">
+      <h2 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>⚙️ Settings</h2>
+
+      {/* User card */}
+      <div className={`rounded-2xl p-4 flex items-center gap-4 border ${isDark ? 'bg-gradient-to-r from-purple-900/40 to-pink-900/40 border-purple-700/30' : 'bg-white border-purple-100 shadow-sm'}`}>
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-lg flex-shrink-0">
           {user?.name?.[0]?.toUpperCase() || 'U'}
         </div>
         <div>
-          <p className="text-white font-bold text-sm">{user?.name}</p>
-          <p className="text-white/40 text-xs">{user?.email}</p>
+          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>{user?.name}</p>
+          <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{user?.email}</p>
         </div>
       </div>
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+
+      {/* Language */}
+      <div className={`rounded-2xl p-4 flex items-center justify-between border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
         <div>
-          <p className="text-white font-bold text-sm">🌐 Language</p>
-          <p className="text-white/40 text-xs mt-0.5">App language</p>
+          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>🌐 Language</p>
+          <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>App language</p>
         </div>
-        <div className="flex bg-white/10 rounded-xl p-1 gap-1">
-          <button onClick={() => changeLanguage('hinglish')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'hinglish' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : 'text-white/50 hover:text-white'}`}>🇮🇳</button>
-          <button onClick={() => changeLanguage('en')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'en' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : 'text-white/50 hover:text-white'}`}>🇬🇧</button>
+        <div className={`flex rounded-xl p-1 gap-1 ${isDark ? 'bg-white/10' : 'bg-gray-100 border border-gray-200'}`}>
+          <button onClick={() => changeLanguage('hinglish')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'hinglish' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}>🇮🇳</button>
+          <button onClick={() => changeLanguage('en')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'en' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}>🇬🇧</button>
         </div>
       </div>
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+
+      {/* Theme */}
+      <div className={`rounded-2xl p-4 flex items-center justify-between border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
         <div>
-          <p className="text-white font-bold text-sm">{isDark ? '🌙 Dark Mode' : '☀️ Light Mode'}</p>
-          <p className="text-white/40 text-xs mt-0.5">Switch theme</p>
+          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{isDark ? '🌙 Dark Mode' : '☀️ Light Mode'}</p>
+          <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Switch theme</p>
         </div>
         <button onClick={toggleTheme} className="relative w-14 h-7 rounded-full bg-purple-500 transition-all">
           <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-all duration-300 ${isDark ? 'left-8' : 'left-1'}`} />
         </button>
       </div>
-      <button onClick={onLogout} className="w-full py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-2xl border border-red-500/20 transition">
+
+      {/* Logout */}
+      <button onClick={onLogout} className="w-full py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold rounded-2xl border border-red-500/20 transition">
         🚪 Logout
       </button>
     </div>
