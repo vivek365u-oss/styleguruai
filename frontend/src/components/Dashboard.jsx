@@ -39,6 +39,8 @@ function LoadingScreen() {
 }
 
 function HomeScreen({ user, onAnalyze, onTabChange }) {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const quickCards = [
     { icon: '🎨', label: 'Best Colors', tab: 'analyze' },
     { icon: '👔', label: 'Outfit Ideas', tab: 'analyze' },
@@ -57,9 +59,9 @@ function HomeScreen({ user, onAnalyze, onTabChange }) {
   return (
     <div className="pb-4 space-y-6">
       <div className="pt-2">
-        <p className="text-white/50 text-sm">Good day,</p>
-        <h2 className="text-white text-2xl font-black">Hey {firstName} 👋</h2>
-        <p className="text-white/40 text-xs mt-1">Discover your perfect style with AI</p>
+        <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Good day,</p>
+        <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>Hey {firstName} 👋</h2>
+        <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Discover your perfect style with AI</p>
       </div>
 
       <button
@@ -70,32 +72,32 @@ function HomeScreen({ user, onAnalyze, onTabChange }) {
       </button>
 
       <div>
-        <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-3">Explore</p>
+        <p className={`text-xs font-semibold uppercase tracking-wide mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Explore</p>
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
           {quickCards.map((c) => (
             <button
               key={c.label}
               onClick={() => onTabChange(c.tab)}
-              className="flex-shrink-0 flex flex-col items-center gap-2 bg-white/5 border border-white/10 hover:border-purple-500/50 rounded-2xl px-5 py-4 transition-all hover:bg-white/10 min-w-[90px]"
+              className={`flex-shrink-0 flex flex-col items-center gap-2 border rounded-2xl px-5 py-4 transition-all min-w-[90px] ${isDark ? 'bg-white/5 border-white/10 hover:border-purple-500/50 hover:bg-white/10' : 'bg-white border-purple-100 hover:border-purple-400 shadow-sm'}`}
             >
               <span className="text-2xl">{c.icon}</span>
-              <span className="text-white/70 text-xs font-medium text-center">{c.label}</span>
+              <span className={`text-xs font-medium text-center ${isDark ? 'text-white/70' : 'text-gray-600'}`}>{c.label}</span>
             </button>
           ))}
         </div>
       </div>
 
       <div>
-        <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-3">Trending Now 🔥</p>
+        <p className={`text-xs font-semibold uppercase tracking-wide mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Trending Now 🔥</p>
         <div className="grid grid-cols-3 gap-3">
           {trendingStyles.map((s) => (
             <button
               key={s.label}
               onClick={onAnalyze}
-              className="flex flex-col items-center gap-2 bg-white/5 border border-white/10 hover:border-purple-500/40 rounded-2xl p-3 transition-all hover:bg-white/10 active:scale-95"
+              className={`flex flex-col items-center gap-2 border rounded-2xl p-3 transition-all active:scale-95 ${isDark ? 'bg-white/5 border-white/10 hover:border-purple-500/40 hover:bg-white/10' : 'bg-white border-purple-100 hover:border-purple-400 shadow-sm'}`}
             >
               <span className="text-3xl">{s.emoji}</span>
-              <span className="text-white/80 text-xs font-semibold text-center leading-tight">{s.label}</span>
+              <span className={`text-xs font-semibold text-center leading-tight ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{s.label}</span>
               <span className="text-purple-400 text-[10px] font-bold bg-purple-500/10 px-2 py-0.5 rounded-full">{s.tag}</span>
             </button>
           ))}
@@ -186,7 +188,7 @@ function Dashboard({ user, onLogout }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#050816] text-white" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
+    <div className={`min-h-screen text-white ${theme === 'dark' ? 'bg-[#050816]' : 'bg-gradient-to-br from-slate-200 via-purple-100/50 to-slate-200'}`} style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
       <div className="fixed top-[-200px] left-[-200px] w-[500px] h-[500px] rounded-full bg-purple-700/20 blur-[120px] pointer-events-none z-0" />
       <div className="fixed bottom-[-200px] right-[-200px] w-[500px] h-[500px] rounded-full bg-pink-700/20 blur-[120px] pointer-events-none z-0" />
 
@@ -195,10 +197,10 @@ function Dashboard({ user, onLogout }) {
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      <header className="relative z-10 flex items-center justify-between px-4 py-4 border-b border-white/10 bg-[#050816]/80 backdrop-blur-xl sticky top-0">
+      <header className={`relative z-10 flex items-center justify-between px-4 py-4 border-b backdrop-blur-xl sticky top-0 ${theme === 'dark' ? 'border-white/10 bg-[#050816]/80' : 'border-purple-200 bg-slate-100/90 shadow-sm'}`}>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm font-black">S</div>
-          <span className="font-black text-base bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">StyleGuru AI</span>
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-black text-white">SG</div>
+          <span className={`font-black text-base bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent`}>StyleGuru AI</span>
         </div>
         <div className="flex items-center gap-2">
           {results && activeTab === 'analyze' && (
@@ -246,13 +248,13 @@ function Dashboard({ user, onLogout }) {
         {activeTab === 'settings' && <SettingsScreen user={user} onLogout={onLogout} />}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#050816]/95 backdrop-blur-xl border-t border-white/10">
+      <nav className={`fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t ${theme === 'dark' ? 'bg-[#050816]/95 border-white/10' : 'bg-slate-100/95 border-purple-200 shadow-lg'}`}>
         <div className="max-w-lg mx-auto flex justify-around px-2 py-2">
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => handleTabChange(item.id)}
-              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${activeTab === item.id ? 'text-purple-400' : 'text-white/30 hover:text-white/60'}`}
+              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${activeTab === item.id ? 'text-purple-500' : theme === 'dark' ? 'text-white/30 hover:text-white/60' : 'text-gray-400 hover:text-gray-700'}`}
             >
               <span className={`text-xl transition-transform ${activeTab === item.id ? 'scale-110' : ''}`}>{item.emoji}</span>
               <span className={`text-[10px] font-semibold ${activeTab === item.id ? 'text-purple-400' : 'text-white/30'}`}>{item.label}</span>
