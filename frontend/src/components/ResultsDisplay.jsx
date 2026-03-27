@@ -6,95 +6,98 @@ import { useLanguage } from '../i18n/LanguageContext';
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   const isFemale = gender === "female";
   const colorLower = colorName.toLowerCase().replace(/\s+/g, '+');
+  const colorDisplay = colorName.toLowerCase().replace(/\s+/g, ' ');
+  const AMAZON_TAG = 'styleguruai-21';
 
-  const categoryMap = {
-    dress: isFemale ? "women+dress" : "shirt",
-    shirt: isFemale ? "women+top+kurti" : "men+formal+shirt",
-    top: isFemale ? "women+top" : "men+shirt",
-    pant: isFemale ? "women+palazzo+leggings" : "men+chinos+trousers",
-    bottom: isFemale ? "women+palazzo+leggings" : "men+chinos+trousers",
-    accessories: isFemale ? "women+jewellery+accessories" : "men+accessories",
-    jewellery: "women+jewellery+gold+silver",
-    handbag: "women+handbag+purse+clutch",
-    footwear: isFemale ? "women+heels+sandals" : "men+formal+shoes",
-    watch: isFemale ? "women+watch+fashion" : "men+watch+formal",
-    dupatta: "women+dupatta+scarf+stole",
-    belt: "men+leather+belt+formal",
-    shoes: isFemale ? "women+heels+sandals+block" : "men+formal+shoes+loafers",
-    bag: isFemale ? "women+handbag+tote" : "men+bag+backpack+office",
-    wallet: isFemale ? "women+wallet+purse" : "men+leather+wallet+slim",
-    sunglasses: isFemale ? "women+sunglasses+uv400" : "men+sunglasses+polarized",
-    kurti: "women+kurti+cotton+printed",
-    lehenga: "women+lehenga+choli+ethnic",
-    saree: "women+saree+silk+cotton",
-  };
+  // ── WOMEN trending 2025 categories ──
+  const womenCategories = [
+    { label: 'Crop Top', icon: '👚', amzKw: `${colorDisplay} women crop top`, amzNode: '1968024031', fkCat: 'women-tops-tshirts', myntra: `https://www.myntra.com/tops?rawQuery=${colorLower}+crop+top`, meesho: `${colorDisplay} women crop top` },
+    { label: 'Coord Set', icon: '✨', amzKw: `${colorDisplay} women coord set two piece`, amzNode: '1968024031', fkCat: 'women-western-wear', myntra: `https://www.myntra.com/co-ords?rawQuery=${colorLower}+coord+set`, meesho: `${colorDisplay} women coord set` },
+    { label: 'Oversized Tee', icon: '👕', amzKw: `${colorDisplay} women oversized t-shirt`, amzNode: '1968024031', fkCat: 'women-tops-tshirts', myntra: `https://www.myntra.com/tshirts?rawQuery=${colorLower}+women+oversized`, meesho: `${colorDisplay} women oversized tshirt` },
+    { label: 'Maxi Dress', icon: '👗', amzKw: `${colorDisplay} women maxi dress`, amzNode: '1968024031', fkCat: 'women-western-wear', myntra: `https://www.myntra.com/dresses?rawQuery=${colorLower}+maxi+dress`, meesho: `${colorDisplay} women maxi dress` },
+    { label: 'Baggy Jeans', icon: '👖', amzKw: `${colorDisplay} women baggy jeans wide leg`, amzNode: '1968024031', fkCat: 'women-jeans', myntra: `https://www.myntra.com/jeans?rawQuery=${colorLower}+baggy+wide+leg`, meesho: `${colorDisplay} women baggy jeans` },
+    { label: 'Palazzo', icon: '🩱', amzKw: `${colorDisplay} women palazzo pants`, amzNode: '1968024031', fkCat: 'women-bottomwear', myntra: `https://www.myntra.com/palazzos?rawQuery=${colorLower}+palazzo`, meesho: `${colorDisplay} women palazzo` },
+    { label: 'Kurti', icon: '🥻', amzKw: `${colorDisplay} women kurti casual`, amzNode: '1968024031', fkCat: 'women-kurtas-and-suits', myntra: `https://www.myntra.com/kurtas?rawQuery=${colorLower}+kurti`, meesho: `${colorDisplay} women kurti` },
+    { label: 'Lehenga', icon: '💃', amzKw: `${colorDisplay} women lehenga choli`, amzNode: '1968024031', fkCat: 'women-lehenga-cholis', myntra: `https://www.myntra.com/lehenga-cholis?rawQuery=${colorLower}+lehenga`, meesho: `${colorDisplay} women lehenga` },
+    { label: 'Saree', icon: '🪷', amzKw: `${colorDisplay} women saree georgette`, amzNode: '1968024031', fkCat: 'women-sarees', myntra: `https://www.myntra.com/sarees?rawQuery=${colorLower}+saree`, meesho: `${colorDisplay} women saree` },
+    { label: 'Sneakers', icon: '👟', amzKw: `${colorDisplay} women sneakers chunky`, amzNode: '1983518031', fkCat: 'women-footwear', myntra: `https://www.myntra.com/sneakers?rawQuery=${colorLower}+women`, meesho: `${colorDisplay} women sneakers` },
+    { label: 'Sling Bag', icon: '👜', amzKw: `${colorDisplay} women sling bag`, amzNode: '1953539031', fkCat: 'women-handbags', myntra: `https://www.myntra.com/handbags?rawQuery=${colorLower}+sling`, meesho: `${colorDisplay} women sling bag` },
+    { label: 'Jewellery', icon: '💍', amzKw: `${colorDisplay} women jewellery set oxidised`, amzNode: '1953557031', fkCat: 'women-jewellery', myntra: `https://www.myntra.com/jewellery?rawQuery=${colorLower}+oxidised`, meesho: `${colorDisplay} women jewellery` },
+  ];
 
-  const searchCat = categoryMap[category] || (isFemale ? "women+fashion" : "men+fashion");
-  const amazonQuery = `${colorLower}+${searchCat}`;
-  const flipkartQuery = `${colorLower} ${searchCat.replace(/\+/g, ' ')}`;
+  // ── MEN trending 2025 categories ──
+  const menCategories = [
+    { label: 'Oversized Tee', icon: '👕', amzKw: `${colorDisplay} men oversized t-shirt`, amzNode: '1968024031', fkCat: 'men-tshirts', myntra: `https://www.myntra.com/tshirts?rawQuery=${colorLower}+men+oversized`, meesho: `${colorDisplay} men oversized tshirt` },
+    { label: 'Polo Shirt', icon: '🎽', amzKw: `${colorDisplay} men polo t-shirt`, amzNode: '1968024031', fkCat: 'men-tshirts', myntra: `https://www.myntra.com/polo-tshirts?rawQuery=${colorLower}+polo`, meesho: `${colorDisplay} men polo shirt` },
+    { label: 'Cargo Pants', icon: '🪖', amzKw: `${colorDisplay} men cargo pants`, amzNode: '1968024031', fkCat: 'men-jeans', myntra: `https://www.myntra.com/cargos?rawQuery=${colorLower}+cargo`, meesho: `${colorDisplay} men cargo pants` },
+    { label: 'Joggers', icon: '🏃', amzKw: `${colorDisplay} men joggers track pants`, amzNode: '1968024031', fkCat: 'men-track-pants-joggers', myntra: `https://www.myntra.com/joggers-track-pants?rawQuery=${colorLower}+joggers`, meesho: `${colorDisplay} men joggers` },
+    { label: 'Baggy Jeans', icon: '👖', amzKw: `${colorDisplay} men baggy jeans loose fit`, amzNode: '1968024031', fkCat: 'men-jeans', myntra: `https://www.myntra.com/jeans?rawQuery=${colorLower}+men+baggy`, meesho: `${colorDisplay} men baggy jeans` },
+    { label: 'Hoodie', icon: '🧥', amzKw: `${colorDisplay} men hoodie sweatshirt`, amzNode: '1968024031', fkCat: 'men-sweatshirts', myntra: `https://www.myntra.com/hoodies?rawQuery=${colorLower}+men+hoodie`, meesho: `${colorDisplay} men hoodie` },
+    { label: 'Co-ord Set', icon: '✨', amzKw: `${colorDisplay} men coord set matching`, amzNode: '1968024031', fkCat: 'men-clothing', myntra: `https://www.myntra.com/co-ords?rawQuery=${colorLower}+men+coord`, meesho: `${colorDisplay} men coord set` },
+    { label: 'Kurta', icon: '🧵', amzKw: `${colorDisplay} men kurta casual`, amzNode: '1968024031', fkCat: 'men-kurtas', myntra: `https://www.myntra.com/kurtas?rawQuery=${colorLower}+men+kurta`, meesho: `${colorDisplay} men kurta` },
+    { label: 'Sneakers', icon: '👟', amzKw: `${colorDisplay} men sneakers casual`, amzNode: '1983518031', fkCat: 'men-sports-shoes', myntra: `https://www.myntra.com/sneakers?rawQuery=${colorLower}+men`, meesho: `${colorDisplay} men sneakers` },
+    { label: 'Watch', icon: '⌚', amzKw: `${colorDisplay} men analog watch`, amzNode: '1350380031', fkCat: 'men-watches', myntra: `https://www.myntra.com/watches?rawQuery=${colorLower}+men`, meesho: `${colorDisplay} men watch` },
+    { label: 'Backpack', icon: '🎒', amzKw: `${colorDisplay} men backpack casual`, amzNode: '1953539031', fkCat: 'men-bags-backpacks', myntra: `https://www.myntra.com/backpacks?rawQuery=${colorLower}+men`, meesho: `${colorDisplay} men backpack` },
+    { label: 'Sunglasses', icon: '🕶️', amzKw: `${colorDisplay} men sunglasses trendy`, amzNode: '1350380031', fkCat: 'men-sunglasses', myntra: `https://www.myntra.com/sunglasses?rawQuery=${colorLower}+men+trendy`, meesho: `${colorDisplay} men sunglasses` },
+  ];
 
-  // Myntra direct category URLs
-  const myntraUrlMap = {
-    shirt: isFemale ? `https://www.myntra.com/tops?rawQuery=${colorLower}+top` : `https://www.myntra.com/shirts?rawQuery=${colorLower}+shirt`,
-    pant: isFemale ? `https://www.myntra.com/palazzos?rawQuery=${colorLower}` : `https://www.myntra.com/trousers?rawQuery=${colorLower}+trousers`,
-    bottom: isFemale ? `https://www.myntra.com/palazzos?rawQuery=${colorLower}` : `https://www.myntra.com/trousers?rawQuery=${colorLower}`,
-    dress: isFemale ? `https://www.myntra.com/dresses?rawQuery=${colorLower}+dress` : `https://www.myntra.com/shirts?rawQuery=${colorLower}`,
-    top: isFemale ? `https://www.myntra.com/tops?rawQuery=${colorLower}` : `https://www.myntra.com/shirts?rawQuery=${colorLower}`,
-    kurti: `https://www.myntra.com/kurtas?rawQuery=${colorLower}+kurti`,
-    lehenga: `https://www.myntra.com/lehenga-cholis?rawQuery=${colorLower}+lehenga`,
-    saree: `https://www.myntra.com/sarees?rawQuery=${colorLower}+saree`,
-    shoes: isFemale ? `https://www.myntra.com/heels?rawQuery=${colorLower}` : `https://www.myntra.com/formal-shoes?rawQuery=${colorLower}`,
-    footwear: isFemale ? `https://www.myntra.com/heels?rawQuery=${colorLower}` : `https://www.myntra.com/formal-shoes?rawQuery=${colorLower}`,
-    watch: isFemale ? `https://www.myntra.com/watches?rawQuery=${colorLower}+women` : `https://www.myntra.com/watches?rawQuery=${colorLower}+men`,
-    handbag: `https://www.myntra.com/handbags?rawQuery=${colorLower}`,
-    bag: isFemale ? `https://www.myntra.com/handbags?rawQuery=${colorLower}` : `https://www.myntra.com/backpacks?rawQuery=${colorLower}`,
-    belt: `https://www.myntra.com/belts?rawQuery=${colorLower}+men`,
-    wallet: isFemale ? `https://www.myntra.com/wallets?rawQuery=${colorLower}+women` : `https://www.myntra.com/wallets?rawQuery=${colorLower}+men`,
-    sunglasses: isFemale ? `https://www.myntra.com/sunglasses?rawQuery=${colorLower}+women` : `https://www.myntra.com/sunglasses?rawQuery=${colorLower}+men`,
-    jewellery: `https://www.myntra.com/jewellery?rawQuery=${colorLower}`,
-    dupatta: `https://www.myntra.com/dupattas?rawQuery=${colorLower}`,
-    accessories: isFemale ? `https://www.myntra.com/jewellery?rawQuery=${colorLower}` : `https://www.myntra.com/accessories?rawQuery=${colorLower}+men`,
-  };
+  const categories = isFemale ? womenCategories : menCategories;
 
-  const myntraUrl = myntraUrlMap[category] || `https://www.myntra.com/fashion?rawQuery=${colorLower}+${isFemale ? 'women' : 'men'}`;
-
-  const meeshoQuery = `${colorLower} ${searchCat.replace(/\+/g, ' ')}`;
-
-  const links = [
+  // Build links for each category
+  const buildLinks = (cat) => [
     {
-      name: "Amazon",
-      url: `https://www.amazon.in/s?k=${amazonQuery}&rh=n%3A1571271031&sort=review-rank`,
-      icon: "🛒",
-      bg: "bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300"
+      name: 'Amazon',
+      url: `https://www.amazon.in/s?k=${encodeURIComponent(cat.amzKw)}&rh=n%3A${cat.amzNode}&sort=review-rank&tag=${AMAZON_TAG}`,
+      icon: '🛒',
+      bg: 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300',
     },
     {
-      name: "Flipkart",
-      url: `https://www.flipkart.com/search?q=${encodeURIComponent(flipkartQuery)}&sort=popularity`,
-      icon: "🏪",
-      bg: "bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300"
+      name: 'Flipkart',
+      url: `https://www.flipkart.com/${cat.fkCat}?q=${encodeURIComponent(colorDisplay)}&sort=popularity`,
+      icon: '🏪',
+      bg: 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300',
     },
     {
-      name: "Myntra",
-      url: myntraUrl,
-      icon: "👗",
-      bg: "bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300"
+      name: 'Myntra',
+      url: cat.myntra,
+      icon: '👗',
+      bg: 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300',
     },
     {
-      name: "Meesho",
-      url: `https://meesho.com/search?q=${encodeURIComponent(meeshoQuery)}`,
-      icon: "🛍️",
-      bg: "bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300"
+      name: 'Meesho',
+      url: `https://meesho.com/search?q=${encodeURIComponent(cat.meesho)}`,
+      icon: '🛍️',
+      bg: 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300',
     },
   ];
 
   return (
-    <div className="flex gap-2 flex-wrap mt-2">
-      {links.map((link) => (
-        <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer"
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}>
-          <span>{link.icon}</span><span>{link.name}</span>
-        </a>
-      ))}
+    <div className="mt-3 space-y-2">
+      <p className="text-white/40 text-xs font-semibold uppercase tracking-wide">🛒 Shop This Color</p>
+      <div className="flex flex-wrap gap-2">
+        {categories.map((cat) => (
+          <div key={cat.label} className="group relative">
+            {/* Category pill — hover pe links dikhenge */}
+            <div className="flex flex-wrap gap-1 items-center">
+              <span className="text-white/60 text-xs font-semibold bg-white/5 border border-white/10 rounded-lg px-2 py-1">
+                {cat.icon} {cat.label}
+              </span>
+              {buildLinks(cat).map((link) => (
+                <a
+                  key={link.name}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center gap-1 px-2 py-1 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}
+                >
+                  <span>{link.icon}</span>
+                  <span className="hidden sm:inline">{link.name}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
