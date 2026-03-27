@@ -1,6 +1,23 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import SEOHead from './SEOHead';
 import Footer from './Footer';
+
+function FAQItem({ q, a }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="bg-gray-900/60 border border-gray-800 rounded-2xl overflow-hidden hover:border-purple-600/40 transition-all">
+      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between px-5 py-4 text-left">
+        <span className="text-white font-semibold text-sm pr-4">{q}</span>
+        <span className={`text-purple-400 text-lg flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>▼</span>
+      </button>
+      {open && (
+        <div className="px-5 pb-4 border-t border-gray-800/50">
+          <p className="text-gray-400 text-sm leading-relaxed pt-3">{a}</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const features = [
   { icon: '🎨', title: 'Skin Tone Detection', desc: 'AI-powered analysis using advanced CIELAB color science.' },
@@ -310,6 +327,28 @@ export default function LandingPage({ onGetStarted }) {
               Get Started — Free ✨
             </button>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="relative z-10 px-6 md:px-12 py-16 max-w-4xl mx-auto">
+        <div className="text-center mb-10">
+          <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-4">FAQ</div>
+          <h2 className="text-3xl md:text-4xl font-bold text-white">Frequently Asked <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Questions</span></h2>
+        </div>
+        <div className="space-y-3">
+          {[
+            { q: 'What is StyleGuru AI?', a: 'StyleGuru AI is a free AI-powered fashion advisor that analyzes your skin tone from a selfie and recommends the best outfit colors, clothing combinations, and style tips personalized for you.' },
+            { q: 'How does skin tone analysis work?', a: 'Our AI uses advanced CIELAB color science and ITA (Individual Typology Angle) method to detect your skin tone category (fair, light, medium, olive, brown, dark) and undertone (warm, cool, neutral) from your photo.' },
+            { q: 'Is my photo stored or shared?', a: 'No. Your uploaded photos are processed in real-time for analysis only and are immediately deleted. We never store or share your images.' },
+            { q: 'Which skin tones does StyleGuru AI support?', a: 'StyleGuru AI supports all 6 major skin tone categories: Fair, Light, Medium/Wheatish, Olive/Dusky, Brown, and Dark. It works for all Indian and global skin tones.' },
+            { q: 'Is StyleGuru AI free to use?', a: 'Yes, StyleGuru AI is completely free. You can analyze your skin tone, get outfit recommendations, and shop for clothes — all at no cost.' },
+            { q: 'Can I use StyleGuru AI without uploading a photo?', a: 'Yes! You can use our Skin Tone Quiz feature to get recommendations without uploading a photo. Simply answer 2 questions about your skin tone and undertone.' },
+            { q: 'Does it work for both men and women?', a: 'Yes. StyleGuru AI provides separate recommendations for men (t-shirts, cargo pants, kurtas) and women (dresses, coord sets, kurtis, lehengas, sarees, makeup).' },
+            { q: 'How accurate is the AI analysis?', a: 'Our AI achieves 95%+ accuracy in controlled conditions. For best results, take a selfie in natural light, face the camera directly, and avoid sunglasses or heavy filters.' },
+          ].map((item, i) => (
+            <FAQItem key={i} q={item.q} a={item.a} />
+          ))}
         </div>
       </section>
 
