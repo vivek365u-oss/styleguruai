@@ -47,21 +47,66 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
 
   const cfg = categoryConfig[category] || { amzKw: `${colorDisplay} ${isFemale ? 'women' : 'men'} ${category}`, amzNode: '1968024031', fkCat: isFemale ? 'women-western-wear' : 'men-tshirts', myntra: `https://www.myntra.com/fashion?rawQuery=${colorLower}+${isFemale ? 'women' : 'men'}`, meesho: `${colorDisplay} ${isFemale ? 'women' : 'men'} ${category}` };
 
-  // Build price-filtered URLs
-  const priceParam = budget ? `&p=%5B%7B%22key%22%3A%22net_price%22%2C%22max%22%3A${budget.amzMax}%7D%5D` : '';
-  const amzPriceParam = budget?.amzMax ? `&rh=n%3A${cfg.amzNode}%2Cp_36%3A-${budget.amzMax * 100}` : `&rh=n%3A${cfg.amzNode}`;
+  // Build price-filtered URLs — optimized for best results
+  const amzPriceParam = budget?.amzMax ? `%2Cp_36%3A-${budget.amzMax * 100}` : '';
   const fkPriceParam = budget?.fkMax ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budget.fkMax}` : '';
   const myntraPriceParam = budget?.myntraMax ? `&p=price%5B0%5D%3D0%20TO%20${budget.myntraMax}` : '';
 
+  // Curated top picks — highly relevant direct search URLs per color+category for ALL 4 platforms
+  const topPicksMap = {
+    'navy blue': {
+      shirt:   { amz: `https://www.amazon.in/s?k=navy+blue+men+oversized+tshirt&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/men-tshirts?q=navy+blue+oversized&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/tshirts?rawQuery=navy+blue+men+oversized${myntraPriceParam}`, mee: 'https://meesho.com/search?q=navy+blue+men+oversized+tshirt' },
+      pant:    { amz: `https://www.amazon.in/s?k=navy+blue+men+cargo+pants&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/men-jeans?q=navy+blue+cargo&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/cargos?rawQuery=navy+blue+cargo${myntraPriceParam}`, mee: 'https://meesho.com/search?q=navy+blue+men+cargo+pants' },
+      dress:   { amz: `https://www.amazon.in/s?k=navy+blue+women+coord+set&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/women-western-wear?q=navy+blue+coord+set&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/co-ords?rawQuery=navy+blue+coord+set${myntraPriceParam}`, mee: 'https://meesho.com/search?q=navy+blue+women+coord+set' },
+    },
+    'teal': {
+      shirt:   { amz: `https://www.amazon.in/s?k=teal+men+oversized+tshirt&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/men-tshirts?q=teal+oversized&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/tshirts?rawQuery=teal+men+oversized${myntraPriceParam}`, mee: 'https://meesho.com/search?q=teal+men+oversized+tshirt' },
+      dress:   { amz: `https://www.amazon.in/s?k=teal+women+coord+set+maxi&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/women-western-wear?q=teal+coord+set&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/co-ords?rawQuery=teal+coord+set${myntraPriceParam}`, mee: 'https://meesho.com/search?q=teal+women+coord+set' },
+    },
+    'rust': {
+      shirt:   { amz: `https://www.amazon.in/s?k=rust+orange+men+oversized+tshirt&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/men-tshirts?q=rust+orange+oversized&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/tshirts?rawQuery=rust+orange+men${myntraPriceParam}`, mee: 'https://meesho.com/search?q=rust+orange+men+tshirt' },
+      dress:   { amz: `https://www.amazon.in/s?k=rust+women+coord+set+maxi&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/women-western-wear?q=rust+coord+set&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/co-ords?rawQuery=rust+coord+set${myntraPriceParam}`, mee: 'https://meesho.com/search?q=rust+women+coord+set' },
+    },
+    'cobalt blue': {
+      shirt:   { amz: `https://www.amazon.in/s?k=cobalt+blue+men+tshirt+polo&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/men-tshirts?q=cobalt+blue+polo&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/tshirts?rawQuery=cobalt+blue+men+polo${myntraPriceParam}`, mee: 'https://meesho.com/search?q=cobalt+blue+men+tshirt+polo' },
+      dress:   { amz: `https://www.amazon.in/s?k=cobalt+blue+women+coord+set&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/women-western-wear?q=cobalt+blue+coord&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/co-ords?rawQuery=cobalt+blue+coord+set${myntraPriceParam}`, mee: 'https://meesho.com/search?q=cobalt+blue+women+coord+set' },
+    },
+    'forest green': {
+      shirt:   { amz: `https://www.amazon.in/s?k=forest+green+men+oversized+tshirt&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/men-tshirts?q=forest+green+oversized&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/tshirts?rawQuery=forest+green+men+oversized${myntraPriceParam}`, mee: 'https://meesho.com/search?q=forest+green+men+oversized+tshirt' },
+      kurti:   { amz: `https://www.amazon.in/s?k=forest+green+women+kurti&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/women-kurtas-and-suits?q=forest+green+kurti&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/kurtas?rawQuery=forest+green+kurti${myntraPriceParam}`, mee: 'https://meesho.com/search?q=forest+green+women+kurti' },
+    },
+    'mustard': {
+      shirt:   { amz: `https://www.amazon.in/s?k=mustard+yellow+men+polo+tshirt&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/men-tshirts?q=mustard+yellow+polo&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/tshirts?rawQuery=mustard+yellow+men+polo${myntraPriceParam}`, mee: 'https://meesho.com/search?q=mustard+yellow+men+polo+tshirt' },
+      dress:   { amz: `https://www.amazon.in/s?k=mustard+yellow+women+coord+set&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/women-western-wear?q=mustard+coord+set&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/co-ords?rawQuery=mustard+yellow+coord+set${myntraPriceParam}`, mee: 'https://meesho.com/search?q=mustard+yellow+women+coord+set' },
+    },
+    'burgundy': {
+      shirt:   { amz: `https://www.amazon.in/s?k=burgundy+maroon+men+oversized+tshirt&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/men-tshirts?q=burgundy+maroon+oversized&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/tshirts?rawQuery=burgundy+men+oversized${myntraPriceParam}`, mee: 'https://meesho.com/search?q=burgundy+maroon+men+tshirt' },
+      lehenga: { amz: `https://www.amazon.in/s?k=burgundy+women+lehenga+choli&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/women-lehenga-cholis?q=burgundy+lehenga&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/lehenga-cholis?rawQuery=burgundy+lehenga${myntraPriceParam}`, mee: 'https://meesho.com/search?q=burgundy+women+lehenga+choli' },
+    },
+    'coral': {
+      dress:   { amz: `https://www.amazon.in/s?k=coral+women+maxi+dress+coord&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/women-western-wear?q=coral+coord+set&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/co-ords?rawQuery=coral+coord+set${myntraPriceParam}`, mee: 'https://meesho.com/search?q=coral+women+coord+set+maxi' },
+      shirt:   { amz: `https://www.amazon.in/s?k=coral+men+polo+tshirt&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/men-tshirts?q=coral+polo&sort=popularity${fkPriceParam}`, myn: `https://www.myntra.com/tshirts?rawQuery=coral+men+polo${myntraPriceParam}`, mee: 'https://meesho.com/search?q=coral+men+polo+tshirt' },
+    },
+  };
+
+  const colorKey = colorDisplay.toLowerCase();
+  const topPick = topPicksMap[colorKey]?.[category];
+
   const links = [
-    { name: 'Amazon',   url: `https://www.amazon.in/s?k=${encodeURIComponent(cfg.amzKw)}${amzPriceParam}&sort=review-rank&tag=${AMAZON_TAG}`, icon: '🛒', bg: 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' },
-    { name: 'Flipkart', url: `https://www.flipkart.com/search?q=${encodeURIComponent(colorDisplay + ' ' + (cfg.fkCat || '').replace(/-/g, ' '))}&sort=popularity${fkPriceParam}`, icon: '🏪', bg: 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' },
-    { name: 'Myntra',   url: `${cfg.myntra}${myntraPriceParam}`, icon: '👗', bg: 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' },
-    { name: 'Meesho',   url: `https://meesho.com/search?q=${encodeURIComponent(cfg.meesho)}`, icon: '🛍️', bg: 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' },
+    { name: 'Amazon',   url: topPick?.amz || `https://www.amazon.in/s?k=${encodeURIComponent(cfg.amzKw)}&rh=n%3A${cfg.amzNode}${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, icon: '🛒', bg: 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' },
+    { name: 'Flipkart', url: topPick?.fk  || `https://www.flipkart.com/${cfg.fkCat}?q=${encodeURIComponent(colorDisplay)}&sort=popularity${fkPriceParam}`, icon: '🏪', bg: 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' },
+    { name: 'Myntra',   url: topPick?.myn || `${cfg.myntra}${myntraPriceParam}`, icon: '👗', bg: 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' },
+    { name: 'Meesho',   url: topPick?.mee || `https://meesho.com/search?q=${encodeURIComponent(cfg.meesho)}`, icon: '🛍️', bg: 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' },
   ];
 
   return (
     <div className="mt-2 space-y-2">
+      {/* Top Pick badge when curated URL available */}
+      {topPick && (
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] font-bold bg-green-500/20 border border-green-500/30 text-green-400 px-2 py-0.5 rounded-full">⭐ Top Pick — All 4 Platforms</span>
+        </div>
+      )}
       {/* Budget filter pills */}
       <div className="flex gap-1.5 flex-wrap">
         {budgets.map((b) => (
