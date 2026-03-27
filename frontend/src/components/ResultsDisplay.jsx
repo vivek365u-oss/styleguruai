@@ -1,8 +1,9 @@
 // ============================================================
 // StyleGuru — Tab-Based Results Display (App-like UX)
 // ============================================================
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { ThemeContext } from '../App';
 
 // ── Shopping Links ───────────────────────────────────────────
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
@@ -55,24 +56,34 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
 }
 
 // ── Color Card (compact, tap to expand) ─────────────────────
-function ColorCard({ color, category, gender }) {
+function ColorCard({ color, category, gender, isDark }) {
   const [expanded, setExpanded] = useState(false);
+  const cardCls = isDark
+    ? 'bg-white/5 border border-white/10'
+    : 'bg-white border border-gray-200 shadow-sm';
+  const nameCls = isDark ? 'text-white' : 'text-gray-800';
+  const hexCls  = isDark ? 'text-white/30' : 'text-gray-400';
+  const chevronCls = isDark ? 'text-white/30' : 'text-gray-400';
+  const hexBorderCls = isDark ? 'border-white/10' : 'border-gray-200';
+  const dividerCls = isDark ? 'border-white/5' : 'border-gray-100';
+  const reasonCls = isDark ? 'text-white/50' : 'text-gray-500';
+
   return (
     <div
-      className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden transition-all duration-300 hover:border-purple-500/40"
+      className={`${cardCls} rounded-2xl overflow-hidden transition-all duration-300 hover:border-purple-500/40`}
       onClick={() => setExpanded(e => !e)}
     >
       <div className="flex items-center gap-3 p-3 cursor-pointer">
-        <div className="w-12 h-12 rounded-xl flex-shrink-0 shadow-lg border border-white/10" style={{ backgroundColor: color.hex }} />
+        <div className={`w-12 h-12 rounded-xl flex-shrink-0 shadow-lg border ${hexBorderCls}`} style={{ backgroundColor: color.hex }} />
         <div className="flex-1 min-w-0">
-          <p className="text-white font-bold text-sm truncate">{color.name}</p>
-          <p className="text-white/30 text-xs font-mono">{color.hex}</p>
+          <p className={`${nameCls} font-bold text-sm truncate`}>{color.name}</p>
+          <p className={`${hexCls} text-xs font-mono`}>{color.hex}</p>
         </div>
-        <span className={`text-white/30 text-xs transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}>▼</span>
+        <span className={`${chevronCls} text-xs transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}>▼</span>
       </div>
       {expanded && (
-        <div className="px-3 pb-3 border-t border-white/5 pt-2" onClick={e => e.stopPropagation()}>
-          {color.reason && <p className="text-white/50 text-xs mb-2 leading-relaxed">{color.reason}</p>}
+        <div className={`px-3 pb-3 border-t ${dividerCls} pt-2`} onClick={e => e.stopPropagation()}>
+          {color.reason && <p className={`${reasonCls} text-xs mb-2 leading-relaxed`}>{color.reason}</p>}
           <ShoppingLinks colorName={color.name} category={category} gender={gender} />
         </div>
       )}
@@ -81,7 +92,7 @@ function ColorCard({ color, category, gender }) {
 }
 
 // ── Outfit Card ──────────────────────────────────────────────
-function OutfitCard({ combo, index }) {
+function OutfitCard({ combo, index, isDark }) {
   const colors = ["purple", "pink", "blue", "emerald", "amber"];
   const color = colors[index % colors.length];
   const colorMap = {
@@ -93,20 +104,25 @@ function OutfitCard({ combo, index }) {
   };
   const topItem = combo.shirt || combo.top || combo.dress || "";
   const bottomItem = combo.pant || combo.bottom || "";
+  const headingCls = isDark ? 'text-white' : 'text-gray-800';
+  const subCls = isDark ? 'text-white/60' : 'text-gray-500';
+  const badgeCls = isDark ? 'bg-white/10 text-white/80' : 'bg-white/60 text-gray-700';
+  const vibeCls = isDark ? 'text-white/30' : 'text-gray-400';
+
   return (
     <div className={`bg-gradient-to-br ${colorMap[color]} border rounded-2xl p-4`}>
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex-1">
-          <p className="text-white font-bold text-sm mb-1">{topItem}</p>
+          <p className={`${headingCls} font-bold text-sm mb-1`}>{topItem}</p>
           <div className="flex flex-wrap gap-2 text-xs">
-            {bottomItem && <span className="text-white/60">👖 {bottomItem}</span>}
-            {combo.shoes && <span className="text-white/60">👟 {combo.shoes}</span>}
-            {combo.dupatta && combo.dupatta !== "-" && <span className="text-white/60">🧣 {combo.dupatta}</span>}
+            {bottomItem && <span className={subCls}>👖 {bottomItem}</span>}
+            {combo.shoes && <span className={subCls}>👟 {combo.shoes}</span>}
+            {combo.dupatta && combo.dupatta !== "-" && <span className={subCls}>🧣 {combo.dupatta}</span>}
           </div>
         </div>
         <div className="text-right flex-shrink-0">
-          <span className="bg-white/10 text-white/80 text-xs px-2 py-1 rounded-full">{combo.occasion}</span>
-          {combo.vibe && <p className="text-white/30 text-xs mt-1 italic">{combo.vibe}</p>}
+          <span className={`${badgeCls} text-xs px-2 py-1 rounded-full`}>{combo.occasion}</span>
+          {combo.vibe && <p className={`${vibeCls} text-xs mt-1 italic`}>{combo.vibe}</p>}
         </div>
       </div>
     </div>
@@ -114,23 +130,35 @@ function OutfitCard({ combo, index }) {
 }
 
 // ── Profile Hero Card ────────────────────────────────────────
-function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSeasonal }) {
+function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSeasonal, isDark }) {
   const toneColors = { fair: "#F5DEB3", light: "#D2A679", medium: "#C68642", olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A" };
+  const wrapperCls = isDark
+    ? 'bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-white/10'
+    : 'bg-white border border-gray-200 shadow-sm';
+  const labelCls = isDark ? 'text-white/40' : 'text-gray-500';
+  const headingCls = isDark ? 'text-white' : 'text-gray-800';
+  const skinLabelCls = isDark ? 'text-white/40' : 'text-gray-400';
+  const imgBorderCls = isDark ? 'border-white/20' : 'border-gray-200';
+  const summaryBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200';
+  const summaryCls = isDark ? 'text-white/60' : 'text-gray-500';
+
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-white/10 rounded-2xl p-4">
+    <div className={`relative overflow-hidden ${wrapperCls} rounded-2xl p-4`}>
       <div className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-10 blur-3xl pointer-events-none" style={{ backgroundColor: toneColors[analysis.skin_tone.category] }} />
       <div className="flex items-center gap-4">
         {uploadedImage && (
           <div className="relative flex-shrink-0">
-            <img src={uploadedImage} alt="Your photo" className="w-20 h-20 object-cover rounded-2xl border-2 border-white/20 shadow-xl" />
+            <img src={uploadedImage} alt="Your photo" className={`w-20 h-20 object-cover rounded-2xl border-2 ${imgBorderCls} shadow-xl`} />
             <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-slate-900" style={{ backgroundColor: toneColors[analysis.skin_tone.category] }} />
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <p className="text-white/40 text-xs uppercase tracking-widest mb-0.5">
+          <p className={`${labelCls} text-xs uppercase tracking-widest mb-0.5`}>
             {isSeasonal ? 'Seasonal' : isFemale ? '👩 Female' : '👨 Male'} Profile
           </p>
-          <h2 className="text-white text-2xl font-black capitalize">{analysis.skin_tone.category} <span className="text-white/40 font-light text-lg">Skin</span></h2>
+          <h2 className={`${headingCls} text-2xl font-black capitalize`}>
+            {analysis.skin_tone.category} <span className={`${skinLabelCls} font-light text-lg`}>Skin</span>
+          </h2>
           <div className="flex flex-wrap gap-1.5 mt-2">
             <span className="bg-purple-500/20 border border-purple-500/30 text-purple-200 text-xs px-2 py-0.5 rounded-full capitalize">{analysis.skin_tone.undertone}</span>
             <span className="bg-pink-500/20 border border-pink-500/30 text-pink-200 text-xs px-2 py-0.5 rounded-full">🍂 {analysis.skin_tone.color_season}</span>
@@ -141,8 +169,8 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
         </div>
       </div>
       {(recommendations.summary || recommendations.description) && (
-        <div className="mt-3 bg-white/5 rounded-xl p-3 border border-white/10">
-          <p className="text-white/60 text-xs leading-relaxed">{recommendations.summary || recommendations.description}</p>
+        <div className={`mt-3 ${summaryBgCls} rounded-xl p-3`}>
+          <p className={`${summaryCls} text-xs leading-relaxed`}>{recommendations.summary || recommendations.description}</p>
         </div>
       )}
     </div>
@@ -150,8 +178,9 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
 }
 
 // ── Colors Tab ───────────────────────────────────────────────
-function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shirtCategory, pantCategory }) {
+function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shirtCategory, pantCategory, isDark }) {
   const avoidColors = recommendations.colors_to_avoid || [];
+  const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
 
   if (isSeasonal) {
     const seasonalColors = recommendations.seasonal_colors || [];
@@ -165,7 +194,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
           </div>
         </div>
         <div className="grid grid-cols-1 gap-2">
-          {seasonalColors.map((color, i) => <ColorCard key={i} color={color} category={shirtCategory} gender={effectiveGender} />)}
+          {seasonalColors.map((color, i) => <ColorCard key={i} color={color} category={shirtCategory} gender={effectiveGender} isDark={isDark} />)}
         </div>
       </div>
     );
@@ -184,9 +213,9 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
       <div className="space-y-5">
         {sections.map((sec) => (
           <div key={sec.title}>
-            <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-2">{sec.title}</p>
+            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>{sec.title}</p>
             <div className="grid grid-cols-1 gap-2">
-              {sec.colors.map((color, i) => <ColorCard key={i} color={color} category={sec.cat} gender="female" />)}
+              {sec.colors.map((color, i) => <ColorCard key={i} color={color} category={sec.cat} gender="female" isDark={isDark} />)}
             </div>
           </div>
         ))}
@@ -194,7 +223,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
           <div>
             <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2">🚫 Avoid These</p>
             <div className="grid grid-cols-1 gap-2">
-              {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="dress" gender="female" />)}
+              {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="dress" gender="female" isDark={isDark} />)}
             </div>
           </div>
         )}
@@ -209,17 +238,17 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
     <div className="space-y-5">
       {shirtColors.length > 0 && (
         <div>
-          <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-2">👕 T-Shirt / Top Colors</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>👕 T-Shirt / Top Colors</p>
           <div className="grid grid-cols-1 gap-2">
-            {shirtColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" />)}
+            {shirtColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} />)}
           </div>
         </div>
       )}
       {pantColors.length > 0 && (
         <div>
-          <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-2">👖 Pants / Cargo Colors</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>👖 Pants / Cargo Colors</p>
           <div className="grid grid-cols-1 gap-2">
-            {pantColors.map((color, i) => <ColorCard key={i} color={color} category="pant" gender="male" />)}
+            {pantColors.map((color, i) => <ColorCard key={i} color={color} category="pant" gender="male" isDark={isDark} />)}
           </div>
         </div>
       )}
@@ -227,7 +256,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
         <div>
           <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2">🚫 Avoid These</p>
           <div className="grid grid-cols-1 gap-2">
-            {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" />)}
+            {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} />)}
           </div>
         </div>
       )}
@@ -236,20 +265,26 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 }
 
 // ── Outfits Tab ──────────────────────────────────────────────
-function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, styleTips, occasionAdvice, ethnicWear, sareeSuggestions }) {
+function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, styleTips, occasionAdvice, ethnicWear, sareeSuggestions, isDark }) {
   let outfits = [];
   if (isSeasonal) outfits = seasonalGender === 'female' ? (recommendations.female_outfits || []) : (recommendations.male_outfits || []);
   else if (isFemale) outfits = recommendations.outfit_combos || [];
   else outfits = recommendations.outfit_combinations || recommendations.outfit_combos || [];
+
+  const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
+  const cardBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
+  const bodyTextCls = isDark ? 'text-white/60' : 'text-gray-500';
+  const mutedCls = isDark ? 'text-white/40' : 'text-gray-400';
+  const tipTextCls = isDark ? 'text-white/70' : 'text-gray-600';
 
   return (
     <div className="space-y-5">
       {/* Outfit combos */}
       {outfits.length > 0 && (
         <div>
-          <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-2">🧥 Outfit Combos</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🧥 Outfit Combos</p>
           <div className="space-y-2">
-            {outfits.map((combo, i) => <OutfitCard key={i} combo={combo} index={i} />)}
+            {outfits.map((combo, i) => <OutfitCard key={i} combo={combo} index={i} isDark={isDark} />)}
           </div>
         </div>
       )}
@@ -257,12 +292,12 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
       {/* Occasion advice */}
       {Object.keys(occasionAdvice).length > 0 && (
         <div>
-          <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-2">📅 What to Wear When</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>📅 What to Wear When</p>
           <div className="space-y-2">
             {Object.entries(occasionAdvice).map(([occasion, advice], i) => (
-              <div key={i} className="bg-white/5 rounded-xl p-3 border border-white/10">
+              <div key={i} className={`${cardBgCls} rounded-xl p-3`}>
                 <p className="text-purple-300 text-xs font-bold uppercase tracking-wide mb-1">{occasion}</p>
-                <p className="text-white/60 text-sm">{advice}</p>
+                <p className={`${bodyTextCls} text-sm`}>{advice}</p>
               </div>
             ))}
           </div>
@@ -272,12 +307,12 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
       {/* Style tips */}
       {styleTips.length > 0 && (
         <div>
-          <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-2">💡 Style Tips</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>💡 Style Tips</p>
           <div className="space-y-2">
             {styleTips.map((tip, i) => (
-              <div key={i} className="flex items-start gap-2 bg-white/5 rounded-xl p-3 border border-white/10">
+              <div key={i} className={`flex items-start gap-2 ${cardBgCls} rounded-xl p-3`}>
                 <span className="text-purple-400 flex-shrink-0">✦</span>
-                <p className="text-white/70 text-sm leading-relaxed">{tip}</p>
+                <p className={`${tipTextCls} text-sm leading-relaxed`}>{tip}</p>
               </div>
             ))}
           </div>
@@ -287,7 +322,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
       {/* Ethnic wear */}
       {ethnicWear.length > 0 && (
         <div>
-          <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-2">🪷 Ethnic Wear</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🪷 Ethnic Wear</p>
           <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl p-4 space-y-2">
             {ethnicWear.map((s, i) => (
               <div key={i} className="flex items-start gap-2">
@@ -302,15 +337,15 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
       {/* Saree suggestions (female) */}
       {sareeSuggestions.length > 0 && (
         <div>
-          <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-2">🥻 Saree & Suits</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🥻 Saree & Suits</p>
           <div className="space-y-2">
             {sareeSuggestions.map((item, i) => (
-              <div key={i} className="bg-white/5 rounded-xl p-3 border border-pink-500/20">
+              <div key={i} className={`${isDark ? 'bg-white/5' : 'bg-white shadow-sm'} rounded-xl p-3 border border-pink-500/20`}>
                 <div className="flex items-start justify-between gap-2 flex-wrap">
                   <div>
                     <p className="text-pink-200 font-bold text-sm">{item.type}</p>
-                    <p className="text-white/50 text-xs mt-0.5">🎨 {item.colors}</p>
-                    <p className="text-white/40 text-xs">{item.reason}</p>
+                    <p className={`${isDark ? 'text-white/50' : 'text-gray-500'} text-xs mt-0.5`}>🎨 {item.colors}</p>
+                    <p className={`${mutedCls} text-xs`}>{item.reason}</p>
                   </div>
                   <span className="bg-pink-500/20 text-pink-300 text-xs px-2 py-0.5 rounded-full border border-pink-500/20">{item.occasion}</span>
                 </div>
@@ -324,7 +359,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
 }
 
 // ── Accessories Tab ──────────────────────────────────────────
-function AccessoriesTab({ recommendations, isFemale, makeupSuggestions }) {
+function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }) {
   const accessories = recommendations.accessories || [];
   const accentColors = recommendations.accent_colors || [];
 
@@ -341,22 +376,29 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions }) {
     return 'accessories';
   };
 
+  const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
+  const cardBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
+  const headingCls = isDark ? 'text-white' : 'text-gray-800';
+  const subCls = isDark ? 'text-white/50' : 'text-gray-500';
+  const mutedCls = isDark ? 'text-white/30' : 'text-gray-400';
+  const emptyTextCls = isDark ? 'text-white/40' : 'text-gray-400';
+
   return (
     <div className="space-y-5">
       {/* Female accessories */}
       {isFemale && accessories.length > 0 && (
         <div>
-          <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-2">👜 Accessories & Jewellery</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>👜 Accessories & Jewellery</p>
           <div className="space-y-2">
             {accessories.map((item, i) => {
               const typeLC = (item.type || '').toLowerCase();
               const cat = getAccCat(typeLC, true);
               const searchTerm = item.suggestion || item.colors || item.type;
               return (
-                <div key={i} className="bg-white/5 rounded-xl p-3 border border-white/10">
+                <div key={i} className={`${cardBgCls} rounded-xl p-3`}>
                   <p className="text-purple-300 font-bold text-sm">{item.type}</p>
-                  <p className="text-white/50 text-xs mt-0.5">{item.suggestion || item.colors}</p>
-                  {item.reason && <p className="text-white/30 text-xs">{item.reason}</p>}
+                  <p className={`${subCls} text-xs mt-0.5`}>{item.suggestion || item.colors}</p>
+                  {item.reason && <p className={`${mutedCls} text-xs`}>{item.reason}</p>}
                   <ShoppingLinks colorName={searchTerm} category={cat} gender="female" />
                 </div>
               );
@@ -368,17 +410,17 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions }) {
       {/* Male accent colors / accessories */}
       {!isFemale && accentColors.length > 0 && (
         <div>
-          <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-2">⌚ Accessories For You</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>⌚ Accessories For You</p>
           <div className="space-y-2">
             {accentColors.map((item, i) => {
               const typeLC = (item.type || '').toLowerCase();
               const cat = getAccCat(typeLC, false);
               const searchTerm = item.suggestion || item.name || item.type;
               return (
-                <div key={i} className="bg-white/5 rounded-xl p-3 border border-white/10">
+                <div key={i} className={`${cardBgCls} rounded-xl p-3`}>
                   <p className="text-purple-300 font-bold text-sm">{item.type}</p>
-                  <p className="text-white/50 text-xs mt-0.5">{item.name}</p>
-                  {item.reason && <p className="text-white/30 text-xs">{item.reason}</p>}
+                  <p className={`${subCls} text-xs mt-0.5`}>{item.name}</p>
+                  {item.reason && <p className={`${mutedCls} text-xs`}>{item.reason}</p>}
                   <ShoppingLinks colorName={searchTerm} category={cat} gender="male" />
                 </div>
               );
@@ -390,14 +432,14 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions }) {
       {/* Makeup (female) */}
       {isFemale && makeupSuggestions.length > 0 && (
         <div>
-          <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-2">💄 Makeup Suggestions</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>💄 Makeup Suggestions</p>
           <div className="space-y-2">
             {makeupSuggestions.map((item, i) => (
-              <div key={i} className="bg-white/5 rounded-xl p-3 border border-rose-500/20">
+              <div key={i} className={`${isDark ? 'bg-white/5' : 'bg-white shadow-sm'} rounded-xl p-3 border border-rose-500/20`}>
                 <p className="text-rose-200 font-bold text-sm">{item.product}</p>
-                <p className="text-white/50 text-xs mt-0.5">{item.shade || item.shades}</p>
-                {item.brands && <p className="text-white/30 text-xs">Brands: {item.brands}</p>}
-                {item.tip && <p className="text-white/40 text-xs mt-1 italic">💡 {item.tip}</p>}
+                <p className={`${subCls} text-xs mt-0.5`}>{item.shade || item.shades}</p>
+                {item.brands && <p className={`${mutedCls} text-xs`}>Brands: {item.brands}</p>}
+                {item.tip && <p className={`${isDark ? 'text-white/40' : 'text-gray-400'} text-xs mt-1 italic`}>💡 {item.tip}</p>}
               </div>
             ))}
           </div>
@@ -407,7 +449,7 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions }) {
       {!isFemale && accentColors.length === 0 && (
         <div className="text-center py-8">
           <p className="text-4xl mb-3">⌚</p>
-          <p className="text-white/40 text-sm">No accessories data available</p>
+          <p className={`${emptyTextCls} text-sm`}>No accessories data available</p>
         </div>
       )}
     </div>
@@ -417,6 +459,8 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions }) {
 // ── Main ResultsDisplay ──────────────────────────────────────
 function ResultsDisplay({ data, uploadedImage, onReset }) {
   const { t } = useLanguage();
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const [activeTab, setActiveTab] = useState('colors');
   const { analysis, recommendations, photo_quality } = data;
   const isFemale = data.gender === "female";
@@ -432,13 +476,16 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const ethnicWear = recommendations.ethnic_wear || sareeSuggestions;
 
   const tabs = [
-    { id: 'colors',    label: 'Colors',    emoji: '🎨' },
-    { id: 'outfits',   label: 'Outfits',   emoji: '👔' },
+    { id: 'colors',      label: 'Colors',      emoji: '🎨' },
+    { id: 'outfits',     label: 'Outfits',     emoji: '👔' },
     { id: 'accessories', label: 'Accessories', emoji: '✨' },
   ];
 
+  const tabBarBg = isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200';
+  const inactiveTabCls = isDark ? 'text-white/40 hover:text-white/70' : 'text-gray-400 hover:text-gray-600';
+
   return (
-    <div className="space-y-4 pb-4 bg-[#050816] rounded-3xl p-3 text-white">
+    <div className="space-y-4 pb-4 bg-transparent">
       {/* Photo quality warning */}
       {photo_quality?.warnings?.length > 0 && (
         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3">
@@ -454,10 +501,11 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         uploadedImage={uploadedImage}
         isFemale={isFemale}
         isSeasonal={isSeasonal}
+        isDark={isDark}
       />
 
       {/* Tab bar */}
-      <div className="flex bg-white/5 border border-white/10 rounded-2xl p-1 gap-1">
+      <div className={`flex ${tabBarBg} rounded-2xl p-1 gap-1`}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -465,7 +513,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === tab.id
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
-                : 'text-white/40 hover:text-white/70'
+                : inactiveTabCls
             }`}
           >
             <span>{tab.emoji}</span>
@@ -484,6 +532,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             effectiveGender={effectiveGender}
             shirtCategory={shirtCategory}
             pantCategory={pantCategory}
+            isDark={isDark}
           />
         )}
         {activeTab === 'outfits' && (
@@ -496,6 +545,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             occasionAdvice={occasionAdvice}
             ethnicWear={ethnicWear}
             sareeSuggestions={sareeSuggestions}
+            isDark={isDark}
           />
         )}
         {activeTab === 'accessories' && (
@@ -503,6 +553,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             recommendations={recommendations}
             isFemale={isFemale}
             makeupSuggestions={makeupSuggestions}
+            isDark={isDark}
           />
         )}
       </div>
