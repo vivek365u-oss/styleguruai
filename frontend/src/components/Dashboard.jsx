@@ -22,10 +22,10 @@ function LoadingScreen() {
   }, []);
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh]">
-      <div className="relative w-24 h-24 b-6">
+      <div className="relative w-24 h-24 mb-6">
         <div className="absolute inset-0 rounded-full border-4 border-purple-500/20" />
         <div className="absolute inset-0 rounded-full border-4 border-purple-500 border-t-transparent animate-spin" />
-        <dder-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+        <div className="absolute inset-2 rounded-full border-2 border-pink-500/30 border-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
         <div className="absolute inset-0 flex items-center justify-center text-3xl">{steps[step].emoji}</div>
       </div>
       <p className="text-white font-bold text-lg mb-1">{steps[step].text}</p>
