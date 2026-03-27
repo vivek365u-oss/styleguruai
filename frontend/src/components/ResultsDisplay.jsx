@@ -434,6 +434,13 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
             </div>
           </div>
         )}
+
+        {/* Complete the Look — Female */}
+        {(() => {
+          const topColor = (recommendations.best_dress_colors || recommendations.best_top_colors || [])[0];
+          const bottomColor = (recommendations.best_bottom_colors || recommendations.best_pant_colors || [])[0];
+          return topColor ? <CompleteTheLook shirtColor={topColor} pantColors={bottomColor ? [bottomColor] : []} isDark={isDark} gender="female" /> : null;
+        })()}
       </div>
     );
   }

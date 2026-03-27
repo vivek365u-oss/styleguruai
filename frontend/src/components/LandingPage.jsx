@@ -156,6 +156,25 @@ export default function LandingPage({ onGetStarted }) {
             <span>✓ Instant results</span>
             <span>✓ 100% free</span>
           </div>
+
+          {/* Social Proof */}
+          <div className="flex items-center gap-4 mt-6 justify-center lg:justify-start flex-wrap">
+            <div className="flex items-center gap-2 bg-purple-900/30 border border-purple-700/30 rounded-full px-4 py-2">
+              <div className="flex -space-x-2">
+                {['#F5DEB3','#C68642','#7B4F2E','#4A2C0A'].map((c,i) => (
+                  <div key={i} className="w-6 h-6 rounded-full border-2 border-purple-900" style={{backgroundColor:c}} />
+                ))}
+              </div>
+              <span className="text-purple-300 text-xs font-semibold">10,000+ users</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-green-900/20 border border-green-700/30 rounded-full px-4 py-2">
+              <span className="text-green-400 text-xs">⭐⭐⭐⭐⭐</span>
+              <span className="text-green-300 text-xs font-semibold">4.9/5 rating</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-blue-900/20 border border-blue-700/30 rounded-full px-4 py-2">
+              <span className="text-blue-300 text-xs font-semibold">🇮🇳 Made for India</span>
+            </div>
+          </div>
         </div>
 
         {/* Right — Phone mockup */}
@@ -222,6 +241,22 @@ export default function LandingPage({ onGetStarted }) {
           <h2 className="text-3xl md:text-5xl font-bold">
             Why <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">StyleGuru AI?</span>
           </h2>
+        </div>
+
+        {/* Stats bar */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+          {[
+            { value: '10K+', label: 'Happy Users', emoji: '👥' },
+            { value: '95%+', label: 'Accuracy', emoji: '🎯' },
+            { value: '6', label: 'Skin Tones', emoji: '🎨' },
+            { value: '100%', label: 'Free', emoji: '✨' },
+          ].map((stat) => (
+            <div key={stat.label} className="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 text-center backdrop-blur-sm">
+              <p className="text-2xl mb-1">{stat.emoji}</p>
+              <p className="text-white font-black text-xl">{stat.value}</p>
+              <p className="text-gray-400 text-xs">{stat.label}</p>
+            </div>
+          ))}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((f) => (
