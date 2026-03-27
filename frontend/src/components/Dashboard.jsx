@@ -210,7 +210,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
 
       <button
         onClick={onAnalyze}
-        className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-2xl text-white font-black text-base shadow-lg shadow-purple-900/50 transition-all hover:scale-[1.02] active:scale-[0.98]"
+        className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-2xl text-white font-black text-base shadow-lg shadow-purple-900/50 transition-all hover:scale-[1.02] active:scale-[0.98] pulse-glow"
       >
         ✨ Analyze Your Style
       </button>
@@ -516,7 +516,7 @@ function Dashboard({ user, onLogout }) {
             >
               <span className={`text-xl transition-transform ${activeTab === item.id ? 'scale-110' : ''}`}>{item.emoji}</span>
               <span className={`text-[10px] font-semibold ${activeTab === item.id ? 'text-purple-400' : 'text-white/30'}`}>{item.label}</span>
-              {activeTab === item.id && <div className="w-1 h-1 rounded-full bg-purple-400" />}
+              {activeTab === item.id && <div className="w-1 h-1 rounded-full bg-purple-400 nav-dot" />}
             </button>
           ))}
         </div>

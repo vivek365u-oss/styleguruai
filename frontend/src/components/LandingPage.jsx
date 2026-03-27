@@ -279,7 +279,7 @@ export default function LandingPage({ onGetStarted }) {
           {features.map((f) => (
             <div
               key={f.title}
-              className="group bg-gray-900/60 border border-gray-800 rounded-2xl p-6 hover:border-purple-600/60 hover:bg-gray-900/80 transition-all duration-300 backdrop-blur-sm hover:shadow-lg hover:shadow-purple-900/20 hover:-translate-y-1"
+              className="group bg-gray-900/60 border border-gray-800 rounded-2xl p-6 hover:border-purple-600/60 hover:bg-gray-900/80 transition-all duration-300 backdrop-blur-sm hover:shadow-lg hover:shadow-purple-900/20 hover:-translate-y-1 card-hover"
             >
               <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">{f.icon}</div>
               <h3 className="text-base font-semibold mb-2 text-white">{f.title}</h3>

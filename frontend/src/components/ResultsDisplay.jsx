@@ -172,7 +172,7 @@ function ColorCard({ color, category, gender, isDark }) {
   return (
     <div className={`${cardCls} rounded-2xl overflow-hidden transition-all duration-300 hover:border-purple-500/40`} onClick={() => setExpanded(e => !e)}>
       <div className="flex items-center gap-3 p-3 cursor-pointer">
-        <div className={`w-12 h-12 rounded-xl flex-shrink-0 shadow-lg border ${hexBorderCls}`} style={{ backgroundColor: color.hex }} />
+        <div className={`w-12 h-12 rounded-xl flex-shrink-0 shadow-lg border ${hexBorderCls} swatch-pop`} style={{ backgroundColor: color.hex }} />
         <div className="flex-1 min-w-0">
           <p className={`${nameCls} font-bold text-sm truncate`}>{color.name}</p>
           <p className={`${hexCls} text-xs font-mono`}>{color.hex}</p>
@@ -187,7 +187,7 @@ function ColorCard({ color, category, gender, isDark }) {
         <span className={`${chevronCls} text-xs transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}>▼</span>
       </div>
       {expanded && (
-        <div className={`px-3 pb-3 border-t ${dividerCls} pt-2`} onClick={e => e.stopPropagation()}>
+        <div className={`px-3 pb-3 border-t ${dividerCls} pt-2 scale-in`} onClick={e => e.stopPropagation()}>
           {color.reason && <p className={`${reasonCls} text-xs mb-2 leading-relaxed`}>{color.reason}</p>}
           <ShoppingLinks colorName={color.name} category={category} gender={gender} />
         </div>
@@ -347,7 +347,7 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
           <span className="text-purple-400 font-black text-sm">{styleScore}/100</span>
         </div>
         <div className={`h-2 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
-          <div className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-1000" style={{ width: `${styleScore}%` }} />
+          <div className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 fill-bar" style={{ '--target-width': `${styleScore}%`, width: `${styleScore}%` }} />
         </div>
       </div>
 
