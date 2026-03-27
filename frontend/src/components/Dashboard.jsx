@@ -6,7 +6,6 @@ import HistoryPanel from './HistoryPanel';
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
 
-// ── Loading Screen ──────────────────────────────────────────
 function LoadingScreen() {
   const [step, setStep] = useState(0);
   const steps = [
@@ -39,7 +38,6 @@ function LoadingScreen() {
   );
 }
 
-// ── Home Screen ─────────────────────────────────────────────
 function HomeScreen({ user, onAnalyze, onTabChange }) {
   const quickCards = [
     { icon: '🎨', label: 'Best Colors', tab: 'analyze' },
@@ -58,23 +56,19 @@ function HomeScreen({ user, onAnalyze, onTabChange }) {
   const firstName = user?.name?.split(' ')[0] || 'there';
   return (
     <div className="pb-4 space-y-6">
-      {/* Greeting */}
       <div className="pt-2">
         <p className="text-white/50 text-sm">Good day,</p>
         <h2 className="text-white text-2xl font-black">Hey {firstName} 👋</h2>
         <p className="text-white/40 text-xs mt-1">Discover your perfect style with AI</p>
       </div>
 
-      {/* CTA */}
       <button
         onClick={onAnalyze}
-ale-[1.02] active:scale-[0.98]"
-        style={{ animation: 'glow 3s ease-in-out infinite' }}
+        className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-2xl text-white font-black text-base shadow-lg shadow-purple-900/50 transition-all hover:scale-[1.02] active:scale-[0.98]"
       >
         ✨ Analyze Your Style
       </button>
 
-      {/* Quick Cards */}
       <div>
         <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-3">Explore</p>
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
@@ -82,7 +76,7 @@ ale-[1.02] active:scale-[0.98]"
             <button
               key={c.label}
               onClick={() => onTabChange(c.tab)}
-="flex-shrink-0 flex flex-col items-center gap-2 bg-white/5 border border-white/10 hover:border-purple-500/50 rounded-2xl px-5 py-4 transition-all hover:bg-white/10 min-w-[90px]"
+              className="flex-shrink-0 flex flex-col items-center gap-2 bg-white/5 border border-white/10 hover:border-purple-500/50 rounded-2xl px-5 py-4 transition-all hover:bg-white/10 min-w-[90px]"
             >
               <span className="text-2xl">{c.icon}</span>
               <span className="text-white/70 text-xs font-medium text-center">{c.label}</span>
@@ -91,9 +85,8 @@ ale-[1.02] active:scale-[0.98]"
         </div>
       </div>
 
-      {/* Trending Styles */}
       <div>
-        <p classNapercase tracking-wide mb-3">Trending Now 🔥</p>
+        <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-3">Trending Now 🔥</p>
         <div className="grid grid-cols-3 gap-3">
           {trendingStyles.map((s) => (
             <button
@@ -102,17 +95,16 @@ ale-[1.02] active:scale-[0.98]"
               className="flex flex-col items-center gap-2 bg-white/5 border border-white/10 hover:border-purple-500/40 rounded-2xl p-3 transition-all hover:bg-white/10 active:scale-95"
             >
               <span className="text-3xl">{s.emoji}</span>
-              80 text-xs font-semibold text-center leading-tight">{s.label}</span>
+              <span className="text-white/80 text-xs font-semibold text-center leading-tight">{s.label}</span>
               <span className="text-purple-400 text-[10px] font-bold bg-purple-500/10 px-2 py-0.5 rounded-full">{s.tag}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Quick Outfit Check */}
       <div
         onClick={() => onTabChange('outfit')}
-        className="cursor-pointer bg-g-500/50 transition-all"
+        className="cursor-pointer bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-blue-700/30 rounded-2xl p-4 flex items-center gap-4 hover:border-blue-500/50 transition-all"
       >
         <span className="text-4xl">👔</span>
         <div className="flex-1">
@@ -125,16 +117,13 @@ ale-[1.02] active:scale-[0.98]"
   );
 }
 
-// ── Settings Screen ──────────────────────────────────────────
-function SettingsScreen({ u{
+function SettingsScreen({ user, onLogout }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t, language, changeLanguage } = useLanguage();
   const isDark = theme === 'dark';
   return (
     <div className="space-y-4 pt-2">
       <h2 className="text-white text-xl font-black">⚙️ Settings</h2>
-
-      {/* User Info */}
       <div className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 border border-purple-700/30 rounded-2xl p-4 flex items-center gap-4">
         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-lg">
           {user?.name?.[0]?.toUpperCase() || 'U'}
@@ -144,20 +133,16 @@ function SettingsScreen({ u{
           <p className="text-white/40 text-xs">{user?.email}</p>
         </div>
       </div>
-
-      {/* Language */}
       <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between">
         <div>
-          <p className="text-white font-bold t-sm">🌐 Language</p>
+          <p className="text-white font-bold text-sm">🌐 Language</p>
           <p className="text-white/40 text-xs mt-0.5">App language</p>
         </div>
         <div className="flex bg-white/10 rounded-xl p-1 gap-1">
           <button onClick={() => changeLanguage('hinglish')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'hinglish' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : 'text-white/50 hover:text-white'}`}>🇮🇳</button>
-          <button onClick={() => changeLanguage('en')} classNam py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'en' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : 'text-white/50 hover:text-white'}`}>🇬🇧</button>
+          <button onClick={() => changeLanguage('en')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'en' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : 'text-white/50 hover:text-white'}`}>🇬🇧</button>
         </div>
       </div>
-
-      {/* Theme */}
       <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between">
         <div>
           <p className="text-white font-bold text-sm">{isDark ? '🌙 Dark Mode' : '☀️ Light Mode'}</p>
@@ -167,16 +152,13 @@ function SettingsScreen({ u{
           <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-all duration-300 ${isDark ? 'left-8' : 'left-1'}`} />
         </button>
       </div>
-
-      {/* Logout */}
       <button onClick={onLogout} className="w-full py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-2xl border border-red-500/20 transition">
-  🚪 Logout
+        🚪 Logout
       </button>
     </div>
   );
 }
 
-// ── Main Dashboard ───────────────────────────────────────────
 function Dashboard({ user, onLogout }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t } = useLanguage();
@@ -191,11 +173,11 @@ function Dashboard({ user, onLogout }) {
   const handleAnalysisComplete = (data) => { setResults({ ...data, gender: data.gender || currentGender }); setLoading(false); };
 
   const navItems = [
-    { id: 'home',    emoji: '🏠', label: 'Home' },
-    { id: 'analyze', emoji: '📸', label: 'Analyze' },
-    { id: 'outfit',  emoji: '👔', label: 'Outfit' },
-    { id: 'history', emoji: '📋', label: 'History' },
-    { id: 'sets',emoji: '⚙️', label: 'Profile' },
+    { id: 'home',     emoji: '🏠', label: 'Home' },
+    { id: 'analyze',  emoji: '📸', label: 'Analyze' },
+    { id: 'outfit',   emoji: '👔', label: 'Outfit' },
+    { id: 'history',  emoji: '📋', label: 'History' },
+    { id: 'settings', emoji: '⚙️', label: 'Profile' },
   ];
 
   const handleTabChange = (tab) => {
@@ -205,18 +187,15 @@ function Dashboard({ user, onLogout }) {
 
   return (
     <div className="min-h-screen bg-[#050816] text-white" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
-      {/* Glow blobs */}
       <div className="fixed top-[-200px] left-[-200px] w-[500px] h-[500px] rounded-full bg-purple-700/20 blur-[120px] pointer-events-none z-0" />
       <div className="fixed bottom-[-200px] right-[-200px] w-[500px] h-[500px] rounded-full bg-pink-700/20 blur-[120px] pointer-events-none z-0" />
 
       <style>{`
-        @keyframes glow { 0%,100%{box-shadow:0 0 20px rgba(168,85,247,0.4)} 50%{box-shadow:0 0 35px rgba(236,72,153,0.7)} }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      {/* Top Header */}
-      <header className="050816]/80 backdrop-blur-xl sticky top-0">
+      <header className="relative z-10 flex items-center justify-between px-4 py-4 border-b border-white/10 bg-[#050816]/80 backdrop-blur-xl sticky top-0">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm font-black">S</div>
           <span className="font-black text-base bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">StyleGuru AI</span>
@@ -233,25 +212,16 @@ function Dashboard({ user, onLogout }) {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="relative z-10 max-w-lg mx-auto px-4 pt-4 pb-24">
-
-        {/* HOME */}
         {activeTab === 'home' && (
-          <HomeScreen
-            user={user}
-            onAnalyze={() => setActiveTab('analyze')}
-            onTabChange={handleTabChange}
-          />
+          <HomeScreen user={user} onAnalyze={() => setActiveTab('analyze')} onTabChange={handleTabChange} />
         )}
-
-        {/* ANALYZE */}
         {activeTab === 'analyze' && (
           <>
             {!results && !loading && (
               <UploadSection
                 onLoadingStart={() => { setLoading(true); setError(null); }}
-                onAnComplete={handleAnalysisComplete}
+                onAnalysisComplete={handleAnalysisComplete}
                 onError={(msg) => { setError(msg); setLoading(false); }}
                 onImageSelected={setUploadedImage}
                 onGenderChange={setCurrentGender}
@@ -261,7 +231,7 @@ function Dashboard({ user, onLogout }) {
             {error && (
               <div className="mt-8 rounded-2xl p-6 text-center border bg-red-500/10 border-red-500/30">
                 <div className="text-4xl mb-3">😕</div>
-                <p classNamemedium mb-1">Oops!</p>
+                <p className="text-red-300 font-medium mb-1">Oops!</p>
                 <p className="text-red-400/80 text-sm whitespace-pre-line">{error}</p>
                 <button onClick={handleReset} className="mt-4 px-5 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/20 text-sm font-medium transition">
                   {t('tryAgain')}
@@ -271,12 +241,20 @@ function Dashboard({ user, onLogout }) {
             {results && <ResultsDisplay data={results} uploadedImage={uploadedImage} onReset={handleReset} />}
           </>
         )}
-
-        {/* OUTFIT */}
         {activeTab === 'outfit' && <OutfitChecker />}
+        {activeTab === 'history' && <HistoryPanel />}
+        {activeTab === 'settings' && <SettingsScreen user={user} onLogout={onLogout} />}
+      </main>
 
-        {/* HISTORY */}
-        {activeTab === 'h''}`}>{item.emoji}</span>
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#050816]/95 backdrop-blur-xl border-t border-white/10">
+        <div className="max-w-lg mx-auto flex justify-around px-2 py-2">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => handleTabChange(item.id)}
+              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${activeTab === item.id ? 'text-purple-400' : 'text-white/30 hover:text-white/60'}`}
+            >
+              <span className={`text-xl transition-transform ${activeTab === item.id ? 'scale-110' : ''}`}>{item.emoji}</span>
               <span className={`text-[10px] font-semibold ${activeTab === item.id ? 'text-purple-400' : 'text-white/30'}`}>{item.label}</span>
               {activeTab === item.id && <div className="w-1 h-1 rounded-full bg-purple-400" />}
             </button>
@@ -288,23 +266,3 @@ function Dashboard({ user, onLogout }) {
 }
 
 export default Dashboard;
- px-2 py-2">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => handleTabChange(item.id)}
-              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${
-                activeTab === item.id
-                  ? 'text-purple-400'
-                  : 'text-white/30 hover:text-white/60'
-              }`}
-            >
-              <span className={`text-xl transition-transform ${activeTab === item.id ? 'scale-110' : istory' && <HistoryPanel />}
-
-        {/* SETTINGS / PROFILE */}
-        {activeTab === 'settings' && <SettingsScreen user={user} onLogout={onLogout} />}
-      </main>
-
-      {/* Fixed Bottom Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#050816]/95 backdrop-blur-xl border-t border-white/10">
-        <div className="max-w-lg mx-auto flex justify-around
