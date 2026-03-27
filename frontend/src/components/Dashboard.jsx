@@ -41,6 +41,8 @@ function LoadingScreen() {
 function HomeScreen({ user, onAnalyze, onTabChange }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
+  const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
+  const toneColors = { fair: "#F5DEB3", light: "#D2A679", medium: "#C68642", olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A" };
   const quickCards = [
     { icon: '🎨', label: 'Best Colors', tab: 'analyze' },
     { icon: '👔', label: 'Outfit Ideas', tab: 'analyze' },
@@ -70,6 +72,22 @@ function HomeScreen({ user, onAnalyze, onTabChange }) {
       >
         ✨ Analyze Your Style
       </button>
+
+      {/* Recent Analysis */}
+      {lastAnalysis && (
+        <div
+          onClick={onAnalyze}
+          className={`cursor-pointer rounded-2xl p-4 border flex items-center gap-4 transition-all hover:border-purple-500/50 ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}
+        >
+          <div className="w-12 h-12 rounded-xl flex-shrink-0 border border-white/20" style={{ backgroundColor: toneColors[lastAnalysis.skinTone] || '#C68642' }} />
+          <div className="flex-1 min-w-0">
+            <p className={`text-xs font-semibold uppercase tracking-wide ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Last Analysis</p>
+            <p className={`font-black text-sm capitalize ${isDark ? 'text-white' : 'text-gray-800'}`}>{lastAnalysis.skinTone} Skin · {lastAnalysis.undertone}</p>
+            <p className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{lastAnalysis.date} · {lastAnalysis.season}</p>
+          </div>
+          <span className={`text-sm ${isDark ? 'text-purple-400' : 'text-purple-500'}`}>→</span>
+        </div>
+      )}
 
       <div>
         <p className={`text-xs font-semibold uppercase tracking-wide mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Explore</p>
@@ -180,7 +198,20 @@ function Dashboard({ user, onLogout }) {
   const [currentGender, setCurrentGender] = useState('male');
 
   const handleReset = () => { setResults(null); setError(null); setUploadedImage(null); };
-  const handleAnalysisComplete = (data) => { setResults({ ...data, gender: data.gender || currentGender }); setLoading(false); };
+  const handleAnalysisComplete = (data) => {
+    const enriched = { ...data, gender: data.gender || currentGender };
+    setResults(enriched);
+    setLoading(false);
+    // Save last analysis summary to localStorage
+    try {
+      localStorage.setItem('sg_last_analysis', JSON.stringify({
+        skinTone: enriched.analysis?.skin_tone?.category,
+        undertone: enriched.analysis?.skin_tone?.undertone,
+        season: enriched.analysis?.skin_tone?.color_season,
+        date: new Date().toLocaleDateString('en-IN'),
+      }));
+    } catch {}
+  };
 
   const navItems = [
     { id: 'home',     emoji: '🏠', label: 'Home' },

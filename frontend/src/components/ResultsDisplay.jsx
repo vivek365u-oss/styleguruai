@@ -11,6 +11,14 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   const colorLower = colorName.toLowerCase().replace(/\s+/g, '+');
   const colorDisplay = colorName.toLowerCase().replace(/\s+/g, ' ');
   const AMAZON_TAG = 'styleguruai-21';
+  const [budget, setBudget] = useState(null); // null = no filter
+
+  const budgets = [
+    { label: '₹500', amzMax: 500, fkMax: 500, myntraMax: 500 },
+    { label: '₹1000', amzMax: 1000, fkMax: 1000, myntraMax: 1000 },
+    { label: '₹2000', amzMax: 2000, fkMax: 2000, myntraMax: 2000 },
+    { label: 'Any', amzMax: null, fkMax: null, myntraMax: null },
+  ];
 
   const categoryConfig = {
     dress:      { amzKw: `${colorDisplay} women maxi dress western`,       amzNode: '1968024031', fkCat: 'women-western-wear',      myntra: `https://www.myntra.com/dresses?rawQuery=${colorLower}+maxi+dress`,          meesho: `${colorDisplay} women dress` },
@@ -36,21 +44,46 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
 
   const cfg = categoryConfig[category] || { amzKw: `${colorDisplay} ${isFemale ? 'women' : 'men'} ${category}`, amzNode: '1968024031', fkCat: isFemale ? 'women-western-wear' : 'men-tshirts', myntra: `https://www.myntra.com/fashion?rawQuery=${colorLower}+${isFemale ? 'women' : 'men'}`, meesho: `${colorDisplay} ${isFemale ? 'women' : 'men'} ${category}` };
 
+  // Build price-filtered URLs
+  const priceParam = budget ? `&p=%5B%7B%22key%22%3A%22net_price%22%2C%22max%22%3A${budget.amzMax}%7D%5D` : '';
+  const amzPriceParam = budget?.amzMax ? `&rh=n%3A${cfg.amzNode}%2Cp_36%3A-${budget.amzMax * 100}` : `&rh=n%3A${cfg.amzNode}`;
+  const fkPriceParam = budget?.fkMax ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budget.fkMax}` : '';
+  const myntraPriceParam = budget?.myntraMax ? `&p=price%5B0%5D%3D0%20TO%20${budget.myntraMax}` : '';
+
   const links = [
-    { name: 'Amazon',   url: `https://www.amazon.in/s?k=${encodeURIComponent(cfg.amzKw)}&rh=n%3A${cfg.amzNode}&sort=review-rank&tag=${AMAZON_TAG}`, icon: '🛒', bg: 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' },
-    { name: 'Flipkart', url: `https://www.flipkart.com/search?q=${encodeURIComponent(colorDisplay + ' ' + (cfg.fkCat || '').replace(/-/g, ' '))}&sort=popularity`, icon: '🏪', bg: 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' },
-    { name: 'Myntra',   url: cfg.myntra, icon: '👗', bg: 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' },
+    { name: 'Amazon',   url: `https://www.amazon.in/s?k=${encodeURIComponent(cfg.amzKw)}${amzPriceParam}&sort=review-rank&tag=${AMAZON_TAG}`, icon: '🛒', bg: 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' },
+    { name: 'Flipkart', url: `https://www.flipkart.com/search?q=${encodeURIComponent(colorDisplay + ' ' + (cfg.fkCat || '').replace(/-/g, ' '))}&sort=popularity${fkPriceParam}`, icon: '🏪', bg: 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' },
+    { name: 'Myntra',   url: `${cfg.myntra}${myntraPriceParam}`, icon: '👗', bg: 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' },
     { name: 'Meesho',   url: `https://meesho.com/search?q=${encodeURIComponent(cfg.meesho)}`, icon: '🛍️', bg: 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' },
   ];
 
   return (
-    <div className="flex gap-1.5 flex-wrap mt-2">
-      {links.map((link) => (
-        <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer"
-          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}>
-          <span>{link.icon}</span><span>{link.name}</span>
-        </a>
-      ))}
+    <div className="mt-2 space-y-2">
+      {/* Budget filter pills */}
+      <div className="flex gap-1.5 flex-wrap">
+        {budgets.map((b) => (
+          <button
+            key={b.label}
+            onClick={(e) => { e.stopPropagation(); setBudget(b.label === 'Any' ? null : b); }}
+            className={`px-2 py-0.5 rounded-full text-xs font-bold border transition-all ${
+              (b.label === 'Any' && !budget) || budget?.label === b.label
+                ? 'bg-purple-500/40 border-purple-400 text-purple-200'
+                : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70'
+            }`}
+          >
+            {b.label}
+          </button>
+        ))}
+      </div>
+      {/* Shop links */}
+      <div className="flex gap-1.5 flex-wrap">
+        {links.map((link) => (
+          <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer"
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}>
+            <span>{link.icon}</span><span>{link.name}</span>
+          </a>
+        ))}
+      </div>
     </div>
   );
 }
@@ -151,6 +184,47 @@ function OutfitCard({ combo, index, isDark }) {
       </div>
     </div>
   );
+}
+
+// ── Color Palette Download ───────────────────────────────────
+function downloadPalette(colors, skinTone) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 600;
+  canvas.height = 200;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#050816';
+  ctx.fillRect(0, 0, 600, 200);
+
+  // Title
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 16px Arial';
+  ctx.fillText(`StyleGuru AI — ${skinTone} Skin Palette`, 20, 30);
+  ctx.fillStyle = '#a855f7';
+  ctx.font = '11px Arial';
+  ctx.fillText('styleguruai.in', 20, 48);
+
+  // Color swatches
+  const swatchW = 70, swatchH = 100, startX = 20, startY = 65, gap = 10;
+  colors.slice(0, 7).forEach((color, i) => {
+    const x = startX + i * (swatchW + gap);
+    ctx.fillStyle = color.hex;
+    ctx.beginPath();
+    ctx.roundRect(x, startY, swatchW, swatchH, 8);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 9px Arial';
+    ctx.fillText(color.name?.slice(0, 10) || '', x + 4, startY + swatchH + 14);
+    ctx.fillStyle = '#888';
+    ctx.font = '8px Arial';
+    ctx.fillText(color.hex, x + 4, startY + swatchH + 25);
+  });
+
+  const link = document.createElement('a');
+  link.download = `styleguruai-${skinTone}-palette.png`;
+  link.href = canvas.toDataURL();
+  link.click();
 }
 
 // ── Celebrity Skin Match ─────────────────────────────────────
@@ -652,6 +726,24 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         isSeasonal={isSeasonal}
         isDark={isDark}
       />
+
+      {/* Download Palette */}
+      {(() => {
+        const allColors = [
+          ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || recommendations.seasonal_colors || []),
+          ...(recommendations.best_pant_colors || []),
+        ].slice(0, 7);
+        if (allColors.length === 0) return null;
+        return (
+          <button
+            onClick={() => downloadPalette(allColors, analysis.skin_tone.category)}
+            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-bold transition-all hover:scale-[1.02] ${isDark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-purple-500/40' : 'bg-white border-gray-200 text-gray-600 hover:border-purple-400 shadow-sm'}`}
+          >
+            <span>🎨</span>
+            <span>Download My Color Palette</span>
+          </button>
+        );
+      })()}
 
       {/* Tab bar */}
       <div className={`flex ${tabBarBg} rounded-2xl p-1 gap-1`}>
