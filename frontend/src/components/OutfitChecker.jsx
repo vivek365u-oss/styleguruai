@@ -228,12 +228,48 @@ function OutfitChecker() {
                 {compatibility.better_alternatives.map((color, i) => (
                   <div key={i} className={`flex items-center gap-3 rounded-xl p-3 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
                     <div className="w-10 h-10 rounded-lg border border-white/20 flex-shrink-0" style={{ backgroundColor: color.hex }} />
-                    <div>
+                    <div className="flex-1">
                       <p className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{color.name}</p>
                       <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{color.reason}</p>
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Shop This Look */}
+          {result?.skin_analysis?.skin_tone && (
+            <div className={`rounded-3xl p-5 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+              <h3 className={`font-black text-base mb-3 ${isDark ? 'text-white' : 'text-gray-800'}`}>🛍️ Shop This Look</h3>
+              <div className="space-y-2">
+                {[
+                  { label: 'Shop Shirts / Tops', cat: result.skin_analysis.gender === 'female' ? 'top' : 'shirt' },
+                  { label: 'Shop Pants / Bottoms', cat: result.skin_analysis.gender === 'female' ? 'bottom' : 'pant' },
+                ].map(({ label, cat }) => {
+                  const colorName = result.outfit_analysis?.color_name || 'trending';
+                  const gender = result.skin_analysis?.gender || 'male';
+                  const AMAZON_TAG = 'styleguruai-21';
+                  const kw = encodeURIComponent(`${colorName} ${gender === 'female' ? 'women' : 'men'} ${cat}`);
+                  return (
+                    <div key={cat}>
+                      <p className={`text-xs font-semibold mb-1.5 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{label}</p>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {[
+                          { name: 'Amazon', url: `https://www.amazon.in/s?k=${kw}&sort=review-rank&tag=${AMAZON_TAG}`, bg: 'bg-orange-500/20 border-orange-500/30 text-orange-300' },
+                          { name: 'Flipkart', url: `https://www.flipkart.com/search?q=${kw}&sort=popularity`, bg: 'bg-blue-500/20 border-blue-500/30 text-blue-300' },
+                          { name: 'Myntra', url: `https://www.myntra.com/fashion?rawQuery=${kw}`, bg: 'bg-pink-500/20 border-pink-500/30 text-pink-300' },
+                          { name: 'Meesho', url: `https://meesho.com/search?q=${kw}`, bg: 'bg-purple-500/20 border-purple-500/30 text-purple-300' },
+                        ].map(link => (
+                          <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer"
+                            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}>
+                            {link.name}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

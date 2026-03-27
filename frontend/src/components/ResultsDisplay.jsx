@@ -802,6 +802,38 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         )}
       </div>
 
+      {/* Related Blog Posts */}
+      {(() => {
+        const skinTone = analysis?.skin_tone?.category;
+        const blogs = [
+          { slug: 'skin-tone-colors', title: 'Best Colors for Your Skin Tone', emoji: '🎨', relevantFor: ['fair','light','medium','olive','brown','dark'] },
+          { slug: 'outfit-guide', title: 'How to Choose the Perfect Outfit', emoji: '👔', relevantFor: ['fair','light','medium','olive','brown','dark'] },
+          { slug: 'ai-fashion', title: 'How AI is Changing Fashion', emoji: '🤖', relevantFor: ['fair','light','medium','olive','brown','dark'] },
+          { slug: 'wardrobe-essentials', title: 'Wardrobe Essentials Every Indian Should Own', emoji: '👗', relevantFor: ['fair','light','medium','olive','brown','dark'] },
+          { slug: 'accessorizing-guide', title: 'The Art of Accessorizing', emoji: '✨', relevantFor: ['fair','light','medium','olive','brown','dark'] },
+        ];
+        const relevant = blogs.filter(b => b.relevantFor.includes(skinTone)).slice(0, 3);
+        if (!relevant.length) return null;
+        return (
+          <div className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+            <p className={`text-xs font-bold uppercase tracking-wide mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>📖 Read More</p>
+            <div className="space-y-2">
+              {relevant.map((blog) => (
+                <a
+                  key={blog.slug}
+                  href={`/blog/${blog.slug}`}
+                  className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all hover:border-purple-500/40 ${isDark ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-gray-50 border-gray-100 hover:bg-purple-50'}`}
+                >
+                  <span className="text-xl">{blog.emoji}</span>
+                  <p className={`text-sm font-semibold flex-1 ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{blog.title}</p>
+                  <span className={`text-xs ${isDark ? 'text-purple-400' : 'text-purple-500'}`}>→</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* New photo button */}
       <button
         onClick={onReset}

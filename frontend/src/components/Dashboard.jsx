@@ -57,6 +57,23 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
     { emoji: '🧥', label: 'Hoodies', tag: 'Trending' },
     { emoji: '👗', label: 'Maxi Dress', tag: 'Hot' },
   ];
+  const DAILY_TIPS = [
+    { emoji: '🎨', tip: 'Navy blue suits warm undertones perfectly — try it for your next outfit!' },
+    { emoji: '👗', tip: 'Coord sets are trending — pick a color that matches your skin tone for max impact.' },
+    { emoji: '✨', tip: 'Gold jewellery enhances medium and dark skin tones beautifully.' },
+    { emoji: '🌿', tip: 'Earthy tones like terracotta and olive are perfect for medium skin tones.' },
+    { emoji: '💡', tip: 'Wear your best color near your face — it draws attention to your features.' },
+    { emoji: '👔', tip: 'Oversized fits look best when you balance with fitted bottoms.' },
+    { emoji: '🪷', tip: 'For ethnic wear, jewel tones like deep red and emerald are universally flattering.' },
+    { emoji: '☀️', tip: 'In summer, light pastels keep you cool and stylish at the same time.' },
+    { emoji: '🧣', tip: 'A dupatta in a contrasting color can completely transform a simple outfit.' },
+    { emoji: '💄', tip: 'Match your lip color to your undertone — warm tones suit coral, cool tones suit berry.' },
+    { emoji: '👟', tip: 'White sneakers go with everything — the most versatile footwear you can own.' },
+    { emoji: '🎉', tip: 'For festive occasions, always go one shade bolder than your usual choice.' },
+    { emoji: '🌙', tip: 'Dark skin tones glow in bright whites and vivid colors — embrace the boldness!' },
+    { emoji: '🌸', tip: 'Fair skin tones look stunning in jewel tones like sapphire and emerald.' },
+  ];
+  const todayTip = DAILY_TIPS[new Date().getDate() % DAILY_TIPS.length];
   const firstName = user?.name?.split(' ')[0] || 'there';
   return (
     <div className="pb-4 space-y-6">
@@ -72,6 +89,15 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
       >
         ✨ Analyze Your Style
       </button>
+
+      {/* Daily Style Tip */}
+      <div className={`rounded-2xl p-4 border flex items-start gap-3 ${isDark ? 'bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-700/30' : 'bg-purple-50 border-purple-200'}`}>
+        <span className="text-2xl flex-shrink-0">{todayTip.emoji}</span>
+        <div>
+          <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>💡 Style Tip of the Day</p>
+          <p className={`text-sm leading-relaxed ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{todayTip.tip}</p>
+        </div>
+      </div>
 
       {/* Recent Analysis */}
       {lastAnalysis && (
