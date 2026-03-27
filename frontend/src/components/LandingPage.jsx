@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from 'react';
+import SEOHead from './SEOHead';
+import Footer from './Footer';
 
 const features = [
   { icon: '🎨', title: 'Skin Tone Detection', desc: 'AI-powered analysis using advanced CIELAB color science.' },
@@ -55,6 +57,10 @@ export default function LandingPage({ onGetStarted }) {
 
   return (
     <div className="min-h-screen bg-[#050816] text-white overflow-x-hidden" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
+      <SEOHead
+        title="StyleGuru AI – AI-Powered Fashion Advisor"
+        description="Get personalized outfit recommendations based on your skin tone using AI. Upload a selfie and discover your perfect colors."
+      />
 
       {/* Particle canvas */}
       <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" />
@@ -272,19 +278,7 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-gray-800/50 px-6 py-10 text-center">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold">S</div>
-          <span className="font-semibold text-gray-300">StyleGuru AI</span>
-        </div>
-        <div className="flex justify-center gap-8 text-sm text-gray-500 mb-4">
-          <button className="hover:text-purple-400 transition">Home</button>
-          <button onClick={onGetStarted} className="hover:text-purple-400 transition">Login</button>
-          <button className="hover:text-purple-400 transition">Privacy</button>
-        </div>
-        <p className="text-gray-600 text-xs">© 2025 StyleGuru AI. All rights reserved.</p>
-      </footer>
+      <Footer />
     </div>
   );
 }
