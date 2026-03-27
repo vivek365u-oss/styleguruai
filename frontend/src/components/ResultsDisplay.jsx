@@ -488,9 +488,9 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
     <div className="space-y-4 pb-4 bg-transparent">
       {/* Photo quality warning */}
       {photo_quality?.warnings?.length > 0 && (
-        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3">
-          <p className="text-yellow-300 text-xs font-semibold mb-1">💡 Photo Tips:</p>
-          {photo_quality.warnings.map((w, i) => <p key={i} className="text-yellow-300/60 text-xs">• {w.message} → {w.fix}</p>)}
+        <div className={`rounded-xl p-3 border ${isDark ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-yellow-50 border-yellow-300'}`}>
+          <p className={`text-xs font-semibold mb-1 ${isDark ? 'text-yellow-300' : 'text-yellow-700'}`}>💡 Photo Tips:</p>
+          {photo_quality.warnings.map((w, i) => <p key={i} className={`text-xs ${isDark ? 'text-yellow-300/60' : 'text-yellow-600'}`}>• {w.message} → {w.fix}</p>)}
         </div>
       )}
 
