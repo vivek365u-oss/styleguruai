@@ -289,26 +289,45 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="relative z-10 px-6 md:px-12 py-20 max-w-4xl mx-auto text-center">
-        <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-4">How It Works</div>
-        <h2 className="text-3xl md:text-5xl font-bold mb-12">3 Simple Steps</h2>
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+      {/* How it works — Visual Demo */}
+      <section className="relative z-10 px-6 md:px-12 py-20 max-w-5xl mx-auto">
+        <div className="text-center mb-12">
+          <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-4">How It Works</div>
+          <h2 className="text-3xl md:text-5xl font-bold text-white">3 Simple Steps to Your <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Perfect Style</span></h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { step: '01', icon: '📸', title: 'Upload Selfie', desc: 'Take or upload a clear photo' },
-            { step: '02', icon: '🔬', title: 'AI Analysis', desc: 'Skin tone detected instantly' },
-            { step: '03', icon: '🎨', title: 'Get Colors', desc: 'Personalized recommendations' },
+            { step: '01', icon: '📸', title: 'Upload Your Selfie', desc: 'Take a clear selfie in natural light. Our AI works best with a front-facing photo without sunglasses.', color: 'from-purple-500/20 to-purple-600/10 border-purple-500/30', badge: 'bg-purple-500' },
+            { step: '02', icon: '🔬', title: 'AI Analyzes Skin Tone', desc: 'Our advanced CIELAB color science detects your exact skin tone category and undertone in seconds.', color: 'from-pink-500/20 to-pink-600/10 border-pink-500/30', badge: 'bg-pink-500' },
+            { step: '03', icon: '🎨', title: 'Get Personalized Results', desc: 'Receive color palettes, outfit combos, shopping links, and style tips tailored specifically for you.', color: 'from-blue-500/20 to-blue-600/10 border-blue-500/30', badge: 'bg-blue-500' },
           ].map((s, i) => (
-            <React.Fragment key={s.step}>
-              <div className="flex-1 bg-gray-900/60 border border-gray-800 rounded-2xl p-6 hover:border-purple-600/50 transition-all backdrop-blur-sm">
-                <div className="text-xs text-purple-400 font-bold mb-3">{s.step}</div>
-                <div className="text-4xl mb-3">{s.icon}</div>
-                <div className="font-semibold mb-1">{s.title}</div>
-                <div className="text-gray-400 text-sm">{s.desc}</div>
-              </div>
-              {i < 2 && <div className="text-purple-600 text-2xl hidden md:block">→</div>}
-            </React.Fragment>
+            <div key={s.step} className={`relative bg-gradient-to-br ${s.color} border rounded-3xl p-6 hover:-translate-y-1 transition-all duration-300`}>
+              <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${s.badge} text-white text-xs font-black mb-4`}>{s.step}</div>
+              <div className="text-5xl mb-4">{s.icon}</div>
+              <h3 className="text-white font-black text-lg mb-2">{s.title}</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">{s.desc}</p>
+              {i < 2 && <div className="hidden md:block absolute -right-4 top-1/2 -translate-y-1/2 text-purple-600 text-2xl z-10">→</div>}
+            </div>
           ))}
+        </div>
+
+        {/* Visual result preview */}
+        <div className="mt-10 bg-gray-900/60 border border-gray-800 rounded-3xl p-6 backdrop-blur-sm">
+          <p className="text-white/50 text-xs font-semibold uppercase tracking-wide text-center mb-4">What You Get</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { icon: '🎨', label: 'Color Palette', desc: '8+ best colors for your skin' },
+              { icon: '👔', label: 'Outfit Combos', desc: 'Complete outfit ideas' },
+              { icon: '🛍️', label: 'Shop Links', desc: 'Amazon, Flipkart, Myntra' },
+              { icon: '💡', label: 'Style Tips', desc: 'Expert fashion advice' },
+            ].map((item) => (
+              <div key={item.label} className="text-center p-3 bg-white/5 rounded-2xl border border-white/10">
+                <div className="text-3xl mb-2">{item.icon}</div>
+                <p className="text-white font-bold text-xs">{item.label}</p>
+                <p className="text-gray-500 text-xs mt-0.5">{item.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
