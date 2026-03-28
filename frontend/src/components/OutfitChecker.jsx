@@ -1,5 +1,5 @@
 import { useState, useRef, useContext } from 'react';
-import { checkOutfitCompatibility } from '../api/styleApi';
+import { checkOutfitCompatibility, saveWardrobeItem, auth } from '../api/styleApi';
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
 
@@ -92,6 +92,8 @@ function OutfitChecker() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [wardrobeSaved, setWardrobeSaved] = useState(false);
+  const [wardrobeSaving, setWardrobeSaving] = useState(false);
 
   const selfieRef = useRef(null);
   const outfitRef = useRef(null);
@@ -129,6 +131,34 @@ function OutfitChecker() {
     setSelfiePreview(null); setOutfitPreview(null);
     setSelfieFile(null); setOutfitFile(null);
     setResult(null); setError(null);
+    setWardrobeSaved(false); setWardrobeSaving(false);
+  };
+
+  const handleSaveToWardrobe = async () => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    setWardrobeSaving(true);
+    try {
+      await saveWardrobeItem(uid, {
+        source: 'outfit_checker',
+        outfit_data: {
+          colors: result.outfit_analysis?.color_name ? [{ name: result.outfit_analysis.color_name, hex: result.outfit_analysis.dominant_color_hex }] : [],
+        },
+        skin_tone: result.skin_analysis?.skin_tone || '',
+        skin_hex: result.skin_analysis?.skin_color_hex || '#C68642',
+        compatibility_score: score,
+      });
+      setWardrobeSaved(true);
+    } catch {
+      try {
+        const queue = JSON.parse(localStorage.getItem('sg_wardrobe_queue') || '[]');
+        queue.push({ source: 'outfit_checker', outfit_data: { colors: [] }, skin_tone: result.skin_analysis?.skin_tone || '', skin_hex: result.skin_analysis?.skin_color_hex || '#C68642', compatibility_score: score, saved_at: new Date().toISOString() });
+        localStorage.setItem('sg_wardrobe_queue', JSON.stringify(queue));
+        setWardrobeSaved(true); // treat offline queue as success
+      } catch {}
+    } finally {
+      setWardrobeSaving(false);
+    }
   };
 
   const compatibility = result?.compatibility;
@@ -277,6 +307,26 @@ function OutfitChecker() {
             <p className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{compatibility?.verdict}</p>
             <p className={`text-sm max-w-md mx-auto ${isDark ? 'text-white/70' : 'text-gray-600'}`}>{compatibility?.message}</p>
           </div>
+
+          {score >= 70 && (
+            <div className="flex gap-2">
+              {auth.currentUser ? (
+                <button
+                  onClick={handleSaveToWardrobe}
+                  disabled={wardrobeSaved || wardrobeSaving}
+                  className={`flex-1 py-3 rounded-2xl text-sm font-bold border transition-all ${
+                    wardrobeSaved
+                      ? isDark ? 'bg-green-500/20 border-green-500/30 text-green-400' : 'bg-green-50 border-green-300 text-green-600'
+                      : isDark ? 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10' : 'bg-white border-gray-200 text-gray-700 hover:border-purple-400 shadow-sm'
+                  } disabled:cursor-not-allowed`}
+                >
+                  {wardrobeSaved ? '✓ Saved to Wardrobe' : wardrobeSaving ? 'Saving...' : '👗 Save to Wardrobe'}
+                </button>
+              ) : (
+                <p className={`flex-1 text-center text-xs py-3 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Login to save this outfit</p>
+              )}
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className={`rounded-3xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>

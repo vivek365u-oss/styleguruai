@@ -2,7 +2,7 @@ import axios from 'axios';
 import { auth, googleProvider, db } from '../firebase';
 export { auth };
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
-import { doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, limit, deleteDoc } from 'firebase/firestore';
 
 const API = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000' });
 
@@ -162,3 +162,147 @@ export const checkOutfitCompatibility = (selfieFile, outfitFile, onProgress) => 
 
 export const testTone = (tone, undertone = 'warm') =>
   API.get(`/api/test/${tone}?undertone=${undertone}`);
+
+
+// ============================================
+// ERROR HELPERS
+// ============================================
+const handleFirestoreError = (fnName, e) => {
+  if (e?.code === 'permission-denied' || e?.message?.includes('permission-denied')) {
+    console.error(`[Firestore] Access denied in ${fnName}. Check security rules or re-login.`, e);
+  } else {
+    console.error(`${fnName} error:`, e);
+  }
+};
+
+// ============================================
+// PROFILE — FIRESTORE
+// ============================================
+
+export const saveProfile = async (uid, profile) => {
+  if (!auth.currentUser) return;
+  try {
+    await setDoc(doc(db, 'users', uid, 'profile', 'data'), {
+      ...profile,
+      updated_at: new Date().toISOString(),
+    });
+  } catch (e) {
+    handleFirestoreError('saveProfile', e);
+    throw e;
+  }
+};
+
+export const loadProfile = async (uid) => {
+  if (!auth.currentUser) return null;
+  try {
+    const snap = await getDoc(doc(db, 'users', uid, 'profile', 'data'));
+    return snap.exists() ? snap.data() : null;
+  } catch (e) {
+    handleFirestoreError('loadProfile', e);
+    return null;
+  }
+};
+
+// ============================================
+// WARDROBE — FIRESTORE
+// ============================================
+
+export const saveWardrobeItem = async (uid, item) => {
+  if (!auth.currentUser) return null;
+  try {
+    const ref = await addDoc(collection(db, 'users', uid, 'wardrobe'), {
+      ...item,
+      saved_at: new Date().toISOString(),
+    });
+    return ref.id;
+  } catch (e) {
+    handleFirestoreError('saveWardrobeItem', e);
+    throw e;
+  }
+};
+
+export const getWardrobe = async (uid) => {
+  if (!auth.currentUser) return [];
+  try {
+    const q = query(
+      collection(db, 'users', uid, 'wardrobe'),
+      orderBy('saved_at', 'desc')
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    handleFirestoreError('getWardrobe', e);
+    return [];
+  }
+};
+
+export const deleteWardrobeItem = async (uid, itemId) => {
+  if (!auth.currentUser) return;
+  try {
+    await deleteDoc(doc(db, 'users', uid, 'wardrobe', itemId));
+  } catch (e) {
+    handleFirestoreError('deleteWardrobeItem', e);
+    throw e;
+  }
+};
+
+export const getWardrobeCount = async (uid) => {
+  if (!auth.currentUser) return 0;
+  try {
+    const snap = await getDocs(collection(db, 'users', uid, 'wardrobe'));
+    return snap.size;
+  } catch (e) {
+    handleFirestoreError('getWardrobeCount', e);
+    return 0;
+  }
+};
+
+// ============================================
+// PUSH SUBSCRIPTIONS — FIRESTORE
+// ============================================
+
+export const savePushSubscription = async (uid, sub, skinTone, colorSeason) => {
+  if (!auth.currentUser) return;
+  try {
+    const subId = btoa(sub.endpoint).slice(0, 20).replace(/[^a-zA-Z0-9]/g, '');
+    await setDoc(doc(db, 'users', uid, 'push_subscriptions', subId), {
+      endpoint: sub.endpoint,
+      keys: sub.keys || { p256dh: sub.toJSON?.()?.keys?.p256dh || '', auth: sub.toJSON?.()?.keys?.auth || '' },
+      skin_tone: skinTone || '',
+      color_season: colorSeason || '',
+      created_at: new Date().toISOString(),
+    });
+    return subId;
+  } catch (e) {
+    handleFirestoreError('savePushSubscription', e);
+    throw e;
+  }
+};
+
+export const deletePushSubscription = async (uid, subId) => {
+  if (!auth.currentUser) return;
+  try {
+    await deleteDoc(doc(db, 'users', uid, 'push_subscriptions', subId));
+  } catch (e) {
+    handleFirestoreError('deletePushSubscription', e);
+    throw e;
+  }
+};
+
+// ============================================
+// ANALYTICS — FIRESTORE
+// ============================================
+
+export const logShareEvent = async (uid, skinTone) => {
+  if (!auth.currentUser) return;
+  try {
+    await addDoc(collection(db, 'users', uid, 'events'), {
+      type: 'share',
+      skin_tone: skinTone || '',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (e) {
+    console.error('logShareEvent error:', e);
+    // Do not throw — share event logging should never block the share action
+  }
+};

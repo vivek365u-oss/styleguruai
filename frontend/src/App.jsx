@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { auth, logout } from './api/styleApi';
+import { auth, logout, loadProfile } from './api/styleApi';
 import { onAuthStateChanged } from 'firebase/auth';
 import AuthPage from './components/AuthPage';
 import Dashboard from './components/Dashboard';
@@ -61,9 +61,34 @@ function App() {
   });
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser({ name: firebaseUser.displayName || firebaseUser.email, email: firebaseUser.email });
+        // Load profile from Firestore and sync to localStorage
+        try {
+          const profile = await loadProfile(firebaseUser.uid);
+          if (profile) {
+            // Overwrite localStorage with Firestore data (cross-device sync)
+            const existing = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
+            const firestoreEntry = {
+              ...(existing || {}),
+              skinTone: profile.skin_tone,
+              undertone: profile.undertone,
+              season: profile.color_season,
+              skinHex: profile.skin_hex,
+              confidence: profile.confidence,
+              date: existing?.date || new Date().toLocaleDateString('en-IN'),
+              timestamp: existing?.timestamp || Date.now(),
+              fullData: existing?.fullData || null,
+            };
+            localStorage.setItem('sg_last_analysis', JSON.stringify(firestoreEntry));
+            // Apply saved preferences
+            if (profile.gender_mode) localStorage.setItem('sg_gender', profile.gender_mode);
+            if (profile.language) localStorage.setItem('sg_language', profile.language);
+          }
+        } catch (e) {
+          console.error('loadProfile on login error:', e);
+        }
       } else {
         setUser(null);
       }

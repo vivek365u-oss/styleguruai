@@ -6,6 +6,23 @@ import HistoryPanel from './HistoryPanel';
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
 import AdSense from '../AdSense';
+import { saveProfile, auth } from '../api/styleApi';
+import WardrobePanel from './WardrobePanel';
+import { saveWardrobeItem } from '../api/styleApi';
+
+const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
+
+function Toast({ message, onClose }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 3000);
+    return () => clearTimeout(t);
+  }, [onClose]);
+  return (
+    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg border border-white/10 animate-fade-in">
+      {message}
+    </div>
+  );
+}
 
 function LoadingScreen() {
   const [step, setStep] = useState(0);
@@ -375,30 +392,70 @@ function SettingsScreen({ user, onLogout }) {
   const { t, language, changeLanguage } = useLanguage();
   const isDark = theme === 'dark';
   const [notifStatus, setNotifStatus] = useState(() => {
-    if (typeof Notification === 'undefined') return 'unsupported';
+    if (typeof Notification === 'undefined' || !('PushManager' in window)) return 'unsupported';
     return Notification.permission;
   });
 
+  const [subId, setSubId] = useState(() => localStorage.getItem('sg_push_sub_id') || null);
+
   const requestNotification = async () => {
-    if (typeof Notification === 'undefined') return;
+    if (typeof Notification === 'undefined' || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
     try {
       const permission = await Notification.requestPermission();
       setNotifStatus(permission);
-      if (permission === 'granted') {
-        // Register service worker
-        if ('serviceWorker' in navigator) {
-          const reg = await navigator.serviceWorker.register('/sw.js');
-          // Show welcome notification
-          reg.showNotification('StyleGuru AI 🎨', {
-            body: 'Notifications enabled! We\'ll send you daily style tips.',
-            icon: '/favicon.svg',
-            badge: '/favicon.svg',
-          });
+      if (permission !== 'granted') return;
+
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: VAPID_PUBLIC_KEY || undefined,
+      });
+      const subJson = sub.toJSON();
+
+      // Get skin tone + season from localStorage
+      const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
+      const skinTone = lastAnalysis?.skinTone || '';
+      const colorSeason = lastAnalysis?.season || '';
+
+      // Save to Firestore via API
+      try {
+        const { savePushSubscription } = await import('../api/styleApi');
+        const uid = auth.currentUser?.uid;
+        if (uid) {
+          const id = await savePushSubscription(uid, subJson, skinTone, colorSeason);
+          if (id) {
+            setSubId(id);
+            localStorage.setItem('sg_push_sub_id', id);
+          }
         }
-        localStorage.setItem('sg_notif', 'granted');
+      } catch (e) {
+        console.error('Failed to save push subscription:', e);
+        return;
       }
+
+      localStorage.setItem('sg_notif', 'granted');
     } catch (e) {
-      console.log('Notification error:', e);
+      console.error('Notification error:', e);
+    }
+  };
+
+  const disableNotification = async () => {
+    try {
+      if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) await sub.unsubscribe();
+      }
+      if (subId && auth.currentUser?.uid) {
+        const { deletePushSubscription } = await import('../api/styleApi');
+        await deletePushSubscription(auth.currentUser.uid, subId);
+      }
+      setSubId(null);
+      localStorage.removeItem('sg_push_sub_id');
+      localStorage.removeItem('sg_notif');
+      setNotifStatus('default');
+    } catch (e) {
+      console.error('Disable notification error:', e);
     }
   };
   return (
@@ -440,26 +497,40 @@ function SettingsScreen({ user, onLogout }) {
       </div>
 
       {/* Push Notifications */}
-      <div className={`rounded-2xl p-4 flex items-center justify-between border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
-        <div>
-          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>🔔 Notifications</p>
-          <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
-            {notifStatus === 'granted' ? 'Enabled ✓' : notifStatus === 'denied' ? 'Blocked in browser' : 'Daily style tips'}
-          </p>
+      {notifStatus !== 'unsupported' && (
+        <div className={`rounded-2xl p-4 flex items-center justify-between border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
+          <div>
+            <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>🔔 Notifications</p>
+            <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
+              {notifStatus === 'granted' ? 'Enabled ✓' : notifStatus === 'denied' ? 'Blocked in browser' : 'Weekly style tips'}
+            </p>
+          </div>
+          {notifStatus === 'granted' ? (
+            <button
+              onClick={disableNotification}
+              className="text-red-400 text-xs font-bold bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-full hover:bg-red-500/20 transition"
+            >
+              Disable
+            </button>
+          ) : notifStatus === 'denied' ? (
+            <a
+              href="https://support.google.com/chrome/answer/3220216"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-red-400 text-xs font-bold underline"
+            >
+              Unblock →
+            </a>
+          ) : (
+            <button
+              onClick={requestNotification}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:from-purple-500 hover:to-pink-500 transition"
+            >
+              Enable
+            </button>
+          )}
         </div>
-        {notifStatus === 'granted' ? (
-          <span className="text-green-400 text-xs font-bold bg-green-500/10 border border-green-500/20 px-3 py-1.5 rounded-full">✓ On</span>
-        ) : notifStatus === 'denied' ? (
-          <span className="text-red-400 text-xs font-bold">Blocked</span>
-        ) : (
-          <button
-            onClick={requestNotification}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:from-purple-500 hover:to-pink-500 transition"
-          >
-            Enable
-          </button>
-        )}
-      </div>
+      )}
 
       {/* Logout */}
       <button onClick={onLogout} className="w-full py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold rounded-2xl border border-red-500/20 transition">
@@ -478,6 +549,21 @@ function Dashboard({ user, onLogout }) {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
   const [currentGender, setCurrentGender] = useState('male');
+  const [toast, setToast] = useState(null);
+  const showToast = (msg) => setToast(msg);
+
+  // Offline wardrobe queue retry
+  useEffect(() => {
+    if (!auth.currentUser || !navigator.onLine) return;
+    try {
+      const queue = JSON.parse(localStorage.getItem('sg_wardrobe_queue') || '[]');
+      if (queue.length === 0) return;
+      const uid = auth.currentUser.uid;
+      Promise.all(queue.map(item => saveWardrobeItem(uid, item)))
+        .then(() => localStorage.removeItem('sg_wardrobe_queue'))
+        .catch(() => {}); // silently fail, will retry next time
+    } catch {}
+  }, []);
 
   const handleReset = () => { setResults(null); setError(null); setUploadedImage(null); };
   const handleAnalysisComplete = (data) => {
@@ -505,12 +591,32 @@ function Dashboard({ user, onLogout }) {
       const updated = [newEntry, ...history].slice(0, 5);
       localStorage.setItem('sg_analysis_history', JSON.stringify(updated));
     } catch {}
+
+    // Save profile to Firestore
+    const uid = auth.currentUser?.uid;
+    if (uid) {
+      const profileData = {
+        skin_tone: enriched.analysis?.skin_tone?.category,
+        undertone: enriched.analysis?.skin_tone?.undertone,
+        color_season: enriched.analysis?.skin_tone?.color_season,
+        skin_hex: enriched.analysis?.skin_color?.hex || '#C68642',
+        confidence: enriched.analysis?.skin_tone?.confidence,
+        best_colors: enriched.recommendations?.best_shirt_colors?.slice(0, 5) || [],
+        gender_mode: enriched.gender || currentGender,
+        language: localStorage.getItem('sg_language') || 'en',
+        analyzed_at: new Date().toISOString(),
+      };
+      saveProfile(uid, profileData).catch(() => {
+        showToast('Profile not synced — will retry on next login');
+      });
+    }
   };
 
   const navItems = [
     { id: 'home',     emoji: '🏠', label: 'Home' },
     { id: 'analyze',  emoji: '📸', label: 'Analyze' },
     { id: 'outfit',   emoji: '👔', label: 'Outfit' },
+    { id: 'wardrobe', emoji: '👗', label: 'Wardrobe' },
     { id: 'history',  emoji: '📋', label: 'History' },
     { id: 'settings', emoji: '⚙️', label: 'Profile' },
   ];
@@ -586,6 +692,7 @@ function Dashboard({ user, onLogout }) {
           </>
         )}
         {activeTab === 'outfit' && <OutfitChecker />}
+        {activeTab === 'wardrobe' && <WardrobePanel user={user} />}
         {activeTab === 'history' && <HistoryPanel onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
         {activeTab === 'settings' && <SettingsScreen user={user} onLogout={onLogout} />}
         </div>
@@ -606,6 +713,7 @@ function Dashboard({ user, onLogout }) {
           ))}
         </div>
       </nav>
+      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
     </div>
   );
 }

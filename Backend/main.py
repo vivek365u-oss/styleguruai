@@ -540,6 +540,101 @@ async def test_recommendations(skin_tone: str, undertone: str = "warm"):
     }
 
 # ============================================
+# PUSH NOTIFICATIONS
+# ============================================
+from push_service import PushService
+from firebase_admin import firestore as firebase_firestore
+
+# Lazy-init PushService from env vars
+def get_push_service() -> PushService:
+    private_key = os.environ.get("VAPID_PRIVATE_KEY", "")
+    public_key = os.environ.get("VAPID_PUBLIC_KEY", "")
+    email = os.environ.get("VAPID_CLAIMS_EMAIL", "admin@styleguruai.in")
+    return PushService(private_key, public_key, email)
+
+def get_firestore_db():
+    return firebase_firestore.client()
+
+class PushSubscribeRequest(BaseModel):
+    endpoint: str
+    keys: dict  # { p256dh: str, auth: str }
+    skin_tone: Optional[str] = ""
+    color_season: Optional[str] = ""
+
+class PushUnsubscribeRequest(BaseModel):
+    sub_id: str
+
+@app.post("/api/push/subscribe")
+async def push_subscribe(
+    request: PushSubscribeRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Save push subscription and send welcome notification."""
+    uid = current_user["uid"]
+    try:
+        db = get_firestore_db()
+        import base64
+        sub_id = base64.b64encode(request.endpoint.encode()).decode()[:20].replace("=", "").replace("+", "").replace("/", "")
+        
+        # Save to Firestore
+        db.collection("users").document(uid).collection("push_subscriptions").document(sub_id).set({
+            "endpoint": request.endpoint,
+            "keys": request.keys,
+            "skin_tone": request.skin_tone or "",
+            "color_season": request.color_season or "",
+            "created_at": datetime.utcnow().isoformat(),
+        })
+
+        # Send welcome notification
+        push_service = get_push_service()
+        if os.environ.get("VAPID_PRIVATE_KEY"):
+            subscription_info = {
+                "endpoint": request.endpoint,
+                "keys": request.keys,
+            }
+            payload = {
+                "title": "StyleGuru AI 🎨",
+                "body": "StyleGuru AI notifications are on! Your weekly style tips start now 🎨",
+                "icon": "/favicon.svg",
+                "data": {"url": "/dashboard"},
+            }
+            try:
+                push_service.send_notification(subscription_info, payload)
+            except Exception as e:
+                print(f"Welcome notification failed: {e}")
+
+        return {"success": True, "sub_id": sub_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/api/push/unsubscribe")
+async def push_unsubscribe(
+    request: PushUnsubscribeRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete push subscription from Firestore."""
+    uid = current_user["uid"]
+    try:
+        db = get_firestore_db()
+        db.collection("users").document(uid).collection("push_subscriptions").document(request.sub_id).delete()
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/push/send-weekly")
+async def push_send_weekly(current_user: dict = Depends(get_current_user)):
+    """Trigger weekly tip notifications (admin/cron use)."""
+    try:
+        db = get_firestore_db()
+        push_service = get_push_service()
+        result = push_service.send_weekly_tips(db)
+        return {"success": True, **result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================
 # RUN
 # ============================================
 if __name__ == "__main__":
