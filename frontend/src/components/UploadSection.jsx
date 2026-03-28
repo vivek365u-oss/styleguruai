@@ -448,13 +448,19 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
             <div className="flex gap-3 justify-center mt-3">
               <button
                 onClick={(e) => { e.stopPropagation(); cameraInputRef.current?.click(); }}
-                className="flex items-center gap-1.5 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-xl text-purple-300 text-xs font-semibold hover:bg-purple-500/30 transition"
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition
+                  ${isDark
+                    ? 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/30'
+                    : 'bg-purple-600 border-purple-600 text-white shadow-sm hover:bg-purple-700'}`}
               >
                 📷 Camera
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                className="flex items-center gap-1.5 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white/50 text-xs font-semibold hover:bg-white/10 transition"
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition
+                  ${isDark
+                    ? 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'
+                    : 'bg-gray-100 border-gray-300 text-gray-700 shadow-sm hover:bg-gray-200'}`}
               >
                 🖼️ Gallery
               </button>
