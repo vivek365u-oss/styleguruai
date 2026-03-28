@@ -45,7 +45,7 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
     belt:       { amzKw: `${colorDisplay} men belt casual streetwear`, amzNode: '1968024031', fkCat: 'men-belts', myntra: `https://www.myntra.com/belts?rawQuery=${colorLower}+men`, meesho: `${colorDisplay} men belt casual` },
   };
 
-  const cfg = categoryConfig[category] || { amzKw: `${colorDisplay} ${isFemale ? 'women' : 'men'} ${category}`, amzNode: '1968024031', fkCat: isFemale ? 'women-western-wear' : 'men-tshirts', myntra: `https://www.myntra.com/fashion?rawQuery=${colorLower}+${isFemale ? 'women' : 'men'}`, meesho: `${colorDisplay} ${isFemale ? 'women' : 'men'} ${category}` };
+  const cfg = categoryConfig[category] || { amzKw: `${colorDisplay} ${isFemale ? 'women' : 'men'} ${category} oversized trending 2025`, amzNode: '1968024031', fkCat: isFemale ? 'women-western-wear' : 'men-tshirts', myntra: `https://www.myntra.com/fashion?rawQuery=${colorLower}+${isFemale ? 'women' : 'men'}+${category}+trending`, meesho: `${colorDisplay} ${isFemale ? 'women' : 'men'} ${category} trending` };
 
   // Build price-filtered URLs — optimized for best results
   const amzPriceParam = budget?.amzMax ? `%2Cp_36%3A-${budget.amzMax * 100}` : '';
