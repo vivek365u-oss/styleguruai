@@ -142,7 +142,7 @@ function TrendingCard({ item, isDark, AMAZON_TAG }) {
           {/* Backdrop */}
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           {/* Panel — fixed bottom sheet on mobile, dropdown on desktop */}
-          <div className={`fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl border-t p-5 shadow-2xl md:absolute md:bottom-auto md:top-full md:left-auto md:right-auto md:rounded-2xl md:border md:mt-1 md:w-56 ${isDark ? 'bg-slate-900 border-white/20' : 'bg-white border-gray-200'}`}>
+          <div className={`fixed bottom-20 left-3 right-3 z-50 rounded-2xl border p-4 shadow-2xl md:absolute md:bottom-auto md:top-full md:left-auto md:right-auto md:rounded-2xl md:border md:mt-1 md:w-56 md:p-3 ${isDark ? 'bg-slate-900 border-white/20' : 'bg-white border-gray-200'}`}>
             <div className="flex items-center justify-between mb-3">
               <p className={`text-xs font-bold ${isDark ? 'text-white/60' : 'text-gray-500'}`}>🛍️ Shop on:</p>
               <button onClick={() => setOpen(false)} className={`text-xs font-bold px-2 py-1 rounded-lg ${isDark ? 'text-white/40 hover:text-white bg-white/5' : 'text-gray-400 hover:text-gray-700 bg-gray-100'}`}>✕</button>
