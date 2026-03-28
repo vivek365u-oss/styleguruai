@@ -277,12 +277,78 @@ function downloadPalette(colors, skinTone) {
 
 // ── Celebrity Skin Match ─────────────────────────────────────
 const CELEBRITY_MAP = {
-  fair:    { name: 'Alia Bhatt', emoji: '⭐', tip: 'Pastels, blush pink, lavender, navy' },
-  light:   { name: 'Katrina Kaif', emoji: '⭐', tip: 'Coral, peach, sky blue, mint green' },
-  medium:  { name: 'Deepika Padukone', emoji: '⭐', tip: 'Terracotta, rust, teal, mustard' },
-  olive:   { name: 'Priyanka Chopra', emoji: '⭐', tip: 'Olive, burnt orange, forest green' },
-  brown:   { name: 'Bipasha Basu', emoji: '⭐', tip: 'Cobalt blue, fuchsia, gold, white' },
-  dark:    { name: 'Nandita Das', emoji: '⭐', tip: 'Bright jewel tones, white, gold, red' },
+  fair: {
+    male:   [
+      { name: 'Ranbir Kapoor', tip: 'Navy, burgundy, olive green, charcoal' },
+      { name: 'Shahid Kapoor', tip: 'Deep maroon, forest green, royal blue' },
+      { name: 'Hrithik Roshan', tip: 'White, navy, teal, mustard' },
+    ],
+    female: [
+      { name: 'Alia Bhatt', tip: 'Pastels, blush pink, lavender, navy' },
+      { name: 'Shraddha Kapoor', tip: 'Mint green, coral, sky blue, white' },
+      { name: 'Anushka Sharma', tip: 'Dusty rose, sage green, cobalt blue' },
+    ],
+  },
+  light: {
+    male:   [
+      { name: 'Varun Dhawan', tip: 'Sky blue, olive, rust, maroon' },
+      { name: 'Tiger Shroff', tip: 'White, navy, coral, forest green' },
+      { name: 'Kartik Aaryan', tip: 'Mustard, teal, burgundy, sky blue' },
+    ],
+    female: [
+      { name: 'Katrina Kaif', tip: 'Coral, peach, sky blue, mint green' },
+      { name: 'Jacqueline Fernandez', tip: 'Bright yellow, hot pink, white, teal' },
+      { name: 'Kriti Sanon', tip: 'Olive, rust, mustard, navy blue' },
+    ],
+  },
+  medium: {
+    male:   [
+      { name: 'Shah Rukh Khan', tip: 'White, navy, maroon, olive green' },
+      { name: 'Salman Khan', tip: 'Sky blue, white, rust, forest green' },
+      { name: 'Ranveer Singh', tip: 'Bold colors — coral, mustard, teal' },
+    ],
+    female: [
+      { name: 'Deepika Padukone', tip: 'Terracotta, rust, teal, mustard' },
+      { name: 'Kareena Kapoor', tip: 'White, coral, sky blue, olive green' },
+      { name: 'Madhuri Dixit', tip: 'Maroon, navy, forest green, coral' },
+    ],
+  },
+  olive: {
+    male:   [
+      { name: 'Ajay Devgn', tip: 'White, sky blue, olive, rust' },
+      { name: 'Akshay Kumar', tip: 'Bright colors — yellow, coral, white' },
+      { name: 'Anil Kapoor', tip: 'White, royal blue, coral, cream' },
+    ],
+    female: [
+      { name: 'Priyanka Chopra', tip: 'Olive, burnt orange, forest green' },
+      { name: 'Sushmita Sen', tip: 'White, royal blue, coral, gold' },
+      { name: 'Shilpa Shetty', tip: 'Bright yellow, white, teal, coral' },
+    ],
+  },
+  brown: {
+    male:   [
+      { name: 'Nawazuddin Siddiqui', tip: 'White, sky blue, cobalt, bright yellow' },
+      { name: 'Irrfan Khan', tip: 'White, royal blue, emerald, cream' },
+      { name: 'Manoj Bajpayee', tip: 'White, bright blue, coral, gold' },
+    ],
+    female: [
+      { name: 'Bipasha Basu', tip: 'Cobalt blue, fuchsia, gold, white' },
+      { name: 'Kajol', tip: 'White, royal blue, bright yellow, coral' },
+      { name: 'Tabu', tip: 'Emerald, white, cobalt blue, gold' },
+    ],
+  },
+  dark: {
+    male:   [
+      { name: 'Vijay (Thalapathy)', tip: 'White, bright yellow, royal blue, gold' },
+      { name: 'Rajinikanth', tip: 'White, cream, bright colors, gold' },
+      { name: 'Dhanush', tip: 'White, cobalt blue, bright yellow, coral' },
+    ],
+    female: [
+      { name: 'Nandita Das', tip: 'Bright jewel tones, white, gold, red' },
+      { name: 'Vidya Balan', tip: 'White, bright yellow, royal blue, coral' },
+      { name: 'Konkona Sen Sharma', tip: 'White, emerald, cobalt blue, gold' },
+    ],
+  },
 };
 
 // ── Profile Hero Card ────────────────────────────────────────
@@ -298,17 +364,23 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
   const summaryBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200';
   const summaryCls = isDark ? 'text-white/60' : 'text-gray-500';
 
-  const celeb = CELEBRITY_MAP[analysis.skin_tone.category];
+  const celebList = CELEBRITY_MAP[analysis.skin_tone.category]?.[isFemale ? 'female' : 'male'] || [];
+  // Pick celebrity based on undertone to add variety
+  const undertoneIdx = analysis.skin_tone.undertone === 'warm' ? 0 : analysis.skin_tone.undertone === 'cool' ? 1 : 2;
+  const celeb = celebList[undertoneIdx % celebList.length];
 
-  // Style Score — based on confidence + quality
-  const styleScore = analysis.skin_tone.confidence === 'high' ? 92 : 75;
+  // Style Score — dynamic based on actual quality score + confidence
+  const qualityScore = data.photo_quality?.score || 85;
+  const confidenceBonus = analysis.skin_tone.confidence === 'high' ? 10 : analysis.skin_tone.confidence === 'medium' ? 5 : 0;
+  const rawScore = Math.round((qualityScore * 0.7) + confidenceBonus + (analysis.skin_tone.brightness_score ? Math.min(10, analysis.skin_tone.brightness_score / 25) : 5));
+  const styleScore = Math.min(98, Math.max(55, rawScore));
 
   // WhatsApp share
   const handleWhatsAppShare = () => {
     const skinTone = analysis.skin_tone.category;
     const undertone = analysis.skin_tone.undertone;
     const season = analysis.skin_tone.color_season;
-    const celebName = celeb?.name || '';
+    const celebName = celeb?.name || celebList[0]?.name || '';
     const msg = `✨ My StyleGuru AI Style Profile!\n\n🎨 Skin Tone: ${skinTone} (${undertone} undertone)\n🍂 Color Season: ${season}\n⭐ Celebrity Match: ${celebName}\n💯 Style Score: ${styleScore}/100\n\nGet your FREE AI style analysis 👇\nhttps://www.styleguruai.in`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   };
@@ -352,13 +424,19 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
       </div>
 
       {/* Celebrity Match */}
-      {celeb && (
-        <div className={`mt-2 rounded-xl p-3 border flex items-center gap-3 ${isDark ? 'bg-amber-500/10 border-amber-500/20' : 'bg-amber-50 border-amber-200'}`}>
-          <span className="text-2xl">⭐</span>
-          <div className="flex-1">
-            <p className={`text-xs font-bold ${isDark ? 'text-amber-200' : 'text-amber-800'}`}>Celebrity Skin Match</p>
-            <p className={`text-sm font-black ${isDark ? 'text-white' : 'text-gray-800'}`}>{celeb.name}</p>
-            <p className={`text-xs ${isDark ? 'text-amber-100/60' : 'text-amber-700'}`}>{celeb.tip}</p>
+      {celebList.length > 0 && (
+        <div className={`mt-2 rounded-xl p-3 border ${isDark ? 'bg-amber-500/10 border-amber-500/20' : 'bg-amber-50 border-amber-200'}`}>
+          <p className={`text-xs font-bold mb-2 ${isDark ? 'text-amber-200' : 'text-amber-800'}`}>⭐ Celebrity Skin Match</p>
+          <div className="space-y-2">
+            {celebList.map((c, i) => (
+              <div key={i} className={`flex items-center gap-2 rounded-lg p-2 ${i === undertoneIdx % celebList.length ? isDark ? 'bg-amber-500/20 border border-amber-500/30' : 'bg-amber-100 border border-amber-300' : ''}`}>
+                <span className="text-lg">{i === undertoneIdx % celebList.length ? '🌟' : '⭐'}</span>
+                <div className="flex-1">
+                  <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>{c.name} {i === undertoneIdx % celebList.length ? <span className="text-xs text-amber-400 ml-1">Best Match</span> : ''}</p>
+                  <p className={`text-xs ${isDark ? 'text-amber-100/60' : 'text-amber-700'}`}>{c.tip}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
