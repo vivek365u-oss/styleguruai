@@ -5,6 +5,7 @@ import ResultsDisplay from './ResultsDisplay';
 import HistoryPanel from './HistoryPanel';
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
+import AdSense from '../AdSense';
 
 function LoadingScreen() {
   const [step, setStep] = useState(0);
@@ -299,6 +300,11 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
 
       {/* Color Contrast Checker */}
       <ColorContrastChecker isDark={isDark} />
+
+      {/* AdSense Ad */}
+      <div className="mt-2">
+        <AdSense />
+      </div>
     </div>
   );
 }
