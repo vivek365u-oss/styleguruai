@@ -30,7 +30,7 @@ function OutfitShopCard({ color, isDark }) {
       url: `https://www.flipkart.com/search?q=${encodeURIComponent(colorDisplay + ' men oversized tshirt')}&sort=popularity_desc${fkPriceParam}` },
     { name: 'Myntra',   icon: '👗',
       bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold',
-      url: `https://www.myntra.com/tshirts?rawQuery=${encodeURIComponent(colorDisplay + ' men oversized')}${myntraPriceParam}` },
+      url: `https://www.myntra.com/search?q=${colorLower}+men+oversized+tshirt` },
     { name: 'Meesho',   icon: '🛍️',
       bg: isDark ? 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' : 'bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700 font-bold',
       url: `https://meesho.com/search?q=${encodeURIComponent(colorDisplay + ' men oversized tshirt trending')}` },
