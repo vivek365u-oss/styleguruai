@@ -424,19 +424,13 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
       </div>
 
       {/* Celebrity Match */}
-      {celebList.length > 0 && (
-        <div className={`mt-2 rounded-xl p-3 border ${isDark ? 'bg-amber-500/10 border-amber-500/20' : 'bg-amber-50 border-amber-200'}`}>
-          <p className={`text-xs font-bold mb-2 ${isDark ? 'text-amber-200' : 'text-amber-800'}`}>⭐ Celebrity Skin Match</p>
-          <div className="space-y-2">
-            {celebList.map((c, i) => (
-              <div key={i} className={`flex items-center gap-2 rounded-lg p-2 ${i === undertoneIdx % celebList.length ? isDark ? 'bg-amber-500/20 border border-amber-500/30' : 'bg-amber-100 border border-amber-300' : ''}`}>
-                <span className="text-lg">{i === undertoneIdx % celebList.length ? '🌟' : '⭐'}</span>
-                <div className="flex-1">
-                  <p className={`text-sm font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>{c.name} {i === undertoneIdx % celebList.length ? <span className="text-xs text-amber-400 ml-1">Best Match</span> : ''}</p>
-                  <p className={`text-xs ${isDark ? 'text-amber-100/60' : 'text-amber-700'}`}>{c.tip}</p>
-                </div>
-              </div>
-            ))}
+      {celeb && (
+        <div className={`mt-2 rounded-xl p-3 border flex items-center gap-3 ${isDark ? 'bg-amber-500/10 border-amber-500/20' : 'bg-amber-50 border-amber-200'}`}>
+          <span className="text-2xl">🌟</span>
+          <div className="flex-1">
+            <p className={`text-xs font-bold ${isDark ? 'text-amber-200' : 'text-amber-800'}`}>⭐ Celebrity Skin Match</p>
+            <p className={`text-sm font-black ${isDark ? 'text-white' : 'text-gray-800'}`}>{celeb.name}</p>
+            <p className={`text-xs ${isDark ? 'text-amber-100/60' : 'text-amber-700'}`}>{celeb.tip}</p>
           </div>
         </div>
       )}
