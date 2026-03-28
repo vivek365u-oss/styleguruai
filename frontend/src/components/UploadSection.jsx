@@ -404,11 +404,11 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
           className="hidden"
         />
-        {/* Camera input — opens front camera directly on mobile */}
+        {/* Camera input — opens camera directly on mobile */}
         <input
           ref={cameraInputRef}
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/*"
           capture="user"
           onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
           className="hidden"
@@ -448,11 +448,12 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
             }`}>
               📁 {t('choosePhoto')}
             </span>
-            {/* Camera button for mobile */}
+            {/* Camera button — mobile only, Gallery for all */}
             <div className="flex gap-3 justify-center mt-3">
+              {/* Camera: only show on touch devices (mobile) */}
               <button
                 onClick={(e) => { e.stopPropagation(); cameraInputRef.current?.click(); }}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition
+                className={`md:hidden flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition
                   ${isDark
                     ? 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/30'
                     : 'bg-purple-600 border-purple-600 text-white shadow-sm hover:bg-purple-700'}`}
