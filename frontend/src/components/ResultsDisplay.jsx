@@ -143,7 +143,7 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
 }
 
 // ── Color Card (compact, tap to expand) ─────────────────────
-function ColorCard({ color, category, gender, isDark }) {
+function ColorCard({ color, category, gender, isDark, className = '' }) {
   const [expanded, setExpanded] = useState(false);
   const [saved, setSaved] = useState(() => {
     try {
@@ -176,7 +176,7 @@ function ColorCard({ color, category, gender, isDark }) {
   const reasonCls = isDark ? 'text-white/50' : 'text-gray-500';
 
   return (
-    <div className={`${cardCls} rounded-2xl overflow-hidden transition-all duration-300 hover:border-purple-500/40`} onClick={() => setExpanded(e => !e)}>
+    <div className={`${cardCls} ${className} rounded-2xl overflow-hidden transition-all duration-300 hover:border-purple-500/40`} onClick={() => setExpanded(e => !e)}>
       <div className="flex items-center gap-3 p-3 cursor-pointer">
         <div className={`w-12 h-12 rounded-xl flex-shrink-0 shadow-lg border ${hexBorderCls} swatch-pop`} style={{ backgroundColor: color.hex }} />
         <div className="flex-1 min-w-0">
@@ -628,7 +628,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
         <div>
           <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>👕 T-Shirt / Top Colors</p>
           <div className="grid grid-cols-1 gap-2">
-            {shirtColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} />)}
+            {shirtColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} className={`stagger-${Math.min(i+1,6)}`} />)}
           </div>
         </div>
       )}
@@ -921,6 +921,13 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [activeTab, setActiveTab] = useState('colors');
+  const [showConfetti, setShowConfetti] = useState(() => {
+    const isFirst = !localStorage.getItem('sg_analysis_count') || localStorage.getItem('sg_analysis_count') === '1';
+    return isFirst;
+  });
+  useEffect(() => {
+    if (showConfetti) { const t = setTimeout(() => setShowConfetti(false), 2000); return () => clearTimeout(t); }
+  }, [showConfetti]);
 
   if (!data || !data.analysis || !data.analysis.skin_tone) {
     return (
@@ -965,6 +972,21 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
 
   return (
     <div className="space-y-4 pb-4 bg-transparent">
+      {/* First analysis confetti */}
+      {showConfetti && (
+        <div className="fixed inset-0 pointer-events-none z-50 flex items-start justify-center pt-20">
+          <div className="text-center scale-in">
+            <p className="text-4xl mb-2">🎉</p>
+            <p className="text-white font-black text-lg bg-purple-600/90 px-6 py-3 rounded-2xl shadow-2xl">
+              Your Style Profile is Ready!
+            </p>
+          </div>
+          {['🎨','✨','💜','🌟','👗'].map((e, i) => (
+            <span key={i} className="confetti absolute text-2xl"
+              style={{ left: `${15 + i * 18}%`, animationDelay: `${i * 0.15}s` }}>{e}</span>
+          ))}
+        </div>
+      )}
       {/* Festival Mode Banner */}
       {(() => {
         const month = new Date().getMonth() + 1;

@@ -176,6 +176,29 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
   const analysisCount = parseInt(localStorage.getItem('sg_analysis_count') || '0');
   const savedCount = (() => { try { return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]').length; } catch { return 0; } })();
   const toneColors = { fair: "#F5DEB3", light: "#D2A679", medium: "#C68642", olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A" };
+
+  // First visit onboarding
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return !localStorage.getItem('sg_onboarded');
+  });
+  const dismissOnboarding = () => {
+    localStorage.setItem('sg_onboarded', '1');
+    setShowOnboarding(false);
+  };
+
+  // Animated social proof counter
+  const [displayCount, setDisplayCount] = useState(0);
+  const TARGET_COUNT = 52847;
+  useEffect(() => {
+    let start = 0;
+    const step = Math.ceil(TARGET_COUNT / 40);
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= TARGET_COUNT) { setDisplayCount(TARGET_COUNT); clearInterval(timer); }
+      else setDisplayCount(start);
+    }, 30);
+    return () => clearInterval(timer);
+  }, []);
   const quickCards = [
     { icon: '🎨', label: 'Best Colors', tab: 'analyze' },
     { icon: '👔', label: 'Outfit Ideas', tab: 'analyze' },
@@ -224,6 +247,44 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
       >
         ✨ Analyze Your Style
       </button>
+
+      {/* Social proof */}
+      <div className={`flex items-center justify-center gap-2 py-2 rounded-xl ${isDark ? 'bg-white/5' : 'bg-purple-50'}`}>
+        <div className="flex -space-x-1.5">
+          {['#F5DEB3','#C68642','#7B4F2E','#4A2C0A'].map((c,i) => (
+            <div key={i} className="w-6 h-6 rounded-full border-2 border-white/30" style={{backgroundColor: c}} />
+          ))}
+        </div>
+        <p className={`text-xs font-semibold ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
+          <span className={`font-black ${isDark ? 'text-purple-300' : 'text-purple-600'} count-up`}>
+            {displayCount.toLocaleString('en-IN')}
+          </span> style profiles created
+        </p>
+      </div>
+
+      {/* First-visit onboarding */}
+      {showOnboarding && (
+        <div className={`tooltip-in rounded-2xl p-4 border-2 border-purple-500/50 relative ${isDark ? 'bg-purple-900/30' : 'bg-purple-50'}`}>
+          <button onClick={dismissOnboarding} className={`absolute top-3 right-3 text-xs px-2 py-1 rounded-lg ${isDark ? 'text-white/40 hover:text-white bg-white/5' : 'text-gray-400 hover:text-gray-700 bg-gray-100'}`}>✕</button>
+          <p className={`font-black text-sm mb-2 ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>👋 Welcome to StyleGuru AI!</p>
+          <div className="space-y-1.5">
+            {[
+              { step: '1', text: 'Tap "Analyze Your Style" and upload a selfie' },
+              { step: '2', text: 'AI detects your skin tone in seconds' },
+              { step: '3', text: 'Get your personal color palette + outfit ideas' },
+            ].map(s => (
+              <div key={s.step} className="flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-purple-500 text-white text-xs font-black flex items-center justify-center flex-shrink-0">{s.step}</span>
+                <p className={`text-xs ${isDark ? 'text-white/70' : 'text-gray-600'}`}>{s.text}</p>
+              </div>
+            ))}
+          </div>
+          <button onClick={() => { dismissOnboarding(); onAnalyze(); }}
+            className="mt-3 w-full py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-black rounded-xl transition-all">
+            Get Started →
+          </button>
+        </div>
+      )}
 
       {/* Stats Row */}
       {analysisCount > 0 && (
