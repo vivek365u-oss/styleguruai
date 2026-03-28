@@ -423,17 +423,26 @@ function Dashboard({ user, onLogout }) {
     const enriched = { ...data, gender: data.gender || currentGender };
     setResults(enriched);
     setLoading(false);
-    // Save last analysis + increment count
+    // Save to history (last 5) + increment count
     try {
       const count = parseInt(localStorage.getItem('sg_analysis_count') || '0') + 1;
       localStorage.setItem('sg_analysis_count', count.toString());
-      localStorage.setItem('sg_last_analysis', JSON.stringify({
+      const newEntry = {
+        id: Date.now(),
         skinTone: enriched.analysis?.skin_tone?.category,
         undertone: enriched.analysis?.skin_tone?.undertone,
         season: enriched.analysis?.skin_tone?.color_season,
+        confidence: enriched.analysis?.skin_tone?.confidence,
+        skinHex: enriched.analysis?.skin_color?.hex || '#C68642',
         date: new Date().toLocaleDateString('en-IN'),
+        timestamp: Date.now(),
         fullData: enriched,
-      }));
+      };
+      localStorage.setItem('sg_last_analysis', JSON.stringify(newEntry));
+      // Keep last 5 analyses
+      const history = JSON.parse(localStorage.getItem('sg_analysis_history') || '[]');
+      const updated = [newEntry, ...history].slice(0, 5);
+      localStorage.setItem('sg_analysis_history', JSON.stringify(updated));
     } catch {}
   };
 
@@ -516,7 +525,7 @@ function Dashboard({ user, onLogout }) {
           </>
         )}
         {activeTab === 'outfit' && <OutfitChecker />}
-        {activeTab === 'history' && <HistoryPanel />}
+        {activeTab === 'history' && <HistoryPanel onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
         {activeTab === 'settings' && <SettingsScreen user={user} onLogout={onLogout} />}
         </div>
       </main>

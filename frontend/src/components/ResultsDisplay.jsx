@@ -452,14 +452,61 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
         </div>
       )}
 
-      {/* WhatsApp Share */}
-      <button
-        onClick={handleWhatsAppShare}
-        className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-xl text-green-400 font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
-      >
-        <span>📱</span>
-        <span>Share on WhatsApp</span>
-      </button>
+      {/* WhatsApp Share + Download Style Card */}
+      <div className="flex gap-2 mt-3">
+        <button
+          onClick={handleWhatsAppShare}
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-xl text-green-400 font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <span>📱</span>
+          <span>WhatsApp</span>
+        </button>
+        <button
+          onClick={() => {
+            // Generate shareable style card
+            const canvas = document.createElement('canvas');
+            canvas.width = 800; canvas.height = 500;
+            const ctx = canvas.getContext('2d');
+            // Background gradient
+            const grad = ctx.createLinearGradient(0, 0, 800, 500);
+            grad.addColorStop(0, '#0f0c29'); grad.addColorStop(0.5, '#302b63'); grad.addColorStop(1, '#24243e');
+            ctx.fillStyle = grad; ctx.fillRect(0, 0, 800, 500);
+            // Skin tone circle
+            const skinHex = analysis.skin_color?.hex || '#C68642';
+            ctx.beginPath(); ctx.arc(120, 180, 70, 0, Math.PI * 2);
+            ctx.fillStyle = skinHex; ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 3; ctx.stroke();
+            // Text
+            ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '14px Arial'; ctx.fillText('MY STYLE PROFILE', 220, 100);
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 42px Arial';
+            ctx.fillText(`${analysis.skin_tone.category.charAt(0).toUpperCase() + analysis.skin_tone.category.slice(1)} Skin`, 220, 155);
+            ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '20px Arial';
+            ctx.fillText(`${analysis.skin_tone.undertone} undertone  •  ${analysis.skin_tone.color_season}`, 220, 195);
+            ctx.fillStyle = '#a855f7'; ctx.font = 'bold 28px Arial';
+            ctx.fillText(`Style Score: ${styleScore}/100`, 220, 245);
+            // Color palette
+            const colors = recommendations?.best_shirt_colors?.slice(0, 5) || [];
+            colors.forEach((c, i) => {
+              ctx.beginPath(); ctx.arc(220 + i * 70, 320, 28, 0, Math.PI * 2);
+              ctx.fillStyle = c.hex; ctx.fill();
+              ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 2; ctx.stroke();
+            });
+            ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '13px Arial';
+            ctx.fillText('Your Best Colors', 220, 380);
+            // Branding
+            ctx.fillStyle = '#a855f7'; ctx.font = 'bold 16px Arial';
+            ctx.fillText('styleguruai.in', 620, 470);
+            // Download
+            const link = document.createElement('a');
+            link.download = `styleguruai-${analysis.skin_tone.category}-profile.png`;
+            link.href = canvas.toDataURL(); link.click();
+          }}
+          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 rounded-xl text-purple-400 font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <span>🎨</span>
+          <span>Save Card</span>
+        </button>
+      </div>
     </div>
   );
 }
