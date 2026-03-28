@@ -353,7 +353,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
 
       {/* Body Type Selector */}
       <div className="mb-5">
-        <p className={`text-xs text-center mb-2 font-semibold uppercase tracking-wide ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Your Body Type (optional)</p>
+        <p className={`text-xs text-center mb-2 font-semibold uppercase tracking-wide ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Your Body Type (optional)</p>
         <div className="flex justify-center gap-2 flex-wrap">
           {[
             { value: 'slim', label: '🏃 Slim', desc: 'Lean' },
@@ -366,12 +366,16 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
               onClick={() => setBodyType(bt.value)}
               className={`flex flex-col items-center px-4 py-2 rounded-xl border text-xs font-bold transition-all ${
                 bodyType === bt.value
-                  ? 'bg-purple-500/30 border-purple-400 text-purple-200'
-                  : isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70' : 'bg-white border-gray-200 text-gray-400 hover:border-purple-300 shadow-sm'
+                  ? isDark
+                    ? 'bg-purple-500/30 border-purple-400 text-purple-200'
+                    : 'bg-purple-600 border-purple-600 text-white shadow-md'
+                  : isDark
+                    ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70'
+                    : 'bg-white border-gray-300 text-gray-700 hover:border-purple-400 hover:text-purple-700 shadow-sm'
               }`}
             >
               <span>{bt.label}</span>
-              <span className="text-[10px] opacity-60">{bt.desc}</span>
+              <span className="text-[10px] opacity-70">{bt.desc}</span>
             </button>
           ))}
         </div>
