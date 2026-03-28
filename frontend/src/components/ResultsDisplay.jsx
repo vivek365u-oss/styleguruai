@@ -352,7 +352,7 @@ const CELEBRITY_MAP = {
 };
 
 // ── Profile Hero Card ────────────────────────────────────────
-function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSeasonal, isDark }) {
+function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSeasonal, isDark, photoQuality }) {
   const toneColors = { fair: "#F5DEB3", light: "#D2A679", medium: "#C68642", olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A" };
   const wrapperCls = isDark
     ? 'bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-white/10'
@@ -370,7 +370,7 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
   const celeb = celebList[undertoneIdx % celebList.length];
 
   // Style Score — dynamic based on actual quality score + confidence
-  const qualityScore = data.photo_quality?.score || 85;
+  const qualityScore = photoQuality?.score || 85;
   const confidenceBonus = analysis.skin_tone.confidence === 'high' ? 10 : analysis.skin_tone.confidence === 'medium' ? 5 : 0;
   const rawScore = Math.round((qualityScore * 0.7) + confidenceBonus + (analysis.skin_tone.brightness_score ? Math.min(10, analysis.skin_tone.brightness_score / 25) : 5));
   const styleScore = Math.min(98, Math.max(55, rawScore));
@@ -870,6 +870,16 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [activeTab, setActiveTab] = useState('colors');
+
+  if (!data || !data.analysis || !data.analysis.skin_tone) {
+    return (
+      <div className="mt-8 text-center">
+        <p className="text-white/40 text-sm">No results available. Please try again.</p>
+        <button onClick={onReset} className="mt-4 px-6 py-2 bg-purple-600 text-white rounded-xl text-sm">Try Again</button>
+      </div>
+    );
+  }
+
   const { analysis, recommendations, photo_quality } = data;
   const isFemale = data.gender === "female";
   const isSeasonal = data.gender === "seasonal";
@@ -936,6 +946,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         isFemale={isFemale}
         isSeasonal={isSeasonal}
         isDark={isDark}
+        photoQuality={photo_quality}
       />
 
       {/* Download Palette */}
