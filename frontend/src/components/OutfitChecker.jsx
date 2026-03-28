@@ -177,12 +177,16 @@ function OutfitChecker() {
               ) : (
                 <>
                   <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-sm
-                    ${isDark ? 'bg-blue-500/20' : 'bg-white border-2 border-blue-200 group-hover:border-blue-400'}`}>
+                    ${isDark ? 'bg-blue-500/20' : 'bg-white border-2 border-blue-300 group-hover:border-blue-500'}`}>
                     <span className="text-3xl">🤳</span>
                   </div>
-                  <p className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('yourSelfie')}</p>
-                  <p className={`text-sm font-medium ${isDark ? 'text-white/40' : 'text-blue-600'}`}>{t('clearFacePhoto')}</p>
-                  <p className={`text-xs mt-2 font-medium ${isDark ? 'text-white/25' : 'text-gray-500'}`}>JPG, PNG, WebP</p>
+                  <p className={`font-black text-base mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('yourSelfie')}</p>
+                  <p className={`text-sm font-semibold mb-2 ${isDark ? 'text-white/40' : 'text-blue-700'}`}>{t('clearFacePhoto')}</p>
+                  <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border
+                    ${isDark ? 'bg-blue-500/20 border-blue-500/30 text-blue-300' : 'bg-blue-600 border-blue-600 text-white shadow-sm'}`}>
+                    📷 Tap to upload
+                  </div>
+                  <p className={`text-xs mt-2 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>JPG, PNG, WebP</p>
                 </>
               )}
             </div>
@@ -205,12 +209,16 @@ function OutfitChecker() {
               ) : (
                 <>
                   <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-sm
-                    ${isDark ? 'bg-pink-500/20' : 'bg-white border-2 border-pink-200 group-hover:border-pink-400'}`}>
+                    ${isDark ? 'bg-pink-500/20' : 'bg-white border-2 border-pink-300 group-hover:border-pink-500'}`}>
                     <span className="text-3xl">👗</span>
                   </div>
-                  <p className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('outfitPhoto')}</p>
-                  <p className={`text-sm font-medium ${isDark ? 'text-white/40' : 'text-pink-600'}`}>{t('outfitCheckDesc')}</p>
-                  <p className={`text-xs mt-2 font-medium ${isDark ? 'text-white/25' : 'text-gray-500'}`}>JPG, PNG, WebP</p>
+                  <p className={`font-black text-base mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('outfitPhoto')}</p>
+                  <p className={`text-sm font-semibold mb-2 ${isDark ? 'text-white/40' : 'text-pink-700'}`}>{t('outfitCheckDesc')}</p>
+                  <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border
+                    ${isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300' : 'bg-pink-600 border-pink-600 text-white shadow-sm'}`}>
+                    📸 Tap to upload
+                  </div>
+                  <p className={`text-xs mt-2 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>JPG, PNG, WebP</p>
                 </>
               )}
             </div>
@@ -239,22 +247,22 @@ function OutfitChecker() {
           </button>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className={`rounded-2xl p-4 border ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-200'}`}>
-              <p className={`font-bold text-sm mb-2 ${isDark ? 'text-blue-300' : 'text-blue-600'}`}>🤳 Selfie Tips:</p>
+            <div className={`rounded-2xl p-4 border ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-300 shadow-sm'}`}>
+              <p className={`font-bold text-sm mb-2 ${isDark ? 'text-blue-300' : 'text-blue-800'}`}>🤳 Selfie Tips:</p>
               <ul className="space-y-1">
                 {[t('clearFacePhotoTip'), t('goodLighting'), t('noSunglasses')].map((tip, i) => (
-                  <li key={i} className={`text-xs flex items-center gap-2 ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
-                    <span className="text-blue-400">•</span>{tip}
+                  <li key={i} className={`text-xs flex items-center gap-2 ${isDark ? 'text-white/50' : 'text-gray-700'}`}>
+                    <span className={isDark ? 'text-blue-400' : 'text-blue-600'}>•</span>{tip}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className={`rounded-2xl p-4 border ${isDark ? 'bg-pink-500/10 border-pink-500/20' : 'bg-pink-50 border-pink-200'}`}>
-              <p className={`font-bold text-sm mb-2 ${isDark ? 'text-pink-300' : 'text-pink-600'}`}>👗 Outfit Tips:</p>
+            <div className={`rounded-2xl p-4 border ${isDark ? 'bg-pink-500/10 border-pink-500/20' : 'bg-pink-50 border-pink-300 shadow-sm'}`}>
+              <p className={`font-bold text-sm mb-2 ${isDark ? 'text-pink-300' : 'text-pink-800'}`}>👗 Outfit Tips:</p>
               <ul className="space-y-1">
                 {[t('plainBackground'), t('fullOutfitVisible'), t('clearBrightPhoto')].map((tip, i) => (
-                  <li key={i} className={`text-xs flex items-center gap-2 ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
-                    <span className="text-pink-400">•</span>{tip}
+                  <li key={i} className={`text-xs flex items-center gap-2 ${isDark ? 'text-white/50' : 'text-gray-700'}`}>
+                    <span className={isDark ? 'text-pink-400' : 'text-pink-600'}>•</span>{tip}
                   </li>
                 ))}
               </ul>
