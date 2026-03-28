@@ -28,6 +28,9 @@ export default function Footer() {
         ))}
       </div>
       <p className="text-gray-600 text-xs">© 2025 StyleGuru AI. All rights reserved.</p>
+      <p className="text-gray-600 text-xs mt-2">
+        StyleGuru AI is a participant in the Amazon Associates Programme, an affiliate advertising programme designed to provide a means for sites to earn advertising fees by advertising and linking to amazon.in. As an Amazon Associate, we earn from qualifying purchases.
+      </p>
     </footer>
   );
 }
