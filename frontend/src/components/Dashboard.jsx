@@ -115,10 +115,10 @@ function TrendingCard({ item, isDark, AMAZON_TAG }) {
   const amzUrl = `https://www.amazon.in/s?k=${kw}&rh=n%3A1968024031&sort=review-rank&tag=${AMAZON_TAG}`;
 
   const shopOptions = [
-    { name: '🛒 Amazon', url: amzUrl, bg: 'bg-orange-500/20 border-orange-500/30 text-orange-300 hover:bg-orange-500/40' },
-    { name: '🏪 Flipkart', url: item.flipkartUrl, bg: 'bg-blue-500/20 border-blue-500/30 text-blue-300 hover:bg-blue-500/40' },
-    { name: '👗 Myntra', url: item.myntraUrl, bg: 'bg-pink-500/20 border-pink-500/30 text-pink-300 hover:bg-pink-500/40' },
-    { name: '🛍️ Meesho', url: `https://meesho.com/search?q=${encodeURIComponent(item.meeshoQ)}`, bg: 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/40' },
+    { name: '🛒 Amazon',   url: amzUrl, bg: isDark ? 'bg-orange-500/20 border-orange-500/30 text-orange-300 hover:bg-orange-500/40' : 'bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100' },
+    { name: '🏪 Flipkart', url: item.flipkartUrl, bg: isDark ? 'bg-blue-500/20 border-blue-500/30 text-blue-300 hover:bg-blue-500/40' : 'bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100' },
+    { name: '👗 Myntra',   url: item.myntraUrl, bg: isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300 hover:bg-pink-500/40' : 'bg-pink-50 border-pink-300 text-pink-700 hover:bg-pink-100' },
+    { name: '🛍️ Meesho',  url: `https://meesho.com/search?q=${encodeURIComponent(item.meeshoQ)}`, bg: isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/40' : 'bg-purple-50 border-purple-300 text-purple-700 hover:bg-purple-100' },
   ];
 
   return (
@@ -133,27 +133,36 @@ function TrendingCard({ item, isDark, AMAZON_TAG }) {
       >
         <span className="text-3xl">{item.emoji}</span>
         <span className={`text-xs font-semibold text-center leading-tight ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{item.label}</span>
-        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.gender === 'male' ? 'text-blue-400 bg-blue-500/10' : 'text-pink-400 bg-pink-500/10'}`}>{item.tag}</span>
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.gender === 'male' ? isDark ? 'text-blue-400 bg-blue-500/10' : 'text-blue-700 bg-blue-100' : isDark ? 'text-pink-400 bg-pink-500/10' : 'text-pink-700 bg-pink-100'}`}>{item.tag}</span>
       </button>
 
-      {/* Shop options dropdown */}
+      {/* Shop options — full width overlay panel */}
       {open && (
-        <div className={`absolute top-full left-0 right-0 mt-1 z-50 rounded-2xl border p-3 space-y-1.5 shadow-2xl ${isDark ? 'bg-slate-900 border-white/20' : 'bg-white border-gray-200 shadow-lg'}`}>
-          <p className={`text-xs font-bold mb-2 ${isDark ? 'text-white/50' : 'text-gray-400'}`}>Shop on:</p>
-          {shopOptions.map(opt => (
-            <a
-              key={opt.name}
-              href={opt.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setOpen(false)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all hover:scale-[1.02] ${opt.bg}`}
-            >
-              {opt.name}
-            </a>
-          ))}
-          <button onClick={() => setOpen(false)} className={`w-full text-xs mt-1 ${isDark ? 'text-white/20 hover:text-white/50' : 'text-gray-300 hover:text-gray-500'}`}>✕ Close</button>
-        </div>
+        <>
+          {/* Backdrop */}
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          {/* Panel — fixed bottom sheet on mobile, dropdown on desktop */}
+          <div className={`fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl border-t p-5 shadow-2xl md:absolute md:bottom-auto md:top-full md:left-auto md:right-auto md:rounded-2xl md:border md:mt-1 md:w-56 ${isDark ? 'bg-slate-900 border-white/20' : 'bg-white border-gray-200'}`}>
+            <div className="flex items-center justify-between mb-3">
+              <p className={`text-xs font-bold ${isDark ? 'text-white/60' : 'text-gray-500'}`}>🛍️ Shop on:</p>
+              <button onClick={() => setOpen(false)} className={`text-xs font-bold px-2 py-1 rounded-lg ${isDark ? 'text-white/40 hover:text-white bg-white/5' : 'text-gray-400 hover:text-gray-700 bg-gray-100'}`}>✕</button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {shopOptions.map(opt => (
+                <a
+                  key={opt.name}
+                  href={opt.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setOpen(false)}
+                  className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-bold transition-all hover:scale-[1.02] ${opt.bg}`}
+                >
+                  {opt.name}
+                </a>
+              ))}
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
@@ -174,13 +183,13 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
   ];
   const trendingStyles = [
     // Men trending 2025
-    { emoji: '👕', label: 'Oversized Tee', tag: '🔥 Men', gender: 'male', category: 'oversized tshirt streetwear', myntraUrl: 'https://www.myntra.com/tshirts?rawQuery=oversized+tshirt+men', flipkartUrl: 'https://www.flipkart.com/men-tshirts?q=oversized+tshirt&sort=popularity', meeshoQ: 'men oversized tshirt' },
-    { emoji: '🪖', label: 'Cargo Pants', tag: '🔥 Men', gender: 'male', category: 'cargo pants men streetwear', myntraUrl: 'https://www.myntra.com/cargos?rawQuery=cargo+pants+men', flipkartUrl: 'https://www.flipkart.com/men-jeans?q=cargo+pants&sort=popularity', meeshoQ: 'men cargo pants' },
-    { emoji: '🎽', label: 'Co-ord Set', tag: '🔥 Men', gender: 'male', category: 'men coord set matching', myntraUrl: 'https://www.myntra.com/co-ords?rawQuery=men+coord+set', flipkartUrl: 'https://www.flipkart.com/men-clothing?q=coord+set+men&sort=popularity', meeshoQ: 'men coord set' },
+    { emoji: '👕', label: 'Oversized Tee', tag: '🔥 Male', gender: 'male', category: 'oversized tshirt streetwear', myntraUrl: 'https://www.myntra.com/tshirts?rawQuery=oversized%20tshirt%20men', flipkartUrl: 'https://www.flipkart.com/search?q=men+oversized+tshirt&sort=popularity_desc', meeshoQ: 'men oversized tshirt' },
+    { emoji: '🪖', label: 'Cargo Pants', tag: '🔥 Male', gender: 'male', category: 'cargo pants men streetwear', myntraUrl: 'https://www.myntra.com/cargos?rawQuery=cargo%20pants%20men', flipkartUrl: 'https://www.flipkart.com/search?q=men+cargo+pants&sort=popularity_desc', meeshoQ: 'men cargo pants' },
+    { emoji: '🎽', label: 'Co-ord Set', tag: '🔥 Male', gender: 'male', category: 'men coord set matching', myntraUrl: 'https://www.myntra.com/co-ords?rawQuery=men%20coord%20set', flipkartUrl: 'https://www.flipkart.com/search?q=men+coord+set&sort=popularity_desc', meeshoQ: 'men coord set' },
     // Women trending 2025
-    { emoji: '✨', label: 'Coord Set', tag: '🔥 Women', gender: 'female', category: 'women coord set two piece', myntraUrl: 'https://www.myntra.com/co-ords?rawQuery=women+coord+set', flipkartUrl: 'https://www.flipkart.com/women-western-wear?q=coord+set+women&sort=popularity', meeshoQ: 'women coord set' },
-    { emoji: '👗', label: 'Maxi Dress', tag: '🔥 Women', gender: 'female', category: 'women maxi dress trending', myntraUrl: 'https://www.myntra.com/dresses?rawQuery=women+maxi+dress', flipkartUrl: 'https://www.flipkart.com/women-western-wear?q=maxi+dress&sort=popularity', meeshoQ: 'women maxi dress' },
-    { emoji: '🥻', label: 'Kurti Set', tag: '🔥 Women', gender: 'female', category: 'women kurti set with pants', myntraUrl: 'https://www.myntra.com/kurta-sets?rawQuery=kurti+set+women', flipkartUrl: 'https://www.flipkart.com/women-kurtas-and-suits?q=kurti+set&sort=popularity', meeshoQ: 'women kurti set' },
+    { emoji: '✨', label: 'Coord Set', tag: '🔥 Female', gender: 'female', category: 'women coord set two piece', myntraUrl: 'https://www.myntra.com/co-ords?rawQuery=women%20coord%20set', flipkartUrl: 'https://www.flipkart.com/search?q=women+coord+set&sort=popularity_desc', meeshoQ: 'women coord set' },
+    { emoji: '👗', label: 'Maxi Dress', tag: '🔥 Female', gender: 'female', category: 'women maxi dress trending', myntraUrl: 'https://www.myntra.com/dresses?rawQuery=women%20maxi%20dress', flipkartUrl: 'https://www.flipkart.com/search?q=women+maxi+dress&sort=popularity_desc', meeshoQ: 'women maxi dress' },
+    { emoji: '🥻', label: 'Kurti Set', tag: '🔥 Female', gender: 'female', category: 'women kurti set with pants', myntraUrl: 'https://www.myntra.com/kurta-sets?rawQuery=kurti%20set%20women', flipkartUrl: 'https://www.flipkart.com/search?q=women+kurti+set&sort=popularity_desc', meeshoQ: 'women kurti set' },
   ];
   const DAILY_TIPS = [
     { emoji: '🎨', tip: 'Navy blue suits warm undertones perfectly — try it for your next outfit!' },
