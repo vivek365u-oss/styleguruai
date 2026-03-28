@@ -409,9 +409,13 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
             {analysis.skin_tone.category} <span className={`${skinLabelCls} font-light text-lg`}>Skin</span>
           </h2>
           <div className="flex flex-wrap gap-1.5 mt-2">
-            <span className="bg-purple-500/20 border border-purple-500/30 text-purple-200 text-xs px-2 py-0.5 rounded-full capitalize">{analysis.skin_tone.undertone}</span>
-            <span className="bg-pink-500/20 border border-pink-500/30 text-pink-200 text-xs px-2 py-0.5 rounded-full">🍂 {analysis.skin_tone.color_season}</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full border ${analysis.skin_tone.confidence === "high" ? "bg-green-500/20 border-green-500/30 text-green-300" : "bg-yellow-500/20 border-yellow-500/30 text-yellow-300"}`}>
+            <span className={`text-xs px-2 py-0.5 rounded-full border capitalize ${isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-200' : 'bg-purple-100 border-purple-400 text-purple-800 font-semibold'}`}>{analysis.skin_tone.undertone}</span>
+            <span className={`text-xs px-2 py-0.5 rounded-full border ${isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-200' : 'bg-pink-100 border-pink-400 text-pink-800 font-semibold'}`}>🍂 {analysis.skin_tone.color_season}</span>
+            <span className={`text-xs px-2 py-0.5 rounded-full border ${
+              analysis.skin_tone.confidence === "high"
+                ? isDark ? "bg-green-500/20 border-green-500/30 text-green-300" : "bg-green-100 border-green-500 text-green-800 font-semibold"
+                : isDark ? "bg-yellow-500/20 border-yellow-500/30 text-yellow-300" : "bg-yellow-100 border-yellow-500 text-yellow-800 font-semibold"
+            }`}>
               {analysis.skin_tone.confidence === "high" ? "✓ High" : "~ Medium"}
             </span>
           </div>
@@ -492,10 +496,10 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
       {/* Shop the full look */}
       <div className="flex gap-1.5 flex-wrap">
         {[
-          { name: '🛒 Amazon', url: `https://www.amazon.in/s?k=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit set'))}&rh=n%3A1968024031&sort=review-rank&tag=${AMAZON_TAG}`, bg: 'bg-orange-500/20 border-orange-500/30 text-orange-300' },
-          { name: '🏪 Flipkart', url: `https://www.flipkart.com/${isFemale ? 'women-western-wear' : 'men-clothing'}?q=${encodeURIComponent(shirtColor.name)}&sort=popularity`, bg: 'bg-blue-500/20 border-blue-500/30 text-blue-300' },
-          { name: '👗 Myntra', url: `https://www.myntra.com/${isFemale ? 'co-ords' : 'tshirts'}?rawQuery=${encodeURIComponent(shirtColor.name.toLowerCase())}+${isFemale ? 'coord+set' : 'men'}`, bg: 'bg-pink-500/20 border-pink-500/30 text-pink-300' },
-          { name: '🛍️ Meesho', url: `https://meesho.com/search?q=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit'))}`, bg: 'bg-purple-500/20 border-purple-500/30 text-purple-300' },
+          { name: '🛒 Amazon', url: `https://www.amazon.in/s?k=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit set'))}&rh=n%3A1968024031&sort=review-rank&tag=${AMAZON_TAG}`, bg: isDark ? 'bg-orange-500/20 border-orange-500/30 text-orange-300' : 'bg-orange-50 border-orange-300 text-orange-700 font-bold' },
+          { name: '🏪 Flipkart', url: `https://www.flipkart.com/search?q=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit'))}&sort=popularity_desc`, bg: isDark ? 'bg-blue-500/20 border-blue-500/30 text-blue-300' : 'bg-blue-50 border-blue-300 text-blue-700 font-bold' },
+          { name: '👗 Myntra', url: `https://www.myntra.com/${isFemale ? 'co-ords' : 'tshirts'}?rawQuery=${shirtColor.name.toLowerCase().replace(/\s+/g, '%20')}%20${isFemale ? 'women%20coord%20set' : 'men%20oversized'}`, bg: isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300' : 'bg-pink-50 border-pink-300 text-pink-700 font-bold' },
+          { name: '🛍️ Meesho', url: `https://meesho.com/search?q=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit'))}`, bg: isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-300' : 'bg-purple-50 border-purple-300 text-purple-700 font-bold' },
         ].map(link => (
           <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer"
             className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}>
@@ -702,11 +706,11 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
               <div key={i} className={`${isDark ? 'bg-white/5' : 'bg-white shadow-sm'} rounded-xl p-3 border border-pink-500/20`}>
                 <div className="flex items-start justify-between gap-2 flex-wrap">
                   <div>
-                    <p className="text-pink-200 font-bold text-sm">{item.type}</p>
+                    <p className={`${isDark ? 'text-pink-200' : 'text-pink-700'} font-bold text-sm`}>{item.type}</p>
                     <p className={`${isDark ? 'text-white/50' : 'text-gray-500'} text-xs mt-0.5`}>🎨 {item.colors}</p>
                     <p className={`${mutedCls} text-xs`}>{item.reason}</p>
                   </div>
-                  <span className="bg-pink-500/20 text-pink-300 text-xs px-2 py-0.5 rounded-full border border-pink-500/20">{item.occasion}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full border ${isDark ? 'bg-pink-500/20 text-pink-300 border-pink-500/20' : 'bg-pink-100 text-pink-700 border-pink-300 font-semibold'}`}>{item.occasion}</span>
                 </div>
               </div>
             ))}
