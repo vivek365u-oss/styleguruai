@@ -12,6 +12,8 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   const colorDisplay = colorName.toLowerCase().replace(/\s+/g, ' ');
   const AMAZON_TAG = 'styleguruai-21';
   const [budget, setBudget] = useState(null); // null = no filter
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
 
   const budgets = [
     { label: '₹500', amzMax: 500, fkMax: 500, myntraMax: 500 },
@@ -93,10 +95,10 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   const topPick = topPicksMap[colorKey]?.[category];
 
   const links = [
-    { name: 'Amazon',   url: topPick?.amz || `https://www.amazon.in/s?k=${encodeURIComponent(cfg.amzKw)}&rh=n%3A${cfg.amzNode}${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, icon: '🛒', bg: 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' },
-    { name: 'Flipkart', url: topPick?.fk  || `https://www.flipkart.com/${cfg.fkCat}?q=${encodeURIComponent(colorDisplay)}&sort=popularity${fkPriceParam}`, icon: '🏪', bg: 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' },
-    { name: 'Myntra',   url: topPick?.myn || `${cfg.myntra}${myntraPriceParam}`, icon: '👗', bg: 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' },
-    { name: 'Meesho',   url: topPick?.mee || `https://meesho.com/search?q=${encodeURIComponent(cfg.meesho)}`, icon: '🛍️', bg: 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' },
+    { name: 'Amazon',   url: topPick?.amz || `https://www.amazon.in/s?k=${encodeURIComponent(cfg.amzKw)}&rh=n%3A${cfg.amzNode}${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, icon: '🛒', bg: isDark ? 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' : 'bg-orange-50 hover:bg-orange-100 border-orange-300 text-orange-700 font-bold' },
+    { name: 'Flipkart', url: topPick?.fk  || `https://www.flipkart.com/${cfg.fkCat}?q=${encodeURIComponent(colorDisplay)}&sort=popularity${fkPriceParam}`, icon: '🏪', bg: isDark ? 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700 font-bold' },
+    { name: 'Myntra',   url: topPick?.myn || `${cfg.myntra}${myntraPriceParam}`, icon: '👗', bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold' },
+    { name: 'Meesho',   url: topPick?.mee || `https://meesho.com/search?q=${encodeURIComponent(cfg.meesho)}`, icon: '🛍️', bg: isDark ? 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' : 'bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700 font-bold' },
   ];
 
   return (
@@ -104,7 +106,10 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
       {/* Top Pick badge when curated URL available */}
       {topPick && (
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-bold bg-green-500/20 border border-green-500/30 text-green-400 px-2 py-0.5 rounded-full">⭐ Top Pick — All 4 Platforms</span>
+          <span className={`text-[10px] font-bold border px-2 py-0.5 rounded-full
+            ${isDark ? 'bg-green-500/20 border-green-500/30 text-green-400' : 'bg-green-100 border-green-400 text-green-700'}`}>
+            ⭐ Top Pick — All 4 Platforms
+          </span>
         </div>
       )}
       {/* Budget filter pills */}
@@ -115,8 +120,8 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
             onClick={(e) => { e.stopPropagation(); setBudget(b.label === 'Any' ? null : b); }}
             className={`px-2 py-0.5 rounded-full text-xs font-bold border transition-all ${
               (b.label === 'Any' && !budget) || budget?.label === b.label
-                ? 'bg-purple-500/40 border-purple-400 text-purple-200'
-                : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70'
+                ? isDark ? 'bg-purple-500/40 border-purple-400 text-purple-200' : 'bg-purple-600 border-purple-600 text-white shadow-sm'
+                : isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70' : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
             }`}
           >
             {b.label}

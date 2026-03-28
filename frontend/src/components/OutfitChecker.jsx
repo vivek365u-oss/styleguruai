@@ -22,14 +22,22 @@ function OutfitShopCard({ color, isDark }) {
   const myntraPriceParam = budget?.max ? `&p=price%5B0%5D%3D0%20TO%20${budget.max}` : '';
 
   const links = [
-    { name: 'Amazon',   icon: '🛒', bg: 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300', url: `https://www.amazon.in/s?k=${encodeURIComponent(colorDisplay + ' men oversized tshirt streetwear trending 2025')}&rh=n%3A1968024031${amzPriceParam}&sort=review-rank&tag=${AMAZON_TAG}` },
-    { name: 'Flipkart', icon: '🏪', bg: 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300',     url: `https://www.flipkart.com/men-tshirts?q=${encodeURIComponent(colorDisplay + ' men oversized tshirt')}&sort=popularity${fkPriceParam}` },
-    { name: 'Myntra',   icon: '👗', bg: 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300',     url: `https://www.myntra.com/tshirts?rawQuery=${colorLower}+men+oversized${myntraPriceParam}` },
-    { name: 'Meesho',   icon: '🛍️', bg: 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300', url: `https://meesho.com/search?q=${encodeURIComponent(colorDisplay + ' men oversized tshirt trending')}` },
+    { name: 'Amazon',   icon: '🛒',
+      bg: isDark ? 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' : 'bg-orange-50 hover:bg-orange-100 border-orange-300 text-orange-700 font-bold',
+      url: `https://www.amazon.in/s?k=${encodeURIComponent(colorDisplay + ' men oversized tshirt streetwear trending 2025')}&rh=n%3A1968024031${amzPriceParam}&sort=review-rank&tag=${AMAZON_TAG}` },
+    { name: 'Flipkart', icon: '🏪',
+      bg: isDark ? 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700 font-bold',
+      url: `https://www.flipkart.com/men-tshirts?q=${encodeURIComponent(colorDisplay + ' men oversized tshirt')}&sort=popularity${fkPriceParam}` },
+    { name: 'Myntra',   icon: '👗',
+      bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold',
+      url: `https://www.myntra.com/tshirts?rawQuery=${colorLower}+men+oversized${myntraPriceParam}` },
+    { name: 'Meesho',   icon: '🛍️',
+      bg: isDark ? 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' : 'bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700 font-bold',
+      url: `https://meesho.com/search?q=${encodeURIComponent(colorDisplay + ' men oversized tshirt trending')}` },
   ];
 
-  const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
-  const nameCls = isDark ? 'text-white' : 'text-gray-800';
+  const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-md';
+  const nameCls = isDark ? 'text-white' : 'text-gray-900';
   const reasonCls = isDark ? 'text-white/40' : 'text-gray-500';
 
   return (
@@ -51,8 +59,8 @@ function OutfitShopCard({ color, isDark }) {
             onClick={() => setBudget(b.label === 'Any' ? null : b)}
             className={`px-2 py-0.5 rounded-full text-xs font-bold border transition-all ${
               (b.label === 'Any' && !budget) || budget?.label === b.label
-                ? 'bg-purple-500/40 border-purple-400 text-purple-200'
-                : isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70' : 'bg-gray-100 border-gray-200 text-gray-400 hover:text-gray-700'
+                ? isDark ? 'bg-purple-500/40 border-purple-400 text-purple-200' : 'bg-purple-600 border-purple-600 text-white shadow-sm'
+                : isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70' : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
             }`}
           >
             {b.label}
@@ -154,23 +162,27 @@ function OutfitChecker() {
             {/* Selfie Upload */}
             <div
               onClick={() => selfieRef.current?.click()}
-              className={`relative border-2 border-dashed rounded-3xl p-8 text-center cursor-pointer transition-all duration-300 ${isDark ? 'border-blue-500/30 bg-blue-500/5 hover:border-blue-400/50 hover:bg-blue-500/10' : 'border-blue-300 bg-blue-50 hover:border-blue-400 hover:bg-blue-100'}`}
+              className={`relative border-2 border-dashed rounded-3xl p-8 text-center cursor-pointer transition-all duration-300 group
+                ${isDark
+                  ? 'border-blue-500/30 bg-blue-500/5 hover:border-blue-400/60 hover:bg-blue-500/10'
+                  : 'border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 hover:border-blue-500 hover:from-blue-100 hover:to-indigo-100 shadow-sm hover:shadow-md'}`}
             >
               <input ref={selfieRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && handleSelfie(e.target.files[0])} className="hidden" />
               {selfiePreview ? (
                 <div className="flex flex-col items-center">
-                  <img src={selfiePreview} alt="Selfie" className="w-32 h-32 object-cover rounded-2xl border-2 border-blue-500/30 shadow-lg mb-3" />
-                  <p className="text-blue-500 text-sm font-medium">✅ Selfie ready!</p>
-                  <p className={`text-xs mt-1 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Click to change</p>
+                  <img src={selfiePreview} alt="Selfie" className="w-32 h-32 object-cover rounded-2xl border-2 border-blue-400 shadow-lg mb-3" />
+                  <p className="text-blue-600 text-sm font-bold">✅ Selfie ready!</p>
+                  <p className={`text-xs mt-1 ${isDark ? 'text-white/30' : 'text-gray-500'}`}>Click to change</p>
                 </div>
               ) : (
                 <>
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 ${isDark ? 'bg-blue-500/20' : 'bg-blue-100'}`}>
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-sm
+                    ${isDark ? 'bg-blue-500/20' : 'bg-white border-2 border-blue-200 group-hover:border-blue-400'}`}>
                     <span className="text-3xl">🤳</span>
                   </div>
-                  <p className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('yourSelfie')}</p>
-                  <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('clearFacePhoto')}</p>
-                  <p className={`text-xs mt-2 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>JPG, PNG, WebP</p>
+                  <p className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('yourSelfie')}</p>
+                  <p className={`text-sm font-medium ${isDark ? 'text-white/40' : 'text-blue-600'}`}>{t('clearFacePhoto')}</p>
+                  <p className={`text-xs mt-2 font-medium ${isDark ? 'text-white/25' : 'text-gray-500'}`}>JPG, PNG, WebP</p>
                 </>
               )}
             </div>
@@ -178,23 +190,27 @@ function OutfitChecker() {
             {/* Outfit Upload */}
             <div
               onClick={() => outfitRef.current?.click()}
-              className={`relative border-2 border-dashed rounded-3xl p-8 text-center cursor-pointer transition-all duration-300 ${isDark ? 'border-pink-500/30 bg-pink-500/5 hover:border-pink-400/50 hover:bg-pink-500/10' : 'border-pink-300 bg-pink-50 hover:border-pink-400 hover:bg-pink-100'}`}
+              className={`relative border-2 border-dashed rounded-3xl p-8 text-center cursor-pointer transition-all duration-300 group
+                ${isDark
+                  ? 'border-pink-500/30 bg-pink-500/5 hover:border-pink-400/60 hover:bg-pink-500/10'
+                  : 'border-pink-400 bg-gradient-to-br from-pink-50 to-rose-50 hover:border-pink-500 hover:from-pink-100 hover:to-rose-100 shadow-sm hover:shadow-md'}`}
             >
               <input ref={outfitRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && handleOutfit(e.target.files[0])} className="hidden" />
               {outfitPreview ? (
                 <div className="flex flex-col items-center">
-                  <img src={outfitPreview} alt="Outfit" className="w-32 h-32 object-cover rounded-2xl border-2 border-pink-500/30 shadow-lg mb-3" />
-                  <p className="text-pink-500 text-sm font-medium">✅ Outfit ready!</p>
-                  <p className={`text-xs mt-1 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Click to change</p>
+                  <img src={outfitPreview} alt="Outfit" className="w-32 h-32 object-cover rounded-2xl border-2 border-pink-400 shadow-lg mb-3" />
+                  <p className="text-pink-600 text-sm font-bold">✅ Outfit ready!</p>
+                  <p className={`text-xs mt-1 ${isDark ? 'text-white/30' : 'text-gray-500'}`}>Click to change</p>
                 </div>
               ) : (
                 <>
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 ${isDark ? 'bg-pink-500/20' : 'bg-pink-100'}`}>
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-sm
+                    ${isDark ? 'bg-pink-500/20' : 'bg-white border-2 border-pink-200 group-hover:border-pink-400'}`}>
                     <span className="text-3xl">👗</span>
                   </div>
-                  <p className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('outfitPhoto')}</p>
-                  <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('outfitCheckDesc')}</p>
-                  <p className={`text-xs mt-2 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>JPG, PNG, WebP</p>
+                  <p className={`font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('outfitPhoto')}</p>
+                  <p className={`text-sm font-medium ${isDark ? 'text-white/40' : 'text-pink-600'}`}>{t('outfitCheckDesc')}</p>
+                  <p className={`text-xs mt-2 font-medium ${isDark ? 'text-white/25' : 'text-gray-500'}`}>JPG, PNG, WebP</p>
                 </>
               )}
             </div>
