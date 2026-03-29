@@ -351,3 +351,40 @@ export const incrementUsage = async (uid, field) => {
 export const createPaymentOrder = () => API.post('/api/payment/create-order');
 
 export const verifyPayment = (payload) => API.post('/api/payment/verify', payload);
+
+// ============================================
+// COMMUNITY FEED
+// ============================================
+
+export const publishToCommunityFeed = async (uid, paletteData) => {
+  if (!auth.currentUser) return null;
+  try {
+    const ref = await addDoc(collection(db, 'community_feed'), {
+      uid, // Used for delete rights later if needed, but not displayed publicly
+      ...paletteData,
+      likes: 0,
+      published_at: new Date().toISOString(),
+    });
+    return ref.id;
+  } catch (e) {
+    if (e?.code === 'permission-denied') {
+        console.error('Community rules denied.');
+    }
+    throw e;
+  }
+};
+
+export const getCommunityFeed = async (limitCount = 20) => {
+  try {
+    const q = query(
+      collection(db, 'community_feed'),
+      orderBy('published_at', 'desc'),
+      limit(limitCount)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    console.error('getCommunityFeed failed', e);
+    return [];
+  }
+};

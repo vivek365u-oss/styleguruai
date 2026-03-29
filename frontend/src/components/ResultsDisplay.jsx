@@ -5,6 +5,7 @@ import { useState, useEffect, useContext } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../App';
 import VirtualTryOn from './VirtualTryOn';
+import { publishToCommunityFeed, auth } from '../api/styleApi';
 
 // ── Shopping Links ───────────────────────────────────────────
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
@@ -939,6 +940,8 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
     const isFirst = !localStorage.getItem('sg_analysis_count') || localStorage.getItem('sg_analysis_count') === '1';
     return isFirst;
   });
+  const [shareStatus, setShareStatus] = useState(null);
+
   useEffect(() => {
     if (showConfetti) { const t = setTimeout(() => setShowConfetti(false), 2000); return () => clearTimeout(t); }
   }, [showConfetti]);
@@ -1055,23 +1058,72 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         photoQuality={photo_quality}
       />
 
-      {/* Download Palette */}
-      {(() => {
-        const allColors = [
-          ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || recommendations.seasonal_colors || []),
-          ...(recommendations.best_pant_colors || []),
-        ].slice(0, 7);
-        if (allColors.length === 0) return null;
-        return (
-          <button
-            onClick={() => downloadPalette(allColors, analysis.skin_tone.category)}
-            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-bold transition-all hover:scale-[1.02] ${isDark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-purple-500/40' : 'bg-white border-gray-200 text-gray-600 hover:border-purple-400 shadow-sm'}`}
-          >
-            <span>🎨</span>
-            <span>Download My Color Palette</span>
-          </button>
-        );
-      })()}
+      {/* Actions: Download / Share */}
+      <div className="flex flex-col sm:flex-row gap-2 mt-4">
+        {(() => {
+          const allColors = [
+            ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || recommendations.seasonal_colors || []),
+            ...(recommendations.best_pant_colors || []),
+          ].slice(0, 7);
+          if (allColors.length === 0) return null;
+          return (
+            <button
+              onClick={() => downloadPalette(allColors, analysis.skin_tone.category)}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-bold transition-all hover:scale-[1.02] ${isDark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-purple-500/40' : 'bg-white border-gray-200 text-gray-600 hover:border-purple-400 shadow-sm'}`}
+            >
+              <span>🎨</span>
+              <span>Download Palette</span>
+            </button>
+          );
+        })()}
+        
+        <button
+          onClick={async () => {
+            if (shareStatus === 'success') return;
+            setShareStatus('loading');
+            try {
+              const paletteData = {
+                skinHex: analysis.skin_color.hex,
+                skinTone: analysis.skin_tone.category,
+                undertone: analysis.skin_tone.undertone || '',
+                colorSeason: analysis.skin_tone.color_season || '',
+                gender: result.gender || 'male',
+                bestColors: [
+                  ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || recommendations.seasonal_colors || []),
+                ].slice(0, 5)
+              };
+              await publishToCommunityFeed(auth.currentUser?.uid || 'anon', paletteData);
+              setShareStatus('success');
+            } catch (e) {
+              setShareStatus('error');
+              setTimeout(() => setShareStatus(null), 3000);
+            }
+          }}
+          disabled={shareStatus === 'loading' || shareStatus === 'success'}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all hover:scale-[1.02] shadow-sm ${
+            shareStatus === 'success' 
+            ? 'bg-green-500 text-white border-green-500' 
+            : shareStatus === 'error'
+            ? 'bg-red-500 text-white border-red-500'
+            : isDark 
+              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-transparent hover:from-purple-500 hover:to-pink-500' 
+              : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-transparent hover:from-purple-600 hover:to-pink-600'
+          }`}
+        >
+          {shareStatus === 'loading' ? (
+             <span className="animate-spin text-sm">↻</span>
+          ) : shareStatus === 'success' ? (
+             <span>✅ Shared!</span>
+          ) : shareStatus === 'error' ? (
+             <span>Error</span>
+          ) : (
+            <>
+              <span>🌍</span>
+              <span>Share to Community</span>
+            </>
+          )}
+        </button>
+      </div>
 
       {/* Tab bar */}
       <div className={`flex ${tabBarBg} rounded-2xl p-1 gap-1`}>

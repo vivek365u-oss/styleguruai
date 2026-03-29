@@ -15,6 +15,7 @@ import OOTDCard from './OOTDCard';
 import WeatherTip from './WeatherTip';
 import ColorScanner from './ColorScanner';
 import StyleBot from './StyleBot';
+import CommunityFeed from './CommunityFeed';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
@@ -692,12 +693,12 @@ function Dashboard({ user, onLogout }) {
   };
 
   const navItems = [
-    { id: 'home',     emoji: '🏠', label: 'Home' },
-    { id: 'analyze',  emoji: '📸', label: 'Analyze' },
-    { id: 'outfit',   emoji: '👔', label: 'Outfit' },
-    { id: 'wardrobe', emoji: '👗', label: 'Wardrobe' },
-    { id: 'history',  emoji: '📋', label: 'History' },
-    { id: 'settings', emoji: '⚙️', label: 'Profile' },
+    { id: 'home',      emoji: '🏠', label: 'Home' },
+    { id: 'analyze',   emoji: '📸', label: 'Analyze' },
+    { id: 'community', emoji: '🌍', label: 'Community' },
+    { id: 'outfit',    emoji: '👔', label: 'Outfit' },
+    { id: 'wardrobe',  emoji: '👗', label: 'Wardrobe' },
+    { id: 'settings',  emoji: '⚙️', label: 'Profile' },
   ];
 
   const handleTabChange = (tab) => {
@@ -782,6 +783,7 @@ function Dashboard({ user, onLogout }) {
         {activeTab === 'outfit' && <OutfitChecker />}
         {activeTab === 'wardrobe' && <WardrobePanel user={user} />}
         {activeTab === 'history' && <HistoryPanel onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
+        {activeTab === 'community' && <CommunityFeed />}
         {activeTab === 'scanner' && (
           <ColorScanner
             savedPalette={(() => {
