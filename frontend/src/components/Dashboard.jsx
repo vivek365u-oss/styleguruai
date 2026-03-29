@@ -2,6 +2,7 @@ import OutfitChecker from './OutfitChecker';
 import { useState, useEffect, useContext } from 'react';
 import UploadSection from './UploadSection';
 import ResultsDisplay from './ResultsDisplay';
+import CoupleResults from './CoupleResults';
 import HistoryPanel from './HistoryPanel';
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -778,7 +779,11 @@ function Dashboard({ user, onLogout }) {
                 </button>
               </div>
             )}
-            {results && <ResultsDisplay data={results} uploadedImage={uploadedImage} onReset={handleReset} />}
+            {results && results.type === 'couple' ? (
+              <CoupleResults data={results} uploadedImages={uploadedImage} onReset={handleReset} />
+            ) : results ? (
+              <ResultsDisplay data={results} uploadedImage={uploadedImage} onReset={handleReset} />
+            ) : null}
           </>
         )}
         {activeTab === 'outfit' && <OutfitChecker />}

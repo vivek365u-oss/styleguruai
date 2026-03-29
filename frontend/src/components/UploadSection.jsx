@@ -182,6 +182,14 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
+  // Couple Mode States
+  const [partner1, setPartner1] = useState(null);
+  const [partner2, setPartner2] = useState(null);
+  const [partner1Gender, setPartner1Gender] = useState('female');
+  const [partner2Gender, setPartner2Gender] = useState('male');
+  const partner1Ref = useRef(null);
+  const partner2Ref = useRef(null);
+
   const handleGenderChange = (newGender) => {
     setGender(newGender);
     if (onGenderChange) onGenderChange(newGender);
@@ -211,6 +219,41 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       const detail = err.response?.data?.detail;
       if (typeof detail === 'object') onError(detail.message || 'Analysis failed.');
       else onError(detail || 'Could not connect to server. Is the backend running?');
+    }
+  };
+
+  const handleCoupleAnalysis = async () => {
+    if (!partner1 || !partner2) {
+      onError('Please select photos for both partners.');
+      return;
+    }
+    const dataURLtoFile = (dataurl, filename) => {
+      let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+          bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+      while(n--){ u8arr[n] = bstr.charCodeAt(n); }
+      return new File([u8arr], filename, {type:mime});
+    };
+    
+    onLoadingStart();
+    try {
+      const file1 = dataURLtoFile(partner1, 'partner1.jpg');
+      const file2 = dataURLtoFile(partner2, 'partner2.jpg');
+
+      setUploadProgress(10);
+      const res1 = partner1Gender === 'female' ? await analyzeImageFemale(file1, () => {}) : await analyzeImage(file1, () => {});
+      setUploadProgress(50);
+      const res2 = partner2Gender === 'female' ? await analyzeImageFemale(file2, () => {}) : await analyzeImage(file2, () => {});
+      setUploadProgress(100);
+
+      onImageSelected([partner1, partner2]);
+      onAnalysisComplete({
+        type: 'couple',
+        partner1: { ...res1.data, gender: partner1Gender },
+        partner2: { ...res2.data, gender: partner2Gender },
+        occasion
+      });
+    } catch (err) {
+      onError('Couple analysis failed. Ensure both photos have clear faces.');
     }
   };
 
@@ -249,7 +292,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
 
       {/* Mode Selector */}
       <div className="flex justify-center mb-6">
-        <div className={`rounded-2xl p-1.5 flex gap-1 border ${isDark ? 'bg-white/10 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
+        <div className={`rounded-2xl p-1.5 flex gap-1 flex-wrap border ${isDark ? 'bg-white/10 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
           <button
             onClick={() => { setMode('normal'); handleGenderChange('male'); }}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${
@@ -269,6 +312,16 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
             }`}
           >
             <span>🌍</span> Seasonal
+          </button>
+          <button
+            onClick={() => { setMode('couple'); }}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${
+              mode === 'couple'
+                ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg'
+                : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'
+            }`}
+          >
+            <span>👩‍❤️‍👨</span> Couple
           </button>
         </div>
       </div>
@@ -354,7 +407,9 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
 
       {/* Mode Info */}
       <div className="text-center mb-4 text-sm font-medium">
-        {mode === 'seasonal' ? (
+        {mode === 'couple' ? (
+          <span className={isDark ? 'text-rose-300' : 'text-rose-600'}>👩‍❤️‍👨 Couple mode: Harmonized colors & matching outfits!</span>
+        ) : mode === 'seasonal' ? (
           <span className={isDark ? 'text-amber-300' : 'text-amber-600'}>
             {seasons.find(s => s.id === season)?.emoji} {gender === 'female' ? '👩 Female' : '👨 Male'} — Special recommendations for {seasons.find(s => s.id === season)?.label}!
           </span>
@@ -479,98 +534,145 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       </div>
 
       {/* Upload Box */}
-      <div
-        className={`relative border-2 border-dashed rounded-3xl p-6 md:p-12 text-center cursor-pointer transition-all duration-300 ${
-          dragActive
-            ? 'border-purple-400 bg-purple-500/10 scale-[1.01]'
-            : mode === 'seasonal'
-              ? isDark ? 'border-amber-500/30 bg-amber-500/5 hover:border-amber-400/50 hover:bg-amber-500/10' : 'border-amber-300 bg-amber-50 hover:border-amber-400 hover:bg-amber-100'
-              : gender === 'female'
-                ? isDark ? 'border-pink-500/30 bg-pink-500/5 hover:border-pink-400/50 hover:bg-pink-500/10' : 'border-pink-300 bg-pink-50 hover:border-pink-400 hover:bg-pink-100'
-                : isDark ? 'border-white/20 bg-white/5 hover:border-purple-400/50 hover:bg-white/10' : 'border-purple-300 bg-slate-100 hover:border-purple-500 hover:bg-purple-50 shadow-sm'
-        }`}
-        onClick={() => fileInputRef.current?.click()}
-        onDrop={handleDrop}
-        onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-        onDragLeave={() => setDragActive(false)}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-          className="hidden"
-        />
-        {/* Camera input — opens camera directly on mobile */}
-        <input
-          ref={cameraInputRef}
-          type="file"
-          accept="image/*"
-          capture="user"
-          onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-          className="hidden"
-        />
-
-        {preview ? (
-          <div className="flex flex-col items-center">
-            <img src={preview} alt="Preview" className="w-40 h-40 object-cover rounded-2xl shadow-2xl mb-4 border-2 border-purple-500/30" />
-            <p className={`animate-pulse ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{t('analyzingPhoto')}</p>
-            {uploadProgress > 0 && uploadProgress < 100 && (
-              <div className={`mt-3 w-48 rounded-full h-1.5 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
-                <div className="bg-purple-500 h-1.5 rounded-full transition-all" style={{ width: `${uploadProgress}%` }}></div>
+      {mode === 'couple' ? (
+        <div className="grid grid-cols-2 gap-4">
+          {[
+            { id: 1, file: partner1, setFile: setPartner1, gender: partner1Gender, setGender: setPartner1Gender, ref: partner1Ref, label: 'Partner 1' },
+            { id: 2, file: partner2, setFile: setPartner2, gender: partner2Gender, setGender: setPartner2Gender, ref: partner2Ref, label: 'Partner 2' },
+          ].map(p => (
+            <div key={p.id} className={`flex flex-col items-center rounded-3xl p-4 border-2 border-dashed transition-all ${isDark ? 'border-rose-500/30 bg-rose-500/5' : 'border-rose-300 bg-rose-50'}`}>
+              <span className="font-bold text-sm mb-2 opacity-70">{p.label}</span>
+              <div className="flex gap-1 mb-3 bg-white/10 p-1 rounded-lg">
+                <button onClick={() => p.setGender('female')} className={`px-2 py-1 text-xs rounded-md ${p.gender === 'female' ? 'bg-pink-500 text-white' : 'text-gray-400'}`}>👩</button>
+                <button onClick={() => p.setGender('male')} className={`px-2 py-1 text-xs rounded-md ${p.gender === 'male' ? 'bg-blue-500 text-white' : 'text-gray-400'}`}>👨</button>
               </div>
+              <input
+                ref={p.ref} type="file" accept="image/*" className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) {
+                    const r = new FileReader();
+                    r.onload = ev => p.setFile(ev.target.result);
+                    r.readAsDataURL(f);
+                  }
+                }}
+              />
+              {p.file ? (
+                <img src={p.file} className="w-24 h-24 object-cover rounded-xl border border-white/20 mb-2 cursor-pointer shadow-lg" onClick={() => p.ref.current?.click()} />
+              ) : (
+                <button onClick={() => p.ref.current?.click()} className="w-24 h-24 rounded-xl bg-black/5 dark:bg-white/5 flex items-center justify-center text-3xl mb-2 hover:bg-black/10 dark:hover:bg-white/10 transition pb-1">
+                  📸
+                </button>
+              )}
+            </div>
+          ))}
+          <div className="col-span-2 mt-2">
+            <button 
+              onClick={handleCoupleAnalysis}
+              disabled={!partner1 || !partner2}
+              className={`w-full py-4 rounded-2xl font-black text-lg text-white shadow-xl transition-all hover:scale-[1.02] ${(!partner1 || !partner2) ? 'bg-gray-400 opacity-50 cursor-not-allowed' : 'bg-gradient-to-r from-rose-500 to-pink-600 shadow-rose-500/30'}`}
+            >
+              👩‍❤️‍👨 Match Outfits
+            </button>
+            {uploadProgress > 0 && uploadProgress < 100 && (
+              <p className="text-center text-xs mt-2 text-rose-500 animate-pulse">Analyzing both photos... {uploadProgress}%</p>
             )}
           </div>
-        ) : (
-          <>
-            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border ${
-              mode === 'seasonal'
-                ? isDark ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-white/10' : 'bg-amber-100 border-amber-200'
+        </div>
+      ) : (
+        <div
+          className={`relative border-2 border-dashed rounded-3xl p-6 md:p-12 text-center cursor-pointer transition-all duration-300 ${
+            dragActive
+              ? 'border-purple-400 bg-purple-500/10 scale-[1.01]'
+              : mode === 'seasonal'
+                ? isDark ? 'border-amber-500/30 bg-amber-500/5 hover:border-amber-400/50 hover:bg-amber-500/10' : 'border-amber-300 bg-amber-50 hover:border-amber-400 hover:bg-amber-100'
                 : gender === 'female'
-                  ? isDark ? 'bg-gradient-to-br from-pink-500/20 to-rose-500/20 border-white/10' : 'bg-pink-100 border-pink-200'
-                  : isDark ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-white/10' : 'bg-purple-100 border-purple-200'
-            }`}>
-              <span className="text-4xl">
-                {mode === 'seasonal' ? seasons.find(s => s.id === season)?.emoji : gender === 'female' ? '👩' : '🤳'}
+                  ? isDark ? 'border-pink-500/30 bg-pink-500/5 hover:border-pink-400/50 hover:bg-pink-500/10' : 'border-pink-300 bg-pink-50 hover:border-pink-400 hover:bg-pink-100'
+                  : isDark ? 'border-white/20 bg-white/5 hover:border-purple-400/50 hover:bg-white/10' : 'border-purple-300 bg-slate-100 hover:border-purple-500 hover:bg-purple-50 shadow-sm'
+          }`}
+          onClick={() => fileInputRef.current?.click()}
+          onDrop={handleDrop}
+          onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+          onDragLeave={() => setDragActive(false)}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+            className="hidden"
+          />
+          {/* Camera input — opens camera directly on mobile */}
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="user"
+            onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+            className="hidden"
+          />
+
+          {preview ? (
+            <div className="flex flex-col items-center">
+              <img src={preview} alt="Preview" className="w-40 h-40 object-cover rounded-2xl shadow-2xl mb-4 border-2 border-purple-500/30" />
+              <p className={`animate-pulse ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{t('analyzingPhoto')}</p>
+              {uploadProgress > 0 && uploadProgress < 100 && (
+                <div className={`mt-3 w-48 rounded-full h-1.5 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
+                  <div className="bg-purple-500 h-1.5 rounded-full transition-all" style={{ width: `${uploadProgress}%` }}></div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border ${
+                mode === 'seasonal'
+                  ? isDark ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-white/10' : 'bg-amber-100 border-amber-200'
+                  : gender === 'female'
+                    ? isDark ? 'bg-gradient-to-br from-pink-500/20 to-rose-500/20 border-white/10' : 'bg-pink-100 border-pink-200'
+                    : isDark ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-white/10' : 'bg-purple-100 border-purple-200'
+              }`}>
+                <span className="text-4xl">
+                  {mode === 'seasonal' ? seasons.find(s => s.id === season)?.emoji : gender === 'female' ? '👩' : '🤳'}
+                </span>
+              </div>
+              <p className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('dropSelfie')}</p>
+              <p className={`mb-6 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('orBrowse')}</p>
+              <span className={`inline-block px-8 py-3.5 text-white font-bold rounded-2xl shadow-lg transition-all hover:scale-105 ${
+                mode === 'seasonal'
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-amber-500/30'
+                  : gender === 'female'
+                    ? 'bg-gradient-to-r from-pink-500 to-rose-500 shadow-pink-500/30'
+                    : 'bg-gradient-to-r from-purple-500 to-pink-500 shadow-purple-500/30'
+              }`}>
+                📁 {t('choosePhoto')}
               </span>
-            </div>
-            <p className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('dropSelfie')}</p>
-            <p className={`mb-6 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('orBrowse')}</p>
-            <span className={`inline-block px-8 py-3.5 text-white font-bold rounded-2xl shadow-lg transition-all hover:scale-105 ${
-              mode === 'seasonal'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-amber-500/30'
-                : gender === 'female'
-                  ? 'bg-gradient-to-r from-pink-500 to-rose-500 shadow-pink-500/30'
-                  : 'bg-gradient-to-r from-purple-500 to-pink-500 shadow-purple-500/30'
-            }`}>
-              📁 {t('choosePhoto')}
-            </span>
-            {/* Camera button — mobile only, Gallery for all */}
-            <div className="flex gap-3 justify-center mt-3">
-              {/* Camera: only show on touch devices (mobile) */}
-              <button
-                onClick={(e) => { e.stopPropagation(); cameraInputRef.current?.click(); }}
-                className={`md:hidden flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition
-                  ${isDark
-                    ? 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/30'
-                    : 'bg-purple-600 border-purple-600 text-white shadow-sm hover:bg-purple-700'}`}
-              >
-                📷 Camera
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition
-                  ${isDark
-                    ? 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'
-                    : 'bg-gray-100 border-gray-300 text-gray-700 shadow-sm hover:bg-gray-200'}`}
-              >
-                🖼️ Gallery
-              </button>
-            </div>
-            <p className={`text-xs mt-4 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>{t('photoNote')}</p>
-          </>
-        )}
-      </div>
+              {/* Camera button — mobile only, Gallery for all */}
+              <div className="flex gap-3 justify-center mt-3">
+                {/* Camera: only show on touch devices (mobile) */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); cameraInputRef.current?.click(); }}
+                  className={`md:hidden flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition
+                    ${isDark
+                      ? 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/30'
+                      : 'bg-purple-600 border-purple-600 text-white shadow-sm hover:bg-purple-700'}`}
+                >
+                  📷 Camera
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition
+                    ${isDark
+                      ? 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'
+                      : 'bg-gray-100 border-gray-300 text-gray-700 shadow-sm hover:bg-gray-200'}`}
+                >
+                  🖼️ Gallery
+                </button>
+              </div>
+              <p className={`text-xs mt-4 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>{t('photoNote')}</p>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Tips */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
