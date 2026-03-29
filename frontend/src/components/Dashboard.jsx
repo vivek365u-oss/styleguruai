@@ -14,6 +14,7 @@ import PaywallModal from './PaywallModal';
 import OOTDCard from './OOTDCard';
 import WeatherTip from './WeatherTip';
 import ColorScanner from './ColorScanner';
+import StyleBot from './StyleBot';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
@@ -814,6 +815,7 @@ function Dashboard({ user, onLogout }) {
       </nav>
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
       <PaywallModal isOpen={paywallOpen} onClose={() => setPaywallOpen(false)} triggerMessage={paywallMessage} />
+      <StyleBot />
     </div>
   );
 }

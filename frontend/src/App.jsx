@@ -16,6 +16,7 @@ import TermsPage from './pages/TermsPage';
 import BlogListPage from './pages/BlogListPage';
 import BlogPostPage from './pages/BlogPostPage';
 import NotFoundPage from './pages/NotFoundPage';
+import AdminDashboard from './pages/AdminDashboard';
 
 export const ThemeContext = createContext();
 
@@ -47,6 +48,11 @@ function AppRoutes({ user, setUser }) {
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/blog" element={<BlogListPage />} />
       <Route path="/blog/:slug" element={<BlogPostPage />} />
+      <Route path="/admin" element={
+        <PrivateRoute user={user}>
+          <AdminDashboard />
+        </PrivateRoute>
+      } />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
