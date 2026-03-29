@@ -1,7 +1,9 @@
 import { useState, useRef, useContext } from 'react';
-import { checkOutfitCompatibility, saveWardrobeItem, auth } from '../api/styleApi';
+import { checkOutfitCompatibility, saveWardrobeItem, auth, incrementUsage } from '../api/styleApi';
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
+import { usePlan } from '../context/PlanContext';
+import PaywallModal from './PaywallModal';
 
 // ── Outfit Shop Card — same style as analyze results ─────────
 function OutfitShopCard({ color, isDark }) {
@@ -84,6 +86,7 @@ function OutfitShopCard({ color, isDark }) {
 function OutfitChecker() {
   const { theme } = useContext(ThemeContext);
   const { t } = useLanguage();
+  const { isPro, usage, setUsage } = usePlan();
   const isDark = theme === 'dark';
   const [selfiePreview, setSelfiePreview] = useState(null);
   const [outfitPreview, setOutfitPreview] = useState(null);
@@ -94,6 +97,7 @@ function OutfitChecker() {
   const [error, setError] = useState(null);
   const [wardrobeSaved, setWardrobeSaved] = useState(false);
   const [wardrobeSaving, setWardrobeSaving] = useState(false);
+  const [paywallOpen, setPaywallOpen] = useState(false);
 
   const selfieRef = useRef(null);
   const outfitRef = useRef(null);
@@ -114,10 +118,22 @@ function OutfitChecker() {
 
   const handleCheck = async () => {
     if (!selfieFile || !outfitFile) { setError(t('uploadBoth')); return; }
+    // Plan gate
+    if (!isPro && usage.outfit_checks_count >= 10) {
+      setPaywallOpen(true);
+      return;
+    }
     setLoading(true); setError(null); setResult(null);
     try {
       const res = await checkOutfitCompatibility(selfieFile, outfitFile);
       setResult(res.data);
+      // Increment usage for free users
+      const uid = auth.currentUser?.uid;
+      if (uid && !isPro) {
+        incrementUsage(uid, 'outfit_checks_count').then(() => {
+          setUsage(prev => ({ ...prev, outfit_checks_count: (prev.outfit_checks_count || 0) + 1 }));
+        });
+      }
     } catch (err) {
       const detail = err.response?.data?.detail;
       if (typeof detail === 'object') setError(detail.message || 'Analysis failed.');
@@ -384,6 +400,11 @@ function OutfitChecker() {
           </button>
         </div>
       )}
+      <PaywallModal
+        isOpen={paywallOpen}
+        onClose={() => setPaywallOpen(false)}
+        triggerMessage="10 checks used this month. Upgrade to Pro for unlimited."
+      />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import axios from 'axios';
 import { auth, googleProvider, db } from '../firebase';
 export { auth };
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
-import { doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, limit, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, limit, deleteDoc, increment } from 'firebase/firestore';
 
 const API = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000' });
 
@@ -306,3 +306,48 @@ export const logShareEvent = async (uid, skinTone) => {
     // Do not throw — share event logging should never block the share action
   }
 };
+
+// ============================================
+// SUBSCRIPTION & USAGE — FIRESTORE
+// ============================================
+
+export const getSubscription = async (uid) => {
+  if (!auth.currentUser) return null;
+  try {
+    const snap = await getDoc(doc(db, 'users', uid, 'subscription', 'data'));
+    return snap.exists() ? snap.data() : null;
+  } catch (e) {
+    console.error('getSubscription error:', e);
+    return null;
+  }
+};
+
+export const getUsage = async (uid, monthKey) => {
+  if (!auth.currentUser) return { analyses_count: 0, outfit_checks_count: 0 };
+  try {
+    const snap = await getDoc(doc(db, 'users', uid, 'usage', monthKey));
+    return snap.exists() ? snap.data() : { analyses_count: 0, outfit_checks_count: 0 };
+  } catch (e) {
+    console.error('getUsage error:', e);
+    return { analyses_count: 0, outfit_checks_count: 0 };
+  }
+};
+
+export const incrementUsage = async (uid, field) => {
+  if (!auth.currentUser) return;
+  try {
+    const monthKey = new Date().toISOString().slice(0, 7); // YYYY-MM
+    const ref = doc(db, 'users', uid, 'usage', monthKey);
+    await setDoc(ref, { [field]: increment(1) }, { merge: true });
+  } catch (e) {
+    console.error('incrementUsage error:', e);
+  }
+};
+
+// ============================================
+// PAYMENT — RAZORPAY
+// ============================================
+
+export const createPaymentOrder = () => API.post('/api/payment/create-order');
+
+export const verifyPayment = (payload) => API.post('/api/payment/verify', payload);

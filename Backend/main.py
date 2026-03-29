@@ -635,6 +635,84 @@ async def push_send_weekly(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================
+# PAYMENT — RAZORPAY
+# ============================================
+import hmac
+import hashlib
+
+try:
+    import razorpay as razorpay_sdk
+    RAZORPAY_AVAILABLE = True
+except ImportError:
+    RAZORPAY_AVAILABLE = False
+
+RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "")
+RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
+
+def get_razorpay_client():
+    if not RAZORPAY_AVAILABLE or not RAZORPAY_KEY_ID:
+        return None
+    return razorpay_sdk.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+
+class VerifyPaymentRequest(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+
+@app.post("/api/payment/create-order")
+async def create_payment_order(current_user: dict = Depends(get_current_user)):
+    """Create a Razorpay order for ₹31/month Pro plan."""
+    client = get_razorpay_client()
+    if not client:
+        raise HTTPException(status_code=500, detail="Payment service unavailable. Please try again.")
+    try:
+        order = client.order.create({
+            "amount": 3100,
+            "currency": "INR",
+            "payment_capture": 1,
+        })
+        return {"order_id": order["id"], "amount": 3100, "currency": "INR"}
+    except Exception as e:
+        print(f"Razorpay create order error: {e}")
+        raise HTTPException(status_code=500, detail="Could not create payment order. Please try again.")
+
+@app.post("/api/payment/verify")
+async def verify_payment(
+    request: VerifyPaymentRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Verify Razorpay payment signature and upgrade user to Pro."""
+    if not RAZORPAY_KEY_SECRET:
+        raise HTTPException(status_code=500, detail="Payment service not configured.")
+
+    # Verify HMAC-SHA256 signature
+    msg = f"{request.razorpay_order_id}|{request.razorpay_payment_id}"
+    expected = hmac.new(
+        RAZORPAY_KEY_SECRET.encode(),
+        msg.encode(),
+        hashlib.sha256
+    ).hexdigest()
+
+    if not hmac.compare_digest(expected, request.razorpay_signature):
+        raise HTTPException(status_code=400, detail="Payment verification failed. Please contact support.")
+
+    # Update Firestore subscription
+    uid = current_user["uid"]
+    try:
+        from firebase_admin import firestore as firebase_firestore
+        db = firebase_firestore.client()
+        from datetime import timedelta
+        valid_until = (datetime.utcnow() + timedelta(days=30)).isoformat() + "Z"
+        db.collection("users").document(uid).collection("subscription").document("data").set({
+            "plan": "pro",
+            "valid_until": valid_until,
+        })
+        return {"status": "success", "valid_until": valid_until}
+    except Exception as e:
+        print(f"Firestore subscription update error: {e}")
+        raise HTTPException(status_code=500, detail="Subscription update failed. Please contact support.")
+
+# ============================================
 # RUN
 # ============================================
 if __name__ == "__main__":

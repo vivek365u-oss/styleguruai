@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { getWardrobe, deleteWardrobeItem, getWardrobeCount } from '../api/styleApi';
 import { auth } from '../api/styleApi';
 import { ThemeContext } from '../App';
+import { usePlan } from '../context/PlanContext';
 
 function SkeletonCard({ isDark }) {
   return (
@@ -19,6 +20,8 @@ function SkeletonCard({ isDark }) {
 
 function WardrobePanel({ user }) {
   const { theme } = useContext(ThemeContext);
+  const { isPro } = usePlan();
+  const wardrobeLimit = isPro ? 50 : 10;
   const isDark = theme === 'dark';
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +55,7 @@ function WardrobePanel({ user }) {
       });
 
     getWardrobeCount(auth.currentUser.uid).then(count => {
-      if (count >= 50) setCapWarning(true);
+      if (count >= wardrobeLimit) setCapWarning(true);
     });
 
     return () => clearTimeout(timeout);
@@ -119,14 +122,14 @@ function WardrobePanel({ user }) {
           <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{items.length} saved outfit{items.length !== 1 ? 's' : ''}</p>
         </div>
         <div className={`rounded-xl px-3 py-2 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
-          <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{items.length}/50</span>
+          <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{items.length}/{wardrobeLimit}</span>
         </div>
       </div>
 
       {capWarning && (
         <div className={`rounded-2xl p-3 mb-4 border flex items-center gap-3 ${isDark ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-yellow-50 border-yellow-200'}`}>
           <span className="text-xl">⚠️</span>
-          <p className={`text-xs ${isDark ? 'text-yellow-300' : 'text-yellow-700'}`}>Wardrobe is full (50/50). Delete older outfits to save new ones.</p>
+          <p className={`text-xs ${isDark ? 'text-yellow-300' : 'text-yellow-700'}`}>Wardrobe is full ({wardrobeLimit}/{wardrobeLimit}). Delete older outfits to save new ones.</p>
         </div>
       )}
 

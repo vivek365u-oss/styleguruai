@@ -6,9 +6,11 @@ import HistoryPanel from './HistoryPanel';
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
 import AdSense from '../AdSense';
-import { saveProfile, auth } from '../api/styleApi';
+import { saveProfile, auth, incrementUsage } from '../api/styleApi';
 import WardrobePanel from './WardrobePanel';
 import { saveWardrobeItem } from '../api/styleApi';
+import { usePlan } from '../context/PlanContext';
+import PaywallModal from './PaywallModal';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
@@ -186,7 +188,7 @@ function TrendingCard({ item, isDark, AMAZON_TAG }) {
   );
 }
 
-function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
+function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
@@ -380,9 +382,11 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
       <ColorContrastChecker isDark={isDark} />
 
       {/* AdSense Ad */}
-      <div className="mt-2">
-        <AdSense />
-      </div>
+      {!isPro && (
+        <div className="mt-2">
+          <AdSense />
+        </div>
+      )}
     </div>
   );
 }
@@ -390,6 +394,8 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult }) {
 function SettingsScreen({ user, onLogout }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t, language, changeLanguage } = useLanguage();
+  const { isPro, plan, usage, validUntil } = usePlan();
+  const [paywallOpen, setPaywallOpen] = useState(false);
   const isDark = theme === 'dark';
   const [notifStatus, setNotifStatus] = useState(() => {
     if (typeof Notification === 'undefined' || !('PushManager' in window)) return 'unsupported';
@@ -461,6 +467,53 @@ function SettingsScreen({ user, onLogout }) {
   return (
     <div className="space-y-4 pt-2">
       <h2 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>⚙️ Settings</h2>
+
+      {/* Plan Status */}
+      <div className={`rounded-2xl p-4 border ${isPro ? (isDark ? 'bg-gradient-to-r from-purple-900/40 to-pink-900/40 border-purple-500/30' : 'bg-purple-50 border-purple-300') : (isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm')}`}>
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <p className={`font-black text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              {isPro ? '⚡ Pro Member ✓' : '🆓 Free Plan'}
+            </p>
+            {isPro && validUntil && (
+              <p className={`text-xs mt-0.5 ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>
+                Valid until {new Date(validUntil).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+              </p>
+            )}
+          </div>
+          {!isPro && (
+            <button
+              onClick={() => setPaywallOpen(true)}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-black px-4 py-2 rounded-xl hover:from-purple-500 hover:to-pink-500 transition"
+            >
+              Upgrade ₹31/mo
+            </button>
+          )}
+        </div>
+        {!isPro && (
+          <div className="space-y-2">
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className={isDark ? 'text-white/50' : 'text-gray-500'}>Analyses</span>
+                <span className={isDark ? 'text-white/70' : 'text-gray-700'}>{usage.analyses_count || 0}/6</span>
+              </div>
+              <div className={`h-1.5 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
+                <div className="h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all" style={{ width: `${Math.min(100, ((usage.analyses_count || 0) / 6) * 100)}%` }} />
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className={isDark ? 'text-white/50' : 'text-gray-500'}>Outfit checks</span>
+                <span className={isDark ? 'text-white/70' : 'text-gray-700'}>{usage.outfit_checks_count || 0}/10</span>
+              </div>
+              <div className={`h-1.5 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
+                <div className="h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all" style={{ width: `${Math.min(100, ((usage.outfit_checks_count || 0) / 10) * 100)}%` }} />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      <PaywallModal isOpen={paywallOpen} onClose={() => setPaywallOpen(false)} triggerMessage="" />
 
       {/* User card */}
       <div className={`rounded-2xl p-4 flex items-center gap-4 border ${isDark ? 'bg-gradient-to-r from-purple-900/40 to-pink-900/40 border-purple-700/30' : 'bg-white border-purple-100 shadow-sm'}`}>
@@ -543,6 +596,7 @@ function SettingsScreen({ user, onLogout }) {
 function Dashboard({ user, onLogout }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t } = useLanguage();
+  const { isPro, usage, setUsage } = usePlan();
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -550,6 +604,8 @@ function Dashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('home');
   const [currentGender, setCurrentGender] = useState('male');
   const [toast, setToast] = useState(null);
+  const [paywallOpen, setPaywallOpen] = useState(false);
+  const [paywallMessage, setPaywallMessage] = useState('');
   const showToast = (msg) => setToast(msg);
 
   // Offline wardrobe queue retry
@@ -595,6 +651,12 @@ function Dashboard({ user, onLogout }) {
     // Save profile to Firestore
     const uid = auth.currentUser?.uid;
     if (uid) {
+      // Increment usage for free users
+      if (!isPro) {
+        incrementUsage(uid, 'analyses_count').then(() => {
+          setUsage(prev => ({ ...prev, analyses_count: (prev.analyses_count || 0) + 1 }));
+        });
+      }
       const profileData = {
         skin_tone: enriched.analysis?.skin_tone?.category,
         undertone: enriched.analysis?.skin_tone?.undertone,
@@ -660,6 +722,7 @@ function Dashboard({ user, onLogout }) {
             user={user}
             onAnalyze={() => setActiveTab('analyze')}
             onTabChange={handleTabChange}
+            isPro={isPro}
             onShowResult={(data) => {
               setResults(data);
               setActiveTab('analyze');
@@ -670,7 +733,15 @@ function Dashboard({ user, onLogout }) {
           <>
             {!results && !loading && (
               <UploadSection
-                onLoadingStart={() => { setLoading(true); setError(null); }}
+                onLoadingStart={() => {
+                  if (!isPro && usage.analyses_count >= 6) {
+                    setPaywallMessage('6 analyses used this month. Upgrade to Pro for unlimited.');
+                    setPaywallOpen(true);
+                    return false; // signal blocked
+                  }
+                  setLoading(true); setError(null);
+                  return true;
+                }}
                 onAnalysisComplete={handleAnalysisComplete}
                 onError={(msg) => { setError(msg); setLoading(false); }}
                 onImageSelected={setUploadedImage}
@@ -714,6 +785,7 @@ function Dashboard({ user, onLogout }) {
         </div>
       </nav>
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+      <PaywallModal isOpen={paywallOpen} onClose={() => setPaywallOpen(false)} triggerMessage={paywallMessage} />
     </div>
   );
 }

@@ -1,6 +1,22 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Subscription — read only from client, write only from backend Admin SDK
+    match /users/{uid}/subscription/{doc} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false; // backend Admin SDK only
+    }
+
+    // Usage — read/write own data, enforce monthly limits
+    match /users/{uid}/usage/{month} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if request.auth != null && request.auth.uid == uid
+        && (!request.resource.data.keys().hasAny(['analyses_count']) || request.resource.data.analyses_count <= 6)
+        && (!request.resource.data.keys().hasAny(['outfit_checks_count']) || request.resource.data.outfit_checks_count <= 10);
+    }
+
+    // All other user data — read/write own data
     match /users/{uid}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }

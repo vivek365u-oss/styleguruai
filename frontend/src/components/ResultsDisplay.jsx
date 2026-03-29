@@ -6,6 +6,9 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../App';
 import { saveWardrobeItem, auth } from '../api/styleApi';
 import ShareCard from './ShareCard';
+import { usePlan } from '../context/PlanContext';
+import LockOverlay from './LockOverlay';
+import PaywallModal from './PaywallModal';
 
 // ── Shopping Links ───────────────────────────────────────────
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
@@ -706,7 +709,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 }
 
 // ── Outfits Tab ──────────────────────────────────────────────
-function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, styleTips, occasionAdvice, ethnicWear, sareeSuggestions, isDark, bodyTypeTips = [], bodyType = null, skinTone = '', skinHex = '#C68642' }) {
+function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, styleTips, occasionAdvice, ethnicWear, sareeSuggestions, isDark, bodyTypeTips = [], bodyType = null, skinTone = '', skinHex = '#C68642', isPro = true, onUpgrade }) {
   let outfits = [];
   if (isSeasonal) outfits = seasonalGender === 'female' ? (recommendations.female_outfits || []) : (recommendations.male_outfits || []);
   else if (isFemale) outfits = recommendations.outfit_combos || [];
@@ -725,7 +728,18 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
         <div>
           <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🧥 Outfit Combos</p>
           <div className="space-y-2">
-            {outfits.map((combo, i) => <OutfitCard key={i} combo={combo} index={i} isDark={isDark} skinTone={skinTone} skinHex={skinHex} />)}
+            {outfits.map((combo, i) => (
+              i < 2 || isPro ? (
+                <OutfitCard key={i} combo={combo} index={i} isDark={isDark} skinTone={skinTone} skinHex={skinHex} />
+              ) : (
+                <div key={i} className="relative">
+                  <div className="blur-sm pointer-events-none select-none">
+                    <OutfitCard combo={combo} index={i} isDark={isDark} skinTone={skinTone} skinHex={skinHex} />
+                  </div>
+                  <LockOverlay onUpgrade={onUpgrade} />
+                </div>
+              )
+            ))}
           </div>
         </div>
       )}
@@ -817,7 +831,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
 }
 
 // ── Accessories Tab ──────────────────────────────────────────
-function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }) {
+function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark, isPro, onUpgrade }) {
   const accessories = recommendations.accessories || [];
   const accentColors = recommendations.accent_colors || [];
 
@@ -842,7 +856,9 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }
   const emptyTextCls = isDark ? 'text-white/40' : 'text-gray-400';
 
   return (
-    <div className="space-y-5">
+    <div className="relative">
+      {!isPro && <LockOverlay onUpgrade={onUpgrade} />}
+      <div className={`space-y-5 ${!isPro ? 'blur-sm pointer-events-none select-none' : ''}`}>
       {/* Female accessories */}
       {isFemale && accessories.length > 0 && (
         <div>
@@ -910,6 +926,7 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }
           <p className={`${emptyTextCls} text-sm`}>No accessories data available</p>
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -968,6 +985,8 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const { t } = useLanguage();
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
+  const { isPro } = usePlan();
+  const [paywallOpen, setPaywallOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('colors');
   const [showConfetti, setShowConfetti] = useState(() => {
     const isFirst = !localStorage.getItem('sg_analysis_count') || localStorage.getItem('sg_analysis_count') === '1';
@@ -1150,6 +1169,8 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             bodyType={bodyType}
             skinTone={data?.analysis?.skin_tone?.category}
             skinHex={data?.analysis?.skin_color?.hex || '#C68642'}
+            isPro={isPro}
+            onUpgrade={() => setPaywallOpen(true)}
           />
         )}
         {activeTab === 'accessories' && (
@@ -1158,6 +1179,8 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             isFemale={isFemale}
             makeupSuggestions={makeupSuggestions}
             isDark={isDark}
+            isPro={isPro}
+            onUpgrade={() => setPaywallOpen(true)}
           />
         )}
         {activeTab === 'saved' && (
@@ -1204,6 +1227,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
       >
         📸 {t('analyzeNewPhoto')}
       </button>
+      <PaywallModal isOpen={paywallOpen} onClose={() => setPaywallOpen(false)} triggerMessage="Upgrade to Pro to unlock all features." />
     </div>
   );
 }

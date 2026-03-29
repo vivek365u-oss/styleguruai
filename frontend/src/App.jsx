@@ -6,6 +6,7 @@ import AuthPage from './components/AuthPage';
 import Dashboard from './components/Dashboard';
 import LandingPage from './components/LandingPage';
 import { LanguageProvider } from './i18n/LanguageContext';
+import { PlanProvider } from './context/PlanContext';
 
 // Lazy imports for new pages (will be created in later tasks)
 import AboutPage from './pages/AboutPage';
@@ -125,9 +126,11 @@ function App() {
   return (
     <LanguageProvider>
       <ThemeContext.Provider value={{ theme, toggleTheme }}>
-        <div className="min-h-screen">
-          <AppRoutes user={user} setUser={setUser} theme={theme} toggleTheme={toggleTheme} />
-        </div>
+        <PlanProvider>
+          <div className="min-h-screen">
+            <AppRoutes user={user} setUser={setUser} theme={theme} toggleTheme={toggleTheme} />
+          </div>
+        </PlanProvider>
       </ThemeContext.Provider>
     </LanguageProvider>
   );

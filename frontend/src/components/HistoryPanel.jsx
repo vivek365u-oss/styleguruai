@@ -2,10 +2,13 @@ import { useState, useEffect, useContext } from 'react';
 import { getHistory, testTone } from '../api/styleApi';
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
+import { usePlan } from '../context/PlanContext';
 
 function HistoryPanel({ onShowResult }) {
   const { theme } = useContext(ThemeContext);
   const { t } = useLanguage();
+  const { isPro } = usePlan();
+  const historyLimit = isPro ? 20 : 5;
   const isDark = theme === 'dark';
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +21,7 @@ function HistoryPanel({ onShowResult }) {
     try {
       const local = JSON.parse(localStorage.getItem('sg_analysis_history') || '[]');
       if (local.length > 0) {
-        setHistory(local);
+        setHistory(local.slice(0, historyLimit));
         setLoading(false);
         return;
       }
@@ -216,6 +219,13 @@ function HistoryPanel({ onShowResult }) {
             </div>
           );
         })}
+        {/* Upgrade prompt for free users after 5 items */}
+        {!isPro && history.length >= 5 && (
+          <div className={`rounded-2xl p-4 border text-center ${isDark ? 'bg-purple-500/10 border-purple-500/20' : 'bg-purple-50 border-purple-200'}`}>
+            <p className={`text-xs font-semibold mb-2 ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>📋 Older history available with Pro</p>
+            <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Upgrade to see up to 20 analyses</p>
+          </div>
+        )}
       </div>
 
       {history.length === 0 && (
