@@ -1,7 +1,7 @@
 // ============================================================
 // StyleGuru — Tab-Based Results Display (App-like UX)
 // ============================================================
-import { useState, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../App';
 
