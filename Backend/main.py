@@ -664,17 +664,20 @@ async def create_payment_order(current_user: dict = Depends(get_current_user)):
     """Create a Razorpay order for ₹31/month Pro plan."""
     client = get_razorpay_client()
     if not client:
-        raise HTTPException(status_code=500, detail="Payment service unavailable. Please try again.")
+        raise HTTPException(
+            status_code=503,
+            detail="Payment service is being set up. Please try again in a few minutes or contact support."
+        )
     try:
         order = client.order.create({
-            "amount": 3100,
+            "amount": 3100,  # ₹31 in paise
             "currency": "INR",
             "payment_capture": 1,
         })
         return {"order_id": order["id"], "amount": 3100, "currency": "INR"}
     except Exception as e:
         print(f"Razorpay create order error: {e}")
-        raise HTTPException(status_code=500, detail="Could not create payment order. Please try again.")
+        raise HTTPException(status_code=500, detail=f"Could not create payment order: {str(e)}")
 
 @app.post("/api/payment/verify")
 async def verify_payment(

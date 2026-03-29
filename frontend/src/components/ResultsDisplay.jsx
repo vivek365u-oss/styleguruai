@@ -1,14 +1,9 @@
 // ============================================================
 // StyleGuru — Tab-Based Results Display (App-like UX)
 // ============================================================
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../App';
-import { saveWardrobeItem, auth } from '../api/styleApi';
-import ShareCard from './ShareCard';
-import { usePlan } from '../context/PlanContext';
-import LockOverlay from './LockOverlay';
-import PaywallModal from './PaywallModal';
 
 // ── Shopping Links ───────────────────────────────────────────
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
@@ -208,38 +203,7 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
 }
 
 // ── Outfit Card ──────────────────────────────────────────────
-function OutfitCard({ combo, index, isDark, skinTone, skinHex }) {
-  const [saved, setSaved] = useState(false);
-  const [saving, setSaving] = useState(false);
-
-  const handleSave = async () => {
-    const uid = auth.currentUser?.uid;
-    if (!uid) return;
-    setSaving(true);
-    try {
-      await saveWardrobeItem(uid, {
-        source: 'analysis',
-        outfit_data: {
-          shirt: combo.shirt || combo.top || combo.dress || '',
-          pant: combo.pant || combo.bottom || '',
-          shoes: combo.shoes || '',
-          occasion: combo.occasion || '',
-        },
-        skin_tone: skinTone || '',
-        skin_hex: skinHex || '#C68642',
-      });
-      setSaved(true);
-    } catch {
-      // Queue offline
-      try {
-        const queue = JSON.parse(localStorage.getItem('sg_wardrobe_queue') || '[]');
-        queue.push({ source: 'analysis', outfit_data: { shirt: combo.shirt || combo.top || combo.dress || '', pant: combo.pant || combo.bottom || '', shoes: combo.shoes || '', occasion: combo.occasion || '' }, skin_tone: skinTone || '', skin_hex: skinHex || '#C68642', saved_at: new Date().toISOString() });
-        localStorage.setItem('sg_wardrobe_queue', JSON.stringify(queue));
-      } catch {}
-    } finally {
-      setSaving(false);
-    }
-  };
+function OutfitCard({ combo, index, isDark }) {
   const colors = ["purple", "pink", "blue", "emerald", "amber"];
   const color = colors[index % colors.length];
   const colorMap = {
@@ -272,21 +236,6 @@ function OutfitCard({ combo, index, isDark, skinTone, skinHex }) {
           {combo.vibe && <p className={`${vibeCls} text-xs mt-1 italic`}>{combo.vibe}</p>}
         </div>
       </div>
-      {auth.currentUser ? (
-        <button
-          onClick={handleSave}
-          disabled={saved || saving}
-          className={`mt-2 w-full py-1.5 rounded-xl text-xs font-bold border transition-all ${
-            saved
-              ? isDark ? 'bg-green-500/20 border-green-500/30 text-green-400' : 'bg-green-50 border-green-300 text-green-600'
-              : isDark ? 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10' : 'bg-white/60 border-white/40 text-gray-600 hover:bg-white'
-          } disabled:cursor-not-allowed`}
-        >
-          {saved ? '✓ Saved to Wardrobe' : saving ? 'Saving...' : '👗 Save to Wardrobe'}
-        </button>
-      ) : (
-        <p className={`mt-2 text-center text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Login to save outfits</p>
-      )}
     </div>
   );
 }
@@ -709,7 +658,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 }
 
 // ── Outfits Tab ──────────────────────────────────────────────
-function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, styleTips, occasionAdvice, ethnicWear, sareeSuggestions, isDark, bodyTypeTips = [], bodyType = null, skinTone = '', skinHex = '#C68642', isPro = true, onUpgrade }) {
+function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, styleTips, occasionAdvice, ethnicWear, sareeSuggestions, isDark, bodyTypeTips = [], bodyType = null, userOccasion = 'casual' }) {
   let outfits = [];
   if (isSeasonal) outfits = seasonalGender === 'female' ? (recommendations.female_outfits || []) : (recommendations.male_outfits || []);
   else if (isFemale) outfits = recommendations.outfit_combos || [];
@@ -721,25 +670,27 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
   const mutedCls = isDark ? 'text-white/40' : 'text-gray-400';
   const tipTextCls = isDark ? 'text-white/70' : 'text-gray-600';
 
+  // Find occasion-specific advice
+  const occasionKey = Object.keys(occasionAdvice).find(k => k.toLowerCase().includes(userOccasion)) || null;
+  const featuredAdvice = occasionKey ? occasionAdvice[occasionKey] : null;
+
   return (
     <div className="space-y-5">
+      {/* Featured occasion advice (highlighted) */}
+      {featuredAdvice && (
+        <div className={`rounded-2xl p-4 border-2 border-purple-500/40 ${isDark ? 'bg-purple-900/20' : 'bg-purple-50'}`}>
+          <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>
+            ✨ For Your {occasionKey} Look
+          </p>
+          <p className={`text-sm font-medium ${isDark ? 'text-white/80' : 'text-gray-800'}`}>{featuredAdvice}</p>
+        </div>
+      )}
       {/* Outfit combos */}
       {outfits.length > 0 && (
         <div>
           <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🧥 Outfit Combos</p>
           <div className="space-y-2">
-            {outfits.map((combo, i) => (
-              i < 2 || isPro ? (
-                <OutfitCard key={i} combo={combo} index={i} isDark={isDark} skinTone={skinTone} skinHex={skinHex} />
-              ) : (
-                <div key={i} className="relative">
-                  <div className="blur-sm pointer-events-none select-none">
-                    <OutfitCard combo={combo} index={i} isDark={isDark} skinTone={skinTone} skinHex={skinHex} />
-                  </div>
-                  <LockOverlay onUpgrade={onUpgrade} />
-                </div>
-              )
-            ))}
+            {outfits.map((combo, i) => <OutfitCard key={i} combo={combo} index={i} isDark={isDark} />)}
           </div>
         </div>
       )}
@@ -831,7 +782,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
 }
 
 // ── Accessories Tab ──────────────────────────────────────────
-function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark, isPro, onUpgrade }) {
+function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }) {
   const accessories = recommendations.accessories || [];
   const accentColors = recommendations.accent_colors || [];
 
@@ -856,9 +807,7 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark, 
   const emptyTextCls = isDark ? 'text-white/40' : 'text-gray-400';
 
   return (
-    <div className="relative">
-      {!isPro && <LockOverlay onUpgrade={onUpgrade} />}
-      <div className={`space-y-5 ${!isPro ? 'blur-sm pointer-events-none select-none' : ''}`}>
+    <div className="space-y-5">
       {/* Female accessories */}
       {isFemale && accessories.length > 0 && (
         <div>
@@ -926,7 +875,6 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark, 
           <p className={`${emptyTextCls} text-sm`}>No accessories data available</p>
         </div>
       )}
-      </div>
     </div>
   );
 }
@@ -985,8 +933,6 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const { t } = useLanguage();
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const { isPro } = usePlan();
-  const [paywallOpen, setPaywallOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('colors');
   const [showConfetti, setShowConfetti] = useState(() => {
     const isFirst = !localStorage.getItem('sg_analysis_count') || localStorage.getItem('sg_analysis_count') === '1';
@@ -1010,6 +956,11 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const isSeasonal = data.gender === "seasonal";
   const seasonalGender = data.seasonalGender || "male";
   const bodyType = data.bodyType || null;
+  const userOccasion = data.occasion || 'casual';
+  const userBudget = data.budget || 'any';
+
+  const OCCASION_LABELS = { casual: '😎 Casual', office: '💼 Office', wedding: '💍 Wedding', party: '🎉 Party', date: '❤️ Date' };
+  const BUDGET_LABELS = { any: 'Any Budget', '500': 'Under ₹500', '1000': 'Under ₹1000', '2000': 'Under ₹2000' };
 
   const BODY_TYPE_TIPS = {
     slim:     ['Layering adds visual bulk — try oversized tees over shirts', 'Horizontal stripes and bold patterns work great for you', 'Baggy jeans and cargo pants suit your frame perfectly'],
@@ -1078,6 +1029,19 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         </div>
       )}
 
+      {/* Occasion + Budget context banner */}
+      <div className={`flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+        <span className={`text-xs font-semibold ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Styled for:</span>
+        <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300' : 'bg-pink-100 border-pink-300 text-pink-700'}`}>
+          {OCCASION_LABELS[userOccasion] || '😎 Casual'}
+        </span>
+        {userBudget !== 'any' && (
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${isDark ? 'bg-green-500/20 border-green-500/30 text-green-300' : 'bg-green-100 border-green-300 text-green-700'}`}>
+            💰 {BUDGET_LABELS[userBudget]}
+          </span>
+        )}
+      </div>
+
       {/* Profile card */}
       <ProfileCard
         analysis={analysis}
@@ -1087,12 +1051,6 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         isSeasonal={isSeasonal}
         isDark={isDark}
         photoQuality={photo_quality}
-      />
-
-      <ShareCard
-        analysisData={data}
-        userName={auth.currentUser?.displayName || ''}
-        theme={theme}
       />
 
       {/* Download Palette */}
@@ -1167,10 +1125,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             isDark={isDark}
             bodyTypeTips={bodyTypeTips}
             bodyType={bodyType}
-            skinTone={data?.analysis?.skin_tone?.category}
-            skinHex={data?.analysis?.skin_color?.hex || '#C68642'}
-            isPro={isPro}
-            onUpgrade={() => setPaywallOpen(true)}
+            userOccasion={userOccasion}
           />
         )}
         {activeTab === 'accessories' && (
@@ -1179,8 +1134,6 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             isFemale={isFemale}
             makeupSuggestions={makeupSuggestions}
             isDark={isDark}
-            isPro={isPro}
-            onUpgrade={() => setPaywallOpen(true)}
           />
         )}
         {activeTab === 'saved' && (
@@ -1227,7 +1180,6 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
       >
         📸 {t('analyzeNewPhoto')}
       </button>
-      <PaywallModal isOpen={paywallOpen} onClose={() => setPaywallOpen(false)} triggerMessage="Upgrade to Pro to unlock all features." />
     </div>
   );
 }

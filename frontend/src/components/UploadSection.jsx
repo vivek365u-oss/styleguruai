@@ -165,6 +165,8 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   const [mode, setMode] = useState('normal');
   const [season, setSeason] = useState('summer');
   const [bodyType, setBodyType] = useState('average');
+  const [occasion, setOccasion] = useState('casual');
+  const [budget, setBudget] = useState('any');
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
@@ -185,13 +187,13 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       let res;
       if (mode === 'seasonal') {
         res = await analyzeImageSeasonal(file, season, setUploadProgress);
-        onAnalysisComplete({ ...res.data, gender: 'seasonal', seasonalGender: gender, bodyType });
+        onAnalysisComplete({ ...res.data, gender: 'seasonal', seasonalGender: gender, bodyType, occasion, budget });
       } else if (gender === 'female') {
         res = await analyzeImageFemale(file, setUploadProgress);
-        onAnalysisComplete({ ...res.data, gender: 'female', bodyType });
+        onAnalysisComplete({ ...res.data, gender: 'female', bodyType, occasion, budget });
       } else {
         res = await analyzeImage(file, setUploadProgress);
-        onAnalysisComplete({ ...res.data, gender: 'male', bodyType });
+        onAnalysisComplete({ ...res.data, gender: 'male', bodyType, occasion, budget });
       }
     } catch (err) {
       const detail = err.response?.data?.detail;
@@ -376,6 +378,59 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
             >
               <span>{bt.label}</span>
               <span className="text-[10px] opacity-70">{bt.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Occasion Selector */}
+      <div className="mb-4">
+        <p className={`text-xs text-center mb-2 font-semibold uppercase tracking-wide ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Occasion</p>
+        <div className="flex justify-center gap-2 flex-wrap">
+          {[
+            { value: 'casual',  label: '😎 Casual',  desc: 'Daily' },
+            { value: 'office',  label: '💼 Office',  desc: 'Work' },
+            { value: 'wedding', label: '💍 Wedding', desc: 'Festive' },
+            { value: 'party',   label: '🎉 Party',   desc: 'Night out' },
+            { value: 'date',    label: '❤️ Date',    desc: 'Romantic' },
+          ].map((oc) => (
+            <button
+              key={oc.value}
+              onClick={() => setOccasion(oc.value)}
+              className={`flex flex-col items-center px-3 py-2 rounded-xl border text-xs font-bold transition-all ${
+                occasion === oc.value
+                  ? isDark ? 'bg-pink-500/30 border-pink-400 text-pink-200' : 'bg-pink-600 border-pink-600 text-white shadow-md'
+                  : isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70' : 'bg-white border-gray-300 text-gray-700 hover:border-pink-400 hover:text-pink-700 shadow-sm'
+              }`}
+            >
+              <span>{oc.label}</span>
+              <span className="text-[10px] opacity-70">{oc.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Budget Selector */}
+      <div className="mb-5">
+        <p className={`text-xs text-center mb-2 font-semibold uppercase tracking-wide ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Budget (optional)</p>
+        <div className="flex justify-center gap-2 flex-wrap">
+          {[
+            { value: 'any',   label: 'Any',    desc: 'No limit' },
+            { value: '500',   label: '₹500',   desc: 'Budget' },
+            { value: '1000',  label: '₹1000',  desc: 'Mid' },
+            { value: '2000',  label: '₹2000',  desc: 'Premium' },
+          ].map((b) => (
+            <button
+              key={b.value}
+              onClick={() => setBudget(b.value)}
+              className={`flex flex-col items-center px-4 py-2 rounded-xl border text-xs font-bold transition-all ${
+                budget === b.value
+                  ? isDark ? 'bg-green-500/30 border-green-400 text-green-200' : 'bg-green-600 border-green-600 text-white shadow-md'
+                  : isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70' : 'bg-white border-gray-300 text-gray-700 hover:border-green-400 hover:text-green-700 shadow-sm'
+              }`}
+            >
+              <span>{b.label}</span>
+              <span className="text-[10px] opacity-70">{b.desc}</span>
             </button>
           ))}
         </div>

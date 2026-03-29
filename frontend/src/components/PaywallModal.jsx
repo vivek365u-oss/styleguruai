@@ -39,7 +39,7 @@ function PaywallModal({ isOpen, onClose, triggerMessage }) {
     setLoading(true);
     try {
       const loaded = await loadRazorpay();
-      if (!loaded) { setError('Payment service unavailable. Please try again.'); setLoading(false); return; }
+      if (!loaded) { setError('Payment service unavailable. Please check your internet connection.'); setLoading(false); return; }
 
       const orderRes = await createPaymentOrder();
       const { order_id, amount, currency } = orderRes.data;
@@ -78,8 +78,15 @@ function PaywallModal({ isOpen, onClose, triggerMessage }) {
 
       const rzp = new window.Razorpay(options);
       rzp.open();
-    } catch {
-      setError('Could not initiate payment. Please try again.');
+    } catch (err) {
+      const msg = err?.response?.data?.detail || err?.message || 'Could not initiate payment.';
+      if (err?.response?.status === 503) {
+        setError('Payment is being configured. Please try again in a few minutes.');
+      } else if (err?.response?.status === 500) {
+        setError('Server error. Please try again or contact support@styleguruai.in');
+      } else {
+        setError(msg);
+      }
       setLoading(false);
     }
   };
