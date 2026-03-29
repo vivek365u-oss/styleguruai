@@ -4,6 +4,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../App';
+import VirtualTryOn from './VirtualTryOn';
 
 // ── Shopping Links ───────────────────────────────────────────
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
@@ -980,6 +981,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
 
   const tabs = [
     { id: 'colors',      label: 'Colors',      emoji: '🎨' },
+    { id: 'tryon',       label: 'Try On',      emoji: '👤' },
     { id: 'outfits',     label: 'Outfits',     emoji: '👔' },
     { id: 'accessories', label: 'Accessories', emoji: '✨' },
     { id: 'saved',       label: 'Saved',       emoji: '❤️' },
@@ -1095,12 +1097,24 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         onTouchStart={(e) => { window._touchStartX = e.touches[0].clientX; }}
         onTouchEnd={(e) => {
           const diff = window._touchStartX - e.changedTouches[0].clientX;
-          const tabOrder = ['colors', 'outfits', 'accessories', 'saved'];
+          const tabOrder = ['colors', 'tryon', 'outfits', 'accessories', 'saved'];
           const idx = tabOrder.indexOf(activeTab);
           if (diff > 50 && idx < tabOrder.length - 1) setActiveTab(tabOrder[idx + 1]);
           if (diff < -50 && idx > 0) setActiveTab(tabOrder[idx - 1]);
         }}
       >
+        {activeTab === 'tryon' && (
+          <VirtualTryOn
+            uploadedImage={uploadedImage}
+            bestColors={[
+              ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || recommendations.seasonal_colors || []),
+              ...(recommendations.best_top_colors || []),
+            ].filter((c, i, a) => a.findIndex(x => x.hex === c.hex) === i)}
+            avoidColors={recommendations.colors_to_avoid || []}
+            gender={effectiveGender}
+            skinTone={analysis.skin_tone.category}
+          />
+        )}
         {activeTab === 'colors' && (
           <ColorsTab
             recommendations={recommendations}
