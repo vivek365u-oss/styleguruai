@@ -1,5 +1,6 @@
 import OutfitChecker from './OutfitChecker';
 import { useState, useEffect, useContext } from 'react';
+import { fetchAITip } from '../api/styleApi';
 import UploadSection from './UploadSection';
 import ResultsDisplay from './ResultsDisplay';
 import CoupleResults from './CoupleResults';
@@ -16,7 +17,7 @@ import OOTDCard from './OOTDCard';
 import WeatherTip from './WeatherTip';
 import ColorScanner from './ColorScanner';
 import StyleBot from './StyleBot';
-import CommunityFeed from './CommunityFeed';
+import ToolsTab from './ToolsTab';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
@@ -64,135 +65,7 @@ function LoadingScreen() {
   );
 }
 
-function ColorContrastChecker({ isDark }) {
-  const [color1, setColor1] = useState('#6d28d9');
-  const [color2, setColor2] = useState('#f9a8d4');
-  const [open, setOpen] = useState(false);
-
-  const hexToRgb = (hex) => {
-    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-    return [r,g,b];
-  };
-  const luminance = ([r,g,b]) => {
-    const [rs,gs,bs] = [r,g,b].map(c => { const s = c/255; return s <= 0.03928 ? s/12.92 : Math.pow((s+0.055)/1.055,2.4); });
-    return 0.2126*rs + 0.7152*gs + 0.0722*bs;
-  };
-  const contrast = () => {
-    const l1 = luminance(hexToRgb(color1)), l2 = luminance(hexToRgb(color2));
-    const ratio = (Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05);
-    return ratio.toFixed(1);
-  };
-  const ratio = parseFloat(contrast());
-  const grade = ratio >= 7 ? { label: 'AAA ✓', color: 'text-green-400' } : ratio >= 4.5 ? { label: 'AA ✓', color: 'text-green-400' } : ratio >= 3 ? { label: 'AA Large ⚠️', color: 'text-yellow-400' } : { label: 'Fail ✗', color: 'text-red-400' };
-  const verdict = ratio >= 4.5 ? '✅ Great combo!' : ratio >= 3 ? '⚠️ Okay for large text' : '❌ Poor contrast';
-
-  return (
-    <div className={`rounded-2xl border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center gap-3 p-4">
-        <span className="text-2xl">🎨</span>
-        <div className="flex-1 text-left">
-          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>Color Contrast Checker</p>
-          <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Check if 2 colors look good together</p>
-        </div>
-        <span className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{open ? '▲' : '▼'}</span>
-      </button>
-      {open && (
-        <div className={`px-4 pb-4 border-t ${isDark ? 'border-white/5' : 'border-gray-100'}`}>
-          <div className="flex gap-3 mt-3 mb-3">
-            <div className="flex-1">
-              <p className={`text-xs mb-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Color 1</p>
-              <div className="flex items-center gap-2">
-                <input type="color" value={color1} onChange={e => setColor1(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent" />
-                <span className={`text-xs font-mono ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{color1}</span>
-              </div>
-            </div>
-            <div className="flex-1">
-              <p className={`text-xs mb-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Color 2</p>
-              <div className="flex items-center gap-2">
-                <input type="color" value={color2} onChange={e => setColor2(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent" />
-                <span className={`text-xs font-mono ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{color2}</span>
-              </div>
-            </div>
-          </div>
-          {/* Preview */}
-          <div className="rounded-xl p-4 mb-3 flex items-center justify-center text-sm font-bold" style={{ backgroundColor: color1, color: color2 }}>
-            Sample Text Preview
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Contrast Ratio</p>
-              <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-800'}`}>{ratio}:1</p>
-            </div>
-            <div className="text-right">
-              <p className={`font-bold text-sm ${grade.color}`}>{grade.label}</p>
-              <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{verdict}</p>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── Trending Card with Shop Modal ───────────────────────────
-function TrendingCard({ item, isDark, AMAZON_TAG }) {
-  const [open, setOpen] = useState(false);
-  const kw = encodeURIComponent(item.category);
-  const amzUrl = `https://www.amazon.in/s?k=${kw}&rh=n%3A1968024031&sort=review-rank&tag=${AMAZON_TAG}`;
-
-  const shopOptions = [
-    { name: '🛒 Amazon',   url: amzUrl, bg: isDark ? 'bg-orange-500/20 border-orange-500/30 text-orange-300 hover:bg-orange-500/40' : 'bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100' },
-    { name: '🏪 Flipkart', url: item.flipkartUrl, bg: isDark ? 'bg-blue-500/20 border-blue-500/30 text-blue-300 hover:bg-blue-500/40' : 'bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100' },
-    { name: '👗 Myntra',   url: item.myntraUrl, bg: isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300 hover:bg-pink-500/40' : 'bg-pink-50 border-pink-300 text-pink-700 hover:bg-pink-100' },
-    { name: '🛍️ Meesho',  url: `https://meesho.com/search?q=${encodeURIComponent(item.meeshoQ)}`, bg: isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/40' : 'bg-purple-50 border-purple-300 text-purple-700 hover:bg-purple-100' },
-  ];
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen(o => !o)}
-        className={`w-full flex flex-col items-center gap-2 border rounded-2xl p-3 transition-all active:scale-95 ${
-          open
-            ? 'border-purple-500/60 bg-purple-500/10'
-            : isDark ? 'bg-white/5 border-white/10 hover:border-purple-500/40 hover:bg-white/10' : 'bg-white border-purple-100 hover:border-purple-400 shadow-sm'
-        }`}
-      >
-        <span className="text-3xl">{item.emoji}</span>
-        <span className={`text-xs font-semibold text-center leading-tight ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{item.label}</span>
-        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.gender === 'male' ? isDark ? 'text-blue-400 bg-blue-500/10' : 'text-blue-700 bg-blue-100' : isDark ? 'text-pink-400 bg-pink-500/10' : 'text-pink-700 bg-pink-100'}`}>{item.tag}</span>
-      </button>
-
-      {/* Shop options — full width overlay panel */}
-      {open && (
-        <>
-          {/* Backdrop */}
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          {/* Panel — fixed bottom sheet on mobile, dropdown on desktop */}
-          <div className={`fixed bottom-20 left-3 right-3 z-50 rounded-2xl border p-4 shadow-2xl md:absolute md:bottom-auto md:top-full md:left-auto md:right-auto md:rounded-2xl md:border md:mt-1 md:w-56 md:p-3 ${isDark ? 'bg-slate-900 border-white/20' : 'bg-white border-gray-200'}`}>
-            <div className="flex items-center justify-between mb-3">
-              <p className={`text-xs font-bold ${isDark ? 'text-white/60' : 'text-gray-500'}`}>🛍️ Shop on:</p>
-              <button onClick={() => setOpen(false)} className={`text-xs font-bold px-2 py-1 rounded-lg ${isDark ? 'text-white/40 hover:text-white bg-white/5' : 'text-gray-400 hover:text-gray-700 bg-gray-100'}`}>✕</button>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {shopOptions.map(opt => (
-                <a
-                  key={opt.name}
-                  href={opt.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setOpen(false)}
-                  className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-bold transition-all hover:scale-[1.02] ${opt.bg}`}
-                >
-                  {opt.name}
-                </a>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
+// ColorContrastChecker and TrendingCard moved to ToolsTab.jsx
 
 function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
   const { theme } = useContext(ThemeContext);
@@ -230,33 +103,46 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
     { icon: '✨', label: 'Accessories', tab: 'analyze' },
     { icon: '🌍', label: 'Seasonal', tab: 'analyze' },
   ];
-  const trendingStyles = [
-    // Men trending 2025
-    { emoji: '👕', label: 'Oversized Tee', tag: '🔥 Male', gender: 'male', category: 'oversized tshirt streetwear', myntraUrl: 'https://www.myntra.com/tshirts?rawQuery=oversized%20tshirt%20men', flipkartUrl: 'https://www.flipkart.com/search?q=men+oversized+tshirt&sort=popularity_desc', meeshoQ: 'men oversized tshirt' },
-    { emoji: '🪖', label: 'Cargo Pants', tag: '🔥 Male', gender: 'male', category: 'cargo pants men streetwear', myntraUrl: 'https://www.myntra.com/cargos?rawQuery=cargo%20pants%20men', flipkartUrl: 'https://www.flipkart.com/search?q=men+cargo+pants&sort=popularity_desc', meeshoQ: 'men cargo pants' },
-    { emoji: '🎽', label: 'Co-ord Set', tag: '🔥 Male', gender: 'male', category: 'men coord set matching', myntraUrl: 'https://www.myntra.com/co-ords?rawQuery=men%20coord%20set', flipkartUrl: 'https://www.flipkart.com/search?q=men+coord+set&sort=popularity_desc', meeshoQ: 'men coord set' },
-    // Women trending 2025
-    { emoji: '✨', label: 'Coord Set', tag: '🔥 Female', gender: 'female', category: 'women coord set two piece', myntraUrl: 'https://www.myntra.com/co-ords?rawQuery=women%20coord%20set', flipkartUrl: 'https://www.flipkart.com/search?q=women+coord+set&sort=popularity_desc', meeshoQ: 'women coord set' },
-    { emoji: '👗', label: 'Maxi Dress', tag: '🔥 Female', gender: 'female', category: 'women maxi dress trending', myntraUrl: 'https://www.myntra.com/dresses?rawQuery=women%20maxi%20dress', flipkartUrl: 'https://www.flipkart.com/search?q=women+maxi+dress&sort=popularity_desc', meeshoQ: 'women maxi dress' },
-    { emoji: '🥻', label: 'Kurti Set', tag: '🔥 Female', gender: 'female', category: 'women kurti set with pants', myntraUrl: 'https://www.myntra.com/kurta-sets?rawQuery=kurti%20set%20women', flipkartUrl: 'https://www.flipkart.com/search?q=women+kurti+set&sort=popularity_desc', meeshoQ: 'women kurti set' },
-  ];
-  const DAILY_TIPS = [
-    { emoji: '🎨', tip: 'Navy blue suits warm undertones perfectly — try it for your next outfit!' },
-    { emoji: '👗', tip: 'Coord sets are trending — pick a color that matches your skin tone for max impact.' },
-    { emoji: '✨', tip: 'Gold jewellery enhances medium and dark skin tones beautifully.' },
-    { emoji: '🌿', tip: 'Earthy tones like terracotta and olive are perfect for medium skin tones.' },
-    { emoji: '💡', tip: 'Wear your best color near your face — it draws attention to your features.' },
-    { emoji: '👔', tip: 'Oversized fits look best when you balance with fitted bottoms.' },
-    { emoji: '🪷', tip: 'For ethnic wear, jewel tones like deep red and emerald are universally flattering.' },
-    { emoji: '☀️', tip: 'In summer, light pastels keep you cool and stylish at the same time.' },
-    { emoji: '🧣', tip: 'A dupatta in a contrasting color can completely transform a simple outfit.' },
-    { emoji: '💄', tip: 'Match your lip color to your undertone — warm tones suit coral, cool tones suit berry.' },
-    { emoji: '👟', tip: 'White sneakers go with everything — the most versatile footwear you can own.' },
-    { emoji: '🎉', tip: 'For festive occasions, always go one shade bolder than your usual choice.' },
-    { emoji: '🌙', tip: 'Dark skin tones glow in bright whites and vivid colors — embrace the boldness!' },
-    { emoji: '🌸', tip: 'Fair skin tones look stunning in jewel tones like sapphire and emerald.' },
-  ];
-  const todayTip = DAILY_TIPS[new Date().getDate() % DAILY_TIPS.length];
+  const [todayTip, setTodayTip] = useState({ emoji: '✨', tip: 'Loading your personalized AI style tip...' });
+
+  useEffect(() => {
+    // Only fetch once per day to save API tokens, or fetch fresh if we want dynamic feel
+    // Let's cache it for today
+    const cacheKey = `sg_ai_tip_${new Date().toLocaleDateString('en-IN')}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      setTodayTip(JSON.parse(cached));
+      return;
+    }
+
+    const st = lastAnalysis?.skinTone || 'medium';
+    const ut = lastAnalysis?.undertone || 'warm';
+    const ssn = lastAnalysis?.season || 'autumn';
+    const gndr = lastAnalysis?.fullData?.gender || 'male';
+
+    fetchAITip({
+      skin_tone: st,
+      undertone: ut,
+      season: ssn,
+      gender: gndr,
+      context: 'daily'
+    }).then(res => {
+      const fulllText = res.data.tip;
+      // Extract emoji if present at the start
+      const firstChar = fulllText.match(/^[\up{Emoji}\u200d]+/iu);
+      let emoji = '💡';
+      let tip = fulllText;
+      if (firstChar) {
+        emoji = firstChar[0];
+        tip = fulllText.replace(emoji, '').trim();
+      }
+      const newTip = { emoji, tip };
+      setTodayTip(newTip);
+      localStorage.setItem(cacheKey, JSON.stringify(newTip));
+    }).catch(err => {
+      setTodayTip({ emoji: '💡', tip: 'Navy blue suits warm undertones perfectly — try it for your next outfit!' });
+    });
+  }, [lastAnalysis?.skinTone]);
   const firstName = user?.name?.split(' ')[0] || 'there';
   return (
     <div className="pb-4 space-y-6">
@@ -386,18 +272,6 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
           ))}
         </div>
       </div>
-
-      <div>
-        <p className={`text-xs font-semibold uppercase tracking-wide mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Trending Now 🔥</p>
-        <div className="grid grid-cols-3 gap-3">
-          {trendingStyles.map((s) => (
-            <TrendingCard key={s.label} item={s} isDark={isDark} AMAZON_TAG="styleguruai-21" />
-          ))}
-        </div>
-      </div>
-
-      {/* Color Contrast Checker */}
-      <ColorContrastChecker isDark={isDark} />
 
       {/* AdSense Ad */}
       {!isPro && (
@@ -696,11 +570,9 @@ function Dashboard({ user, onLogout }) {
   const navItems = [
     { id: 'home',      emoji: '🏠', label: 'Home' },
     { id: 'analyze',   emoji: '📸', label: 'Analyze' },
-    { id: 'community', emoji: '🌍', label: 'Community' },
-    { id: 'outfit',    emoji: '👔', label: 'Outfit' },
     { id: 'wardrobe',  emoji: '👗', label: 'Wardrobe' },
-    { id: 'history',   emoji: '📋', label: 'History' },
-    { id: 'settings',  emoji: '⚙️', label: 'Profile' },
+    { id: 'tools',     emoji: '🛠️', label: 'Tools' },
+    { id: 'settings',  emoji: '⚙️', label: 'Profile' }
   ];
 
   const handleTabChange = (tab) => {
@@ -786,10 +658,8 @@ function Dashboard({ user, onLogout }) {
             ) : null}
           </>
         )}
-        {activeTab === 'outfit' && <OutfitChecker />}
         {activeTab === 'wardrobe' && <WardrobePanel user={user} />}
-        {activeTab === 'history' && <HistoryPanel onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
-        {activeTab === 'community' && <CommunityFeed />}
+        {activeTab === 'tools' && <ToolsTab onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
         {activeTab === 'scanner' && (
           <ColorScanner
             savedPalette={(() => {

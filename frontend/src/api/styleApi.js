@@ -163,6 +163,8 @@ export const checkOutfitCompatibility = (selfieFile, outfitFile, onProgress) => 
 export const testTone = (tone, undertone = 'warm') =>
   API.get(`/api/test/${tone}?undertone=${undertone}`);
 
+export const fetchAITip = (payload) => API.post('/api/ai/daily-tip', payload);
+
 
 // ============================================
 // ERROR HELPERS

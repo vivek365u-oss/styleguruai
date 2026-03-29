@@ -9,6 +9,7 @@ from typing import Optional
 
 import firebase_admin
 from firebase_admin import credentials, auth as firebase_auth
+import google.generativeai as genai
 
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -36,6 +37,7 @@ if not firebase_admin._apps:
 # CONFIG
 # ============================================
 UPLOAD_DIR = Path("/tmp/uploads")
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
 UPLOAD_DIR.mkdir(exist_ok=True)
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 MAX_FILE_SIZE = 10 * 1024 * 1024
@@ -538,6 +540,39 @@ async def test_recommendations(skin_tone: str, undertone: str = "warm"):
         "ethnic_wear": recs.ethnic_suggestions,
         "accent_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.accent_colors],
     }
+
+# ============================================
+# GENERATIVE AI TIPS (GEMINI 1.5)
+# ============================================
+class AITipRequest(BaseModel):
+    skin_tone: str
+    undertone: str
+    season: str
+    gender: str = "male"
+    context: str = "daily"
+    weather: Optional[str] = None
+
+@app.post("/api/ai/daily-tip")
+async def get_ai_tip(req: AITipRequest, current_user: dict = None):
+    # current_user is optional here to ensure it works smoothly if auth is flaky on first load
+    try:
+        if req.context == "weather":
+            prompt = f"Write a single sentence fashion stylist tip (max 15 words) for a person going out in {req.weather} weather. Emphasize how their clothing colors should match their skin tone: {req.skin_tone} ({req.undertone} undertone), color season: {req.season}, gender: {req.gender}. Start with exactly one relevant emoji."
+        else:
+            prompt = f"Write a single sentence expert fashion tip (max 15 words). Give a specific color recommendation based on their skin tone: {req.skin_tone} ({req.undertone} undertone), color season is {req.season}, gender is {req.gender}. Start with exactly one relevant emoji."
+            
+        if not os.environ.get("GEMINI_API_KEY"):
+            # Mock fallback if key missing
+            emoji = "🌤️" if req.context == "weather" else "✨"
+            return {"tip": f"{emoji} Wear colors that complement your {req.skin_tone} skin tone today!"}
+            
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        response = model.generate_content(prompt)
+        text = response.text.strip().replace('"', '').replace('\n', ' ')
+        return {"tip": text}
+    except Exception as e:
+        print(f"Gemini error: {e}")
+        return {"tip": "✨ Wear bold, confident colors that make your skin tone pop today!"}
 
 # ============================================
 # PUSH NOTIFICATIONS

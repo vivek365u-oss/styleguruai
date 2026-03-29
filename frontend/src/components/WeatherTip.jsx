@@ -4,6 +4,7 @@
 // ============================================================
 import { useState, useEffect, useContext } from 'react';
 import { ThemeContext } from '../App';
+import { fetchAITip } from '../api/styleApi';
 
 const WEATHER_TIPS = {
   hot: { emoji: '☀️', label: 'Hot & Sunny', fabrics: 'Cotton, Linen, Khadi', tips: [
@@ -52,6 +53,7 @@ function WeatherTip({ city, isDark }) {
   const [loading, setLoading] = useState(true);
   const [userCity, setUserCity] = useState(city || '');
   const [editMode, setEditMode] = useState(!city);
+  const [aiTip, setAiTip] = useState(null);
 
   useEffect(() => {
     if (!userCity) { setLoading(false); return; }
@@ -87,8 +89,40 @@ function WeatherTip({ city, isDark }) {
     }
   };
 
+  useEffect(() => {
+    if (!weather) return;
+    const cacheKey = `sg_weather_ai_${weather.city}_${new Date().toLocaleDateString('en-IN')}`;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      setAiTip(cached);
+      return;
+    }
+    
+    const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
+    const st = lastAnalysis?.skinTone || 'medium';
+    const ut = lastAnalysis?.undertone || 'warm';
+    const ssn = lastAnalysis?.season || 'autumn';
+    const gndr = lastAnalysis?.fullData?.gender || 'male';
+
+    fetchAITip({
+      context: 'weather',
+      skin_tone: st,
+      undertone: ut,
+      season: ssn,
+      gender: gndr,
+      weather: `${weather.temp}°C, ${weather.desc}`
+    }).then(res => {
+      setAiTip(res.data.tip);
+      sessionStorage.setItem(cacheKey, res.data.tip);
+    }).catch(() => {
+      // Fallback
+      if (tip) {
+        setAiTip(tip.tips[0]);
+      }
+    });
+  }, [weather]);
+
   const tip = weather ? WEATHER_TIPS[weather.category] : null;
-  const randomTip = tip ? tip.tips[Math.floor(Date.now() / 86400000) % tip.tips.length] : '';
 
   if (editMode || !userCity) {
     return (
@@ -144,8 +178,8 @@ function WeatherTip({ city, isDark }) {
         </div>
 
         <div className={`rounded-xl p-3 border ${isDark ? 'bg-white/5 border-white/5' : 'bg-white/60 border-white/40'}`}>
-          <p className={`text-xs font-semibold mb-1 ${isDark ? 'text-sky-300' : 'text-sky-700'}`}>👔 Style Tip</p>
-          <p className={`text-xs leading-relaxed ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{randomTip}</p>
+          <p className={`text-xs font-semibold mb-1 ${isDark ? 'text-sky-300' : 'text-sky-700'}`}>👔 Expert Weather Tip</p>
+          <p className={`text-xs leading-relaxed ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{aiTip || 'Loading personalized weather tip...'}</p>
         </div>
 
         <p className={`text-[10px] mt-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>

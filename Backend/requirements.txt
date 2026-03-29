@@ -10,3 +10,5 @@ bcrypt==4.0.1
 firebase-admin
 pywebpush
 razorpay
+google-generativeai
+mediapipe

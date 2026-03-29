@@ -17,11 +17,14 @@ const loadRazorpay = () => new Promise((resolve) => {
 const features = [
   { label: 'Photo analyses', free: '6/month', pro: 'Unlimited' },
   { label: 'Outfit checker', free: '10/month', pro: 'Unlimited' },
+  { label: 'Couple Matcher', free: '🔒 Locked', pro: '✅ Full access' },
+  { label: 'Virtual Try-On', free: '2/month', pro: 'Unlimited' },
+  { label: 'StyleBot AI Chat', free: '🔒 Locked', pro: '✅ Full access' },
   { label: 'Accessories tab', free: '🔒 Locked', pro: '✅ Full access' },
   { label: 'Makeup suggestions', free: '🔒 Locked', pro: '✅ Full access' },
   { label: 'Outfit combos', free: '2 visible', pro: 'All 5' },
-  { label: 'Wardrobe items', free: '10 items', pro: '50 items' },
-  { label: 'History', free: 'Last 5', pro: 'Last 20' },
+  { label: 'Wardrobe items', free: '10 items', pro: 'Unlimited' },
+  { label: 'History', free: 'Last 5', pro: 'Unlimited' },
   { label: 'Ads', free: '✅ Shown', pro: '❌ No ads' },
 ];
 

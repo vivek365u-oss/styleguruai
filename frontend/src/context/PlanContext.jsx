@@ -27,7 +27,7 @@ export function PlanProvider({ children }) {
         getUsage(user.uid, getCurrentMonthKey()),
       ]);
       const pro = isPlanPro(sub);
-      setPlan(sub?.plan || 'free');
+      setPlan(pro ? 'pro' : (sub?.plan || 'free'));
       setIsPro(pro);
       setValidUntil(sub?.valid_until || null);
       setUsage(usageData);

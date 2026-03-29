@@ -3,6 +3,30 @@ import { getWardrobe, deleteWardrobeItem, getWardrobeCount } from '../api/styleA
 import { auth } from '../api/styleApi';
 import { ThemeContext } from '../App';
 import { usePlan } from '../context/PlanContext';
+import { getLocalWardrobeImage, deleteLocalWardrobeImage } from '../utils/indexedDB';
+
+function WardrobeImage({ imageId, fallbackColor, isDark }) {
+  const [src, setSrc] = useState(null);
+
+  useEffect(() => {
+    if (!imageId) return;
+    getLocalWardrobeImage(imageId).then(data => {
+      if (data) setSrc(data);
+    });
+  }, [imageId]);
+
+  if (src) {
+    return <img src={src} alt="Wardrobe item" className="w-12 h-12 object-cover rounded-xl shadow border border-white/20" />;
+  }
+  return (
+    <div
+      className="w-12 h-12 rounded-xl flex items-center justify-center border border-white/20 shadow"
+      style={{ backgroundColor: fallbackColor || '#C68642' }}
+    >
+      <span className="text-xl">👗</span>
+    </div>
+  );
+}
 
 function SkeletonCard({ isDark }) {
   return (
@@ -69,6 +93,9 @@ function WardrobePanel({ user }) {
     setItems(prev => prev.filter(i => i.id !== item.id));
     try {
       await deleteWardrobeItem(uid, item.id);
+      if (item.imageId) {
+        await deleteLocalWardrobeImage(item.imageId);
+      }
       showToast('Outfit removed from wardrobe');
     } catch {
       // Restore on failure
@@ -150,10 +177,7 @@ function WardrobePanel({ user }) {
                 className="flex items-center gap-4 p-4 cursor-pointer"
                 onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
               >
-                <div
-                  className="w-12 h-12 rounded-xl flex-shrink-0 border border-white/20 shadow"
-                  style={{ backgroundColor: item.skin_hex || '#C68642' }}
-                />
+                <WardrobeImage imageId={item.imageId} fallbackColor={item.skin_hex} isDark={isDark} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <span className={`font-bold text-sm capitalize ${isDark ? 'text-white' : 'text-gray-800'}`}>

@@ -3,6 +3,7 @@ import { checkOutfitCompatibility, saveWardrobeItem, auth, incrementUsage } from
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
+import { compressImage, saveLocalWardrobeImage } from '../utils/indexedDB';
 import PaywallModal from './PaywallModal';
 
 // ── Outfit Shop Card — same style as analyze results ─────────
@@ -155,8 +156,19 @@ function OutfitChecker() {
     if (!uid) return;
     setWardrobeSaving(true);
     try {
+      const imageId = `outfit_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      try {
+        if (outfitFile) {
+          const base64 = await compressImage(outfitFile, 400);
+          await saveLocalWardrobeImage(imageId, base64);
+        }
+      } catch (e) {
+        console.warn('Failed to save to IDB', e);
+      }
+
       await saveWardrobeItem(uid, {
         source: 'outfit_checker',
+        imageId: imageId,
         outfit_data: {
           colors: result.outfit_analysis?.color_name ? [{ name: result.outfit_analysis.color_name, hex: result.outfit_analysis.dominant_color_hex }] : [],
         },
@@ -168,9 +180,9 @@ function OutfitChecker() {
     } catch {
       try {
         const queue = JSON.parse(localStorage.getItem('sg_wardrobe_queue') || '[]');
-        queue.push({ source: 'outfit_checker', outfit_data: { colors: [] }, skin_tone: result.skin_analysis?.skin_tone || '', skin_hex: result.skin_analysis?.skin_color_hex || '#C68642', compatibility_score: score, saved_at: new Date().toISOString() });
+        queue.push({ source: 'outfit_checker', imageId: null, outfit_data: { colors: [] }, skin_tone: result.skin_analysis?.skin_tone || '', skin_hex: result.skin_analysis?.skin_color_hex || '#C68642', compatibility_score: score, saved_at: new Date().toISOString() });
         localStorage.setItem('sg_wardrobe_queue', JSON.stringify(queue));
-        setWardrobeSaved(true); // treat offline queue as success
+        setWardrobeSaved(true); 
       } catch {}
     } finally {
       setWardrobeSaving(false);
