@@ -1,22 +1,24 @@
-import React, { useState, useEffect, createContext } from 'react';
+import React, { useState, useEffect, createContext, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { auth, logout, loadProfile } from './api/styleApi';
 import { onAuthStateChanged } from 'firebase/auth';
-import AuthPage from './components/AuthPage';
-import Dashboard from './components/Dashboard';
-import LandingPage from './components/LandingPage';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { PlanProvider } from './context/PlanContext';
 
-// Lazy imports for new pages (will be created in later tasks)
-import AboutPage from './pages/AboutPage';
-import PrivacyPage from './pages/PrivacyPage';
-import ContactPage from './pages/ContactPage';
-import TermsPage from './pages/TermsPage';
-import BlogListPage from './pages/BlogListPage';
-import BlogPostPage from './pages/BlogPostPage';
-import NotFoundPage from './pages/NotFoundPage';
-import AdminDashboard from './pages/AdminDashboard';
+// Eagerly loaded components for fast initial render
+import LandingPage from './components/LandingPage';
+import AuthPage from './components/AuthPage';
+
+// Lazy loaded components for code splitting
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const BlogListPage = lazy(() => import('./pages/BlogListPage'));
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 export const ThemeContext = createContext();
 
@@ -33,28 +35,36 @@ function AppRoutes({ user, setUser }) {
     setUser(null);
   };
 
+  const LoadingFallback = () => (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="text-white text-xl animate-pulse">Loading ToneFit...</div>
+    </div>
+  );
+
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage onGetStarted={() => navigate('/login')} />} />
-      <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} />} />
-      <Route path="/dashboard" element={
-        <PrivateRoute user={user}>
-          <Dashboard user={user} onLogout={handleLogout} />
-        </PrivateRoute>
-      } />
-      <Route path="/about" element={<AboutPage />} />
-      <Route path="/privacy" element={<PrivacyPage />} />
-      <Route path="/contact" element={<ContactPage />} />
-      <Route path="/terms" element={<TermsPage />} />
-      <Route path="/blog" element={<BlogListPage />} />
-      <Route path="/blog/:slug" element={<BlogPostPage />} />
-      <Route path="/admin" element={
-        <PrivateRoute user={user}>
-          <AdminDashboard />
-        </PrivateRoute>
-      } />
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+    <Suspense fallback={<LoadingFallback />}>
+      <Routes>
+        <Route path="/" element={<LandingPage onGetStarted={() => navigate('/login')} />} />
+        <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} />} />
+        <Route path="/dashboard" element={
+          <PrivateRoute user={user}>
+            <Dashboard user={user} onLogout={handleLogout} />
+          </PrivateRoute>
+        } />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/blog" element={<BlogListPage />} />
+        <Route path="/blog/:slug" element={<BlogPostPage />} />
+        <Route path="/admin" element={
+          <PrivateRoute user={user}>
+            <AdminDashboard />
+          </PrivateRoute>
+        } />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </Suspense>
   );
 }
 

@@ -41,6 +41,16 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
         { label: '🌸 Plus Size / Curvy', value: 'plus' },
       ]
     },
+    {
+      q: 'What is your eye color?',
+      key: 'eyeColor',
+      options: [
+        { label: '🟤 Brown / Dark Brown', value: 'brown' },
+        { label: '⚫ Black / Very Dark', value: 'black' },
+        { label: '🟢 Hazel / Green', value: 'hazel' },
+        { label: '🔵 Blue / Grey', value: 'blue' },
+      ]
+    },
   ];
 
   // Static recommendation map
@@ -87,6 +97,7 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
       const mockResult = {
         gender,
         bodyType,
+        eyeColor: newAnswers.eyeColor || 'brown',
         analysis: {
           skin_color: { hex: '#C68642', rgb: { r: 198, g: 134, b: 66 } },
           skin_tone: { category: tone, undertone, color_season: undertone === 'warm' ? 'Autumn' : undertone === 'cool' ? 'Winter' : 'Spring', confidence: 'medium', description: rec.summary },
@@ -167,6 +178,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   const [bodyType, setBodyType] = useState('average');
   const [occasion, setOccasion] = useState('casual');
   const [budget, setBudget] = useState('any');
+  const [eyeColor, setEyeColor] = useState('brown');
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
@@ -187,13 +199,13 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       let res;
       if (mode === 'seasonal') {
         res = await analyzeImageSeasonal(file, season, setUploadProgress);
-        onAnalysisComplete({ ...res.data, gender: 'seasonal', seasonalGender: gender, bodyType, occasion, budget });
+        onAnalysisComplete({ ...res.data, gender: 'seasonal', seasonalGender: gender, bodyType, occasion, budget, eyeColor });
       } else if (gender === 'female') {
         res = await analyzeImageFemale(file, setUploadProgress);
-        onAnalysisComplete({ ...res.data, gender: 'female', bodyType, occasion, budget });
+        onAnalysisComplete({ ...res.data, gender: 'female', bodyType, occasion, budget, eyeColor });
       } else {
         res = await analyzeImage(file, setUploadProgress);
-        onAnalysisComplete({ ...res.data, gender: 'male', bodyType, occasion, budget });
+        onAnalysisComplete({ ...res.data, gender: 'male', bodyType, occasion, budget, eyeColor });
       }
     } catch (err) {
       const detail = err.response?.data?.detail;
@@ -378,6 +390,36 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
             >
               <span>{bt.label}</span>
               <span className="text-[10px] opacity-70">{bt.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Eye Color Selector */}
+      <div className="mb-5">
+        <p className={`text-xs text-center mb-2 font-semibold uppercase tracking-wide ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Your Eye Color (optional)</p>
+        <div className="flex justify-center gap-2 flex-wrap">
+          {[
+            { value: 'brown', label: '🟤 Brown', desc: 'Dark' },
+            { value: 'black', label: '⚫ Black', desc: 'Very Dark' },
+            { value: 'hazel', label: '🟢 Hazel', desc: 'Green' },
+            { value: 'blue', label: '🔵 Blue', desc: 'Grey' },
+          ].map((ec) => (
+            <button
+              key={ec.value}
+              onClick={() => setEyeColor(ec.value)}
+              className={`flex flex-col items-center px-4 py-2 rounded-xl border text-xs font-bold transition-all ${
+                eyeColor === ec.value
+                  ? isDark
+                    ? 'bg-purple-500/30 border-purple-400 text-purple-200'
+                    : 'bg-purple-600 border-purple-600 text-white shadow-md'
+                  : isDark
+                    ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70'
+                    : 'bg-white border-gray-300 text-gray-700 hover:border-purple-400 hover:text-purple-700 shadow-sm'
+              }`}
+            >
+              <span>{ec.label}</span>
+              <span className="text-[10px] opacity-70">{ec.desc}</span>
             </button>
           ))}
         </div>
