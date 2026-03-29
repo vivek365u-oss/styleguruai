@@ -1111,8 +1111,18 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
               ...(recommendations.best_top_colors || []),
             ].filter((c, i, a) => a.findIndex(x => x.hex === c.hex) === i)}
             avoidColors={recommendations.colors_to_avoid || []}
+            pantColors={recommendations.best_pant_colors || recommendations.best_bottom_colors || []}
+            outfitCombos={(recommendations.outfit_combinations || []).map(c => ({
+              label: `${c.shirt || c.dress || c.top || ''} + ${c.pant || c.bottom || c.skirt || ''}`,
+              shirtHex: (recommendations.best_shirt_colors || recommendations.best_dress_colors || [])[0]?.hex || '#6d28d9',
+              shirtName: c.shirt || c.dress || c.top || 'Top',
+              pantHex: (recommendations.best_pant_colors || recommendations.best_bottom_colors || [])[0]?.hex || '#1e293b',
+              pantName: c.pant || c.bottom || c.skirt || 'Bottom',
+              occasion: c.occasion || 'Casual',
+            }))}
             gender={effectiveGender}
             skinTone={analysis.skin_tone.category}
+            skinHex={analysis.skin_tone.hex_code}
           />
         )}
         {activeTab === 'colors' && (
