@@ -11,6 +11,9 @@ import WardrobePanel from './WardrobePanel';
 import { saveWardrobeItem } from '../api/styleApi';
 import { usePlan } from '../context/PlanContext';
 import PaywallModal from './PaywallModal';
+import OOTDCard from './OOTDCard';
+import WeatherTip from './WeatherTip';
+import ColorScanner from './ColorScanner';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
@@ -330,6 +333,18 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
           <p className={`text-sm leading-relaxed ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{todayTip.tip}</p>
         </div>
       </div>
+
+      {/* OOTD — Outfit of the Day */}
+      {lastAnalysis && (
+        <OOTDCard
+          skinTone={lastAnalysis.skinTone}
+          gender={lastAnalysis.fullData?.gender || 'male'}
+          isDark={isDark}
+        />
+      )}
+
+      {/* Weather-Based Style Tip */}
+      <WeatherTip isDark={isDark} />
 
       {/* Recent Analysis */}
       {lastAnalysis && (
@@ -765,6 +780,19 @@ function Dashboard({ user, onLogout }) {
         {activeTab === 'outfit' && <OutfitChecker />}
         {activeTab === 'wardrobe' && <WardrobePanel user={user} />}
         {activeTab === 'history' && <HistoryPanel onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
+        {activeTab === 'scanner' && (
+          <ColorScanner
+            savedPalette={(() => {
+              try {
+                const lastA = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
+                return lastA?.fullData?.recommendations?.best_shirt_colors ||
+                       lastA?.fullData?.recommendations?.best_dress_colors || [];
+              } catch { return []; }
+            })()}
+            skinTone={(() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || '{}').skinTone; } catch { return ''; } })()}
+            onClose={() => setActiveTab('home')}
+          />
+        )}
         {activeTab === 'settings' && <SettingsScreen user={user} onLogout={onLogout} />}
         </div>
       </main>
