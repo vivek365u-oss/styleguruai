@@ -698,6 +698,7 @@ function Dashboard({ user, onLogout }) {
     { id: 'community', emoji: '🌍', label: 'Community' },
     { id: 'outfit',    emoji: '👔', label: 'Outfit' },
     { id: 'wardrobe',  emoji: '👗', label: 'Wardrobe' },
+    { id: 'history',   emoji: '📋', label: 'History' },
     { id: 'settings',  emoji: '⚙️', label: 'Profile' },
   ];
 
@@ -802,12 +803,12 @@ function Dashboard({ user, onLogout }) {
       </main>
 
       <nav className={`fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t ${theme === 'dark' ? 'bg-[#050816]/95 border-white/10' : 'bg-slate-100/95 border-purple-200 shadow-lg'}`}>
-        <div className="max-w-lg mx-auto flex justify-around px-2 py-2">
+        <div className="max-w-lg mx-auto flex gap-2 sm:justify-around overflow-x-auto scrollbar-hide px-3 py-2">
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => handleTabChange(item.id)}
-              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${activeTab === item.id ? 'text-purple-500' : theme === 'dark' ? 'text-white/30 hover:text-white/60' : 'text-gray-400 hover:text-gray-700'}`}
+              className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${activeTab === item.id ? 'text-purple-500' : theme === 'dark' ? 'text-white/30 hover:text-white/60' : 'text-gray-400 hover:text-gray-700'}`}
             >
               <span className={`text-xl transition-transform ${activeTab === item.id ? 'scale-110' : ''}`}>{item.emoji}</span>
               <span className={`text-[10px] font-semibold ${activeTab === item.id ? 'text-purple-400' : 'text-white/30'}`}>{item.label}</span>
