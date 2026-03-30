@@ -330,6 +330,8 @@ function VirtualTryOn({
   const canvasRef = useRef(null);
 
   // State
+  const [localImage, setLocalImage] = useState(null);
+  const activeImage = localImage || uploadedImage;
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [mode, setMode] = useState('best'); // 'best' | 'avoid' | 'combo'
   const [opacity, setOpacity] = useState(0.50);
@@ -341,7 +343,16 @@ function VirtualTryOn({
   const [savedToast, setSavedToast] = useState(null);
   const [activeCombo, setActiveCombo] = useState(null);
 
-  const colors = mode === 'best' ? bestColors : mode === 'avoid' ? avoidColors : bestColors;
+  const fallbackColors = [
+    { name: 'Navy Blue', hex: '#1e3a8a' }, { name: 'Olive Green', hex: '#4d7c0f' },
+    { name: 'Burgundy', hex: '#831843' }, { name: 'Mustard', hex: '#ca8a04' },
+    { name: 'Charcoal', hex: '#374151' }, { name: 'Bright White', hex: '#ffffff' },
+    { name: 'True Black', hex: '#000000' }, { name: 'Teal', hex: '#0f766e' }
+  ];
+  const safeBestColors = bestColors.length > 0 ? bestColors : fallbackColors;
+  const safeAvoidColors = avoidColors.length > 0 ? avoidColors : [{ name: 'Neon Green', hex: '#39ff14' }];
+
+  const colors = mode === 'best' ? safeBestColors : mode === 'avoid' ? safeAvoidColors : safeBestColors;
   const currentColor = colors[selectedIdx];
   const currentHex = activeCombo ? activeCombo.shirtHex : (currentColor?.hex || '#6d28d9');
   const currentName = activeCombo ? activeCombo.label : (currentColor?.name || 'Purple');
@@ -362,7 +373,7 @@ function VirtualTryOn({
 
   // Canvas engine
   const { ready, redraw } = useDrapingEngine(
-    canvasRef, uploadedImage, currentHex, opacity, drapeStart, drapeMode
+    canvasRef, activeImage, currentHex, opacity, drapeStart, drapeMode
   );
 
   // Capture draped image for before/after slider
@@ -426,14 +437,23 @@ function VirtualTryOn({
   };
 
   // No image
-  if (!uploadedImage) {
+  if (!activeImage) {
     return (
-      <div className="text-center py-10">
-        <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
-          <span className="text-4xl">👤</span>
-        </div>
-        <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>Virtual Try-On</h3>
-        <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Upload a selfie first to try on colors</p>
+      <div className="text-center py-12">
+        <label className={`cursor-pointer inline-flex items-center justify-center w-24 h-24 rounded-3xl mx-auto mb-4 border shadow-sm transition-all hover:scale-105 active:scale-95 ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-purple-50 border-purple-200 hover:bg-purple-100'}`}>
+          <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+            if (e.target.files && e.target.files[0]) {
+              const reader = new FileReader();
+              reader.onload = (e) => setLocalImage(e.target.result);
+              reader.readAsDataURL(e.target.files[0]);
+            }
+          }} />
+          <span className="text-4xl text-purple-500">📸</span>
+        </label>
+        <h3 className={`font-black text-2xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>Virtual Try-On</h3>
+        <p className={`text-sm max-w-[240px] mx-auto leading-relaxed ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
+          Tap the camera to upload a photo and start trying on colors instantly!
+        </p>
       </div>
     );
   }
@@ -542,7 +562,7 @@ function VirtualTryOn({
         </div>
       ) : (
         <BeforeAfterSlider
-          uploadedImage={uploadedImage}
+          uploadedImage={activeImage}
           drapedCanvas={drapedImage}
           canvasSize={canvasSize}
           isDark={isDark}
@@ -564,13 +584,13 @@ function VirtualTryOn({
           className={`flex-1 flex items-center justify-center gap-1 py-2.5 rounded-xl text-[11px] font-bold transition-all ${
             mode === 'best' ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg' : isDark ? 'text-white/40' : 'text-gray-400'
           }`}
-        >✅ Best ({bestColors.length})</button>
+        >✅ Best ({safeBestColors.length})</button>
         <button
           onClick={() => setMode('avoid')}
           className={`flex-1 flex items-center justify-center gap-1 py-2.5 rounded-xl text-[11px] font-bold transition-all ${
             mode === 'avoid' ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg' : isDark ? 'text-white/40' : 'text-gray-400'
           }`}
-        >🚫 Avoid ({avoidColors.length})</button>
+        >🚫 Avoid ({safeAvoidColors.length})</button>
         <button
           onClick={() => setMode('combo')}
           className={`flex-1 flex items-center justify-center gap-1 py-2.5 rounded-xl text-[11px] font-bold transition-all ${
