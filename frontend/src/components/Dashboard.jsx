@@ -10,7 +10,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import AdSense from '../AdSense';
 import { saveProfile, auth, incrementUsage } from '../api/styleApi';
 import WardrobePanel from './WardrobePanel';
-import { saveWardrobeItem } from '../api/styleApi';
+import { saveWardrobeItem, activateProSubscription } from '../api/styleApi';
 import { usePlan } from '../context/PlanContext';
 import PaywallModal from './PaywallModal';
 import OOTDCard from './OOTDCard';
@@ -522,8 +522,19 @@ function Dashboard({ user, onLogout }) {
   const [currentGender, setCurrentGender] = useState('male');
   const [toast, setToast] = useState(null);
   const [paywallOpen, setPaywallOpen] = useState(false);
-  const [paywallMessage, setPaywallMessage] = useState('');
   const showToast = (msg) => setToast(msg);
+
+  const handleUpgradeSuccess = async () => {
+    try {
+      if (auth.currentUser) {
+        await activateProSubscription(auth.currentUser.uid);
+        // Refresh the context to unlock the app
+        window.location.reload(); // Quickest way to hard refresh React context states for Pro bounds
+      }
+    } catch (e) {
+      showToast('❌ Upgrade failed to sync');
+    }
+  };
 
   // Offline wardrobe queue retry
   useEffect(() => {
@@ -625,6 +636,15 @@ function Dashboard({ user, onLogout }) {
               ← New
             </button>
           )}
+          {!isPro ? (
+            <button onClick={() => setPaywallOpen(true)} className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1.5 rounded-xl shadow-md transition hover:scale-105 active:scale-95">
+              <span>✨</span> PRO
+            </button>
+          ) : (
+            <div className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider border border-purple-500/30 text-purple-600 px-3 py-1.5 rounded-xl shadow-sm bg-purple-50/50">
+              <span className="text-purple-500">✨</span> PRO
+            </div>
+          )}
           <button onClick={toggleTheme} className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-sm">
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
@@ -651,7 +671,6 @@ function Dashboard({ user, onLogout }) {
               <UploadSection
                 onLoadingStart={() => {
                   if (!isPro && usage.analyses_count >= 6) {
-                    setPaywallMessage('6 analyses used this month. Upgrade to Pro for unlimited.');
                     setPaywallOpen(true);
                     return false; // signal blocked
                   }
@@ -717,7 +736,7 @@ function Dashboard({ user, onLogout }) {
         </div>
       </nav>
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
-      <PaywallModal isOpen={paywallOpen} onClose={() => setPaywallOpen(false)} triggerMessage={paywallMessage} />
+      <PaywallModal isOpen={paywallOpen} onClose={() => setPaywallOpen(false)} onUpgrade={handleUpgradeSuccess} isDark={theme === 'dark'} />
       <StyleBot />
     </div>
   );

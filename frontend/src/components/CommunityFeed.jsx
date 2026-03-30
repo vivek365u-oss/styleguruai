@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { ThemeContext } from '../App';
-import { getCommunityFeed } from '../api/styleApi';
+import { getCommunityFeed, likeCommunityPost, publishToCommunityFeed, auth } from '../api/styleApi';
 
 function CommunityFeed() {
   const { theme } = useContext(ThemeContext);
@@ -24,6 +24,69 @@ function CommunityFeed() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const [uploading, setUploading] = useState(false);
+
+  const handleOOTDUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      // Get current user context
+      const lastA = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
+      if (!lastA) throw new Error("Please complete a color analysis first!");
+
+      // Compress image
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = async () => {
+          const canvas = document.createElement('canvas');
+          const MAX_SIZE = 300;
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+          } else {
+            if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const base64Image = canvas.toDataURL('image/jpeg', 0.5); // high compression
+
+          // Assemble post
+          const postData = {
+            skinTone: lastA.skinTone || 'medium',
+            undertone: lastA.undertone || 'warm',
+            skinHex: lastA.skinHex || '#C68642',
+            colorSeason: lastA.season || 'unknown',
+            gender: lastA.fullData?.gender || 'male',
+            bestColors: (lastA.fullData?.recommendations?.best_shirt_colors || []).slice(0, 5),
+            ootdImage: base64Image
+          };
+
+          const uid = auth.currentUser?.uid || 'anonymous';
+          await publishToCommunityFeed(uid, postData);
+          await loadFeed(); // refresh feed
+        };
+      };
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleLike = async (postId) => {
+    // Optimistic UI update
+    setFeed(prev => prev.map(p => p.id === postId ? { ...p, likes: (p.likes || 0) + 1, hasLiked: true } : p));
+    await likeCommunityPost(postId);
   };
 
   const getTimeAgo = (dateStr) => {
@@ -70,10 +133,19 @@ function CommunityFeed() {
           <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></span>
           <span className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>LIVE FEED</span>
         </div>
-        <h2 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>Community Palettes</h2>
-        <p className={`text-xs mt-1 max-w-[250px] mx-auto ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
-          Anonymous color palettes from users around the world. Find your twin!
+        <h2 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>Community Palettes & OOTD</h2>
+        <p className={`text-xs mt-1 mb-4 max-w-[250px] mx-auto ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
+          Anonymous OOTDs and color palettes from users around the world.
         </p>
+
+        <label className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl cursor-pointer font-black text-sm uppercase tracking-wider transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg ${
+              uploading 
+                ? 'bg-gray-500 text-white cursor-wait'
+                : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-500/30'
+            }`}>
+          <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={handleOOTDUpload} />
+          {uploading ? 'Uploading...' : '📸 Post your OOTD'}
+        </label>
       </div>
 
       <div className="space-y-4 max-w-lg mx-auto">
@@ -96,17 +168,32 @@ function CommunityFeed() {
                   </p>
                 </div>
               </div>
-              <span className={`text-[10px] font-medium ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
-                {getTimeAgo(post.published_at)}
-              </span>
+              <div className="flex flex-col items-end gap-1">
+                <span className={`text-[10px] font-medium ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
+                  {getTimeAgo(post.published_at)}
+                </span>
+                <button 
+                  onClick={() => !post.hasLiked && handleLike(post.id)}
+                  className={`text-xs font-bold px-2 py-1 rounded-lg border transition ${post.hasLiked ? (isDark ? 'bg-pink-500/20 border-pink-500/40 text-pink-400' : 'bg-pink-50 border-pink-200 text-pink-500') : (isDark ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white/60' : 'bg-gray-50 border-gray-200 hover:bg-gray-100 text-gray-500')}`}
+                >
+                  🔥 {post.likes || 0}
+                </button>
+              </div>
             </div>
 
+            {/* OOTD Image if exists */}
+            {post.ootdImage && (
+              <div className="w-full aspect-[4/5] overflow-hidden rounded-2xl mb-4 border shadow-sm" style={{ borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}>
+                <img src={post.ootdImage} alt="OOTD" className="w-full h-full object-cover" />
+              </div>
+            )}
+
             {/* Colors Grid */}
-            <div className="grid grid-cols-5 gap-2">
+            <div className={`grid gap-2 ${post.bestColors?.length > 0 ? `grid-cols-${Math.min((post.bestColors||[]).length, 5)}` : 'grid-cols-5'}`}>
               {(post.bestColors || []).slice(0, 5).map((color, i) => (
                 <div key={i} className="flex flex-col items-center gap-1 group">
                   <div 
-                    className="w-full aspect-square rounded-2xl border shadow-sm transition-transform group-hover:scale-110"
+                    className="w-full aspect-square rounded-xl sm:rounded-2xl border shadow-sm transition-transform group-hover:scale-110"
                     style={{ backgroundColor: color.hex, borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}
                   />
                   <span className={`text-[8px] sm:text-[9px] font-bold truncate w-full text-center ${isDark ? 'text-white/40' : 'text-gray-500'}`}>

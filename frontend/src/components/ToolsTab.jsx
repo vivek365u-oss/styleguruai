@@ -4,6 +4,7 @@ import OutfitChecker from './OutfitChecker';
 import CommunityFeed from './CommunityFeed';
 import HistoryPanel from './HistoryPanel';
 import StyleBot from './StyleBot';
+import OutfitCalendar from './OutfitCalendar';
 
 // --- Extracted from Dashboard.jsx ---
 function ColorContrastChecker({ isDark }) {
@@ -175,6 +176,29 @@ function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) 
     );
   }
 
+  if (activeTool === 'calendar') {
+    return (
+      <OutfitCalendar 
+        isDark={isDark}
+        onClose={() => setActiveTool(null)}
+        bestColors={(() => {
+          const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
+          const rec = data?.analysis?.recommendations || data?.recommendations || {};
+          return [...(rec.best_shirt_colors || rec.best_dress_colors || rec.seasonal_colors || []), ...(rec.best_top_colors || [])].filter((c, i, a) => a.findIndex(x => x.hex === c.hex) === i);
+        })()}
+        pantColors={(() => {
+          const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
+          const rec = data?.analysis?.recommendations || data?.recommendations || {};
+          return rec.best_pant_colors || rec.best_bottom_colors || [];
+        })()}
+        gender={(() => {
+          const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
+          return data?.gender || 'male';
+        })()}
+      />
+    );
+  }
+
 
 
   return (
@@ -197,6 +221,14 @@ function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) 
           <span className="text-3xl mb-1 mt-1">👔</span>
           <span className={`font-bold text-sm mt-1 ${isDark ? 'text-blue-100' : 'text-blue-900'}`}>Outfit Checker</span>
           <span className={`text-[10px] ${isDark ? 'text-blue-300/60' : 'text-blue-600/60'}`}>Rate my fit</span>
+        </button>
+
+        <button 
+          onClick={() => setActiveTool('calendar')}
+          className={`flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-amber-900/40 to-orange-900/40 border-amber-500/30' : 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 shadow-sm'}`}>
+          <span className="text-3xl mb-1 mt-1">📅</span>
+          <span className={`font-bold text-sm mt-1 ${isDark ? 'text-amber-100' : 'text-amber-900'}`}>AI Calendar</span>
+          <span className={`text-[10px] ${isDark ? 'text-amber-300/60' : 'text-amber-600/60'}`}>Weekly Drops</span>
         </button>
 
         <button 

@@ -329,6 +329,22 @@ export const getSubscription = async (uid) => {
   }
 };
 
+export const activateProSubscription = async (uid) => {
+  if (!auth.currentUser) return;
+  try {
+    const validUntil = new Date();
+    validUntil.setDate(validUntil.getDate() + 30); // 30 days from now
+    await setDoc(doc(db, 'users', uid, 'subscription', 'data'), {
+      plan: 'pro',
+      valid_until: validUntil.toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+  } catch (e) {
+    console.error('activateProSubscription error:', e);
+    throw e;
+  }
+};
+
 export const getUsage = async (uid, monthKey) => {
   if (!auth.currentUser) return { analyses_count: 0, outfit_checks_count: 0 };
   try {
@@ -378,6 +394,16 @@ export const publishToCommunityFeed = async (uid, paletteData) => {
       console.error('Community rules denied.');
     }
     throw e;
+  }
+};
+
+export const likeCommunityPost = async (postId) => {
+  if (!auth.currentUser) return;
+  try {
+    const ref = doc(db, 'community_feed', postId);
+    await setDoc(ref, { likes: increment(1) }, { merge: true });
+  } catch (e) {
+    console.error('Failed to like post:', e);
   }
 };
 
