@@ -179,6 +179,112 @@ function useDrapingEngine(canvasRef, imageSrc, color, opacity, drapeStart, drape
   return { ready, redraw: draw };
 }
 
+// ── Live AR Camera Engine ───────────────────────────────────
+function useCameraEngine(canvasRef, isCameraActive, color, opacity, drapeStart, drapeMode) {
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+  const rafRef = useRef(null);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [cameraError, setCameraError] = useState(false);
+
+  useEffect(() => {
+    if (!isCameraActive) {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
+      }
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      setCameraReady(false);
+      return;
+    }
+
+    const startCamera = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 1280 } }
+        });
+        streamRef.current = stream;
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.playsInline = true;
+        video.muted = true;
+        videoRef.current = video;
+        
+        video.onloadedmetadata = () => {
+          video.play();
+          setCameraReady(true);
+        };
+      } catch (err) {
+        setCameraError(true);
+        console.error("Camera access denied", err);
+      }
+    };
+    startCamera();
+
+    return () => {
+      if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [isCameraActive]);
+
+  useEffect(() => {
+    if (!isCameraActive || !cameraReady || !videoRef.current || !canvasRef.current) return;
+    
+    const renderLoop = () => {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      const video = videoRef.current;
+      const cw = canvas.width;
+      const ch = canvas.height;
+
+      // Draw mirrored video frame
+      ctx.save();
+      ctx.translate(cw, 0);
+      ctx.scale(-1, 1);
+      
+      // Cover crop strategy
+      const vRatio = video.videoWidth / video.videoHeight;
+      const cRatio = cw / ch;
+      let dx = 0, dy = 0, dw = cw, dh = ch;
+      
+      if (vRatio > cRatio) {
+        dw = ch * vRatio;
+        dx = (cw - dw) / 2;
+      } else {
+        dh = cw / vRatio;
+        dy = (ch - dh) / 2;
+      }
+      
+      ctx.drawImage(video, dx, dy, dw, dh);
+      ctx.restore();
+
+      // Apply AR Drape
+      if (color) {
+        if (drapeMode === 'tshirt') {
+          ctx.globalCompositeOperation = 'overlay';
+          drawTshirtShape(ctx, cw, ch, ch * drapeStart, color, opacity);
+          ctx.globalCompositeOperation = 'source-over';
+        } else {
+          drawGradientDrape(ctx, cw, ch, drapeStart, color, opacity);
+        }
+        
+        // Bottom vignette
+        const vGrad = ctx.createLinearGradient(0, ch - 50, 0, ch);
+        vGrad.addColorStop(0, 'rgba(0,0,0,0)');
+        vGrad.addColorStop(1, 'rgba(0,0,0,0.12)');
+        ctx.fillStyle = vGrad;
+        ctx.fillRect(0, ch - 50, cw, 50);
+      }
+
+      rafRef.current = requestAnimationFrame(renderLoop);
+    };
+
+    renderLoop();
+  }, [isCameraActive, cameraReady, color, opacity, drapeStart, drapeMode, canvasRef]);
+
+  return { cameraReady, cameraError };
+}
+
 // ── Before/After Swipe Slider ───────────────────────────────
 function BeforeAfterSlider({ uploadedImage, drapedCanvas, canvasSize, isDark }) {
   const [sliderPos, setSliderPos] = useState(50);
@@ -338,6 +444,7 @@ function VirtualTryOn({
   // State
   const [localImage, setLocalImage] = useState(null);
   const activeImage = localImage || uploadedImage;
+  const [inputType, setInputType] = useState('image'); // 'image' | 'camera'
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [mode, setMode] = useState('best'); // 'best' | 'avoid' | 'combo'
   const [opacity, setOpacity] = useState(0.50);
@@ -377,19 +484,25 @@ function VirtualTryOn({
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  // Canvas engine
-  const { ready, redraw } = useDrapingEngine(
+  // Canvas engines
+  const { ready: imageReady, redraw } = useDrapingEngine(
     canvasRef, activeImage, currentHex, opacity, drapeStart, drapeMode
   );
+  
+  const { cameraReady, cameraError } = useCameraEngine(
+    canvasRef, inputType === 'camera', currentHex, opacity, drapeStart, drapeMode
+  );
+  
+  const isCanvasActive = (inputType === 'image' && imageReady) || (inputType === 'camera' && cameraReady);
 
   // Capture draped image for before/after slider
   useEffect(() => {
-    if (!ready || !canvasRef.current) return;
+    if (!isCanvasActive || !canvasRef.current || inputType === 'camera') return;
     const timer = setTimeout(() => {
       try { setDrapedImage(canvasRef.current.toDataURL('image/png')); } catch {}
     }, 100);
     return () => clearTimeout(timer);
-  }, [ready, currentHex, opacity, drapeStart, drapeMode]);
+  }, [isCanvasActive, currentHex, opacity, drapeStart, drapeMode, inputType]);
 
   // Navigate
   const prev = () => {
@@ -442,10 +555,18 @@ function VirtualTryOn({
     setTimeout(() => setSavedToast(null), 2500);
   };
 
-  // No image
-  if (!activeImage) {
+  // No image & No Camera
+  if (inputType === 'image' && !activeImage) {
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-12 animate-fade-in relative">
+        <div className="flex justify-center gap-4 mb-8">
+          <button className={`px-6 py-2.5 rounded-full font-bold text-sm shadow-lg ${isDark ? 'bg-purple-600 text-white' : 'bg-purple-600 text-white'}`}>
+            🖼️ Photo
+          </button>
+          <button onClick={() => setInputType('camera')} className={`px-6 py-2.5 rounded-full font-bold text-sm border transition-all ${isDark ? 'bg-white/5 border-white/20 text-white/50 hover:text-white hover:border-white/40' : 'bg-white border-gray-300 text-gray-400 hover:text-purple-600'}`}>
+            📸 Live Mirror
+          </button>
+        </div>
         <label className={`cursor-pointer inline-flex items-center justify-center w-24 h-24 rounded-3xl mx-auto mb-4 border shadow-sm transition-all hover:scale-105 active:scale-95 ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-purple-50 border-purple-200 hover:bg-purple-100'}`}>
           <input type="file" accept="image/*" className="hidden" onChange={(e) => {
             if (e.target.files && e.target.files[0]) {
@@ -454,11 +575,11 @@ function VirtualTryOn({
               reader.readAsDataURL(e.target.files[0]);
             }
           }} />
-          <span className="text-4xl text-purple-500">📸</span>
+          <span className="text-4xl text-purple-500">➕</span>
         </label>
         <h3 className={`font-black text-2xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>Virtual Try-On</h3>
         <p className={`text-sm max-w-[240px] mx-auto leading-relaxed ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
-          Tap the camera to upload a photo and start trying on colors instantly!
+          Upload a photo to see clothes change color instantly.
         </p>
       </div>
     );
@@ -489,34 +610,48 @@ function VirtualTryOn({
       }));
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="text-center">
-        <p className={`text-xs font-bold uppercase tracking-wider ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>
-          ✨ Virtual Color Draping
-        </p>
-        <p className={`text-xs mt-1 ${labelCls}`}>See how colors look against your skin</p>
+    <div className="space-y-4 animate-fade-in">
+      {/* Header & Input Toggle */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1 ${inputType === 'camera' ? 'text-emerald-400' : isDark ? 'text-purple-300' : 'text-purple-600'}`}>
+            {inputType === 'camera' ? <><span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"/> LIVE AR MODE</> : '✨ VIRTUAL DRAPING'}
+          </p>
+          <p className={`text-[10px] mt-0.5 ${labelCls}`}>
+            {inputType === 'camera' ? 'Align your chest in the center' : 'Tap to try colors instantly'}
+          </p>
+        </div>
+        <div className={`p-1 rounded-xl flex gap-1 ${isDark ? 'bg-white/5' : 'bg-gray-100'}`}>
+          <button onClick={() => { setInputType('image'); setViewMode('live'); }} className={`p-2 rounded-lg transition-all ${inputType === 'image' ? 'bg-white text-purple-600 shadow-sm' : 'text-gray-400 hover:text-white'}`}>
+            🖼️
+          </button>
+          <button onClick={() => { setInputType('camera'); setViewMode('live'); }} className={`p-2 rounded-lg transition-all ${inputType === 'camera' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-400 hover:text-white'}`}>
+            📸
+          </button>
+        </div>
       </div>
 
-      {/* View Mode: Live vs Before/After */}
-      <div className={`flex rounded-xl p-0.5 gap-0.5 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
-        <button
-          onClick={() => setViewMode('live')}
-          className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
-            viewMode === 'live'
-              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
-              : isDark ? 'text-white/40' : 'text-gray-400'
-          }`}
-        >🎨 Live Preview</button>
-        <button
-          onClick={() => setViewMode('compare')}
-          className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
-            viewMode === 'compare'
-              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
-              : isDark ? 'text-white/40' : 'text-gray-400'
-          }`}
-        >⟷ Before / After</button>
-      </div>
+      {/* View Mode: Live vs Before/After (Only for image mode) */}
+      {inputType === 'image' && (
+        <div className={`flex rounded-xl p-0.5 gap-0.5 border mt-2 ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
+          <button
+            onClick={() => setViewMode('live')}
+            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
+              viewMode === 'live'
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
+                : isDark ? 'text-white/40' : 'text-gray-400'
+            }`}
+          >🎨 Try On</button>
+          <button
+            onClick={() => setViewMode('compare')}
+            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
+              viewMode === 'compare'
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
+                : isDark ? 'text-white/40' : 'text-gray-400'
+            }`}
+          >⟷ Compare</button>
+        </div>
+      )}
 
       {/* Canvas / Comparison View */}
       {viewMode === 'live' ? (
@@ -534,15 +669,32 @@ function VirtualTryOn({
           </div>
 
           {/* Color name badge */}
-          <div className={`absolute top-3 left-3 z-10 px-3 py-1.5 rounded-xl backdrop-blur-md border ${
+          <div className={`absolute top-3 left-3 z-10 px-3 py-1.5 rounded-xl backdrop-blur-md border flex flex-col items-start ${
             mode === 'avoid'
               ? 'bg-red-500/30 border-red-500/30'
-              : isDark ? 'bg-black/40 border-white/20' : 'bg-white/80 border-gray-300'
+              : isDark ? 'bg-black/60 border-white/20' : 'bg-white/90 border-gray-300 shadow-lg'
           }`}>
-            <span className={`text-xs font-bold ${mode === 'avoid' ? 'text-red-200' : isDark ? 'text-white' : 'text-gray-800'}`}>
+            <span className={`text-[10px] uppercase font-black tracking-widest ${isDark ? 'text-white/50' : 'text-purple-600'}`}>{inputType === 'camera' ? 'AR Mirror' : 'Try On'}</span>
+            <span className={`text-sm font-black ${mode === 'avoid' ? 'text-red-200' : isDark ? 'text-white' : 'text-gray-900'}`}>
               {mode === 'avoid' ? '🚫 ' : ''}{currentName}
             </span>
           </div>
+
+          {/* Camera Loading State */}
+          {inputType === 'camera' && !cameraReady && !cameraError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-20 backdrop-blur-sm">
+              <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mb-4"></div>
+              <p className="text-white font-bold tracking-widest text-sm animate-pulse">WARMING UP LENS...</p>
+            </div>
+          )}
+          {inputType === 'camera' && cameraError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-900/90 z-20 backdrop-blur-sm p-6 text-center">
+              <span className="text-4xl shadow-black drop-shadow-lg mb-2">📸</span>
+              <p className="text-white font-bold tracking-widest text-sm">CAMERA ACCESS DENIED</p>
+              <p className="text-white/60 text-xs mt-1">Please enable camera permissions to use the AR Mirror.</p>
+              <button onClick={() => setInputType('image')} className="mt-4 px-4 py-2 bg-white text-red-900 font-bold rounded-lg text-xs">Return to Photo Mode</button>
+            </div>
+          )}
 
           {/* Canvas */}
           <canvas
