@@ -1,15 +1,18 @@
 import { Link } from 'react-router-dom';
-
-const links = [
-  { label: 'Home', to: '/' },
-  { label: 'About', to: '/about' },
-  { label: 'Privacy Policy', to: '/privacy' },
-  { label: 'Contact', to: '/contact' },
-  { label: 'Terms', to: '/terms' },
-  { label: 'Blog', to: '/blog' },
-];
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function Footer() {
+  const { t } = useLanguage();
+
+  const links = [
+    { label: t('navHome'), to: '/' },
+    { label: t('navAbout'), to: '/about' },
+    { label: t('navPrivacy'), to: '/privacy' },
+    { label: t('navContact'), to: '/contact' },
+    { label: t('navTerms'), to: '/terms' },
+    { label: t('navBlog'), to: '/blog' },
+  ];
+
   return (
     <footer className="relative z-10 border-t border-gray-800/50 bg-[#050816] px-6 py-10 text-center">
       <div className="flex items-center justify-center gap-2 mb-4">
@@ -27,9 +30,9 @@ export default function Footer() {
           </Link>
         ))}
       </div>
-      <p className="text-gray-600 text-xs">© 2025 StyleGuru AI. All rights reserved.</p>
+      <p className="text-gray-600 text-xs">{t('footerRights')}</p>
       <p className="text-gray-600 text-xs mt-2">
-        StyleGuru AI is a participant in the Amazon Associates Programme, an affiliate advertising programme designed to provide a means for sites to earn advertising fees by advertising and linking to amazon.in. As an Amazon Associate, we earn from qualifying purchases.
+        {t('footerAffiliate')}
       </p>
     </footer>
   );

@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { ThemeContext } from '../App';
 import { getCommunityFeed, likeCommunityPost, publishToCommunityFeed, auth } from '../api/styleApi';
+import { logEvent, EVENTS } from '../utils/analytics';
+import { useLanguage } from '../i18n/LanguageContext';
 
 function CommunityFeed() {
+  const { t } = useLanguage();
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [feed, setFeed] = useState([]);
@@ -20,7 +23,7 @@ function CommunityFeed() {
       const data = await getCommunityFeed(30);
       setFeed(data);
     } catch (e) {
-      setError('Could not load community feed. Try again later.');
+      setError(t('couldNotLoadFeed'));
     } finally {
       setLoading(false);
     }
@@ -36,7 +39,7 @@ function CommunityFeed() {
     try {
       // Get current user context
       const lastA = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
-      if (!lastA) throw new Error("Please complete a color analysis first!");
+      if (!lastA) throw new Error(t('completeAnalysisFirst'));
 
       // Compress image
       const reader = new FileReader();
@@ -73,6 +76,7 @@ function CommunityFeed() {
 
           const uid = auth.currentUser?.uid || 'anonymous';
           await publishToCommunityFeed(uid, postData);
+          logEvent(EVENTS.FEED_INTERACTION, { type: 'post_ootd', gender: postData.gender });
           await loadFeed(); // refresh feed
         };
       };
@@ -86,24 +90,25 @@ function CommunityFeed() {
   const handleLike = async (postId) => {
     // Optimistic UI update
     setFeed(prev => prev.map(p => p.id === postId ? { ...p, likes: (p.likes || 0) + 1, hasLiked: true } : p));
+    logEvent(EVENTS.FEED_INTERACTION, { type: 'like_post' });
     await likeCommunityPost(postId);
   };
 
   const getTimeAgo = (dateStr) => {
-    if (!dateStr) return 'Unknown';
+    if (!dateStr) return t('timeAgoUnknown');
     const seconds = Math.floor((new Date() - new Date(dateStr)) / 1000);
     const intervals = [
-      { seconds: 31536000, label: 'y' },
-      { seconds: 2592000, label: 'mo' },
-      { seconds: 86400, label: 'd' },
-      { seconds: 3600, label: 'h' },
-      { seconds: 60, label: 'm' },
+      { seconds: 31536000, label: t('timeAgoYear') },
+      { seconds: 2592000, label: t('timeAgoMonth') },
+      { seconds: 86400, label: t('timeAgoDay') },
+      { seconds: 3600, label: t('timeAgoHour') },
+      { seconds: 60, label: t('timeAgoMinute') },
     ];
     for (const i of intervals) {
       const count = Math.floor(seconds / i.seconds);
-      if (count >= 1) return `${count}${i.label} ago`;
+      if (count >= 1) return language === 'hi' ? `${count} ${i.label} पहले` : `${count}${i.label} ago`;
     }
-    return 'Just now';
+    return language === 'hi' ? 'अभी' : 'Just now';
   };
 
   if (loading) {

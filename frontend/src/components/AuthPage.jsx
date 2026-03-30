@@ -109,7 +109,7 @@ function AuthPage({ onLoginSuccess, onSkip }) {
                 <path fill="none" d="M0 0h48v48H0z"/>
               </svg>
             )}
-            {googleLoading ? 'Signing in...' : t('googleLogin')}
+            {googleLoading ? t('signingIn') : t('googleLogin')}
           </button>
 
           {/* Divider */}
@@ -123,7 +123,7 @@ function AuthPage({ onLoginSuccess, onSkip }) {
           <div className="space-y-4">
             {mode === 'register' && (
               <div>
-                <label className="text-white/70 text-xs font-medium mb-1.5 block">Full Name</label>
+                <label className="text-white/70 text-xs font-medium mb-1.5 block">{t('fullName')}</label>
                 <input
                   name="full_name"
                   placeholder={t('namePlaceholder')}
@@ -135,7 +135,7 @@ function AuthPage({ onLoginSuccess, onSkip }) {
             )}
 
             <div>
-              <label className="text-white/70 text-xs font-medium mb-1.5 block">Email</label>
+              <label className="text-white/70 text-xs font-medium mb-1.5 block">{t('emailLabel')}</label>
               <input
                 name="email"
                 type="email"
@@ -147,7 +147,7 @@ function AuthPage({ onLoginSuccess, onSkip }) {
             </div>
 
             <div>
-              <label className="text-white/70 text-xs font-medium mb-1.5 block">Password</label>
+              <label className="text-white/70 text-xs font-medium mb-1.5 block">{t('passwordLabel')}</label>
               <input
                 name="password"
                 type="password"
@@ -178,7 +178,7 @@ function AuthPage({ onLoginSuccess, onSkip }) {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                   </svg>
-                  Processing...
+                  {t('processing')}
                 </span>
               ) : mode === 'login' ? `🚀 ${t('loginBtn')}` : `✨ ${t('registerBtn')}`}
             </button>
@@ -189,7 +189,7 @@ function AuthPage({ onLoginSuccess, onSkip }) {
                 onClick={onSkip}
                 className="w-full mt-2 py-2 text-white/50 text-sm font-medium hover:text-white transition-colors underline decoration-white/20 hover:decoration-white/50 underline-offset-4"
               >
-                Skip & Explore as Guest →
+                {t('skipGuest')}
               </button>
             )}
           </div>

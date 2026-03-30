@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Dict
 from skin_tone_classifier import SkinToneResult
+from translations import MESSAGES, LABELS, CELEBRITIES
 
 @dataclass
 class OutfitRecommendation:
@@ -59,12 +60,13 @@ class RecommendationEngine:
         "orange": {"hex": "#FFA500", "name": "Orange"},
     }
 
-    def get_recommendations(self, skin_tone: SkinToneResult) -> OutfitRecommendation:
+    def get_recommendations(self, skin_tone: SkinToneResult, lang: str = "en") -> OutfitRecommendation:
+        self.lang = lang if lang in MESSAGES else "en"
         category = skin_tone.category
         undertone = skin_tone.subcategory
         return OutfitRecommendation(
-            skin_tone=category,
-            undertone=undertone,
+            skin_tone=self._localize_label(category),
+            undertone=self._localize_label(undertone),
             confidence=skin_tone.confidence,
             best_shirt_colors=self._get_shirt_colors(category, undertone),
             best_pant_colors=self._get_pant_colors(category, undertone),
@@ -77,39 +79,51 @@ class RecommendationEngine:
             summary=self._generate_summary(category, undertone)
         )
 
+    def _localize(self, key):
+        return MESSAGES.get(self.lang, MESSAGES["en"]).get(key, key)
+
+    def _localize_label(self, label):
+        return LABELS.get(self.lang, LABELS["en"]).get(label, label)
+
+    def _localize_celeb(self, name):
+        return CELEBRITIES.get(self.lang, CELEBRITIES["en"]).get(name, name)
+
+    def _get_text_by_lang(self, mapping):
+        return mapping.get(self.lang, mapping.get("en", ""))
+
     def _get_shirt_colors(self, category, undertone):
         recommendations = {
             ("fair", "warm"): [
-                {**self.COLORS["navy_blue"], "reason": "Creates strong contrast with fair skin"},
-                {**self.COLORS["forest_green"], "reason": "Brings out warmth in your complexion"},
-                {**self.COLORS["burgundy"], "reason": "Rich color that complements fair warm skin"},
-                {**self.COLORS["coral"], "reason": "Enhances your natural warm glow"},
-                {**self.COLORS["mustard"], "reason": "Warm tone that harmonizes with your skin"},
-                {**self.COLORS["teal"], "reason": "Beautiful contrast without being too harsh"},
+                {**self.COLORS["navy_blue"], "reason": self._localize("creates_contrast")},
+                {**self.COLORS["forest_green"], "reason": self._localize("warm_glow")},
+                {**self.COLORS["burgundy"], "reason": self._localize("rich_color")},
+                {**self.COLORS["coral"], "reason": self._localize("warm_glow")},
+                {**self.COLORS["mustard"], "reason": self._localize("harmonizes")},
+                {**self.COLORS["teal"], "reason": self._localize("creates_contrast")},
             ],
             ("fair", "cool"): [
-                {**self.COLORS["royal_blue"], "reason": "Cool tone that matches your undertone"},
-                {**self.COLORS["emerald"], "reason": "Rich cool green complements cool fair skin"},
-                {**self.COLORS["lavender"], "reason": "Soft cool color that looks elegant"},
-                {**self.COLORS["dusty_rose"], "reason": "Subtle pink that enhances cool undertones"},
-                {**self.COLORS["charcoal"], "reason": "Sophisticated and flattering"},
-                {**self.COLORS["cobalt_blue"], "reason": "Vivid blue that makes fair cool skin glow"},
+                {**self.COLORS["royal_blue"], "reason": self._localize("complements_undertone")},
+                {**self.COLORS["emerald"], "reason": self._localize("rich_color")},
+                {**self.COLORS["lavender"], "reason": self._localize("sophisticated")},
+                {**self.COLORS["dusty_rose"], "reason": self._localize("complements_undertone")},
+                {**self.COLORS["charcoal"], "reason": self._localize("sophisticated")},
+                {**self.COLORS["cobalt_blue"], "reason": self._localize("power_color")},
             ],
             ("light", "warm"): [
-                {**self.COLORS["olive_green"], "reason": "Earth tone that suits wheatish warm skin perfectly"},
-                {**self.COLORS["rust"], "reason": "Warm earth tone that enhances your complexion"},
-                {**self.COLORS["navy_blue"], "reason": "Classic choice that always works"},
-                {**self.COLORS["maroon"], "reason": "Deep warm red that complements golden undertones"},
-                {**self.COLORS["teal"], "reason": "Rich blue-green that pops against wheatish skin"},
-                {**self.COLORS["mustard"], "reason": "Warm and trendy choice for your skin tone"},
+                {**self.COLORS["olive_green"], "reason": self._localize("versatile")},
+                {**self.COLORS["rust"], "reason": self._localize("warm_glow")},
+                {**self.COLORS["navy_blue"], "reason": self._localize("classic_choice")},
+                {**self.COLORS["maroon"], "reason": self._localize("rich_color")},
+                {**self.COLORS["teal"], "reason": self._localize("harmonizes")},
+                {**self.COLORS["mustard"], "reason": self._localize("warm_glow")},
             ],
             ("light", "cool"): [
-                {**self.COLORS["royal_blue"], "reason": "Cool blue enhances your natural undertone"},
-                {**self.COLORS["sage_green"], "reason": "Muted green that harmonizes with cool skin"},
-                {**self.COLORS["wine_red"], "reason": "Deep cool red that looks sophisticated"},
-                {**self.COLORS["pastel_blue"], "reason": "Soft cool color that flatters naturally"},
-                {**self.COLORS["charcoal"], "reason": "Cool neutral that always looks polished"},
-                {**self.COLORS["lavender"], "reason": "Light purple that brings out cool tones beautifully"},
+                {**self.COLORS["royal_blue"], "reason": self._localize("complements_undertone")},
+                {**self.COLORS["sage_green"], "reason": self._localize("harmonizes")},
+                {**self.COLORS["wine_red"], "reason": self._localize("sophisticated")},
+                {**self.COLORS["pastel_blue"], "reason": self._localize("fresh_look")},
+                {**self.COLORS["charcoal"], "reason": self._localize("sophisticated")},
+                {**self.COLORS["lavender"], "reason": self._localize("complements_undertone")},
             ],
             ("medium", "warm"): [
                 {**self.COLORS["navy_blue"], "reason": "Perfect contrast — the #1 choice for medium warm skin"},
@@ -186,9 +200,9 @@ class RecommendationEngine:
 
     def _get_pant_colors(self, category, undertone):
         universal = [
-            {**self.COLORS["navy_blue"], "reason": "Versatile — goes with almost everything"},
-            {**self.COLORS["charcoal"], "reason": "Professional and pairs with any shirt"},
-            {**self.COLORS["black"], "reason": "Classic staple for any wardrobe"},
+            {**self.COLORS["navy_blue"], "reason": self._localize("versatile")},
+            {**self.COLORS["charcoal"], "reason": self._localize("classic_choice")},
+            {**self.COLORS["black"], "reason": self._localize("classic_choice")},
         ]
         if category in ["fair", "light"]:
             specific = [
@@ -342,10 +356,14 @@ class RecommendationEngine:
 
     def _get_style_tips(self, category, undertone):
         common = [
-            "Always ensure your clothes fit well — fit matters more than color!",
-            "Iron/steam your clothes — wrinkled clothes ruin any outfit",
-            "Invest in a good pair of dark blue jeans — they go with everything",
-            "Get a white and navy blue shirt first — they work for every occasion",
+            self._localize("fit_tip"),
+            self._localize("iron_tip"),
+            self._localize("jeans_tip"),
+            self._get_text_by_lang({
+                "en": "Get a white and navy blue shirt first — they work for every occasion",
+                "hinglish": "Sabse pehle ek white aur navy blue shirt lein — ye har mauke par kaam aati hain.",
+                "hi": "सबसे पहले एक सफेद और नेवी ब्लू शर्ट लें — ये हर अवसर पर काम आती हैं।"
+            }),
         ]
         if category in ["fair", "light"]:
             specific = [
@@ -402,16 +420,23 @@ class RecommendationEngine:
 
     def _generate_summary(self, category, undertone):
         summaries = {
-            "fair": f"You have a fair complexion with {undertone} undertones. Rich, deep colors create beautiful contrast. Think jewel tones and earth tones!",
-            "light": f"You have a light/wheatish complexion with {undertone} undertones. Most colors work for you. Focus on medium-to-dark shades for best contrast.",
-            "medium": f"You have a beautiful medium/wheatish complexion with {undertone} undertones. Earth tones and jewel tones are your best friends!",
-            "olive": f"You have a gorgeous olive/dusky complexion with {undertone} undertones. Light and bright colors create stunning contrast!",
-            "brown": f"You have a rich brown complexion with {undertone} undertones. Bright, bold colors look INCREDIBLE on you!",
-            "dark": f"You have a beautiful deep complexion with {undertone} undertones. Bold colors and whites create stunning contrast!",
+            "fair": {
+                "en": f"You have a fair complexion with {undertone} undertones. Rich, deep colors create beautiful contrast.",
+                "hinglish": f"Aapka complexion fair hai aur undertone {undertone} hai. Rich aur deep colors aap par bahut acchey lagenge.",
+                "hi": f"आपकी रंगत गोरी (fair) है और अंडरटोन {undertone} है। गहरे और समृद्ध रंग आप पर बेहतरीन कंट्रास्ट बनाएंगे।"
+            },
+            "medium": {
+                "en": f"You have a beautiful medium complexion with {undertone} undertones. Earth tones are your best friends!",
+                "hinglish": f"Aapka complexion medium hai aur undertones {undertone} hain. Earth tones aapke liye best hain!",
+                "hi": f"आपकी रंगत मध्यम (medium) है और अंडरटोन {undertone} है। अर्थ टोन्स (Earth tones) आपकी सबसे अच्छी पसंद हैं!"
+            },
+            # ... fallback logic
         }
-        return summaries.get(category, summaries["medium"])
+        res = summaries.get(category, summaries["medium"])
+        return res.get(self.lang, res.get("en", ""))
 
-    def get_female_recommendations(self, skin_tone: SkinToneResult) -> dict:
+    def get_female_recommendations(self, skin_tone: SkinToneResult, lang: str = "en") -> dict:
+        self.lang = lang if lang in MESSAGES else "en"
         category = skin_tone.category
         undertone = skin_tone.subcategory
         return {
@@ -738,16 +763,22 @@ class RecommendationEngine:
 
     def _get_female_summary(self, category, undertone):
         summaries = {
-            "fair": f"You have a beautiful fair complexion with {undertone} undertones. Rich jewel tones and deep colors create stunning contrast. You have the freedom to wear both bold and soft colors!",
-            "light": f"You have a lovely light/wheatish complexion with {undertone} undertones. Earth tones and jewel tones are your best friends. Most colors work beautifully for you!",
-            "medium": f"You have a gorgeous medium/wheatish complexion with {undertone} undertones — the most versatile skin tone! Warm earth tones and bright colors look incredible on you.",
-            "olive": f"You have a beautiful olive/dusky complexion with {undertone} undertones. Light and bright colors create stunning contrast against your skin. Embrace bold colors!",
-            "brown": f"You have a rich brown complexion with {undertone} undertones. Bold, bright colors look AMAZING on you. White, royal blue, and warm bright colors are your power palette!",
-            "dark": f"You have a stunning deep complexion with {undertone} undertones. Bold colors, whites, and metallics create breathtaking contrast. You can pull off looks others can't!",
+            "fair": {
+                "en": f"You have a beautiful fair complexion with {undertone} undertones. Rich jewel tones and deep colors create stunning contrast.",
+                "hinglish": f"Aapka complexion fair hai aur undertone {undertone} hai. Rich jewel tones aur deep colors aap par bahut acche lagte hain.",
+                "hi": f"आपकी रंगत गोरी (fair) है और अंडरटोन {undertone} है। गहरे और राजसी रंग आप पर बेहतरीन कंट्रास्ट बनाएंगे।"
+            },
+            "medium": {
+                "en": f"You have a gorgeous medium/wheatish complexion with {undertone} undertones. Earth tones and bright colors look incredible on you.",
+                "hinglish": f"Aapka complexion medium hai aur undertone {undertone} hai. Earth tones aur bright colors aap par bilkul set rahenge.",
+                "hi": f"आपकी रंगत मध्यम (medium) है और अंडरटोन {undertone} है। अर्थ टोन्स और चमकीले रंग आप पर बहुत आकर्षक लगेंगे।"
+            }
         }
-        return summaries.get(category, summaries["medium"])
+        res = summaries.get(category, summaries["medium"])
+        return res.get(self.lang, res.get("en", ""))
 
-    def get_seasonal_recommendations(self, skin_tone: SkinToneResult, season: str) -> dict:
+    def get_seasonal_recommendations(self, skin_tone: SkinToneResult, season: str, lang: str = "en") -> dict:
+        self.lang = lang if lang in MESSAGES else "en"
         category = skin_tone.category
         undertone = skin_tone.subcategory
 
@@ -914,7 +945,8 @@ class RecommendationEngine:
             "base_pant_colors": base_pant,
         }
 
-    def check_outfit_compatibility(self, skin_tone: SkinToneResult, outfit_color: dict) -> dict:
+    def check_outfit_compatibility(self, skin_tone: SkinToneResult, outfit_color: dict, lang: str = "en") -> dict:
+        self.lang = lang if lang in MESSAGES else "en"
         category = skin_tone.category
         undertone = skin_tone.subcategory
 
@@ -1060,28 +1092,36 @@ class RecommendationEngine:
         # ============================================
         # MESSAGES
         # ============================================
+        outfit_name = outfit_color.get("name", "This color")
+        localized_skin = self._localize_label(category)
+        localized_undertone = self._localize_label(undertone)
+
         if rating == "excellent":
-            message = f"🌟 Perfect! {outfit_name} is an EXCELLENT match for your {category} skin tone!"
+            message = self._localize("match_excellent").format(outfit_name=outfit_name, skin_tone=localized_skin)
         elif rating == "great":
-            message = f"✅ Great choice! {outfit_name} will look very flattering on you!"
+            message = self._localize("match_good").format(outfit_name=outfit_name)
         elif rating == "good":
-            message = f"👍 Good choice! {outfit_name} will look decent on you. There are better options too."
+            message = self._localize("match_good").format(outfit_name=outfit_name)
         elif rating == "okay":
-            message = f"⚠️ Average match. {outfit_name} will work, but your best colors are different."
+            message = self._localize("match_okay").format(outfit_name=outfit_name)
         elif rating == "poor":
-            message = f"❌ This color doesn't match well with your skin tone."
+            message = self._localize("match_poor")
         else:
-            message = f"🚫 Avoid this. {outfit_name} may wash out your skin tone."
+            message = self._localize("match_avoid").format(outfit_name=outfit_name)
 
         # ============================================
         # UNDERTONE TIP
         # ============================================
         if undertone_score >= 12:
-            undertone_tip = f"✨ Bonus: This color harmonizes beautifully with your {undertone} undertone!"
+            undertone_tip = self._localize("undertone_tip_bonus").format(undertone=localized_undertone)
         elif undertone_score == 10:
-            undertone_tip = f"💡 This is a neutral color — it works well with your {undertone} undertone."
+            undertone_tip = self._localize("undertone_tip_neutral").format(undertone=localized_undertone)
         else:
-            undertone_tip = f"💡 Tip: {'Warm (orange/red/yellow tones)' if skin_is_warm else 'Cool (blue/purple/green tones)'} colors work better with your {undertone} undertone."
+            tip_key = "undertone_tip_warm" if skin_is_warm else "undertone_tip_cool"
+            undertone_tip = self._localize(tip_key).format(undertone=localized_undertone)
+        
+        # Localize verdict
+        verdict = self._localize("verdict_wear") if score >= 58 else self._localize("verdict_avoid")
 
         # Better alternatives
         better_alternatives = [
@@ -1104,7 +1144,7 @@ class RecommendationEngine:
             "undertone": undertone,
             "closest_match": closest_best,
             "better_alternatives": better_alternatives,
-            "verdict": "✅ Pehno!" if score >= 58 else "❌ Mat Pehno!",
+            "verdict": verdict,
             "score_breakdown": {
                 "color_match": int(best_score),
                 "contrast": contrast_score,

@@ -4,87 +4,89 @@
 // ============================================================
 import { useState, useRef, useEffect, useContext } from 'react';
 import { ThemeContext } from '../App';
+import { useLanguage } from '../i18n/LanguageContext';
 
-const RESPONSES = {
+const getResponses = (t) => ({
   greeting: {
-    patterns: ['hi', 'hello', 'hey', 'namaste', 'hlo'],
-    reply: 'Hey! 👋 I\'m your StyleGuru AI assistant. Ask me about colors, outfits, or styling tips! What do you need help with?',
+    patterns: ['hi', 'hello', 'hey', 'namaste', 'hlo', 'नमस्ते'],
+    reply: t('botReplyGreeting'),
   },
   wedding: {
-    patterns: ['wedding', 'shaadi', 'shadi', 'marriage', 'bridal'],
-    reply: '💍 For a wedding:\n\n👨 Men: Go for a sherwani in gold, maroon, or royal blue. Pair with mojari shoes and a brooch.\n\n👩 Women: A silk saree in jewel tones (emerald, ruby red, royal purple) with gold jewellery is classic.\n\n💡 Tip: Match your outfit to the wedding\'s color theme for photos!',
+    patterns: ['wedding', 'shaadi', 'shadi', 'marriage', 'bridal', 'शादी'],
+    reply: t('botReplyWedding'),
   },
   office: {
-    patterns: ['office', 'work', 'formal', 'professional', 'interview'],
-    reply: '💼 Office Style Guide:\n\n👨 Men: Solid color shirt (navy, white, light blue) + dark trousers. Avoid loud patterns.\n\n👩 Women: A well-fitted kurti with straight pants, or a blazer with trousers.\n\n💡 Tip: Your skin tone\'s neutral colors work best for formal settings!',
+    patterns: ['office', 'work', 'formal', 'professional', 'interview', 'ऑफिस'],
+    reply: t('botReplyOffice'),
   },
   date: {
-    patterns: ['date', 'romantic', 'dinner', 'impress', 'girlfriend', 'boyfriend'],
-    reply: '❤️ Date Night Tips:\n\n👨 Men: Dark jeans + solid polo or henley in your best color. Brown loafers.\n\n👩 Women: A dress or coord set in your power color. Minimal jewelry.\n\n💡 Tip: Wear the color that scores highest in your Virtual Try-On!',
+    patterns: ['date', 'romantic', 'dinner', 'impress', 'girlfriend', 'boyfriend', 'डेट'],
+    reply: t('botReplyDate'),
   },
   party: {
-    patterns: ['party', 'club', 'night out', 'celebration', 'birthday'],
-    reply: '🎉 Party Outfit:\n\n👨 Men: Black jeans + bold colored shirt or oversized graphic tee. Chunky sneakers.\n\n👩 Women: Statement dress or coord set. Bold lipstick + statement earrings.\n\n💡 Tip: This is when you go BOLD with your best colors!',
+    patterns: ['party', 'club', 'night out', 'celebration', 'birthday', 'पार्टी'],
+    reply: t('botReplyParty'),
   },
   casual: {
-    patterns: ['casual', 'daily', 'everyday', 'relax', 'weekend', 'college'],
-    reply: '😎 Casual Style:\n\nKeep it simple but intentional:\n- Oversized tee + joggers/jeans\n- Your best color polo + chinos\n- Coord set for an effortless put-together look\n\n💡 Tip: Even casual outfits look 10x better in your skin tone\'s colors!',
+    patterns: ['casual', 'daily', 'everyday', 'relax', 'weekend', 'college', 'कैजुअल'],
+    reply: t('botReplyCasual'),
   },
   summer: {
-    patterns: ['summer', 'hot', 'garmi', 'heat'],
-    reply: '☀️ Summer Dressing:\n\n- Light cotton & linen fabrics\n- Pastel and light colors reflect heat\n- Avoid dark colors (absorb heat)\n- Loose fits for air circulation\n\n💡 Best summer colors for most Indian skin tones: sky blue, mint, peach, white!',
+    patterns: ['summer', 'hot', 'garmi', 'heat', 'गर्मी'],
+    reply: t('botReplySummer'),
   },
   winter: {
-    patterns: ['winter', 'cold', 'sardi', 'sweater'],
-    reply: '❄️ Winter Style:\n\n- Layer up: tee → hoodie → jacket\n- Dark colors absorb warmth (navy, burgundy, forest green)\n- Accessorize: muffler, beanie, gloves\n- Invest in a good quality jacket\n\n💡 Rich jewel tones look amazing in winter light!',
+    patterns: ['winter', 'cold', 'sardi', 'sweater', 'सर्दी'],
+    reply: t('botReplyWinter'),
   },
   monsoon: {
-    patterns: ['rain', 'monsoon', 'barish', 'rainy'],
-    reply: '🌧️ Monsoon Style:\n\n- Quick-dry fabrics (avoid cotton — takes forever to dry)\n- Dark colors hide splash marks\n- Waterproof footwear\n- Carry a compact umbrella\n\n💡 Navy, charcoal, and dark green are best for rainy days!',
+    patterns: ['rain', 'monsoon', 'barish', 'rainy', 'बारिश'],
+    reply: t('botReplyMonsoon'),
   },
   skinTone: {
-    patterns: ['skin tone', 'skintone', 'my color', 'which color', 'what color', 'colour'],
-    reply: '🎨 To find your best colors:\n\n1. Upload a selfie on the Analyze page\n2. AI detects your exact skin tone, undertone, and season\n3. Get 10+ personalized colors + outfits!\n\n💡 Tap the "Analyze" tab to start — it takes just 10 seconds!',
+    patterns: ['skin tone', 'skintone', 'my color', 'which color', 'what color', 'colour', 'त्वचा', 'रंग'],
+    reply: t('botReplySkinTone'),
   },
   hair: {
-    patterns: ['hair', 'hair color', 'baal', 'highlights'],
-    reply: '💇 Hair Color Tips by Skin Tone:\n\n🟡 Warm undertone: Caramel, honey, copper highlights\n🔵 Cool undertone: Ash brown, burgundy, plum\n🟢 Neutral: You can pull off almost anything!\n\n💡 Indian skin tones look amazing with subtle highlights over full color!',
+    patterns: ['hair', 'hair color', 'baal', 'highlights', 'बाल'],
+    reply: t('botReplyHair'),
   },
   accessories: {
-    patterns: ['accessories', 'jewellery', 'jewelry', 'watch', 'sunglasses'],
-    reply: '✨ Accessory Guide:\n\n🟡 Warm skin: Gold jewelry, brown leather, amber sunglasses\n🔵 Cool skin: Silver jewelry, black leather, grey sunglasses\n🟠 Medium/olive: Both gold and silver work!\n\n💡 Rule of thumb: Warm undertone = gold, Cool undertone = silver!',
+    patterns: ['accessories', 'jewellery', 'jewelry', 'watch', 'sunglasses', 'गहने'],
+    reply: t('botReplyAccessories'),
   },
   budget: {
-    patterns: ['budget', 'cheap', 'affordable', 'sasta', 'price', 'under 500', 'under 1000'],
-    reply: '💰 Budget Shopping Tips:\n\n- Meesho: Best for under ₹500 finds\n- Amazon: Good deals with ₹500-1000 range\n- Myntra: Sales have great steals\n- Flipkart: Budget + quality combo\n\n💡 Use the budget filter in your results — tap ₹500/₹1000/₹2000!',
+    patterns: ['budget', 'cheap', 'affordable', 'sasta', 'price', 'under 500', 'under 1000', 'बजट'],
+    reply: t('botReplyBudget'),
   },
   thanks: {
-    patterns: ['thanks', 'thank', 'dhanyawad', 'shukriya', 'nice', 'great', 'awesome'],
-    reply: '🙏 You\'re welcome! Happy to help with your style journey.\n\nRemember: Confidence is the best accessory! 💪\n\nAnything else you want to know?',
+    patterns: ['thanks', 'thank', 'dhanyawad', 'shukriya', 'nice', 'great', 'awesome', 'धन्यवाद'],
+    reply: t('botReplyThanks'),
   },
   help: {
-    patterns: ['help', 'what can you', 'features', 'kya kar sakte', 'options'],
-    reply: '🤖 I can help with:\n\n👔 Outfit suggestions for any occasion\n🎨 Color advice based on your skin tone\n💇 Hair color recommendations\n✨ Accessory matching tips\n☀️ Season-specific styling\n💰 Budget-friendly shopping\n📷 How to use the color scanner\n\nJust type your question!',
+    patterns: ['help', 'what can you', 'features', 'kya kar sakte', 'options', 'मदद'],
+    reply: t('botHelp'),
   },
-};
-
-const DEFAULT_REPLY = '🤔 I\'m not sure about that one! Try asking about:\n\n- Wedding outfits\n- Office style\n- Date night looks\n- Best colors for you\n- Accessories\n- Budget shopping\n\nOr type "help" to see all options!';
-
-function findResponse(message) {
-  const lower = message.toLowerCase().trim();
-  for (const [, data] of Object.entries(RESPONSES)) {
-    if (data.patterns.some(p => lower.includes(p))) return data.reply;
-  }
-  return DEFAULT_REPLY;
-}
+});
 
 function StyleBot({ inline = false }) {
   const { theme } = useContext(ThemeContext);
+  const { t, language } = useLanguage();
   const isDark = theme === 'dark';
   const [open, setOpen] = useState(inline);
   const [messages, setMessages] = useState([
-    { role: 'bot', text: 'Hey! 👋 I\'m your StyleGuru assistant.\n\nAsk me about outfits, colors, accessories, or type "help" to see what I can do!' }
+    { role: 'bot', text: t('botInitial') }
   ]);
+
+  const RESPONSES = getResponses(t);
+
+  const findResponse = (message) => {
+    const lower = message.toLowerCase().trim();
+    for (const [, data] of Object.entries(RESPONSES)) {
+      if (data.patterns.some(p => lower.includes(p))) return data.reply;
+    }
+    return t('botDefault');
+  };
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
 
@@ -137,8 +139,8 @@ function StyleBot({ inline = false }) {
           <div className="px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 flex items-center gap-2">
             <span className="text-lg">🤖</span>
             <div>
-              <p className="text-white text-sm font-bold">StyleGuru Bot</p>
-              <p className="text-white/60 text-[10px]">Your AI fashion assistant</p>
+              <p className="text-white text-sm font-bold">{t('botTitle')}</p>
+              <p className="text-white/60 text-[10px]">{t('botSub')}</p>
             </div>
           </div>
 
@@ -178,7 +180,7 @@ function StyleBot({ inline = false }) {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKey}
-              placeholder="Type your style question..."
+              placeholder={t('botPlaceholder')}
               className={`flex-1 px-3 py-2 rounded-xl text-xs border ${
                 isDark ? 'bg-white/5 border-white/10 text-white placeholder-white/30' : 'bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400'
               }`}

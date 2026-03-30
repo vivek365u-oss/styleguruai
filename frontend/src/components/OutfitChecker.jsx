@@ -86,7 +86,7 @@ function OutfitShopCard({ color, isDark }) {
 
 function OutfitChecker() {
   const { theme } = useContext(ThemeContext);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { isPro, usage, setUsage } = usePlan();
   const isDark = theme === 'dark';
   const [selfiePreview, setSelfiePreview] = useState(null);
@@ -126,7 +126,7 @@ function OutfitChecker() {
     }
     setLoading(true); setError(null); setResult(null);
     try {
-      const res = await checkOutfitCompatibility(selfieFile, outfitFile);
+      const res = await checkOutfitCompatibility(selfieFile, outfitFile, language);
       setResult(res.data);
       // Increment usage for free users
       const uid = auth.currentUser?.uid;

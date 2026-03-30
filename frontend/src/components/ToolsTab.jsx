@@ -1,4 +1,5 @@
 import { useState, useContext } from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../App';
 import OutfitChecker from './OutfitChecker';
 import CommunityFeed from './CommunityFeed';
@@ -12,6 +13,7 @@ function ColorContrastChecker({ isDark }) {
   const [color2, setColor2] = useState('#f9a8d4');
   const [open, setOpen] = useState(false);
 
+  const { t, language } = useLanguage();
   const hexToRgb = (hex) => {
     const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
     return [r,g,b];
@@ -27,15 +29,15 @@ function ColorContrastChecker({ isDark }) {
   };
   const ratio = parseFloat(contrast());
   const grade = ratio >= 7 ? { label: 'AAA ✓', color: 'text-green-400' } : ratio >= 4.5 ? { label: 'AA ✓', color: 'text-green-400' } : ratio >= 3 ? { label: 'AA Large ⚠️', color: 'text-yellow-400' } : { label: 'Fail ✗', color: 'text-red-400' };
-  const verdict = ratio >= 4.5 ? '✅ Great combo!' : ratio >= 3 ? '⚠️ Okay for large text' : '❌ Poor contrast';
+  const verdict = ratio >= 4.5 ? t('greatCombo') : ratio >= 3 ? t('okayForLarge') : t('poorContrast');
 
   return (
     <div className={`rounded-2xl border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
       <button onClick={() => setOpen(o => !o)} className="w-full flex items-center gap-3 p-4 transition hover:bg-white/5">
         <span className="text-2xl">🎨</span>
         <div className="flex-1 text-left">
-          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>Color Contrast Checker</p>
-          <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Check if 2 colors look good together</p>
+          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('contrastChecker')}</p>
+          <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('contrastDesc')}</p>
         </div>
         <span className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{open ? '▲' : '▼'}</span>
       </button>
@@ -43,14 +45,14 @@ function ColorContrastChecker({ isDark }) {
         <div className={`px-4 pb-4 border-t ${isDark ? 'border-white/5' : 'border-gray-100'}`}>
           <div className="flex gap-3 mt-3 mb-3">
             <div className="flex-1">
-              <p className={`text-xs mb-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Color 1</p>
+              <p className={`text-xs mb-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('color1')}</p>
               <div className="flex items-center gap-2">
                 <input type="color" value={color1} onChange={e => setColor1(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent" />
                 <span className={`text-xs font-mono ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{color1}</span>
               </div>
             </div>
             <div className="flex-1">
-              <p className={`text-xs mb-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Color 2</p>
+              <p className={`text-xs mb-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('color2')}</p>
               <div className="flex items-center gap-2">
                 <input type="color" value={color2} onChange={e => setColor2(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent" />
                 <span className={`text-xs font-mono ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{color2}</span>
@@ -59,11 +61,11 @@ function ColorContrastChecker({ isDark }) {
           </div>
           {/* Preview */}
           <div className="rounded-xl p-4 mb-3 flex items-center justify-center text-sm font-bold" style={{ backgroundColor: color1, color: color2 }}>
-            Sample Text Preview
+            {t('sampleText')}
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Contrast Ratio</p>
+              <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('contrastRatio')}</p>
               <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-800'}`}>{ratio}:1</p>
             </div>
             <div className="text-right">
@@ -109,7 +111,7 @@ function TrendingCard({ item, isDark, AMAZON_TAG }) {
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className={`fixed bottom-20 left-3 right-3 z-50 rounded-2xl border p-4 shadow-2xl md:absolute md:bottom-auto md:top-full md:left-auto md:right-auto md:rounded-2xl md:border md:mt-1 md:w-56 md:p-3 ${isDark ? 'bg-slate-900 border-white/20' : 'bg-white border-gray-200'}`}>
             <div className="flex items-center justify-between mb-3">
-              <p className={`text-xs font-bold ${isDark ? 'text-white/60' : 'text-gray-500'}`}>🛍️ Shop on:</p>
+              <p className={`text-xs font-bold ${isDark ? 'text-white/60' : 'text-gray-500'}`}>{t('shopOn')}</p>
               <button onClick={() => setOpen(false)} className={`text-xs font-bold px-2 py-1 rounded-lg ${isDark ? 'text-white/40 hover:text-white bg-white/5' : 'text-gray-400 hover:text-gray-700 bg-gray-100'}`}>✕</button>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -145,7 +147,7 @@ function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) 
     return (
       <div className="space-y-4 pt-2">
         <button onClick={() => setActiveTool(null)} className={`text-sm font-bold flex items-center gap-2 ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
-          ← Back to Tools
+          ← {t('backTools')}
         </button>
         <OutfitChecker />
       </div>
@@ -156,7 +158,7 @@ function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) 
     return (
       <div className="space-y-4 pt-2">
         <button onClick={() => setActiveTool(null)} className={`text-sm font-bold flex items-center gap-2 ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
-          ← Back to Tools
+          ← {t('backTools')}
         </button>
         <CommunityFeed />
       </div>
@@ -167,7 +169,7 @@ function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) 
     return (
       <div className="space-y-4 pt-2">
         <button onClick={() => setActiveTool(null)} className={`text-sm font-bold flex items-center gap-2 ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
-          ← Back to Tools
+          ← {t('backTools')}
         </button>
         <div className={`rounded-2xl border h-[70vh] flex flex-col overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
           <StyleBot isDark={isDark} inline={true} />
@@ -201,9 +203,10 @@ function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) 
 
 
 
+  const { t } = useLanguage();
   return (
     <div className="space-y-6 pt-2">
-      <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>🛠️ Tools & Utilities</h2>
+      <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>🛠️ {t('toolsHeader')}</h2>
       
       {/* Primary Tool Buttons */}
       <div className="grid grid-cols-2 gap-3 mb-6">
@@ -211,24 +214,24 @@ function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) 
           onClick={() => setActiveTool('stylebot')}
           className={`flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border-purple-500/30' : 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200 shadow-sm'}`}>
           <span className="text-4xl mb-2">💬</span>
-          <span className={`font-bold text-sm ${isDark ? 'text-purple-100' : 'text-purple-900'}`}>AI StyleBot</span>
-          <span className={`text-[10px] ${isDark ? 'text-purple-300/60' : 'text-purple-600/60'}`}>Chat & advice</span>
+          <span className={`font-bold text-sm ${isDark ? 'text-purple-100' : 'text-purple-900'}`}>{t('aiStyleBot')}</span>
+          <span className={`text-[10px] ${isDark ? 'text-purple-300/60' : 'text-purple-600/60'}`}>{t('styleBotDesc')}</span>
         </button>
 
         <button 
           onClick={() => setActiveTool('outfit')}
           className={`flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-blue-900/40 to-cyan-900/40 border-blue-500/30' : 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 shadow-sm'}`}>
           <span className="text-3xl mb-1 mt-1">👔</span>
-          <span className={`font-bold text-sm mt-1 ${isDark ? 'text-blue-100' : 'text-blue-900'}`}>Outfit Checker</span>
-          <span className={`text-[10px] ${isDark ? 'text-blue-300/60' : 'text-blue-600/60'}`}>Rate my fit</span>
+          <span className={`font-bold text-sm mt-1 ${isDark ? 'text-blue-100' : 'text-blue-900'}`}>{t('outfitChecker')}</span>
+          <span className={`text-[10px] ${isDark ? 'text-blue-300/60' : 'text-blue-600/60'}`}>{t('outfitCheckerDesc')}</span>
         </button>
 
         <button 
           onClick={() => setActiveTool('calendar')}
           className={`flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-amber-900/40 to-orange-900/40 border-amber-500/30' : 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 shadow-sm'}`}>
           <span className="text-3xl mb-1 mt-1">📅</span>
-          <span className={`font-bold text-sm mt-1 ${isDark ? 'text-amber-100' : 'text-amber-900'}`}>AI Calendar</span>
-          <span className={`text-[10px] ${isDark ? 'text-amber-300/60' : 'text-amber-600/60'}`}>Weekly Drops</span>
+          <span className={`font-bold text-sm mt-1 ${isDark ? 'text-amber-100' : 'text-amber-900'}`}>{t('aiCalendar')}</span>
+          <span className={`text-[10px] ${isDark ? 'text-amber-300/60' : 'text-amber-600/60'}`}>{t('calendarDesc')}</span>
         </button>
 
         <button 
@@ -237,8 +240,8 @@ function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) 
           <span className="flex items-center gap-3">
             <span className="text-4xl">📸</span>
             <div className="flex flex-col items-start text-left">
-              <span className={`font-bold text-lg leading-none ${isDark ? 'text-emerald-100' : 'text-emerald-900'}`}>Color Scanner</span>
-              <span className={`text-xs mt-1 ${isDark ? 'text-emerald-300/60' : 'text-emerald-600/60'}`}>Scan real clothes using camera</span>
+              <span className={`font-bold text-lg leading-none ${isDark ? 'text-emerald-100' : 'text-emerald-900'}`}>{t('colorScanner')}</span>
+              <span className={`text-xs mt-1 ${isDark ? 'text-emerald-300/60' : 'text-emerald-600/60'}`}>{t('scannerDesc')}</span>
             </div>
           </span>
         </button>
@@ -249,7 +252,7 @@ function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) 
       <div>
         <div className="flex items-center gap-2 mb-3">
           <span className="text-xl">🔥</span>
-          <h3 className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>Trending Now</h3>
+          <h3 className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('trendingNow')}</h3>
         </div>
         <div className="grid grid-cols-3 gap-3">
           {trendingStyles.map((s) => (

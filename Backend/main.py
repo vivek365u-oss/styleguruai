@@ -11,11 +11,11 @@ from typing import Optional
 import firebase_admin
 from firebase_admin import credentials, auth as firebase_auth
 
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
+import sentry_sdk
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 from image_processor import ImageProcessor
 from skin_tone_classifier import SkinToneClassifier
@@ -32,6 +32,19 @@ if not firebase_admin._apps:
     else:
         cred = credentials.Certificate("firebase-credentials.json")
     firebase_admin.initialize_app(cred)
+
+# ============================================
+# SECURITY & MONITORING INIT
+# ============================================
+SENTRY_DSN = os.environ.get("SENTRY_DSN", "")
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        traces_sample_rate=1.0,
+        profiles_sample_rate=1.0,
+    )
+
+limiter = Limiter(key_func=get_remote_address)
 
 # ============================================
 # CONFIG
@@ -77,6 +90,8 @@ async def get_current_user_lenient(token: str = Depends(oauth2_scheme_optional))
 # APP INIT
 # ============================================
 app = FastAPI(title="StyleGuru API", version="1.0.0")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -293,14 +308,17 @@ async def get_history(current_user: dict = Depends(get_current_user)):
 # MALE ANALYZE
 # ============================================
 @app.post("/api/analyze")
+@limiter.limit("5/minute")
 async def analyze_image(
     file: UploadFile = File(...),
+    request: Optional[dict] = None, # For slowapi context
+    lang: str = "en",
     current_user: dict = Depends(get_current_user_lenient)
 ):
     start_time = time.time()
     try:
         image, face, full_quality, skin_color, skin_tone, color_season = await process_image_core(file)
-        recommendations = recommendation_engine.get_recommendations(skin_tone)
+        recommendations = recommendation_engine.get_recommendations(skin_tone, lang=lang)
         processing_time = round(time.time() - start_time, 2)
         return JSONResponse(content={
             "success": True,
@@ -348,12 +366,13 @@ async def analyze_image(
 @app.post("/api/analyze/female")
 async def analyze_image_female(
     file: UploadFile = File(...),
+    lang: str = "en",
     current_user: dict = Depends(get_current_user_lenient)
 ):
     start_time = time.time()
     try:
         image, face, full_quality, skin_color, skin_tone, color_season = await process_image_core(file)
-        recommendations = recommendation_engine.get_female_recommendations(skin_tone)
+        recommendations = recommendation_engine.get_female_recommendations(skin_tone, lang=lang)
         processing_time = round(time.time() - start_time, 2)
         return JSONResponse(content={
             "success": True,
@@ -408,12 +427,13 @@ async def analyze_image_female(
 async def analyze_seasonal(
     file: UploadFile = File(...),
     season: str = "summer",
+    lang: str = "en",
     current_user: dict = Depends(get_current_user_lenient)
 ):
     start_time = time.time()
     try:
         image, face, full_quality, skin_color, skin_tone, color_season = await process_image_core(file)
-        seasonal_recs = recommendation_engine.get_seasonal_recommendations(skin_tone, season)
+        seasonal_recs = recommendation_engine.get_seasonal_recommendations(skin_tone, season, lang=lang)
         processing_time = round(time.time() - start_time, 2)
         return JSONResponse(content={
             "success": True,
@@ -450,9 +470,12 @@ async def analyze_seasonal(
 # OUTFIT CHECKER
 # ============================================
 @app.post("/api/outfit/check")
+@limiter.limit("5/minute")
 async def check_outfit_compatibility(
     selfie: UploadFile = File(...),
     outfit: UploadFile = File(...),
+    lang: str = "en",
+    request: Optional[dict] = None, # For slowapi context
     current_user: dict = Depends(get_current_user_lenient)
 ):
     start_time = time.time()
@@ -488,7 +511,7 @@ async def check_outfit_compatibility(
 
         # Smart color extraction — background ignore, kapde ka color detect
         outfit_color = extract_dominant_outfit_color(outfit_image)
-        result = recommendation_engine.check_outfit_compatibility(skin_tone, outfit_color)
+        result = recommendation_engine.check_outfit_compatibility(skin_tone, outfit_color, lang=lang)
 
         processing_time = round(time.time() - start_time, 2)
         return JSONResponse(content={
@@ -525,7 +548,7 @@ async def check_outfit_compatibility(
 # TEST ROUTE
 # ============================================
 @app.get("/api/test/{skin_tone}")
-async def test_recommendations(skin_tone: str, undertone: str = "warm"):
+async def test_recommendations(skin_tone: str, undertone: str = "warm", lang: str = "en"):
     valid_tones = ["fair", "light", "medium", "olive", "brown", "dark"]
     if skin_tone not in valid_tones:
         raise HTTPException(status_code=400, detail=f"Valid options: {', '.join(valid_tones)}")
@@ -537,7 +560,7 @@ async def test_recommendations(skin_tone: str, undertone: str = "warm"):
     r, g, b = test_rgb[skin_tone]
     result = skin_classifier.classify(r, g, b)
     result.subcategory = undertone
-    recs = recommendation_engine.get_recommendations(result)
+    recs = recommendation_engine.get_recommendations(result, lang=lang)
     return {
         "success": True,
         "skin_tone": skin_tone,

@@ -1,34 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import SEOHead from './SEOHead';
 import Footer from './Footer';
+import { useLanguage } from '../i18n/LanguageContext';
 
-function FAQItem({ q, a }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="bg-gray-900/60 border border-gray-800 rounded-2xl overflow-hidden hover:border-purple-600/40 transition-all">
-      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between px-5 py-4 text-left">
-        <span className="text-white font-semibold text-sm pr-4">{q}</span>
-        <span className={`text-purple-400 text-lg flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>▼</span>
-      </button>
-      {open && (
-        <div className="px-5 pb-4 border-t border-gray-800/50">
-          <p className="text-gray-400 text-sm leading-relaxed pt-3">{a}</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-const features = [
-  { icon: '🎨', title: 'Skin Tone Detection', desc: 'AI-powered analysis using advanced CIELAB color science.' },
-  { icon: '👔', title: 'Outfit Recommendations', desc: 'Personalized color palettes for shirts, pants & accessories.' },
-  { icon: '✨', title: 'Fashion Advice', desc: 'Style tips, occasion advice & ethnic wear suggestions.' },
-  { icon: '📱', title: 'Easy to Use', desc: 'Upload a selfie — get instant results in seconds.' },
-];
+// FAQ items and Features are now handled inside the component to allow for dynamic translations.
 
 const floatingItems = ['👗', '👔', '👠', '🧣', '💍', '👒', '🧥', '👜'];
 
 export default function LandingPage({ onGetStarted, onLoginClick }) {
+  const { t } = useLanguage();
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -75,8 +55,8 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
   return (
     <div className="min-h-screen bg-[#050816] text-white overflow-x-hidden" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
       <SEOHead
-        title="StyleGuru AI – AI-Powered Fashion Advisor"
-        description="Get personalized outfit recommendations based on your skin tone using AI. Upload a selfie and discover your perfect colors."
+        title={t('landingHeroTitle') + " " + t('landingHeroSub')}
+        description={t('landingTagline').replace('{perfectColors}', t('perfectColors'))}
       />
 
       {/* Particle canvas */}
@@ -117,13 +97,13 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
           <span className="text-lg font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">StyleGuru AI</span>
         </div>
         <div className="flex items-center gap-4">
-          <button onClick={onLoginClick} className="text-gray-400 hover:text-white transition text-sm">Login</button>
+          <button onClick={onLoginClick} className="text-gray-400 hover:text-white transition text-sm">{t('login')}</button>
           <button
             onClick={onGetStarted}
             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 transition px-5 py-2 rounded-full text-sm font-medium"
             style={{ animation: 'glow 3s ease-in-out infinite' }}
           >
-            Try Now
+            {t('tryNow')}
           </button>
         </div>
       </nav>
@@ -141,15 +121,19 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
             <span className="text-white">StyleGuru AI</span>
             <br />
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
-              Smart Fashion
+              {t('landingHeroTitle')}
             </span>
             <br />
-            <span className="text-white">Advisor</span>
+            <span className="text-white">{t('landingHeroSub')}</span>
           </h1>
 
           <p className="text-gray-400 text-lg md:text-xl mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-            Get outfit recommendations based on your skin tone using AI.
-            Upload a selfie and discover your <span className="text-purple-400 font-medium">perfect colors</span>.
+            {t('landingTagline').split('{perfectColors}').map((part, index, array) => (
+              <React.Fragment key={index}>
+                {part}
+                {index < array.length - 1 && <span className="text-purple-400 font-medium">{t('perfectColors')}</span>}
+              </React.Fragment>
+            ))}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -158,20 +142,20 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
               className="relative group bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 transition-all px-8 py-4 rounded-full text-lg font-semibold overflow-hidden"
               style={{ animation: 'glow 3s ease-in-out infinite' }}
             >
-              <span className="relative z-10">✨ Try Now — It's Free</span>
+              <span className="relative z-10">✨ {t('tryNowFree')}</span>
             </button>
             <button
               onClick={onLoginClick}
               className="border border-purple-600/60 hover:border-purple-400 hover:bg-purple-900/20 transition-all px-8 py-4 rounded-full text-lg font-semibold backdrop-blur-sm"
             >
-              Login →
+              {t('loginArrow')}
             </button>
           </div>
 
           <div className="flex items-center gap-6 mt-10 justify-center lg:justify-start text-sm text-gray-500">
-            <span>✓ No credit card</span>
-            <span>✓ Instant results</span>
-            <span>✓ 100% free</span>
+            <span>✓ {t('noCreditCard')}</span>
+            <span>✓ {t('instantResults')}</span>
+            <span>✓ {t('fullyFree')}</span>
           </div>
 
           {/* Social Proof */}
@@ -189,7 +173,7 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
               <span className="text-green-300 text-xs font-semibold">4.9/5 rating</span>
             </div>
             <div className="flex items-center gap-1.5 bg-blue-900/20 border border-blue-700/30 rounded-full px-4 py-2">
-              <span className="text-blue-300 text-xs font-semibold">🇮🇳 Made for India</span>
+              <span className="text-blue-300 text-xs font-semibold">🇮🇳 {t('madeForIndia')}</span>
             </div>
           </div>
         </div>
@@ -245,7 +229,7 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
               AI Powered ✨
             </div>
             <div className="absolute -bottom-4 -left-4 bg-gray-900 border border-purple-700/50 rounded-2xl px-3 py-2 text-xs shadow-lg">
-              <span className="text-green-400">●</span> 98% Accuracy
+              <span className="text-green-400">●</span> 98% {t('accuracy')}
             </div>
           </div>
         </div>
@@ -256,17 +240,22 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
         <div className="text-center mb-14">
           <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-4">Features</div>
           <h2 className="text-3xl md:text-5xl font-bold">
-            Why <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">StyleGuru AI?</span>
+            {t('whyToneFit').split('StyleGuru AI').map((part, i, arr) => (
+              <React.Fragment key={i}>
+                {part}
+                {i < arr.length - 1 && <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">StyleGuru AI</span>}
+              </React.Fragment>
+            ))}
           </h2>
         </div>
 
         {/* Stats bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           {[
-            { value: '10K+', label: 'Happy Users', emoji: '👥' },
-            { value: '95%+', label: 'Accuracy', emoji: '🎯' },
-            { value: '6', label: 'Skin Tones', emoji: '🎨' },
-            { value: '100%', label: 'Free', emoji: '✨' },
+            { value: '10K+', label: t('happyUsers'), emoji: '👥' },
+            { value: '95%+', label: t('accuracy'), emoji: '🎯' },
+            { value: '6', label: t('skinToneCategories'), emoji: '🎨' },
+            { value: '100%', label: t('fullyFree'), emoji: '✨' },
           ].map((stat) => (
             <div key={stat.label} className="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 text-center backdrop-blur-sm">
               <p className="text-2xl mb-1">{stat.emoji}</p>
@@ -276,7 +265,12 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
           ))}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((f) => (
+          {[
+            { icon: '🎨', title: t('featureSkinTitle'), desc: t('featureSkinDesc') },
+            { icon: '👔', title: t('featureOutfitTitle'), desc: t('featureOutfitDesc') },
+            { icon: '✨', title: t('featureAdviceTitle'), desc: t('featureAdviceDesc') },
+            { icon: '📱', title: t('featureEaseTitle'), desc: t('featureEaseDesc') },
+          ].map((f) => (
             <div
               key={f.title}
               className="group bg-gray-900/60 border border-gray-800 rounded-2xl p-6 hover:border-purple-600/60 hover:bg-gray-900/80 transition-all duration-300 backdrop-blur-sm hover:shadow-lg hover:shadow-purple-900/20 hover:-translate-y-1 card-hover"
@@ -292,14 +286,21 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
       {/* How it works — Visual Demo */}
       <section className="relative z-10 px-6 md:px-12 py-20 max-w-5xl mx-auto">
         <div className="text-center mb-12">
-          <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-4">How It Works</div>
-          <h2 className="text-3xl md:text-5xl font-bold text-white">3 Simple Steps to Your <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Perfect Style</span></h2>
+          <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-4">{t('howItWorks')}</div>
+          <h2 className="text-3xl md:text-5xl font-bold text-white">
+            {t('howItWorksSubTitle').split('{perfectStyle}').map((part, i, arr) => (
+              <React.Fragment key={i}>
+                {part}
+                {i < arr.length - 1 && <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{t('perfectStyle')}</span>}
+              </React.Fragment>
+            ))}
+          </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { step: '01', icon: '📸', title: 'Upload Your Selfie', desc: 'Take a clear selfie in natural light. Our AI works best with a front-facing photo without sunglasses.', color: 'from-purple-500/20 to-purple-600/10 border-purple-500/30', badge: 'bg-purple-500' },
-            { step: '02', icon: '🔬', title: 'AI Analyzes Skin Tone', desc: 'Our advanced CIELAB color science detects your exact skin tone category and undertone in seconds.', color: 'from-pink-500/20 to-pink-600/10 border-pink-500/30', badge: 'bg-pink-500' },
-            { step: '03', icon: '🎨', title: 'Get Personalized Results', desc: 'Receive color palettes, outfit combos, shopping links, and style tips tailored specifically for you.', color: 'from-blue-500/20 to-blue-600/10 border-blue-500/30', badge: 'bg-blue-500' },
+            { step: '01', icon: '📸', title: t('step1Title'), desc: t('step1Desc'), color: 'from-purple-500/20 to-purple-600/10 border-purple-500/30', badge: 'bg-purple-500' },
+            { step: '02', icon: '🔬', title: t('step2Title'), desc: t('step2Desc'), color: 'from-pink-500/20 to-pink-600/10 border-pink-500/30', badge: 'bg-pink-500' },
+            { step: '03', icon: '🎨', title: t('step3Title'), desc: t('step3Desc'), color: 'from-blue-500/20 to-blue-600/10 border-blue-500/30', badge: 'bg-blue-500' },
           ].map((s, i) => (
             <div key={s.step} className={`relative bg-gradient-to-br ${s.color} border rounded-3xl p-6 hover:-translate-y-1 transition-all duration-300`}>
               <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${s.badge} text-white text-xs font-black mb-4`}>{s.step}</div>
@@ -313,13 +314,13 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
 
         {/* Visual result preview */}
         <div className="mt-10 bg-gray-900/60 border border-gray-800 rounded-3xl p-6 backdrop-blur-sm">
-          <p className="text-white/50 text-xs font-semibold uppercase tracking-wide text-center mb-4">What You Get</p>
+          <p className="text-white/50 text-xs font-semibold uppercase tracking-wide text-center mb-4">{t('whatYouGet')}</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: '🎨', label: 'Color Palette', desc: '8+ best colors for your skin' },
-              { icon: '👔', label: 'Outfit Combos', desc: 'Complete outfit ideas' },
-              { icon: '🛍️', label: 'Shop Links', desc: 'Amazon, Flipkart, Myntra' },
-              { icon: '💡', label: 'Style Tips', desc: 'Expert fashion advice' },
+              { icon: '🎨', label: t('colorPalette'), desc: t('colorPaletteDesc') },
+              { icon: '👔', label: t('outfitCombos'), desc: t('outfitCombosDesc') },
+              { icon: '🛍️', label: t('shopLinks'), desc: t('shopLinksDesc') },
+              { icon: '💡', label: t('styleTips'), desc: t('styleTipsDesc') },
             ].map((item) => (
               <div key={item.label} className="text-center p-3 bg-white/5 rounded-2xl border border-white/10">
                 <div className="text-3xl mb-2">{item.icon}</div>
@@ -336,14 +337,14 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
         <div className="relative bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-700/40 rounded-3xl p-12 md:p-16 backdrop-blur-sm overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-pink-600/10 blur-2xl" />
           <div className="relative z-10">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Start your fashion journey today</h2>
-            <p className="text-gray-400 text-lg mb-10">Join thousands discovering their perfect style with AI.</p>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">{t('startJourneyToday')}</h2>
+            <p className="text-gray-400 text-lg mb-10">{t('joinThousands')}</p>
             <button
               onClick={onGetStarted}
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 transition-all px-12 py-4 rounded-full text-lg font-semibold shadow-2xl shadow-purple-900/50 hover:scale-105"
               style={{ animation: 'glow 3s ease-in-out infinite' }}
             >
-              Get Started — Free ✨
+              {t('getStartedFree')}
             </button>
           </div>
         </div>
@@ -353,7 +354,14 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
       <section className="relative z-10 px-6 md:px-12 py-16 max-w-7xl mx-auto">
         <div className="text-center mb-10">
           <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-4">Reviews</div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white">What Users <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Are Saying</span></h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-white">
+            {t('whatUsersSay').split('{areSaying}').map((part, i, arr) => (
+              <React.Fragment key={i}>
+                {part}
+                {i < arr.length - 1 && <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{t('areSaying')}</span>}
+              </React.Fragment>
+            ))}
+          </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
@@ -385,18 +393,25 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
       <section className="relative z-10 px-6 md:px-12 py-16 max-w-4xl mx-auto">
         <div className="text-center mb-10">
           <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-4">FAQ</div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white">Frequently Asked <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Questions</span></h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-white">
+            {t('faqTitle').split('{questions}').map((part, i, arr) => (
+              <React.Fragment key={i}>
+                {part}
+                {i < arr.length - 1 && <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{t('questions')}</span>}
+              </React.Fragment>
+            ))}
+          </h2>
         </div>
         <div className="space-y-3">
           {[
-            { q: 'What is StyleGuru AI?', a: 'StyleGuru AI is a free AI-powered fashion advisor that analyzes your skin tone from a selfie and recommends the best outfit colors, clothing combinations, and style tips personalized for you.' },
-            { q: 'How does skin tone analysis work?', a: 'Our AI uses advanced CIELAB color science and ITA (Individual Typology Angle) method to detect your skin tone category (fair, light, medium, olive, brown, dark) and undertone (warm, cool, neutral) from your photo.' },
-            { q: 'Is my photo stored or shared?', a: 'No. Your uploaded photos are processed in real-time for analysis only and are immediately deleted. We never store or share your images.' },
-            { q: 'Which skin tones does StyleGuru AI support?', a: 'StyleGuru AI supports all 6 major skin tone categories: Fair, Light, Medium/Wheatish, Olive/Dusky, Brown, and Dark. It works for all Indian and global skin tones.' },
-            { q: 'Is StyleGuru AI free to use?', a: 'Yes, StyleGuru AI is completely free. You can analyze your skin tone, get outfit recommendations, and shop for clothes — all at no cost.' },
-            { q: 'Can I use StyleGuru AI without uploading a photo?', a: 'Yes! You can use our Skin Tone Quiz feature to get recommendations without uploading a photo. Simply answer 2 questions about your skin tone and undertone.' },
-            { q: 'Does it work for both men and women?', a: 'Yes. StyleGuru AI provides separate recommendations for men (t-shirts, cargo pants, kurtas) and women (dresses, coord sets, kurtis, lehengas, sarees, makeup).' },
-            { q: 'How accurate is the AI analysis?', a: 'Our AI achieves 95%+ accuracy in controlled conditions. For best results, take a selfie in natural light, face the camera directly, and avoid sunglasses or heavy filters.' },
+            { q: t('faq1Q'), a: t('faq1A') },
+            { q: t('faq2Q'), a: t('faq2A') },
+            { q: t('faq3Q'), a: t('faq3A') },
+            { q: t('faq4Q'), a: t('faq4A') },
+            { q: t('faq5Q'), a: t('faq5A') },
+            { q: t('faq6Q'), a: t('faq6A') },
+            { q: t('faq7Q'), a: t('faq7A') },
+            { q: t('faq8Q'), a: t('faq8A') },
           ].map((item, i) => (
             <FAQItem key={i} q={item.q} a={item.a} />
           ))}
@@ -413,9 +428,9 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { slug: 'skin-tone-colors', title: 'Best Colors for Your Skin Tone', excerpt: 'Discover which colors complement your skin tone — from fair to dark, find your perfect palette.', emoji: '🎨', date: 'Jan 15, 2025' },
-            { slug: 'outfit-guide', title: 'How to Choose the Perfect Outfit', excerpt: 'Master outfit selection based on occasion, color coordination, and seasonal trends.', emoji: '👔', date: 'Jan 20, 2025' },
-            { slug: 'ai-fashion', title: 'How AI is Changing Fashion', excerpt: 'Explore how AI is revolutionizing fashion with personalized styling and smart recommendations.', emoji: '🤖', date: 'Jan 25, 2025' },
+            { slug: 'skin-tone-colors', title: t('blog1Title'), excerpt: t('blog1Excerpt'), emoji: '🎨', date: 'Jan 15, 2025' },
+            { slug: 'outfit-guide', title: t('blog2Title'), excerpt: t('blog2Excerpt'), emoji: '👔', date: 'Jan 20, 2025' },
+            { slug: 'ai-fashion', title: t('blog3Title'), excerpt: t('blog3Excerpt'), emoji: '🤖', date: 'Jan 25, 2025' },
           ].map((post) => (
             <a
               key={post.slug}
@@ -426,18 +441,35 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
               <p className="text-purple-400 text-xs mb-2">{post.date}</p>
               <h3 className="text-white font-bold text-base mb-2 group-hover:text-purple-300 transition-colors">{post.title}</h3>
               <p className="text-gray-400 text-sm leading-relaxed flex-1">{post.excerpt}</p>
-              <p className="text-purple-400 text-xs mt-4 font-semibold group-hover:text-purple-300">Read More →</p>
+              <p className="text-purple-400 text-xs mt-4 font-semibold group-hover:text-purple-300">{t('readMore') || 'Read More →'}</p>
             </a>
           ))}
         </div>
         <div className="text-center mt-8">
           <a href="/blog" className="inline-block border border-purple-600/60 hover:border-purple-400 hover:bg-purple-900/20 transition-all px-8 py-3 rounded-full text-sm font-semibold text-white">
-            View All Articles →
+            {t('viewAllArticles') || 'View All Articles →'}
           </a>
         </div>
       </section>
 
       <Footer />
+    </div>
+  );
+}
+
+function FAQItem({ q, a }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="bg-gray-900/60 border border-gray-800 rounded-2xl overflow-hidden hover:border-purple-600/40 transition-all">
+      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between px-5 py-4 text-left">
+        <span className="text-white font-semibold text-sm pr-4">{q}</span>
+        <span className={`text-purple-400 text-lg flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>▼</span>
+      </button>
+      {open && (
+        <div className="px-5 pb-4 border-t border-gray-800/50">
+          <p className="text-gray-400 text-sm leading-relaxed pt-3">{a}</p>
+        </div>
+      )}
     </div>
   );
 }

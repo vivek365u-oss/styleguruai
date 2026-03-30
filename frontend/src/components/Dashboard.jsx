@@ -19,6 +19,7 @@ import ColorScanner from './ColorScanner';
 import StyleBot from './StyleBot';
 import ToolsTab from './ToolsTab';
 import { getLocalizedTip } from '../data/localTips';
+import { logEvent, EVENTS } from '../utils/analytics';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
@@ -35,13 +36,13 @@ function Toast({ message, onClose }) {
 }
 
 function LoadingScreen() {
-  const [step, setStep] = useState(0);
+  const { t } = useLanguage();
   const steps = [
-    { emoji: '🔍', text: 'Scanning photo...', sub: 'Checking quality' },
-    { emoji: '👤', text: 'Detecting face...', sub: 'Face detection running' },
-    { emoji: '🎨', text: 'Analyzing skin tone...', sub: 'ITA + Lab color space' },
-    { emoji: '👔', text: 'Building recommendations...', sub: '25+ fashion rules' },
-    { emoji: '✨', text: 'Almost done...', sub: 'Preparing your style guide' },
+    { emoji: '🔍', text: t('loadingScan'), sub: t('loadingQuality') },
+    { emoji: '👤', text: t('loadingFace'), sub: t('loadingFaceSub') },
+    { emoji: '🎨', text: t('loadingSkin'), sub: t('loadingSkinSub') },
+    { emoji: '👔', text: t('loadingRecs'), sub: t('loadingRecsSub') },
+    { emoji: '✨', text: t('loadingDone'), sub: t('loadingDoneSub') },
   ];
   useEffect(() => {
     const interval = setInterval(() => setStep(p => p < steps.length - 1 ? p + 1 : p), 900);
@@ -82,21 +83,21 @@ function DailyDropModal({ lastAnalysis, isDark, onClose }) {
           <div className="space-y-6 scale-in">
             <div className="text-6xl animate-bounce-slow">🎁</div>
             <div>
-              <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-purple-700'}`}>Your Daily Drop is Ready!</h2>
-              <p className={`text-sm mt-2 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>We prepared today's perfect outfit based on the weather and your {lastAnalysis?.skinTone} skin tone.</p>
+              <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-purple-700'}`}>{t('dailyDropReady')}</h2>
+              <p className={`text-sm mt-2 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>{t('dailyDropSub').replace('{skinTone}', lastAnalysis?.skinTone)}</p>
             </div>
             <button 
               onClick={handleReveal}
               className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-2xl text-white font-black text-lg shadow-lg pulse-glow"
             >
-              Unlock Outfit 🔓
+              {t('unlockOutfit')}
             </button>
-            <button onClick={() => { localStorage.setItem('sg_daily_drop_date', new Date().toLocaleDateString('en-CA')); onClose(); }} className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Skip for today</button>
+            <button onClick={() => { localStorage.setItem('sg_daily_drop_date', new Date().toLocaleDateString('en-CA')); onClose(); }} className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('skipToday')}</button>
           </div>
         ) : (
           <div className="scale-in space-y-4">
             <span className="text-5xl">✨</span>
-            <h2 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>Unlocking your wardrobe...</h2>
+            <h2 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('unlockingWardrobe')}</h2>
             <div className="flex gap-2 justify-center">
               {[1,2,3].map(i => <div key={i} className="w-3 h-3 rounded-full bg-purple-500 animate-bounce" style={{animationDelay: `${i*0.15}s`}}/>)}
             </div>
@@ -174,29 +175,26 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
   const gndr = lastAnalysis?.fullData?.gender || 'male';
   const tone = lastAnalysis?.skinTone?.toLowerCase() || 'medium';
   const todayTip = getLocalizedTip(gndr, tone, language);
-  const firstName = user?.name?.split(' ')[0] || 'there';
+  const firstName = user?.name?.split(' ')[0] || t('guestName');
   return (
     <div className="pb-4 space-y-6">
       {showDailyDrop && <DailyDropModal lastAnalysis={lastAnalysis} isDark={isDark} onClose={() => setShowDailyDrop(false)} />}
-      <div className="pt-2 flex justify-between items-start">
+        <div className="pt-2 flex justify-between items-start">
         <div>
-          <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Good day,</p>
-          <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>{user?.name ? `Hey ${firstName} 👋` : 'Welcome to StyleGuru AI ✨'}</h2>
-          <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Discover your perfect style with AI</p>
+          <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{t('goodDay')}</p>
+          <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            {user?.name ? t('welcomeHey').replace('{name}', firstName) : t('welcomeNew')}
+          </h2>
+          <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('discoverPerfect')}</p>
         </div>
-        {streak > 0 && (
-          <div className="flex flex-col items-center justify-center animate-bounce-slow">
-            <span className="text-3xl filter drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]">🔥</span>
-            <span className={`text-[10px] font-black mt-1 ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>{streak} Day{streak > 1 ? 's' : ''}</span>
-          </div>
-        )}
+        {/* ... streak ... */}
       </div>
 
       <button
         onClick={onAnalyze}
         className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-2xl text-white font-black text-base shadow-lg shadow-purple-900/50 transition-all hover:scale-[1.02] active:scale-[0.98] pulse-glow"
       >
-        ✨ Analyze Your Style
+        {t('analyzeBtn')}
       </button>
 
       {/* Social proof */}
@@ -209,7 +207,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
         <p className={`text-xs font-semibold ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
           <span className={`font-black ${isDark ? 'text-purple-300' : 'text-purple-600'} count-up`}>
             {displayCount.toLocaleString('en-IN')}
-          </span> style profiles created
+          </span> {t('profilesCreated')}
         </p>
       </div>
 
@@ -217,12 +215,12 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
       {showOnboarding && (
         <div className={`tooltip-in rounded-2xl p-4 border-2 border-purple-500/50 relative ${isDark ? 'bg-purple-900/30' : 'bg-purple-50'}`}>
           <button onClick={dismissOnboarding} className={`absolute top-3 right-3 text-xs px-2 py-1 rounded-lg ${isDark ? 'text-white/40 hover:text-white bg-white/5' : 'text-gray-400 hover:text-gray-700 bg-gray-100'}`}>✕</button>
-          <p className={`font-black text-sm mb-2 ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>👋 Welcome to StyleGuru AI!</p>
+          <p className={`font-black text-sm mb-2 ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>{t('welcomeGuru')}</p>
           <div className="space-y-1.5">
             {[
-              { step: '1', text: 'Tap "Analyze Your Style" and upload a selfie' },
-              { step: '2', text: 'AI detects your skin tone in seconds' },
-              { step: '3', text: 'Get your personal color palette + outfit ideas' },
+              { step: '1', text: t('step1') },
+              { step: '2', text: t('step2') },
+              { step: '3', text: t('step3') },
             ].map(s => (
               <div key={s.step} className="flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-purple-500 text-white text-xs font-black flex items-center justify-center flex-shrink-0">{s.step}</span>
@@ -232,7 +230,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
           </div>
           <button onClick={() => { dismissOnboarding(); onAnalyze(); }}
             className="mt-3 w-full py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-black rounded-xl transition-all">
-            Get Started →
+            {t('getStarted')}
           </button>
         </div>
       )}
@@ -241,7 +239,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
       <div className={`rounded-2xl p-4 border flex items-start gap-3 ${isDark ? 'bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-700/30' : 'bg-purple-50 border-purple-200'}`}>
         <span className="text-2xl flex-shrink-0">{todayTip.emoji}</span>
         <div>
-          <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>💡 Style Tip of the Day</p>
+          <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{t('styleTipDay')}</p>
           <p className={`text-sm leading-relaxed ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{todayTip.tip}</p>
         </div>
       </div>
@@ -258,14 +256,14 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
           {/* Rate My Fit - Hook mechanics */}
           <div className={`rounded-2xl p-4 border flex items-center gap-3 justify-between ${isDark ? 'bg-gradient-to-r from-orange-900/40 to-red-900/40 border-orange-700/30' : 'bg-gradient-to-r from-orange-50 to-red-50 border-orange-200'}`}>
             <div>
-              <p className={`text-sm font-black uppercase tracking-wide ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>📸 Rate My Fit</p>
-              <p className={`text-[10px] mt-0.5 leading-tight ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Wear your Outfit & get your daily Style Score 🔥</p>
+              <p className={`text-sm font-black uppercase tracking-wide ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>{t('rateMyFit')}</p>
+              <p className={`text-[10px] mt-0.5 leading-tight ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{t('rateMyFitSub')}</p>
             </div>
             <button
               onClick={onAnalyze}
               className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-lg hover:scale-105 flex-shrink-0 heartbeat ${isDark ? 'bg-orange-500 text-white shadow-orange-900/50' : 'bg-orange-500 text-white hover:bg-orange-600 shadow-orange-500/30'}`}
             >
-              Scan Fit
+              {t('scanFit')}
             </button>
           </div>
         </div>
@@ -366,8 +364,8 @@ function SettingsScreen({ user, onLogout }) {
   const savedCount = user ? (() => { try { return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]').length; } catch { return 0; } })() : 0;
 
   return (
-    <div className="space-y-4 pt-2">
-      <h2 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>⚙️ Settings</h2>
+    <div className="space-y-4 pt-2 text-left">
+      <h2 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>⚙️ {t('settings')}</h2>
 
       {/* User card moved to top */}
       <div className={`rounded-2xl p-4 flex items-center gap-4 border ${isDark ? 'bg-gradient-to-r from-purple-900/40 to-pink-900/40 border-purple-700/30' : 'bg-white border-purple-100 shadow-sm'}`}>
@@ -384,9 +382,9 @@ function SettingsScreen({ user, onLogout }) {
       {analysisCount > 0 && (
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Analyses', value: analysisCount, emoji: '📸' },
-            { label: 'Saved Colors', value: savedCount, emoji: '❤️' },
-            { label: 'Style Score', value: '92', emoji: '💯' },
+            { label: t('analyses'), value: analysisCount, emoji: '📸' },
+            { label: t('savedColors'), value: savedCount, emoji: '❤️' },
+            { label: t('styleScore'), value: '92', emoji: '💯' },
           ].map((stat) => (
             <div key={stat.label} className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
               <p className="text-xl mb-1">{stat.emoji}</p>
@@ -402,11 +400,11 @@ function SettingsScreen({ user, onLogout }) {
         <div className="flex items-center justify-between mb-3">
           <div>
             <p className={`font-black text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              {isPro ? '⚡ Pro Member ✓' : '🆓 Free Plan'}
+              {isPro ? `⚡ ${t('proMember')} ✓` : `🆓 ${t('freePlan')}`}
             </p>
             {isPro && validUntil && (
               <p className={`text-xs mt-0.5 ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>
-                Valid until {new Date(validUntil).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                {t('validUntilLabel')} {new Date(validUntil).toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
               </p>
             )}
           </div>
@@ -415,7 +413,7 @@ function SettingsScreen({ user, onLogout }) {
               onClick={() => setPaywallOpen(true)}
               className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-black px-4 py-2 rounded-xl hover:from-purple-500 hover:to-pink-500 transition"
             >
-              Upgrade ₹59/mo
+              {t('upgrade')} ₹59/mo
             </button>
           )}
         </div>
@@ -423,7 +421,7 @@ function SettingsScreen({ user, onLogout }) {
           <div className="space-y-2">
             <div>
               <div className="flex justify-between text-xs mb-1">
-                <span className={isDark ? 'text-white/50' : 'text-gray-500'}>Analyses</span>
+                <span className={isDark ? 'text-white/50' : 'text-gray-500'}>{t('analyses')}</span>
                 <span className={isDark ? 'text-white/70' : 'text-gray-700'}>{usage.analyses_count || 0}/6</span>
               </div>
               <div className={`h-1.5 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
@@ -432,7 +430,7 @@ function SettingsScreen({ user, onLogout }) {
             </div>
             <div>
               <div className="flex justify-between text-xs mb-1">
-                <span className={isDark ? 'text-white/50' : 'text-gray-500'}>Outfit checks</span>
+                <span className={isDark ? 'text-white/50' : 'text-gray-500'}>{t('outfitTitle')}</span>
                 <span className={isDark ? 'text-white/70' : 'text-gray-700'}>{usage.outfit_checks_count || 0}/10</span>
               </div>
               <div className={`h-1.5 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
@@ -446,8 +444,8 @@ function SettingsScreen({ user, onLogout }) {
       {/* Language */}
       <div className={`rounded-2xl p-4 flex items-center justify-between border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
         <div>
-          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>🌐 Language</p>
-          <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>App language</p>
+          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>🌐 {t('languageLabel')}</p>
+          <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('appLanguage')}</p>
         </div>
         <div className={`flex rounded-xl p-1 gap-1 ${isDark ? 'bg-white/10' : 'bg-gray-100 border border-gray-200'}`}>
           <button onClick={() => changeLanguage('hinglish')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'hinglish' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}>🇮🇳</button>
@@ -459,8 +457,8 @@ function SettingsScreen({ user, onLogout }) {
       {/* Theme */}
       <div className={`rounded-2xl p-4 flex items-center justify-between border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
         <div>
-          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{isDark ? '🌙 Dark Mode' : '☀️ Light Mode'}</p>
-          <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Switch theme</p>
+          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{isDark ? `🌙 ${t('darkMode')}` : `☀️ ${t('lightMode')}`}</p>
+          <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('switchTheme')}</p>
         </div>
         <button onClick={toggleTheme} className="relative w-14 h-7 rounded-full bg-purple-500 transition-all">
           <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-all duration-300 ${isDark ? 'left-8' : 'left-1'}`} />
@@ -471,9 +469,9 @@ function SettingsScreen({ user, onLogout }) {
       {notifStatus !== 'unsupported' && (
         <div className={`rounded-2xl p-4 flex items-center justify-between border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
           <div>
-            <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>🔔 Notifications</p>
+            <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>🔔 {t('notifications')}</p>
             <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
-              {notifStatus === 'granted' ? 'Enabled ✓' : notifStatus === 'denied' ? 'Blocked in browser' : 'Weekly style tips'}
+              {notifStatus === 'granted' ? t('notifEnabled') : notifStatus === 'denied' ? t('notifBlocked') : t('notifWeekly')}
             </p>
           </div>
           {notifStatus === 'granted' ? (
@@ -481,7 +479,7 @@ function SettingsScreen({ user, onLogout }) {
               onClick={disableNotification}
               className="text-red-400 text-xs font-bold bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-full hover:bg-red-500/20 transition"
             >
-              Disable
+              {t('disable')}
             </button>
           ) : notifStatus === 'denied' ? (
             <a
@@ -490,14 +488,14 @@ function SettingsScreen({ user, onLogout }) {
               rel="noopener noreferrer"
               className="text-red-400 text-xs font-bold underline"
             >
-              Unblock →
+              {t('unblock')}
             </a>
           ) : (
             <button
               onClick={requestNotification}
               className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:from-purple-500 hover:to-pink-500 transition"
             >
-              Enable
+              {t('enable')}
             </button>
           )}
         </div>
@@ -505,7 +503,7 @@ function SettingsScreen({ user, onLogout }) {
 
       {/* Logout */}
       <button onClick={onLogout} className="w-full py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold rounded-2xl border border-red-500/20 transition">
-        🚪 Logout
+        🚪 {t('logout')}
       </button>
     </div>
   );
@@ -586,6 +584,12 @@ function Dashboard({ user, onLogout }) {
           setUsage(prev => ({ ...prev, analyses_count: (prev.analyses_count || 0) + 1 }));
         });
       }
+      logEvent(EVENTS.STYLE_ANALYSIS_SUCCESS, {
+        skin_tone: enriched.analysis?.skin_tone?.category,
+        color_season: enriched.analysis?.skin_tone?.color_season,
+        gender: enriched.gender || currentGender,
+        is_pro: isPro,
+      });
       const profileData = {
         skin_tone: enriched.analysis?.skin_tone?.category,
         undertone: enriched.analysis?.skin_tone?.undertone,
@@ -604,11 +608,11 @@ function Dashboard({ user, onLogout }) {
   };
 
   const navItems = [
-    { id: 'home',      emoji: '🏠', label: 'Home' },
-    { id: 'analyze',   emoji: '📸', label: 'Analyze' },
-    { id: 'wardrobe',  emoji: '👗', label: 'Wardrobe' },
-    { id: 'tools',     emoji: '🛠️', label: 'Tools' },
-    { id: 'settings',  emoji: '⚙️', label: 'Profile' }
+    { id: 'home',      emoji: '🏠', label: t('navHome') },
+    { id: 'analyze',   emoji: '📸', label: t('navAnalyze') },
+    { id: 'wardrobe',  emoji: '👗', label: t('navWardrobe') },
+    { id: 'tools',     emoji: '🛠️', label: t('navTools') },
+    { id: 'settings',  emoji: '⚙️', label: t('navProfile') }
   ];
 
   const handleTabChange = (tab) => {
@@ -634,7 +638,7 @@ function Dashboard({ user, onLogout }) {
         <div className="flex items-center gap-2">
           {results && activeTab === 'analyze' && (
             <button onClick={handleReset} className="text-xs text-purple-400 border border-purple-500/30 px-3 py-1.5 rounded-full hover:bg-purple-500/10 transition">
-              ← New
+              {t('navNew')}
             </button>
           )}
           {!isPro ? (
@@ -672,14 +676,19 @@ function Dashboard({ user, onLogout }) {
               <UploadSection
                 onLoadingStart={() => {
                   if (!isPro && usage.analyses_count >= 6) {
+                    logEvent(EVENTS.PAYWALL_VIEW, { reason: 'limit_reached' });
                     setPaywallOpen(true);
                     return false; // signal blocked
                   }
+                  logEvent(EVENTS.STYLE_ANALYSIS_START, { gender: currentGender });
                   setLoading(true); setError(null);
                   return true;
                 }}
                 onAnalysisComplete={handleAnalysisComplete}
-                onError={(msg) => { setError(msg); setLoading(false); }}
+                onError={(msg) => { 
+                  logEvent(EVENTS.STYLE_ANALYSIS_ERROR, { message: msg });
+                  setError(msg); setLoading(false); 
+                }}
                 onImageSelected={setUploadedImage}
                 onGenderChange={setCurrentGender}
               />

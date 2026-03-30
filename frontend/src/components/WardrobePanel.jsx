@@ -2,12 +2,14 @@ import { useState, useEffect, useContext } from 'react';
 import { getWardrobe, deleteWardrobeItem, getWardrobeCount } from '../api/styleApi';
 import { auth } from '../api/styleApi';
 import { ThemeContext } from '../App';
+import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
 import { getLocalWardrobeImage, deleteLocalWardrobeImage } from '../utils/indexedDB';
 import HistoryPanel from './HistoryPanel';
 
 // ── Saved Colors Tab ─────────────────────────────────────────
 function SavedColorsTab({ isDark }) {
+  const { t } = useLanguage();
   const [saved, setSaved] = useState(() => {
     try { return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]'); } catch { return []; }
   });
@@ -28,8 +30,8 @@ function SavedColorsTab({ isDark }) {
         <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
           <span className="text-4xl">🤍</span>
         </div>
-        <p className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>No saved colors yet</p>
-        <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Tap 🤍 on any color to save it</p>
+        <p className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('noSavedColors')}</p>
+        <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('tapToSaveColor')}</p>
       </div>
     );
   }
@@ -38,8 +40,8 @@ function SavedColorsTab({ isDark }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>🎨 Saved Colors</h2>
-          <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{saved.length} saved color{saved.length !== 1 ? 's' : ''}</p>
+          <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>🎨 {t('savedColors')}</h2>
+          <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{saved.length} {t('colors')}</p>
         </div>
       </div>
       {saved.map((color, i) => (
@@ -56,7 +58,7 @@ function SavedColorsTab({ isDark }) {
         onClick={() => { localStorage.removeItem('sg_saved_colors'); setSaved([]); }}
         className={`mt-4 w-full py-3 text-xs font-semibold rounded-xl border transition ${isDark ? 'border-white/10 text-white/30 hover:text-red-400 hover:border-red-500/30' : 'border-gray-200 text-gray-400 hover:text-red-500'}`}
       >
-        Clear All Colors
+        {t('clearAllColors')}
       </button>
     </div>
   );
@@ -101,6 +103,7 @@ function SkeletonCard({ isDark }) {
 
 function WardrobePanel({ user, onShowResult }) {
   const { theme } = useContext(ThemeContext);
+  const { t, language } = useLanguage();
   const { isPro } = usePlan();
   const wardrobeLimit = isPro ? 50 : 10;
   const isDark = theme === 'dark';
@@ -121,7 +124,7 @@ function WardrobePanel({ user, onShowResult }) {
   useEffect(() => {
     if (!auth.currentUser) { setLoading(false); return; }
     const timeout = setTimeout(() => {
-      if (loading) { setError('Could not load wardrobe. Please try again.'); setLoading(false); }
+      if (loading) { setError(t('somethingWrong')); setLoading(false); }
     }, 3000);
 
     getWardrobe(auth.currentUser.uid)
@@ -132,7 +135,7 @@ function WardrobePanel({ user, onShowResult }) {
       })
       .catch(() => {
         clearTimeout(timeout);
-        setError('Could not load wardrobe. Please try again.');
+        setError(t('somethingWrong'));
         setLoading(false);
       });
 
@@ -154,11 +157,11 @@ function WardrobePanel({ user, onShowResult }) {
       if (item.imageId) {
         await deleteLocalWardrobeImage(item.imageId);
       }
-      showToast('Outfit removed from wardrobe');
+      showToast(t('outfitRemoved'));
     } catch {
       // Restore on failure
       setItems(prev => [item, ...prev].sort((a, b) => new Date(b.saved_at) - new Date(a.saved_at)));
-      showToast('Delete failed — please try again');
+      showToast(t('deleteFailed'));
     } finally {
       setDeletingId(null);
     }
@@ -166,7 +169,7 @@ function WardrobePanel({ user, onShowResult }) {
 
   const formatDate = (iso) => {
     try {
-      return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      return new Date(iso).toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
     } catch { return ''; }
   };
 
@@ -176,8 +179,8 @@ function WardrobePanel({ user, onShowResult }) {
         <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
           <span className="text-4xl">👗</span>
         </div>
-        <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>Your Wardrobe</h3>
-        <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Login to save and view your outfits</p>
+        <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('myWardrobe')}</h3>
+        <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('wardrobeLimitNote')}</p>
       </div>
     );
   }
@@ -185,7 +188,7 @@ function WardrobePanel({ user, onShowResult }) {
   if (loading) {
     return (
       <div className="mt-4 space-y-3">
-        <h2 className={`font-black text-2xl mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>👗 My Wardrobe</h2>
+        <h2 className={`font-black text-2xl mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>👗 {t('myWardrobe')}</h2>
         {[1, 2, 3].map(i => <SkeletonCard key={i} isDark={isDark} />)}
       </div>
     );
@@ -207,19 +210,19 @@ function WardrobePanel({ user, onShowResult }) {
           onClick={() => setActiveSubTab('saved')}
           className={`flex-1 py-1.5 text-xs sm:text-sm sm:py-2 font-bold rounded-full transition-all ${activeSubTab === 'saved' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}
         >
-          👗 Outfits
+          👗 {t('outfits')}
         </button>
         <button
           onClick={() => setActiveSubTab('colors')}
           className={`flex-1 py-1.5 text-xs sm:text-sm sm:py-2 font-bold rounded-full transition-all ${activeSubTab === 'colors' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}
         >
-          🎨 Colors
+          🎨 {t('colors')}
         </button>
         <button
           onClick={() => setActiveSubTab('history')}
           className={`flex-1 py-1.5 text-xs sm:text-sm sm:py-2 font-bold rounded-full transition-all ${activeSubTab === 'history' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}
         >
-          📋 History
+          📋 {t('history')}
         </button>
       </div>
 
@@ -231,8 +234,8 @@ function WardrobePanel({ user, onShowResult }) {
         <>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>👗 My Wardrobe</h2>
-              <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{items.length} saved outfit{items.length !== 1 ? 's' : ''}</p>
+              <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>👗 {t('myWardrobe')}</h2>
+              <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{items.length} {t('outfits')}</p>
             </div>
             <div className={`rounded-xl px-3 py-2 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
               <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{items.length}/{wardrobeLimit}</span>
@@ -242,7 +245,7 @@ function WardrobePanel({ user, onShowResult }) {
       {capWarning && (
         <div className={`rounded-2xl p-3 mb-4 border flex items-center gap-3 ${isDark ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-yellow-50 border-yellow-200'}`}>
           <span className="text-xl">⚠️</span>
-          <p className={`text-xs ${isDark ? 'text-yellow-300' : 'text-yellow-700'}`}>Wardrobe is full ({wardrobeLimit}/{wardrobeLimit}). Delete older outfits to save new ones.</p>
+          <p className={`text-xs ${isDark ? 'text-yellow-300' : 'text-yellow-700'}`}>{t('wardrobeFull', { current: items.length, limit: wardrobeLimit })}</p>
         </div>
       )}
 
@@ -251,8 +254,8 @@ function WardrobePanel({ user, onShowResult }) {
           <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
             <span className="text-4xl">👗</span>
           </div>
-          <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>No outfits saved yet</h3>
-          <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Analyze your style and save outfits you love</p>
+          <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('noOutfitsSaved')}</h3>
+          <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('analyzeToSave')}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -274,7 +277,7 @@ function WardrobePanel({ user, onShowResult }) {
                         ? isDark ? 'bg-blue-500/20 text-blue-300 border-blue-500/20' : 'bg-blue-100 text-blue-700 border-blue-300'
                         : isDark ? 'bg-purple-500/20 text-purple-300 border-purple-500/20' : 'bg-purple-100 text-purple-700 border-purple-300'
                     }`}>
-                      {item.source === 'outfit_checker' ? '🔍 Checked' : '✨ Analyzed'}
+                      {item.source === 'outfit_checker' ? t('checked') : t('analyzed')}
                     </span>
                   </div>
                   <p className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{formatDate(item.saved_at)}</p>
@@ -334,7 +337,7 @@ function WardrobePanel({ user, onShowResult }) {
                         : 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'
                     } disabled:opacity-50`}
                   >
-                    {deletingId === item.id ? 'Deleting...' : '🗑️ Remove from Wardrobe'}
+                    {deletingId === item.id ? t('deleting') : t('removeFromWardrobe')}
                   </button>
                 </div>
               )}

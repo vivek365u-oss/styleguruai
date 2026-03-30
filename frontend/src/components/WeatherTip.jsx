@@ -69,11 +69,11 @@ function WeatherTip({ city, isDark }) {
   if (editMode || !userCity) {
     return (
       <div className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-        <p className={`text-xs font-bold mb-2 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>🌤️ {t('Weather Style Tip') || 'Weather Style Tip'}</p>
+        <p className={`text-xs font-bold mb-2 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>🌤️ {t('weatherStyleTip')}</p>
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder={t('Enter your city (e.g. Delhi, Mumbai)') || 'Enter your city'}
+            placeholder={t('enterCity')}
             value={userCity}
             onChange={e => setUserCity(e.target.value)}
             className={`flex-1 px-3 py-2 rounded-xl text-xs border ${isDark ? 'bg-white/5 border-white/10 text-white placeholder-white/30' : 'bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400'}`}
@@ -81,7 +81,7 @@ function WeatherTip({ city, isDark }) {
           <button
             onClick={() => { if (userCity.trim()) { setEditMode(false); fetchWeather(userCity.trim()); } }}
             className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white hover:bg-purple-500 transition-all"
-          >{t('Set') || 'Set'}</button>
+          >{t('set')}</button>
         </div>
       </div>
     );
@@ -109,7 +109,7 @@ function WeatherTip({ city, isDark }) {
                 {weather.temp}°C • {tip.label}
               </p>
               <p className={`text-[10px] ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
-                📍 {t(weather.city) || weather.city} • {t(weather.desc) || weather.desc}
+                📍 {weather.city} • {weather.desc}
               </p>
             </div>
           </div>
@@ -120,12 +120,12 @@ function WeatherTip({ city, isDark }) {
         </div>
 
         <div className={`rounded-xl p-3 border ${isDark ? 'bg-white/5 border-white/5' : 'bg-white/60 border-white/40'}`}>
-          <p className={`text-xs font-semibold mb-1 ${isDark ? 'text-sky-300' : 'text-sky-700'}`}>👔 {t('Expert Weather Tip') || 'Expert Weather Tip'}</p>
+          <p className={`text-xs font-semibold mb-1 ${isDark ? 'text-sky-300' : 'text-sky-700'}`}>👔 {t('expertWeatherTip')}</p>
           <p className={`text-xs leading-relaxed ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{localWeatherTip}</p>
         </div>
 
         <p className={`text-[10px] mt-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
-          🧵 {t('Best fabrics today:') || 'Best fabrics today:'} {tip.fabrics}
+          🧵 {t('bestFabricsToday')} {tip.fabrics}
         </p>
       </div>
     </div>

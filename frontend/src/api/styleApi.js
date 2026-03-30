@@ -117,10 +117,10 @@ export const getHistory = async () => {
 // ANALYSIS APIs
 // ============================================
 
-export const analyzeImage = (file, onProgress) => {
+export const analyzeImage = (file, lang = 'en', onProgress) => {
   const formData = new FormData();
   formData.append('file', file);
-  return API.post('/api/analyze', formData, {
+  return API.post(`/api/analyze?lang=${lang}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: (e) => {
       if (onProgress) onProgress(Math.round((e.loaded * 100) / e.total));
@@ -129,10 +129,10 @@ export const analyzeImage = (file, onProgress) => {
   });
 };
 
-export const analyzeImageFemale = (file, onProgress) => {
+export const analyzeImageFemale = (file, lang = 'en', onProgress) => {
   const formData = new FormData();
   formData.append('file', file);
-  return API.post('/api/analyze/female', formData, {
+  return API.post(`/api/analyze/female?lang=${lang}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: (e) => {
       if (onProgress) onProgress(Math.round((e.loaded * 100) / e.total));
@@ -141,10 +141,10 @@ export const analyzeImageFemale = (file, onProgress) => {
   });
 };
 
-export const analyzeImageSeasonal = (file, season, onProgress) => {
+export const analyzeImageSeasonal = (file, season, lang = 'en', onProgress) => {
   const formData = new FormData();
   formData.append('file', file);
-  return API.post(`/api/analyze/seasonal?season=${season}`, formData, {
+  return API.post(`/api/analyze/seasonal?season=${season}&lang=${lang}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: (e) => {
       if (onProgress) onProgress(Math.round((e.loaded * 100) / e.total));
@@ -153,11 +153,11 @@ export const analyzeImageSeasonal = (file, season, onProgress) => {
   });
 };
 
-export const checkOutfitCompatibility = (selfieFile, outfitFile, onProgress) => {
+export const checkOutfitCompatibility = (selfieFile, outfitFile, lang = 'en', onProgress) => {
   const formData = new FormData();
   formData.append('selfie', selfieFile);
   formData.append('outfit', outfitFile);
-  return API.post('/api/outfit/check', formData, {
+  return API.post(`/api/outfit/check?lang=${lang}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: (e) => {
       if (onProgress) onProgress(Math.round((e.loaded * 100) / e.total));

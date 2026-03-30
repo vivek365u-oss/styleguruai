@@ -1,11 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { logEvent, EVENTS } from '../utils/analytics';
+import { useLanguage } from '../i18n/LanguageContext';
 
 function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
+  useEffect(() => {
+    if (isOpen) {
+      logEvent(EVENTS.PAYWALL_VIEW);
+    }
+  }, [isOpen]);
+
   const handlePayment = () => {
+    logEvent(EVENTS.UPGRADE_CLICK);
     setLoading(true);
     // Simulate Razorpay payment gateway
     setTimeout(() => {
@@ -40,25 +50,25 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
           <div className="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center mb-2 z-10 rotate-3">
             <span className="text-2xl font-black bg-gradient-to-br from-purple-600 to-pink-600 text-transparent bg-clip-text">PRO</span>
           </div>
-          <h2 className="text-white text-xl font-black tracking-widest z-10 drop-shadow-md">TONEFIT PRO</h2>
+          <h2 className="text-white text-xl font-black tracking-widest z-10 drop-shadow-md">{t('proTitle')}</h2>
         </div>
 
         {/* Content */}
         <div className="p-6 relative z-10 bg-inherit">
           <div className="text-center mb-6">
-            <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-500'}`}>Unlock the ultimate AI stylist</p>
+            <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-500'}`}>{t('proSub')}</p>
             <div className="mt-2 flex items-end justify-center gap-1 leading-none">
               <span className={`text-5xl tracking-tighter font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>₹59</span>
-              <span className={`text-sm mb-1 font-bold ${isDark ? 'text-white/40' : 'text-gray-400'}`}>/month</span>
+              <span className={`text-sm mb-1 font-bold ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('perMonth')}</span>
             </div>
           </div>
 
           {/* Features */}
           <div className="space-y-4 mb-8">
-            <FeatureItem icon="📅" title="Ultimate Outfit Calendar" desc="7-day AI outfit generator based on weather" isDark={isDark} />
-            <FeatureItem icon="💬" title="Unlimited AI StyleBot" desc="Chat with your personal AI stylist endlessly" isDark={isDark} />
-            <FeatureItem icon="🚀" title="Priority Feed OOTD" desc="Boost your social feed posts to the top" isDark={isDark} />
-            <FeatureItem icon="🚫" title="Ad-Free Experience" desc="Zero interruptions" isDark={isDark} />
+            <FeatureItem icon="📅" title={t('featureCalendarTitle')} desc={t('featureCalendarDesc')} isDark={isDark} />
+            <FeatureItem icon="💬" title={t('featureBotTitle')} desc={t('featureBotDesc')} isDark={isDark} />
+            <FeatureItem icon="🚀" title={t('featureFeedTitle')} desc={t('featureFeedDesc')} isDark={isDark} />
+            <FeatureItem icon="🚫" title={t('featureAdsTitle')} desc={t('featureAdsDesc')} isDark={isDark} />
           </div>
 
           {/* Checkout Button */}
@@ -74,15 +84,20 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
             {loading ? (
               <span className="flex items-center justify-center gap-2">
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Processing Payment...
+                {t('processingPayment')}
               </span>
             ) : (
-              'Upgrade Now ✨'
+              t('upgradeNow')
             )}
           </button>
           
           <p className={`text-[9px] text-center mt-4 font-medium leading-relaxed ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
-            Secure payment powered by Razorpay.<br/>This is currently running in TEST MODE.
+            {t('secureRazorpay').split('\n').map((line, i) => (
+              <React.Fragment key={i}>
+                {line}
+                <br />
+              </React.Fragment>
+            ))}
           </p>
         </div>
       </div>

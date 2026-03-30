@@ -111,7 +111,7 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
         <div className="flex items-center gap-1.5">
           <span className={`text-[10px] font-bold border px-2 py-0.5 rounded-full
             ${isDark ? 'bg-green-500/20 border-green-500/30 text-green-400' : 'bg-green-100 border-green-400 text-green-700'}`}>
-            ⭐ Top Pick — All 4 Platforms
+            ⭐ {t('topPicks')}
           </span>
         </div>
       )}
@@ -427,7 +427,7 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
       {/* Style Score */}
       <div className={`mt-3 rounded-xl p-3 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
         <div className="flex items-center justify-between mb-1.5">
-          <p className={`text-xs font-bold ${isDark ? 'text-white/70' : 'text-gray-700'}`}>💯 Style Score</p>
+          <p className={`text-xs font-bold ${isDark ? 'text-white/70' : 'text-gray-700'}`}>💯 {t('styleScore')}</p>
           <span className="text-purple-400 font-black text-sm">{styleScore}/100</span>
         </div>
         <div className={`h-2 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
@@ -440,9 +440,9 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
         <div className={`mt-2 rounded-xl p-3 border flex items-center gap-3 ${isDark ? 'bg-amber-500/10 border-amber-500/20' : 'bg-amber-50 border-amber-200'}`}>
           <span className="text-2xl">🌟</span>
           <div className="flex-1">
-            <p className={`text-xs font-bold ${isDark ? 'text-amber-200' : 'text-amber-800'}`}>⭐ Celebrity Skin Match</p>
-            <p className={`text-sm font-black ${isDark ? 'text-white' : 'text-gray-800'}`}>{celeb.name}</p>
-            <p className={`text-xs ${isDark ? 'text-amber-100/60' : 'text-amber-700'}`}>{celeb.tip}</p>
+            <p className={`text-xs font-bold ${isDark ? 'text-amber-200' : 'text-amber-800'}`}>⭐ {t('celebMatch')}</p>
+            <p className={`text-sm font-black ${isDark ? 'text-white' : 'text-gray-800'}`}>{t(celeb?.name)}</p>
+            <p className={`text-xs ${isDark ? 'text-amber-100/60' : 'text-amber-700'}`}>{celeb?.tip}</p>
           </div>
         </div>
       )}
@@ -532,7 +532,7 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
 
   return (
     <div className={`${cardCls} rounded-2xl p-4`}>
-      <p className={`text-xs font-bold uppercase tracking-wide mb-3 ${labelCls}`}>✨ Complete the Look</p>
+      <p className={`text-xs font-bold uppercase tracking-wide mb-3 ${labelCls}`}>✨ {t('completeLook')}</p>
       <div className="flex gap-2 mb-3">
         {items.map((item, i) => (
           <div key={i} className="flex-1 text-center">
@@ -585,18 +585,18 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 
   if (isFemale) {
     const sections = [
-      { title: '👗 Dress Colors', colors: recommendations.best_dress_colors || [], cat: 'dress' },
-      { title: '👚 Top Colors', colors: recommendations.best_top_colors || [], cat: 'top' },
-      { title: '🥻 Kurti Colors', colors: recommendations.best_kurti_colors || [], cat: 'kurti' },
-      { title: '✨ Lehenga Colors', colors: recommendations.best_lehenga_colors || [], cat: 'lehenga' },
-      { title: '👖 Bottom Colors', colors: recommendations.best_bottom_colors || recommendations.best_pant_colors || [], cat: 'bottom' },
+      { title: 'dressColors', colors: recommendations.best_dress_colors || [], cat: 'dress' },
+      { title: 'topColors', colors: recommendations.best_top_colors || [], cat: 'top' },
+      { title: 'kurtiColors', colors: recommendations.best_kurti_colors || [], cat: 'kurti' },
+      { title: 'lehengaColors', colors: recommendations.best_lehenga_colors || [], cat: 'lehenga' },
+      { title: 'bottomColors', colors: recommendations.best_bottom_colors || recommendations.best_pant_colors || [], cat: 'bottom' },
     ].filter(s => s.colors.length > 0);
 
     return (
       <div className="space-y-5">
         {sections.map((sec) => (
           <div key={sec.title}>
-            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>{sec.title}</p>
+            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>{t(sec.title)}</p>
             <div className="grid grid-cols-1 gap-2">
               {sec.colors.map((color, i) => <ColorCard key={i} color={color} category={sec.cat} gender="female" isDark={isDark} />)}
             </div>
@@ -604,7 +604,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
         ))}
         {avoidColors.length > 0 && (
           <div>
-            <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2">🚫 Avoid These</p>
+            <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2">🚫 {t('avoidThese')}</p>
             <div className="grid grid-cols-1 gap-2">
               {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="dress" gender="female" isDark={isDark} />)}
             </div>
@@ -690,7 +690,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
       {/* Outfit combos */}
       {outfits.length > 0 && (
         <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🧥 Outfit Combos</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🧥 {t('outfitCombos')}</p>
           <div className="space-y-2">
             {outfits.map((combo, i) => <OutfitCard key={i} combo={combo} index={i} isDark={isDark} />)}
           </div>
@@ -700,7 +700,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
       {/* Occasion advice */}
       {Object.keys(occasionAdvice).length > 0 && (
         <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>📅 What to Wear When</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>📅 {t('whatToWear')}</p>
           <div className="space-y-2">
             {Object.entries(occasionAdvice).map(([occasion, advice], i) => (
               <div key={i} className={`${cardBgCls} rounded-xl p-3`}>
@@ -715,7 +715,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
       {/* Style tips */}
       {styleTips.length > 0 && (
         <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>💡 Style Tips</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>💡 {t('styleTips')}</p>
           <div className="space-y-2">
             {styleTips.map((tip, i) => (
               <div key={i} className={`flex items-start gap-2 ${cardBgCls} rounded-xl p-3`}>
@@ -747,7 +747,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
 
       {ethnicWear.length > 0 && (
         <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🪷 Ethnic Wear</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🪷 {t('ethnicWear')}</p>
           <div className={`rounded-2xl p-4 space-y-2 border ${isDark ? 'bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20' : 'bg-amber-50 border-amber-200'}`}>
             {ethnicWear.map((s, i) => (
               <div key={i} className="flex items-start gap-2">
@@ -762,7 +762,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
       {/* Saree suggestions (female) */}
       {sareeSuggestions.length > 0 && (
         <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🥻 Saree & Suits</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🥻 {t('sareeSuits')}</p>
           <div className="space-y-2">
             {sareeSuggestions.map((item, i) => (
               <div key={i} className={`${isDark ? 'bg-white/5' : 'bg-white shadow-sm'} rounded-xl p-3 border border-pink-500/20`}>

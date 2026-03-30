@@ -167,7 +167,7 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
 
 function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSelected, onGenderChange }) {
   const { theme } = useContext(ThemeContext);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const isDark = theme === 'dark';
   const [preview, setPreview] = useState(null);
   const [dragActive, setDragActive] = useState(false);
@@ -206,13 +206,13 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     try {
       let res;
       if (mode === 'seasonal') {
-        res = await analyzeImageSeasonal(file, season, setUploadProgress);
+        res = await analyzeImageSeasonal(file, season, language, setUploadProgress);
         onAnalysisComplete({ ...res.data, gender: 'seasonal', seasonalGender: gender, bodyType, occasion, budget, eyeColor });
       } else if (gender === 'female') {
-        res = await analyzeImageFemale(file, setUploadProgress);
+        res = await analyzeImageFemale(file, language, setUploadProgress);
         onAnalysisComplete({ ...res.data, gender: 'female', bodyType, occasion, budget, eyeColor });
       } else {
-        res = await analyzeImage(file, setUploadProgress);
+        res = await analyzeImage(file, language, setUploadProgress);
         onAnalysisComplete({ ...res.data, gender: 'male', bodyType, occasion, budget, eyeColor });
       }
     } catch (err) {
@@ -240,9 +240,9 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       const file2 = dataURLtoFile(partner2, 'partner2.jpg');
 
       setUploadProgress(10);
-      const res1 = partner1Gender === 'female' ? await analyzeImageFemale(file1, () => {}) : await analyzeImage(file1, () => {});
+      const res1 = partner1Gender === 'female' ? await analyzeImageFemale(file1, language, () => {}) : await analyzeImage(file1, language, () => {});
       setUploadProgress(50);
-      const res2 = partner2Gender === 'female' ? await analyzeImageFemale(file2, () => {}) : await analyzeImage(file2, () => {});
+      const res2 = partner2Gender === 'female' ? await analyzeImageFemale(file2, language, () => {}) : await analyzeImage(file2, language, () => {});
       setUploadProgress(100);
 
       onImageSelected([partner1, partner2]);
@@ -281,9 +281,9 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>AI-Powered • 95%+ Accuracy</span>
         </div>
         <h2 className={`text-3xl md:text-5xl font-black mb-3 leading-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          Discover Your
-          <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent"> Perfect </span>
-          Style
+          {t('discoverStyle')}
+          <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent"> {t('perfectStyle')} </span>
+          {t('styleWord')}
         </h2>
         <p className={`text-lg max-w-xl mx-auto ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
           {t('uploadSubtitle')}

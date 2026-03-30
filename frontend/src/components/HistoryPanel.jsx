@@ -107,11 +107,11 @@ function HistoryPanel({ onShowResult }) {
             <div className="w-16 h-16 rounded-2xl border-2 border-white/20 shadow-lg" style={{ backgroundColor: toneColors[selectedItem.skin_tone] }} />
             <div>
               <p className={`text-xs uppercase tracking-widest ${isDark ? 'text-white/40' : 'text-purple-400'}`}>Style Profile</p>
-              <h2 className={`text-2xl font-black capitalize ${isDark ? 'text-white' : 'text-gray-900'}`}>{selectedItem.skin_tone} Skin</h2>
+              <h2 className={`text-2xl font-black capitalize ${isDark ? 'text-white' : 'text-gray-900'}`}>{t(selectedItem.skin_tone)} {language === 'hi' ? 'त्वचा' : 'Skin'}</h2>
               <div className="flex gap-2 mt-1 flex-wrap">
-                <span className="bg-purple-500/20 text-purple-300 text-xs px-2 py-1 rounded-full border border-purple-500/20 capitalize">{selectedItem.undertone} undertone</span>
-                <span className="bg-pink-500/20 text-pink-300 text-xs px-2 py-1 rounded-full border border-pink-500/20">{selectedItem.color_season}</span>
-                <span className="bg-green-500/20 text-green-300 text-xs px-2 py-1 rounded-full border border-green-500/20">{selectedItem.quality_score}% quality</span>
+                <span className="bg-purple-500/20 text-purple-300 text-xs px-2 py-1 rounded-full border border-purple-500/20 capitalize">{t(selectedItem.undertone)} {language === 'hi' ? 'अंडरटोन' : 'undertone'}</span>
+                <span className="bg-pink-500/20 text-pink-300 text-xs px-2 py-1 rounded-full border border-pink-500/20">{t(selectedItem.color_season)}</span>
+                <span className="bg-green-500/20 text-green-300 text-xs px-2 py-1 rounded-full border border-green-500/20">{selectedItem.quality_score}% {language === 'hi' ? 'क्वालिटी' : 'quality'}</span>
               </div>
               <p className={`text-xs mt-1 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{formatDate(selectedItem.date)}</p>
             </div>
@@ -123,7 +123,7 @@ function HistoryPanel({ onShowResult }) {
 
         <div className={`rounded-3xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
           <h3 className={`font-black text-lg mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
-            <span>👔</span> Best Shirt Colors
+            <span>👔</span> {t('bestShirtColors')}
           </h3>
           <div className="space-y-3">
             {(rec?.best_shirt_colors || []).map((color, i) => (
@@ -140,7 +140,7 @@ function HistoryPanel({ onShowResult }) {
 
         <div className={`rounded-3xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
           <h3 className={`font-black text-lg mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
-            <span>🧥</span> Outfit Ideas
+            <span>🧥</span> {t('outfitIdeas')}
           </h3>
           <div className="space-y-3">
             {(rec?.outfit_combinations || []).map((combo, i) => (
@@ -155,7 +155,7 @@ function HistoryPanel({ onShowResult }) {
 
         <div className={`rounded-3xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
           <h3 className={`font-black text-lg mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
-            <span>💡</span> Style Tips
+            <span>💡</span> {t('styleTips')}
           </h3>
           <div className="space-y-2">
             {(rec?.style_tips || []).map((tip, i) => (
@@ -178,7 +178,7 @@ function HistoryPanel({ onShowResult }) {
           <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Total {history.length} analyses</p>
         </div>
         <div className="bg-purple-500/20 border border-purple-500/30 rounded-xl px-3 py-2">
-          <span className="text-purple-500 text-sm font-medium">Last {history.length} results</span>
+          <span className="text-purple-500 text-sm font-medium">{language === 'hi' ? `पिछले ${history.length} परिणाम` : `Last ${history.length} results`}</span>
         </div>
       </div>
 
@@ -201,9 +201,9 @@ function HistoryPanel({ onShowResult }) {
                   style={{ backgroundColor: item.skinHex || toneColors[skinTone] || '#C68642' }} />
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <span className={`font-bold capitalize text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{skinTone} skin</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full border capitalize ${isDark ? 'bg-purple-500/20 text-purple-300 border-purple-500/20' : 'bg-purple-100 text-purple-700 border-purple-300'}`}>{undertone}</span>
-                    {season && <span className={`text-xs px-2 py-0.5 rounded-full border ${isDark ? 'bg-pink-500/20 text-pink-300 border-pink-500/20' : 'bg-pink-100 text-pink-700 border-pink-300'}`}>🍂 {season}</span>}
+                    <span className={`font-bold capitalize text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{t(skinTone)} {language === 'hi' ? 'त्वचा' : 'skin'}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full border capitalize ${isDark ? 'bg-purple-500/20 text-purple-300 border-purple-500/20' : 'bg-purple-100 text-purple-700 border-purple-300'}`}>{t(undertone)}</span>
+                    {season && <span className={`text-xs px-2 py-0.5 rounded-full border ${isDark ? 'bg-pink-500/20 text-pink-300 border-pink-500/20' : 'bg-pink-100 text-pink-700 border-pink-300'}`}>🍂 {t(season)}</span>}
                   </div>
                   <p className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{dateStr}</p>
                 </div>
