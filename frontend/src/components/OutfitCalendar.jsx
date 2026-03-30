@@ -94,7 +94,13 @@ function OutfitCalendar({ bestColors, pantColors, gender, isDark, onClose }) {
           </div>
         </div>
 
-        <button className="mt-10 px-8 py-3 bg-white/5 border border-white/10 rounded-full text-xs font-bold hover:bg-white/10 transition">
+        <button 
+          onClick={() => {
+            const query = `${currentOutfit.top.name} ${currentOutfit.bottom.name}`.replace(/\s+/g, '%20');
+            window.open(`https://www.myntra.com/search?rawQuery=${query}`, '_blank');
+          }}
+          className="mt-10 px-8 py-3 bg-white/5 border border-white/10 rounded-full text-xs font-bold hover:bg-white/10 transition"
+        >
           🛒 Find on Market
         </button>
       </div>

@@ -181,7 +181,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
       <div className="pt-2 flex justify-between items-start">
         <div>
           <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Good day,</p>
-          <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>Hey {firstName} 👋</h2>
+          <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>{user?.name ? `Hey ${firstName} 👋` : 'Welcome to StyleGuru AI ✨'}</h2>
           <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Discover your perfect style with AI</p>
         </div>
         {streak > 0 && (
@@ -298,9 +298,13 @@ function SettingsScreen({ user, onLogout }) {
   const [subId, setSubId] = useState(() => localStorage.getItem('sg_push_sub_id') || null);
 
   const requestNotification = async () => {
-    if (typeof Notification === 'undefined' || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    if (typeof Notification === 'undefined') {
+      alert("This browser doesn't support notifications.");
+      return;
+    }
     try {
       const permission = await Notification.requestPermission();
+      console.log('Notification permission:', permission);
       setNotifStatus(permission);
       if (permission !== 'granted') return;
 
@@ -358,8 +362,8 @@ function SettingsScreen({ user, onLogout }) {
     }
   };
 
-  const analysisCount = parseInt(localStorage.getItem('sg_analysis_count') || '0');
-  const savedCount = (() => { try { return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]').length; } catch { return 0; } })();
+  const analysisCount = user ? parseInt(localStorage.getItem('sg_analysis_count') || '0') : 0;
+  const savedCount = user ? (() => { try { return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]').length; } catch { return 0; } })() : 0;
 
   return (
     <div className="space-y-4 pt-2">
@@ -411,7 +415,7 @@ function SettingsScreen({ user, onLogout }) {
               onClick={() => setPaywallOpen(true)}
               className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-black px-4 py-2 rounded-xl hover:from-purple-500 hover:to-pink-500 transition"
             >
-              Upgrade ₹31/mo
+              Upgrade ₹59/mo
             </button>
           )}
         </div>
@@ -438,9 +442,6 @@ function SettingsScreen({ user, onLogout }) {
           </div>
         )}
       </div>
-      <PaywallModal isOpen={paywallOpen} onClose={() => setPaywallOpen(false)} triggerMessage="" />
-
-      <PaywallModal isOpen={paywallOpen} onClose={() => setPaywallOpen(false)} triggerMessage="" />
 
       {/* Language */}
       <div className={`rounded-2xl p-4 flex items-center justify-between border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>

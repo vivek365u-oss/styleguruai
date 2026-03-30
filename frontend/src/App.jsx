@@ -48,6 +48,19 @@ function AppRoutes({ user, setUser }) {
   const handleLogout = () => {
     logout();
     setUser(null);
+    // Clear fashion data on logout to prevent persistence for the next user/guest
+    const keysToClear = [
+      'sg_last_analysis', 
+      'sg_analysis_count', 
+      'sg_streak_count', 
+      'sg_last_checkin', 
+      'sg_daily_drop_date',
+      'sg_analysis_history',
+      'sg_saved_colors',
+      'sg_wardrobe_queue'
+    ];
+    keysToClear.forEach(key => localStorage.removeItem(key));
+    navigate('/');
   };
 
   const handleGuestEntry = async () => {
