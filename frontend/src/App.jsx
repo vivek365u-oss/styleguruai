@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { auth, logout, loadProfile } from './api/styleApi';
+import { auth, logout, loadProfile, guestLogin } from './api/styleApi';
 import { onAuthStateChanged } from 'firebase/auth';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { PlanProvider } from './context/PlanContext';
@@ -50,11 +50,22 @@ function AppRoutes({ user, setUser }) {
     setUser(null);
   };
 
+  const handleGuestEntry = async () => {
+    if (!user) {
+      try {
+        await guestLogin();
+      } catch (e) {
+        console.error('Guest login failed', e);
+      }
+    }
+    navigate('/dashboard');
+  };
+
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
-        <Route path="/" element={<LandingPage onGetStarted={() => navigate('/dashboard')} onLoginClick={() => navigate('/login')} />} />
-        <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} onSkip={() => navigate('/dashboard')} />} />
+        <Route path="/" element={<LandingPage onGetStarted={handleGuestEntry} onLoginClick={() => navigate('/login')} />} />
+        <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} onSkip={handleGuestEntry} />} />
         <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />

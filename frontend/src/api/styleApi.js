@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { auth, googleProvider, db } from '../firebase';
 export { auth };
-import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
+import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, signInAnonymously } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, limit, deleteDoc, increment } from 'firebase/firestore';
 
 const API = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000' });
@@ -36,6 +36,12 @@ export const googleLogin = async () => {
     });
   }
   return { name: user.displayName, email: user.email };
+};
+
+// Guest Login (Anonymous)
+export const guestLogin = async () => {
+  const result = await signInAnonymously(auth);
+  return { name: 'Guest', email: null };
 };
 
 // Email Register
