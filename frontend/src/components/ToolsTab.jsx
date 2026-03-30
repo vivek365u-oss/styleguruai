@@ -3,6 +3,8 @@ import { ThemeContext } from '../App';
 import OutfitChecker from './OutfitChecker';
 import CommunityFeed from './CommunityFeed';
 import HistoryPanel from './HistoryPanel';
+import StyleBot from './StyleBot';
+import VirtualTryOn from './VirtualTryOn';
 
 // --- Extracted from Dashboard.jsx ---
 function ColorContrastChecker({ isDark }) {
@@ -125,10 +127,10 @@ function TrendingCard({ item, isDark, AMAZON_TAG }) {
 }
 // ------------------------------------------
 
-function ToolsTab({ onShowResult }) {
+function ToolsTab({ onShowResult, onOpenScanner }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const [activeTool, setActiveTool] = useState(null); // 'outfit', 'history', 'community'
+  const [activeTool, setActiveTool] = useState(null); // 'outfit', 'community', 'stylebot', 'tryon'
 
   const trendingStyles = [
     { emoji: '👕', label: 'Oversized Tee', tag: '🔥 Male', gender: 'male', category: 'oversized tshirt streetwear', myntraUrl: 'https://www.myntra.com/tshirts?rawQuery=oversized%20tshirt%20men', flipkartUrl: 'https://www.flipkart.com/search?q=men+oversized+tshirt&sort=popularity_desc', meeshoQ: 'men oversized tshirt' },
@@ -161,13 +163,26 @@ function ToolsTab({ onShowResult }) {
     );
   }
 
-  if (activeTool === 'history') {
+  if (activeTool === 'stylebot') {
     return (
       <div className="space-y-4 pt-2">
         <button onClick={() => setActiveTool(null)} className={`text-sm font-bold flex items-center gap-2 ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
           ← Back to Tools
         </button>
-        <HistoryPanel onShowResult={onShowResult} />
+        <div className={`rounded-2xl border h-[70vh] flex flex-col overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
+          <StyleBot isDark={isDark} />
+        </div>
+      </div>
+    );
+  }
+
+  if (activeTool === 'tryon') {
+    return (
+      <div className="space-y-4 pt-2">
+        <button onClick={() => setActiveTool(null)} className={`text-sm font-bold flex items-center gap-2 ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
+          ← Back to Tools
+        </button>
+        <VirtualTryOn isDark={isDark} standalone={true} />
       </div>
     );
   }
@@ -177,30 +192,35 @@ function ToolsTab({ onShowResult }) {
       <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>🛠️ Tools & Utilities</h2>
       
       {/* Primary Tool Buttons */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        <button 
+          onClick={() => setActiveTool('tryon')}
+          className={`flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-pink-900/40 to-rose-900/40 border-pink-500/30' : 'bg-gradient-to-br from-pink-50 to-rose-50 border-pink-200 shadow-sm'}`}>
+          <span className="text-4xl mb-2">👘</span>
+          <span className={`font-bold text-sm ${isDark ? 'text-pink-100' : 'text-pink-900'}`}>Virtual Try-On</span>
+          <span className={`text-[10px] ${isDark ? 'text-pink-300/60' : 'text-pink-600/60'}`}>Try outfits instantly</span>
+        </button>
+        
+        <button 
+          onClick={() => setActiveTool('stylebot')}
+          className={`flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border-purple-500/30' : 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200 shadow-sm'}`}>
+          <span className="text-4xl mb-2">💬</span>
+          <span className={`font-bold text-sm ${isDark ? 'text-purple-100' : 'text-purple-900'}`}>AI StyleBot</span>
+          <span className={`text-[10px] ${isDark ? 'text-purple-300/60' : 'text-purple-600/60'}`}>Chat & advice</span>
+        </button>
+
         <button 
           onClick={() => setActiveTool('outfit')}
-          className={`flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-blue-900/40 to-purple-900/40 border-blue-500/30' : 'bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200 shadow-sm'}`}>
-          <span className="text-4xl mb-2">👔</span>
-          <span className={`font-bold text-sm ${isDark ? 'text-blue-100' : 'text-blue-900'}`}>Outfit Checker</span>
-          <span className={`text-[10px] ${isDark ? 'text-blue-300/60' : 'text-blue-600/60'}`}>AI Compatibility</span>
+          className={`col-span-1 flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-blue-900/40 to-cyan-900/40 border-blue-500/30' : 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 shadow-sm'}`}>
+          <span className="text-3xl mb-1">👔</span>
+          <span className={`font-bold text-xs ${isDark ? 'text-blue-100' : 'text-blue-900'}`}>Outfit Checker</span>
         </button>
+
         <button 
-          onClick={() => setActiveTool('community')}
-          className={`flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-emerald-900/40 to-teal-900/40 border-emerald-500/30' : 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 shadow-sm'}`}>
-          <span className="text-4xl mb-2">🌍</span>
-          <span className={`font-bold text-sm ${isDark ? 'text-emerald-100' : 'text-emerald-900'}`}>Community</span>
-          <span className={`text-[10px] ${isDark ? 'text-emerald-300/60' : 'text-emerald-600/60'}`}>Share & Discover</span>
-        </button>
-        <button 
-          onClick={() => setActiveTool('history')}
-          className={`col-span-2 flex items-center p-4 rounded-2xl border transition-all duration-300 hover:scale-[1.01] ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-          <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-2xl mr-4 flex-shrink-0">📋</div>
-          <div className="text-left flex-1">
-            <span className={`block font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>My History</span>
-            <span className={`block text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>View your past analyses</span>
-          </div>
-          <span className={`text-lg ${isDark ? 'text-white/30' : 'text-gray-400'}`}>→</span>
+          onClick={() => onOpenScanner ? onOpenScanner() : null}
+          className={`col-span-1 flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-emerald-900/40 to-teal-900/40 border-emerald-500/30' : 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 shadow-sm'}`}>
+          <span className="text-3xl mb-1">📸</span>
+          <span className={`font-bold text-xs ${isDark ? 'text-emerald-100' : 'text-emerald-900'}`}>Color Scanner</span>
         </button>
       </div>
 

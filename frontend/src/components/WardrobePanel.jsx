@@ -4,6 +4,63 @@ import { auth } from '../api/styleApi';
 import { ThemeContext } from '../App';
 import { usePlan } from '../context/PlanContext';
 import { getLocalWardrobeImage, deleteLocalWardrobeImage } from '../utils/indexedDB';
+import HistoryPanel from './HistoryPanel';
+
+// ── Saved Colors Tab ─────────────────────────────────────────
+function SavedColorsTab({ isDark }) {
+  const [saved, setSaved] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]'); } catch { return []; }
+  });
+
+  const remove = (hex) => {
+    const updated = saved.filter(c => c.hex !== hex);
+    localStorage.setItem('sg_saved_colors', JSON.stringify(updated));
+    setSaved(updated);
+  };
+
+  const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
+  const nameCls = isDark ? 'text-white' : 'text-gray-800';
+  const hexCls = isDark ? 'text-white/30' : 'text-gray-400';
+
+  if (saved.length === 0) {
+    return (
+      <div className="text-center py-10 mt-8">
+        <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
+          <span className="text-4xl">🤍</span>
+        </div>
+        <p className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>No saved colors yet</p>
+        <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Tap 🤍 on any color to save it</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>🎨 Saved Colors</h2>
+          <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{saved.length} saved color{saved.length !== 1 ? 's' : ''}</p>
+        </div>
+      </div>
+      {saved.map((color, i) => (
+        <div key={i} className={`${cardCls} rounded-2xl p-4 flex items-center gap-4`}>
+          <div className="w-12 h-12 rounded-xl flex-shrink-0 shadow-lg border border-white/10" style={{ backgroundColor: color.hex }} />
+          <div className="flex-1 min-w-0">
+            <p className={`${nameCls} font-bold text-sm`}>{color.name}</p>
+            <p className={`${hexCls} text-xs font-mono`}>{color.hex}</p>
+          </div>
+          <button onClick={() => remove(color.hex)} className="text-red-400/60 hover:text-red-400 text-2xl transition-colors px-2">✕</button>
+        </div>
+      ))}
+      <button
+        onClick={() => { localStorage.removeItem('sg_saved_colors'); setSaved([]); }}
+        className={`mt-4 w-full py-3 text-xs font-semibold rounded-xl border transition ${isDark ? 'border-white/10 text-white/30 hover:text-red-400 hover:border-red-500/30' : 'border-gray-200 text-gray-400 hover:text-red-500'}`}
+      >
+        Clear All Colors
+      </button>
+    </div>
+  );
+}
 
 function WardrobeImage({ imageId, fallbackColor, isDark }) {
   const [src, setSrc] = useState(null);
@@ -42,11 +99,12 @@ function SkeletonCard({ isDark }) {
   );
 }
 
-function WardrobePanel({ user }) {
+function WardrobePanel({ user, onShowResult }) {
   const { theme } = useContext(ThemeContext);
   const { isPro } = usePlan();
   const wardrobeLimit = isPro ? 50 : 10;
   const isDark = theme === 'dark';
+  const [activeSubTab, setActiveSubTab] = useState('saved'); // 'saved' or 'history'
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -143,15 +201,43 @@ function WardrobePanel({ user }) {
 
   return (
     <div className="mt-4 pb-4">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>👗 My Wardrobe</h2>
-          <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{items.length} saved outfit{items.length !== 1 ? 's' : ''}</p>
-        </div>
-        <div className={`rounded-xl px-3 py-2 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
-          <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{items.length}/{wardrobeLimit}</span>
-        </div>
+      {/* Sub-Tabs Nav */}
+      <div className={`flex rounded-full mb-6 p-1 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
+        <button
+          onClick={() => setActiveSubTab('saved')}
+          className={`flex-1 py-1.5 text-xs sm:text-sm sm:py-2 font-bold rounded-full transition-all ${activeSubTab === 'saved' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}
+        >
+          👗 Outfits
+        </button>
+        <button
+          onClick={() => setActiveSubTab('colors')}
+          className={`flex-1 py-1.5 text-xs sm:text-sm sm:py-2 font-bold rounded-full transition-all ${activeSubTab === 'colors' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}
+        >
+          🎨 Colors
+        </button>
+        <button
+          onClick={() => setActiveSubTab('history')}
+          className={`flex-1 py-1.5 text-xs sm:text-sm sm:py-2 font-bold rounded-full transition-all ${activeSubTab === 'history' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}
+        >
+          📋 History
+        </button>
       </div>
+
+      {activeSubTab === 'history' ? (
+        <HistoryPanel onShowResult={onShowResult} />
+      ) : activeSubTab === 'colors' ? (
+        <SavedColorsTab isDark={isDark} />
+      ) : (
+        <>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>👗 My Wardrobe</h2>
+              <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{items.length} saved outfit{items.length !== 1 ? 's' : ''}</p>
+            </div>
+            <div className={`rounded-xl px-3 py-2 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
+              <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{items.length}/{wardrobeLimit}</span>
+            </div>
+          </div>
 
       {capWarning && (
         <div className={`rounded-2xl p-3 mb-4 border flex items-center gap-3 ${isDark ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-yellow-50 border-yellow-200'}`}>
@@ -262,6 +348,8 @@ function WardrobePanel({ user }) {
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg border border-white/10">
           {toast}
         </div>
+      )}
+        </>
       )}
     </div>
   );

@@ -4,7 +4,6 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../App';
-import VirtualTryOn from './VirtualTryOn';
 import { publishToCommunityFeed, auth } from '../api/styleApi';
 import { translateBackendObject } from '../i18n/backendTranslations';
 
@@ -882,54 +881,7 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }
   );
 }
 
-// ── Saved Colors Tab ─────────────────────────────────────────
-function SavedColorsTab({ isDark }) {
-  const [saved, setSaved] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]'); } catch { return []; }
-  });
 
-  const remove = (hex) => {
-    const updated = saved.filter(c => c.hex !== hex);
-    localStorage.setItem('sg_saved_colors', JSON.stringify(updated));
-    setSaved(updated);
-  };
-
-  const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
-  const nameCls = isDark ? 'text-white' : 'text-gray-800';
-  const hexCls = isDark ? 'text-white/30' : 'text-gray-400';
-
-  if (saved.length === 0) {
-    return (
-      <div className="text-center py-10">
-        <p className="text-4xl mb-3">🤍</p>
-        <p className={`font-bold text-sm ${isDark ? 'text-white/60' : 'text-gray-500'}`}>No saved colors yet</p>
-        <p className={`text-xs mt-1 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Tap 🤍 on any color to save it</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-3">
-      <p className={`text-xs font-semibold uppercase tracking-wide ${isDark ? 'text-white/50' : 'text-gray-500'}`}>❤️ Your Saved Colors ({saved.length})</p>
-      {saved.map((color, i) => (
-        <div key={i} className={`${cardCls} rounded-2xl p-3 flex items-center gap-3`}>
-          <div className="w-12 h-12 rounded-xl flex-shrink-0 shadow-lg border border-white/10" style={{ backgroundColor: color.hex }} />
-          <div className="flex-1 min-w-0">
-            <p className={`${nameCls} font-bold text-sm`}>{color.name}</p>
-            <p className={`${hexCls} text-xs font-mono`}>{color.hex}</p>
-          </div>
-          <button onClick={() => remove(color.hex)} className="text-red-400/60 hover:text-red-400 text-lg transition-colors">✕</button>
-        </div>
-      ))}
-      <button
-        onClick={() => { localStorage.removeItem('sg_saved_colors'); setSaved([]); }}
-        className={`w-full py-2 text-xs font-semibold rounded-xl border transition ${isDark ? 'border-white/10 text-white/30 hover:text-red-400 hover:border-red-500/30' : 'border-gray-200 text-gray-400 hover:text-red-500'}`}
-      >
-        Clear All
-      </button>
-    </div>
-  );
-}
 
 // ── Main ResultsDisplay ──────────────────────────────────────
 function ResultsDisplay({ data, uploadedImage, onReset }) {
@@ -994,10 +946,8 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
 
   const tabs = [
     { id: 'colors',      label: 'Colors',      emoji: '🎨' },
-    { id: 'tryon',       label: 'Try On',      emoji: '👤' },
     { id: 'outfits',     label: 'Outfits',     emoji: '👔' },
     { id: 'accessories', label: 'Accessories', emoji: '✨' },
-    { id: 'saved',       label: 'Saved',       emoji: '❤️' },
   ];
 
   const tabBarBg = isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200';
@@ -1159,34 +1109,12 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         onTouchStart={(e) => { window._touchStartX = e.touches[0].clientX; }}
         onTouchEnd={(e) => {
           const diff = window._touchStartX - e.changedTouches[0].clientX;
-          const tabOrder = ['colors', 'tryon', 'outfits', 'accessories', 'saved'];
+          const tabOrder = ['colors', 'outfits', 'accessories'];
           const idx = tabOrder.indexOf(activeTab);
           if (diff > 50 && idx < tabOrder.length - 1) setActiveTab(tabOrder[idx + 1]);
           if (diff < -50 && idx > 0) setActiveTab(tabOrder[idx - 1]);
         }}
       >
-        {activeTab === 'tryon' && (
-          <VirtualTryOn
-            uploadedImage={uploadedImage}
-            bestColors={[
-              ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || recommendations.seasonal_colors || []),
-              ...(recommendations.best_top_colors || []),
-            ].filter((c, i, a) => a.findIndex(x => x.hex === c.hex) === i)}
-            avoidColors={recommendations.colors_to_avoid || []}
-            pantColors={recommendations.best_pant_colors || recommendations.best_bottom_colors || []}
-            outfitCombos={(recommendations.outfit_combinations || []).map(c => ({
-              label: `${c.shirt || c.dress || c.top || ''} + ${c.pant || c.bottom || c.skirt || ''}`,
-              shirtHex: (recommendations.best_shirt_colors || recommendations.best_dress_colors || [])[0]?.hex || '#6d28d9',
-              shirtName: c.shirt || c.dress || c.top || 'Top',
-              pantHex: (recommendations.best_pant_colors || recommendations.best_bottom_colors || [])[0]?.hex || '#1e293b',
-              pantName: c.pant || c.bottom || c.skirt || 'Bottom',
-              occasion: c.occasion || 'Casual',
-            }))}
-            gender={effectiveGender}
-            skinTone={analysis.skin_tone.category}
-            skinHex={analysis.skin_tone.hex_code}
-          />
-        )}
         {activeTab === 'colors' && (
           <ColorsTab
             recommendations={recommendations}
@@ -1221,9 +1149,6 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             makeupSuggestions={makeupSuggestions}
             isDark={isDark}
           />
-        )}
-        {activeTab === 'saved' && (
-          <SavedColorsTab isDark={isDark} />
         )}
       </div>
 

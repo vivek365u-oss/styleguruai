@@ -107,7 +107,7 @@ function DailyDropModal({ lastAnalysis, isDark, onClose }) {
   );
 }
 
-// ColorContrastChecker and TrendingCard moved to ToolsTab.jsx
+// ------------------------------------------
 
 function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
   const { theme } = useContext(ThemeContext);
@@ -171,12 +171,6 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
     return hasAnalysis && lastDrop !== today;
   });
 
-  const quickCards = [
-    { icon: '🎨', label: 'Best Colors', tab: 'analyze' },
-    { icon: '👔', label: 'Outfit Ideas', tab: 'analyze' },
-    { icon: '✨', label: 'Accessories', tab: 'analyze' },
-    { icon: '🌍', label: 'Seasonal', tab: 'analyze' },
-  ];
   const gndr = lastAnalysis?.fullData?.gender || 'male';
   const tone = lastAnalysis?.skinTone?.toLowerCase() || 'medium';
   const todayTip = getLocalizedTip(gndr, tone, language);
@@ -243,23 +237,6 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
         </div>
       )}
 
-      {/* Stats Row */}
-      {analysisCount > 0 && (
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: 'Analyses', value: analysisCount, emoji: '📸' },
-            { label: 'Saved Colors', value: savedCount, emoji: '❤️' },
-            { label: 'Style Score', value: '92', emoji: '💯' },
-          ].map((stat) => (
-            <div key={stat.label} className={`rounded-2xl p-3 border text-center ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-              <p className="text-xl mb-1">{stat.emoji}</p>
-              <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-800'}`}>{stat.value}</p>
-              <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{stat.label}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
       {/* Daily Style Tip */}
       <div className={`rounded-2xl p-4 border flex items-start gap-3 ${isDark ? 'bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-700/30' : 'bg-purple-50 border-purple-200'}`}>
         <span className="text-2xl flex-shrink-0">{todayTip.emoji}</span>
@@ -296,44 +273,6 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
 
       {/* Weather-Based Style Tip */}
       <WeatherTip isDark={isDark} />
-
-      {/* Recent Analysis */}
-      {lastAnalysis && (
-        <div
-          onClick={() => {
-            if (lastAnalysis.fullData) {
-              onShowResult(lastAnalysis.fullData);
-            } else {
-              onAnalyze();
-            }
-          }}
-          className={`cursor-pointer rounded-2xl p-4 border flex items-center gap-4 transition-all hover:border-purple-500/50 ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}
-        >
-          <div className="w-12 h-12 rounded-xl flex-shrink-0 border border-white/20" style={{ backgroundColor: toneColors[lastAnalysis.skinTone] || '#C68642' }} />
-          <div className="flex-1 min-w-0">
-            <p className={`text-xs font-semibold uppercase tracking-wide ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Last Analysis</p>
-            <p className={`font-black text-sm capitalize ${isDark ? 'text-white' : 'text-gray-800'}`}>{lastAnalysis.skinTone} Skin · {lastAnalysis.undertone}</p>
-            <p className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{lastAnalysis.date} · {lastAnalysis.season}</p>
-          </div>
-          <span className={`text-sm ${isDark ? 'text-purple-400' : 'text-purple-500'}`}>→</span>
-        </div>
-      )}
-
-      <div>
-        <p className={`text-xs font-semibold uppercase tracking-wide mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Explore</p>
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-          {quickCards.map((c) => (
-            <button
-              key={c.label}
-              onClick={() => onTabChange(c.tab)}
-              className={`flex-shrink-0 flex flex-col items-center gap-2 border rounded-2xl px-5 py-4 transition-all min-w-[90px] ${isDark ? 'bg-white/5 border-white/10 hover:border-purple-500/50 hover:bg-white/10' : 'bg-white border-purple-100 hover:border-purple-400 shadow-sm'}`}
-            >
-              <span className="text-2xl">{c.icon}</span>
-              <span className={`text-xs font-medium text-center ${isDark ? 'text-white/70' : 'text-gray-600'}`}>{c.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* AdSense Ad */}
       {!isPro && (
@@ -418,9 +357,41 @@ function SettingsScreen({ user, onLogout }) {
       console.error('Disable notification error:', e);
     }
   };
+
+  const analysisCount = parseInt(localStorage.getItem('sg_analysis_count') || '0');
+  const savedCount = (() => { try { return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]').length; } catch { return 0; } })();
+
   return (
     <div className="space-y-4 pt-2">
       <h2 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>⚙️ Settings</h2>
+
+      {/* User card moved to top */}
+      <div className={`rounded-2xl p-4 flex items-center gap-4 border ${isDark ? 'bg-gradient-to-r from-purple-900/40 to-pink-900/40 border-purple-700/30' : 'bg-white border-purple-100 shadow-sm'}`}>
+        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-2xl flex-shrink-0 shadow-lg">
+          {user?.name?.[0]?.toUpperCase() || 'U'}
+        </div>
+        <div>
+          <p className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{user?.name}</p>
+          <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{user?.email}</p>
+        </div>
+      </div>
+
+      {/* Stats Row */}
+      {analysisCount > 0 && (
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: 'Analyses', value: analysisCount, emoji: '📸' },
+            { label: 'Saved Colors', value: savedCount, emoji: '❤️' },
+            { label: 'Style Score', value: '92', emoji: '💯' },
+          ].map((stat) => (
+            <div key={stat.label} className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
+              <p className="text-xl mb-1">{stat.emoji}</p>
+              <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{stat.value}</p>
+              <p className={`text-[10px] uppercase tracking-wide font-bold ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{stat.label}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Plan Status */}
       <div className={`rounded-2xl p-4 border ${isPro ? (isDark ? 'bg-gradient-to-r from-purple-900/40 to-pink-900/40 border-purple-500/30' : 'bg-purple-50 border-purple-300') : (isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm')}`}>
@@ -469,16 +440,7 @@ function SettingsScreen({ user, onLogout }) {
       </div>
       <PaywallModal isOpen={paywallOpen} onClose={() => setPaywallOpen(false)} triggerMessage="" />
 
-      {/* User card */}
-      <div className={`rounded-2xl p-4 flex items-center gap-4 border ${isDark ? 'bg-gradient-to-r from-purple-900/40 to-pink-900/40 border-purple-700/30' : 'bg-white border-purple-100 shadow-sm'}`}>
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-lg flex-shrink-0">
-          {user?.name?.[0]?.toUpperCase() || 'U'}
-        </div>
-        <div>
-          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>{user?.name}</p>
-          <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{user?.email}</p>
-        </div>
-      </div>
+      <PaywallModal isOpen={paywallOpen} onClose={() => setPaywallOpen(false)} triggerMessage="" />
 
       {/* Language */}
       <div className={`rounded-2xl p-4 flex items-center justify-between border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
@@ -720,8 +682,8 @@ function Dashboard({ user, onLogout }) {
             ) : null}
           </>
         )}
-        {activeTab === 'wardrobe' && <WardrobePanel user={user} />}
-        {activeTab === 'tools' && <ToolsTab onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
+        {activeTab === 'wardrobe' && <WardrobePanel user={user} onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
+        {activeTab === 'tools' && <ToolsTab onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} onOpenScanner={() => setActiveTab('scanner')} />}
         {activeTab === 'scanner' && (
           <ColorScanner
             savedPalette={(() => {
