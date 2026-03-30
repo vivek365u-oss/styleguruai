@@ -7,8 +7,8 @@ Pillow
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 bcrypt==4.0.1
-firebase-admin
+firebase-admin>=6.5.0
 razorpay
-google-generativeai==0.4.1
-mediapipe==0.10.11
-protobuf==3.20.3
+google-generativeai>=0.8.3
+mediapipe==0.10.33
+protobuf>=4.25.3,<5
