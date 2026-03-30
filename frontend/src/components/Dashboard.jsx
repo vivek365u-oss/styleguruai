@@ -128,13 +128,13 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
       context: 'daily'
     }).then(res => {
       const fulllText = res.data.tip;
-      // Extract emoji if present at the start
-      const firstChar = fulllText.match(/^[\up{Emoji}\u200d]+/iu);
+      // Extract emoji if present at the start (simple non-ASCII check)
       let emoji = '💡';
       let tip = fulllText;
-      if (firstChar) {
-        emoji = firstChar[0];
-        tip = fulllText.replace(emoji, '').trim();
+      const emojiMatch = fulllText.match(/^(\ud83c[\udf00-\udfff]|\ud83d[\udc00-\ude4f\ude80-\udeff]|\ud83e[\udd00-\uddff]|[\u2600-\u27bf]|\u200d)+/u);
+      if (emojiMatch) {
+        emoji = emojiMatch[0];
+        tip = fulllText.slice(emoji.length).trim();
       }
       const newTip = { emoji, tip };
       setTodayTip(newTip);
