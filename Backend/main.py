@@ -10,7 +10,6 @@ from typing import Optional
 
 import firebase_admin
 from firebase_admin import credentials, auth as firebase_auth
-import google.generativeai as genai
 
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -38,7 +37,6 @@ if not firebase_admin._apps:
 # CONFIG
 # ============================================
 UPLOAD_DIR = Path("/tmp/uploads")
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
 UPLOAD_DIR.mkdir(exist_ok=True)
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 MAX_FILE_SIZE = 10 * 1024 * 1024
@@ -542,93 +540,7 @@ async def test_recommendations(skin_tone: str, undertone: str = "warm"):
         "accent_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.accent_colors],
     }
 
-# ============================================
-# GENERATIVE AI TIPS (GEMINI 1.5)
-# ============================================
-class AITipRequest(BaseModel):
-    skin_tone: str = "medium"
-    undertone: str = "warm"
-    season: str = "autumn"
-    gender: str = "male"
-    context: str = "daily"
-    weather: Optional[str] = None
 
-@app.post("/api/ai/daily-tip")
-async def get_ai_tip(req: AITipRequest, current_user: dict = None):
-    # current_user is optional here to ensure it works smoothly if auth is flaky on first load
-    try:
-        if req.context == "weather":
-            prompt = f"Write a single sentence fashion stylist tip (max 15 words) for a person going out in {req.weather} weather. Emphasize how their clothing colors should match their skin tone: {req.skin_tone} ({req.undertone} undertone), color season: {req.season}, gender: {req.gender}. Start with exactly one relevant emoji."
-        else:
-            prompt = f"Write a single sentence expert fashion tip (max 15 words). Give a specific color recommendation based on their skin tone: {req.skin_tone} ({req.undertone} undertone), color season is {req.season}, gender is {req.gender}. Start with exactly one relevant emoji."
-            
-        if not os.environ.get("GEMINI_API_KEY"):
-            # Mock fallback if key missing
-            emoji = "🌤️" if req.context == "weather" else "✨"
-            return {"tip": f"{emoji} Wear colors that complement your {req.skin_tone} skin tone today!"}
-            
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(prompt)
-        text = response.text.strip().replace('"', '').replace('\n', ' ')
-        return {"tip": text}
-    except Exception as e:
-        print(f"Gemini error: {e}")
-        return {"tip": "✨ Wear bold, confident colors that make your skin tone pop today!"}
-
-# ============================================
-# AI OUTFIT OF THE DAY (OOTD)
-# ============================================
-class OOTDRequest(BaseModel):
-    skin_tone: str = "medium"
-    undertone: str = "warm"
-    season: str = "autumn"
-    gender: str = "male"
-    weather_temp: Optional[int] = None
-    weather_desc: Optional[str] = None
-    city: Optional[str] = None
-
-@app.post("/api/ai/ootd")
-async def get_ai_ootd(req: OOTDRequest, current_user: dict = None):
-    try:
-        weather_ctx = ""
-        if req.weather_temp is not None and req.weather_desc:
-            weather_ctx = f"Current weather: {req.weather_temp}°C, {req.weather_desc} in {req.city or 'their city'}. The outfit MUST be suitable for this weather."
-        
-        prompt = f"""You are a world-class fashion stylist. Suggest today's complete outfit for a {req.gender} with {req.skin_tone} skin tone ({req.undertone} undertone, {req.season} color season). {weather_ctx}
-
-Reply ONLY with this exact JSON format, nothing else:
-{{"shirt": "specific garment name with color", "shirtHex": "#hex", "pant": "specific bottom name with color", "pantHex": "#hex", "shoes": "specific footwear", "occasion": "one word occasion", "tip": "one sentence why this works for their skin tone and weather"}}"""
-
-        if not os.environ.get("GEMINI_API_KEY"):
-            return {"outfit": {
-                "shirt": "Royal Blue Polo", "shirtHex": "#4169e1",
-                "pant": "Beige Chinos", "pantHex": "#d2b48c",
-                "shoes": "White Sneakers", "occasion": "Casual",
-                "tip": f"Royal blue creates a striking contrast with {req.skin_tone} skin"
-            }, "source": "fallback"}
-
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(prompt)
-        text = response.text.strip()
-        
-        # Clean markdown code fences if present
-        if text.startswith("```"):
-            text = text.split("\n", 1)[-1]
-        if text.endswith("```"):
-            text = text.rsplit("```", 1)[0]
-        text = text.strip()
-        
-        import json as json_mod
-        outfit = json_mod.loads(text)
-        return {"outfit": outfit, "source": "gemini"}
-    except Exception as e:
-        print(f"OOTD Gemini error: {e}")
-        return {"outfit": {
-            "shirt": "Navy Blue Shirt", "shirtHex": "#1e3a5f",
-            "pant": "Charcoal Trousers", "pantHex": "#36454f",
-            "shoes": "Brown Loafers", "occasion": "Smart Casual",
-            "tip": f"Classic navy complements {req.skin_tone} skin tone beautifully"
-        }, "source": "fallback"}
 
 # ============================================
 # PUSH NOTIFICATIONS

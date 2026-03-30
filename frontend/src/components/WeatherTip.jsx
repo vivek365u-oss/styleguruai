@@ -4,39 +4,8 @@
 // ============================================================
 import { useState, useEffect, useContext } from 'react';
 import { ThemeContext } from '../App';
-import { fetchAITip } from '../api/styleApi';
-
-const WEATHER_TIPS = {
-  hot: { emoji: '☀️', label: 'Hot & Sunny', fabrics: 'Cotton, Linen, Khadi', tips: [
-    'Light cotton shirts breathe best in this heat',
-    'Linen kurtas keep you cool and stylish',
-    'Pastel colors reflect heat — stay cool literally',
-    'Avoid dark colors — they absorb more heat',
-  ]},
-  warm: { emoji: '🌤️', label: 'Warm', fabrics: 'Cotton, Rayon, Chambray', tips: [
-    'A cotton polo or chambray shirt is perfect today',
-    'Light layers work — easy to remove when it warms up',
-    'Joggers + tee combo is comfort meets style',
-  ]},
-  cool: { emoji: '🍂', label: 'Cool & Pleasant', fabrics: 'Denim, Light Wool, Flannel', tips: [
-    'Perfect layering weather — shirt + light jacket',
-    'Denim jacket over a tee is a timeless combo',
-    'Flannel shirts look great in cool weather',
-    'Try earth tones — they match the autumn vibe',
-  ]},
-  cold: { emoji: '❄️', label: 'Cold', fabrics: 'Wool, Fleece, Cashmere', tips: [
-    'Layer up: tee + hoodie + jacket',
-    'Dark colors absorb heat — wear black, navy, maroon',
-    'A nice wool sweater elevates any winter look',
-    'Don\'t forget accessories — muffler + beanie',
-  ]},
-  rainy: { emoji: '🌧️', label: 'Rainy / Monsoon', fabrics: 'Quick-dry, Polyester, Nylon', tips: [
-    'Quick-dry fabrics are your best friend today',
-    'Avoid white — splashes will show',
-    'Dark jeans + waterproof jacket is the move',
-    'Carry a compact umbrella that matches your outfit',
-  ]},
-};
+import { useLanguage } from '../i18n/LanguageContext';
+import { getLocalizedWeatherTip } from '../data/weatherTips';
 
 function getWeatherCategory(tempC, weatherCode) {
   // Check if rainy first (wttr.in weather codes)
@@ -49,11 +18,11 @@ function getWeatherCategory(tempC, weatherCode) {
 }
 
 function WeatherTip({ city, isDark }) {
+  const { language, t } = useLanguage();
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userCity, setUserCity] = useState(city || '');
   const [editMode, setEditMode] = useState(!city);
-  const [aiTip, setAiTip] = useState(null);
 
   useEffect(() => {
     if (!userCity) { setLoading(false); return; }
@@ -89,49 +58,22 @@ function WeatherTip({ city, isDark }) {
     }
   };
 
-  useEffect(() => {
-    if (!weather) return;
-    const cacheKey = `sg_weather_ai_${weather.city}_${new Date().toLocaleDateString('en-IN')}`;
-    const cached = sessionStorage.getItem(cacheKey);
-    if (cached) {
-      setAiTip(cached);
-      return;
-    }
-    
+  const tip = weather ? (() => {
     const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
-    const st = lastAnalysis?.skinTone || 'medium';
-    const ut = lastAnalysis?.undertone || 'warm';
-    const ssn = lastAnalysis?.season || 'autumn';
-    const gndr = lastAnalysis?.fullData?.gender || 'male';
+    const tone = lastAnalysis?.skinTone?.toLowerCase() || 'default';
+    return getLocalizedWeatherTip(weather.category, tone, language);
+  })() : null;
 
-    fetchAITip({
-      context: 'weather',
-      skin_tone: st,
-      undertone: ut,
-      season: ssn,
-      gender: gndr,
-      weather: `${weather.temp}°C, ${weather.desc}`
-    }).then(res => {
-      setAiTip(res.data.tip);
-      sessionStorage.setItem(cacheKey, res.data.tip);
-    }).catch(() => {
-      // Fallback
-      if (tip) {
-        setAiTip(tip.tips[0]);
-      }
-    });
-  }, [weather]);
-
-  const tip = weather ? WEATHER_TIPS[weather.category] : null;
+  const localWeatherTip = tip?.tip || '';
 
   if (editMode || !userCity) {
     return (
       <div className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-        <p className={`text-xs font-bold mb-2 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>🌤️ Weather Style Tip</p>
+        <p className={`text-xs font-bold mb-2 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>🌤️ {t('Weather Style Tip') || 'Weather Style Tip'}</p>
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="Enter your city (e.g. Delhi, Mumbai)"
+            placeholder={t('Enter your city (e.g. Delhi, Mumbai)') || 'Enter your city'}
             value={userCity}
             onChange={e => setUserCity(e.target.value)}
             className={`flex-1 px-3 py-2 rounded-xl text-xs border ${isDark ? 'bg-white/5 border-white/10 text-white placeholder-white/30' : 'bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400'}`}
@@ -139,7 +81,7 @@ function WeatherTip({ city, isDark }) {
           <button
             onClick={() => { if (userCity.trim()) { setEditMode(false); fetchWeather(userCity.trim()); } }}
             className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white hover:bg-purple-500 transition-all"
-          >Set</button>
+          >{t('Set') || 'Set'}</button>
         </div>
       </div>
     );
@@ -167,7 +109,7 @@ function WeatherTip({ city, isDark }) {
                 {weather.temp}°C • {tip.label}
               </p>
               <p className={`text-[10px] ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
-                📍 {weather.city} • {weather.desc}
+                📍 {t(weather.city) || weather.city} • {t(weather.desc) || weather.desc}
               </p>
             </div>
           </div>
@@ -178,12 +120,12 @@ function WeatherTip({ city, isDark }) {
         </div>
 
         <div className={`rounded-xl p-3 border ${isDark ? 'bg-white/5 border-white/5' : 'bg-white/60 border-white/40'}`}>
-          <p className={`text-xs font-semibold mb-1 ${isDark ? 'text-sky-300' : 'text-sky-700'}`}>👔 Expert Weather Tip</p>
-          <p className={`text-xs leading-relaxed ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{aiTip || 'Loading personalized weather tip...'}</p>
+          <p className={`text-xs font-semibold mb-1 ${isDark ? 'text-sky-300' : 'text-sky-700'}`}>👔 {t('Expert Weather Tip') || 'Expert Weather Tip'}</p>
+          <p className={`text-xs leading-relaxed ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{localWeatherTip}</p>
         </div>
 
         <p className={`text-[10px] mt-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
-          🧵 Best fabrics today: {tip.fabrics}
+          🧵 {t('Best fabrics today:') || 'Best fabrics today:'} {tip.fabrics}
         </p>
       </div>
     </div>

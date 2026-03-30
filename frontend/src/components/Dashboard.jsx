@@ -1,6 +1,6 @@
 import OutfitChecker from './OutfitChecker';
 import { useState, useEffect, useContext } from 'react';
-import { fetchAITip } from '../api/styleApi';
+
 import UploadSection from './UploadSection';
 import ResultsDisplay from './ResultsDisplay';
 import CoupleResults from './CoupleResults';
@@ -18,6 +18,7 @@ import WeatherTip from './WeatherTip';
 import ColorScanner from './ColorScanner';
 import StyleBot from './StyleBot';
 import ToolsTab from './ToolsTab';
+import { getLocalizedTip } from '../data/localTips';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
@@ -69,6 +70,7 @@ function LoadingScreen() {
 
 function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
   const { theme } = useContext(ThemeContext);
+  const { language } = useLanguage();
   const isDark = theme === 'dark';
   const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
   const analysisCount = parseInt(localStorage.getItem('sg_analysis_count') || '0');
@@ -103,46 +105,9 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
     { icon: '✨', label: 'Accessories', tab: 'analyze' },
     { icon: '🌍', label: 'Seasonal', tab: 'analyze' },
   ];
-  const [todayTip, setTodayTip] = useState({ emoji: '✨', tip: 'Loading your personalized AI style tip...' });
-
-  useEffect(() => {
-    // Only fetch once per day to save API tokens, or fetch fresh if we want dynamic feel
-    // Let's cache it for today
-    const cacheKey = `sg_ai_tip_${new Date().toLocaleDateString('en-IN')}`;
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      setTodayTip(JSON.parse(cached));
-      return;
-    }
-
-    const st = lastAnalysis?.skinTone || 'medium';
-    const ut = lastAnalysis?.undertone || 'warm';
-    const ssn = lastAnalysis?.season || 'autumn';
-    const gndr = lastAnalysis?.fullData?.gender || 'male';
-
-    fetchAITip({
-      skin_tone: st,
-      undertone: ut,
-      season: ssn,
-      gender: gndr,
-      context: 'daily'
-    }).then(res => {
-      const fulllText = res.data.tip;
-      // Extract emoji if present at the start (simple non-ASCII check)
-      let emoji = '💡';
-      let tip = fulllText;
-      const emojiMatch = fulllText.match(/^(\ud83c[\udf00-\udfff]|\ud83d[\udc00-\ude4f\ude80-\udeff]|\ud83e[\udd00-\uddff]|[\u2600-\u27bf]|\u200d)+/u);
-      if (emojiMatch) {
-        emoji = emojiMatch[0];
-        tip = fulllText.slice(emoji.length).trim();
-      }
-      const newTip = { emoji, tip };
-      setTodayTip(newTip);
-      localStorage.setItem(cacheKey, JSON.stringify(newTip));
-    }).catch(err => {
-      setTodayTip({ emoji: '💡', tip: 'Navy blue suits warm undertones perfectly — try it for your next outfit!' });
-    });
-  }, [lastAnalysis?.skinTone]);
+  const gndr = lastAnalysis?.fullData?.gender || 'male';
+  const tone = lastAnalysis?.skinTone?.toLowerCase() || 'medium';
+  const todayTip = getLocalizedTip(gndr, tone, language);
   const firstName = user?.name?.split(' ')[0] || 'there';
   return (
     <div className="pb-4 space-y-6">

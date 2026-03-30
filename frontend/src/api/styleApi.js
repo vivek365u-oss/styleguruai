@@ -24,7 +24,7 @@ API.interceptors.request.use(async (config) => {
 export const googleLogin = async () => {
   const result = await signInWithPopup(auth, googleProvider);
   const user = result.user;
-  
+
   // Firestore mein user save karo (pehli baar)
   const userRef = doc(db, 'users', user.uid);
   const userSnap = await getDoc(userRef);
@@ -42,7 +42,7 @@ export const googleLogin = async () => {
 export const registerUser = async (data) => {
   const result = await createUserWithEmailAndPassword(auth, data.email, data.password);
   await updateProfile(result.user, { displayName: data.full_name });
-  
+
   // Firestore mein save karo
   await setDoc(doc(db, 'users', result.user.uid), {
     email: data.email,
@@ -96,7 +96,7 @@ export const saveHistory = async (historyData) => {
 export const getHistory = async () => {
   const user = auth.currentUser;
   if (!user) return { data: { total: 0, history: [] } };
-  
+
   const q = query(
     collection(db, 'users', user.uid, 'history'),
     orderBy('date', 'desc'),
@@ -160,12 +160,9 @@ export const checkOutfitCompatibility = (selfieFile, outfitFile, onProgress) => 
   });
 };
 
+
 export const testTone = (tone, undertone = 'warm') =>
   API.get(`/api/test/${tone}?undertone=${undertone}`);
-
-export const fetchAITip = (payload) => API.post('/api/ai/daily-tip', payload);
-
-export const fetchAIOOTD = (payload) => API.post('/api/ai/ootd', payload);
 
 
 // ============================================
@@ -372,7 +369,7 @@ export const publishToCommunityFeed = async (uid, paletteData) => {
     return ref.id;
   } catch (e) {
     if (e?.code === 'permission-denied') {
-        console.error('Community rules denied.');
+      console.error('Community rules denied.');
     }
     throw e;
   }

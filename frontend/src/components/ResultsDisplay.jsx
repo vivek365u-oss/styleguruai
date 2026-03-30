@@ -1,11 +1,12 @@
 // ============================================================
 // StyleGuru — Tab-Based Results Display (App-like UX)
 // ============================================================
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../App';
 import VirtualTryOn from './VirtualTryOn';
 import { publishToCommunityFeed, auth } from '../api/styleApi';
+import { translateBackendObject } from '../i18n/backendTranslations';
 
 // ── Shopping Links ───────────────────────────────────────────
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
@@ -932,7 +933,7 @@ function SavedColorsTab({ isDark }) {
 
 // ── Main ResultsDisplay ──────────────────────────────────────
 function ResultsDisplay({ data, uploadedImage, onReset }) {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [activeTab, setActiveTab] = useState('colors');
@@ -942,8 +943,17 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   });
   const [shareStatus, setShareStatus] = useState(null);
 
+  const displayData = useMemo(() => {
+    if (!data || !data.analysis || !data.analysis.recommendations) return data;
+    const clone = JSON.parse(JSON.stringify(data));
+    clone.analysis.recommendations = translateBackendObject(clone.analysis.recommendations, language);
+    return clone;
+  }, [data, language]);
+
+  data = displayData;
+
   useEffect(() => {
-    if (showConfetti) { const t = setTimeout(() => setShowConfetti(false), 2000); return () => clearTimeout(t); }
+    if (showConfetti) { const timer = setTimeout(() => setShowConfetti(false), 2000); return () => clearTimeout(timer); }
   }, [showConfetti]);
 
   if (!data || !data.analysis || !data.analysis.skin_tone) {
