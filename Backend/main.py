@@ -576,6 +576,61 @@ async def get_ai_tip(req: AITipRequest, current_user: dict = None):
         return {"tip": "✨ Wear bold, confident colors that make your skin tone pop today!"}
 
 # ============================================
+# AI OUTFIT OF THE DAY (OOTD)
+# ============================================
+class OOTDRequest(BaseModel):
+    skin_tone: str
+    undertone: str
+    season: str
+    gender: str = "male"
+    weather_temp: Optional[int] = None
+    weather_desc: Optional[str] = None
+    city: Optional[str] = None
+
+@app.post("/api/ai/ootd")
+async def get_ai_ootd(req: OOTDRequest, current_user: dict = None):
+    try:
+        weather_ctx = ""
+        if req.weather_temp is not None and req.weather_desc:
+            weather_ctx = f"Current weather: {req.weather_temp}°C, {req.weather_desc} in {req.city or 'their city'}. The outfit MUST be suitable for this weather."
+        
+        prompt = f"""You are a world-class fashion stylist. Suggest today's complete outfit for a {req.gender} with {req.skin_tone} skin tone ({req.undertone} undertone, {req.season} color season). {weather_ctx}
+
+Reply ONLY with this exact JSON format, nothing else:
+{{"shirt": "specific garment name with color", "shirtHex": "#hex", "pant": "specific bottom name with color", "pantHex": "#hex", "shoes": "specific footwear", "occasion": "one word occasion", "tip": "one sentence why this works for their skin tone and weather"}}"""
+
+        if not os.environ.get("GEMINI_API_KEY"):
+            return {"outfit": {
+                "shirt": "Royal Blue Polo", "shirtHex": "#4169e1",
+                "pant": "Beige Chinos", "pantHex": "#d2b48c",
+                "shoes": "White Sneakers", "occasion": "Casual",
+                "tip": f"Royal blue creates a striking contrast with {req.skin_tone} skin"
+            }, "source": "fallback"}
+
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        response = model.generate_content(prompt)
+        text = response.text.strip()
+        
+        # Clean markdown code fences if present
+        if text.startswith("```"):
+            text = text.split("\n", 1)[-1]
+        if text.endswith("```"):
+            text = text.rsplit("```", 1)[0]
+        text = text.strip()
+        
+        import json as json_mod
+        outfit = json_mod.loads(text)
+        return {"outfit": outfit, "source": "gemini"}
+    except Exception as e:
+        print(f"OOTD Gemini error: {e}")
+        return {"outfit": {
+            "shirt": "Navy Blue Shirt", "shirtHex": "#1e3a5f",
+            "pant": "Charcoal Trousers", "pantHex": "#36454f",
+            "shoes": "Brown Loafers", "occasion": "Smart Casual",
+            "tip": f"Classic navy complements {req.skin_tone} skin tone beautifully"
+        }, "source": "fallback"}
+
+# ============================================
 # PUSH NOTIFICATIONS
 # ============================================
 from push_service import PushService

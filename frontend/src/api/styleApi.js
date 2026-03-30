@@ -165,6 +165,8 @@ export const testTone = (tone, undertone = 'warm') =>
 
 export const fetchAITip = (payload) => API.post('/api/ai/daily-tip', payload);
 
+export const fetchAIOOTD = (payload) => API.post('/api/ai/ootd', payload);
+
 
 // ============================================
 // ERROR HELPERS
