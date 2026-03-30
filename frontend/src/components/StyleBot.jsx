@@ -78,10 +78,10 @@ function findResponse(message) {
   return DEFAULT_REPLY;
 }
 
-function StyleBot() {
+function StyleBot({ inline = false }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(inline);
   const [messages, setMessages] = useState([
     { role: 'bot', text: 'Hey! 👋 I\'m your StyleGuru assistant.\n\nAsk me about outfits, colors, accessories, or type "help" to see what I can do!' }
   ]);
@@ -111,8 +111,9 @@ function StyleBot() {
 
   return (
     <>
-      {/* Floating button */}
-      <button
+      {/* Floating button (only if not inline) */}
+      {!inline && (
+        <button
         onClick={() => setOpen(!open)}
         className={`fixed bottom-24 right-4 z-40 w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${
           open
@@ -122,13 +123,16 @@ function StyleBot() {
         style={{ boxShadow: open ? 'none' : '0 0 25px rgba(168,85,247,0.4)' }}
       >
         <span className="text-2xl">{open ? '✕' : '🤖'}</span>
-      </button>
+        </button>
+      )}
 
       {/* Chat panel */}
-      {open && (
-        <div className={`fixed bottom-40 right-4 z-40 w-[320px] max-h-[60vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden ${
-          isDark ? 'bg-[#0f0a2e] border-purple-700/40' : 'bg-white border-gray-200'
-        }`}>
+      {(open || inline) && (
+        <div className={
+          inline 
+            ? `flex-1 flex flex-col w-full h-full ${isDark ? 'bg-transparent' : 'bg-transparent'}`
+            : `fixed bottom-40 right-4 z-40 w-[320px] max-h-[60vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden ${isDark ? 'bg-[#0f0a2e] border-purple-700/40' : 'bg-white border-gray-200'}`
+        }>
           {/* Header */}
           <div className="px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 flex items-center gap-2">
             <span className="text-lg">🤖</span>

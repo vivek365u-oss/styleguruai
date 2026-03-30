@@ -127,7 +127,7 @@ function TrendingCard({ item, isDark, AMAZON_TAG }) {
 }
 // ------------------------------------------
 
-function ToolsTab({ onShowResult, onOpenScanner }) {
+function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [activeTool, setActiveTool] = useState(null); // 'outfit', 'community', 'stylebot', 'tryon'
@@ -170,7 +170,7 @@ function ToolsTab({ onShowResult, onOpenScanner }) {
           ← Back to Tools
         </button>
         <div className={`rounded-2xl border h-[70vh] flex flex-col overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
-          <StyleBot isDark={isDark} />
+          <StyleBot isDark={isDark} inline={true} />
         </div>
       </div>
     );
@@ -182,7 +182,50 @@ function ToolsTab({ onShowResult, onOpenScanner }) {
         <button onClick={() => setActiveTool(null)} className={`text-sm font-bold flex items-center gap-2 ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
           ← Back to Tools
         </button>
-        <VirtualTryOn isDark={isDark} standalone={true} />
+        <VirtualTryOn 
+          isDark={isDark} 
+          standalone={true}
+          uploadedImage={uploadedImage || localStorage.getItem('sg_last_photo')}
+          bestColors={(() => {
+            const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
+            const rec = data?.analysis?.recommendations || data?.recommendations || {};
+            return [...(rec.best_shirt_colors || rec.best_dress_colors || rec.seasonal_colors || []), ...(rec.best_top_colors || [])].filter((c, i, a) => a.findIndex(x => x.hex === c.hex) === i);
+          })()}
+          avoidColors={(() => {
+            const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
+            const rec = data?.analysis?.recommendations || data?.recommendations || {};
+            return rec.colors_to_avoid || [];
+          })()}
+          pantColors={(() => {
+            const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
+            const rec = data?.analysis?.recommendations || data?.recommendations || {};
+            return rec.best_pant_colors || rec.best_bottom_colors || [];
+          })()}
+          outfitCombos={(() => {
+            const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
+            const rec = data?.analysis?.recommendations || data?.recommendations || {};
+            return (rec.outfit_combinations || []).map(c => ({
+              label: `${c.shirt || c.dress || c.top || ''} + ${c.pant || c.bottom || c.skirt || ''}`,
+              shirtHex: (rec.best_shirt_colors || rec.best_dress_colors || [])[0]?.hex || '#6d28d9',
+              shirtName: c.shirt || c.dress || c.top || 'Top',
+              pantHex: (rec.best_pant_colors || rec.best_bottom_colors || [])[0]?.hex || '#1e293b',
+              pantName: c.pant || c.bottom || c.skirt || 'Bottom',
+              occasion: c.occasion || 'Casual',
+            }));
+          })()}
+          gender={(() => {
+            const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
+            return data?.gender || 'male';
+          })()}
+          skinTone={(() => {
+            const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
+            return data?.analysis?.skin_tone?.category || 'medium';
+          })()}
+          skinHex={(() => {
+            const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
+            return data?.analysis?.skin_tone?.hex_code || '#C68642';
+          })()}
+        />
       </div>
     );
   }

@@ -683,7 +683,7 @@ function Dashboard({ user, onLogout }) {
           </>
         )}
         {activeTab === 'wardrobe' && <WardrobePanel user={user} onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
-        {activeTab === 'tools' && <ToolsTab onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} onOpenScanner={() => setActiveTab('scanner')} />}
+        {activeTab === 'tools' && <ToolsTab uploadedImage={uploadedImage} analysisData={results} onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} onOpenScanner={() => setActiveTab('scanner')} />}
         {activeTab === 'scanner' && (
           <ColorScanner
             savedPalette={(() => {
