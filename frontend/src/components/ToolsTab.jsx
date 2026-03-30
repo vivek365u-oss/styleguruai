@@ -4,7 +4,6 @@ import OutfitChecker from './OutfitChecker';
 import CommunityFeed from './CommunityFeed';
 import HistoryPanel from './HistoryPanel';
 import StyleBot from './StyleBot';
-import VirtualTryOn from './VirtualTryOn';
 
 // --- Extracted from Dashboard.jsx ---
 function ColorContrastChecker({ isDark }) {
@@ -176,59 +175,7 @@ function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) 
     );
   }
 
-  if (activeTool === 'tryon') {
-    return (
-      <div className="space-y-4 pt-2">
-        <button onClick={() => setActiveTool(null)} className={`text-sm font-bold flex items-center gap-2 ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
-          ← Back to Tools
-        </button>
-        <VirtualTryOn 
-          isDark={isDark} 
-          standalone={true}
-          uploadedImage={uploadedImage || localStorage.getItem('sg_last_photo')}
-          bestColors={(() => {
-            const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
-            const rec = data?.analysis?.recommendations || data?.recommendations || {};
-            return [...(rec.best_shirt_colors || rec.best_dress_colors || rec.seasonal_colors || []), ...(rec.best_top_colors || [])].filter((c, i, a) => a.findIndex(x => x.hex === c.hex) === i);
-          })()}
-          avoidColors={(() => {
-            const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
-            const rec = data?.analysis?.recommendations || data?.recommendations || {};
-            return rec.colors_to_avoid || [];
-          })()}
-          pantColors={(() => {
-            const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
-            const rec = data?.analysis?.recommendations || data?.recommendations || {};
-            return rec.best_pant_colors || rec.best_bottom_colors || [];
-          })()}
-          outfitCombos={(() => {
-            const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
-            const rec = data?.analysis?.recommendations || data?.recommendations || {};
-            return (rec.outfit_combinations || []).map(c => ({
-              label: `${c.shirt || c.dress || c.top || ''} + ${c.pant || c.bottom || c.skirt || ''}`,
-              shirtHex: (rec.best_shirt_colors || rec.best_dress_colors || [])[0]?.hex || '#6d28d9',
-              shirtName: c.shirt || c.dress || c.top || 'Top',
-              pantHex: (rec.best_pant_colors || rec.best_bottom_colors || [])[0]?.hex || '#1e293b',
-              pantName: c.pant || c.bottom || c.skirt || 'Bottom',
-              occasion: c.occasion || 'Casual',
-            }));
-          })()}
-          gender={(() => {
-            const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
-            return data?.gender || 'male';
-          })()}
-          skinTone={(() => {
-            const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
-            return data?.analysis?.skin_tone?.category || 'medium';
-          })()}
-          skinHex={(() => {
-            const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
-            return data?.analysis?.skin_tone?.hex_code || '#C68642';
-          })()}
-        />
-      </div>
-    );
-  }
+
 
   return (
     <div className="space-y-6 pt-2">
@@ -236,14 +183,6 @@ function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) 
       
       {/* Primary Tool Buttons */}
       <div className="grid grid-cols-2 gap-3 mb-6">
-        <button 
-          onClick={() => setActiveTool('tryon')}
-          className={`flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-pink-900/40 to-rose-900/40 border-pink-500/30' : 'bg-gradient-to-br from-pink-50 to-rose-50 border-pink-200 shadow-sm'}`}>
-          <span className="text-4xl mb-2">👘</span>
-          <span className={`font-bold text-sm ${isDark ? 'text-pink-100' : 'text-pink-900'}`}>Virtual Try-On</span>
-          <span className={`text-[10px] ${isDark ? 'text-pink-300/60' : 'text-pink-600/60'}`}>Try outfits instantly</span>
-        </button>
-        
         <button 
           onClick={() => setActiveTool('stylebot')}
           className={`flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border-purple-500/30' : 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200 shadow-sm'}`}>
@@ -254,16 +193,22 @@ function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) 
 
         <button 
           onClick={() => setActiveTool('outfit')}
-          className={`col-span-1 flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-blue-900/40 to-cyan-900/40 border-blue-500/30' : 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 shadow-sm'}`}>
-          <span className="text-3xl mb-1">👔</span>
-          <span className={`font-bold text-xs ${isDark ? 'text-blue-100' : 'text-blue-900'}`}>Outfit Checker</span>
+          className={`flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-blue-900/40 to-cyan-900/40 border-blue-500/30' : 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 shadow-sm'}`}>
+          <span className="text-3xl mb-1 mt-1">👔</span>
+          <span className={`font-bold text-sm mt-1 ${isDark ? 'text-blue-100' : 'text-blue-900'}`}>Outfit Checker</span>
+          <span className={`text-[10px] ${isDark ? 'text-blue-300/60' : 'text-blue-600/60'}`}>Rate my fit</span>
         </button>
 
         <button 
           onClick={() => onOpenScanner ? onOpenScanner() : null}
-          className={`col-span-1 flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-emerald-900/40 to-teal-900/40 border-emerald-500/30' : 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 shadow-sm'}`}>
-          <span className="text-3xl mb-1">📸</span>
-          <span className={`font-bold text-xs ${isDark ? 'text-emerald-100' : 'text-emerald-900'}`}>Color Scanner</span>
+          className={`col-span-2 flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-emerald-900/40 to-teal-900/40 border-emerald-500/30' : 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 shadow-sm'}`}>
+          <span className="flex items-center gap-3">
+            <span className="text-4xl">📸</span>
+            <div className="flex flex-col items-start text-left">
+              <span className={`font-bold text-lg leading-none ${isDark ? 'text-emerald-100' : 'text-emerald-900'}`}>Color Scanner</span>
+              <span className={`text-xs mt-1 ${isDark ? 'text-emerald-300/60' : 'text-emerald-600/60'}`}>Scan real clothes using camera</span>
+            </div>
+          </span>
         </button>
       </div>
 
