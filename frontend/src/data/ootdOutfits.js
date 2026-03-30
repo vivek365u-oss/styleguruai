@@ -1,4 +1,4 @@
-export const getLocalizedOOTD = (gender, skinTone, language) => {
+export const getLocalizedOOTD = (gender, skinTone, language, indexOffset = 0) => {
   const OUTFITS = {
     male: {
       fair: [
@@ -235,9 +235,10 @@ export const getLocalizedOOTD = (gender, skinTone, language) => {
   }
 
   const now = new Date();
-  const index = (now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate()) % pool.length;
+  const index = (now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate() + indexOffset) % pool.length;
+  const safeIndex = index < 0 ? (pool.length - (Math.abs(index) % pool.length)) % pool.length : index;
   
-  const selected = pool[index];
+  const selected = pool[safeIndex];
   
   // if format is { en: ..., hinglish: ... }
   if (selected.shirt && typeof selected.shirt === 'object') {

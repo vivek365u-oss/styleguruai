@@ -18,11 +18,16 @@ function OOTDCard({ skinTone, gender, isDark }) {
   const { language, t } = useLanguage();
   const [saved, setSaved] = useState(false);
   const [toast, setToast] = useState(null);
+  const [indexOffset, setIndexOffset] = useState(0);
+  const [animating, setAnimating] = useState("");
+
+  const handleNext = () => { setAnimating("-translate-x-full opacity-0"); setTimeout(() => { setIndexOffset(i => i + 1); setSaved(false); setAnimating("translate-x-full opacity-0"); requestAnimationFrame(() => setAnimating("")); }, 150); };
+  const handlePrev = () => { setAnimating("translate-x-full opacity-0"); setTimeout(() => { setIndexOffset(i => i - 1); setSaved(false); setAnimating("-translate-x-full opacity-0"); requestAnimationFrame(() => setAnimating("")); }, 150); };
 
   // Get today's outfit
   const genderKey = gender === 'female' ? 'female' : 'male';
   let toneKey = skinTone?.toLowerCase() || 'medium';
-  const outfit = getLocalizedOOTD(genderKey, toneKey, language);
+  const outfit = getLocalizedOOTD(genderKey, toneKey, language, indexOffset);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2500); };
 
@@ -50,21 +55,35 @@ function OOTDCard({ skinTone, gender, isDark }) {
     <div className={`rounded-2xl border overflow-hidden ${isDark ? 'bg-gradient-to-br from-purple-900/30 to-pink-900/20 border-purple-700/30' : 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200'}`}>
       {/* Header */}
       <div className="px-4 pt-4 pb-2 flex items-center justify-between">
-        <div>
-          <p className={`text-[10px] font-bold uppercase tracking-widest ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
-            👔 {t('OUTFIT OF THE DAY') || 'OUTFIT OF THE DAY'}
-          </p>
-          <p className={`text-[10px] mt-0.5 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
-            {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' })}
-          </p>
+        <div className="flex items-center gap-2">
+          <button onClick={handlePrev} className={`p-1.5 rounded-full ${isDark ? 'bg-white/10 hover:bg-white/20' : 'bg-purple-100 hover:bg-purple-200'}`}>⬅️</button>
+          <div>
+            <p className={`text-[10px] font-bold uppercase tracking-widest ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
+              👔 {t('OUTFIT OF THE DAY')}
+            </p>
+            <p className={`text-[10px] mt-0.5 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
+              Swipe for more 🔥
+            </p>
+          </div>
         </div>
-        <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300' : 'bg-pink-100 border-pink-300 text-pink-700'}`}>
-          {OCCASION_EMOJIS[outfit.occasion] || '✨'} {t(outfit.occasion)}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300' : 'bg-pink-100 border-pink-300 text-pink-700'}`}>
+            {OCCASION_EMOJIS[outfit.occasion] || '✨'} {t(outfit.occasion)}
+          </span>
+          <button onClick={handleNext} className={`p-1.5 rounded-full ${isDark ? 'bg-white/10 hover:bg-white/20' : 'bg-pink-100 hover:bg-pink-200'}`}>➡️</button>
+        </div>
       </div>
 
       {/* Outfit visual */}
-      <div className="px-4 py-3 flex items-center gap-3">
+      <div 
+        className={`px-4 py-3 flex items-center gap-3 transition-all duration-300 ${animating}`}
+        onTouchStart={(e) => { window._ootdTouchStart = e.touches[0].clientX; }}
+        onTouchEnd={(e) => {
+          const diff = window._ootdTouchStart - e.changedTouches[0].clientX;
+          if (diff > 40) handleNext();
+          if (diff < -40) handlePrev();
+        }}
+      >
         {/* Color blocks */}
         <div className="flex flex-col items-center gap-1">
           <div className="w-14 h-12 rounded-xl border border-white/20 shadow-lg relative overflow-hidden"

@@ -66,6 +66,47 @@ function LoadingScreen() {
   );
 }
 
+function DailyDropModal({ lastAnalysis, isDark, onClose }) {
+  const [revealed, setRevealed] = useState(false);
+  const handleReveal = () => {
+    setRevealed(true);
+    setTimeout(() => {
+      localStorage.setItem('sg_daily_drop_date', new Date().toLocaleDateString('en-CA'));
+      onClose();
+    }, 2500); // closes after reading 
+  };
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+      <div className={`w-full max-w-sm rounded-3xl p-6 text-center border-2 border-purple-500/50 shadow-2xl relative overflow-hidden ${isDark ? 'bg-gradient-to-br from-purple-900 to-slate-900' : 'bg-white'}`}>
+        {!revealed ? (
+          <div className="space-y-6 scale-in">
+            <div className="text-6xl animate-bounce-slow">🎁</div>
+            <div>
+              <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-purple-700'}`}>Your Daily Drop is Ready!</h2>
+              <p className={`text-sm mt-2 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>We prepared today's perfect outfit based on the weather and your {lastAnalysis?.skinTone} skin tone.</p>
+            </div>
+            <button 
+              onClick={handleReveal}
+              className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-2xl text-white font-black text-lg shadow-lg pulse-glow"
+            >
+              Unlock Outfit 🔓
+            </button>
+            <button onClick={() => { localStorage.setItem('sg_daily_drop_date', new Date().toLocaleDateString('en-CA')); onClose(); }} className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Skip for today</button>
+          </div>
+        ) : (
+          <div className="scale-in space-y-4">
+            <span className="text-5xl">✨</span>
+            <h2 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>Unlocking your wardrobe...</h2>
+            <div className="flex gap-2 justify-center">
+              {[1,2,3].map(i => <div key={i} className="w-3 h-3 rounded-full bg-purple-500 animate-bounce" style={{animationDelay: `${i*0.15}s`}}/>)}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ColorContrastChecker and TrendingCard moved to ToolsTab.jsx
 
 function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
@@ -99,6 +140,37 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
     }, 30);
     return () => clearInterval(timer);
   }, []);
+
+  // Daily Streak Logic 🔥
+  const [streak, setStreak] = useState(0);
+  useEffect(() => {
+    const today = new Date().toLocaleDateString('en-CA');
+    const lastCheckin = localStorage.getItem('sg_last_checkin');
+    let currentStreak = parseInt(localStorage.getItem('sg_streak_count') || '0');
+    if (lastCheckin !== today) {
+      if (lastCheckin) {
+        const lastDate = new Date(lastCheckin);
+        const currDate = new Date(today);
+        const diffDays = Math.round((currDate - lastDate) / (1000 * 60 * 60 * 24));
+        if (diffDays === 1) currentStreak += 1;
+        else if (diffDays > 1) currentStreak = 1;
+      } else {
+        currentStreak = 1;
+      }
+      localStorage.setItem('sg_streak_count', currentStreak.toString());
+      localStorage.setItem('sg_last_checkin', today);
+    }
+    setStreak(currentStreak);
+  }, []);
+
+  // Daily Drop Logic 🎁
+  const [showDailyDrop, setShowDailyDrop] = useState(() => {
+    const today = new Date().toLocaleDateString('en-CA');
+    const lastDrop = localStorage.getItem('sg_daily_drop_date');
+    const hasAnalysis = !!lastAnalysis;
+    return hasAnalysis && lastDrop !== today;
+  });
+
   const quickCards = [
     { icon: '🎨', label: 'Best Colors', tab: 'analyze' },
     { icon: '👔', label: 'Outfit Ideas', tab: 'analyze' },
@@ -111,10 +183,19 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
   const firstName = user?.name?.split(' ')[0] || 'there';
   return (
     <div className="pb-4 space-y-6">
-      <div className="pt-2">
-        <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Good day,</p>
-        <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>Hey {firstName} 👋</h2>
-        <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Discover your perfect style with AI</p>
+      {showDailyDrop && <DailyDropModal lastAnalysis={lastAnalysis} isDark={isDark} onClose={() => setShowDailyDrop(false)} />}
+      <div className="pt-2 flex justify-between items-start">
+        <div>
+          <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Good day,</p>
+          <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>Hey {firstName} 👋</h2>
+          <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Discover your perfect style with AI</p>
+        </div>
+        {streak > 0 && (
+          <div className="flex flex-col items-center justify-center animate-bounce-slow">
+            <span className="text-3xl filter drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]">🔥</span>
+            <span className={`text-[10px] font-black mt-1 ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>{streak} Day{streak > 1 ? 's' : ''}</span>
+          </div>
+        )}
       </div>
 
       <button
@@ -188,13 +269,29 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
         </div>
       </div>
 
-      {/* OOTD — Outfit of the Day */}
+      {/* OOTD & Hook — Outfit of the Day */}
       {lastAnalysis && (
-        <OOTDCard
-          skinTone={lastAnalysis.skinTone}
-          gender={lastAnalysis.fullData?.gender || 'male'}
-          isDark={isDark}
-        />
+        <div className="space-y-3">
+          <OOTDCard
+            skinTone={lastAnalysis.skinTone}
+            gender={lastAnalysis.fullData?.gender || 'male'}
+            isDark={isDark}
+          />
+          
+          {/* Rate My Fit - Hook mechanics */}
+          <div className={`rounded-2xl p-4 border flex items-center gap-3 justify-between ${isDark ? 'bg-gradient-to-r from-orange-900/40 to-red-900/40 border-orange-700/30' : 'bg-gradient-to-r from-orange-50 to-red-50 border-orange-200'}`}>
+            <div>
+              <p className={`text-sm font-black uppercase tracking-wide ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>📸 Rate My Fit</p>
+              <p className={`text-[10px] mt-0.5 leading-tight ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Wear your Outfit & get your daily Style Score 🔥</p>
+            </div>
+            <button
+              onClick={onAnalyze}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-lg hover:scale-105 flex-shrink-0 heartbeat ${isDark ? 'bg-orange-500 text-white shadow-orange-900/50' : 'bg-orange-500 text-white hover:bg-orange-600 shadow-orange-500/30'}`}
+            >
+              Scan Fit
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Weather-Based Style Tip */}
