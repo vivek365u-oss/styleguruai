@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { registerUser, loginUser, saveAuth, googleLogin } from '../api/styleApi';
 import { useLanguage } from '../i18n/LanguageContext';
 
-function AuthPage({ onLoginSuccess }) {
+function AuthPage({ onLoginSuccess, onSkip }) {
   const { t } = useLanguage();
   const [mode, setMode] = useState('login');
   const [form, setForm] = useState({ email: '', password: '', full_name: '' });
@@ -182,6 +182,16 @@ function AuthPage({ onLoginSuccess }) {
                 </span>
               ) : mode === 'login' ? `🚀 ${t('loginBtn')}` : `✨ ${t('registerBtn')}`}
             </button>
+            
+            {/* Skip as Guest */}
+            {onSkip && (
+              <button
+                onClick={onSkip}
+                className="w-full mt-2 py-2 text-white/50 text-sm font-medium hover:text-white transition-colors underline decoration-white/20 hover:decoration-white/50 underline-offset-4"
+              >
+                Skip & Explore as Guest →
+              </button>
+            )}
           </div>
         </div>
 

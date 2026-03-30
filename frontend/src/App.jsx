@@ -36,21 +36,26 @@ function AppRoutes({ user, setUser }) {
   };
 
   const LoadingFallback = () => (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-      <div className="text-white text-xl animate-pulse">Loading ToneFit...</div>
+    <div className="min-h-screen bg-gradient-to-br from-[#050816] via-purple-950 to-[#050816] flex flex-col items-center justify-center relative overflow-hidden">
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-purple-600 rounded-full opacity-20 blur-[100px] animate-pulse"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-pink-600 rounded-full opacity-20 blur-[100px] animate-pulse" style={{ animationDelay: '1s' }}></div>
+      </div>
+      <div className="relative z-10 flex flex-col items-center">
+        <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl shadow-2xl shadow-purple-500/40 flex items-center justify-center mb-6 animate-bounce">
+          <span className="text-white text-3xl font-black tracking-tighter">SG</span>
+        </div>
+        <h2 className="text-2xl font-black text-white tracking-widest uppercase opacity-80 animate-pulse">StyleGuru</h2>
+      </div>
     </div>
   );
 
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
-        <Route path="/" element={<LandingPage onGetStarted={() => navigate('/login')} />} />
-        <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} />} />
-        <Route path="/dashboard" element={
-          <PrivateRoute user={user}>
-            <Dashboard user={user} onLogout={handleLogout} />
-          </PrivateRoute>
-        } />
+        <Route path="/" element={<LandingPage onGetStarted={() => navigate('/dashboard')} onLoginClick={() => navigate('/login')} />} />
+        <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} onSkip={() => navigate('/dashboard')} />} />
+        <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/contact" element={<ContactPage />} />
@@ -132,11 +137,7 @@ function App() {
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl animate-pulse">Loading ToneFit...</div>
-      </div>
-    );
+    return <LoadingFallback />;
   }
 
   return (

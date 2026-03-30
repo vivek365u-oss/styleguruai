@@ -28,7 +28,7 @@ const features = [
 
 const floatingItems = ['👗', '👔', '👠', '🧣', '💍', '👒', '🧥', '👜'];
 
-export default function LandingPage({ onGetStarted }) {
+export default function LandingPage({ onGetStarted, onLoginClick }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -117,7 +117,7 @@ export default function LandingPage({ onGetStarted }) {
           <span className="text-lg font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">StyleGuru AI</span>
         </div>
         <div className="flex items-center gap-4">
-          <button onClick={onGetStarted} className="text-gray-400 hover:text-white transition text-sm">Login</button>
+          <button onClick={onLoginClick} className="text-gray-400 hover:text-white transition text-sm">Login</button>
           <button
             onClick={onGetStarted}
             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 transition px-5 py-2 rounded-full text-sm font-medium"
@@ -161,7 +161,7 @@ export default function LandingPage({ onGetStarted }) {
               <span className="relative z-10">✨ Try Now — It's Free</span>
             </button>
             <button
-              onClick={onGetStarted}
+              onClick={onLoginClick}
               className="border border-purple-600/60 hover:border-purple-400 hover:bg-purple-900/20 transition-all px-8 py-4 rounded-full text-lg font-semibold backdrop-blur-sm"
             >
               Login →
