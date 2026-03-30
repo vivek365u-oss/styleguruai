@@ -34,53 +34,68 @@ function drawTshirtShape(ctx, cw, ch, startY, color, opacity) {
   ctx.save();
   ctx.beginPath();
 
-  // Neck curve
-  const neckW = cw * 0.18;
+  // Better proportions for a minimalist shirt centered on canvas
+  const W = cw * 0.65; // Shirt width is 65% of canvas
+  const offsetX = (cw - W) / 2;
   const neckY = startY;
-  const shoulderY = startY + ch * 0.04;
-  const sleeveEndY = startY + ch * 0.14;
+  const shoulderY = startY + ch * 0.05;
+  const sleeveEndY = startY + ch * 0.18;
   const bodyEndY = ch;
 
-  // Left shoulder to neck
-  ctx.moveTo(0, shoulderY);
-  ctx.lineTo(cw * 0.15, shoulderY);
-  // Left sleeve up
-  ctx.lineTo(cw * 0.22, neckY);
-  // Neck curve
-  ctx.quadraticCurveTo(cw * 0.5, neckY - ch * 0.03, cw * 0.78, neckY);
-  // Right sleeve
-  ctx.lineTo(cw * 0.85, shoulderY);
-  ctx.lineTo(cw, shoulderY);
-  // Right side down
-  ctx.lineTo(cw, bodyEndY);
-  // Bottom
-  ctx.lineTo(0, bodyEndY);
+  // Start from bottom left of the shirt
+  ctx.moveTo(offsetX + W * 0.1, bodyEndY);
+  // Left waist up to armpit
+  ctx.lineTo(offsetX + W * 0.05, shoulderY + ch * 0.05);
+  // Armpit down to left sleeve end
+  ctx.lineTo(offsetX - cw * 0.05, sleeveEndY);
+  // Left sleeve up to shoulder
+  ctx.lineTo(offsetX + W * 0.2, shoulderY);
+
+  // Left collar point
+  ctx.lineTo(offsetX + W * 0.3, neckY);
+  // Gentle curve for the front neck opening
+  ctx.quadraticCurveTo(cw / 2, neckY + ch * 0.05, offsetX + W * 0.7, neckY);
+
+  // Right neck to right shoulder
+  ctx.lineTo(offsetX + W * 0.8, shoulderY);
+  // Right shoulder down to sleeve end
+  ctx.lineTo(offsetX + W + cw * 0.05, sleeveEndY);
+  // Right sleeve end to armpit
+  ctx.lineTo(offsetX + W * 0.95, shoulderY + ch * 0.05);
+  // Right armpit down to bottom waist
+  ctx.lineTo(offsetX + W * 0.9, bodyEndY);
+  
   ctx.closePath();
 
+  // Fill with base color + soft shadow blur
+  ctx.shadowColor = `rgba(0,0,0,0.3)`;
+  ctx.shadowBlur = 15;
   ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
   ctx.fill();
+  
+  // Clear shadow for overlays
+  ctx.shadowBlur = 0;
 
-  // Add fabric texture effect
-  ctx.globalCompositeOperation = 'overlay';
+  // Add realistic fabric shading (Multiply blend)
+  ctx.globalCompositeOperation = 'multiply';
   const grad = ctx.createLinearGradient(0, neckY, 0, bodyEndY);
-  grad.addColorStop(0, `rgba(255,255,255,0.08)`);
-  grad.addColorStop(0.3, `rgba(0,0,0,0.03)`);
-  grad.addColorStop(0.6, `rgba(255,255,255,0.05)`);
-  grad.addColorStop(1, `rgba(0,0,0,0.08)`);
+  grad.addColorStop(0, `rgba(255,255,255,0.1)`);
+  grad.addColorStop(0.4, `rgba(0,0,0,0.02)`);
+  grad.addColorStop(1, `rgba(0,0,0,0.15)`);
   ctx.fillStyle = grad;
   ctx.fill();
 
-  // Subtle collar shadow
+  // Gentle neck fold shadow
   ctx.globalCompositeOperation = 'source-over';
-  const collarGrad = ctx.createLinearGradient(0, neckY - 2, 0, neckY + ch * 0.03);
-  collarGrad.addColorStop(0, `rgba(0,0,0,0.15)`);
-  collarGrad.addColorStop(1, `rgba(0,0,0,0)`);
-  ctx.fillStyle = collarGrad;
+  const foldGrad = ctx.createLinearGradient(0, neckY, 0, neckY + ch * 0.1);
+  foldGrad.addColorStop(0, `rgba(0,0,0,0.2)`);
+  foldGrad.addColorStop(1, `rgba(0,0,0,0)`);
+  ctx.fillStyle = foldGrad;
   ctx.beginPath();
-  ctx.moveTo(cw * 0.22, neckY);
-  ctx.quadraticCurveTo(cw * 0.5, neckY - ch * 0.03, cw * 0.78, neckY);
-  ctx.lineTo(cw * 0.78, neckY + ch * 0.03);
-  ctx.quadraticCurveTo(cw * 0.5, neckY, cw * 0.22, neckY + ch * 0.03);
+  ctx.moveTo(offsetX + W * 0.3, neckY);
+  ctx.quadraticCurveTo(cw / 2, neckY + ch * 0.05, offsetX + W * 0.7, neckY);
+  ctx.lineTo(offsetX + W * 0.7, neckY + ch * 0.1);
+  ctx.quadraticCurveTo(cw / 2, neckY + ch * 0.08, offsetX + W * 0.3, neckY + ch * 0.1);
   ctx.closePath();
   ctx.fill();
 
@@ -90,20 +105,26 @@ function drawTshirtShape(ctx, cw, ch, startY, color, opacity) {
 // ── Gradient drape overlay ──────────────────────────────────
 function drawGradientDrape(ctx, cw, ch, drapeStart, color, opacity) {
   const { r, g, b } = hexToRgb(color);
-  const drapeY = ch * drapeStart;
-  const fadeZone = ch * 0.12;
-
-  // Gradient zone
-  const gradient = ctx.createLinearGradient(0, drapeY - fadeZone, 0, drapeY + fadeZone);
-  gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0)`);
-  gradient.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${opacity * 0.5})`);
-  gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, ${opacity})`);
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, drapeY - fadeZone, cw, fadeZone * 2);
-
-  // Solid below
-  ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity})`;
-  ctx.fillRect(0, drapeY + fadeZone, cw, ch - drapeY - fadeZone);
+  // Create a soft glowing aura around the chest rather than a hard block
+  const centerY = ch * drapeStart + ch * 0.2; 
+  const centerX = cw / 2;
+  const radius = cw * 0.75;
+  
+  ctx.save();
+  const aura = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+  aura.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${opacity})`);
+  aura.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${opacity * 0.6})`);
+  aura.addColorStop(0.8, `rgba(${r}, ${g}, ${b}, ${opacity * 0.1})`);
+  aura.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+  
+  ctx.fillStyle = aura;
+  // Blend over the body
+  ctx.globalCompositeOperation = 'overlay';
+  ctx.fillRect(0, 0, cw, ch);
+  ctx.globalCompositeOperation = 'multiply';
+  // Second pass for richness
+  ctx.fillRect(0, 0, cw, ch);
+  ctx.restore();
 }
 
 // ── Enhanced Canvas Engine ──────────────────────────────────
@@ -136,27 +157,12 @@ function useDrapingEngine(canvasRef, imageSrc, color, opacity, drapeStart, drape
 
     if (drapeMode === 'tshirt') {
       // T-shirt silhouette mode
-      ctx.globalCompositeOperation = 'multiply';
+      ctx.globalCompositeOperation = 'overlay';
       drawTshirtShape(ctx, cw, ch, ch * drapeStart, color, opacity);
       ctx.globalCompositeOperation = 'source-over';
     } else {
-      // Gradient drape mode
-      ctx.globalCompositeOperation = 'multiply';
+      // Smooth gradient aura mode
       drawGradientDrape(ctx, cw, ch, drapeStart, color, opacity);
-
-      // Vibrancy overlay
-      ctx.globalCompositeOperation = 'source-atop';
-      const { r, g, b } = hexToRgb(color);
-      const drapeY = ch * drapeStart;
-      const fadeZone = ch * 0.12;
-      const oGrad = ctx.createLinearGradient(0, drapeY - fadeZone, 0, drapeY + fadeZone);
-      oGrad.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0)`);
-      oGrad.addColorStop(1, `rgba(${r}, ${g}, ${b}, ${opacity * 0.2})`);
-      ctx.fillStyle = oGrad;
-      ctx.fillRect(0, drapeY - fadeZone, cw, fadeZone * 2);
-      ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${opacity * 0.2})`;
-      ctx.fillRect(0, drapeY + fadeZone, cw, ch - drapeY - fadeZone);
-      ctx.globalCompositeOperation = 'source-over';
     }
 
     // Bottom vignette
