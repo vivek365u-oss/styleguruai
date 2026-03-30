@@ -546,9 +546,9 @@ async def test_recommendations(skin_tone: str, undertone: str = "warm"):
 # GENERATIVE AI TIPS (GEMINI 1.5)
 # ============================================
 class AITipRequest(BaseModel):
-    skin_tone: str
-    undertone: str
-    season: str
+    skin_tone: str = "medium"
+    undertone: str = "warm"
+    season: str = "autumn"
     gender: str = "male"
     context: str = "daily"
     weather: Optional[str] = None
@@ -579,9 +579,9 @@ async def get_ai_tip(req: AITipRequest, current_user: dict = None):
 # AI OUTFIT OF THE DAY (OOTD)
 # ============================================
 class OOTDRequest(BaseModel):
-    skin_tone: str
-    undertone: str
-    season: str
+    skin_tone: str = "medium"
+    undertone: str = "warm"
+    season: str = "autumn"
     gender: str = "male"
     weather_temp: Optional[int] = None
     weather_desc: Optional[str] = None
