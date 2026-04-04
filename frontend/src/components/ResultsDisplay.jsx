@@ -895,31 +895,57 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   });
   const [shareStatus, setShareStatus] = useState(null);
 
-  const displayData = useMemo(() => {
-    if (!data || !data.analysis || !data.analysis.recommendations) return data;
-    const clone = JSON.parse(JSON.stringify(data));
-    clone.analysis.recommendations = translateBackendObject(clone.analysis.recommendations, language);
-    return clone;
+  // Normalize data to handle both { analysis: { skin_tone } } and { skin_tone } root formats
+  const normalizedData = useMemo(() => {
+    if (!data) return null;
+    let base = { ...data };
+    
+    // If skin_tone is at root, move it into analysis wrapper for consistency
+    if (!base.analysis && base.skin_tone) {
+      base.analysis = {
+        skin_tone: base.skin_tone,
+        skin_color: base.skin_color,
+        description: base.description || base.summary
+      };
+    }
+    
+    // Ensure recommendations is at root if it was nested
+    if (!base.recommendations && base.analysis?.recommendations) {
+      base.recommendations = base.analysis.recommendations;
+    }
+
+    // Translate if recommendations exist
+    if (base.recommendations) {
+      base.recommendations = translateBackendObject(base.recommendations, language);
+    }
+    
+    return base;
   }, [data, language]);
 
-  data = displayData;
+  const finalData = normalizedData;
 
   useEffect(() => {
     if (showConfetti) { const timer = setTimeout(() => setShowConfetti(false), 2000); return () => clearTimeout(timer); }
   }, [showConfetti]);
 
-  if (!data || !data.analysis || !data.analysis.skin_tone) {
+  if (!finalData || !finalData.analysis?.skin_tone) {
     return (
-      <div className="mt-8 text-center">
-        <p className="text-white/40 text-sm">No results available. Please try again.</p>
-        <button onClick={onReset} className="mt-4 px-6 py-2 bg-purple-600 text-white rounded-xl text-sm">Try Again</button>
+      <div className="mt-8 text-center px-6">
+        <p className="text-4xl mb-4">🔍</p>
+        <p className="text-white/60 text-sm font-medium mb-2">{t('resultsLoadError') || 'Analysis results could not be processed.'}</p>
+        <p className="text-white/30 text-xs mb-6">This usually happens if the photo was too dark or blurry.</p>
+        <button onClick={onReset} className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-sm font-bold transition-all shadow-lg active:scale-95">
+          {t('tryAgain')}
+        </button>
       </div>
     );
   }
 
-  const { analysis, recommendations, photo_quality } = data;
-  const isFemale = data.gender === "female";
-  const isSeasonal = data.gender === "seasonal";
+  const analysis = finalData.analysis;
+  const recommendations = finalData.recommendations || {};
+  const photo_quality = finalData.photo_quality || { score: 80, warnings: [] };
+  const isFemale = finalData.gender === "female";
+  const isSeasonal = finalData.gender === "seasonal";
   const seasonalGender = data.seasonalGender || "male";
   const bodyType = data.bodyType || null;
   const userOccasion = data.occasion || 'casual';

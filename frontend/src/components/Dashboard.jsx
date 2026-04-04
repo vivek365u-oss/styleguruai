@@ -576,30 +576,52 @@ function Dashboard({ user, onLogout }) {
 
   const handleReset = () => { setResults(null); setError(null); setUploadedImage(null); };
   const handleAnalysisComplete = (data) => {
-    const enriched = { ...data, gender: data.gender || currentGender };
+    if (!data) return;
+    
+    // Normalize: Ensure skin_tone is accessible either at root or inside analysis
+    const skinToneObj = data.analysis?.skin_tone || data.skin_tone;
+    const skinColorObj = data.analysis?.skin_color || data.skin_color;
+    const recsObj = data.recommendations || data.analysis?.recommendations;
+    
+    const enriched = { 
+      ...data, 
+      gender: data.gender || currentGender,
+      // Ensure the structure matches what the UI expects
+      analysis: data.analysis || { 
+        skin_tone: skinToneObj, 
+        skin_color: skinColorObj 
+      },
+      recommendations: recsObj
+    };
+    
     setResults(enriched);
     setLoading(false);
+    
     // Save to history (last 5) + increment count
     try {
       const count = parseInt(localStorage.getItem('sg_analysis_count') || '0') + 1;
       localStorage.setItem('sg_analysis_count', count.toString());
+      
       const newEntry = {
         id: Date.now(),
-        skinTone: enriched.analysis?.skin_tone?.category,
-        undertone: enriched.analysis?.skin_tone?.undertone,
-        season: enriched.analysis?.skin_tone?.color_season,
-        confidence: enriched.analysis?.skin_tone?.confidence,
-        skinHex: enriched.analysis?.skin_color?.hex || '#C68642',
+        skinTone: skinToneObj?.category || 'medium',
+        undertone: skinToneObj?.undertone || 'neutral',
+        season: skinToneObj?.color_season || 'Spring',
+        confidence: skinToneObj?.confidence || 'medium',
+        skinHex: skinColorObj?.hex || '#C68642',
         date: new Date().toLocaleDateString('en-IN'),
         timestamp: Date.now(),
         fullData: enriched,
       };
       localStorage.setItem('sg_last_analysis', JSON.stringify(newEntry));
+      
       // Keep last 5 analyses
       const history = JSON.parse(localStorage.getItem('sg_analysis_history') || '[]');
       const updated = [newEntry, ...history].slice(0, 5);
       localStorage.setItem('sg_analysis_history', JSON.stringify(updated));
-    } catch {}
+    } catch (e) {
+      console.error('Error saving analysis to local history:', e);
+    }
 
     // Save profile to Firestore
     const uid = auth.currentUser?.uid;
