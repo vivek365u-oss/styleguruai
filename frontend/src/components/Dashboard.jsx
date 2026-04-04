@@ -165,6 +165,14 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
     setStreak(currentStreak);
   }, []);
 
+  // Gender Preference Logic
+  const [genderPref, setGenderPref] = useState(() => localStorage.getItem('sg_gender_pref') || 'male');
+  const toggleGenderPref = () => {
+    const next = genderPref === 'male' ? 'female' : 'male';
+    setGenderPref(next);
+    localStorage.setItem('sg_gender_pref', next);
+  };
+
   // Daily Drop Logic 🎁
   const [showDailyDrop, setShowDailyDrop] = useState(() => {
     const today = new Date().toLocaleDateString('en-CA');
@@ -173,7 +181,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
     return hasAnalysis && lastDrop !== today;
   });
 
-  const gndr = lastAnalysis?.fullData?.gender || 'male';
+  const gndr = lastAnalysis?.fullData?.gender || genderPref;
   const tone = (typeof lastAnalysis?.skinTone === 'string' ? lastAnalysis?.skinTone : lastAnalysis?.skinTone?.category || 'medium')?.toLowerCase();
   const todayTip = getLocalizedTip(gndr, tone, language);
   const firstName = user?.name?.split(' ')[0] || t('guestName');
@@ -188,7 +196,24 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
           </h2>
           <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('discoverPerfect')}</p>
         </div>
-        {/* ... streak ... */}
+        <div className="flex flex-col items-end gap-2">
+          {/* Gender Toggle */}
+          {!lastAnalysis && (
+            <button 
+              onClick={toggleGenderPref}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white' : 'bg-white border-purple-100 text-purple-600 shadow-sm'}`}
+            >
+              <span>{genderPref === 'male' ? '🧔' : '👩'}</span>
+              <span>{t(genderPref)}</span>
+            </button>
+          )}
+          {streak > 0 && (
+            <div className={`px-2.5 py-1 rounded-full flex items-center gap-1.5 border ${isDark ? 'bg-orange-500/10 border-orange-500/20' : 'bg-orange-50 border-orange-200'}`}>
+              <span className="text-sm">🔥</span>
+              <span className={`text-[10px] font-black ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>{streak}</span>
+            </div>
+          )}
+        </div>
       </div>
 
       <button
@@ -250,7 +275,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
         <div className="space-y-3">
           <OOTDCard
             skinTone={lastAnalysis.skinTone}
-            gender={lastAnalysis.fullData?.gender || 'male'}
+            gender={lastAnalysis.fullData?.gender || genderPref}
             isDark={isDark}
           />
           

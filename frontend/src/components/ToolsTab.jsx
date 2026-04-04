@@ -255,9 +255,16 @@ function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) 
           <h3 className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('trendingNow')}</h3>
         </div>
         <div className="grid grid-cols-3 gap-3">
-          {trendingStyles.map((s) => (
-            <TrendingCard key={s.label} item={s} isDark={isDark} AMAZON_TAG="styleguruai-21" />
-          ))}
+          {(() => {
+            const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
+            const prefGender = localStorage.getItem('sg_gender_pref') || 'male';
+            const userGender = data?.gender || prefGender;
+            return trendingStyles
+              .filter(s => s.gender === userGender)
+              .map((s) => (
+                <TrendingCard key={s.label} item={s} isDark={isDark} AMAZON_TAG="styleguruai-21" />
+              ));
+          })()}
         </div>
       </div>
 

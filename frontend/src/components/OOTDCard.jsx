@@ -43,11 +43,18 @@ function OOTDCard({ skinTone, gender, isDark }) {
       });
       setSaved(true);
       showToast(t('✅ Saved to wardrobe!'));
-    } catch { showToast(t('❌ Could not save')); }
+    } catch (e) { 
+      showToast(t('❌ Could not save')); 
+    }
   };
 
   const handleShare = () => {
-    const msg = `👔 My Outfit of the Day from StyleGuru AI!\n\n👕 ${outfit.shirt}\n👖 ${outfit.pant}\n👟 ${outfit.shoes}\n📅 ${outfit.occasion}\n\n💡 ${outfit.tip}\n\nGet yours free 👇\nhttps://www.styleguruai.in`;
+    const isFemale = gender === 'female';
+    const titleIcon = isFemale ? '💃' : '👔';
+    const topIcon = isFemale ? '👗' : '👕';
+    const botIcon = isFemale ? '✨' : '👖';
+    
+    const msg = `${titleIcon} My Outfit of the Day from StyleGuru AI!\n\n${topIcon} ${outfit.shirt}\n${outfit.pant ? botIcon + ' ' + outfit.pant + '\n' : ''}👟 ${outfit.shoes}\n📅 ${outfit.occasion}\n\n💡 ${outfit.tip}\n\nGet yours free 👇\nhttps://www.styleguruai.in`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
@@ -58,11 +65,11 @@ function OOTDCard({ skinTone, gender, isDark }) {
         <div className="flex items-center gap-2">
           <button onClick={handlePrev} className={`p-1.5 rounded-full ${isDark ? 'bg-white/10 hover:bg-white/20' : 'bg-purple-100 hover:bg-purple-200'}`}>⬅️</button>
           <div>
-            <p className={`text-[10px] font-bold uppercase tracking-widest ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
-              👔 {t('OUTFIT OF THE DAY')}
+            <p className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
+              {gender === 'female' ? '💃' : '👔'} {t('OUTFIT OF THE DAY')}
             </p>
             <p className={`text-[10px] mt-0.5 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
-              Swipe for more 🔥
+              {t('Swipe for more')} 🔥
             </p>
           </div>
         </div>
@@ -89,12 +96,12 @@ function OOTDCard({ skinTone, gender, isDark }) {
           <div className="w-14 h-12 rounded-xl border border-white/20 shadow-lg relative overflow-hidden"
             style={{ backgroundColor: outfit.shirtHex }}>
             <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.2), transparent)' }} />
-            <span className="absolute inset-0 flex items-center justify-center text-sm">👕</span>
+            <span className="absolute inset-0 flex items-center justify-center text-sm">{gender === 'female' ? '👗' : '👕'}</span>
           </div>
           {outfit.pant && (
             <div className="w-11 h-14 rounded-xl border border-white/20 shadow-lg relative overflow-hidden"
               style={{ backgroundColor: outfit.pantHex }}>
-              <span className="absolute inset-0 flex items-center justify-center text-sm">👖</span>
+              <span className="absolute inset-0 flex items-center justify-center text-sm">{gender === 'female' ? '✨' : '👖'}</span>
             </div>
           )}
         </div>
@@ -117,12 +124,12 @@ function OOTDCard({ skinTone, gender, isDark }) {
               ? 'bg-green-500/20 border-green-500/30 text-green-400'
               : isDark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-purple-500/40' : 'bg-white border-gray-200 text-gray-600 hover:border-purple-400'
             }`}>
-          {saved ? `✅ ${t('Saved') || 'Saved'}` : `👗 ${t('Save') || 'Save'}`}
+          {saved ? `✅ ${t('Saved')}` : `👗 ${t('Save')}`}
         </button>
         <button onClick={handleShare}
           className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold border transition-all ${isDark ? 'bg-green-500/15 border-green-500/20 text-green-400 hover:bg-green-500/25' : 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
             }`}>
-          📱 {t('Share') || 'Share'}
+          📱 {t('Share')}
         </button>
       </div>
 

@@ -57,12 +57,26 @@ export const getLocalizedTip = (gender, skinTone, language) => {
         { emoji: '✨', en: 'Navy silk saree with gold border is timelessly elegant for weddings', hinglish: 'Gold border wali navy silk saree weddings ke liye timeless lagti hai.', hi: 'गोल्डन बॉर्डर वाली नेवी सिल्क साड़ी शादियों के लिए हमेशा खूबसूरत लगती है।' },
         { emoji: '🎀', en: 'Avoid harsh neons — soft pastels are your secret weapon', hinglish: 'Hard neons se bacho — soft pastels tumhara secret weapon hain.', hi: 'कठोर नियॉन रंगों से बचें — हल्के पेस्टल रंग आपका गुप्त हथियार हैं।' }
       ],
+      light: [
+        { emoji: '🍑', en: 'Peach and apricot tones give light skin a healthy, vibrant glow', hinglish: 'Peach aur apricot tones light skin ko ek healthy glow dete hain.', hi: 'पीच और एप्रीकॉट टोन हल्की त्वचा को एक स्वस्थ और जीवंत चमक देते हैं।' },
+        { emoji: '🌊', en: 'Sea green and mint are refreshing choices for casual ethnic wear', hinglish: 'Sea green aur mint ethnic wear ke liye refreshing choices hain.', hi: 'सी ग्रीन और मिंट कैजुअल एथनिक वियर के लिए ताज़ा विकल्प हैं।' },
+        { emoji: '🍂', en: 'Terracotta and rust shades highlight the warmth in your light complexion', hinglish: 'Terracotta aur rust shades light complexion ki warmth ko highlight karte hain.', hi: 'टेराकोटा और रस्ट शेड्स आपकी हल्की त्वचा की रंगत में गर्माहट को उभारते हैं।' },
+        { emoji: '💎', en: 'Sky blue and champagne gold are perfect for formal evening events', hinglish: 'Sky blue aur champagne gold formal events ke liye perfect hain.', hi: 'स्काई ब्लू और शैंपेन गोल्ड औपचारिक शाम के कार्यक्रमों के लिए एकदम सही हैं।' },
+        { emoji: '🌟', en: 'Opt for silver or rose gold jewellery to complement your undertone', hinglish: 'Silver ya rose gold jewellery tumhare undertone ko complement karegi.', hi: 'अपने अंडरटोन के लिए चांदी या रोज़ गोल्ड के गहनों का चुनाव करें।' }
+      ],
       medium: [
         { emoji: '💎', en: 'Teal + gold is a stunning festive combination for medium skin tones', hinglish: 'Teal + gold medium skin tones ke liye ek stunning festive combination hai.', hi: 'टील और गोल्ड मध्यम त्वचा के रंग के लिए एक शानदार त्यौहारी संयोजन है।' },
         { emoji: '🔥', en: 'Rust and terracotta coord sets amplify your natural warmth beautifully', hinglish: 'Rust aur terracotta coord sets tumhari natural warmth ko beautifully amplify karte hain.', hi: 'रस्ट और टेराकोटा कॉर्ड सेट आपकी प्राकृतिक गर्मी को खूबसूरती से बढ़ाते हैं।' },
         { emoji: '👑', en: 'Royal blue silk saree is show-stopping wedding elegance for your tone', hinglish: 'Royal blue silk saree tumhare tone ke liye show-stopping wedding elegance hai.', hi: 'रॉयल ब्लू सिल्क साड़ी आपके रंग के लिए एक शानदार वेडिंग ड्रेस है।' },
         { emoji: '🌟', en: 'Mustard kurtis make you look confident and stylish — try with white', hinglish: 'Mustard kurtis tumhe confident aur stylish dikhati hain — white ke sath try karo.', hi: 'मस्टर्ड कुर्ती आपको आत्मविश्वासी और स्टाइलिश दिखाती है — सफेद के साथ आज़माएँ।' },
         { emoji: '💚', en: 'Emerald green makes your skin absolutely glow — ideal for dates', hinglish: 'Emerald green se skin continuously glow karti hai — dates ke liye ideal.', hi: 'पन्ना हरा आपकी त्वचा को पूरी तरह से निखारता है — डेट के लिए आदर्श है।' }
+      ],
+      olive: [
+        { emoji: '🍷', en: 'Deep wine and burgundy create a rich contrast with olive undertones', hinglish: 'Deep wine aur burgundy olive undertones ke sath rich contrast dete hain.', hi: 'गहरी वाइन और बरगंडी जैतून के अंडरटोन के साथ एक समृद्ध कंट्रास्ट बनाते हैं।' },
+        { emoji: '✨', en: 'Ivory and cream sarees look incredibly sophisticated on olive skin', hinglish: 'Ivory aur cream sarees olive skin par bahut sophisticated lagti hain.', hi: 'हाथीदांत और क्रीम रंग की साड़ियाँ जैतून की त्वचा पर अविश्वसनीय रूप से परिष्कृत लगती हैं।' },
+        { emoji: '🍊', en: 'Burnt orange and amber bring out the golden glow in your complexion', hinglish: 'Burnt orange aur amber complexion ki golden glow ko bahar nikalte hain.', hi: 'बर्न ऑरेंज और एम्बर आपकी त्वचा की सुनहरी चमक को बाहर लाते हैं।' },
+        { emoji: '🌿', en: 'Try olive green on olive skin for a chic tone-on-tone look', hinglish: 'Olive green ko olive skin par try karo chic tone-on-tone look ke liye.', hi: 'एक शानदार टोन-ऑन-टोन लुक के लिए जैतून की त्वचा पर जैतून हरा रंग आज़माएँ।' },
+        { emoji: '💎', en: 'Silver and gunmetal jewellery work better than traditional gold for you', hinglish: 'Tumhare liye silver aur gunmetal jewellery gold se better kaam karti hai.', hi: 'आपके लिए चांदी और गनमेटल के गहने पारंपरिक सोने से बेहतर काम करते हैं।' }
       ],
       brown: [
         { emoji: '💖', en: 'Hot pink and gold is a power combination that makes brown skin radiate', hinglish: 'Hot pink aur gold ek power combination hai jo brown skin ko fully radiate karta hai.', hi: 'हॉट पिंक और गोल्ड एक शक्तिशाली संयोजन है जो भूरी त्वचा को चमका देता है।' },
