@@ -37,6 +37,7 @@ function Toast({ message, onClose }) {
 
 function LoadingScreen() {
   const { t } = useLanguage();
+  const [step, setStep] = useState(0);
   const steps = [
     { emoji: '🔍', text: t('loadingScan'), sub: t('loadingQuality') },
     { emoji: '👤', text: t('loadingFace'), sub: t('loadingFaceSub') },
