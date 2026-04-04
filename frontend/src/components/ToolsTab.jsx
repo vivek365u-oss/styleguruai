@@ -80,6 +80,7 @@ function ColorContrastChecker({ isDark }) {
 }
 
 function TrendingCard({ item, isDark, AMAZON_TAG }) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const kw = encodeURIComponent(item.category);
   const amzUrl = `https://www.amazon.in/s?k=${kw}&rh=n%3A1968024031&sort=review-rank&tag=${AMAZON_TAG}`;
@@ -130,6 +131,7 @@ function TrendingCard({ item, isDark, AMAZON_TAG }) {
 // ------------------------------------------
 
 function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) {
+  const { t } = useLanguage();
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [activeTool, setActiveTool] = useState(null); // 'outfit', 'community', 'stylebot', 'tryon'
@@ -203,7 +205,7 @@ function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) 
 
 
 
-  const { t } = useLanguage();
+
   return (
     <div className="space-y-6 pt-2">
       <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>🛠️ {t('toolsHeader')}</h2>
