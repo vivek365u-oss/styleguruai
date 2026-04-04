@@ -97,6 +97,25 @@ app = FastAPI(title="StyleGuru API", version="1.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    error_traceback = traceback.format_exc()
+    print(f"GLOBAL ERROR: {str(exc)}")
+    print(error_traceback)
+    
+    # Check if headers already exist to avoid duplication
+    # CORSMiddleware will normally handle this, but for internal errors, it's safer.
+    return JSONResponse(
+        status_code=500,
+        content={
+            "success": False,
+            "error": "internal_server_error",
+            "message": "A server error occurred. Our team has been notified. Please try again soon.",
+            "type": type(exc).__name__,
+            "detail": str(exc) if os.environ.get("DEBUG") == "true" else "Confidential information hidden."
+        }
+    )
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -314,8 +333,8 @@ async def get_history(current_user: dict = Depends(get_current_user)):
 @app.post("/api/analyze")
 @limiter.limit("5/minute")
 async def analyze_image(
+    request: Request,
     file: UploadFile = File(...),
-    request: Optional[dict] = None, # For slowapi context
     lang: str = "en",
     current_user: dict = Depends(get_current_user_lenient)
 ):
@@ -476,10 +495,10 @@ async def analyze_seasonal(
 @app.post("/api/outfit/check")
 @limiter.limit("5/minute")
 async def check_outfit_compatibility(
+    request: Request,
     selfie: UploadFile = File(...),
     outfit: UploadFile = File(...),
     lang: str = "en",
-    request: Optional[dict] = None, # For slowapi context
     current_user: dict = Depends(get_current_user_lenient)
 ):
     start_time = time.time()
