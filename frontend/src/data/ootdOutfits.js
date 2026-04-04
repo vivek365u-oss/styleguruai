@@ -225,7 +225,7 @@ export const getLocalizedOOTD = (gender, skinTone, language, indexOffset = 0) =>
   };
 
   const gndr = gender === 'female' ? 'female' : 'male';
-  let tone = skinTone?.toLowerCase() || 'medium';
+  let tone = (typeof skinTone === 'string' ? skinTone : skinTone?.category || 'medium')?.toLowerCase();
   if (!OUTFITS[gndr][tone] && !genericOutfitPoolFallback[gndr][tone]) tone = 'medium';
   
   let pool = OUTFITS[gndr][tone] || genericOutfitPoolFallback[gndr][tone];

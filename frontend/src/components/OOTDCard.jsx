@@ -26,7 +26,7 @@ function OOTDCard({ skinTone, gender, isDark }) {
 
   // Get today's outfit
   const genderKey = gender === 'female' ? 'female' : 'male';
-  let toneKey = skinTone?.toLowerCase() || 'medium';
+  let toneKey = (typeof skinTone === 'string' ? skinTone : skinTone?.category || 'medium')?.toLowerCase();
   const outfit = getLocalizedOOTD(genderKey, toneKey, language, indexOffset);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2500); };

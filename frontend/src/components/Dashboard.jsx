@@ -173,7 +173,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
   });
 
   const gndr = lastAnalysis?.fullData?.gender || 'male';
-  const tone = lastAnalysis?.skinTone?.toLowerCase() || 'medium';
+  const tone = (typeof lastAnalysis?.skinTone === 'string' ? lastAnalysis?.skinTone : lastAnalysis?.skinTone?.category || 'medium')?.toLowerCase();
   const todayTip = getLocalizedTip(gndr, tone, language);
   const firstName = user?.name?.split(' ')[0] || t('guestName');
   return (

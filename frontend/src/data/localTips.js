@@ -82,7 +82,7 @@ export const getLocalizedTip = (gender, skinTone, language) => {
   };
 
   const gndr = gender === 'female' ? 'female' : 'male';
-  let tone = skinTone?.toLowerCase() || 'medium';
+  let tone = (typeof skinTone === 'string' ? skinTone : skinTone?.category || 'medium')?.toLowerCase();
   if (!LOCAL_TIPS[gndr][tone]) tone = 'medium';
   
   const tonePool = LOCAL_TIPS[gndr][tone];

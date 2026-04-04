@@ -60,7 +60,7 @@ function WeatherTip({ city, isDark }) {
 
   const tip = weather ? (() => {
     const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
-    const tone = lastAnalysis?.skinTone?.toLowerCase() || 'default';
+    const tone = (typeof lastAnalysis?.skinTone === 'string' ? lastAnalysis?.skinTone : lastAnalysis?.skinTone?.category || 'medium')?.toLowerCase();
     return getLocalizedWeatherTip(weather.category, tone, language);
   })() : null;
 

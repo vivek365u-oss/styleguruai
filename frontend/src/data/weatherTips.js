@@ -74,7 +74,7 @@ export const getLocalizedWeatherTip = (weatherCategory, skinTone, language) => {
 
   const categoryPool = WEATHER_TIPS[weatherCategory] || WEATHER_TIPS.warm;
   
-  const tone = skinTone?.toLowerCase() || 'default';
+  const tone = (typeof skinTone === 'string' ? skinTone : skinTone?.category || 'medium')?.toLowerCase();
   const tipObj = categoryPool.tips[tone] || categoryPool.tips.default;
   
   return {
