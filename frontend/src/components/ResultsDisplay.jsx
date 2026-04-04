@@ -9,6 +9,7 @@ import { translateBackendObject } from '../i18n/backendTranslations';
 
 // ── Shopping Links ───────────────────────────────────────────
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
+  const { t } = useLanguage();
   const isFemale = gender === "female";
   const colorLower = colorName.toLowerCase().replace(/\s+/g, '+');
   const colorDisplay = colorName.toLowerCase().replace(/\s+/g, ' ');
@@ -361,6 +362,7 @@ const CELEBRITY_MAP = {
 
 // ── Profile Hero Card ────────────────────────────────────────
 function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSeasonal, isDark, photoQuality }) {
+  const { t } = useLanguage();
   const toneColors = { fair: "#F5DEB3", light: "#D2A679", medium: "#C68642", olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A" };
   const wrapperCls = isDark
     ? 'bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-white/10'
@@ -515,6 +517,7 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
 
 // ── Complete the Look ────────────────────────────────────────
 function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
+  const { t } = useLanguage();
   const AMAZON_TAG = 'styleguruai-21';
   const isFemale = gender === 'female';
   const pant = pantColors?.[0];
@@ -562,6 +565,7 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
 
 // ── Colors Tab ───────────────────────────────────────────────
 function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shirtCategory, pantCategory, isDark }) {
+  const { t } = useLanguage();
   const avoidColors = recommendations.colors_to_avoid || [];
   const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
 
@@ -661,6 +665,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 
 // ── Outfits Tab ──────────────────────────────────────────────
 function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, styleTips, occasionAdvice, ethnicWear, sareeSuggestions, isDark, bodyTypeTips = [], bodyType = null, userOccasion = 'casual' }) {
+  const { t } = useLanguage();
   let outfits = [];
   if (isSeasonal) outfits = seasonalGender === 'female' ? (recommendations.female_outfits || []) : (recommendations.male_outfits || []);
   else if (isFemale) outfits = recommendations.outfit_combos || [];
@@ -785,6 +790,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
 
 // ── Accessories Tab ──────────────────────────────────────────
 function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }) {
+  const { t } = useLanguage();
   const accessories = recommendations.accessories || [];
   const accentColors = recommendations.accent_colors || [];
 
