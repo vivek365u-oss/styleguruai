@@ -11,6 +11,9 @@ from typing import Optional
 import firebase_admin
 from firebase_admin import credentials, auth as firebase_auth
 
+from fastapi import FastAPI, UploadFile, File, BackgroundTasks, Request, Depends, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 import sentry_sdk
 from slowapi import Limiter, _rate_limit_exceeded_handler
