@@ -68,6 +68,7 @@ function LoadingScreen() {
 }
 
 function DailyDropModal({ lastAnalysis, isDark, onClose }) {
+  const { t } = useLanguage();
   const [revealed, setRevealed] = useState(false);
   const handleReveal = () => {
     setRevealed(true);
@@ -112,7 +113,7 @@ function DailyDropModal({ lastAnalysis, isDark, onClose }) {
 
 function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
   const { theme } = useContext(ThemeContext);
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const isDark = theme === 'dark';
   const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
   const analysisCount = parseInt(localStorage.getItem('sg_analysis_count') || '0');
