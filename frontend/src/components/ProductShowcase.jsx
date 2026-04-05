@@ -77,9 +77,9 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
               console.log('[Products] Seeding started, retrying with exponential backoff...');
               
               const retryFetch = async (attempt = 1) => {
-                const delays = [10000, 15000, 20000];  // 10s, 15s, 20s
+                const delays = [5000, 10000, 15000, 20000];  // 5s, 10s, 15s, 20s
                 const waitTime = delays[Math.min(attempt - 1, delays.length - 1)];
-                const maxAttempts = 3;
+                const maxAttempts = 4;
                 
                 if (attempt > maxAttempts) {
                   console.error('[Products] Max retry attempts reached');
