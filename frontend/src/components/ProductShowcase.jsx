@@ -19,6 +19,7 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [seeding, setSeeding] = useState(false);
+  const [autoSeeded, setAutoSeeded] = useState(false);
 
   const handleSeedProducts = async () => {
     try {
@@ -34,18 +35,17 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
       const res = await seedAPI.post(`/api/products/seed`);
       
       if (res.data.success) {
-        console.log('[Products] ✅ Seeding successful!', res.data);
-        alert(`✅ ${res.data.message}\nTotal: ${res.data.total_products} products\n\nRefresh the page to see products!`);
-        // Reload products after a short delay
-        setTimeout(() => window.location.reload(), 2000);
+        console.log('[Products] ✅ Seeding response:', res.data);
+        setAutoSeeded(true);
+        // Don't reload page - just trigger refetch
+        return true;
       } else {
         throw new Error(res.data.message || 'Seeding failed');
       }
     } catch (err) {
       console.error('[Products] Seeding error:', err.message);
-      alert(`❌ Seeding failed: ${err.message}\n\nTry again - first time can take 2-3 minutes.`);
-    } finally {
       setSeeding(false);
+      return false;
     }
   };
 
@@ -61,12 +61,34 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
           params: { limit: count }
         });
 
-        if (res.data.success) {
+        if (res.data.success && res.data.products.length > 0) {
           console.log(`[Products] ✅ Loaded ${res.data.products.length} products`);
           setProducts(res.data.products.slice(0, count));
           setError(null);
+          setSeeding(false);
         } else {
-          throw new Error(res.data.detail || 'Failed to fetch products');
+          // No products found - auto-seed silently
+          if (!autoSeeded) {
+            console.log('[Products] No products found, auto-seeding...');
+            const seedSuccess = await handleSeedProducts();
+            if (seedSuccess) {
+              // After seeding, try fetching again after a delay
+              setTimeout(async () => {
+                try {
+                  const retryRes = await API.get(`/api/products/by-color/${colorName.toLowerCase()}`, {
+                    params: { limit: count }
+                  });
+                  if (retryRes.data.success) {
+                    setProducts(retryRes.data.products.slice(0, count));
+                    setError(null);
+                  }
+                } catch (e) {
+                  console.error('[Products] Retry fetch error:', e.message);
+                }
+              }, 3000);
+            }
+          }
+          throw new Error(res.data.detail || 'No products available');
         }
       } catch (err) {
         console.error('[Products] ❌ Error:', err.message);
@@ -78,7 +100,7 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
     };
 
     fetchProducts();
-  }, [colorName, count]);
+  }, [colorName, count, autoSeeded]);
 
   if (loading) {
     return (
@@ -104,28 +126,35 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
     );
   }
 
-  if (products.length === 0) {
+  if (products.length === 0 && !seeding) {
     return (
       <div className={`p-8 rounded-xl text-center ${
         isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'
       }`}>
         <p className={`text-sm font-bold ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
-          📦 No products found for this color
+          📦 No products for this color yet
         </p>
         <p className={`text-xs mt-2 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
-          Products database is empty. Seed it to get started!
+          Try a different color or refresh the page
         </p>
-        <button
-          onClick={handleSeedProducts}
-          disabled={seeding}
-          className={`mt-4 px-4 py-2 rounded-lg font-bold text-sm transition ${
-            seeding
-              ? isDark ? 'bg-gray-500/20 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-              : isDark ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500' : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
-          }`}
-        >
-          {seeding ? '🌱 Seeding...' : '🌱 Seed Products'}
-        </button>
+      </div>
+    );
+  }
+
+  if (seeding) {
+    return (
+      <div className={`p-8 rounded-xl text-center ${
+        isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'
+      }`}>
+        <div className="inline-block">
+          <div className="w-8 h-8 border-4 border-purple-600 border-t-pink-600 rounded-full animate-spin" />
+        </div>
+        <p className={`text-sm font-bold mt-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          🌱 Setting up products...
+        </p>
+        <p className={`text-xs mt-2 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
+          This may take 1-2 minutes on first run
+        </p>
       </div>
     );
   }
