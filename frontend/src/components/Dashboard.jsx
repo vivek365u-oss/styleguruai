@@ -309,6 +309,140 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
   );
 }
 
+function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro, usage, onShowSettings }) {
+  const { t } = useLanguage();
+  const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
+  const wardrobeStats = lastAnalysis ? {
+    skinTone: lastAnalysis.skinTone,
+    undertone: lastAnalysis.undertone,
+    season: lastAnalysis.season,
+    skinHex: lastAnalysis.skinHex,
+    date: lastAnalysis.date,
+  } : null;
+
+  // Check if user is logged in (has email with proper format)
+  const isLoggedIn = user?.email && !user.email.includes('@guest');
+
+  return (
+    <div className="space-y-4 pt-2">
+      {/* Authentication Status */}
+      {isLoggedIn ? (
+        <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-green-500/10 border-green-500/20' : 'bg-green-50 border-green-200'}`}>
+          <p className={`text-xs font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>✅ Logged In</p>
+        </div>
+      ) : (
+        <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-200'}`}>
+          <p className={`text-xs font-bold mb-2 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>👤 Guest Mode</p>
+          <button
+            onClick={() => window.location.href = '/login'}
+            className={`w-full px-3 py-2 rounded-lg font-bold text-xs transition-all ${isDark ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+          >
+            Login to Save Progress
+          </button>
+        </div>
+      )}
+
+      {/* Profile Header */}
+      <div className={`rounded-3xl p-6 border text-center ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+        <div className="inline-block mb-4 relative">
+          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+            <span className="text-5xl text-white font-black">{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
+          </div>
+        </div>
+        <h2 className={`text-2xl font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{user?.name}</h2>
+        <p className={`text-sm mb-4 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{user?.email}</p>
+        <button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 font-semibold transition-all text-sm">
+          ✏️ Edit Profile
+        </button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+          <p className="text-2xl mb-1">📸</p>
+          <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{analysisCount}</p>
+          <p className={`text-[10px] uppercase font-bold ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Analyses</p>
+        </div>
+        <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+          <p className="text-2xl mb-1">❤️</p>
+          <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{savedCount}</p>
+          <p className={`text-[10px] uppercase font-bold ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Saved Colors</p>
+        </div>
+        <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white  border-gray-200 shadow-sm'}`}>
+          <p className="text-2xl mb-1">⭐</p>
+          <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>92%</p>
+          <p className={`text-[10px] uppercase font-bold ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Score</p>
+        </div>
+      </div>
+
+      {/* Skin Tone Analysis */}
+      {wardrobeStats && (
+        <div className={`rounded-3xl p-6 border ${isDark ? 'bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/30' : 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200'}`}>
+          <h3 className={`text-lg font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>🎨 Color Analysis</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className={`p-3 rounded-xl ${isDark ? 'bg-white/5' : 'bg-white/80'}`}>
+              <p className={`text-xs uppercase font-bold mb-1 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Tone</p>
+              <p className={`font-black capitalize ${isDark ? 'text-white' : 'text-gray-900'}`}>{wardrobeStats.skinTone}</p>
+            </div>
+            <div className={`p-3 rounded-xl ${isDark ? 'bg-white/5' : 'bg-white/80'}`}>
+              <p className={`text-xs uppercase font-bold mb-1 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Undertone</p>
+              <p className={`font-black capitalize ${isDark ? 'text-white' : 'text-gray-900'}`}>{wardrobeStats.undertone}</p>
+            </div>
+            <div className={`p-3 rounded-xl ${isDark ? 'bg-white/5' : 'bg-white/80'}`}>
+              <p className={`text-xs uppercase font-bold mb-1 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Season</p>
+              <p className={`font-black capitalize ${isDark ? 'text-white' : 'text-gray-900'}`}>{wardrobeStats.season}</p>
+            </div>
+            <div className={`p-3 rounded-xl ${isDark ? 'bg-white/5' : 'bg-white/80'} flex flex-col items-center justify-center`}>
+              <div className="w-10 h-10 rounded-lg border-2 border-white/30 shadow-lg" style={{ backgroundColor: wardrobeStats.skinHex }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Plan Status */}
+      <div className={`rounded-3xl p-6 border ${isPro ? (isDark ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-500/30' : 'bg-gradient-to-br from-purple-100 to-pink-100 border-purple-300') : (isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm')}`}>
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <h3 className={`text-lg font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{isPro ? '⚡ PRO' : '🆓 Free'}</h3>
+            {isPro && (
+              <p className={`text-sm ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>Premium unlocked ✓</p>
+            )}
+          </div>
+        </div>
+        {!isPro && (
+          <div className="space-y-2">
+            <div>
+              <div className="flex justify-between text-xs mb-1">
+                <span className={isDark ? 'text-white/50' : 'text-gray-500'}>Analyses</span>
+                <span className={isDark ? 'text-white/70' : 'text-gray-700'}>{usage?.analyses_count || 0}/6</span>
+              </div>
+              <div className={`h-2 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
+                <div className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500" style={{ width: `${Math.min(100, ((usage?.analyses_count || 0) / 6) * 100)}%` }} />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Settings Button */}
+      <button
+        onClick={onShowSettings}
+        className={`w-full p-4 rounded-2xl font-black border transition-all text-base ${isDark ? 'bg-purple-600/20 border-purple-500/30 hover:bg-purple-600/40 text-purple-300' : 'bg-purple-100 border-purple-300 hover:bg-purple-200 text-purple-700'}`}
+      >
+        ⚙️ Settings & Preferences
+      </button>
+
+      {/* Website Link */}
+      <button
+        onClick={() => window.open('https://styleguruai.in', '_blank')}
+        className={`w-full p-4 rounded-2xl font-black border transition-all text-base ${isDark ? 'bg-blue-600/20 border-blue-500/30 hover:bg-blue-600/40 text-blue-300' : 'bg-blue-100 border-blue-300 hover:bg-blue-200 text-blue-700'}`}
+      >
+        🌐 Visit Website
+      </button>
+    </div>
+  );
+}
+
 function SettingsScreen({ user, onLogout }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t, language, changeLanguage } = useLanguage();
@@ -630,7 +764,7 @@ function SettingsScreen({ user, onLogout }) {
       <div className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
         <h3 className={`text-sm font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>ℹ️ About</h3>
         <button
-          onClick={() => window.open('https://styleguruai.com', '_blank')}
+          onClick={() => window.open('https://styleguruai.in', '_blank')}
           className={`w-full p-3 rounded-xl font-bold transition-all ${isDark ? 'bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:bg-purple-600/40' : 'bg-purple-100 border border-purple-300 text-purple-700 hover:bg-purple-200'}`}
         >
           🌐 Visit Website
@@ -833,11 +967,6 @@ function Dashboard({ user, onLogout }) {
               <span className="text-purple-500">✨</span> PRO
             </div>
           )}
-          {user && (
-            <button onClick={() => window.location.href = '/profile'} className="w-8 h-8 rounded-xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 flex items-center justify-center text-sm transition">
-              ❤️
-            </button>
-          )}
           <button onClick={toggleTheme} className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-sm">
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
@@ -917,50 +1046,15 @@ function Dashboard({ user, onLogout }) {
         {activeTab === 'profile' && (
           <>
             {!showProfileSettings ? (
-              <div className="space-y-4 pt-2">
-                {/* Profile Header */}
-                <div className={`rounded-3xl p-6 border text-center ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-                  <div className="inline-block mb-4">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
-                      <span className="text-4xl text-white font-black">{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
-                    </div>
-                  </div>
-                  <h2 className={`text-2xl font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{user?.name}</h2>
-                  <p className={`text-sm mb-4 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{user?.email}</p>
-                  <div className="flex gap-2 justify-center">
-                    <button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 font-semibold transition-all text-sm">
-                      ✏️ Edit Name
-                    </button>
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-                    <p className="text-xl mb-1">📸</p>
-                    <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{analysisCount}</p>
-                    <p className={`text-[10px] font-bold ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Analyses</p>
-                  </div>
-                  <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-                    <p className="text-xl mb-1">❤️</p>
-                    <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{savedCount}</p>
-                    <p className={`text-[10px] font-bold ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Saved</p>
-                  </div>
-                  <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-                    <p className="text-xl mb-1">⭐</p>
-                    <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>92%</p>
-                    <p className={`text-[10px] font-bold ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Score</p>
-                  </div>
-                </div>
-
-                {/* Settings Button */}
-                <button
-                  onClick={() => setShowProfileSettings(true)}
-                  className={`w-full p-3 rounded-2xl font-semibold border transition-all ${isDark ? 'bg-purple-600/20 border-purple-500/30 hover:bg-purple-600/40 text-purple-300' : 'bg-purple-100 border-purple-300 hover:bg-purple-200 text-purple-700'}`}
-                >
-                  ⚙️ Settings & Preferences
-                </button>
-              </div>
+              <ProfileScreenComponent 
+                user={user} 
+                isDark={isDark} 
+                analysisCount={analysisCount}
+                savedCount={savedCount}
+                isPro={isPro}
+                usage={usage}
+                onShowSettings={() => setShowProfileSettings(true)}
+              />
             ) : (
               <div>
                 <button
