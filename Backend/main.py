@@ -943,6 +943,7 @@ async def get_products_by_color(color_name: str, limit: int = 50, gender: str = 
             
             # Greens
             "olive": "olive",
+            "olive green": "olive",
             "forest green": "green",
             "light green": "green",
             "sage": "green",
