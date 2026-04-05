@@ -2,12 +2,29 @@
 // StyleGuru — Shopping Cart Context
 // Global cart state management for products
 // ============================================================
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sg_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('sg_cart', JSON.stringify(cart));
+      console.log('[Cart] 💾 Saved to localStorage:', cart);
+    } catch (e) {
+      console.error('[Cart] Failed to save:', e);
+    }
+  }, [cart]);
 
   // Add item to cart
   const addToCart = useCallback((product) => {
