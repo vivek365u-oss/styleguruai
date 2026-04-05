@@ -919,32 +919,111 @@ async def get_product_details(product_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch product: {str(e)}")
 
-@app.post("/api/products/seed")
-async def seed_products(background_tasks: BackgroundTasks):
-    """Seed 1000+ products to Firestore (one-time setup, runs in background)."""
+@app.post("/api/products/clear-and-reseed")
+async def clear_and_reseed(background_tasks: BackgroundTasks):
+    """Clear all old products and reseed with new image URLs (dummyimage.com)."""
     try:
         db = get_firestore_db()
         
-        # Check if products already exist (avoid duplicate seeding)
-        all_products = list(db.collection("products").limit(1).stream())
-        if len(all_products) > 0:
-            try:
-                count = db.collection("products").count().get()[0][0].value
-            except:
-                count = "unknown"
-            return {
-                "success": True,
-                "message": f"Products already seeded ({count} products exist)",
-                "total_products": count,
-                "already_seeded": True
-            }
+        print("[Products] Clearing old products with via.placeholder URLs...")
         
-        # Queue the seeding operation to run in the background
+        # Delete all existing products
+        docs = db.collection("products").stream()
+        batch = db.batch()
+        batch_count = 0
+        
+        for doc in docs:
+            batch.delete(doc.reference)
+            batch_count += 1
+            if batch_count >= 500:
+                batch.commit()
+                batch = db.batch()
+                batch_count = 0
+        
+        if batch_count > 0:
+            batch.commit()
+        
+        print("[Products] ✅ Cleared all old products. Queuing fresh seed...")
+        
+        # Queue fresh seeding
         background_tasks.add_task(perform_seeding)
         
         return {
             "success": True,
-            "message": "Seeding started in background - this may take 2-3 minutes",
+            "message": "Cleared old products. Reseeding with new dummyimage URLs (1-2 minutes)...",
+            "status": "clearing_and_reseeding"
+        }
+    except Exception as e:
+        print(f"[Products] Clear error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Clear failed: {str(e)}")
+
+@app.post("/api/products/seed")
+async def seed_products(background_tasks: BackgroundTasks):
+    """Seed 3600+ products to Firestore (one-time setup, runs in background)."""
+    try:
+        db = get_firestore_db()
+        
+        print("[Products] Checking for existing products...")
+        
+        # Check if products exist
+        all_products = list(db.collection("products").limit(1).stream())
+        if len(all_products) > 0:
+            # Check if they have old image URLs (via.placeholder)
+            first_product = all_products[0].to_dict()
+            has_old_urls = "via.placeholder" in first_product.get("image_url", "")
+            
+            if has_old_urls:
+                print("[Products] Found old products with via.placeholder URLs - clearing and reseeding...")
+                # Clear in background and then reseed
+                async def clear_and_reseed_task():
+                    try:
+                        # Delete all products
+                        docs = db.collection("products").stream()
+                        batch = db.batch()
+                        batch_count = 0
+                        
+                        for doc in docs:
+                            batch.delete(doc.reference)
+                            batch_count += 1
+                            if batch_count >= 500:
+                                batch.commit()
+                                batch = db.batch()
+                                batch_count = 0
+                        
+                        if batch_count > 0:
+                            batch.commit()
+                        
+                        print("[Products] ✅ Cleared old products, now reseeding...")
+                        await perform_seeding()
+                    except Exception as e:
+                        print(f"[Products] Clear/reseed error: {str(e)}")
+                
+                background_tasks.add_task(clear_and_reseed_task)
+                return {
+                    "success": True,
+                    "message": "Old products found - clearing and reseeding with correct URLs (1-2 minutes)...",
+                    "status": "clearing_and_reseeding"
+                }
+            else:
+                # Products exist and have correct URLs
+                try:
+                    count = db.collection("products").count().get()[0][0].value
+                except:
+                    count = "unknown"
+                return {
+                    "success": True,
+                    "message": f"Products already seeded with correct URLs ({count} products exist)",
+                    "total_products": count,
+                    "already_seeded": True
+                }
+        
+        # No products exist - queue fresh seeding
+        print("[Products] No products found - starting fresh seed...")
+        background_tasks.add_task(perform_seeding)
+        
+        return {
+            "success": True,
+            "message": "Seeding started in background (30-60 seconds)...",
             "status": "seeding_in_progress"
         }
     except Exception as e:
