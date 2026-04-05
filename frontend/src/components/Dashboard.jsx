@@ -1,6 +1,6 @@
 import OutfitChecker from './OutfitChecker';
 import { useState, useEffect, useContext } from 'react';
-
+import { useNavigate } from 'react-router-dom';
 import UploadSection from './UploadSection';
 import ResultsDisplay from './ResultsDisplay';
 import CoupleResults from './CoupleResults';
@@ -334,7 +334,7 @@ function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro
         <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-200'}`}>
           <p className={`text-xs font-bold mb-2 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>👤 Guest Mode</p>
           <button
-            onClick={() => window.location.href = '/login'}
+            onClick={() => navigate('/login')}
             className={`w-full px-3 py-2 rounded-lg font-bold text-xs transition-all ${isDark ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
           >
             Login to Save Progress
@@ -1077,10 +1077,10 @@ function Dashboard({ user, onLogout }) {
             <button
               key={item.id}
               onClick={() => handleTabChange(item.id)}
-              className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${activeTab === item.id ? 'text-purple-500' : theme === 'dark' ? 'text-white/30 hover:text-white/60' : 'text-gray-400 hover:text-gray-700'}`}
+              className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${activeTab === item.id ? 'text-purple-500' : theme === 'dark' ? 'text-white/30 hover:text-white/60' : 'text-gray-600 hover:text-gray-900'}`}
             >
               <span className={`text-xl transition-transform ${activeTab === item.id ? 'scale-110' : ''}`}>{item.emoji}</span>
-              <span className={`text-[10px] font-semibold ${activeTab === item.id ? 'text-purple-400' : 'text-white/30'}`}>{item.label}</span>
+              <span className={`text-[10px] font-semibold ${activeTab === item.id ? 'text-purple-400' : theme === 'dark' ? 'text-white/30' : 'text-gray-700'}`}>{item.label}</span>
               {activeTab === item.id && <div className="w-1 h-1 rounded-full bg-purple-400 nav-dot" />}
             </button>
           ))}

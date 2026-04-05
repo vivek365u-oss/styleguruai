@@ -267,6 +267,7 @@ function SettingsPage() {
             >
               🌐 Visit Website
             </button>
+            <p className={`text-xs text-center ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Version 2.0 • Built with ❤️ for fashion</p>
           </div>
         </div>
 
