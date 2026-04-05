@@ -186,6 +186,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
   const tone = (typeof lastAnalysis?.skinTone === 'string' ? lastAnalysis?.skinTone : lastAnalysis?.skinTone?.category || 'medium')?.toLowerCase();
   const todayTip = getLocalizedTip(gndr, tone, language);
   const isLoggedIn = user && !user.isAnonymous;
+  const firstName = user?.name?.split(' ')[0] || t('guestName');
 
   return (
     <div className="pb-4 space-y-6">
