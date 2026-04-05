@@ -137,12 +137,12 @@ function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) 
   const [activeTool, setActiveTool] = useState(null); // 'outfit', 'community', 'stylebot', 'tryon'
 
   const trendingStyles = [
-    { emoji: '👕', label: 'Oversized Tee', tag: '🔥 Male', gender: 'male', category: 'oversized tshirt streetwear', myntraUrl: 'https://www.myntra.com/tshirts?rawQuery=oversized%20tshirt%20men', flipkartUrl: 'https://www.flipkart.com/search?q=men+oversized+tshirt&sort=popularity_desc', meeshoQ: 'men oversized tshirt' },
-    { emoji: '🪖', label: 'Cargo Pants', tag: '🔥 Male', gender: 'male', category: 'cargo pants men streetwear', myntraUrl: 'https://www.myntra.com/cargos?rawQuery=cargo%20pants%20men', flipkartUrl: 'https://www.flipkart.com/search?q=men+cargo+pants&sort=popularity_desc', meeshoQ: 'men cargo pants' },
-    { emoji: '🎽', label: 'Co-ord Set', tag: '🔥 Male', gender: 'male', category: 'men coord set matching', myntraUrl: 'https://www.myntra.com/co-ords?rawQuery=men%20coord%20set', flipkartUrl: 'https://www.flipkart.com/search?q=men+coord+set&sort=popularity_desc', meeshoQ: 'men coord set' },
-    { emoji: '✨', label: 'Coord Set', tag: '🔥 Female', gender: 'female', category: 'women coord set two piece', myntraUrl: 'https://www.myntra.com/co-ords?rawQuery=women%20coord%20set', flipkartUrl: 'https://www.flipkart.com/search?q=women+coord+set&sort=popularity_desc', meeshoQ: 'women coord set' },
-    { emoji: '👗', label: 'Maxi Dress', tag: '🔥 Female', gender: 'female', category: 'women maxi dress trending', myntraUrl: 'https://www.myntra.com/dresses?rawQuery=women%20maxi%20dress', flipkartUrl: 'https://www.flipkart.com/search?q=women+maxi+dress&sort=popularity_desc', meeshoQ: 'women maxi dress' },
-    { emoji: '🥻', label: 'Kurti Set', tag: '🔥 Female', gender: 'female', category: 'women kurti set with pants', myntraUrl: 'https://www.myntra.com/kurta-sets?rawQuery=kurti%20set%20women', flipkartUrl: 'https://www.flipkart.com/search?q=women+kurti+set&sort=popularity_desc', meeshoQ: 'women kurti set' },
+    { emoji: '👕', label: 'Oversized Tee', tag: '🔥 Male', gender: 'male', category: 'oversized tshirt', myntraUrl: 'https://www.myntra.com/men-oversized-tshirt', flipkartUrl: 'https://www.flipkart.com/search?q=men+oversized+tshirt', meeshoQ: 'men oversized tshirt' },
+    { emoji: '🎽', label: 'Cargo Pants', tag: '🔥 Male', gender: 'male', category: 'cargo pants', myntraUrl: 'https://www.myntra.com/men-cargo-pants', flipkartUrl: 'https://www.flipkart.com/search?q=men+cargo+pants', meeshoQ: 'men cargo pants' },
+    { emoji: '🧥', label: 'Co-ord Set', tag: '🔥 Male', gender: 'male', category: 'men coord set', myntraUrl: 'https://www.myntra.com/men-coord-set', flipkartUrl: 'https://www.flipkart.com/search?q=men+coord+set', meeshoQ: 'men coord set' },
+    { emoji: '✨', label: 'Coord Set', tag: '🔥 Female', gender: 'female', category: 'women coord set', myntraUrl: 'https://www.myntra.com/women-coord-set', flipkartUrl: 'https://www.flipkart.com/search?q=women+coord+set', meeshoQ: 'women coord set' },
+    { emoji: '👗', label: 'Maxi Dress', tag: '🔥 Female', gender: 'female', category: 'women maxi dress', myntraUrl: 'https://www.myntra.com/women-maxi-dress', flipkartUrl: 'https://www.flipkart.com/search?q=women+maxi+dress', meeshoQ: 'women maxi dress' },
+    { emoji: '🥻', label: 'Kurti Set', tag: '🔥 Female', gender: 'female', category: 'women kurti set', myntraUrl: 'https://www.myntra.com/women-kurti-set', flipkartUrl: 'https://www.flipkart.com/search?q=women+kurti+set', meeshoQ: 'women kurti set' },
   ];
 
   if (activeTool === 'outfit') {

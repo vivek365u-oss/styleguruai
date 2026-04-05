@@ -11,9 +11,8 @@ import { translateBackendObject } from '../i18n/backendTranslations';
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   const { t } = useLanguage();
   const isFemale = gender === "female";
-  const colorLower = colorName.toLowerCase().replace(/\s+/g, '+');
   const colorDisplay = colorName.toLowerCase().replace(/\s+/g, ' ');
-  const colorMyntra = colorName.toLowerCase().replace(/\s+/g, '%20'); // Myntra rawQuery needs %20
+  const colorSlug = colorName.toLowerCase().replace(/\s+/g, '-');
   const AMAZON_TAG = 'styleguruai-21';
   const [budget, setBudget] = useState(null); // null = no filter
   const { theme } = useContext(ThemeContext);
@@ -26,96 +25,49 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
     { label: 'Any', amzMax: null, fkMax: null, myntraMax: null },
   ];
 
-  const categoryConfig = {
-    // ── WOMEN ── 2025 trending keywords
-    dress:      { amzKw: `${colorDisplay} women coord set maxi dress trending 2025`,    amzNode: '1968024031', myntra: `https://www.myntra.com/co-ords?rawQuery=${colorMyntra}%20women%20coord%20set`,           meesho: `${colorDisplay} women coord set maxi dress` },
-    top:        { amzKw: `${colorDisplay} women crop top oversized tshirt trending`,    amzNode: '1968024031', myntra: `https://www.myntra.com/tops?rawQuery=${colorMyntra}%20women%20crop%20top%20oversized`,     meesho: `${colorDisplay} women crop top oversized` },
-    kurti:      { amzKw: `${colorDisplay} women kurti with jeans casual trending`,      amzNode: '1968024031', myntra: `https://www.myntra.com/kurtas?rawQuery=${colorMyntra}%20women%20kurti`,         meesho: `${colorDisplay} women kurti casual` },
-    lehenga:    { amzKw: `${colorDisplay} women lehenga choli bridal wedding 2025`,     amzNode: '1968024031', myntra: `https://www.myntra.com/lehenga-cholis?rawQuery=${colorMyntra}%20women%20lehenga`,      meesho: `${colorDisplay} women lehenga bridal` },
-    saree:      { amzKw: `${colorDisplay} women saree georgette silk trending`,         amzNode: '1968024031', myntra: `https://www.myntra.com/sarees?rawQuery=${colorMyntra}%20women%20saree`,      meesho: `${colorDisplay} women saree georgette` },
-    bottom:     { amzKw: `${colorDisplay} women baggy jeans wide leg palazzo trending`, amzNode: '1968024031', myntra: `https://www.myntra.com/jeans?rawQuery=${colorMyntra}%20women%20jeans`,        meesho: `${colorDisplay} women baggy jeans palazzo` },
-    handbag:    { amzKw: `${colorDisplay} women sling bag tote trending 2025`,          amzNode: '1953539031', myntra: `https://www.myntra.com/handbags?rawQuery=${colorMyntra}%20women%20handbag`,         meesho: `${colorDisplay} women sling bag tote` },
-    jewellery:  { amzKw: `${colorDisplay} women oxidised jewellery set trending`,       amzNode: '1953557031', myntra: `https://www.myntra.com/jewellery?rawQuery=${colorMyntra}%20women%20jewellery`,      meesho: `${colorDisplay} women jewellery set` },
-    dupatta:    { amzKw: `${colorDisplay} women dupatta stole trending`,                amzNode: '1968024031', myntra: `https://www.myntra.com/dupattas?rawQuery=${colorMyntra}%20women%20dupatta`,            meesho: `${colorDisplay} women dupatta stole` },
-    // ── GENDER AWARE ──
-    watch:      { amzKw: isFemale ? `${colorDisplay} women analog watch fashion trending` : `${colorDisplay} men analog watch casual trending`, amzNode: '1350380031', myntra: isFemale ? `https://www.myntra.com/watches?rawQuery=${colorMyntra}%20women%20watch` : `https://www.myntra.com/watches?rawQuery=${colorMyntra}%20men%20watch`, meesho: isFemale ? `${colorDisplay} women watch fashion` : `${colorDisplay} men watch casual` },
-    wallet:     { amzKw: isFemale ? `${colorDisplay} women wallet clutch trending` : `${colorDisplay} men slim wallet rfid`, amzNode: '1953539031', myntra: isFemale ? `https://www.myntra.com/wallets?rawQuery=${colorMyntra}%20women%20wallet` : `https://www.myntra.com/wallets?rawQuery=${colorMyntra}%20men%20wallet`, meesho: isFemale ? `${colorDisplay} women wallet clutch` : `${colorDisplay} men slim wallet` },
-    sunglasses: { amzKw: isFemale ? `${colorDisplay} women sunglasses trendy oversized` : `${colorDisplay} men sunglasses trendy polarized`, amzNode: '1350380031', myntra: isFemale ? `https://www.myntra.com/sunglasses?rawQuery=${colorMyntra}%20women%20sunglasses` : `https://www.myntra.com/sunglasses?rawQuery=${colorMyntra}%20men%20sunglasses`, meesho: isFemale ? `${colorDisplay} women sunglasses trendy` : `${colorDisplay} men sunglasses trendy` },
-    accessories:{ amzKw: isFemale ? `${colorDisplay} women accessories jewellery trending` : `${colorDisplay} men accessories cap streetwear`, amzNode: isFemale ? '1953557031' : '1968024031', myntra: isFemale ? `https://www.myntra.com/jewellery?rawQuery=${colorMyntra}%20women%20jewellery` : `https://www.myntra.com/accessories?rawQuery=${colorMyntra}%20men%20accessories`, meesho: isFemale ? `${colorDisplay} women accessories` : `${colorDisplay} men accessories streetwear` },
-    bag:        { amzKw: isFemale ? `${colorDisplay} women sling bag tote trending` : `${colorDisplay} men backpack sling bag streetwear`, amzNode: '1953539031', myntra: isFemale ? `https://www.myntra.com/handbags?rawQuery=${colorMyntra}%20women%20handbag` : `https://www.myntra.com/backpacks?rawQuery=${colorMyntra}%20men%20backpack`, meesho: isFemale ? `${colorDisplay} women sling bag` : `${colorDisplay} men backpack streetwear` },
-    shoes:      { amzKw: isFemale ? `${colorDisplay} women sneakers chunky platform trending` : `${colorDisplay} men sneakers casual streetwear`, amzNode: '1983518031', myntra: isFemale ? `https://www.myntra.com/sneakers?rawQuery=${colorMyntra}%20women%20sneakers` : `https://www.myntra.com/sneakers?rawQuery=${colorMyntra}%20men%20sneakers`, meesho: isFemale ? `${colorDisplay} women chunky sneakers` : `${colorDisplay} men casual sneakers` },
-    footwear:   { amzKw: isFemale ? `${colorDisplay} women sneakers heels sandals trending` : `${colorDisplay} men sneakers loafers casual`, amzNode: '1983518031', myntra: isFemale ? `https://www.myntra.com/sneakers?rawQuery=${colorMyntra}%20women%20footwear` : `https://www.myntra.com/sneakers?rawQuery=${colorMyntra}%20men%20footwear`, meesho: isFemale ? `${colorDisplay} women footwear trending` : `${colorDisplay} men footwear casual` },
-    // ── MEN ── 2025 trending keywords
-    shirt:      { amzKw: isFemale ? `${colorDisplay} women crop top coord set oversized` : `${colorDisplay} men oversized tshirt polo streetwear trending`, amzNode: '1968024031', myntra: isFemale ? `https://www.myntra.com/tops?rawQuery=${colorMyntra}%20women%20crop%20top` : `https://www.myntra.com/tshirts?rawQuery=${colorMyntra}%20men%20oversized%20tshirt`, meesho: isFemale ? `${colorDisplay} women crop top coord` : `${colorDisplay} men oversized tshirt polo` },
-    pant:       { amzKw: isFemale ? `${colorDisplay} women baggy jeans palazzo wide leg` : `${colorDisplay} men cargo pants joggers streetwear trending`, amzNode: '1968024031', myntra: isFemale ? `https://www.myntra.com/jeans?rawQuery=${colorMyntra}%20women%20jeans` : `https://www.myntra.com/cargos?rawQuery=${colorMyntra}%20men%20cargo`, meesho: isFemale ? `${colorDisplay} women baggy jeans palazzo` : `${colorDisplay} men cargo joggers streetwear` },
-    belt:       { amzKw: `${colorDisplay} men belt casual streetwear`, amzNode: '1968024031', myntra: `https://www.myntra.com/belts?rawQuery=${colorMyntra}%20men%20belt`, meesho: `${colorDisplay} men belt casual` },
+  // 1. Correct gender-specific category naming
+  const getProductCategory = () => {
+    const cat = category.toLowerCase();
+    if (isFemale) {
+      if (cat === 'shirt' || cat === 'top') return 'top';
+      if (cat === 'pant' || cat === 'bottom') return 'jeans';
+      if (cat === 'shoes' || cat === 'footwear') return 'heels';
+      if (cat === 'jewellery') return 'earrings';
+      if (cat === 'bag' || cat === 'handbag') return 'handbag';
+      return cat;
+    } else {
+      if (cat === 'shirt' || cat === 'top') return 'shirt';
+      if (cat === 'pant' || cat === 'bottom') return 'jeans';
+      if (cat === 'shoes' || cat === 'footwear') return 'shoes';
+      return cat;
+    }
   };
 
-  const cfg = categoryConfig[category] || { amzKw: `${colorDisplay} ${isFemale ? 'women' : 'men'} ${category} oversized trending 2025`, amzNode: '1968024031', myntra: isFemale ? `https://www.myntra.com/women?rawQuery=${colorMyntra}%20women%20${category}` : `https://www.myntra.com/men?rawQuery=${colorMyntra}%20men%20${category}`, meesho: `${colorDisplay} ${isFemale ? 'women' : 'men'} ${category} trending` };
+  const product = getProductCategory();
+  
+  // 2. Build Myntra dynamic slug (e.g., navy-shirt)
+  // Myntra search logic: slug works best for popular combos, /search?q= for everything else.
+  // The user requested: myntra.com/color-product
+  const myntraUrl = `https://www.myntra.com/${colorSlug}-${product}`;
+  
+  // 3. Other platforms (updated to match same categories)
+  const amzKw = `${colorDisplay} ${gender} ${product} trending 2025`;
+  const fkKw = `${colorDisplay} ${gender} ${product}`;
+  const meeKw = `${colorDisplay} ${gender} ${product}`;
 
-  // Build price-filtered URLs — optimized for best results
   const amzPriceParam = budget?.amzMax ? `%2Cp_36%3A-${budget.amzMax * 100}` : '';
   const fkPriceParam = budget?.fkMax ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budget.fkMax}` : '';
   const myntraPriceParam = budget?.myntraMax ? `&p=price%5B0%5D%3D0%20TO%20${budget.myntraMax}` : '';
 
-  // Curated top picks — highly relevant direct search URLs per color+category for ALL 4 platforms
-  const topPicksMap = {
-    'navy blue': {
-      shirt:   { amz: `https://www.amazon.in/s?k=navy%20blue%20men%20oversized%20tshirt&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=navy%20blue%20men%20oversized%20tshirt&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/tshirts?rawQuery=navy%20blue%20men%20oversized%20tshirt`, mee: 'https://meesho.com/search?q=navy+blue+men+oversized+tshirt' },
-      pant:    { amz: `https://www.amazon.in/s?k=navy%20blue%20men%20cargo%20pants&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=navy%20blue%20men%20cargo%20pants&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/cargos?rawQuery=navy%20blue%20men%20cargo`, mee: 'https://meesho.com/search?q=navy+blue+men+cargo+pants' },
-      dress:   { amz: `https://www.amazon.in/s?k=navy%20blue%20women%20coord%20set&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=navy%20blue%20women%20coord%20set&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/co-ords?rawQuery=navy%20blue%20women%20coord%20set`, mee: 'https://meesho.com/search?q=navy+blue+women+coord+set' },
-    },
-    'teal': {
-      shirt:   { amz: `https://www.amazon.in/s?k=teal%20men%20oversized%20tshirt&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=teal%20men%20oversized%20tshirt&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/tshirts?rawQuery=teal%20men%20oversized%20tshirt`, mee: 'https://meesho.com/search?q=teal+men+oversized+tshirt' },
-      dress:   { amz: `https://www.amazon.in/s?k=teal%20women%20coord%20set%20maxi&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=teal%20women%20coord%20set&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/co-ords?rawQuery=teal%20women%20coord%20set`, mee: 'https://meesho.com/search?q=teal+women+coord+set' },
-    },
-    'rust': {
-      shirt:   { amz: `https://www.amazon.in/s?k=rust%20orange%20men%20oversized%20tshirt&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=rust%20orange%20men%20oversized%20tshirt&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/tshirts?rawQuery=rust%20orange%20men%20oversized%20tshirt`, mee: 'https://meesho.com/search?q=rust+orange+men+tshirt' },
-      dress:   { amz: `https://www.amazon.in/s?k=rust%20women%20coord%20set%20maxi&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=rust%20women%20coord%20set&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/co-ords?rawQuery=rust%20women%20coord%20set`, mee: 'https://meesho.com/search?q=rust+women+coord+set' },
-    },
-    'cobalt blue': {
-      shirt:   { amz: `https://www.amazon.in/s?k=cobalt%20blue%20men%20tshirt%20polo&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=cobalt%20blue%20men%20tshirt%20polo&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/tshirts?rawQuery=cobalt%20blue%20men%20tshirt`, mee: 'https://meesho.com/search?q=cobalt+blue+men+tshirt+polo' },
-      dress:   { amz: `https://www.amazon.in/s?k=cobalt%20blue%20women%20coord%20set&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=cobalt%20blue%20women%20coord%20set&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/co-ords?rawQuery=cobalt%20blue%20women%20coord%20set`, mee: 'https://meesho.com/search?q=cobalt+blue+women+coord+set' },
-    },
-    'forest green': {
-      shirt:   { amz: `https://www.amazon.in/s?k=forest%20green%20men%20oversized%20tshirt&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=forest%20green%20men%20oversized%20tshirt&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/tshirts?rawQuery=forest%20green%20men%20oversized%20tshirt`, mee: 'https://meesho.com/search?q=forest+green+men+oversized+tshirt' },
-      kurti:   { amz: `https://www.amazon.in/s?k=forest%20green%20women%20kurti&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=forest%20green%20women%20kurti&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/kurtas?rawQuery=forest%20green%20women%20kurti`, mee: 'https://meesho.com/search?q=forest+green+women+kurti' },
-    },
-    'mustard': {
-      shirt:   { amz: `https://www.amazon.in/s?k=mustard%20yellow%20men%20polo%20tshirt&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=mustard%20yellow%20men%20polo%20tshirt&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/tshirts?rawQuery=mustard%20yellow%20men%20polo%20tshirt`, mee: 'https://meesho.com/search?q=mustard+yellow+men+polo+tshirt' },
-      dress:   { amz: `https://www.amazon.in/s?k=mustard%20yellow%20women%20coord%20set&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=mustard%20yellow%20women%20coord%20set&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/co-ords?rawQuery=mustard%20yellow%20women%20coord%20set`, mee: 'https://meesho.com/search?q=mustard+yellow+women+coord+set' },
-    },
-    'burgundy': {
-      shirt:   { amz: `https://www.amazon.in/s?k=burgundy%20maroon%20men%20oversized%20tshirt&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=burgundy%20maroon%20men%20oversized%20tshirt&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/tshirts?rawQuery=burgundy%20men%20oversized%20tshirt`, mee: 'https://meesho.com/search?q=burgundy+maroon+men+tshirt' },
-      lehenga: { amz: `https://www.amazon.in/s?k=burgundy%20women%20lehenga%20choli&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=burgundy%20women%20lehenga%20choli&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/lehenga-cholis?rawQuery=burgundy%20women%20lehenga`, mee: 'https://meesho.com/search?q=burgundy+women+lehenga+choli' },
-    },
-    'coral': {
-      dress:   { amz: `https://www.amazon.in/s?k=coral%20women%20maxi%20dress%20coord&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=coral%20women%20coord%20set&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/co-ords?rawQuery=coral%20women%20coord%20set`, mee: 'https://meesho.com/search?q=coral+women+coord+set+maxi' },
-      shirt:   { amz: `https://www.amazon.in/s?k=coral%20men%20polo%20tshirt&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, fk: `https://www.flipkart.com/search?q=coral%20men%20polo%20tshirt&sort=popularity_desc${fkPriceParam}`, myn: `https://www.myntra.com/tshirts?rawQuery=coral%20men%20polo%20tshirt`, mee: 'https://meesho.com/search?q=coral+men+polo+tshirt' },
-    },
-  };
-
-  const colorKey = colorDisplay.toLowerCase();
-  const topPick = topPicksMap[colorKey]?.[category];
-
   const links = [
-    { name: 'Amazon',   url: topPick?.amz || `https://www.amazon.in/s?k=${encodeURIComponent(cfg.amzKw)}&rh=n%3A${cfg.amzNode}${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, icon: '🛒', bg: isDark ? 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' : 'bg-orange-50 hover:bg-orange-100 border-orange-300 text-orange-700 font-bold' },
-    { name: 'Flipkart', url: topPick?.fk  || `https://www.flipkart.com/search?q=${encodeURIComponent(colorDisplay + ' ' + category)}&sort=popularity_desc${fkPriceParam}`, icon: '🏪', bg: isDark ? 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700 font-bold' },
-    { name: 'Myntra',   url: topPick?.myn || `${cfg.myntra}${myntraPriceParam}`, icon: '👗', bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold' },
-    { name: 'Meesho',   url: topPick?.mee || `https://meesho.com/search?q=${encodeURIComponent(cfg.meesho)}`, icon: '🛍️', bg: isDark ? 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' : 'bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700 font-bold' },
+    { name: 'Amazon',   url: `https://www.amazon.in/s?k=${encodeURIComponent(amzKw)}&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, icon: '🛒', bg: isDark ? 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' : 'bg-orange-50 hover:bg-orange-100 border-orange-300 text-orange-700 font-bold' },
+    { name: 'Flipkart', url: `https://www.flipkart.com/search?q=${encodeURIComponent(fkKw)}&sort=popularity_desc${fkPriceParam}`, icon: '🏪', bg: isDark ? 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700 font-bold' },
+    { name: 'Myntra',   url: `${myntraUrl}${myntraUrl.includes('?') ? '&' : '?'}${myntraPriceParam.slice(1)}`, icon: '👗', bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold' },
+    { name: 'Meesho',   url: `https://meesho.com/search?q=${encodeURIComponent(meeKw)}`, icon: '🛍️', bg: isDark ? 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' : 'bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700 font-bold' },
   ];
 
   return (
     <div className="mt-2 space-y-2">
-      {/* Top Pick badge when curated URL available */}
-      {topPick && (
-        <div className="flex items-center gap-1.5">
-          <span className={`text-[10px] font-bold border px-2 py-0.5 rounded-full
-            ${isDark ? 'bg-green-500/20 border-green-500/30 text-green-400' : 'bg-green-100 border-green-400 text-green-700'}`}>
-            ⭐ {t('topPicks')}
-          </span>
-        </div>
-      )}
       {/* Budget filter pills */}
       <div className="flex gap-1.5 flex-wrap">
         {budgets.map((b) => (

@@ -21,57 +21,31 @@ function OutfitShopCard({ color, isDark, gender = 'male' }) {
 
   // Generate shopping links with budget filtering
   const generateShoppingLinks = () => {
-    // Color-specific keywords database
-    const colorKeywords = {
-      'red': { trending: 'red party wear, red trending tops', search: 'red' },
-      'blue': { trending: 'blue casual shirts, blue denim', search: 'blue' },
-      'black': { trending: 'black elegant, black formal', search: 'black' },
-      'white': { trending: 'white premium shirts, white clean', search: 'white' },
-      'green': { trending: 'green streetwear, green mint', search: 'green' },
-      'yellow': { trending: 'yellow summer wear, yellow', search: 'yellow' },
-      'pink': { trending: 'pink blush, pink trending fashion', search: 'pink' },
-      'purple': { trending: 'purple royal, purple outfits', search: 'purple' },
-      'orange': { trending: 'orange vibrant, orange trending', search: 'orange' },
-      'brown': { trending: 'brown neutral, brown classic', search: 'brown' },
-      'gray': { trending: 'gray modern, gray neutral', search: 'gray' },
-      'beige': { trending: 'beige neutral, beige elegant', search: 'beige' },
-    };
+    const isFemale = gender === 'female';
+    const colorSlug = color.name.toLowerCase().replace(/\s+/g, '-');
+    const colorDisplay = color.name.toLowerCase().replace(/\s+/g, ' ');
 
-    const colorData = colorKeywords[colorDisplay] || { trending: `${colorDisplay} premium trending`, search: colorDisplay };
+    // Match categories as requested
+    const product = isFemale ? 'top' : 'shirt';
+    
+    // Myntra dynamic URL
+    const myntraUrl = `https://www.myntra.com/${colorSlug}-${product}`;
+    
+    const amzKw = `${colorDisplay} ${gender} ${product} trending 2025`;
+    const fkKw = `${colorDisplay} ${gender} ${product}`;
+    const meeKw = `${colorDisplay} ${gender} ${product}`;
 
-    // Build price parameters
     const budgetMax = budget?.max;
     const amzPrice = budgetMax ? `%2Cp_36%3A-${budgetMax * 100}` : '';
     const fkPrice = budgetMax ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budgetMax}` : '';
     const myntraPrice = budgetMax ? `&p=price%5B0%5D%3D0%20TO%20${budgetMax}` : '';
 
-    // Platform-specific search terms
-    let searchTerms = {};
-    if (gender === 'female') {
-      searchTerms = {
-        amazon: `${colorData.search} women top blouse trending bestseller`,
-        flipkart: `${colorData.search} women top`,
-        myntra: `${colorData.search}+women+apparel`,
-        meesho: `${colorData.search} women top`,
-      };
-    } else {
-      searchTerms = {
-        amazon: `${colorData.search} men shirt tshirt oversized trending bestseller`,
-        flipkart: `${colorData.search} men shirt tshirt`,
-        myntra: `${colorData.search}+men+apparel`,
-        meesho: `${colorData.search} men shirt`,
-      };
-    }
-
-    // Build actual URLs with proper encoding and budget
-    const urls = {
-      amazon: `https://www.amazon.in/s?k=${encodeURIComponent(searchTerms.amazon)}&rh=${gender === 'female' ? 'n%3A7534543031' : 'n%3A1968024031'}${amzPrice}&sort=review-rank&tag=${AMAZON_TAG}`,
-      flipkart: `https://www.flipkart.com/search?q=${encodeURIComponent(searchTerms.flipkart)}&sort=review-rank${fkPrice}`,
-      myntra: `https://www.myntra.com/search?q=${encodeURIComponent(searchTerms.myntra)}&sort=popularity${myntraPrice}`,
-      meesho: `https://meesho.com/search?q=${encodeURIComponent(searchTerms.meesho)}&sort=popularity`,
+    return {
+      amazon: `https://www.amazon.in/s?k=${encodeURIComponent(amzKw)}&rh=${isFemale ? 'n%3A7534543031' : 'n%3A1968024031'}${amzPrice}&sort=review-rank&tag=${AMAZON_TAG}`,
+      flipkart: `https://www.flipkart.com/search?q=${encodeURIComponent(fkKw)}&sort=review-rank${fkPrice}`,
+      myntra: `${myntraUrl}${myntraUrl.includes('?') ? '&' : '?'}${myntraPrice.slice(1)}`,
+      meesho: `https://meesho.com/search?q=${encodeURIComponent(meeKw)}`,
     };
-
-    return urls;
   };
 
   const shopLinks = generateShoppingLinks();
