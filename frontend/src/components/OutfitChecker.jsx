@@ -11,7 +11,6 @@ function OutfitShopCard({ color, isDark, gender = 'male' }) {
   const [budget, setBudget] = useState(null);
   const AMAZON_TAG = 'styleguruai-21';
   const colorDisplay = color.name.toLowerCase();
-  const colorLower = colorDisplay.replace(/\s+/g, '+');
 
   const budgets = [
     { label: '₹500', max: 500 },
@@ -20,63 +19,72 @@ function OutfitShopCard({ color, isDark, gender = 'male' }) {
     { label: 'Any', max: null },
   ];
 
-  const amzPriceParam = budget?.max ? `%2Cp_36%3A-${budget.max * 100}` : '';
-  const fkPriceParam = budget?.max ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budget.max}` : '';
-  const myntraPriceParam = budget?.max ? `&p=price%5B0%5D%3D0%20TO%20${budget.max}` : '';
-
-  // Different search queries based on gender & color
-  const getSearchQueries = () => {
+  // Generate shopping links with budget filtering
+  const generateShoppingLinks = () => {
+    // Color-specific keywords database
     const colorKeywords = {
-      'red': { category: 'festive, ethnic, bold', trending: 'red party wear, red trending tops 2025' },
-      'blue': { category: 'casual, formal, smart', trending: 'blue casual shirts, blue denim trending' },
-      'black': { category: 'formal, elegant, minimal', trending: 'black elegant, black formal trending' },
-      'white': { category: 'crisp, pure, fresh', trending: 'white premium shirts, white clean look' },
-      'green': { category: 'nature, fresh, trendy', trending: 'green streetwear, green mint trending' },
-      'yellow': { category: 'bright, cheerful, summer', trending: 'yellow summer wear, yellow trending' },
-      'pink': { category: 'romantic, feminine, pastel', trending: 'pink blush, pink trending fashion' },
-      'purple': { category: 'royal, elegant, unique', trending: 'purple royal, purple trending outfits' },
-      'orange': { category: 'vibrant, warm, energetic', trending: 'orange vibrant, orange trending wear' },
-      'brown': { category: 'earthy, classic, neutral', trending: 'brown neutral, brown classic style' },
-      'gray': { category: 'sophisticated, neutral, modern', trending: 'gray modern, gray neutral trending' },
-      'beige': { category: 'minimalist, neutral, elegant', trending: 'beige neutral, beige elegant styling' },
+      'red': { trending: 'red party wear, red trending tops', search: 'red' },
+      'blue': { trending: 'blue casual shirts, blue denim', search: 'blue' },
+      'black': { trending: 'black elegant, black formal', search: 'black' },
+      'white': { trending: 'white premium shirts, white clean', search: 'white' },
+      'green': { trending: 'green streetwear, green mint', search: 'green' },
+      'yellow': { trending: 'yellow summer wear, yellow', search: 'yellow' },
+      'pink': { trending: 'pink blush, pink trending fashion', search: 'pink' },
+      'purple': { trending: 'purple royal, purple outfits', search: 'purple' },
+      'orange': { trending: 'orange vibrant, orange trending', search: 'orange' },
+      'brown': { trending: 'brown neutral, brown classic', search: 'brown' },
+      'gray': { trending: 'gray modern, gray neutral', search: 'gray' },
+      'beige': { trending: 'beige neutral, beige elegant', search: 'beige' },
     };
 
-    const keywordData = colorKeywords[colorDisplay] || { category: 'trendy', trending: `${colorDisplay} premium trending 2025` };
+    const colorData = colorKeywords[colorDisplay] || { trending: `${colorDisplay} premium trending`, search: colorDisplay };
 
+    // Build price parameters
+    const budgetMax = budget?.max;
+    const amzPrice = budgetMax ? `%2Cp_36%3A-${budgetMax * 100}` : '';
+    const fkPrice = budgetMax ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budgetMax}` : '';
+    const myntraPrice = budgetMax ? `&p=price%5B0%5D%3D0%20TO%20${budgetMax}` : '';
+
+    // Platform-specific search terms
+    let searchTerms = {};
     if (gender === 'female') {
-      return {
-        amazon: `${keywordData.trending} women fashion`,
-        flipkart: `${colorDisplay} women top blouse`,
-        myntra: `${colorLower}-women-top`,
-        meesho: `${colorDisplay} women top trending`,
-        amazonCategory: 'n%3A7534543031', // Women's Clothing
+      searchTerms = {
+        amazon: `${colorData.search} women top blouse trending bestseller`,
+        flipkart: `${colorData.search} women top`,
+        myntra: `${colorData.search}+women+apparel`,
+        meesho: `${colorData.search} women top`,
       };
     } else {
-      return {
-        amazon: `${keywordData.trending} men fashion streetwear`,
-        flipkart: `${colorDisplay} men oversized tshirt`,
-        myntra: `${colorLower}-men-shirt`,
-        meesho: `${colorDisplay} men oversized tshirt trending`,
-        amazonCategory: 'n%3A1968024031', // Men's Clothing
+      searchTerms = {
+        amazon: `${colorData.search} men shirt tshirt oversized trending bestseller`,
+        flipkart: `${colorData.search} men shirt tshirt`,
+        myntra: `${colorData.search}+men+apparel`,
+        meesho: `${colorData.search} men shirt`,
       };
     }
+
+    // Build actual URLs with proper encoding and budget
+    const urls = {
+      amazon: `https://www.amazon.in/s?k=${encodeURIComponent(searchTerms.amazon)}&rh=${gender === 'female' ? 'n%3A7534543031' : 'n%3A1968024031'}${amzPrice}&sort=review-rank&tag=${AMAZON_TAG}`,
+      flipkart: `https://www.flipkart.com/search?q=${encodeURIComponent(searchTerms.flipkart)}&sort=review-rank${fkPrice}`,
+      myntra: `https://www.myntra.com/search?q=${encodeURIComponent(searchTerms.myntra)}&sort=popularity${myntraPrice}`,
+      meesho: `https://meesho.com/search?q=${encodeURIComponent(searchTerms.meesho)}&sort=popularity`,
+    };
+
+    return urls;
   };
 
-  const queries = getSearchQueries();
+  const shopLinks = generateShoppingLinks();
 
   const links = [
-    { name: 'Amazon',   icon: '🛒',
-      bg: isDark ? 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' : 'bg-orange-50 hover:bg-orange-100 border-orange-300 text-orange-700 font-bold',
-      url: `https://www.amazon.in/s?k=${encodeURIComponent(queries.amazon + ' bestseller')}&rh=${queries.amazonCategory}${amzPriceParam}&sort=review-rank&tag=${AMAZON_TAG}` },
-    { name: 'Flipkart', icon: '🏪',
-      bg: isDark ? 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700 font-bold',
-      url: `https://www.flipkart.com/search?q=${encodeURIComponent(queries.flipkart)}&sort=review-rank${fkPriceParam}` },
-    { name: 'Myntra',   icon: '👗',
-      bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold',
-      url: `https://www.myntra.com/search?q=${queries.myntra}&sort=popularity&pageNo=1` },
-    { name: 'Meesho',   icon: '🛍️',
-      bg: isDark ? 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' : 'bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700 font-bold',
-      url: `https://meesho.com/search?q=${encodeURIComponent(queries.meesho)}&sort=popularity` },
+    { name: 'Amazon', icon: '🛒', platform: 'amazon',
+      bg: isDark ? 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' : 'bg-orange-50 hover:bg-orange-100 border-orange-300 text-orange-700 font-bold' },
+    { name: 'Flipkart', icon: '🏪', platform: 'flipkart',
+      bg: isDark ? 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700 font-bold' },
+    { name: 'Myntra', icon: '👗', platform: 'myntra',
+      bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold' },
+    { name: 'Meesho', icon: '🛍️', platform: 'meesho',
+      bg: isDark ? 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' : 'bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700 font-bold' },
   ];
 
   const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-md';
@@ -114,7 +122,7 @@ function OutfitShopCard({ color, isDark, gender = 'male' }) {
       {/* Shop links */}
       <div className="flex gap-1.5 flex-wrap">
         {links.map((link) => (
-          <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer"
+          <a key={link.name} href={shopLinks[link.platform]} target="_blank" rel="noopener noreferrer"
             className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}>
             <span>{link.icon}</span><span>{link.name}</span>
           </a>
