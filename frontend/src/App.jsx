@@ -1,10 +1,11 @@
 import React, { useState, useEffect, createContext, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { auth, logout, loadProfile } from './api/styleApi';
-import { onAuthStateChanged } from 'firebase/auth';
+import { auth, logout } from './api/styleApi';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { PlanProvider } from './context/PlanContext';
 import SplashScreen from './components/SplashScreen';
+import { useAuthState } from './hooks/useAuthState';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Eagerly loaded components for fast initial render
 import LandingPage from './components/LandingPage';
@@ -39,6 +40,27 @@ const LoadingFallback = () => (
     </div>
   </div>
 );
+
+/**
+ * Auth Error Component - Shown when profile loading fails
+ */
+function AuthErrorUI({ error, onRetry }) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#050816] via-purple-950 to-[#050816] flex flex-col items-center justify-center p-4">
+      <div className="max-w-sm text-center space-y-4">
+        <div className="text-6xl">⚠️</div>
+        <h2 className="text-2xl font-bold text-white">Something went wrong</h2>
+        <p className="text-purple-200/80">{error}</p>
+        <button
+          onClick={onRetry}
+          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-lg text-white font-semibold transition-all"
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function PrivateRoute({ user, children }) {
   if (!user) return <Navigate to="/" replace />;
@@ -101,88 +123,52 @@ function AppRoutes({ user, setUser }) {
 }
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const authState = useAuthState();
   const [showSplash, setShowSplash] = useState(true);
   const [theme, setTheme] = useState(() => {
-    // Always start with light mode by default
-    return 'light';
+    return localStorage.getItem('tonefit_theme') || 'light';
   });
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        setUser({ name: firebaseUser.displayName || firebaseUser.email, email: firebaseUser.email });
-        // Load profile from Firestore and sync to localStorage
-        try {
-          const profile = await loadProfile(firebaseUser.uid);
-          if (profile) {
-            // Overwrite localStorage with Firestore data (cross-device sync)
-            const existing = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
-            const firestoreEntry = {
-              ...(existing || {}),
-              skinTone: profile.skin_tone,
-              undertone: profile.undertone,
-              season: profile.color_season,
-              skinHex: profile.skin_hex,
-              confidence: profile.confidence,
-              date: existing?.date || new Date().toLocaleDateString('en-IN'),
-              timestamp: existing?.timestamp || Date.now(),
-              fullData: existing?.fullData || null,
-            };
-            localStorage.setItem('sg_last_analysis', JSON.stringify(firestoreEntry));
-            // Apply saved preferences
-            if (profile.gender_mode) localStorage.setItem('sg_gender', profile.gender_mode);
-            if (profile.language) localStorage.setItem('sg_language', profile.language);
-          }
-        } catch (e) {
-          console.error('loadProfile on login error:', e);
-        }
-        // Remove guest status sync since guest mode no longer exists
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
+  const user = authState.user ? 
+    { name: authState.user.name, email: authState.user.email } 
+    : null;
 
-  useEffect(() => {
-    localStorage.setItem('tonefit_theme', theme);
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, [theme]);
+  const setUser = (newUser) => {
+    if (newUser === null) {
+      logout();
+    }
+  };
 
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e) => {
-      const saved = localStorage.getItem('tonefit_theme');
-      if (!saved) setTheme(e.matches ? 'dark' : 'light');
-    };
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
-
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  // Handle auth errors with retry
+  if (authState.authError && !authState.loading) {
+    return (
+      <AuthErrorUI
+        error={authState.error}
+        onRetry={() => window.location.reload()}
+      />
+    );
+  }
 
   if (showSplash) {
     return <SplashScreen onComplete={() => setShowSplash(false)} />;
   }
 
-  if (loading) {
+  if (authState.loading) {
     return <LoadingFallback />;
   }
 
   return (
-    <LanguageProvider>
-      <ThemeContext.Provider value={{ theme, toggleTheme }}>
-        <PlanProvider>
-          <div className="min-h-screen">
-            <AppRoutes user={user} setUser={setUser} theme={theme} toggleTheme={toggleTheme} />
-          </div>
-        </PlanProvider>
-      </ThemeContext.Provider>
-    </LanguageProvider>
+    <ErrorBoundary>
+      <LanguageProvider>
+        <ThemeContext.Provider value={{ theme, toggleTheme: () => setTheme(prev => prev === 'dark' ? 'light' : 'dark') }}>
+          <PlanProvider>
+            <div className="min-h-screen">
+              <AppRoutes user={user} setUser={setUser} theme={theme} toggleTheme={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')} />
+            </div>
+          </PlanProvider>
+        </ThemeContext.Provider>
+      </LanguageProvider>
+    </ErrorBoundary>
   );
-}
 
 export default App;

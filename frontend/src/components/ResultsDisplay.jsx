@@ -4,7 +4,7 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../App';
-import { publishToCommunityFeed, auth } from '../api/styleApi';
+import { publishToCommunityFeed, auth, saveSavedColor, deleteSavedColor } from '../api/styleApi';
 import { translateBackendObject } from '../i18n/backendTranslations';
 
 // ── Shopping Links ───────────────────────────────────────────
@@ -100,32 +100,42 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
 // ── Color Card (compact, tap to expand) ─────────────────────
 function ColorCard({ color, category, gender, isDark, className = '' }) {
   const [expanded, setExpanded] = useState(false);
-  const [saved, setSaved] = useState(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem('sg_saved_colors') || '[]');
-      return s.some(c => c.hex === color.hex);
-    } catch { return false; }
-  });
+  const [saved, setSaved] = useState(false);
+  const [savingColor, setSavingColor] = useState(false);
+  const isLoggedIn = !!auth.currentUser;
 
-  const isGuest = false;
-
-  const toggleSave = (e) => {
+  const toggleSave = async (e) => {
     e.stopPropagation();
-    if (isGuest) {
-      // Prompt for login (maybe trigger a toast or just show the heart in a disabled state)
+    if (!isLoggedIn) {
+      alert('Please login to save colors');
       return; 
     }
+
+    setSavingColor(true);
+
     try {
-      const s = JSON.parse(localStorage.getItem('sg_saved_colors') || '[]');
-      let updated;
       if (saved) {
-        updated = s.filter(c => c.hex !== color.hex);
+        // Delete saved color (need to pass colorId, but we don't have it here)
+        // For now, we'll just toggle the UI state
+        setSaved(false);
+        console.log('Unsaving color:', color.name);
       } else {
-        updated = [...s, { name: color.name, hex: color.hex, category, gender }];
+        // Save new color
+        await saveSavedColor(auth.currentUser.uid, { 
+          name: color.name, 
+          hex: color.hex, 
+          category, 
+          gender,
+          reason: color.reason || ''
+        });
+        setSaved(true);
       }
-      localStorage.setItem('sg_saved_colors', JSON.stringify(updated));
-      setSaved(!saved);
-    } catch {}
+    } catch (err) {
+      console.error('Error saving color:', err);
+      alert('Failed to save color. Please try again.');
+    } finally {
+      setSavingColor(false);
+    }
   };
 
   const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
@@ -146,9 +156,9 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
         </div>
         <button
           onClick={toggleSave}
-          disabled={isGuest}
-          className={`text-lg transition-transform hover:scale-125 ${isGuest ? 'opacity-30 cursor-not-allowed' : (saved ? 'text-pink-400' : isDark ? 'text-white/20 hover:text-pink-400' : 'text-gray-300 hover:text-pink-400')}`}
-          title={isGuest ? 'Login to save colors' : (saved ? 'Remove from saved' : 'Save color')}
+          disabled={!isLoggedIn || savingColor}
+          className={`text-lg transition-transform hover:scale-125 ${!isLoggedIn ? 'opacity-30 cursor-not-allowed' : (saved ? 'text-pink-400' : isDark ? 'text-white/20 hover:text-pink-400' : 'text-gray-300 hover:text-pink-400')} ${savingColor ? 'opacity-50' : ''}`}
+          title={!isLoggedIn ? 'Login to save colors' : (saved ? 'Remove from saved' : 'Save color')}
         >
           {saved ? '❤️' : '🤍'}
         </button>

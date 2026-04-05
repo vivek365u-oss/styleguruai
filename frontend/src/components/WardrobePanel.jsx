@@ -7,22 +7,112 @@ import { usePlan } from '../context/PlanContext';
 import { getLocalWardrobeImage, deleteLocalWardrobeImage } from '../utils/indexedDB';
 import HistoryPanel from './HistoryPanel';
 
-// ── Saved Colors Tab ─────────────────────────────────────────
-function SavedColorsTab({ isDark }) {
-  const { t } = useLanguage();
-  const [saved, setSaved] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]'); } catch { return []; }
-  });
+import { useState, useEffect, useContext } from 'react';
+import { getWardrobe, deleteWardrobeItem, getWardrobeCount, getSavedColors, deleteSavedColor, deleteAllSavedColors } from '../api/styleApi';
+import { auth } from '../api/styleApi';
+import { ThemeContext } from '../App';
+import { useLanguage } from '../i18n/LanguageContext';
+import { usePlan } from '../context/PlanContext';
+import { getLocalWardrobeImage, deleteLocalWardrobeImage } from '../utils/indexedDB';
+import HistoryPanel from './HistoryPanel';
 
-  const remove = (hex) => {
-    const updated = saved.filter(c => c.hex !== hex);
-    localStorage.setItem('sg_saved_colors', JSON.stringify(updated));
-    setSaved(updated);
+// ── Saved Colors Tab ─────────────────────────────────────────
+function SavedColorsTab({ isDark, user }) {
+  const { t } = useLanguage();
+  const [saved, setSaved] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [deletingId, setDeletingId] = useState(null);
+
+  useEffect(() => {
+    if (!user) { setLoading(false); return; }
+    
+    setLoading(true);
+    getSavedColors(auth.currentUser.uid)
+      .then(data => {
+        setSaved(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to load saved colors:', err);
+        setError(t('somethingWrong'));
+        setLoading(false);
+      });
+  }, [user]);
+
+  const remove = async (colorId) => {
+    if (!auth.currentUser) return;
+    setDeletingId(colorId);
+    
+    // Optimistic removal
+    setSaved(prev => prev.filter(c => c.id !== colorId));
+    
+    try {
+      await deleteSavedColor(auth.currentUser.uid, colorId);
+    } catch {
+      // Restore on failure
+      getSavedColors(auth.currentUser.uid).then(setSaved);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const clearAll = async () => {
+    if (!auth.currentUser) return;
+    if (!window.confirm(t('confirmClearAllColors') || 'Are you sure you want to delete all saved colors?')) return;
+    
+    // Optimistic clear
+    setSaved([]);
+    
+    try {
+      await deleteAllSavedColors(auth.currentUser.uid);
+    } catch {
+      // Restore on failure
+      getSavedColors(auth.currentUser.uid).then(setSaved);
+    }
   };
 
   const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
   const nameCls = isDark ? 'text-white' : 'text-gray-800';
   const hexCls = isDark ? 'text-white/30' : 'text-gray-400';
+
+  if (loading) {
+    return (
+      <div className="space-y-3">
+        {[1, 2, 3].map(i => (
+          <div key={i} className={`${cardCls} rounded-2xl p-4 animate-pulse`}>
+            <div className="flex items-center gap-4">
+              <div className={`w-12 h-12 rounded-xl flex-shrink-0 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
+              <div className="flex-1 space-y-2">
+                <div className={`h-3 rounded-full w-3/4 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
+                <div className={`h-3 rounded-full w-1/2 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={`rounded-2xl p-4 border text-center ${isDark ? 'bg-red-500/10 border-red-500/20' : 'bg-red-50 border-red-200'}`}>
+        <p className={isDark ? 'text-red-300 text-sm' : 'text-red-600 text-sm'}>{error}</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="text-center py-10 mt-8">
+        <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
+          <span className="text-4xl">🔐</span>
+        </div>
+        <p className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('loginRequired')}</p>
+        <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('loginToSaveColors')}</p>
+      </div>
+    );
+  }
 
   if (saved.length === 0) {
     return (
@@ -44,18 +134,24 @@ function SavedColorsTab({ isDark }) {
           <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{saved.length} {t('colors')}</p>
         </div>
       </div>
-      {saved.map((color, i) => (
-        <div key={i} className={`${cardCls} rounded-2xl p-4 flex items-center gap-4`}>
+      {saved.map((color) => (
+        <div key={color.id} className={`${cardCls} rounded-2xl p-4 flex items-center gap-4`}>
           <div className="w-12 h-12 rounded-xl flex-shrink-0 shadow-lg border border-white/10" style={{ backgroundColor: color.hex }} />
           <div className="flex-1 min-w-0">
-            <p className={`${nameCls} font-bold text-sm`}>{color.name}</p>
+            <p className={`${nameCls} font-bold text-sm`}>{color.name || 'Color'}</p>
             <p className={`${hexCls} text-xs font-mono`}>{color.hex}</p>
           </div>
-          <button onClick={() => remove(color.hex)} className="text-red-400/60 hover:text-red-400 text-2xl transition-colors px-2">✕</button>
+          <button 
+            onClick={() => remove(color.id)} 
+            disabled={deletingId === color.id}
+            className="text-red-400/60 hover:text-red-400 text-2xl transition-colors px-2 disabled:opacity-50"
+          >
+            ✕
+          </button>
         </div>
       ))}
       <button
-        onClick={() => { localStorage.removeItem('sg_saved_colors'); setSaved([]); }}
+        onClick={clearAll}
         className={`mt-4 w-full py-3 text-xs font-semibold rounded-xl border transition ${isDark ? 'border-white/10 text-white/30 hover:text-red-400 hover:border-red-500/30' : 'border-gray-200 text-gray-400 hover:text-red-500'}`}
       >
         {t('clearAllColors')}
@@ -229,7 +325,7 @@ function WardrobePanel({ user, onShowResult }) {
       {activeSubTab === 'history' ? (
         <HistoryPanel onShowResult={onShowResult} />
       ) : activeSubTab === 'colors' ? (
-        <SavedColorsTab isDark={isDark} />
+        <SavedColorsTab isDark={isDark} user={user} />
       ) : (
         <>
           <div className="flex items-center justify-between mb-4">

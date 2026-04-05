@@ -346,6 +346,61 @@ export const getWardrobeCount = async (uid) => {
 };
 
 // ============================================
+// SAVED COLORS — FIRESTORE
+// ============================================
+
+export const saveSavedColor = async (uid, color) => {
+  if (!auth.currentUser) return null;
+  try {
+    const ref = await addDoc(collection(db, 'users', uid, 'saved_colors'), {
+      ...color,
+      saved_at: new Date().toISOString(),
+    });
+    return ref.id;
+  } catch (e) {
+    handleFirestoreError('saveSavedColor', e);
+    throw e;
+  }
+};
+
+export const getSavedColors = async (uid) => {
+  if (!auth.currentUser) return [];
+  try {
+    const q = query(
+      collection(db, 'users', uid, 'saved_colors'),
+      orderBy('saved_at', 'desc')
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    handleFirestoreError('getSavedColors', e);
+    return [];
+  }
+};
+
+export const deleteSavedColor = async (uid, colorId) => {
+  if (!auth.currentUser) return;
+  try {
+    await deleteDoc(doc(db, 'users', uid, 'saved_colors', colorId));
+  } catch (e) {
+    handleFirestoreError('deleteSavedColor', e);
+    throw e;
+  }
+};
+
+export const deleteAllSavedColors = async (uid) => {
+  if (!auth.currentUser) return;
+  try {
+    const snap = await getDocs(collection(db, 'users', uid, 'saved_colors'));
+    const deletePromises = snap.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+  } catch (e) {
+    handleFirestoreError('deleteAllSavedColors', e);
+    throw e;
+  }
+};
+
+// ============================================
 // PUSH SUBSCRIPTIONS — FIRESTORE
 // ============================================
 
