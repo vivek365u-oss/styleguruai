@@ -824,9 +824,11 @@ function Dashboard({ user, onLogout }) {
     try {
       // Get token for API request
       const token = await auth.currentUser.getIdToken();
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       
       // Create order on backend
-      const response = await fetch('https://api.tonefit.app/api/orders/create-checkout', {
+      console.log('[Checkout] Creating order at:', apiUrl);
+      const response = await fetch(`${apiUrl}/api/orders/create-checkout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -844,7 +846,9 @@ function Dashboard({ user, onLogout }) {
         return;
       }
 
-      const { order_id, amount, currency } = await response.json();
+      const data = await response.json();
+      const { order_id, amount, currency } = data;
+      console.log('[Checkout] Order created:', { order_id, amount, currency });
 
       // Initialize Razorpay
       const options = {
@@ -860,7 +864,8 @@ function Dashboard({ user, onLogout }) {
         handler: async (response) => {
           try {
             // Verify payment on backend
-            const verifyResponse = await fetch('https://api.tonefit.app/api/orders/verify-payment', {
+            console.log('[Checkout] Verifying payment...');
+            const verifyResponse = await fetch(`${apiUrl}/api/orders/verify-payment`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
