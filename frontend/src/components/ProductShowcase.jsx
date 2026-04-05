@@ -20,6 +20,7 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
   const [error, setError] = useState(null);
   const [seeding, setSeeding] = useState(false);
   const [autoSeeded, setAutoSeeded] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   const handleSeedProducts = async () => {
     try {
@@ -200,11 +201,68 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
         </span>
       </div>
       
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      {/* Category Filters */}
+      {(() => {
+        const uniqueCategories = [...new Set(products.map(p => p.category))].filter(Boolean);
+        if (uniqueCategories.length > 1) {
+          const filteredProducts = selectedCategory 
+            ? products.filter(p => p.category === selectedCategory)
+            : products;
+          
+          return (
+            <div className="space-y-3">
+              <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide">
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                    selectedCategory === null
+                      ? isDark ? 'bg-purple-500/40 text-purple-100' : 'bg-purple-600 text-white'
+                      : isDark ? 'bg-white/10 text-white/60' : 'bg-gray-200 text-gray-700'
+                  }`}
+                >
+                  All ({products.length})
+                </button>
+                {uniqueCategories.map((cat) => {
+                  const count = products.filter(p => p.category === cat).length;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold capitalize whitespace-nowrap transition-all ${
+                        selectedCategory === cat
+                          ? isDark ? 'bg-purple-500/40 text-purple-100' : 'bg-purple-600 text-white'
+                          : isDark ? 'bg-white/10 text-white/60 hover:text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      {cat} ({count})
+                    </button>
+                  );
+                })}
+              </div>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </div>
+          );
+        }
+      })()}
+      
+      {/* No category filters - just show all products */}
+      {(() => {
+        const uniqueCategories = [...new Set(products.map(p => p.category))].filter(Boolean);
+        if (uniqueCategories.length <= 1) {
+          return (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          );
+        }
+      })()}
     </div>
   );
 }
