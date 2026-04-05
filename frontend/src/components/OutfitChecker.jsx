@@ -7,7 +7,7 @@ import { compressImage, saveLocalWardrobeImage } from '../utils/indexedDB';
 import PaywallModal from './PaywallModal';
 
 // ── Outfit Shop Card — same style as analyze results ─────────
-function OutfitShopCard({ color, isDark }) {
+function OutfitShopCard({ color, isDark, gender = 'male' }) {
   const [budget, setBudget] = useState(null);
   const AMAZON_TAG = 'styleguruai-21';
   const colorDisplay = color.name.toLowerCase();
@@ -24,19 +24,42 @@ function OutfitShopCard({ color, isDark }) {
   const fkPriceParam = budget?.max ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budget.max}` : '';
   const myntraPriceParam = budget?.max ? `&p=price%5B0%5D%3D0%20TO%20${budget.max}` : '';
 
+  // Different search queries based on gender
+  const getSearchQueries = () => {
+    if (gender === 'female') {
+      return {
+        amazon: `${colorDisplay} women top blouse saree trending 2025`,
+        flipkart: `${colorDisplay} women top blouse`,
+        myntra: `${colorLower}+women+top+blouse`,
+        meesho: `${colorDisplay} women top trending`,
+        amazonCategory: 'n%3A7534543031', // Women's Clothing
+      };
+    } else {
+      return {
+        amazon: `${colorDisplay} men oversized tshirt streetwear trending 2025`,
+        flipkart: `${colorDisplay} men oversized tshirt`,
+        myntra: `${colorLower}+men+oversized+tshirt`,
+        meesho: `${colorDisplay} men oversized tshirt trending`,
+        amazonCategory: 'n%3A1968024031', // Men's Clothing
+      };
+    }
+  };
+
+  const queries = getSearchQueries();
+
   const links = [
     { name: 'Amazon',   icon: '🛒',
       bg: isDark ? 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' : 'bg-orange-50 hover:bg-orange-100 border-orange-300 text-orange-700 font-bold',
-      url: `https://www.amazon.in/s?k=${encodeURIComponent(colorDisplay + ' men oversized tshirt streetwear trending 2025')}&rh=n%3A1968024031${amzPriceParam}&sort=review-rank&tag=${AMAZON_TAG}` },
+      url: `https://www.amazon.in/s?k=${encodeURIComponent(queries.amazon)}&rh=${queries.amazonCategory}${amzPriceParam}&sort=review-rank&tag=${AMAZON_TAG}` },
     { name: 'Flipkart', icon: '🏪',
       bg: isDark ? 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700 font-bold',
-      url: `https://www.flipkart.com/search?q=${encodeURIComponent(colorDisplay + ' men oversized tshirt')}&sort=popularity_desc${fkPriceParam}` },
+      url: `https://www.flipkart.com/search?q=${encodeURIComponent(queries.flipkart)}&sort=popularity_desc${fkPriceParam}` },
     { name: 'Myntra',   icon: '👗',
       bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold',
-      url: `https://www.myntra.com/search?q=${colorLower}+men+oversized+tshirt` },
+      url: `https://www.myntra.com/search?q=${queries.myntra}` },
     { name: 'Meesho',   icon: '🛍️',
       bg: isDark ? 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' : 'bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700 font-bold',
-      url: `https://meesho.com/search?q=${encodeURIComponent(colorDisplay + ' men oversized tshirt trending')}` },
+      url: `https://meesho.com/search?q=${encodeURIComponent(queries.meesho)}` },
   ];
 
   const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-md';
@@ -93,6 +116,7 @@ function OutfitChecker() {
   const [outfitPreview, setOutfitPreview] = useState(null);
   const [selfieFile, setSelfieFile] = useState(null);
   const [outfitFile, setOutfitFile] = useState(null);
+  const [gender, setGender] = useState('male'); // NEW: Gender selector
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -216,6 +240,33 @@ function OutfitChecker() {
 
       {!result ? (
         <>
+          {/* NEW: Gender Selection */}
+          <div className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
+            <p className={`text-sm font-bold mb-3 ${isDark ? 'text-white/70' : 'text-gray-700'}`}>👥 I'm shopping for:</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setGender('male')}
+                className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all border ${
+                  gender === 'male'
+                    ? isDark ? 'bg-blue-500/30 border-blue-500/50 text-blue-300 shadow-lg shadow-blue-500/20' : 'bg-blue-100 border-blue-400 text-blue-700 shadow-sm'
+                    : isDark ? 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                👔 Men's Clothes
+              </button>
+              <button
+                onClick={() => setGender('female')}
+                className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all border ${
+                  gender === 'female'
+                    ? isDark ? 'bg-pink-500/30 border-pink-500/50 text-pink-300 shadow-lg shadow-pink-500/20' : 'bg-pink-100 border-pink-400 text-pink-700 shadow-sm'
+                    : isDark ? 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                👗 Women's Clothes
+              </button>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Selfie Upload */}
             <div
@@ -396,9 +447,34 @@ function OutfitChecker() {
           {compatibility?.better_alternatives?.length > 0 && (
             <div className={`rounded-3xl p-5 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
               <h3 className={`font-black text-base mb-4 ${isDark ? 'text-white' : 'text-gray-800'}`}>💡 Better Alternatives — Shop Now</h3>
+              
+              {/* NEW: Gender Selector */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  onClick={() => setGender('male')}
+                  className={`flex-1 py-2.5 rounded-lg font-bold text-sm transition-all border ${
+                    gender === 'male'
+                      ? isDark ? 'bg-blue-500/30 border-blue-500/50 text-blue-300' : 'bg-blue-100 border-blue-400 text-blue-700 shadow-sm'
+                      : isDark ? 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10' : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  👔 Men's
+                </button>
+                <button
+                  onClick={() => setGender('female')}
+                  className={`flex-1 py-2.5 rounded-lg font-bold text-sm transition-all border ${
+                    gender === 'female'
+                      ? isDark ? 'bg-pink-500/30 border-pink-500/50 text-pink-300' : 'bg-pink-100 border-pink-400 text-pink-700 shadow-sm'
+                      : isDark ? 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10' : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  👗 Women's
+                </button>
+              </div>
+
               <div className="space-y-4">
                 {compatibility.better_alternatives.slice(0, 3).map((color, i) => (
-                  <OutfitShopCard key={i} color={color} isDark={isDark} />
+                  <OutfitShopCard key={i} color={color} isDark={isDark} gender={gender} />
                 ))}
               </div>
             </div>
