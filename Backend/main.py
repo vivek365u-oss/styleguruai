@@ -876,14 +876,75 @@ async def debug_product_count():
 
 @app.get("/api/products/by-color/{color_name}")
 async def get_products_by_color(color_name: str, limit: int = 50):
-    """Get products matching a color category (for shopping feature)."""
+    """Get products matching a color category (for shopping feature). Handles color name variations."""
     try:
         db = get_firestore_db()
+        
+        # Color mapping: maps detailed color names to basic database colors
+        color_mapping = {
+            # Blues
+            "royal blue": "blue",
+            "navy blue": "navy",
+            "sky blue": "blue",
+            "light blue": "blue",
+            "dark blue": "blue",
+            "cyan": "blue",
+            "blue": "blue",
+            
+            # Reds
+            "dark red": "red",
+            "burgundy": "red",
+            "maroon": "maroon",
+            "crimson": "red",
+            "scarlet": "red",
+            "red": "red",
+            
+            # Greens
+            "olive": "olive",
+            "forest green": "green",
+            "light green": "green",
+            "sage": "green",
+            "green": "green",
+            "teal": "teal",
+            "dark green": "green",
+            
+            # Yellows & Oranges
+            "gold": "gold",
+            "golden": "gold",
+            "yellow": "yellow",
+            "orange": "orange",
+            "amber": "gold",
+            
+            # Neutral
+            "white": "white",
+            "black": "black",
+            "grey": "grey",
+            "gray": "grey",
+            "silver": "silver",
+            "beige": "beige",
+            "cream": "cream",
+            "khaki": "khaki",
+            "brown": "brown",
+            "tan": "beige",
+            
+            # Pink & Purple
+            "pink": "pink",
+            "hot pink": "pink",
+            "light pink": "pink",
+            "purple": "purple",
+            "violet": "purple",
+            "magenta": "purple",
+            "lavender": "purple",
+        }
+        
         # Normalize color_name for comparison
         normalized_color = color_name.lower().strip()
         
+        # Map to basic color if needed
+        basic_color = color_mapping.get(normalized_color, normalized_color)
+        
         # Query products collection by color field
-        docs = db.collection("products").where("color", "==", normalized_color).limit(limit).stream()
+        docs = db.collection("products").where("color", "==", basic_color).limit(limit).stream()
         
         products = []
         for doc in docs:
@@ -891,9 +952,18 @@ async def get_products_by_color(color_name: str, limit: int = 50):
             data["id"] = doc.id
             products.append(data)
         
+        # If no products found with mapped color, try original
+        if len(products) == 0 and basic_color != normalized_color:
+            docs = db.collection("products").where("color", "==", normalized_color).limit(limit).stream()
+            for doc in docs:
+                data = doc.to_dict()
+                data["id"] = doc.id
+                products.append(data)
+        
         return {
             "success": True,
             "color": color_name,
+            "mapped_to": basic_color,
             "count": len(products),
             "products": products
         }

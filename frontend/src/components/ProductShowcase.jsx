@@ -72,26 +72,46 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
             setSeeding(true);
             const seedSuccess = await handleSeedProducts();
             if (seedSuccess) {
-              // After seeding, wait 5 seconds then try fetching (batch write speed improvement)
-              console.log('[Products] Seeding queued in background, waiting 5s...');
-              setTimeout(async () => {
-                try {
-                  const retryRes = await API.get(`/api/products/by-color/${colorName.toLowerCase()}`, {
-                    params: { limit: count }
-                  });
-                  if (retryRes.data.success && retryRes.data.products.length > 0) {
-                    console.log(`[Products] ✅ Retry successful! Loaded ${retryRes.data.products.length} products`);
-                    setProducts(retryRes.data.products.slice(0, count));
-                    setError(null);
-                    setSeeding(false);
-                    setLoading(false);
-                  }
-                } catch (e) {
-                  console.error('[Products] Retry fetch error:', e.message);
+              // Retry fetching with exponential backoff after seeding starts
+              console.log('[Products] Seeding started, retrying with exponential backoff...');
+              
+              const retryFetch = async (attempt = 1) => {
+                const delays = [10000, 15000, 20000];  // 10s, 15s, 20s
+                const waitTime = delays[Math.min(attempt - 1, delays.length - 1)];
+                const maxAttempts = 3;
+                
+                if (attempt > maxAttempts) {
+                  console.error('[Products] Max retry attempts reached');
                   setSeeding(false);
                   setLoading(false);
+                  return;
                 }
-              }, 5000);  // Wait 5 seconds for seeding to complete
+                
+                setTimeout(async () => {
+                  try {
+                    console.log(`[Products] Retry attempt ${attempt} (waiting ${waitTime / 1000}s) for ${colorName}...`);
+                    const retryRes = await API.get(`/api/products/by-color/${colorName.toLowerCase()}`, {
+                      params: { limit: count }
+                    });
+                    
+                    if (retryRes.data.success && retryRes.data.products.length > 0) {
+                      console.log(`[Products] ✅ Retry ${attempt} successful! Loaded ${retryRes.data.products.length} products (mapped to: ${retryRes.data.mapped_to})`);
+                      setProducts(retryRes.data.products.slice(0, count));
+                      setError(null);
+                      setSeeding(false);
+                      setLoading(false);
+                    } else {
+                      console.log(`[Products] Retry ${attempt}: No products yet, trying again...`);
+                      retryFetch(attempt + 1);
+                    }
+                  } catch (e) {
+                    console.error(`[Products] Retry ${attempt} error:`, e.message);
+                    retryFetch(attempt + 1);
+                  }
+                }, waitTime);
+              };
+              
+              retryFetch(1);
             }
           }
           throw new Error(res.data.detail || 'No products available');
