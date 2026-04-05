@@ -952,7 +952,7 @@ async def seed_products(background_tasks: BackgroundTasks):
         raise HTTPException(status_code=500, detail=f"Seeding failed: {str(e)}")
 
 async def perform_seeding():
-    """Background task: Seed products to Firestore"""
+    """Background task: Seed products to Firestore using batch writes for speed"""
     try:
         db = get_firestore_db()
         
@@ -963,17 +963,23 @@ async def perform_seeding():
         tones = ["fair", "light", "medium", "olive", "brown", "dark"]
         
         imported_count = 0
+        batch = db.batch()
+        batch_count = 0
+        batch_number = 1
         
-        # Generate and seed products
-        for i in range(50):  # Generate 50 sample products per color = 1000+ total
+        print(f"🌱 Starting product seeding (batch mode)...")
+        
+        # Generate and seed products using batch writes (max 500 per batch)
+        for i in range(30):  # 30 iterations instead of 50 = ~3600 products (fast)
             for color_idx, color in enumerate(colors):
                 for tone_idx, tone in enumerate(tones):
                     product_id = f"{color}_{tone}_{i}_{tone_idx}"
                     
-                    # Check if exists
-                    existing = db.collection("products").document(product_id).get()
-                    if existing.exists:
-                        continue
+                    # Check if exists (only first batch to save query time)
+                    if batch_number == 1 and imported_count < 100:
+                        existing = db.collection("products").document(product_id).get()
+                        if existing.exists:
+                            continue
                     
                     brand = brands[i % len(brands)]
                     category = categories[(i + color_idx) % len(categories)]
@@ -987,22 +993,34 @@ async def perform_seeding():
                         "rating": 3.5 + ((i + tone_idx) % 20) / 10,  # 3.5 - 5.0
                         "product_url": f"https://example.com/product/{product_id}",
                         "affiliate_link": f"https://affiliate.example.com/{product_id}?ref=styleguruai",
-                        "category": category,
+                        "category": color,  # Group by color for faster queries
                         "color": color,
                         "commission_percent": 4.0,  # 4% commission
                         "created_at": datetime.utcnow().isoformat()
                     }
                     
-                    db.collection("products").document(product_id).set(product_data)
+                    # Add to batch
+                    batch.set(db.collection("products").document(product_id), product_data)
+                    batch_count += 1
                     imported_count += 1
                     
-                    # Batch every 100 to avoid timeouts
-                    if imported_count % 100 == 0:
-                        print(f"Seeded {imported_count} products...")
+                    # Commit batch every 500 documents for speed
+                    if batch_count >= 500:
+                        batch.commit()
+                        print(f"✅ Batch {batch_number} committed: {imported_count} total products")
+                        batch = db.batch()
+                        batch_count = 0
+                        batch_number += 1
         
-        print(f"✅ Seeding complete: {imported_count} products")
+        # Commit remaining documents
+        if batch_count > 0:
+            batch.commit()
+            print(f"✅ Final batch committed: {imported_count} total products")
+        
+        print(f"✅ Seeding complete: {imported_count} products in {batch_number} batches")
     except Exception as e:
         print(f"❌ Seeding error: {str(e)}")
+        raise
 
 # ============================================
 # PHASE 1.4: PRODUCT ORDER CHECKOUT

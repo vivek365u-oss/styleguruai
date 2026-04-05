@@ -24,12 +24,12 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
   const handleSeedProducts = async () => {
     try {
       setSeeding(true);
-      console.log('[Products] Starting seed process...');
+      console.log('[Products] Starting seed process with batch writes...');
       
       // Create a custom axios instance with longer timeout for seeding
       const seedAPI = axios.create({ 
         baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
-        timeout: 120000  // 2 minute timeout for seeding (1000+ products take time)
+        timeout: 180000  // 3 minute timeout - batch writes are fast now
       });
       
       const res = await seedAPI.post(`/api/products/seed`);
@@ -37,7 +37,6 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
       if (res.data.success) {
         console.log('[Products] ✅ Seeding response:', res.data);
         setAutoSeeded(true);
-        // Don't reload page - just trigger refetch
         return true;
       } else {
         throw new Error(res.data.message || 'Seeding failed');
@@ -70,22 +69,29 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
           // No products found - auto-seed silently
           if (!autoSeeded) {
             console.log('[Products] No products found, auto-seeding...');
+            setSeeding(true);
             const seedSuccess = await handleSeedProducts();
             if (seedSuccess) {
-              // After seeding, try fetching again after a delay
+              // After seeding, wait 5 seconds then try fetching (batch write speed improvement)
+              console.log('[Products] Seeding queued in background, waiting 5s...');
               setTimeout(async () => {
                 try {
                   const retryRes = await API.get(`/api/products/by-color/${colorName.toLowerCase()}`, {
                     params: { limit: count }
                   });
-                  if (retryRes.data.success) {
+                  if (retryRes.data.success && retryRes.data.products.length > 0) {
+                    console.log(`[Products] ✅ Retry successful! Loaded ${retryRes.data.products.length} products`);
                     setProducts(retryRes.data.products.slice(0, count));
                     setError(null);
+                    setSeeding(false);
+                    setLoading(false);
                   }
                 } catch (e) {
                   console.error('[Products] Retry fetch error:', e.message);
+                  setSeeding(false);
+                  setLoading(false);
                 }
-              }, 3000);
+              }, 5000);  // Wait 5 seconds for seeding to complete
             }
           }
           throw new Error(res.data.detail || 'No products available');
@@ -150,10 +156,10 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
           <div className="w-8 h-8 border-4 border-purple-600 border-t-pink-600 rounded-full animate-spin" />
         </div>
         <p className={`text-sm font-bold mt-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          🌱 Setting up products...
+          🌱 Setting up 3000+ products...
         </p>
         <p className={`text-xs mt-2 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
-          This may take 1-2 minutes on first run
+          First time: ~30-60 seconds | Using fast batch writes
         </p>
       </div>
     );
