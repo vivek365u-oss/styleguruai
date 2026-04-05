@@ -540,6 +540,7 @@ function Dashboard({ user, onLogout }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t } = useLanguage();
   const { isPro, usage, setUsage } = usePlan();
+  const isDark = theme === 'dark';
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
