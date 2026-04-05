@@ -24,6 +24,7 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage'));
 
 export const ThemeContext = createContext();
 
@@ -96,6 +97,11 @@ function AppRoutes({ user, setUser }) {
         <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} />} />
         <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
+        <Route path="/order-success" element={
+          <PrivateRoute user={user}>
+            <OrderSuccessPage />
+          </PrivateRoute>
+        } />
         <Route path="/profile" element={
           <PrivateRoute user={user}>
             <ProfilePage />

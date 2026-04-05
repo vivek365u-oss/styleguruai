@@ -880,10 +880,29 @@ function Dashboard({ user, onLogout }) {
 
             if (verifyResponse.ok) {
               const result = await verifyResponse.json();
+              console.log('[Checkout] ✅ Payment verified:', result);
+              
+              // Save order data to localStorage for success page
+              const orderData = {
+                order_id: response.razorpay_order_id,
+                payment_id: response.razorpay_payment_id,
+                items: cart,
+                total: totals.total,
+                commission: result.commission_earned,
+                timestamp: new Date().toISOString()
+              };
+              localStorage.setItem('sg_last_order', JSON.stringify(orderData));
+              
               showToast(`✅ Order placed! Commission: ₹${result.commission_earned.toFixed(0)}`);
+              
               // Clear cart after successful purchase
               clearCart();
               setCartOpen(false);
+              
+              // Redirect to order success page after 1 second
+              setTimeout(() => {
+                navigate('/order-success');
+              }, 1000);
             } else {
               showToast('❌ Payment verification failed');
             }
