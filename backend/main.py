@@ -302,13 +302,6 @@ async def process_image_core(file: UploadFile):
             pass
 
 # ============================================
-# HEALTH CHECK
-# ============================================
-@app.get("/")
-async def root():
-    return {"status": "running", "app": "StyleGuru API", "version": "1.0.0", "message": "Welcome to StyleGuru!"}
-
-# ============================================
 # AUTH ROUTES
 # ============================================
 @app.get("/auth/me")
