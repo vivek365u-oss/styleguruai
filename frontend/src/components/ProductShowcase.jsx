@@ -25,17 +25,25 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
       setSeeding(true);
       console.log('[Products] Starting seed process...');
       
-      const res = await API.post(`/api/products/seed`);
+      // Create a custom axios instance with longer timeout for seeding
+      const seedAPI = axios.create({ 
+        baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+        timeout: 120000  // 2 minute timeout for seeding (1000+ products take time)
+      });
+      
+      const res = await seedAPI.post(`/api/products/seed`);
       
       if (res.data.success) {
         console.log('[Products] ✅ Seeding successful!', res.data);
         alert(`✅ ${res.data.message}\nTotal: ${res.data.total_products} products\n\nRefresh the page to see products!`);
-        // Reload products
-        window.location.reload();
+        // Reload products after a short delay
+        setTimeout(() => window.location.reload(), 2000);
+      } else {
+        throw new Error(res.data.message || 'Seeding failed');
       }
     } catch (err) {
       console.error('[Products] Seeding error:', err.message);
-      alert(`❌ Seeding failed: ${err.message}`);
+      alert(`❌ Seeding failed: ${err.message}\n\nTry again - first time can take 2-3 minutes.`);
     } finally {
       setSeeding(false);
     }

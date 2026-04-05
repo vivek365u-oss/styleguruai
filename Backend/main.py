@@ -920,8 +920,8 @@ async def get_product_details(product_id: str):
         raise HTTPException(status_code=500, detail=f"Failed to fetch product: {str(e)}")
 
 @app.post("/api/products/seed")
-async def seed_products():
-    """Seed 1000+ products to Firestore (one-time setup)."""
+async def seed_products(background_tasks: BackgroundTasks):
+    """Seed 1000+ products to Firestore (one-time setup, runs in background)."""
     try:
         db = get_firestore_db()
         
@@ -938,6 +938,23 @@ async def seed_products():
                 "total_products": count,
                 "already_seeded": True
             }
+        
+        # Queue the seeding operation to run in the background
+        background_tasks.add_task(perform_seeding)
+        
+        return {
+            "success": True,
+            "message": "Seeding started in background - this may take 2-3 minutes",
+            "status": "seeding_in_progress"
+        }
+    except Exception as e:
+        print(f"Seeding error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Seeding failed: {str(e)}")
+
+async def perform_seeding():
+    """Background task: Seed products to Firestore"""
+    try:
+        db = get_firestore_db()
         
         # Sample product data generator
         brands = ["H&M", "Zara", "Forever 21", "Uniqlo", "Mango", "Gap", "ASOS", "Shein", "Myntra", "Flipkart"]
@@ -983,14 +1000,9 @@ async def seed_products():
                     if imported_count % 100 == 0:
                         print(f"Seeded {imported_count} products...")
         
-        return {
-            "success": True,
-            "message": f"Seeded {imported_count} products to Firestore",
-            "total_products": imported_count
-        }
+        print(f"✅ Seeding complete: {imported_count} products")
     except Exception as e:
-        print(f"Seeding error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Seeding failed: {str(e)}")
+        print(f"❌ Seeding error: {str(e)}")
 
 # ============================================
 # RUN
