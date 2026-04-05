@@ -1,13 +1,4 @@
 import { useState, useEffect, useContext } from 'react';
-import { getWardrobe, deleteWardrobeItem, getWardrobeCount } from '../api/styleApi';
-import { auth } from '../api/styleApi';
-import { ThemeContext } from '../App';
-import { useLanguage } from '../i18n/LanguageContext';
-import { usePlan } from '../context/PlanContext';
-import { getLocalWardrobeImage, deleteLocalWardrobeImage } from '../utils/indexedDB';
-import HistoryPanel from './HistoryPanel';
-
-import { useState, useEffect, useContext } from 'react';
 import { getWardrobe, deleteWardrobeItem, getWardrobeCount, getSavedColors, deleteSavedColor, deleteAllSavedColors } from '../api/styleApi';
 import { auth } from '../api/styleApi';
 import { ThemeContext } from '../App';
