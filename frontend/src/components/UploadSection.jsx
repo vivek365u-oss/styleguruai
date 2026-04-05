@@ -243,6 +243,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   const [eyeColor, setEyeColor] = useState('brown');
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
+  const [currentStep, setCurrentStep] = useState(0); // 0: Body, 1: Eye, 2: Occasion, 3: Budget, 4: Upload
 
   // Couple Mode States
   const [partner1, setPartner1] = useState(null);
@@ -482,256 +483,343 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
         )}
       </div>
 
-      {/* Body Type Selector */}
-      <div className="mb-5">
-        <p className={`text-xs text-center mb-2 font-semibold uppercase tracking-wide ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Your Body Type (optional)</p>
-        <div className="flex justify-center gap-2 flex-wrap">
-          {[
-            { value: 'slim', label: '🏃 Slim', desc: 'Lean' },
-            { value: 'athletic', label: '💪 Athletic', desc: 'Muscular' },
-            { value: 'average', label: '⚖️ Average', desc: 'Regular' },
-            { value: 'plus', label: '🌸 Plus', desc: 'Curvy' },
-          ].map((bt) => (
-            <button
-              key={bt.value}
-              onClick={() => setBodyType(bt.value)}
-              className={`flex flex-col items-center px-4 py-2 rounded-xl border text-xs font-bold transition-all ${
-                bodyType === bt.value
-                  ? isDark
-                    ? 'bg-purple-500/30 border-purple-400 text-purple-200'
-                    : 'bg-purple-600 border-purple-600 text-white shadow-md'
-                  : isDark
-                    ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70'
-                    : 'bg-white border-gray-300 text-gray-700 hover:border-purple-400 hover:text-purple-700 shadow-sm'
-              }`}
-            >
-              <span>{bt.label}</span>
-              <span className="text-[10px] opacity-70">{bt.desc}</span>
-            </button>
-          ))}
+      {/* Wizard Flow: Step 0 - Body Type */}
+      {currentStep === 0 && (
+        <div className={`rounded-3xl p-6 mb-5 border animate-fadeIn ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>1. {t('bodyTypeTitle') || 'Body Type'}</h3>
+            <span className="text-xs font-bold text-purple-500">Step 1/4</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            {[
+              { value: 'slim', label: '🏃 Slim', desc: 'Lean' },
+              { value: 'athletic', label: '💪 Athletic', desc: 'Muscular' },
+              { value: 'average', label: '⚖️ Average', desc: 'Regular' },
+              { value: 'plus', label: '🌸 Plus', desc: 'Curvy' },
+            ].map((bt) => (
+              <button
+                key={bt.value}
+                onClick={() => { setBodyType(bt.value); setCurrentStep(1); }}
+                className={`flex flex-col items-center p-4 rounded-2xl border-2 transition-all transform hover:scale-[1.02] ${
+                  bodyType === bt.value
+                    ? isDark
+                      ? 'bg-purple-600/30 border-purple-500 shadow-lg shadow-purple-500/20'
+                      : 'bg-purple-100 border-purple-500 shadow-lg shadow-purple-500/20'
+                    : isDark
+                      ? 'bg-white/5 border-white/10 hover:border-purple-500/30'
+                      : 'bg-white border-gray-200 hover:border-purple-300 shadow-sm'
+                }`}
+              >
+                <span className={`text-sm font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{bt.label}</span>
+                <span className={`text-[10px] font-bold uppercase opacity-50 ${isDark ? 'text-white' : 'text-gray-900'}`}>{bt.desc}</span>
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setCurrentStep(1)}
+            className={`w-full py-3 rounded-xl font-bold text-sm border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
+          >
+            ⏭️ Skip
+          </button>
         </div>
-      </div>
+      )}
 
-      {/* Eye Color Selector */}
-      <div className="mb-5">
-        <p className={`text-xs text-center mb-2 font-semibold uppercase tracking-wide ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Your Eye Color (optional)</p>
-        <div className="flex justify-center gap-2 flex-wrap">
-          {[
-            { value: 'brown', label: '🟤 Brown', desc: 'Dark' },
-            { value: 'black', label: '⚫ Black', desc: 'Very Dark' },
-            { value: 'hazel', label: '🟢 Hazel', desc: 'Green' },
-            { value: 'blue', label: '🔵 Blue', desc: 'Grey' },
-          ].map((ec) => (
+      {/* Wizard Flow: Step 1 - Eye Color */}
+      {currentStep === 1 && (
+        <div className={`rounded-3xl p-6 mb-5 border animate-fadeIn ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>2. {t('eyeColorTitle') || 'Eye Color'}</h3>
+            <span className="text-xs font-bold text-purple-500">Step 2/4</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            {[
+              { value: 'brown', label: '🟤 Brown', desc: 'Dark' },
+              { value: 'black', label: '⚫ Black', desc: 'Very Dark' },
+              { value: 'hazel', label: '🟢 Hazel', desc: 'Green' },
+              { value: 'blue', label: '🔵 Blue', desc: 'Grey' },
+            ].map((ec) => (
+              <button
+                key={ec.value}
+                onClick={() => { setEyeColor(ec.value); setCurrentStep(2); }}
+                className={`flex flex-col items-center p-4 rounded-2xl border-2 transition-all transform hover:scale-[1.02] ${
+                  eyeColor === ec.value
+                    ? isDark
+                      ? 'bg-purple-600/30 border-purple-500 shadow-lg shadow-purple-500/20'
+                      : 'bg-purple-100 border-purple-500 shadow-lg shadow-purple-500/20'
+                    : isDark
+                      ? 'bg-white/5 border-white/10 hover:border-purple-500/30'
+                      : 'bg-white border-gray-200 hover:border-purple-300 shadow-sm'
+                }`}
+              >
+                <span className={`text-sm font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{ec.label}</span>
+                <span className={`text-[10px] font-bold uppercase opacity-50 ${isDark ? 'text-white' : 'text-gray-900'}`}>{ec.desc}</span>
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
             <button
-              key={ec.value}
-              onClick={() => setEyeColor(ec.value)}
-              className={`flex flex-col items-center px-4 py-2 rounded-xl border text-xs font-bold transition-all ${
-                eyeColor === ec.value
-                  ? isDark
-                    ? 'bg-purple-500/30 border-purple-400 text-purple-200'
-                    : 'bg-purple-600 border-purple-600 text-white shadow-md'
-                  : isDark
-                    ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70'
-                    : 'bg-white border-gray-300 text-gray-700 hover:border-purple-400 hover:text-purple-700 shadow-sm'
-              }`}
+              onClick={() => setCurrentStep(0)}
+              className={`flex-1 py-3 rounded-xl font-bold text-sm border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
             >
-              <span>{ec.label}</span>
-              <span className="text-[10px] opacity-70">{ec.desc}</span>
+              ← Back
             </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Occasion Selector */}
-      <div className="mb-4">
-        <p className={`text-xs text-center mb-2 font-semibold uppercase tracking-wide ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Occasion</p>
-        <div className="flex justify-center gap-2 flex-wrap">
-          {[
-            { value: 'casual',  label: '😎 Casual',  desc: 'Daily' },
-            { value: 'office',  label: '💼 Office',  desc: 'Work' },
-            { value: 'wedding', label: '💍 Wedding', desc: 'Festive' },
-            { value: 'party',   label: '🎉 Party',   desc: 'Night out' },
-            { value: 'date',    label: '❤️ Date',    desc: 'Romantic' },
-          ].map((oc) => (
             <button
-              key={oc.value}
-              onClick={() => setOccasion(oc.value)}
-              className={`flex flex-col items-center px-3 py-2 rounded-xl border text-xs font-bold transition-all ${
-                occasion === oc.value
-                  ? isDark ? 'bg-pink-500/30 border-pink-400 text-pink-200' : 'bg-pink-600 border-pink-600 text-white shadow-md'
-                  : isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70' : 'bg-white border-gray-300 text-gray-700 hover:border-pink-400 hover:text-pink-700 shadow-sm'
-              }`}
+              onClick={() => setCurrentStep(2)}
+              className={`flex-1 py-3 rounded-xl font-bold text-sm border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
             >
-              <span>{oc.label}</span>
-              <span className="text-[10px] opacity-70">{oc.desc}</span>
+              ⏭️ Skip
             </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Budget Selector */}
-      <div className="mb-5">
-        <p className={`text-xs text-center mb-2 font-semibold uppercase tracking-wide ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Budget (optional)</p>
-        <div className="flex justify-center gap-2 flex-wrap">
-          {[
-            { value: 'any',   label: 'Any',    desc: 'No limit' },
-            { value: '500',   label: '₹500',   desc: 'Budget' },
-            { value: '1000',  label: '₹1000',  desc: 'Mid' },
-            { value: '2000',  label: '₹2000',  desc: 'Premium' },
-          ].map((b) => (
-            <button
-              key={b.value}
-              onClick={() => setBudget(b.value)}
-              className={`flex flex-col items-center px-4 py-2 rounded-xl border text-xs font-bold transition-all ${
-                budget === b.value
-                  ? isDark ? 'bg-green-500/30 border-green-400 text-green-200' : 'bg-green-600 border-green-600 text-white shadow-md'
-                  : isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70' : 'bg-white border-gray-300 text-gray-700 hover:border-green-400 hover:text-green-700 shadow-sm'
-              }`}
-            >
-              <span>{b.label}</span>
-              <span className="text-[10px] opacity-70">{b.desc}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Upload Box */}
-      {mode === 'couple' ? (
-        <div className="grid grid-cols-2 gap-4">
-          {[
-            { id: 1, file: partner1, setFile: setPartner1, gender: partner1Gender, setGender: setPartner1Gender, ref: partner1Ref, label: 'Partner 1' },
-            { id: 2, file: partner2, setFile: setPartner2, gender: partner2Gender, setGender: setPartner2Gender, ref: partner2Ref, label: 'Partner 2' },
-          ].map(p => (
-            <div key={p.id} className={`flex flex-col items-center rounded-3xl p-4 border-2 border-dashed transition-all ${isDark ? 'border-rose-500/30 bg-rose-500/5' : 'border-rose-300 bg-rose-50'}`}>
-              <span className="font-bold text-sm mb-2 opacity-70">{p.label}</span>
-              <div className="flex gap-1 mb-3 bg-white/10 p-1 rounded-lg">
-                <button onClick={() => p.setGender('female')} className={`px-2 py-1 text-xs rounded-md ${p.gender === 'female' ? 'bg-pink-500 text-white' : 'text-gray-400'}`}>👩</button>
-                <button onClick={() => p.setGender('male')} className={`px-2 py-1 text-xs rounded-md ${p.gender === 'male' ? 'bg-blue-500 text-white' : 'text-gray-400'}`}>👨</button>
-              </div>
-              <input
-                ref={p.ref} type="file" accept="image/*" className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) {
-                    const r = new FileReader();
-                    r.onload = ev => p.setFile(ev.target.result);
-                    r.readAsDataURL(f);
-                  }
-                }}
-              />
-              {p.file ? (
-                <img src={p.file} className="w-24 h-24 object-cover rounded-xl border border-white/20 mb-2 cursor-pointer shadow-lg" onClick={() => p.ref.current?.click()} />
-              ) : (
-                <button onClick={() => p.ref.current?.click()} className="w-24 h-24 rounded-xl bg-black/5 dark:bg-white/5 flex items-center justify-center text-3xl mb-2 hover:bg-black/10 dark:hover:bg-white/10 transition pb-1">
-                  📸
-                </button>
-              )}
-            </div>
-          ))}
-          <div className="col-span-2 mt-2">
-            <button 
-              onClick={handleCoupleAnalysis}
-              disabled={!partner1 || !partner2}
-              className={`w-full py-4 rounded-2xl font-black text-lg text-white shadow-xl transition-all hover:scale-[1.02] ${(!partner1 || !partner2) ? 'bg-gray-400 opacity-50 cursor-not-allowed' : 'bg-gradient-to-r from-rose-500 to-pink-600 shadow-rose-500/30'}`}
-            >
-              👩‍❤️‍👨 Match Outfits
-            </button>
-            {uploadProgress > 0 && uploadProgress < 100 && (
-              <p className="text-center text-xs mt-2 text-rose-500 animate-pulse">Analyzing both photos... {uploadProgress}%</p>
-            )}
           </div>
         </div>
-      ) : (
-        <div
-          className={`relative border-2 border-dashed rounded-3xl p-6 md:p-12 text-center cursor-pointer transition-all duration-300 ${
-            dragActive
-              ? 'border-purple-400 bg-purple-500/10 scale-[1.01]'
-              : mode === 'seasonal'
-                ? isDark ? 'border-amber-500/30 bg-amber-500/5 hover:border-amber-400/50 hover:bg-amber-500/10' : 'border-amber-300 bg-amber-50 hover:border-amber-400 hover:bg-amber-100'
-                : gender === 'female'
-                  ? isDark ? 'border-pink-500/30 bg-pink-500/5 hover:border-pink-400/50 hover:bg-pink-500/10' : 'border-pink-300 bg-pink-50 hover:border-pink-400 hover:bg-pink-100'
-                  : isDark ? 'border-white/20 bg-white/5 hover:border-purple-400/50 hover:bg-white/10' : 'border-purple-300 bg-slate-100 hover:border-purple-500 hover:bg-purple-50 shadow-sm'
-          }`}
-          onClick={() => fileInputRef.current?.click()}
-          onDrop={handleDrop}
-          onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-          onDragLeave={() => setDragActive(false)}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-            className="hidden"
-          />
-          {/* Camera input — opens camera directly on mobile */}
-          <input
-            ref={cameraInputRef}
-            type="file"
-            accept="image/*"
-            capture="user"
-            onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-            className="hidden"
-          />
+      )}
 
-          {preview ? (
-            <div className="flex flex-col items-center">
-              <img src={preview} alt="Preview" className="w-40 h-40 object-cover rounded-2xl shadow-2xl mb-4 border-2 border-purple-500/30" />
-              <p className={`animate-pulse ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{t('analyzingPhoto')}</p>
-              {uploadProgress > 0 && uploadProgress < 100 && (
-                <div className={`mt-3 w-48 rounded-full h-1.5 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
-                  <div className="bg-purple-500 h-1.5 rounded-full transition-all" style={{ width: `${uploadProgress}%` }}></div>
+      {/* Wizard Flow: Step 2 - Occasion */}
+      {currentStep === 2 && (
+        <div className={`rounded-3xl p-6 mb-5 border animate-fadeIn ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>3. {t('occasionTitle') || 'Occasion'}</h3>
+            <span className="text-xs font-bold text-purple-500">Step 3/4</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            {[
+              { value: 'casual',  label: '😎 Casual',  desc: 'Daily' },
+              { value: 'office',  label: '💼 Office',  desc: 'Work' },
+              { value: 'wedding', label: '💍 Wedding', desc: 'Festive' },
+              { value: 'party',   label: '🎉 Party',   desc: 'Night out' },
+              { value: 'date',    label: '❤️ Date',    desc: 'Romantic' },
+            ].map((oc) => (
+              <button
+                key={oc.value}
+                onClick={() => { setOccasion(oc.value); setCurrentStep(3); }}
+                className={`flex flex-col items-center p-4 rounded-2xl border-2 transition-all transform hover:scale-[1.02] ${
+                  occasion === oc.value
+                    ? isDark
+                      ? 'bg-purple-600/30 border-purple-500 shadow-lg shadow-purple-500/20'
+                      : 'bg-purple-100 border-purple-500 shadow-lg shadow-purple-500/20'
+                    : isDark
+                      ? 'bg-white/5 border-white/10 hover:border-purple-500/30'
+                      : 'bg-white border-gray-200 hover:border-purple-300 shadow-sm'
+                }`}
+              >
+                <span className={`text-sm font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{oc.label}</span>
+                <span className={`text-[10px] font-bold uppercase opacity-50 ${isDark ? 'text-white' : 'text-gray-900'}`}>{oc.desc}</span>
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentStep(1)}
+              className={`flex-1 py-3 rounded-xl font-bold text-sm border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
+            >
+              ← Back
+            </button>
+            <button
+              onClick={() => setCurrentStep(3)}
+              className={`flex-1 py-3 rounded-xl font-bold text-sm border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
+            >
+              ⏭️ Skip
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Wizard Flow: Step 3 - Budget */}
+      {currentStep === 3 && (
+        <div className={`rounded-3xl p-6 mb-5 border animate-fadeIn ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>4. {t('budgetTitle') || 'Budget'}</h3>
+            <span className="text-xs font-bold text-purple-500">Step 4/4</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            {[
+              { value: 'any',   label: 'Any',    desc: 'No limit' },
+              { value: '500',   label: '₹500',   desc: 'Budget' },
+              { value: '1000',  label: '₹1000',  desc: 'Mid' },
+              { value: '2000',  label: '₹2000',  desc: 'Premium' },
+            ].map((b) => (
+              <button
+                key={b.value}
+                onClick={() => { setBudget(b.value); setCurrentStep(4); }}
+                className={`flex flex-col items-center p-4 rounded-2xl border-2 transition-all transform hover:scale-[1.02] ${
+                  budget === b.value
+                    ? isDark
+                      ? 'bg-purple-600/30 border-purple-500 shadow-lg shadow-purple-500/20'
+                      : 'bg-purple-100 border-purple-500 shadow-lg shadow-purple-500/20'
+                    : isDark
+                      ? 'bg-white/5 border-white/10 hover:border-purple-500/30'
+                      : 'bg-white border-gray-200 hover:border-purple-300 shadow-sm'
+                }`}
+              >
+                <span className={`text-sm font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{b.label}</span>
+                <span className={`text-[10px] font-bold uppercase opacity-50 ${isDark ? 'text-white' : 'text-gray-900'}`}>{b.desc}</span>
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentStep(2)}
+              className={`flex-1 py-3 rounded-xl font-bold text-sm border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
+            >
+              ← Back
+            </button>
+            <button
+              onClick={() => setCurrentStep(4)}
+              className={`flex-1 py-3 rounded-xl font-bold text-sm border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
+            >
+              ⏭️ Skip
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Wizard Flow: Step 4 - Upload Photo */}
+      {currentStep === 4 && (
+        <div className="animate-fadeIn">
+          <div className="flex items-center justify-between mb-4 px-2">
+            <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>5. {t('uploadTitle') || 'Upload Photo'}</h3>
+            <button
+              onClick={() => setCurrentStep(0)}
+              className="text-xs font-bold text-purple-500 hover:text-purple-400 transition"
+            >
+              🔄 Change Settings
+            </button>
+          </div>
+          
+          {mode === 'couple' ? (
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { id: 1, file: partner1, setFile: setPartner1, gender: partner1Gender, setGender: setPartner1Gender, ref: partner1Ref, label: 'Partner 1' },
+                { id: 2, file: partner2, setFile: setPartner2, gender: partner2Gender, setGender: setPartner2Gender, ref: partner2Ref, label: 'Partner 2' },
+              ].map(p => (
+                <div key={p.id} className={`flex flex-col items-center rounded-3xl p-4 border-2 border-dashed transition-all ${isDark ? 'border-rose-500/30 bg-rose-500/5' : 'border-rose-300 bg-rose-50'}`}>
+                  <span className="font-bold text-sm mb-2 opacity-70">{p.label}</span>
+                  <div className="flex gap-1 mb-3 bg-white/10 p-1 rounded-lg">
+                    <button onClick={() => p.setGender('female')} className={`px-2 py-1 text-xs rounded-md ${p.gender === 'female' ? 'bg-pink-500 text-white' : 'text-gray-400'}`}>👩</button>
+                    <button onClick={() => p.setGender('male')} className={`px-2 py-1 text-xs rounded-md ${p.gender === 'male' ? 'bg-blue-500 text-white' : 'text-gray-400'}`}>👨</button>
+                  </div>
+                  <input
+                    ref={p.ref} type="file" accept="image/*" className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) {
+                        const r = new FileReader();
+                        r.onload = ev => p.setFile(ev.target.result);
+                        r.readAsDataURL(f);
+                      }
+                    }}
+                  />
+                  {p.file ? (
+                    <img src={p.file} className="w-24 h-24 object-cover rounded-xl border border-white/20 mb-2 cursor-pointer shadow-lg" onClick={() => p.ref.current?.click()} />
+                  ) : (
+                    <button onClick={() => p.ref.current?.click()} className="w-24 h-24 rounded-xl bg-black/5 dark:bg-white/5 flex items-center justify-center text-3xl mb-2 hover:bg-black/10 dark:hover:bg-white/10 transition pb-1">
+                      📸
+                    </button>
+                  )}
                 </div>
-              )}
+              ))}
+              <div className="col-span-2 mt-2">
+                <button 
+                  onClick={handleCoupleAnalysis}
+                  disabled={!partner1 || !partner2}
+                  className={`w-full py-4 rounded-2xl font-black text-lg text-white shadow-xl transition-all hover:scale-[1.02] ${(!partner1 || !partner2) ? 'bg-gray-400 opacity-50 cursor-not-allowed' : 'bg-gradient-to-r from-rose-500 to-pink-600 shadow-rose-500/30'}`}
+                >
+                  👩‍❤️‍👨 Match Outfits
+                </button>
+                {uploadProgress > 0 && uploadProgress < 100 && (
+                  <p className="text-center text-xs mt-2 text-rose-500 animate-pulse">Analyzing both photos... {uploadProgress}%</p>
+                )}
+              </div>
             </div>
           ) : (
-            <>
-              <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border ${
-                mode === 'seasonal'
-                  ? isDark ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-white/10' : 'bg-amber-100 border-amber-200'
-                  : gender === 'female'
-                    ? isDark ? 'bg-gradient-to-br from-pink-500/20 to-rose-500/20 border-white/10' : 'bg-pink-100 border-pink-200'
-                    : isDark ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-white/10' : 'bg-purple-100 border-purple-200'
-              }`}>
-                <span className="text-4xl">
-                  {mode === 'seasonal' ? seasons.find(s => s.id === season)?.emoji : gender === 'female' ? '👩' : '🤳'}
-                </span>
-              </div>
-              <p className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('dropSelfie')}</p>
-              <p className={`mb-6 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('orBrowse')}</p>
-              <span className={`inline-block px-8 py-3.5 text-white font-bold rounded-2xl shadow-lg transition-all hover:scale-105 ${
-                mode === 'seasonal'
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-amber-500/30'
-                  : gender === 'female'
-                    ? 'bg-gradient-to-r from-pink-500 to-rose-500 shadow-pink-500/30'
-                    : 'bg-gradient-to-r from-purple-500 to-pink-500 shadow-purple-500/30'
-              }`}>
-                📁 {t('choosePhoto')}
-              </span>
-              {/* Camera button — mobile only, Gallery for all */}
-              <div className="flex gap-3 justify-center mt-3">
-                {/* Camera: only show on touch devices (mobile) */}
-                <button
-                  onClick={(e) => { e.stopPropagation(); cameraInputRef.current?.click(); }}
-                  className={`md:hidden flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition
-                    ${isDark
-                      ? 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/30'
-                      : 'bg-purple-600 border-purple-600 text-white shadow-sm hover:bg-purple-700'}`}
-                >
-                  📷 Camera
-                </button>
-                <button
-                  onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition
-                    ${isDark
-                      ? 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'
-                      : 'bg-gray-100 border-gray-300 text-gray-700 shadow-sm hover:bg-gray-200'}`}
-                >
-                  🖼️ Gallery
-                </button>
-              </div>
-              <p className={`text-xs mt-4 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>{t('photoNote')}</p>
-            </>
+            <div
+              className={`relative border-2 border-dashed rounded-3xl p-6 md:p-12 text-center cursor-pointer transition-all duration-300 ${
+                dragActive
+                  ? 'border-purple-400 bg-purple-500/10 scale-[1.01]'
+                  : mode === 'seasonal'
+                    ? isDark ? 'border-amber-500/30 bg-amber-500/5 hover:border-amber-400/50 hover:bg-amber-500/10' : 'border-amber-300 bg-amber-50 hover:border-amber-400 hover:bg-amber-100'
+                    : gender === 'female'
+                      ? isDark ? 'border-pink-500/30 bg-pink-500/5 hover:border-pink-400/50 hover:bg-pink-500/10' : 'border-pink-300 bg-pink-50 hover:border-pink-400 hover:bg-pink-100'
+                      : isDark ? 'border-white/20 bg-white/5 hover:border-purple-400/50 hover:bg-white/10' : 'border-purple-300 bg-slate-100 hover:border-purple-500 hover:bg-purple-50 shadow-sm'
+              }`}
+              onClick={() => fileInputRef.current?.click()}
+              onDrop={handleDrop}
+              onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+              onDragLeave={() => setDragActive(false)}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+                className="hidden"
+              />
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="user"
+                onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+                className="hidden"
+              />
+    
+              {preview ? (
+                <div className="flex flex-col items-center">
+                  <img src={preview} alt="Preview" className="w-40 h-40 object-cover rounded-2xl shadow-2xl mb-4 border-2 border-purple-500/30" />
+                  <p className={`animate-pulse ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{t('analyzingPhoto')}</p>
+                  {uploadProgress > 0 && uploadProgress < 100 && (
+                    <div className={`mt-3 w-48 rounded-full h-1.5 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
+                      <div className="bg-purple-500 h-1.5 rounded-full transition-all" style={{ width: `${uploadProgress}%` }}></div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border ${
+                    mode === 'seasonal'
+                      ? isDark ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-white/10' : 'bg-amber-100 border-amber-200'
+                      : gender === 'female'
+                        ? isDark ? 'bg-gradient-to-br from-pink-500/20 to-rose-500/20 border-white/10' : 'bg-pink-100 border-pink-200'
+                        : isDark ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-white/10' : 'bg-purple-100 border-purple-200'
+                  }`}>
+                    <span className="text-4xl">
+                      {mode === 'seasonal' ? seasons.find(s => s.id === season)?.emoji : gender === 'female' ? '👩' : '🤳'}
+                    </span>
+                  </div>
+                  <p className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('dropSelfie')}</p>
+                  <p className={`mb-6 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('orBrowse')}</p>
+                  <span className={`inline-block px-8 py-3.5 text-white font-bold rounded-2xl shadow-lg transition-all hover:scale-105 ${
+                    mode === 'seasonal'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-amber-500/30'
+                      : gender === 'female'
+                        ? 'bg-gradient-to-r from-pink-500 to-rose-500 shadow-pink-500/30'
+                        : 'bg-gradient-to-r from-purple-500 to-pink-500 shadow-purple-500/30'
+                  }`}>
+                    📁 {t('choosePhoto')}
+                  </span>
+                  <div className="flex gap-3 justify-center mt-3">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); cameraInputRef.current?.click(); }}
+                      className={`md:hidden flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition
+                        ${isDark
+                          ? 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/30'
+                          : 'bg-purple-600 border-purple-600 text-white shadow-sm hover:bg-purple-700'}`}
+                    >
+                      📷 Camera
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                      className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition
+                        ${isDark
+                          ? 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'
+                          : 'bg-gray-100 border-gray-300 text-gray-700 shadow-sm hover:bg-gray-200'}`}
+                    >
+                      🖼️ Gallery
+                    </button>
+                  </div>
+                  <p className={`text-xs mt-4 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>{t('photoNote')}</p>
+                </>
+              )}
+            </div>
           )}
         </div>
       )}

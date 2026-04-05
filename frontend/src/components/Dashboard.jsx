@@ -357,26 +357,33 @@ function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-          <p className="text-2xl mb-1">📸</p>
-          <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{analysisCount}</p>
-          <p className={`text-[10px] uppercase font-bold ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Analyses</p>
+      {isLoggedIn ? (
+        <div className="grid grid-cols-3 gap-3">
+          <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+            <p className="text-2xl mb-1">📸</p>
+            <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{analysisCount}</p>
+            <p className={`text-[10px] uppercase font-bold ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Analyses</p>
+          </div>
+          <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+            <p className="text-2xl mb-1">❤️</p>
+            <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{savedCount}</p>
+            <p className={`text-[10px] uppercase font-bold ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Saved Colors</p>
+          </div>
+          <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white  border-gray-200 shadow-sm'}`}>
+            <p className="text-2xl mb-1">⭐</p>
+            <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>92%</p>
+            <p className={`text-[10px] uppercase font-bold ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Score</p>
+          </div>
         </div>
-        <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-          <p className="text-2xl mb-1">❤️</p>
-          <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{savedCount}</p>
-          <p className={`text-[10px] uppercase font-bold ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Saved Colors</p>
+      ) : (
+        <div className={`rounded-2xl p-6 text-center border border-dashed ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-300'}`}>
+          <p className="text-3xl mb-2">📊</p>
+          <p className={`font-bold text-sm ${isDark ? 'text-white/70' : 'text-gray-600'}`}>Login to see your analysis stats & score</p>
         </div>
-        <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white  border-gray-200 shadow-sm'}`}>
-          <p className="text-2xl mb-1">⭐</p>
-          <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>92%</p>
-          <p className={`text-[10px] uppercase font-bold ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Score</p>
-        </div>
-      </div>
+      )}
 
       {/* Skin Tone Analysis */}
-      {wardrobeStats && (
+      {isLoggedIn && wardrobeStats ? (
         <div className={`rounded-3xl p-6 border ${isDark ? 'bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-500/30' : 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200'}`}>
           <h3 className={`text-lg font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>🎨 Color Analysis</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -396,6 +403,11 @@ function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro
               <div className="w-10 h-10 rounded-lg border-2 border-white/30 shadow-lg" style={{ backgroundColor: wardrobeStats.skinHex }} />
             </div>
           </div>
+        </div>
+      ) : !isLoggedIn && (
+        <div className={`rounded-3xl p-6 text-center border border-dashed ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-300'}`}>
+          <p className="text-3xl mb-2">👗</p>
+          <p className={`font-bold text-sm ${isDark ? 'text-white/70' : 'text-gray-600'}`}>Login to save your wardrobe & color profile</p>
         </div>
       )}
 
