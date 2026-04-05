@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { auth, logout, loadProfile, guestLogin } from './api/styleApi';
+import { auth, logout, loadProfile } from './api/styleApi';
 import { onAuthStateChanged } from 'firebase/auth';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { PlanProvider } from './context/PlanContext';
