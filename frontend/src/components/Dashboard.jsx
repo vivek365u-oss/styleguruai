@@ -799,6 +799,7 @@ function SettingsScreen({ user, onLogout }) {
 }
 
 function Dashboard({ user, onLogout }) {
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t } = useLanguage();
   const { isPro, usage, setUsage } = usePlan();
