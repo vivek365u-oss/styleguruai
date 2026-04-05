@@ -66,22 +66,12 @@ function AppRoutes({ user, setUser }) {
     navigate('/');
   };
 
-  const handleGuestEntry = async () => {
-    if (!user) {
-      try {
-        await guestLogin();
-      } catch (e) {
-        console.error('Guest login failed', e);
-      }
-    }
-    navigate('/dashboard');
-  };
 
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
-        <Route path="/" element={<LandingPage onGetStarted={handleGuestEntry} onLoginClick={() => navigate('/login')} />} />
-        <Route path="/login" element={(user && !user.isAnonymous) ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} onSkip={handleGuestEntry} />} />
+        <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} />} />
+        <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
         <Route path="/profile" element={
           <PrivateRoute user={user}>
@@ -148,10 +138,9 @@ function App() {
         } catch (e) {
           console.error('loadProfile on login error:', e);
         }
-        localStorage.setItem('tonefit_user_status', firebaseUser.isAnonymous ? 'guest' : 'logged_in');
+        // Remove guest status sync since guest mode no longer exists
       } else {
         setUser(null);
-        localStorage.setItem('tonefit_user_status', 'guest');
       }
       setLoading(false);
     });

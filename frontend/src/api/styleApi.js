@@ -43,11 +43,6 @@ export const googleLogin = async () => {
   return { name: user.displayName, email: user.email };
 };
 
-// Guest Login (Anonymous)
-export const guestLogin = async () => {
-  const result = await signInAnonymously(auth);
-  return { name: 'Guest', email: null };
-};
 
 // Email Register
 export const registerUser = async (data) => {
@@ -97,7 +92,7 @@ export const getMe = () => API.get('/auth/me');
 
 export const saveHistory = async (historyData) => {
   const user = auth.currentUser;
-  if (!user || user.isAnonymous) return;
+  if (!user) return;
   await addDoc(collection(db, 'users', user.uid, 'history'), {
     ...historyData,
     date: new Date().toISOString()
@@ -239,7 +234,7 @@ const handleFirestoreError = (fnName, e) => {
 // ============================================
 
 export const saveProfile = async (uid, profile) => {
-  if (!auth.currentUser || auth.currentUser.isAnonymous) return;
+  if (!auth.currentUser) return;
   try {
     await setDoc(doc(db, 'users', uid, 'profile', 'data'), {
       ...profile,
@@ -267,7 +262,7 @@ export const loadProfile = async (uid) => {
 // ============================================
 
 export const saveWardrobeItem = async (uid, item) => {
-  if (!auth.currentUser || auth.currentUser.isAnonymous) return null;
+  if (!auth.currentUser) return null;
   try {
     const ref = await addDoc(collection(db, 'users', uid, 'wardrobe'), {
       ...item,
@@ -321,7 +316,7 @@ export const getWardrobeCount = async (uid) => {
 // ============================================
 
 export const savePushSubscription = async (uid, sub, skinTone, colorSeason) => {
-  if (!auth.currentUser || auth.currentUser.isAnonymous) return;
+  if (!auth.currentUser) return;
   try {
     const subId = btoa(sub.endpoint).slice(0, 20).replace(/[^a-zA-Z0-9]/g, '');
     await setDoc(doc(db, 'users', uid, 'push_subscriptions', subId), {
@@ -353,7 +348,7 @@ export const deletePushSubscription = async (uid, subId) => {
 // ============================================
 
 export const logShareEvent = async (uid, skinTone) => {
-  if (!auth.currentUser || auth.currentUser.isAnonymous) return;
+  if (!auth.currentUser) return;
   try {
     await addDoc(collection(db, 'users', uid, 'events'), {
       type: 'share',
@@ -382,7 +377,7 @@ export const getSubscription = async (uid) => {
 };
 
 export const activateProSubscription = async (uid) => {
-  if (!auth.currentUser || auth.currentUser.isAnonymous) return;
+  if (!auth.currentUser) return;
   try {
     const validUntil = new Date();
     validUntil.setDate(validUntil.getDate() + 30); // 30 days from now
@@ -409,7 +404,7 @@ export const getUsage = async (uid, monthKey) => {
 };
 
 export const incrementUsage = async (uid, field) => {
-  if (!auth.currentUser || auth.currentUser.isAnonymous) return;
+  if (!auth.currentUser) return;
   try {
     const monthKey = new Date().toISOString().slice(0, 7); // YYYY-MM
     const ref = doc(db, 'users', uid, 'usage', monthKey);
@@ -432,7 +427,7 @@ export const verifyPayment = (payload) => API.post('/api/payment/verify', payloa
 // ============================================
 
 export const publishToCommunityFeed = async (uid, paletteData) => {
-  if (!auth.currentUser || auth.currentUser.isAnonymous) return null;
+  if (!auth.currentUser) return null;
   try {
     const ref = await addDoc(collection(db, 'community_feed'), {
       uid, // Used for delete rights later if needed, but not displayed publicly

@@ -155,7 +155,7 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
     } catch { return false; }
   });
 
-  const isGuest = auth.currentUser?.isAnonymous;
+  const isGuest = false;
 
   const toggleSave = (e) => {
     e.stopPropagation();
@@ -1078,11 +1078,10 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         
         <button
           onClick={async () => {
-            if (auth.currentUser?.isAnonymous) {
-              // Redirection to profile tab to login
-              onReset(); // Go back to start if needed, or just let them know
-              return;
-            }
+            // Always allow saving as user is now always authenticated
+            await saveHistory({
+              skinTone: analysis.skin_tone.category,
+            });
             if (shareStatus === 'success') return;
             setShareStatus('loading');
             try {

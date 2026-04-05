@@ -183,15 +183,6 @@ function AuthPage({ onLoginSuccess, onSkip }) {
               ) : mode === 'login' ? `🚀 ${t('loginBtn')}` : `✨ ${t('registerBtn')}`}
             </button>
             
-            {/* Skip as Guest */}
-            {onSkip && (
-              <button
-                onClick={onSkip}
-                className="w-full mt-2 py-2 text-white/50 text-sm font-medium hover:text-white transition-colors underline decoration-white/20 hover:decoration-white/50 underline-offset-4"
-              >
-                {t('skipGuest')}
-              </button>
-            )}
           </div>
         </div>
 

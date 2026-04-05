@@ -185,7 +185,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
   const gndr = lastAnalysis?.fullData?.gender || genderPref;
   const tone = (typeof lastAnalysis?.skinTone === 'string' ? lastAnalysis?.skinTone : lastAnalysis?.skinTone?.category || 'medium')?.toLowerCase();
   const todayTip = getLocalizedTip(gndr, tone, language);
-  const firstName = user?.name?.split(' ')[0] || t('guestName');
+  const firstName = user?.name?.split(' ')[0] || '';
   return (
     <div className="pb-4 space-y-6">
       {showDailyDrop && <DailyDropModal lastAnalysis={lastAnalysis} isDark={isDark} onClose={() => setShowDailyDrop(false)} />}
@@ -193,7 +193,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
         <div>
           <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{t('goodDay')}</p>
           <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {user?.name ? t('welcomeHey').replace('{name}', firstName) : t('welcomeNew')}
+            {t('welcomeHey').replace('{name}', firstName)}
           </h2>
           <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('discoverPerfect')}</p>
         </div>
@@ -320,37 +320,8 @@ function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro
     date: lastAnalysis.date,
   } : null;
 
-  // Check if user is logged in
-  const isLoggedIn = user && !user.isAnonymous;
-
   return (
     <div className="space-y-4 pt-2">
-      {/* Authentication Status */}
-      {isLoggedIn ? (
-        <div className={`rounded-2xl p-4 flex flex-col items-center gap-3 border ${isDark ? 'bg-green-500/10 border-green-500/20' : 'bg-green-50 border-green-200'}`}>
-          <div className="flex items-center gap-2">
-            <span className="text-sm">✅</span>
-            <p className={`text-xs font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>Logged In</p>
-          </div>
-          <button
-            onClick={onLogout}
-            className={`w-full py-2.5 rounded-xl font-black text-xs transition-all border ${isDark ? 'bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500/20' : 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'}`}
-          >
-            Logout From StyleGuru
-          </button>
-        </div>
-      ) : (
-        <div className={`rounded-2xl p-4 text-center border ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-200'}`}>
-          <p className={`text-xs font-bold mb-3 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>👤 Guest Mode</p>
-          <button
-            onClick={() => navigate('/login')}
-            className={`w-full px-3 py-2.5 rounded-xl font-black text-sm transition-all ${isDark ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg' : 'bg-blue-500 hover:bg-blue-600 text-white shadow-sm'}`}
-          >
-            Login to Save Progress
-          </button>
-        </div>
-      )}
-
       {/* Profile Header */}
       <div className={`rounded-3xl p-6 border text-center ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
         <div className="inline-block mb-4 relative">
@@ -359,9 +330,12 @@ function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro
           </div>
         </div>
         <h2 className={`text-2xl font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{user?.name}</h2>
-        <p className={`text-sm mb-4 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{user?.email}</p>
-        <button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 font-semibold transition-all text-sm">
-          ✏️ Edit Profile
+        <p className={`text-sm mb-6 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{user?.email}</p>
+        <button
+          onClick={onLogout}
+          className={`w-full py-3 rounded-2xl font-black text-sm transition-all border shadow-lg ${isDark ? 'bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500/20' : 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'}`}
+        >
+          Logout From StyleGuru
         </button>
       </div>
 
