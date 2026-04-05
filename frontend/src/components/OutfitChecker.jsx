@@ -24,21 +24,38 @@ function OutfitShopCard({ color, isDark, gender = 'male' }) {
   const fkPriceParam = budget?.max ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budget.max}` : '';
   const myntraPriceParam = budget?.max ? `&p=price%5B0%5D%3D0%20TO%20${budget.max}` : '';
 
-  // Different search queries based on gender
+  // Different search queries based on gender & color
   const getSearchQueries = () => {
+    const colorKeywords = {
+      'red': { category: 'festive, ethnic, bold', trending: 'red party wear, red trending tops 2025' },
+      'blue': { category: 'casual, formal, smart', trending: 'blue casual shirts, blue denim trending' },
+      'black': { category: 'formal, elegant, minimal', trending: 'black elegant, black formal trending' },
+      'white': { category: 'crisp, pure, fresh', trending: 'white premium shirts, white clean look' },
+      'green': { category: 'nature, fresh, trendy', trending: 'green streetwear, green mint trending' },
+      'yellow': { category: 'bright, cheerful, summer', trending: 'yellow summer wear, yellow trending' },
+      'pink': { category: 'romantic, feminine, pastel', trending: 'pink blush, pink trending fashion' },
+      'purple': { category: 'royal, elegant, unique', trending: 'purple royal, purple trending outfits' },
+      'orange': { category: 'vibrant, warm, energetic', trending: 'orange vibrant, orange trending wear' },
+      'brown': { category: 'earthy, classic, neutral', trending: 'brown neutral, brown classic style' },
+      'gray': { category: 'sophisticated, neutral, modern', trending: 'gray modern, gray neutral trending' },
+      'beige': { category: 'minimalist, neutral, elegant', trending: 'beige neutral, beige elegant styling' },
+    };
+
+    const keywordData = colorKeywords[colorDisplay] || { category: 'trendy', trending: `${colorDisplay} premium trending 2025` };
+
     if (gender === 'female') {
       return {
-        amazon: `${colorDisplay} women top blouse saree trending 2025`,
+        amazon: `${keywordData.trending} women fashion`,
         flipkart: `${colorDisplay} women top blouse`,
-        myntra: `${colorLower}+women+top+blouse`,
+        myntra: `${colorLower}-women-top`,
         meesho: `${colorDisplay} women top trending`,
         amazonCategory: 'n%3A7534543031', // Women's Clothing
       };
     } else {
       return {
-        amazon: `${colorDisplay} men oversized tshirt streetwear trending 2025`,
+        amazon: `${keywordData.trending} men fashion streetwear`,
         flipkart: `${colorDisplay} men oversized tshirt`,
-        myntra: `${colorLower}+men+oversized+tshirt`,
+        myntra: `${colorLower}-men-shirt`,
         meesho: `${colorDisplay} men oversized tshirt trending`,
         amazonCategory: 'n%3A1968024031', // Men's Clothing
       };
@@ -50,16 +67,16 @@ function OutfitShopCard({ color, isDark, gender = 'male' }) {
   const links = [
     { name: 'Amazon',   icon: '🛒',
       bg: isDark ? 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' : 'bg-orange-50 hover:bg-orange-100 border-orange-300 text-orange-700 font-bold',
-      url: `https://www.amazon.in/s?k=${encodeURIComponent(queries.amazon)}&rh=${queries.amazonCategory}${amzPriceParam}&sort=review-rank&tag=${AMAZON_TAG}` },
+      url: `https://www.amazon.in/s?k=${encodeURIComponent(queries.amazon + ' bestseller')}&rh=${queries.amazonCategory}${amzPriceParam}&sort=review-rank&tag=${AMAZON_TAG}` },
     { name: 'Flipkart', icon: '🏪',
       bg: isDark ? 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700 font-bold',
-      url: `https://www.flipkart.com/search?q=${encodeURIComponent(queries.flipkart)}&sort=popularity_desc${fkPriceParam}` },
+      url: `https://www.flipkart.com/search?q=${encodeURIComponent(queries.flipkart)}&sort=review-rank${fkPriceParam}` },
     { name: 'Myntra',   icon: '👗',
       bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold',
-      url: `https://www.myntra.com/search?q=${queries.myntra}` },
+      url: `https://www.myntra.com/search?q=${queries.myntra}&sort=popularity&pageNo=1` },
     { name: 'Meesho',   icon: '🛍️',
       bg: isDark ? 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' : 'bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700 font-bold',
-      url: `https://meesho.com/search?q=${encodeURIComponent(queries.meesho)}` },
+      url: `https://meesho.com/search?q=${encodeURIComponent(queries.meesho)}&sort=popularity` },
   ];
 
   const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-md';
