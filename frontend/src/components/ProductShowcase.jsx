@@ -54,10 +54,10 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        console.log(`[Products] Fetching products for color: ${colorName}`);
+        console.log(`[Products] Fetching products for color: ${colorName}, gender: ${gender}`);
         
         const res = await API.get(`/api/products/by-color/${colorName.toLowerCase()}`, {
-          params: { limit: count }
+          params: { limit: count, gender: gender }
         });
 
         if (res.data.success && res.data.products.length > 0) {

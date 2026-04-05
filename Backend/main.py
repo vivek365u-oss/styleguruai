@@ -875,7 +875,7 @@ async def debug_product_count():
         }
 
 @app.get("/api/products/by-color/{color_name}")
-async def get_products_by_color(color_name: str, limit: int = 50):
+async def get_products_by_color(color_name: str, limit: int = 50, gender: str = "male"):
     """Get products matching a color category (for shopping feature). Handles color name variations."""
     try:
         db = get_firestore_db()
@@ -943,8 +943,9 @@ async def get_products_by_color(color_name: str, limit: int = 50):
         # Map to basic color if needed
         basic_color = color_mapping.get(normalized_color, normalized_color)
         
-        # Query products collection by color field
-        docs = db.collection("products").where("color", "==", basic_color).limit(limit).stream()
+        # Query products collection by color AND gender
+        # Gender must match the requested gender or be 'unisex'
+        docs = db.collection("products").where("color", "==", basic_color).where("gender", "in", [gender, "unisex"]).limit(limit).stream()
         
         products = []
         for doc in docs:
@@ -954,7 +955,7 @@ async def get_products_by_color(color_name: str, limit: int = 50):
         
         # If no products found with mapped color, try original
         if len(products) == 0 and basic_color != normalized_color:
-            docs = db.collection("products").where("color", "==", normalized_color).limit(limit).stream()
+            docs = db.collection("products").where("color", "==", normalized_color).where("gender", "in", [gender, "unisex"]).limit(limit).stream()
             for doc in docs:
                 data = doc.to_dict()
                 data["id"] = doc.id

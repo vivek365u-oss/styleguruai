@@ -1165,6 +1165,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             {recommendations.best_shirt_colors?.[0]?.name && (
               <ProductShowcase
                 colorName={recommendations.best_shirt_colors[0].name}
+                gender={finalData.gender || "male"}
                 isDark={isDark}
               />
             )}
