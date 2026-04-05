@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
-import { auth, updateUserProfile, loadProfile } from '../api/styleApi';
+import { auth, loadProfile } from '../api/styleApi';
 import { updateProfile } from 'firebase/auth';
 
 function ProfilePage() {
