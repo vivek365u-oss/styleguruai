@@ -115,33 +115,51 @@ function ColorRecommendationsShop({ recommendations, gender = 'male', isDark = f
 
       {/* Outfit Combinations */}
       {showOutfits && recommendations.outfit_combos && recommendations.outfit_combos.length > 0 && (
-        <OutfitCombinations outfits={recommendations.outfit_combos} isDark={isDark} />
+        <OutfitCombinations outfits={recommendations.outfit_combos} isDark={isDark} gender={gender} />
       )}
     </div>
   );
 }
 
 // ============================================================
-// Outfit Combinations Sub-Component
+// Outfit Combinations Sub-Component with Related Colors
 // ============================================================
-function OutfitCombinations({ outfits, isDark = false }) {
+function OutfitCombinations({ outfits, gender = 'male', isDark = false }) {
   const [expandedIdx, setExpandedIdx] = useState(0);
 
-  const outfit = outfits[expandedIdx] || outfits[0];
+  const outfit = outfits[expandedIdx];
+  const isFemale = gender === 'female';
+
+  // Format outfit display based on data structure
+  const formatOutfitDisplay = (outfitData) => {
+    if (typeof outfitData === 'string') {
+      return outfitData;
+    }
+    if (typeof outfitData === 'object') {
+      const parts = [];
+      if (outfitData.top) parts.push(`👕 ${outfitData.top}`);
+      if (outfitData.bottom) parts.push(`👖 ${outfitData.bottom}`);
+      if (outfitData.dupatta && outfitData.dupatta !== '-') parts.push(`🧣 ${outfitData.dupatta}`);
+      if (outfitData.shoes && outfitData.shoes !== '-') parts.push(`👞 ${outfitData.shoes}`);
+      if (outfitData.occasion) parts.push(`📍 ${outfitData.occasion}`);
+      return parts.join(' • ');
+    }
+    return String(outfitData);
+  };
 
   return (
     <div className={`rounded-xl border p-4 ${isDark ? 'bg-white/5 border-white/10' : 'bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200'}`}>
       <h4 className={`text-sm font-bold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-        👔 Outfit Combinations
+        👔 Suggested Outfit Combinations
       </h4>
 
       {/* Outfit Tabs */}
-      <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1">
+      <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1 scrollbar-hide">
         {outfits.map((_, idx) => (
           <button
             key={idx}
             onClick={() => setExpandedIdx(idx)}
-            className={`px-2 py-1 rounded text-xs font-semibold whitespace-nowrap transition-all ${
+            className={`px-2.5 py-1 rounded text-xs font-semibold whitespace-nowrap transition-all ${
               expandedIdx === idx
                 ? isDark
                   ? 'bg-purple-500/40 text-purple-100'
@@ -159,13 +177,20 @@ function OutfitCombinations({ outfits, isDark = false }) {
       {/* Outfit Details */}
       {outfit && (
         <div
-          className={`p-3 rounded-lg border ${
+          className={`p-3 rounded-lg border space-y-2 ${
             isDark
               ? 'bg-white/5 border-white/10 text-white/80'
               : 'bg-white border-purple-200 text-gray-700'
           }`}
         >
-          <p className="text-sm">{outfit}</p>
+          <p className="text-sm leading-relaxed">{formatOutfitDisplay(outfit)}</p>
+          
+          {/* Vibe/Occasion tip */}
+          {outfit.vibe && (
+            <div className={`text-xs italic pt-2 border-t ${isDark ? 'border-white/10 text-white/60' : 'border-purple-200 text-gray-600'}`}>
+              ✨ Vibe: {outfit.vibe}
+            </div>
+          )}
         </div>
       )}
     </div>
