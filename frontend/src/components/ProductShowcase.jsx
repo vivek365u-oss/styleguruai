@@ -62,6 +62,7 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
 
         if (res.data.success && res.data.products.length > 0) {
           console.log(`[Products] ✅ Loaded ${res.data.products.length} products`);
+          console.log(`[Products] Genders in response:`, res.data.products.map(p => ({ name: p.name, gender: p.gender, category: p.category })));
           setProducts(res.data.products.slice(0, count));
           setError(null);
           setSeeding(false);
@@ -96,6 +97,7 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
                     
                     if (retryRes.data.success && retryRes.data.products.length > 0) {
                       console.log(`[Products] ✅ Retry ${attempt} successful! Loaded ${retryRes.data.products.length} products (mapped to: ${retryRes.data.mapped_to})`);
+                      console.log(`[Products] Retry - Genders:`, retryRes.data.products.map(p => ({ name: p.name, gender: p.gender })));
                       setProducts(retryRes.data.products.slice(0, count));
                       setError(null);
                       setSeeding(false);
