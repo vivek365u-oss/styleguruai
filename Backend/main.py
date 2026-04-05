@@ -62,7 +62,6 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 # AUTH SETUP
 # ============================================
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
-oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="auth/login", auto_error=False)
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
@@ -78,17 +77,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-async def get_current_user_lenient(token: str = Depends(oauth2_scheme_optional)):
-    if not token:
-        return {"uid": f"guest_{str(uuid.uuid4())[:8]}", "email": "guest", "full_name": "Guest"}
-    try:
-        decoded = firebase_auth.verify_id_token(token)
-        uid = decoded["uid"]
-        email = decoded.get("email", "")
-        name = decoded.get("name", email)
-        return {"uid": uid, "email": email, "full_name": name}
-    except Exception:
-        return {"uid": f"guest_{str(uuid.uuid4())[:8]}", "email": "guest", "full_name": "Guest"}
 
 # ============================================
 # APP INIT
@@ -336,7 +324,7 @@ async def analyze_image(
     request: Request,
     file: UploadFile = File(...),
     lang: str = "en",
-    current_user: dict = Depends(get_current_user_lenient)
+    current_user: dict = Depends(get_current_user)
 ):
     start_time = time.time()
     try:
@@ -390,7 +378,7 @@ async def analyze_image(
 async def analyze_image_female(
     file: UploadFile = File(...),
     lang: str = "en",
-    current_user: dict = Depends(get_current_user_lenient)
+    current_user: dict = Depends(get_current_user)
 ):
     start_time = time.time()
     try:
@@ -451,7 +439,7 @@ async def analyze_seasonal(
     file: UploadFile = File(...),
     season: str = "summer",
     lang: str = "en",
-    current_user: dict = Depends(get_current_user_lenient)
+    current_user: dict = Depends(get_current_user)
 ):
     start_time = time.time()
     try:
@@ -499,7 +487,7 @@ async def check_outfit_compatibility(
     selfie: UploadFile = File(...),
     outfit: UploadFile = File(...),
     lang: str = "en",
-    current_user: dict = Depends(get_current_user_lenient)
+    current_user: dict = Depends(get_current_user)
 ):
     start_time = time.time()
     selfie_path = None

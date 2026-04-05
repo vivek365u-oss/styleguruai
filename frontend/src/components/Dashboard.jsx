@@ -112,11 +112,10 @@ function DailyDropModal({ lastAnalysis, isDark, onClose }) {
 
 // ------------------------------------------
 
-function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
+function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro, lastAnalysis }) {
   const { theme } = useContext(ThemeContext);
   const { t, language } = useLanguage();
   const isDark = theme === 'dark';
-  const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
   const analysisCount = parseInt(localStorage.getItem('sg_analysis_count') || '0');
   const savedCount = (() => { try { return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]').length; } catch { return 0; } })();
   const toneColors = { fair: "#F5DEB3", light: "#D2A679", medium: "#C68642", olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A" };
@@ -309,7 +308,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
   );
 }
 
-function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro, usage, onShowSettings, onLogout }) {
+function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro, usage, onShowSettings, onLogout, lastAnalysis }) {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const wardrobeStats = lastAnalysis ? {
@@ -796,6 +795,7 @@ function Dashboard({ user, onLogout }) {
   const [toast, setToast] = useState(null);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
+  const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
   const showToast = (msg) => setToast(msg);
 
   // Define analysisCount and savedCount for profile tab display
@@ -959,100 +959,94 @@ function Dashboard({ user, onLogout }) {
 
       <main className="relative z-10 max-w-lg mx-auto px-4 pt-4 pb-24">
         <div className="tab-content" key={activeTab}>
-        {activeTab === 'home' && (
-          <HomeScreen
-            user={user}
-            onAnalyze={() => setActiveTab('analyze')}
-            onTabChange={handleTabChange}
-            isPro={isPro}
-            onShowResult={(data) => {
-              setResults(data);
-              setActiveTab('analyze');
-            }}
-          />
-        )}
-        {activeTab === 'analyze' && (
-          <>
-            {!results && !loading && (
-              <UploadSection
-                onLoadingStart={() => {
-                  if (!isPro && usage.analyses_count >= 6) {
-                    logEvent(EVENTS.PAYWALL_VIEW, { reason: 'limit_reached' });
-                    setPaywallOpen(true);
-                    return false; // signal blocked
-                  }
-                  logEvent(EVENTS.STYLE_ANALYSIS_START, { gender: currentGender });
-                  setLoading(true); setError(null);
-                  return true;
-                }}
-                onAnalysisComplete={handleAnalysisComplete}
-                onError={(msg) => { 
-                  logEvent(EVENTS.STYLE_ANALYSIS_ERROR, { message: msg });
-                  setError(msg); setLoading(false); 
-                }}
-                onImageSelected={setUploadedImage}
-                onGenderChange={setCurrentGender}
-              />
-            )}
-            {loading && <LoadingScreen />}
-            {error && (
-              <div className="mt-8 rounded-2xl p-6 text-center border bg-red-500/10 border-red-500/30">
-                <div className="text-4xl mb-3">😕</div>
-                <p className="text-red-300 font-medium mb-1">Oops!</p>
-                <p className="text-red-400/80 text-sm whitespace-pre-line">{error}</p>
-                <button onClick={handleReset} className="mt-4 px-5 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/20 text-sm font-medium transition">
-                  {t('tryAgain')}
-                </button>
-              </div>
-            )}
-            {results && results.type === 'couple' ? (
-              <CoupleResults data={results} uploadedImages={uploadedImage} onReset={handleReset} />
-            ) : results ? (
-              <ResultsDisplay data={results} uploadedImage={uploadedImage} onReset={handleReset} />
-            ) : null}
-          </>
-        )}
-        {activeTab === 'wardrobe' && <WardrobePanel user={user} onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
-        {activeTab === 'tools' && <ToolsTab uploadedImage={uploadedImage} analysisData={results} onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} onOpenScanner={() => setActiveTab('scanner')} />}
-        {activeTab === 'scanner' && (
-          <ColorScanner
-            savedPalette={(() => {
-              try {
-                const lastA = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
-                return lastA?.fullData?.recommendations?.best_shirt_colors ||
-                       lastA?.fullData?.recommendations?.best_dress_colors || [];
-              } catch { return []; }
-            })()}
-            skinTone={(() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || '{}').skinTone; } catch { return ''; } })()}
-            onClose={() => setActiveTab('home')}
-          />
-        )}
-        {activeTab === 'profile' && (
-          <>
-            {!showProfileSettings ? (
-              <ProfileScreenComponent 
-                user={user} 
-                isDark={isDark} 
-                analysisCount={analysisCount}
-                savedCount={savedCount}
-                isPro={isPro}
-                usage={usage}
-                onShowSettings={() => setShowProfileSettings(true)}
-                onLogout={onLogout}
-              />
-            ) : (
-              <div>
-                <button
-                  onClick={() => setShowProfileSettings(false)}
-                  className={`mb-4 p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
-                >
-                  ← Back to Profile
-                </button>
-                <SettingsScreen user={user} onLogout={onLogout} />
-              </div>
-            )}
-          </>
-        )}
+          {activeTab === 'home' && (
+            <HomeScreen 
+              user={user} 
+              lastAnalysis={lastAnalysis} 
+              onAnalyze={() => setActiveTab('analyze')} 
+              onTabChange={handleTabChange} 
+              onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} 
+              isPro={isPro} 
+            />
+          )}
+
+          {activeTab === 'analyze' && (
+            <>
+              {!results && !loading && !error && (
+                <UploadSection 
+                  onAnalyze={handleAnalysisComplete} 
+                  setLoading={setLoading} 
+                  setError={setError} 
+                  setUploadedImage={setUploadedImage} 
+                  currentGender={currentGender}
+                  setCurrentGender={setCurrentGender}
+                  isPro={isPro}
+                  usage={usage}
+                />
+              )}
+              {loading && <LoadingScreen />}
+              {error && (
+                <div className="mt-8 rounded-2xl p-6 text-center border bg-red-500/10 border-red-500/30">
+                  <div className="text-4xl mb-3">😕</div>
+                  <p className="text-red-300 font-medium mb-1">Oops!</p>
+                  <p className="text-red-400/80 text-sm whitespace-pre-line">{error}</p>
+                  <button onClick={handleReset} className="mt-4 px-5 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/20 text-sm font-medium transition">
+                    {t('tryAgain')}
+                  </button>
+                </div>
+              )}
+              {results && results.type === 'couple' ? (
+                <CoupleResults data={results} uploadedImages={uploadedImage} onReset={handleReset} />
+              ) : results ? (
+                <ResultsDisplay data={results} uploadedImage={uploadedImage} onReset={handleReset} />
+              ) : null}
+            </>
+          )}
+
+          {activeTab === 'wardrobe' && <WardrobePanel user={user} onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
+          
+          {activeTab === 'tools' && <ToolsTab uploadedImage={uploadedImage} analysisData={results} onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} onOpenScanner={() => setActiveTab('scanner')} />}
+          
+          {activeTab === 'scanner' && (
+            <ColorScanner
+              savedPalette={(() => {
+                try {
+                  return lastAnalysis?.fullData?.recommendations?.best_shirt_colors ||
+                         lastAnalysis?.fullData?.recommendations?.best_dress_colors || [];
+                } catch { return []; }
+              })()}
+              skinTone={lastAnalysis?.skinTone || ''}
+              onClose={() => setActiveTab('home')}
+            />
+          )}
+
+          {activeTab === 'profile' && (
+            <>
+              {!showProfileSettings ? (
+                <ProfileScreenComponent 
+                  user={user} 
+                  isDark={isDark} 
+                  analysisCount={analysisCount}
+                  savedCount={savedCount}
+                  isPro={isPro}
+                  usage={usage}
+                  onShowSettings={() => setShowProfileSettings(true)}
+                  onLogout={onLogout}
+                  lastAnalysis={lastAnalysis}
+                />
+              ) : (
+                <div>
+                  <button
+                    onClick={() => setShowProfileSettings(false)}
+                    className={`mb-4 p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
+                  >
+                    ← Back to Profile
+                  </button>
+                  <SettingsScreen user={user} onLogout={onLogout} />
+                </div>
+              )}
+            </>
+          )}
         </div>
       </main>
 
