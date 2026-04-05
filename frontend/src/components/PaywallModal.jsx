@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { logEvent, EVENTS } from '../utils/analytics';
 import { useLanguage } from '../i18n/LanguageContext';
 import { auth } from '../api/styleApi';
@@ -6,86 +6,105 @@ import { auth } from '../api/styleApi';
 function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState('monthly'); // 'monthly' or 'yearly'
-
-  if (!isOpen) return null;
+  const [selectedPlan, setSelectedPlan] = useState('monthly');
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
     if (isOpen) {
       logEvent(EVENTS.PAYWALL_VIEW);
+      // Load Razorpay script once when modal opens
+      if (!window.Razorpay) {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
+      }
     }
+
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [isOpen]);
 
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   const handlePayment = async (plan) => {
+    if (!isMountedRef.current) return;
+    
     logEvent(EVENTS.UPGRADE_CLICK, { plan });
     setLoading(true);
     
     const user = auth.currentUser;
     if (!user) {
-      setLoading(false);
+      if (isMountedRef.current) setLoading(false);
+      return;
+    }
+
+    // Wait for Razorpay to be available
+    if (!window.Razorpay) {
+      setTimeout(() => handlePayment(plan), 500);
       return;
     }
 
     try {
-      // Initialize Razorpay
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.async = true;
-      document.body.appendChild(script);
-
-      script.onload = () => {
-        const amount = plan === 'monthly' ? 5900 : 49900; // in paise
-        const planName = plan === 'monthly' ? '₹59/month' : '₹499/year';
-        
-        const options = {
-          key: process.env.REACT_APP_RAZORPAY_KEY_ID || 'rzp_live_12345',
-          amount: amount,
-          currency: 'INR',
-          description: `StyleGuru AI Premium - ${planName}`,
-          prefill: {
-            email: user.email || '',
-            name: user.displayName || 'User',
-          },
-          handler: async (response) => {
-            try {
-              const res = await fetch('/api/subscriptions/activate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  uid: user.uid,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_signature: response.razorpay_signature,
-                  plan: plan,
-                })
-              });
-              if (res.ok) {
-                setLoading(false);
-                onUpgrade();
-              } else {
-                alert('Payment verified but subscription activation failed. Contact support.');
-                setLoading(false);
-              }
-            } catch (err) {
-              console.error('Subscription activation error:', err);
-              setLoading(false);
+      const amount = plan === 'monthly' ? 5900 : 49900; // in paise
+      const planName = plan === 'monthly' ? '₹59/month' : '₹499/year';
+      
+      const options = {
+        key: process.env.REACT_APP_RAZORPAY_KEY_ID || 'rzp_test_12345',
+        amount: amount,
+        currency: 'INR',
+        description: `StyleGuru AI Premium - ${planName}`,
+        prefill: {
+          email: user.email || '',
+          name: user.displayName || 'User',
+        },
+        handler: async (response) => {
+          try {
+            const res = await fetch('/api/subscriptions/activate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                uid: user.uid,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                plan: plan,
+              })
+            });
+            if (res.ok) {
+              if (isMountedRef.current) setLoading(false);
+              // Small delay before upgrade to show success
+              setTimeout(() => onUpgrade?.(), 500);
+            } else {
+              console.error('Subscription activation failed');
+              if (isMountedRef.current) setLoading(false);
             }
-          },
-          modal: {
-            ondismiss: () => {
-              setLoading(false);
-            }
+          } catch (err) {
+            console.error('Subscription activation error:', err);
+            if (isMountedRef.current) setLoading(false);
           }
-        };
-        
-        const razorpay = new window.Razorpay(options);
-        razorpay.open();
+        },
+        modal: {
+          ondismiss: () => {
+            if (isMountedRef.current) setLoading(false);
+          }
+        }
       };
+      
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
     } catch (err) {
       console.error('Payment initialization error:', err);
-      setLoading(false);
+      if (isMountedRef.current) setLoading(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

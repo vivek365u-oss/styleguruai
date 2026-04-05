@@ -827,8 +827,14 @@ function Dashboard({ user, onLogout }) {
       localStorage.setItem('sg_analysis_count', count.toString());
       
       // PHASE 1.2: Show paywall after 3rd free analysis (non-pro users)
-      if (!isPro && count >= 3) {
-        setTimeout(() => setPaywallOpen(true), 800); // Show after results animate in
+      // Only trigger if exactly on 3rd and not already shown
+      if (!isPro && count === 3) {
+        // Use a flag to prevent multiple triggers
+        const paywallShown = localStorage.getItem('sg_paywall_shown_' + (new Date()).toDateString());
+        if (!paywallShown) {
+          localStorage.setItem('sg_paywall_shown_' + (new Date()).toDateString(), 'true');
+          setTimeout(() => setPaywallOpen(true), 1000); // Show after results display
+        }
       }
       
       const newEntry = {
@@ -857,8 +863,8 @@ function Dashboard({ user, onLogout }) {
     if (uid) {
       // Increment usage for free users
       if (!isPro) {
-        incrementUsage(uid, 'analyses_count').then(() => {
-          setUsage(prev => ({ ...prev, analyses_count: (prev.analyses_count || 0) + 1 }));
+        incrementUsage(uid, 'analyses_count').catch(() => {
+          // Silently fail, will sync on next load
         });
       }
       logEvent(EVENTS.STYLE_ANALYSIS_SUCCESS, {
