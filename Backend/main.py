@@ -1432,6 +1432,172 @@ async def verify_product_payment(
         raise HTTPException(status_code=500, detail=f"Verification failed: {str(e)}")
 
 # ============================================
+# AFFILIATE TRACKING (Phase 2)
+# ============================================
+
+class AffiliateClickData(BaseModel):
+    """Track affiliate link clicks"""
+    color: str
+    category: str
+    brand: str
+    platform: str  # amazon, flipkart, myntra, meesho
+    product_id: Optional[str] = None
+    price: Optional[float] = None
+
+@app.post("/api/affiliate/track-click")
+async def track_affiliate_click(
+    data: AffiliateClickData,
+    current_user: dict = Depends(get_current_user)
+):
+    """Track when user clicks on affiliate links"""
+    try:
+        db = get_firestore_db()
+        user_id = current_user.get("uid")
+        
+        click_doc = {
+            "user_id": user_id,
+            "color": data.color.lower(),
+            "category": data.category.lower(),
+            "brand": data.brand,
+            "platform": data.platform.lower(),
+            "product_id": data.product_id,
+            "price": data.price,
+            "timestamp": datetime.now().isoformat(),
+            "date": datetime.now().strftime("%Y-%m-%d"),
+            "hour": datetime.now().strftime("%Y-%m-%d %H:00:00")
+        }
+        
+        # Store in affiliate_clicks collection
+        db.collection("affiliate_clicks").add(click_doc)
+        
+        # Also store in user's affiliate_history subcollection
+        db.collection("users").document(user_id).collection("affiliate_history").add(click_doc)
+        
+        print(f"[Affiliate] Click tracked: user={user_id}, platform={data.platform}, color={data.color}")
+        
+        return {
+            "success": True,
+            "message": "Click tracked successfully",
+            "timestamp": click_doc["timestamp"]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[Affiliate] Error tracking click: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to track click: {str(e)}")
+
+@app.get("/api/affiliate/analytics/summary")
+async def get_affiliate_summary(current_user: dict = Depends(get_current_user)):
+    """Get affiliate analytics summary for current user"""
+    try:
+        db = get_firestore_db()
+        user_id = current_user.get("uid")
+        
+        # Get all clicks for user
+        clicks = db.collection("affiliate_clicks").where("user_id", "==", user_id).stream()
+        
+        total_clicks = 0
+        platform_stats = {}
+        color_stats = {}
+        category_stats = {}
+        
+        for click in clicks:
+            data = click.to_dict()
+            total_clicks += 1
+            
+            # Platform breakdown
+            platform = data.get("platform", "unknown")
+            platform_stats[platform] = platform_stats.get(platform, 0) + 1
+            
+            # Color breakdown
+            color = data.get("color", "unknown")
+            color_stats[color] = color_stats.get(color, 0) + 1
+            
+            # Category breakdown
+            category = data.get("category", "unknown")
+            category_stats[category] = category_stats.get(category, 0) + 1
+        
+        # Calculate estimated commission (conservative: 5% of clicks convert, ₹50 avg commission per conversion)
+        estimated_conversions = int(total_clicks * 0.05)
+        estimated_commission = estimated_conversions * 50
+        
+        return {
+            "success": True,
+            "total_clicks": total_clicks,
+            "estimated_conversions": estimated_conversions,
+            "estimated_commission": estimated_commission,
+            "currency": "INR",
+            "platform_breakdown": platform_stats,
+            "color_breakdown": color_stats,
+            "category_breakdown": category_stats,
+            "top_color": max(color_stats, key=color_stats.get) if color_stats else None,
+            "top_platform": max(platform_stats, key=platform_stats.get) if platform_stats else None
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[Affiliate] Error getting analytics: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get analytics: {str(e)}")
+
+@app.get("/api/affiliate/analytics/timeline")
+async def get_affiliate_timeline(days: int = 7, current_user: dict = Depends(get_current_user)):
+    """Get affiliate clicks over time (last N days)"""
+    try:
+        db = get_firestore_db()
+        user_id = current_user.get("uid")
+        
+        clicks = db.collection("affiliate_clicks").where("user_id", "==", user_id).stream()
+        
+        daily_stats = {}
+        for click in clicks:
+            data = click.to_dict()
+            date_str = data.get("date", "unknown")
+            daily_stats[date_str] = daily_stats.get(date_str, 0) + 1
+        
+        # Sort by date
+        sorted_dates = sorted(daily_stats.keys(), reverse=True)
+        
+        return {
+            "success": True,
+            "daily_stats": {date: daily_stats[date] for date in sorted_dates[:days]},
+            "period_days": days
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[Affiliate] Error getting timeline: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get timeline: {str(e)}")
+
+@app.get("/api/affiliate/top-products")
+async def get_top_affiliate_products(limit: int = 10, current_user: dict = Depends(get_current_user)):
+    """Get most-clicked products"""
+    try:
+        db = get_firestore_db()
+        user_id = current_user.get("uid")
+        
+        clicks = db.collection("affiliate_clicks").where("user_id", "==", user_id).stream()
+        
+        product_stats = {}
+        for click in clicks:
+            data = click.to_dict()
+            key = f"{data.get('color')} - {data.get('category')} ({data.get('platform')})"
+            product_stats[key] = product_stats.get(key, 0) + 1
+        
+        # Sort by clicks
+        top_products = sorted(product_stats.items(), key=lambda x: x[1], reverse=True)[:limit]
+        
+        return {
+            "success": True,
+            "top_products": [{"product": name, "clicks": clicks} for name, clicks in top_products],
+            "count": len(top_products)
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[Affiliate] Error getting top products: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get top products: {str(e)}")
+
+# ============================================
 # RUN
 # ============================================
 if __name__ == "__main__":

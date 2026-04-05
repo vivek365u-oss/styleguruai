@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
 import { auth, logout } from '../api/styleApi';
+import AffiliateAnalytics from '../components/AffiliateAnalytics';
 
 function SettingsPage() {
   const { theme, setTheme } = useContext(ThemeContext);
@@ -16,6 +17,7 @@ function SettingsPage() {
   });
 
   const [user, setUser] = useState(null);
+  const [activeTab, setActiveTab] = useState('settings'); // 'settings' or 'affiliate'
 
   useEffect(() => {
     if (auth.currentUser) {
@@ -130,6 +132,33 @@ function SettingsPage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+        {/* Tabs */}
+        <div className="flex gap-2 border-b" style={isDark ? {borderColor: 'rgba(255,255,255,0.1)'} : {borderColor: '#e5e7eb'}}>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`px-4 py-3 font-semibold text-sm border-b-2 transition-colors ${
+              activeTab === 'settings'
+                ? isDark ? 'border-purple-400 text-purple-300' : 'border-purple-600 text-purple-600'
+                : isDark ? 'border-transparent text-white/60 hover:text-white' : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            ⚙️ Settings
+          </button>
+          <button
+            onClick={() => setActiveTab('affiliate')}
+            className={`px-4 py-3 font-semibold text-sm border-b-2 transition-colors ${
+              activeTab === 'affiliate'
+                ? isDark ? 'border-purple-400 text-purple-300' : 'border-purple-600 text-purple-600'
+                : isDark ? 'border-transparent text-white/60 hover:text-white' : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            💰 Affiliate Earnings
+          </button>
+        </div>
+
+        {/* Settings Tab */}
+        {activeTab === 'settings' && (
+          <>
         {/* Appearance */}
         <div className={`rounded-3xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
           <h3 className={`text-lg font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>🌙 Appearance</h3>
@@ -304,6 +333,13 @@ function SettingsPage() {
 
         {/* Spacing */}
         <div className="h-4" />
+        </>
+        )}
+
+        {/* Affiliate Tab */}
+        {activeTab === 'affiliate' && (
+          <AffiliateAnalytics />
+        )}
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import { publishToCommunityFeed, auth, saveSavedColor, deleteSavedColor } from '
 import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';
 import ColorRecommendationsShop from './ColorRecommendationsShop';
+import AffiliateLink from './AffiliateLink';
 
 // ── Shopping Links ───────────────────────────────────────────
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
@@ -89,10 +90,18 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
       {/* Shop links */}
       <div className="flex gap-1.5 flex-wrap">
         {links.map((link) => (
-          <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer"
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}>
+          <AffiliateLink 
+            key={link.name}
+            href={link.url}
+            color={colorName}
+            category={product}
+            brand={link.name}
+            platform={link.name.toLowerCase()}
+            isDark={isDark}
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}
+          >
             <span>{link.icon}</span><span>{link.name}</span>
-          </a>
+          </AffiliateLink>
         ))}
       </div>
     </div>
