@@ -28,13 +28,10 @@ export const compressImage = (file) => {
         ctx.drawImage(img, 0, 0, width, height);
         
         // Compress with quality 75
+        let quality = 0.75;
         canvas.toBlob(
           (blob) => {
             // Check if size is in target range (300KB - 700KB)
-            let finalBlob = blob;
-            let quality = 0.75;
-            
-            // If blob is still too large, reduce quality
             if (blob.size > 700 * 1024) {
               // Recursively compress with lower quality
               canvas.toBlob((smallerBlob) => {
