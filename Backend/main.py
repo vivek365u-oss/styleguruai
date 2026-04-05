@@ -982,7 +982,7 @@ async def perform_seeding():
                         "name": f"{brand} {color.title()} {category.title()}",
                         "brand": brand,
                         "price": 500 + (i * 100) % 8000,  # ₹500 - ₹8500
-                        "image_url": f"https://via.placeholder.com/300?text={color}",
+                        "image_url": f"https://dummyimage.com/300x300/{color.lower().replace(' ', '')}/ffffff?text={category.title()}",
                         "best_for_tone": [tone],
                         "rating": 3.5 + ((i + tone_idx) % 20) / 10,  # 3.5 - 5.0
                         "product_url": f"https://example.com/product/{product_id}",
