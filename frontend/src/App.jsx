@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { auth, logout } from './api/styleApi';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { PlanProvider } from './context/PlanContext';
+import { CartProvider } from './context/CartContext';
 import SplashScreen from './components/SplashScreen';
 import { useAuthState } from './hooks/useAuthState';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -162,9 +163,11 @@ function App() {
       <LanguageProvider>
         <ThemeContext.Provider value={{ theme, toggleTheme: () => setTheme(prev => prev === 'dark' ? 'light' : 'dark') }}>
           <PlanProvider>
-            <div className="min-h-screen">
-              <AppRoutes user={user} setUser={setUser} theme={theme} toggleTheme={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')} />
-            </div>
+            <CartProvider>
+              <div className="min-h-screen">
+                <AppRoutes user={user} setUser={setUser} theme={theme} toggleTheme={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')} />
+              </div>
+            </CartProvider>
           </PlanProvider>
         </ThemeContext.Provider>
       </LanguageProvider>

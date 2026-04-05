@@ -21,6 +21,8 @@ import StyleBot from './StyleBot';
 import ToolsTab from './ToolsTab';
 import { getLocalizedTip } from '../data/localTips';
 import { logEvent, EVENTS } from '../utils/analytics';
+import { useCart } from '../context/CartContext';
+import ShoppingCart from './ShoppingCart';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
@@ -750,6 +752,26 @@ function SettingsScreen({ user, onLogout }) {
   );
 }
 
+// ── Cart Button Component ────────────────────────────────────
+function CartButton({ cartOpen, setCartOpen }) {
+  const { cart } = useCart();
+  const itemCount = cart.length;
+  
+  return (
+    <button
+      onClick={() => setCartOpen(true)}
+      className="relative w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-lg hover:bg-white/10 transition"
+    >
+      🛒
+      {itemCount > 0 && (
+        <span className="absolute -top-2 -right-2 w-5 h-5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs rounded-full flex items-center justify-center font-bold">
+          {itemCount > 9 ? '9+' : itemCount}
+        </span>
+      )}
+    </button>
+  );
+}
+
 function Dashboard({ user, onLogout }) {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useContext(ThemeContext);
@@ -765,6 +787,7 @@ function Dashboard({ user, onLogout }) {
   const [currentGender, setCurrentGender] = useState('male');
   const [toast, setToast] = useState(null);
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
   const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
   const showToast = (msg) => setToast(msg);
@@ -924,6 +947,7 @@ function Dashboard({ user, onLogout }) {
               {t('navNew')}
             </button>
           )}
+          <CartButton cartOpen={cartOpen} setCartOpen={setCartOpen} />
           {!isPro ? (
             <button onClick={() => setPaywallOpen(true)} className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1.5 rounded-xl shadow-md transition hover:scale-105 active:scale-95">
               <span>✨</span> PRO
@@ -1050,6 +1074,7 @@ function Dashboard({ user, onLogout }) {
       </nav>
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
       <PaywallModal isOpen={paywallOpen} onClose={() => setPaywallOpen(false)} onUpgrade={handleUpgradeSuccess} isDark={theme === 'dark'} />
+      <ShoppingCart isOpen={cartOpen} onClose={() => setCartOpen(false)} isDark={isDark} />
       <StyleBot />
     </div>
   );

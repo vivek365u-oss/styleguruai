@@ -6,6 +6,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../App';
 import { publishToCommunityFeed, auth, saveSavedColor, deleteSavedColor } from '../api/styleApi';
 import { translateBackendObject } from '../i18n/backendTranslations';
+import ProductShowcase from './ProductShowcase';
 
 // ── Shopping Links ───────────────────────────────────────────
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
@@ -949,6 +950,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
     { id: 'colors',      label: 'Colors',      emoji: '🎨' },
     { id: 'outfits',     label: 'Outfits',     emoji: '👔' },
     { id: 'accessories', label: 'Accessories', emoji: '✨' },
+    { id: 'shopping',    label: 'Shop',        emoji: '🛍️' },
   ];
 
   const tabBarBg = isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200';
@@ -1154,6 +1156,19 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             makeupSuggestions={makeupSuggestions}
             isDark={isDark}
           />
+        )}
+        {activeTab === 'shopping' && (
+          <div className="space-y-4">
+            <p className={`text-sm font-semibold ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+              Shop curated products based on your color analysis.
+            </p>
+            {recommendations.best_shirt_colors?.[0]?.name && (
+              <ProductShowcase
+                colorName={recommendations.best_shirt_colors[0].name}
+                isDark={isDark}
+              />
+            )}
+          </div>
         )}
       </div>
 
