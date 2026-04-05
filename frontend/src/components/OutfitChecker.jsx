@@ -173,9 +173,11 @@ function OutfitChecker() {
       setPaywallOpen(true);
       return;
     }
+    console.log("[OutfitChecker] Starting outfit check...");
     setLoading(true); setError(null); setResult(null);
     try {
       const res = await checkOutfitCompatibility(selfieFile, outfitFile, language);
+      console.log("[OutfitChecker] Analysis successful!");
       setResult(res.data);
       // Increment usage for free users
       const uid = auth.currentUser?.uid;
@@ -185,9 +187,14 @@ function OutfitChecker() {
         });
       }
     } catch (err) {
-      const detail = err.response?.data?.detail;
-      if (typeof detail === 'object') setError(detail.message || 'Analysis failed.');
-      else setError(detail || 'Something went wrong.');
+      console.error("[OutfitChecker] Analysis error:", err);
+      if (err.code === 'ECONNABORTED') {
+        setError('Analysis is taking too long. Server is busy, please try again later.');
+      } else {
+        const detail = err.response?.data?.detail;
+        if (typeof detail === 'object') setError(detail.message || 'Analysis failed.');
+        else setError(detail || 'Something went wrong.');
+      }
     } finally {
       setLoading(false);
     }

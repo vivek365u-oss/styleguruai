@@ -6,17 +6,45 @@ import { doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, limit
 import { compressImage, validateImageFile } from '../utils/imageCompression';
 import { retryRequest, startKeepAlive, healthCheck } from '../utils/apiRetry';
 
-const API = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000' });
+const API = axios.create({ 
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  timeout: 30000 // 30s global timeout
+});
 
 // Auto-attach Firebase token to every request
 API.interceptors.request.use(async (config) => {
   const user = auth.currentUser;
   if (user) {
-    const token = await user.getIdToken();
-    config.headers.Authorization = `Bearer ${token}`;
+    try {
+      const token = await user.getIdToken();
+      config.headers.Authorization = `Bearer ${token}`;
+      console.log(`[API] Attached auth token for user: ${user.uid}`);
+    } catch (e) {
+      console.error('[API] Failed to get auth token', e);
+    }
+  } else {
+    console.warn('[API] Request sent without authentication!');
   }
   return config;
+}, (error) => {
+  console.error('[API] Request error:', error);
+  return Promise.reject(error);
 });
+
+// Response Interceptor for better error handling
+API.interceptors.response.use(
+  (response) => {
+    console.log(`[API] Success: ${response.config.url}`);
+    return response;
+  },
+  (error) => {
+    console.error(`[API] Error on ${error.config?.url || 'unknown url'}:`, error.message);
+    if (error.code === 'ECONNABORTED') {
+      console.error('[API] Request timed out after 30s');
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Start keep-alive system on API initialization
 startKeepAlive(() => healthCheck(API));

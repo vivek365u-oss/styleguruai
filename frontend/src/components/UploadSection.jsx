@@ -265,23 +265,29 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     const reader = new FileReader();
     reader.onload = (e) => { setPreview(e.target.result); onImageSelected(e.target.result); };
     reader.readAsDataURL(file);
+    console.log("[UploadSection] Starting analysis for mode:", mode, "gender:", gender);
     onLoadingStart();
     try {
       let res;
       if (mode === 'seasonal') {
         res = await analyzeImageSeasonal(file, season, language, setUploadProgress);
-        onAnalysisComplete({ ...res.data, gender: 'seasonal', seasonalGender: gender, bodyType, occasion, budget, eyeColor });
       } else if (gender === 'female') {
         res = await analyzeImageFemale(file, language, setUploadProgress);
-        onAnalysisComplete({ ...res.data, gender: 'female', bodyType, occasion, budget, eyeColor });
       } else {
         res = await analyzeImage(file, language, setUploadProgress);
-        onAnalysisComplete({ ...res.data, gender: 'male', bodyType, occasion, budget, eyeColor });
       }
+      
+      console.log("[UploadSection] Analysis successful!");
+      onAnalysisComplete({ ...res.data, gender: mode === 'seasonal' ? 'seasonal' : gender, seasonalGender: gender, bodyType, occasion, budget, eyeColor });
     } catch (err) {
-      const detail = err.response?.data?.detail;
-      if (typeof detail === 'object') onError(detail.message || 'Analysis failed.');
-      else onError(detail || 'Could not connect to server. Is the backend running?');
+      console.error("[UploadSection] Analysis error:", err);
+      if (err.code === 'ECONNABORTED') {
+        onError('Analysis is taking too long. Server is busy, please try again later.');
+      } else {
+        const detail = err.response?.data?.detail;
+        if (typeof detail === 'object') onError(detail.message || 'Analysis failed.');
+        else onError(detail || 'Could not connect to server. Is the backend running?');
+      }
     }
   };
 
