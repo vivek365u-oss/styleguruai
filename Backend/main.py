@@ -1082,7 +1082,7 @@ async def clear_and_reseed(background_tasks: BackgroundTasks):
 
 @app.post("/api/products/seed")
 async def seed_products(background_tasks: BackgroundTasks):
-    """Seed products to Firestore (one-time setup, handles cleanup of old products)."""
+    """Seed products to Firestore (one-time setup, handles cleanup of old/incomplete products)."""
     try:
         db = get_firestore_db()
         
@@ -1091,16 +1091,20 @@ async def seed_products(background_tasks: BackgroundTasks):
         # Check if products exist
         all_products = list(db.collection("products").limit(1).stream())
         if len(all_products) > 0:
-            # Check if they have gender field (new seeded products have it)
             first_product = all_products[0].to_dict()
-            has_gender_field = "gender" in first_product
             
-            if not has_gender_field:
-                print("[Products] Found old products WITHOUT gender field - IMMEDIATELY clearing and reseeding...")
-                
-                # SYNCHRONOUSLY delete all old products NOW - don't wait
+            # Check if products have complete schema (all required fields)
+            required_fields = ["name", "brand", "price", "image_url", "color", "gender", "rating", "category"]
+            has_complete_schema = all(field in first_product for field in required_fields)
+            
+            if not has_complete_schema:
+                print(f"[Products] ⚠️  Products missing required fields: {first_product.keys()}")
+                print("[Products] Deleting incomplete products and reseeding...")
+            
+            # Delete old products if they don't have complete schema
+            if not has_complete_schema:
                 docs_to_delete = list(db.collection("products").stream())
-                print(f"[Products] Deleting {len(docs_to_delete)} old products...")
+                print(f"[Products] Deleting {len(docs_to_delete)} incomplete/old products...")
                 batch = db.batch()
                 batch_count = 0
                 total_deleted = 0
@@ -1118,26 +1122,26 @@ async def seed_products(background_tasks: BackgroundTasks):
                 if batch_count > 0:
                     batch.commit()
                 
-                print(f"[Products] ✅ Synchronously deleted {total_deleted} old products")
+                print(f"[Products] ✅ Synchronously deleted {total_deleted} old/incomplete products")
                 
-                # Now queue background seeding
+                # Queue background seeding
                 background_tasks.add_task(perform_seeding)
                 
                 return {
                     "success": True,
-                    "message": f"Cleared {total_deleted} old products. Seeding started in background (2-5 seconds)...",
-                    "status": "cleared_and_seeding",
+                    "message": f"Removed {total_deleted} incomplete products. Reseeding started (2-5 seconds)...",
+                    "status": "reseeding",
                     "deleted": total_deleted
                 }
             else:
-                # Products exist and have gender field
+                # Products have complete schema
                 try:
                     count = db.collection("products").count().get()[0][0].value
                 except:
                     count = "unknown"
                 return {
                     "success": True,
-                    "message": f"Products already seeded with gender support ({count} products exist)",
+                    "message": f"Products already seeded with complete schema ({count} products exist)",
                     "total_products": count,
                     "already_seeded": True
                 }
