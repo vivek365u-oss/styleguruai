@@ -699,6 +699,16 @@ function Dashboard({ user, onLogout }) {
               <span className="text-purple-500">✨</span> PRO
             </div>
           )}
+          {user && (
+            <>
+              <button onClick={() => window.location.href = '/profile'} className="w-8 h-8 rounded-xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 flex items-center justify-center text-sm transition">
+                ❤️
+              </button>
+              <button onClick={() => window.location.href = '/settings'} className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-sm hover:bg-white/10 transition">
+                ⚙️
+              </button>
+            </>
+          )}
           <button onClick={toggleTheme} className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-sm">
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>

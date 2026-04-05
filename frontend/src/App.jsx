@@ -19,6 +19,8 @@ const BlogListPage = lazy(() => import('./pages/BlogListPage'));
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
 export const ThemeContext = createContext();
 
@@ -80,6 +82,16 @@ function AppRoutes({ user, setUser }) {
         <Route path="/" element={<LandingPage onGetStarted={handleGuestEntry} onLoginClick={() => navigate('/login')} />} />
         <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} onSkip={handleGuestEntry} />} />
         <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
+        <Route path="/profile" element={
+          <PrivateRoute user={user}>
+            <ProfilePage />
+          </PrivateRoute>
+        } />
+        <Route path="/settings" element={
+          <PrivateRoute user={user}>
+            <SettingsPage />
+          </PrivateRoute>
+        } />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/contact" element={<ContactPage />} />
