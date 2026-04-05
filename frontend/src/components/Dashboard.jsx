@@ -387,6 +387,56 @@ function SettingsScreen({ user, onLogout }) {
     }
   };
 
+  // Support functions
+  const handleHelpFAQ = () => {
+    const email = 'support@styleguruai.com';
+    const subject = 'StyleGuru App - Help & FAQ';
+    const body = `Hi StyleGuru Team,\n\nI have a question about StyleGuru:\n\n[Please describe your question here]\n\n---\nUser Email: ${user?.email || 'Not logged in'}`;
+    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+  const handleReportIssue = () => {
+    const email = 'support@styleguruai.com';
+    const subject = 'StyleGuru App - Report Issue';
+    const body = `Hi StyleGuru Team,\n\nI'm reporting an issue:\n\nProblem Description:\n[Please describe the issue here]\n\nSteps to Reproduce:\n[How can we repeat this issue?]\n\nExpected Behavior:\n[What should happen?]\n\n---\nUser Email: ${user?.email || 'Not logged in'}\nDevice: ${navigator.userAgent}`;
+    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+  const handleRequestFeature = () => {
+    const email = 'support@styleguruai.com';
+    const subject = 'StyleGuru App - Feature Request';
+    const body = `Hi StyleGuru Team,\n\nI would like to request a new feature:\n\nFeature Description:\n[What feature would you like to see?]\n\nWhy would this be useful:\n[Explain how this feature would help you]\n\n---\nUser Email: ${user?.email || 'Not logged in'}`;
+    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+  const handleDownloadData = async () => {
+    try {
+      const userData = {
+        email: user?.email,
+        displayName: user?.name,
+        exportedAt: new Date().toISOString(),
+        preferences: {
+          theme,
+          language,
+        }
+      };
+      const json = JSON.stringify(userData, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `styleguruai-data-${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      alert('✅ Your data has been downloaded!');
+    } catch (err) {
+      console.error('Error downloading data:', err);
+      alert('Error downloading data');
+    }
+  };
+
   const analysisCount = user ? parseInt(localStorage.getItem('sg_analysis_count') || '0') : 0;
   const savedCount = user ? (() => { try { return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]').length; } catch { return 0; } })() : 0;
 
@@ -394,7 +444,7 @@ function SettingsScreen({ user, onLogout }) {
     <div className="space-y-4 pt-2 text-left">
       <h2 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>⚙️ {t('settings')}</h2>
 
-      {/* User card moved to top */}
+      {/* User card */}
       <div className={`rounded-2xl p-4 flex items-center gap-4 border ${isDark ? 'bg-gradient-to-r from-purple-900/40 to-pink-900/40 border-purple-700/30' : 'bg-white border-purple-100 shadow-sm'}`}>
         <div className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-2xl flex-shrink-0 shadow-lg">
           {user?.name?.[0]?.toUpperCase() || 'U'}
@@ -405,7 +455,7 @@ function SettingsScreen({ user, onLogout }) {
         </div>
       </div>
 
-      {/* Stats Row */}
+      {/* Stats */}
       {analysisCount > 0 && (
         <div className="grid grid-cols-3 gap-3">
           {[
@@ -468,68 +518,146 @@ function SettingsScreen({ user, onLogout }) {
         )}
       </div>
 
-      {/* Language */}
-      <div className={`rounded-2xl p-4 flex items-center justify-between border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
-        <div>
-          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>🌐 {t('languageLabel')}</p>
-          <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('appLanguage')}</p>
-        </div>
-        <div className={`flex rounded-xl p-1 gap-1 ${isDark ? 'bg-white/10' : 'bg-gray-100 border border-gray-200'}`}>
-          <button onClick={() => changeLanguage('hinglish')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'hinglish' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}>🇮🇳</button>
-          <button onClick={() => changeLanguage('en')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'en' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}>🇬🇧</button>
-          <button onClick={() => changeLanguage('hi')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${language === 'hi' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}>अ</button>
-        </div>
-      </div>
-
-      {/* Theme */}
-      <div className={`rounded-2xl p-4 flex items-center justify-between border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
-        <div>
-          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{isDark ? `🌙 ${t('darkMode')}` : `☀️ ${t('lightMode')}`}</p>
-          <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('switchTheme')}</p>
-        </div>
-        <button onClick={toggleTheme} className="relative w-14 h-7 rounded-full bg-purple-500 transition-all">
-          <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-all duration-300 ${isDark ? 'left-8' : 'left-1'}`} />
-        </button>
-      </div>
-
-      {/* Push Notifications */}
-      {notifStatus !== 'unsupported' && (
-        <div className={`rounded-2xl p-4 flex items-center justify-between border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
-          <div>
-            <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>🔔 {t('notifications')}</p>
-            <p className={`text-xs mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
-              {notifStatus === 'granted' ? t('notifEnabled') : notifStatus === 'denied' ? t('notifBlocked') : t('notifWeekly')}
-            </p>
+      {/* Appearance - Theme & Language */}
+      <div className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
+        <h3 className={`text-sm font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>🌙 {t('appearance')}</h3>
+        <div className="space-y-3">
+          {/* Theme Toggle */}
+          <div className={`flex items-center justify-between p-3 rounded-xl ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
+            <div>
+              <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{isDark ? '🌙 Dark' : '☀️ Light'}</p>
+              <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('switchTheme')}</p>
+            </div>
+            <button onClick={toggleTheme} className="relative w-12 h-6 rounded-full bg-purple-500 transition-all">
+              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-300 ${isDark ? 'left-7' : 'left-1'}`} />
+            </button>
           </div>
-          {notifStatus === 'granted' ? (
-            <button
-              onClick={disableNotification}
-              className="text-red-400 text-xs font-bold bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-full hover:bg-red-500/20 transition"
-            >
-              {t('disable')}
-            </button>
-          ) : notifStatus === 'denied' ? (
-            <a
-              href="https://support.google.com/chrome/answer/3220216"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-red-400 text-xs font-bold underline"
-            >
-              {t('unblock')}
-            </a>
-          ) : (
-            <button
-              onClick={requestNotification}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:from-purple-500 hover:to-pink-500 transition"
-            >
-              {t('enable')}
-            </button>
-          )}
+
+          {/* Language Selector */}
+          <div className={`flex items-center justify-between p-3 rounded-xl ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
+            <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>🌐 {t('languageLabel')}</p>
+            <div className={`flex rounded-lg p-1 gap-1 ${isDark ? 'bg-white/10' : 'bg-gray-100'}`}>
+              <button onClick={() => changeLanguage('en')} className={`px-2.5 py-1 rounded text-xs font-bold transition-all ${language === 'en' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500'}`}>🇬🇧</button>
+              <button onClick={() => changeLanguage('hi')} className={`px-2.5 py-1 rounded text-xs font-bold transition-all ${language === 'hi' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500'}`}>अ</button>
+              <button onClick={() => changeLanguage('hinglish')} className={`px-2.5 py-1 rounded text-xs font-bold transition-all ${language === 'hinglish' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500'}`}>🇮🇳</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Notifications */}
+      {notifStatus !== 'unsupported' && (
+        <div className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
+          <h3 className={`text-sm font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>🔔 {t('notifications')}</h3>
+          <div className={`flex items-center justify-between p-3 rounded-xl ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
+            <div>
+              <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('notifications')}</p>
+              <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
+                {notifStatus === 'granted' ? t('notifEnabled') : notifStatus === 'denied' ? t('notifBlocked') : t('notifWeekly')}
+              </p>
+            </div>
+            {notifStatus === 'granted' ? (
+              <button
+                onClick={disableNotification}
+                className="text-red-400 text-xs font-bold bg-red-500/10 border border-red-500/20 px-3 py-1 rounded-full hover:bg-red-500/20 transition"
+              >
+                {t('disable')}
+              </button>
+            ) : notifStatus === 'denied' ? (
+              <a
+                href="https://support.google.com/chrome/answer/3220216"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-red-400 text-xs font-bold underline"
+              >
+                {t('unblock')}
+              </a>
+            ) : (
+              <button
+                onClick={requestNotification}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold px-3 py-1 rounded-full hover:from-purple-500 hover:to-pink-500 transition"
+              >
+                {t('enable')}
+              </button>
+            )}
+          </div>
         </div>
       )}
 
+      {/* Help & Support */}
+      <div className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
+        <h3 className={`text-sm font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>💬 Help & Support</h3>
+        <div className="space-y-2">
+          <button
+            onClick={handleHelpFAQ}
+            className={`w-full text-left p-3 rounded-xl transition-all ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'}`}
+          >
+            <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>❓ Help & FAQ</p>
+            <p className={`text-xs ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Email us your questions</p>
+          </button>
+
+          <button
+            onClick={handleReportIssue}
+            className={`w-full text-left p-3 rounded-xl transition-all ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'}`}
+          >
+            <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>🐛 Report Issue</p>
+            <p className={`text-xs ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Report bugs and problems</p>
+          </button>
+
+          <button
+            onClick={handleRequestFeature}
+            className={`w-full text-left p-3 rounded-xl transition-all ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'}`}
+          >
+            <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>💡 Request Feature</p>
+            <p className={`text-xs ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Suggest new features</p>
+          </button>
+        </div>
+      </div>
+
+      {/* Account & Data */}
+      <div className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
+        <h3 className={`text-sm font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>👤 Account</h3>
+        <button
+          onClick={handleDownloadData}
+          className={`w-full text-left p-3 rounded-xl transition-all ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'}`}
+        >
+          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>📥 Download My Data</p>
+          <p className={`text-xs ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Export your data (JSON)</p>
+        </button>
+      </div>
+
+      {/* About */}
+      <div className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
+        <h3 className={`text-sm font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>ℹ️ About</h3>
+        <button
+          onClick={() => window.open('https://styleguruai.com', '_blank')}
+          className={`w-full p-3 rounded-xl font-bold transition-all ${isDark ? 'bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:bg-purple-600/40' : 'bg-purple-100 border border-purple-300 text-purple-700 hover:bg-purple-200'}`}
+        >
+          🌐 Visit Website
+        </button>
+      </div>
+
+      {/* Legal */}
+      <div className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
+        <h3 className={`text-sm font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>⚖️ Legal</h3>
+        <div className="space-y-2">
+          <button
+            onClick={() => window.open('/privacy', '_blank')}
+            className={`w-full text-left p-3 rounded-xl transition-all ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'}`}
+          >
+            <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>📄 Privacy Policy</p>
+          </button>
+          <button
+            onClick={() => window.open('/terms', '_blank')}
+            className={`w-full text-left p-3 rounded-xl transition-all ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'}`}
+          >
+            <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>⚖️ Terms of Service</p>
+          </button>
+        </div>
+      </div>
+
       {/* Logout */}
-      <button onClick={onLogout} className="w-full py-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold rounded-2xl border border-red-500/20 transition">
+      <button onClick={onLogout} className={`w-full py-3 rounded-2xl font-black border transition ${isDark ? 'bg-red-500/10 hover:bg-red-500/20 text-red-500 border-red-500/20' : 'bg-red-100 hover:bg-red-200 text-red-700 border-red-300'}`}>
         🚪 {t('logout')}
       </button>
     </div>
