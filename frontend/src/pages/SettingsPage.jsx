@@ -12,7 +12,6 @@ function SettingsPage() {
 
   const [notifications, setNotifications] = useState({
     push: JSON.parse(localStorage.getItem('sg_notif_push') || 'true'),
-    email: JSON.parse(localStorage.getItem('sg_notif_email') || 'false'),
     tips: JSON.parse(localStorage.getItem('sg_notif_tips') || 'true'),
   });
 
@@ -40,39 +39,60 @@ function SettingsPage() {
     localStorage.setItem(`sg_notif_${key}`, JSON.stringify(newValue));
   };
 
-  const handleRateApp = () => {
-    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.styleguruai';
-    window.open(playStoreUrl, '_blank');
-  };
-
-  const handleShareApp = async () => {
-    const text = `Check out StyleGuru! 👗 The AI-powered app that finds the perfect colors for you based on your skin tone. Download now! 🎨`;
-    const url = 'https://play.google.com/store/apps/details?id=com.styleguruai';
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'StyleGuru - Your Personal Color Analyst',
-          text: text,
-          url: url,
-        });
-      } catch (err) {
-        if (err.name !== 'AbortError') console.error('Error sharing:', err);
-      }
-    } else {
-      try {
-        await navigator.clipboard.writeText(`${text}\n${url}`);
-        alert('Share link copied to clipboard!');
-      } catch (err) {
-        console.error('Error copying to clipboard:', err);
-      }
+  const handleDownloadData = async () => {
+    try {
+      const userData = {
+        email: user?.email,
+        displayName: user?.displayName,
+        exportedAt: new Date().toISOString(),
+        preferences: {
+          theme,
+          language,
+          notifications,
+        }
+      };
+      const json = JSON.stringify(userData, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `styleguruai-data-${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      alert('✅ Your data has been downloaded!');
+    } catch (err) {
+      console.error('Error downloading data:', err);
+      alert('Error downloading data');
     }
   };
 
-  const handleContactUs = () => {
+  const handleHelpFAQ = () => {
     const email = 'support@styleguruai.com';
-    const subject = 'StyleGuru App - Contact Us';
-    const body = `Hi StyleGuru Team,\n\nI would like to contact you regarding:\n\n[Please describe your query here]\n\n---\nUser Email: ${user?.email || 'Not logged in'}`;
+    const subject = 'StyleGuru App - Help & FAQ';
+    const body = `Hi StyleGuru Team,\n\nI have a question about StyleGuru:\n\n[Please describe your question here]\n\n---\nUser Email: ${user?.email || 'Not logged in'}`;
+    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+  const handleReportIssue = () => {
+    const email = 'support@styleguruai.com';
+    const subject = 'StyleGuru App - Report Issue';
+    const body = `Hi StyleGuru Team,\n\nI'm reporting an issue:\n\nProblem Description:\n[Please describe the issue here]\n\nSteps to Reproduce:\n[How can we repeat this issue?]\n\nExpected Behavior:\n[What should happen?]\n\n---\nUser Email: ${user?.email || 'Not logged in'}\nDevice: ${navigator.userAgent}`;
+    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+  const handleRequestFeature = () => {
+    const email = 'support@styleguruai.com';
+    const subject = 'StyleGuru App - Feature Request';
+    const body = `Hi StyleGuru Team,\n\nI would like to request a new feature:\n\nFeature Description:\n[What feature would you like to see?]\n\nWhy would this be useful:\n[Explain how this feature would help you]\n\n---\nUser Email: ${user?.email || 'Not logged in'}`;
+    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+  const handleSecuritySettings = () => {
+    const email = 'support@styleguruai.com';
+    const subject = 'StyleGuru App - Security & Password Help';
+    const body = `Hi StyleGuru Team,\n\nI need help with security settings or password reset:\n\n[Please describe what you need]\n\n---\nUser Email: ${user?.email || 'Not logged in'}`;
     window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
@@ -152,7 +172,6 @@ function SettingsPage() {
           <div className="space-y-4">
             {[
               { key: 'push', label: 'Push Notifications', emoji: '🔔' },
-              { key: 'email', label: 'Email Updates', emoji: '📧' },
               { key: 'tips', label: 'Daily Fashion Tips', emoji: '💡' },
             ].map(({ key, label, emoji }) => (
               <div key={key} className={`flex items-center justify-between p-4 rounded-2xl ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>
@@ -174,32 +193,22 @@ function SettingsPage() {
           </div>
         </div>
 
-        {/* Support */}
+        {/* Support & Feedback - All Email Based */}
         <div className={`rounded-3xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-          <h3 className={`text-lg font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>👥 Support</h3>
+          <h3 className={`text-lg font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>💬 Help & Support</h3>
           <div className="space-y-2">
             <button
-              onClick={() => window.open('https://styleguruai.com/faq', '_blank')}
+              onClick={handleHelpFAQ}
               className={`w-full text-left p-4 rounded-2xl transition-all ${
                 isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
               }`}
             >
               <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>❓ Help & FAQ</p>
-              <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Frequently asked questions</p>
-            </button>
-
-            <button
-              onClick={handleContactUs}
-              className={`w-full text-left p-4 rounded-2xl transition-all ${
-                isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
-              }`}
-            >
-              <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>📧 Contact Us</p>
               <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Email us your questions</p>
             </button>
 
             <button
-              onClick={() => window.open('https://styleguruai.com/report-bug', '_blank')}
+              onClick={handleReportIssue}
               className={`w-full text-left p-4 rounded-2xl transition-all ${
                 isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
               }`}
@@ -209,7 +218,7 @@ function SettingsPage() {
             </button>
 
             <button
-              onClick={() => window.open('https://styleguruai.com/features', '_blank')}
+              onClick={handleRequestFeature}
               className={`w-full text-left p-4 rounded-2xl transition-all ${
                 isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
               }`}
@@ -217,65 +226,31 @@ function SettingsPage() {
               <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>💡 Request Feature</p>
               <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Suggest new features</p>
             </button>
-
-            <button
-              onClick={handleRateApp}
-              className={`w-full text-left p-4 rounded-2xl transition-all ${
-                isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
-              }`}
-            >
-              <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>⭐ Rate Us on Play Store</p>
-              <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Love StyleGuru? Rate us!</p>
-            </button>
-
-            <button
-              onClick={handleShareApp}
-              className={`w-full text-left p-4 rounded-2xl transition-all ${
-                isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
-              }`}
-            >
-              <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>📱 Share App</p>
-              <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Tell friends about StyleGuru</p>
-            </button>
           </div>
         </div>
 
-        {/* Account */}
+        {/* Account & Security */}
         <div className={`rounded-3xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-          <h3 className={`text-lg font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>🔐 Account</h3>
+          <h3 className={`text-lg font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>🔐 Account & Security</h3>
           <div className="space-y-2">
             <button
-              onClick={() => window.open('https://styleguruai.com/security', '_blank')}
+              onClick={handleSecuritySettings}
               className={`w-full text-left p-4 rounded-2xl transition-all ${
                 isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
               }`}
             >
               <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>🔑 Security Settings</p>
-              <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Change password, 2FA</p>
+              <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Password & account security</p>
             </button>
 
             <button
-              onClick={() => window.open('https://styleguruai.com/download-data', '_blank')}
+              onClick={handleDownloadData}
               className={`w-full text-left p-4 rounded-2xl transition-all ${
                 isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
               }`}
             >
               <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>📥 Download My Data</p>
-              <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-600'}`}>GDPR - Export your data</p>
-            </button>
-
-            <button
-              onClick={() => {
-                if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                  window.open('https://styleguruai.com/delete-account', '_blank');
-                }
-              }}
-              className={`w-full text-left p-4 rounded-2xl transition-all ${
-                isDark ? 'bg-red-500/20 hover:bg-red-500/30 border border-red-500/30' : 'bg-red-50 hover:bg-red-100 border border-red-200'
-              }`}
-            >
-              <p className={`font-semibold ${isDark ? 'text-red-400' : 'text-red-600'}`}>🗑️ Delete Account</p>
-              <p className={`text-sm ${isDark ? 'text-red-400/70' : 'text-red-600/70'}`}>Permanently delete your account</p>
+              <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Export your data (JSON)</p>
             </button>
           </div>
         </div>
@@ -284,21 +259,9 @@ function SettingsPage() {
         <div className={`rounded-3xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
           <h3 className={`text-lg font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>ℹ️ About</h3>
           <div className="space-y-3">
-            <div>
-              <p className={`text-xs uppercase tracking-widest ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Version</p>
-              <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>1.0.0</p>
-            </div>
-            <div>
-              <p className={`text-xs uppercase tracking-widest ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Build</p>
-              <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>001</p>
-            </div>
-            <div>
-              <p className={`text-xs uppercase tracking-widest ${isDark ? 'text-white/60' : 'text-gray-600'}`}>Last Updated</p>
-              <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{new Date().toLocaleDateString('en-IN')}</p>
-            </div>
             <button
               onClick={() => window.open('https://styleguruai.com', '_blank')}
-              className={`w-full mt-4 p-3 rounded-lg font-semibold transition-all ${
+              className={`w-full p-3 rounded-lg font-semibold transition-all ${
                 isDark ? 'bg-purple-600/20 border border-purple-500/30 text-purple-300 hover:bg-purple-600/40' : 'bg-purple-100 border border-purple-300 text-purple-700 hover:bg-purple-200'
               }`}
             >
