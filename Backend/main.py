@@ -1048,12 +1048,12 @@ async def seed_products(background_tasks: BackgroundTasks):
         # Check if products exist
         all_products = list(db.collection("products").limit(1).stream())
         if len(all_products) > 0:
-            # Check if they have old image URLs (via.placeholder)
+            # Check if they have gender field (new seeded products have it)
             first_product = all_products[0].to_dict()
-            has_old_urls = "via.placeholder" in first_product.get("image_url", "")
+            has_gender_field = "gender" in first_product
             
-            if has_old_urls:
-                print("[Products] Found old products with via.placeholder URLs - clearing and reseeding...")
+            if not has_gender_field:
+                print("[Products] Found old products WITHOUT gender field - clearing and reseeding with gender support...")
                 # Clear in background and then reseed
                 async def clear_and_reseed_task():
                     try:
@@ -1073,7 +1073,7 @@ async def seed_products(background_tasks: BackgroundTasks):
                         if batch_count > 0:
                             batch.commit()
                         
-                        print("[Products] ✅ Cleared old products, now reseeding...")
+                        print("[Products] ✅ Cleared old products, now reseeding with gender field...")
                         await perform_seeding()
                     except Exception as e:
                         print(f"[Products] Clear/reseed error: {str(e)}")
@@ -1081,18 +1081,18 @@ async def seed_products(background_tasks: BackgroundTasks):
                 background_tasks.add_task(clear_and_reseed_task)
                 return {
                     "success": True,
-                    "message": "Old products found - clearing and reseeding with correct URLs (1-2 minutes)...",
+                    "message": "Old products found without gender field - clearing and reseeding (1-2 minutes)...",
                     "status": "clearing_and_reseeding"
                 }
             else:
-                # Products exist and have correct URLs
+                # Products exist and have gender field
                 try:
                     count = db.collection("products").count().get()[0][0].value
                 except:
                     count = "unknown"
                 return {
                     "success": True,
-                    "message": f"Products already seeded with correct URLs ({count} products exist)",
+                    "message": f"Products already seeded with gender support ({count} products exist)",
                     "total_products": count,
                     "already_seeded": True
                 }

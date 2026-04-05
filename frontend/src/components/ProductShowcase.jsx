@@ -89,9 +89,9 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
                 
                 setTimeout(async () => {
                   try {
-                    console.log(`[Products] Retry attempt ${attempt} (waiting ${waitTime / 1000}s) for ${colorName}...`);
+                    console.log(`[Products] Retry attempt ${attempt} (waiting ${waitTime / 1000}s) for ${colorName}, gender: ${gender}...`);
                     const retryRes = await API.get(`/api/products/by-color/${colorName.toLowerCase()}`, {
-                      params: { limit: count }
+                      params: { limit: count, gender: gender }
                     });
                     
                     if (retryRes.data.success && retryRes.data.products.length > 0) {
