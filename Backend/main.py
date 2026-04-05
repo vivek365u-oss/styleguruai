@@ -117,6 +117,48 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+async def startup_event():
+    """Check products on startup and clear old ones without gender field"""
+    try:
+        db = get_firestore_db()
+        
+        # Check if products exist
+        all_products = list(db.collection("products").limit(1).stream())
+        if len(all_products) > 0:
+            first_product = all_products[0].to_dict()
+            has_gender_field = "gender" in first_product
+            
+            if not has_gender_field:
+                print("[STARTUP] ⚠️  Found products WITHOUT gender field - queueing cleanup and reseed...")
+                # Delete all products synchronously
+                docs = db.collection("products").stream()
+                batch = db.batch()
+                batch_count = 0
+                total_deleted = 0
+                
+                for doc in docs:
+                    batch.delete(doc.reference)
+                    batch_count += 1
+                    total_deleted += 1
+                    if batch_count >= 500:
+                        batch.commit()
+                        print(f"[STARTUP] ✅ Deleted batch of {batch_count}")
+                        batch = db.batch()
+                        batch_count = 0
+                
+                if batch_count > 0:
+                    batch.commit()
+                
+                print(f"[STARTUP] ✅ Cleaned {total_deleted} old products")
+            else:
+                product_count = db.collection("products").count().get()[0][0].value
+                print(f"[STARTUP] ✅ {product_count} products with gender field found - OK")
+        else:
+            print("[STARTUP] ℹ️  No products found - seeding will start on first request")
+    except Exception as e:
+        print(f"[STARTUP] ⚠️  Error during startup check: {str(e)}")
+
 @app.get("/")
 async def root():
     return {"message": "StyleGuru AI API is running"}
