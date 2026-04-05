@@ -945,10 +945,10 @@ function Dashboard({ user, onLogout }) {
             <>
               {!results && !loading && !error && (
                 <UploadSection 
-                  onAnalyze={handleAnalysisComplete} 
-                  setLoading={setLoading} 
-                  setError={setError} 
-                  setUploadedImage={setUploadedImage} 
+                  onLoadingStart={() => setLoading(true)}
+                  onAnalysisComplete={handleAnalysisComplete}
+                  onError={setError}
+                  onImageSelected={setUploadedImage}
                   setUploadProgress={setUploadProgress}
                   currentGender={currentGender}
                   setCurrentGender={setCurrentGender}
