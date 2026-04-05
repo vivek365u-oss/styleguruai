@@ -389,22 +389,22 @@ function SettingsScreen({ user, onLogout }) {
 
   // Support functions
   const handleHelpFAQ = () => {
-    const email = 'support@styleguruai.com';
-    const subject = 'StyleGuru App - Help & FAQ';
+    const email = 'StyleGuruAI.in@gmail.com';
+    const subject = 'Help & FAQ - StyleGuru AI';
     const body = `Hi StyleGuru Team,\n\nI have a question about StyleGuru:\n\n[Please describe your question here]\n\n---\nUser Email: ${user?.email || 'Not logged in'}`;
     window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   const handleReportIssue = () => {
-    const email = 'support@styleguruai.com';
-    const subject = 'StyleGuru App - Report Issue';
+    const email = 'StyleGuruAI.in@gmail.com';
+    const subject = 'Report Issue - StyleGuru AI';
     const body = `Hi StyleGuru Team,\n\nI'm reporting an issue:\n\nProblem Description:\n[Please describe the issue here]\n\nSteps to Reproduce:\n[How can we repeat this issue?]\n\nExpected Behavior:\n[What should happen?]\n\n---\nUser Email: ${user?.email || 'Not logged in'}\nDevice: ${navigator.userAgent}`;
     window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   const handleRequestFeature = () => {
-    const email = 'support@styleguruai.com';
-    const subject = 'StyleGuru App - Feature Request';
+    const email = 'StyleGuruAI.in@gmail.com';
+    const subject = 'Feature Request - StyleGuru AI';
     const body = `Hi StyleGuru Team,\n\nI would like to request a new feature:\n\nFeature Description:\n[What feature would you like to see?]\n\nWhy would this be useful:\n[Explain how this feature would help you]\n\n---\nUser Email: ${user?.email || 'Not logged in'}`;
     window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
@@ -973,17 +973,6 @@ function Dashboard({ user, onLogout }) {
               </div>
             )}
           </>
-        )}
-        {activeTab === 'profile' && showProfileSettings && (
-          <div>
-            <button
-              onClick={() => setShowProfileSettings(false)}
-              className={`mb-4 p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-white/10' : 'hover:bg-gray-100'}`}
-            >
-              ← Back to Profile
-            </button>
-            <SettingsScreen user={user} onLogout={onLogout} />
-          </div>
         )}
         </div>
       </main>
