@@ -920,15 +920,24 @@ async def get_product_details(product_id: str):
         raise HTTPException(status_code=500, detail=f"Failed to fetch product: {str(e)}")
 
 @app.post("/api/products/seed")
-async def seed_products(current_user: dict = Depends(get_current_user)):
-    """Seed 1000+ products to Firestore (admin only)."""
-    # Simple admin check - in production use roles
-    ADMIN_UIDS = os.environ.get("ADMIN_UIDS", "vivek365u").split(",")
-    if current_user["uid"] not in ADMIN_UIDS:
-        raise HTTPException(status_code=403, detail="Admin access required")
-    
+async def seed_products():
+    """Seed 1000+ products to Firestore (one-time setup)."""
     try:
         db = get_firestore_db()
+        
+        # Check if products already exist (avoid duplicate seeding)
+        all_products = list(db.collection("products").limit(1).stream())
+        if len(all_products) > 0:
+            try:
+                count = db.collection("products").count().get()[0][0].value
+            except:
+                count = "unknown"
+            return {
+                "success": True,
+                "message": f"Products already seeded ({count} products exist)",
+                "total_products": count,
+                "already_seeded": True
+            }
         
         # Sample product data generator
         brands = ["H&M", "Zara", "Forever 21", "Uniqlo", "Mango", "Gap", "ASOS", "Shein", "Myntra", "Flipkart"]

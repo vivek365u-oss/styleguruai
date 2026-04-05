@@ -18,6 +18,28 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [seeding, setSeeding] = useState(false);
+
+  const handleSeedProducts = async () => {
+    try {
+      setSeeding(true);
+      console.log('[Products] Starting seed process...');
+      
+      const res = await API.post(`/api/products/seed`);
+      
+      if (res.data.success) {
+        console.log('[Products] ✅ Seeding successful!', res.data);
+        alert(`✅ ${res.data.message}\nTotal: ${res.data.total_products} products\n\nRefresh the page to see products!`);
+        // Reload products
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error('[Products] Seeding error:', err.message);
+      alert(`❌ Seeding failed: ${err.message}`);
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   useEffect(() => {
     if (!colorName) return;
@@ -82,6 +104,20 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
         <p className={`text-sm font-bold ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
           📦 No products found for this color
         </p>
+        <p className={`text-xs mt-2 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
+          Products database is empty. Seed it to get started!
+        </p>
+        <button
+          onClick={handleSeedProducts}
+          disabled={seeding}
+          className={`mt-4 px-4 py-2 rounded-lg font-bold text-sm transition ${
+            seeding
+              ? isDark ? 'bg-gray-500/20 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              : isDark ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500' : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
+          }`}
+        >
+          {seeding ? '🌱 Seeding...' : '🌱 Seed Products'}
+        </button>
       </div>
     );
   }
