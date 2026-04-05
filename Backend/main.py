@@ -1082,7 +1082,7 @@ async def clear_and_reseed(background_tasks: BackgroundTasks):
 
 @app.post("/api/products/seed")
 async def seed_products(background_tasks: BackgroundTasks):
-    """Seed 3600+ products to Firestore (one-time setup, runs in background)."""
+    """Seed products to Firestore (one-time setup, handles cleanup of old products)."""
     try:
         db = get_firestore_db()
         
@@ -1096,36 +1096,38 @@ async def seed_products(background_tasks: BackgroundTasks):
             has_gender_field = "gender" in first_product
             
             if not has_gender_field:
-                print("[Products] Found old products WITHOUT gender field - clearing and reseeding with gender support...")
-                # Clear in background and then reseed
-                async def clear_and_reseed_task():
-                    try:
-                        # Delete all products
-                        docs = db.collection("products").stream()
+                print("[Products] Found old products WITHOUT gender field - IMMEDIATELY clearing and reseeding...")
+                
+                # SYNCHRONOUSLY delete all old products NOW - don't wait
+                docs_to_delete = list(db.collection("products").stream())
+                print(f"[Products] Deleting {len(docs_to_delete)} old products...")
+                batch = db.batch()
+                batch_count = 0
+                total_deleted = 0
+                
+                for doc in docs_to_delete:
+                    batch.delete(doc.reference)
+                    batch_count += 1
+                    total_deleted += 1
+                    if batch_count >= 500:
+                        batch.commit()
+                        print(f"[Products] ✅ Deleted batch of {batch_count}")
                         batch = db.batch()
                         batch_count = 0
-                        
-                        for doc in docs:
-                            batch.delete(doc.reference)
-                            batch_count += 1
-                            if batch_count >= 500:
-                                batch.commit()
-                                batch = db.batch()
-                                batch_count = 0
-                        
-                        if batch_count > 0:
-                            batch.commit()
-                        
-                        print("[Products] ✅ Cleared old products, now reseeding with gender field...")
-                        await perform_seeding()
-                    except Exception as e:
-                        print(f"[Products] Clear/reseed error: {str(e)}")
                 
-                background_tasks.add_task(clear_and_reseed_task)
+                if batch_count > 0:
+                    batch.commit()
+                
+                print(f"[Products] ✅ Synchronously deleted {total_deleted} old products")
+                
+                # Now queue background seeding
+                background_tasks.add_task(perform_seeding)
+                
                 return {
                     "success": True,
-                    "message": "Old products found without gender field - clearing and reseeding (1-2 minutes)...",
-                    "status": "clearing_and_reseeding"
+                    "message": f"Cleared {total_deleted} old products. Seeding started in background (2-5 seconds)...",
+                    "status": "cleared_and_seeding",
+                    "deleted": total_deleted
                 }
             else:
                 # Products exist and have gender field
@@ -1146,7 +1148,7 @@ async def seed_products(background_tasks: BackgroundTasks):
         
         return {
             "success": True,
-            "message": "Seeding started in background (30-60 seconds)...",
+            "message": "Seeding started in background (2-5 seconds)...",
             "status": "seeding_in_progress"
         }
     except Exception as e:
