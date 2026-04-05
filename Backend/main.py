@@ -767,6 +767,70 @@ async def verify_payment(
         raise HTTPException(status_code=500, detail="Subscription update failed. Please contact support.")
 
 # ============================================
+# PHASE 1.2: RAZORPAY SUBSCRIPTION ACTIVATION
+# ============================================
+
+class ActivateSubscriptionRequest(BaseModel):
+    uid: str
+    razorpay_payment_id: str
+    razorpay_order_id: str
+    razorpay_signature: str
+    plan: str  # 'monthly' or 'yearly'
+
+@app.post("/api/subscriptions/activate")
+async def activate_subscription(request: ActivateSubscriptionRequest):
+    """Verify Razorpay payment and activate premium subscription."""
+    import hmac
+    import hashlib
+    from datetime import timedelta
+    
+    # Get Razorpay key secret
+    RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
+    if not RAZORPAY_KEY_SECRET:
+        raise HTTPException(status_code=500, detail="Payment service not configured.")
+
+    # Verify HMAC-SHA256 signature
+    msg = f"{request.razorpay_order_id}|{request.razorpay_payment_id}"
+    expected = hmac.new(
+        RAZORPAY_KEY_SECRET.encode(),
+        msg.encode(),
+        hashlib.sha256
+    ).hexdigest()
+
+    if not hmac.compare_digest(expected, request.razorpay_signature):
+        raise HTTPException(status_code=400, detail="Payment verification failed.")
+
+    # Update Firestore subscription
+    try:
+        db = get_firestore_db()
+        uid = request.uid
+        
+        # Calculate expiry based on plan
+        if request.plan == 'monthly':
+            valid_until = (datetime.utcnow() + timedelta(days=30)).isoformat() + "Z"
+        else:  # yearly
+            valid_until = (datetime.utcnow() + timedelta(days=365)).isoformat() + "Z"
+        
+        # Save subscription data
+        db.collection("users").document(uid).set({
+            "tier": "premium",
+            "subscription_plan": request.plan,
+            "premium_until": valid_until,
+            "payment_id": request.razorpay_payment_id,
+            "activated_at": datetime.utcnow().isoformat() + "Z",
+        }, merge=True)
+        
+        return {
+            "success": True,
+            "tier": "premium",
+            "plan": request.plan,
+            "premium_until": valid_until,
+        }
+    except Exception as e:
+        print(f"Subscription activation error: {e}")
+        raise HTTPException(status_code=500, detail="Subscription activation failed.")
+
+# ============================================
 # PRODUCTS — PHASE 1 REVENUE
 # ============================================
 

@@ -826,6 +826,11 @@ function Dashboard({ user, onLogout }) {
       const count = parseInt(localStorage.getItem('sg_analysis_count') || '0') + 1;
       localStorage.setItem('sg_analysis_count', count.toString());
       
+      // PHASE 1.2: Show paywall after 3rd free analysis (non-pro users)
+      if (!isPro && count >= 3) {
+        setTimeout(() => setPaywallOpen(true), 800); // Show after results animate in
+      }
+      
       const newEntry = {
         id: Date.now(),
         skinTone: skinToneObj?.category || 'medium',
