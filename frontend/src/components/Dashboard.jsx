@@ -777,6 +777,7 @@ function Dashboard({ user, onLogout }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t } = useLanguage();
   const { isPro, usage, setUsage } = usePlan();
+  const { cart, clearCart } = useCart();
   const isDark = theme === 'dark';
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -805,6 +806,105 @@ function Dashboard({ user, onLogout }) {
       }
     } catch (e) {
       showToast('❌ Upgrade failed to sync');
+    }
+  };
+
+  // Product order checkout handler
+  const handleCheckoutClick = async (totals) => {
+    if (!auth.currentUser) {
+      showToast('❌ Please login first');
+      return;
+    }
+
+    if (!cart || cart.length === 0) {
+      showToast('❌ Cart is empty');
+      return;
+    }
+
+    try {
+      // Get token for API request
+      const token = await auth.currentUser.getIdToken();
+      
+      // Create order on backend
+      const response = await fetch('https://api.tonefit.app/api/orders/create-checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          cart_items: cart,
+          total_amount: totals.total
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        showToast(`❌ ${error.detail || 'Checkout failed'}`);
+        return;
+      }
+
+      const { order_id, amount, currency } = await response.json();
+
+      // Initialize Razorpay
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_BKnG5mzHD4nH0p',
+        order_id,
+        amount,
+        currency,
+        description: 'StyleGuru AI - Product Purchase',
+        prefill: {
+          email: auth.currentUser.email || '',
+          name: auth.currentUser.displayName || 'Guest'
+        },
+        handler: async (response) => {
+          try {
+            // Verify payment on backend
+            const verifyResponse = await fetch('https://api.tonefit.app/api/orders/verify-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+
+            if (verifyResponse.ok) {
+              const result = await verifyResponse.json();
+              showToast(`✅ Order placed! Commission: ₹${result.commission_earned.toFixed(0)}`);
+              // Clear cart after successful purchase
+              clearCart();
+              setCartOpen(false);
+            } else {
+              showToast('❌ Payment verification failed');
+            }
+          } catch (e) {
+            console.error('Payment verification error:', e);
+            showToast('❌ Verification error');
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            showToast('❌ Payment cancelled');
+          }
+        }
+      };
+
+      // Load and open Razorpay
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => {
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      };
+      document.body.appendChild(script);
+    } catch (e) {
+      console.error('Checkout error:', e);
+      showToast('❌ Checkout error');
     }
   };
 
@@ -1074,7 +1174,7 @@ function Dashboard({ user, onLogout }) {
       </nav>
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
       <PaywallModal isOpen={paywallOpen} onClose={() => setPaywallOpen(false)} onUpgrade={handleUpgradeSuccess} isDark={theme === 'dark'} />
-      <ShoppingCart isOpen={cartOpen} onClose={() => setCartOpen(false)} isDark={isDark} />
+      <ShoppingCart isOpen={cartOpen} onClose={() => setCartOpen(false)} onProceedToCheckout={handleCheckoutClick} isDark={isDark} />
       <StyleBot />
     </div>
   );

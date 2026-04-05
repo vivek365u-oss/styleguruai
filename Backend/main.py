@@ -1005,6 +1005,154 @@ async def perform_seeding():
         print(f"❌ Seeding error: {str(e)}")
 
 # ============================================
+# PHASE 1.4: PRODUCT ORDER CHECKOUT
+# ============================================
+
+class CreateProductOrderRequest(BaseModel):
+    cart_items: list  # [{"id": "product_id", "quantity": 2, "price": 5000}, ...]
+    total_amount: float  # total in rupees (includes tax, commission)
+
+@app.post("/api/orders/create-checkout")
+async def create_product_checkout(
+    request: CreateProductOrderRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Create a Razorpay order for product purchase.
+    Accepts cart items with quantities and calculates total.
+    """
+    client = get_razorpay_client()
+    if not client:
+        raise HTTPException(
+            status_code=503,
+            detail="Payment service is being set up. Please try again later."
+        )
+    
+    try:
+        uid = current_user["uid"]
+        
+        # Validate order
+        if not request.cart_items or request.total_amount <= 0:
+            raise HTTPException(status_code=400, detail="Invalid cart or amount")
+        
+        # Calculate amount in paise (Razorpay requirement: amount in paise)
+        amount_paise = int(request.total_amount * 100)
+        
+        # Create Razorpay order
+        order = client.order.create({
+            "amount": amount_paise,
+            "currency": "INR",
+            "payment_capture": 1,
+            "notes": {
+                "user_id": uid,
+                "order_type": "product_order",
+                "item_count": len(request.cart_items)
+            }
+        })
+        
+        # Store pending order in Firestore
+        db = get_firestore_db()
+        order_doc = {
+            "razorpay_order_id": order["id"],
+            "user_id": uid,
+            "cart_items": request.cart_items,
+            "total_amount": request.total_amount,
+            "status": "pending",
+            "created_at": datetime.utcnow().isoformat()
+        }
+        
+        db.collection("orders").document(order["id"]).set(order_doc)
+        
+        return {
+            "order_id": order["id"],
+            "amount": amount_paise,
+            "currency": "INR",
+            "user_id": uid
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Order creation error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create order: {str(e)}")
+
+class VerifyProductPaymentRequest(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+
+@app.post("/api/orders/verify-payment")
+async def verify_product_payment(
+    request: VerifyProductPaymentRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Verify Razorpay payment signature for product order.
+    Update order status to completed and store affiliate commission.
+    """
+    if not RAZORPAY_KEY_SECRET:
+        raise HTTPException(status_code=500, detail="Payment service not configured.")
+
+    try:
+        # Verify HMAC-SHA256 signature
+        msg = f"{request.razorpay_order_id}|{request.razorpay_payment_id}"
+        expected = hmac.new(
+            RAZORPAY_KEY_SECRET.encode(),
+            msg.encode(),
+            hashlib.sha256
+        ).hexdigest()
+
+        if not hmac.compare_digest(expected, request.razorpay_signature):
+            raise HTTPException(status_code=400, detail="Payment verification failed")
+
+        # Get order from Firestore
+        db = get_firestore_db()
+        order_doc = db.collection("orders").document(request.razorpay_order_id).get()
+        
+        if not order_doc.exists:
+            raise HTTPException(status_code=404, detail="Order not found")
+        
+        order_data = order_doc.to_dict()
+        uid = order_data.get("user_id")
+        total_amount = order_data.get("total_amount", 0)
+        cart_items = order_data.get("cart_items", [])
+        
+        # Calculate affiliate commission (4% of product sales)
+        commission_percent = 0.04
+        commission_amount = total_amount * commission_percent
+        
+        # Update order status
+        db.collection("orders").document(request.razorpay_order_id).update({
+            "status": "completed",
+            "razorpay_payment_id": request.razorpay_payment_id,
+            "razorpay_signature": request.razorpay_signature,
+            "commission_amount": commission_amount,
+            "completed_at": datetime.utcnow().isoformat()
+        })
+
+        # Log affiliate conversion for analytics
+        db.collection("users").document(uid).collection("orders").document(request.razorpay_payment_id).set({
+            "razorpay_order_id": request.razorpay_order_id,
+            "razorpay_payment_id": request.razorpay_payment_id,
+            "total_amount": total_amount,
+            "commission_earned": commission_amount,
+            "items_purchased": len(cart_items),
+            "purchased_at": datetime.utcnow().isoformat()
+        })
+
+        return {
+            "status": "success",
+            "order_id": request.razorpay_order_id,
+            "payment_id": request.razorpay_payment_id,
+            "commission_earned": commission_amount,
+            "total_amount": total_amount
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Payment verification error: {e}")
+        raise HTTPException(status_code=500, detail=f"Verification failed: {str(e)}")
+
+# ============================================
 # RUN
 # ============================================
 if __name__ == "__main__":
