@@ -767,6 +767,126 @@ async def verify_payment(
         raise HTTPException(status_code=500, detail="Subscription update failed. Please contact support.")
 
 # ============================================
+# PRODUCTS — PHASE 1 REVENUE
+# ============================================
+
+class ProductSchema(BaseModel):
+    name: str
+    brand: str
+    price: float
+    image_url: str
+    best_for_tone: list = []  # ["fair", "medium", "dark"]
+    rating: float = 4.5
+    product_url: str = ""
+    affiliate_link: str = ""
+    category: str = "top"  # top, bottom, dress, saree, etc
+
+@app.get("/api/products/by-color/{color_name}")
+async def get_products_by_color(color_name: str, limit: int = 50):
+    """Get products matching a color category (for shopping feature)."""
+    try:
+        db = get_firestore_db()
+        # Query products collection by color
+        docs = db.collection("products").where("best_for_tone", "array-contains", color_name).limit(limit).stream()
+        
+        products = []
+        for doc in docs:
+            data = doc.to_dict()
+            data["id"] = doc.id
+            products.append(data)
+        
+        return {
+            "success": True,
+            "color": color_name,
+            "count": len(products),
+            "products": products
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch products: {str(e)}")
+
+@app.get("/api/products/{product_id}")
+async def get_product_details(product_id: str):
+    """Get single product details."""
+    try:
+        db = get_firestore_db()
+        doc = db.collection("products").document(product_id).get()
+        
+        if not doc.exists:
+            raise HTTPException(status_code=404, detail="Product not found")
+        
+        data = doc.to_dict()
+        data["id"] = doc.id
+        return {"success": True, "product": data}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch product: {str(e)}")
+
+@app.post("/api/products/seed")
+async def seed_products(current_user: dict = Depends(get_current_user)):
+    """Seed 1000+ products to Firestore (admin only)."""
+    # Simple admin check - in production use roles
+    ADMIN_UIDS = os.environ.get("ADMIN_UIDS", "vivek365u").split(",")
+    if current_user["uid"] not in ADMIN_UIDS:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        db = get_firestore_db()
+        
+        # Sample product data generator
+        brands = ["H&M", "Zara", "Forever 21", "Uniqlo", "Mango", "Gap", "ASOS", "Shein", "Myntra", "Flipkart"]
+        colors = ["red", "blue", "green", "yellow", "pink", "purple", "black", "white", "navy", "brown", "orange", "teal", "maroon", "gold", "silver", "beige", "cream", "grey", "olive", "khaki"]
+        categories = ["top", "bottom", "dress", "saree", "kurti", "lehenga", "shirt", "pant", "skirt", "jacket"]
+        tones = ["fair", "light", "medium", "olive", "brown", "dark"]
+        
+        imported_count = 0
+        
+        # Generate and seed products
+        for i in range(50):  # Generate 50 sample products per color = 1000+ total
+            for color_idx, color in enumerate(colors):
+                for tone_idx, tone in enumerate(tones):
+                    product_id = f"{color}_{tone}_{i}_{tone_idx}"
+                    
+                    # Check if exists
+                    existing = db.collection("products").document(product_id).get()
+                    if existing.exists:
+                        continue
+                    
+                    brand = brands[i % len(brands)]
+                    category = categories[(i + color_idx) % len(categories)]
+                    
+                    product_data = {
+                        "name": f"{brand} {color.title()} {category.title()}",
+                        "brand": brand,
+                        "price": 500 + (i * 100) % 8000,  # ₹500 - ₹8500
+                        "image_url": f"https://via.placeholder.com/300?text={color}",
+                        "best_for_tone": [tone],
+                        "rating": 3.5 + ((i + tone_idx) % 20) / 10,  # 3.5 - 5.0
+                        "product_url": f"https://example.com/product/{product_id}",
+                        "affiliate_link": f"https://affiliate.example.com/{product_id}?ref=styleguruai",
+                        "category": category,
+                        "color": color,
+                        "commission_percent": 4.0,  # 4% commission
+                        "created_at": datetime.utcnow().isoformat()
+                    }
+                    
+                    db.collection("products").document(product_id).set(product_data)
+                    imported_count += 1
+                    
+                    # Batch every 100 to avoid timeouts
+                    if imported_count % 100 == 0:
+                        print(f"Seeded {imported_count} products...")
+        
+        return {
+            "success": True,
+            "message": f"Seeded {imported_count} products to Firestore",
+            "total_products": imported_count
+        }
+    except Exception as e:
+        print(f"Seeding error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Seeding failed: {str(e)}")
+
+# ============================================
 # RUN
 # ============================================
 if __name__ == "__main__":
