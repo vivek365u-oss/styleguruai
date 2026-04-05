@@ -7,6 +7,7 @@ import { ThemeContext } from '../App';
 import { publishToCommunityFeed, auth, saveSavedColor, deleteSavedColor } from '../api/styleApi';
 import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';
+import ColorRecommendationsShop from './ColorRecommendationsShop';
 
 // ── Shopping Links ───────────────────────────────────────────
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
@@ -1162,40 +1163,11 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             <p className={`text-sm font-semibold ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
               Shop curated products based on your color analysis.
             </p>
-            {(() => {
-              // Get first color based on gender/mode
-              let selectedColor = null;
-              const gender = finalData.gender || 'male';
-              
-              if (gender === 'female') {
-                // Female mode: try dress/top/kurti/lehenga colors
-                selectedColor = recommendations.best_dress_colors?.[0]?.name || 
-                               recommendations.best_top_colors?.[0]?.name || 
-                               recommendations.best_kurti_colors?.[0]?.name || 
-                               recommendations.best_lehenga_colors?.[0]?.name ||
-                               recommendations.best_bottom_colors?.[0]?.name;
-              } else {
-                // Male/seasonal mode: use shirt colors
-                selectedColor = recommendations.best_shirt_colors?.[0]?.name;
-              }
-              
-              if (selectedColor) {
-                console.log('[Shop] Fetching products with color:', selectedColor, 'gender:', gender);
-                return (
-                  <ProductShowcase
-                    colorName={selectedColor}
-                    gender={gender}
-                    isDark={isDark}
-                  />
-                );
-              } else {
-                return (
-                  <div className={`p-4 rounded-xl text-center ${isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200'}`}>
-                    <p className={isDark ? 'text-white/50' : 'text-gray-600'}>🔍 No color recommendations available</p>
-                  </div>
-                );
-              }
-            })()}
+            <ColorRecommendationsShop
+              recommendations={recommendations}
+              gender={finalData.gender || 'male'}
+              isDark={isDark}
+            />
           </div>
         )}
       </div>
