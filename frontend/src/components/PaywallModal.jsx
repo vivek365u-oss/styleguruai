@@ -2,6 +2,26 @@ import React, { useState, useEffect, useRef } from 'react';
 import { logEvent, EVENTS } from '../utils/analytics';
 import { useLanguage } from '../i18n/LanguageContext';
 import { auth } from '../api/styleApi';
+import axios from 'axios';
+
+const API = axios.create({ 
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  timeout: 30000
+});
+
+// Add auth interceptor
+API.interceptors.request.use(async (config) => {
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      const token = await user.getIdToken();
+      config.headers.Authorization = `Bearer ${token}`;
+    } catch (e) {
+      console.error('[PaywallModal] Token fetch failed:', e);
+    }
+  }
+  return config;
+});
 
 function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
   const { t } = useLanguage();
@@ -65,27 +85,23 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
         },
         handler: async (response) => {
           try {
-            const res = await fetch('/api/subscriptions/activate', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                uid: user.uid,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_signature: response.razorpay_signature,
-                plan: plan,
-              })
+            console.log('[Payment] Processing payment response...');
+            
+            // Call backend with axios (uses proper API URL + auth token)
+            const res = await API.post('/api/subscriptions/activate', {
+              uid: user.uid,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              plan: plan,
             });
-            if (res.ok) {
-              if (isMountedRef.current) setLoading(false);
-              // Small delay before upgrade to show success
-              setTimeout(() => onUpgrade?.(), 500);
-            } else {
-              console.error('Subscription activation failed');
-              if (isMountedRef.current) setLoading(false);
-            }
+            
+            console.log('[Payment] ✅ Subscription activated:', res.data);
+            if (isMountedRef.current) setLoading(false);
+            // Small delay before upgrade to show success
+            setTimeout(() => onUpgrade?.(), 500);
           } catch (err) {
-            console.error('Subscription activation error:', err);
+            console.error('[Payment] ❌ Error:', err.response?.data || err.message);
             if (isMountedRef.current) setLoading(false);
           }
         },
