@@ -170,5 +170,6 @@ function App() {
       </LanguageProvider>
     </ErrorBoundary>
   );
+}
 
 export default App;
