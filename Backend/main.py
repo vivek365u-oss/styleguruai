@@ -953,7 +953,16 @@ async def get_products_by_color(color_name: str, limit: int = 50, gender: str = 
             data["id"] = doc.id
             products.append(data)
         
-        # If no products found with mapped color, try original
+        # If no products found with gender filter, fallback to any gender (for old products without gender field)
+        if len(products) == 0:
+            print(f"[Products] No products with gender={gender}, falling back to any gender...")
+            docs = db.collection("products").where("color", "==", basic_color).limit(limit).stream()
+            for doc in docs:
+                data = doc.to_dict()
+                data["id"] = doc.id
+                products.append(data)
+        
+        # If still no products found with mapped color, try original
         if len(products) == 0 and basic_color != normalized_color:
             docs = db.collection("products").where("color", "==", normalized_color).where("gender", "in", [gender, "unisex"]).limit(limit).stream()
             for doc in docs:
@@ -1134,6 +1143,16 @@ async def perform_seeding():
                     brand = brands[i % len(brands)]
                     category = categories[(i + color_idx) % len(categories)]
                     
+                    # Determine gender based on category
+                    female_categories = ["saree", "kurti", "lehenga", "skirt", "dress"]
+                    if category in female_categories:
+                        gender = "female"
+                    elif category in ["shirt", "pant"]:
+                        gender = "male"
+                    else:
+                        # Alternate gender for neutral categories
+                        gender = "female" if (i % 2 == 0) else "male"
+                    
                     product_data = {
                         "name": f"{brand} {color.title()} {category.title()}",
                         "brand": brand,
@@ -1145,6 +1164,7 @@ async def perform_seeding():
                         "affiliate_link": f"https://affiliate.example.com/{product_id}?ref=styleguruai",
                         "category": color,  # Group by color for faster queries
                         "color": color,
+                        "gender": gender,  # NEW: Set gender for filtering
                         "commission_percent": 4.0,  # 4% commission
                         "created_at": datetime.utcnow().isoformat()
                     }
