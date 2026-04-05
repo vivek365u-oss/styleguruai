@@ -6,7 +6,7 @@ import { usePlan } from '../context/PlanContext';
 
 function HistoryPanel({ onShowResult }) {
   const { theme } = useContext(ThemeContext);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { isPro } = usePlan();
   const historyLimit = isPro ? 20 : 5;
   const isDark = theme === 'dark';

@@ -5,7 +5,7 @@ import { logEvent, EVENTS } from '../utils/analytics';
 import { useLanguage } from '../i18n/LanguageContext';
 
 function CommunityFeed() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [feed, setFeed] = useState([]);
