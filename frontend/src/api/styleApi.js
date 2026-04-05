@@ -23,7 +23,13 @@ API.interceptors.request.use(async (config) => {
       console.error('[API] Failed to get auth token', e);
     }
   } else {
-    console.warn('[API] Request sent without authentication!');
+    // Only warn if it's NOT the health check or a public route
+    const isPublic = config.url === '/health' || config.url === '/';
+    if (!isPublic) {
+      console.warn(`[API] Request to ${config.url} sent without authentication!`);
+    } else {
+      console.log(`[API] Public request: ${config.url}`);
+    }
   }
   return config;
 }, (error) => {

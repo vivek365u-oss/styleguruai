@@ -117,6 +117,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+async def root():
+    return {"message": "StyleGuru AI API is running"}
+
+@app.get("/health")
+async def health():
+    return {"status": "ok", "timestamp": time.time()}
+
 image_processor = ImageProcessor()
 skin_classifier = SkinToneClassifier()
 recommendation_engine = RecommendationEngine()
