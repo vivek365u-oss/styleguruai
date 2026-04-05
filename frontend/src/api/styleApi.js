@@ -309,6 +309,23 @@ export const saveWardrobeItem = async (uid, item) => {
   }
 };
 
+const getCachedWardrobe = (uid) => {
+  try {
+    const cached = localStorage.getItem(getCacheKey(uid, 'wardrobe'));
+    return cached ? JSON.parse(cached) : [];
+  } catch {
+    return [];
+  }
+};
+
+const setCachedWardrobe = (uid, items) => {
+  try {
+    localStorage.setItem(getCacheKey(uid, 'wardrobe'), JSON.stringify(items));
+  } catch (e) {
+    console.warn('[Cache] Failed to save wardrobe to localStorage:', e);
+  }
+};
+
 export const getWardrobe = async (uid) => {
   if (!auth.currentUser) return [];
   try {
@@ -317,10 +334,15 @@ export const getWardrobe = async (uid) => {
       orderBy('saved_at', 'desc')
     );
     const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // Always update cache on successful fetch
+    setCachedWardrobe(uid, items);
+    return items;
   } catch (e) {
     handleFirestoreError('getWardrobe', e);
-    return [];
+    // Offline fallback: return cached data
+    console.log('[API] Offline - returning cached wardrobe');
+    return getCachedWardrobe(uid);
   }
 };
 
@@ -328,6 +350,9 @@ export const deleteWardrobeItem = async (uid, itemId) => {
   if (!auth.currentUser) return;
   try {
     await deleteDoc(doc(db, 'users', uid, 'wardrobe', itemId));
+    // Update cache
+    const cached = getCachedWardrobe(uid);
+    setCachedWardrobe(uid, cached.filter(c => c.id !== itemId));
   } catch (e) {
     handleFirestoreError('deleteWardrobeItem', e);
     throw e;
@@ -341,13 +366,34 @@ export const getWardrobeCount = async (uid) => {
     return snap.size;
   } catch (e) {
     handleFirestoreError('getWardrobeCount', e);
-    return 0;
+    // Offline fallback
+    return getCachedWardrobe(uid).length;
   }
 };
 
 // ============================================
 // SAVED COLORS — FIRESTORE
 // ============================================
+
+// Offline cache helpers
+const getCacheKey = (uid, collection) => `cache_${uid}_${collection}`;
+
+const getCachedColors = (uid) => {
+  try {
+    const cached = localStorage.getItem(getCacheKey(uid, 'saved_colors'));
+    return cached ? JSON.parse(cached) : [];
+  } catch {
+    return [];
+  }
+};
+
+const setCachedColors = (uid, colors) => {
+  try {
+    localStorage.setItem(getCacheKey(uid, 'saved_colors'), JSON.stringify(colors));
+  } catch (e) {
+    console.warn('[Cache] Failed to save colors to localStorage:', e);
+  }
+};
 
 export const saveSavedColor = async (uid, color) => {
   if (!auth.currentUser) return null;
@@ -356,6 +402,12 @@ export const saveSavedColor = async (uid, color) => {
       ...color,
       saved_at: new Date().toISOString(),
     });
+    
+    // Update local cache
+    const current = getCachedColors(uid);
+    const newColor = { id: ref.id, ...color, saved_at: new Date().toISOString() };
+    setCachedColors(uid, [newColor, ...current]);
+    
     return ref.id;
   } catch (e) {
     handleFirestoreError('saveSavedColor', e);
@@ -371,10 +423,15 @@ export const getSavedColors = async (uid) => {
       orderBy('saved_at', 'desc')
     );
     const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const colors = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // Always update cache on successful fetch
+    setCachedColors(uid, colors);
+    return colors;
   } catch (e) {
     handleFirestoreError('getSavedColors', e);
-    return [];
+    // Offline fallback: return cached data
+    console.log('[API] Offline - returning cached saved colors');
+    return getCachedColors(uid);
   }
 };
 
@@ -382,6 +439,9 @@ export const deleteSavedColor = async (uid, colorId) => {
   if (!auth.currentUser) return;
   try {
     await deleteDoc(doc(db, 'users', uid, 'saved_colors', colorId));
+    // Update cache
+    const cached = getCachedColors(uid);
+    setCachedColors(uid, cached.filter(c => c.id !== colorId));
   } catch (e) {
     handleFirestoreError('deleteSavedColor', e);
     throw e;
@@ -394,6 +454,8 @@ export const deleteAllSavedColors = async (uid) => {
     const snap = await getDocs(collection(db, 'users', uid, 'saved_colors'));
     const deletePromises = snap.docs.map(doc => deleteDoc(doc.ref));
     await Promise.all(deletePromises);
+    // Clear cache
+    setCachedColors(uid, []);
   } catch (e) {
     handleFirestoreError('deleteAllSavedColors', e);
     throw e;
