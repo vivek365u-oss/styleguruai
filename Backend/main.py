@@ -1166,70 +1166,71 @@ async def perform_seeding():
         
         # Curated product list - hand-selected for quality + speed
         # ~150 products covering all major colors and genders
+        # PRICES: Updated to realistic Indian market prices (₹400-2000 range)
         seed_products = [
             # === MALE PRODUCTS ===
             # Navy/Blue shirts
-            {"name": "Zara Navy Blue Shirt", "brand": "Zara", "color": "navy", "category": "shirt", "gender": "male", "price": 1499, "rating": 4.3},
-            {"name": "H&M Light Blue Shirt", "brand": "H&M", "color": "blue", "category": "shirt", "gender": "male", "price": 999, "rating": 4.1},
-            {"name": "ASOS Sky Blue Shirt", "brand": "ASOS", "color": "blue", "category": "shirt", "gender": "male", "price": 2499, "rating": 4.4},
+            {"name": "Zara Navy Blue Shirt", "brand": "Zara", "color": "navy", "category": "shirt", "gender": "male", "price": 749, "rating": 4.3},
+            {"name": "H&M Light Blue Shirt", "brand": "H&M", "color": "blue", "category": "shirt", "gender": "male", "price": 599, "rating": 4.1},
+            {"name": "ASOS Sky Blue Shirt", "brand": "ASOS", "color": "blue", "category": "shirt", "gender": "male", "price": 899, "rating": 4.4},
             # Black shirts
-            {"name": "Uniqlo Black Shirt", "brand": "Uniqlo", "color": "black", "category": "shirt", "gender": "male", "price": 1299, "rating": 4.2},
-            {"name": "Gap Black Oxford", "brand": "Gap", "color": "black", "category": "shirt", "gender": "male", "price": 3999, "rating": 4.5},
+            {"name": "Uniqlo Black Shirt", "brand": "Uniqlo", "color": "black", "category": "shirt", "gender": "male", "price": 649, "rating": 4.2},
+            {"name": "Gap Black Oxford", "brand": "Gap", "color": "black", "category": "shirt", "gender": "male", "price": 999, "rating": 4.5},
             # White shirts
-            {"name": "Forever 21 White Shirt", "brand": "Forever 21", "color": "white", "category": "shirt", "gender": "male", "price": 799, "rating": 3.9},
-            {"name": "Mango White Formal", "brand": "Mango", "color": "white", "category": "shirt", "gender": "male", "price": 2799, "rating": 4.3},
+            {"name": "Forever 21 White Shirt", "brand": "Forever 21", "color": "white", "category": "shirt", "gender": "male", "price": 399, "rating": 3.9},
+            {"name": "Mango White Formal", "brand": "Mango", "color": "white", "category": "shirt", "gender": "male", "price": 799, "rating": 4.3},
             # Red shirts
-            {"name": "H&M Red Shirt", "brand": "H&M", "color": "red", "category": "shirt", "gender": "male", "price": 1199, "rating": 4.0},
-            {"name": "ASOS Burgundy Shirt", "brand": "ASOS", "color": "maroon", "category": "shirt", "gender": "male", "price": 2199, "rating": 4.2},
+            {"name": "H&M Red Shirt", "brand": "H&M", "color": "red", "category": "shirt", "gender": "male", "price": 549, "rating": 4.0},
+            {"name": "ASOS Burgundy Shirt", "brand": "ASOS", "color": "maroon", "category": "shirt", "gender": "male", "price": 749, "rating": 4.2},
             # Green shirts
-            {"name": "Zara Forest Green", "brand": "Zara", "color": "green", "category": "shirt", "gender": "male", "price": 1699, "rating": 4.1},
-            {"name": "Myntra Olive Shirt", "brand": "Myntra", "color": "olive", "category": "shirt", "gender": "male", "price": 899, "rating": 3.8},
+            {"name": "Zara Forest Green", "brand": "Zara", "color": "green", "category": "shirt", "gender": "male", "price": 699, "rating": 4.1},
+            {"name": "Myntra Olive Shirt", "brand": "Myntra", "color": "olive", "category": "shirt", "gender": "male", "price": 449, "rating": 3.8},
             # Grey shirts
-            {"name": "Uniqlo Grey Shirt", "brand": "Uniqlo", "color": "grey", "category": "shirt", "gender": "male", "price": 999, "rating": 4.3},
-            {"name": "Gap Light Grey", "brand": "Gap", "color": "grey", "category": "shirt", "gender": "male", "price": 2999, "rating": 4.4},
+            {"name": "Uniqlo Grey Shirt", "brand": "Uniqlo", "color": "grey", "category": "shirt", "gender": "male", "price": 549, "rating": 4.3},
+            {"name": "Gap Light Grey", "brand": "Gap", "color": "grey", "category": "shirt", "gender": "male", "price": 849, "rating": 4.4},
             # Beige/Cream shirts
-            {"name": "Mango Beige Shirt", "brand": "Mango", "color": "beige", "category": "shirt", "gender": "male", "price": 2499, "rating": 4.2},
-            {"name": "Forever 21 Cream Shirt", "brand": "Forever 21", "color": "cream", "category": "shirt", "gender": "male", "price": 895, "rating": 3.9},
+            {"name": "Mango Beige Shirt", "brand": "Mango", "color": "beige", "category": "shirt", "gender": "male", "price": 749, "rating": 4.2},
+            {"name": "Forever 21 Cream Shirt", "brand": "Forever 21", "color": "cream", "category": "shirt", "gender": "male", "price": 399, "rating": 3.9},
             # Brown shirts
-            {"name": "Zara Brown Shirt", "brand": "Zara", "color": "brown", "category": "shirt", "gender": "male", "price": 1599, "rating": 4.0},
+            {"name": "Zara Brown Shirt", "brand": "Zara", "color": "brown", "category": "shirt", "gender": "male", "price": 699, "rating": 4.0},
             # Teal shirts
-            {"name": "H&M Teal Shirt", "brand": "H&M", "color": "teal", "category": "shirt", "gender": "male", "price": 1399, "rating": 4.2},
+            {"name": "H&M Teal Shirt", "brand": "H&M", "color": "teal", "category": "shirt", "gender": "male", "price": 599, "rating": 4.2},
             
             # === MALE PANTS ===
-            {"name": "Uniqlo Blue Jeans", "brand": "Uniqlo", "color": "blue", "category": "pant", "gender": "male", "price": 1999, "rating": 4.4},
-            {"name": "Gap Black Pants", "brand": "Gap", "color": "black", "category": "pant", "gender": "male", "price": 3499, "rating": 4.3},
-            {"name": "Myntra Grey Trousers", "brand": "Myntra", "color": "grey", "category": "pant", "gender": "male", "price": 1299, "rating": 4.1},
-            {"name": "H&M Navy Chinos", "brand": "H&M", "color": "navy", "category": "pant", "gender": "male", "price": 1599, "rating": 4.2},
-            {"name": "Zara Beige Pants", "brand": "Zara", "color": "beige", "category": "pant", "gender": "male", "price": 2999, "rating": 4.3},
-            {"name": "ASOS Olive Cargo", "brand": "ASOS", "color": "olive", "category": "pant", "gender": "male", "price": 2199, "rating": 4.0},
-            {"name": "Forever 21 Black Slim", "brand": "Forever 21", "color": "black", "category": "pant", "gender": "male", "price": 999, "rating": 3.8},
+            {"name": "Uniqlo Blue Jeans", "brand": "Uniqlo", "color": "blue", "category": "pant", "gender": "male", "price": 999, "rating": 4.4},
+            {"name": "Gap Black Pants", "brand": "Gap", "color": "black", "category": "pant", "gender": "male", "price": 1299, "rating": 4.3},
+            {"name": "Myntra Grey Trousers", "brand": "Myntra", "color": "grey", "category": "pant", "gender": "male", "price": 599, "rating": 4.1},
+            {"name": "H&M Navy Chinos", "brand": "H&M", "color": "navy", "category": "pant", "gender": "male", "price": 849, "rating": 4.2},
+            {"name": "Zara Beige Pants", "brand": "Zara", "color": "beige", "category": "pant", "gender": "male", "price": 1099, "rating": 4.3},
+            {"name": "ASOS Olive Cargo", "brand": "ASOS", "color": "olive", "category": "pant", "gender": "male", "price": 899, "rating": 4.0},
+            {"name": "Forever 21 Black Slim", "brand": "Forever 21", "color": "black", "category": "pant", "gender": "male", "price": 499, "rating": 3.8},
             
             # === FEMALE PRODUCTS ===
             # Female dresses
-            {"name": "Zara Black Dress", "brand": "Zara", "color": "black", "category": "dress", "gender": "female", "price": 1999, "rating": 4.5},
-            {"name": "Forever 21 Red Dress", "brand": "Forever 21", "color": "red", "category": "dress", "gender": "female", "price": 1299, "rating": 4.1},
-            {"name": "H&M Blue Dress", "brand": "H&M", "color": "blue", "category": "dress", "gender": "female", "price": 1599, "rating": 4.3},
-            {"name": "ASOS White Dress", "brand": "ASOS", "color": "white", "category": "dress", "gender": "female", "price": 2999, "rating": 4.4},
-            {"name": "Mango Green Dress", "brand": "Mango", "color": "green", "category": "dress", "gender": "female", "price": 3499, "rating": 4.5},
+            {"name": "Zara Black Dress", "brand": "Zara", "color": "black", "category": "dress", "gender": "female", "price": 999, "rating": 4.5},
+            {"name": "Forever 21 Red Dress", "brand": "Forever 21", "color": "red", "category": "dress", "gender": "female", "price": 599, "rating": 4.1},
+            {"name": "H&M Blue Dress", "brand": "H&M", "color": "blue", "category": "dress", "gender": "female", "price": 749, "rating": 4.3},
+            {"name": "ASOS White Dress", "brand": "ASOS", "color": "white", "category": "dress", "gender": "female", "price": 899, "rating": 4.4},
+            {"name": "Mango Green Dress", "brand": "Mango", "color": "green", "category": "dress", "gender": "female", "price": 999, "rating": 4.5},
             # Female kurtis
-            {"name": "Myntra Blue Kurti", "brand": "Myntra", "color": "blue", "category": "kurti", "gender": "female", "price": 899, "rating": 4.2},
-            {"name": "Flipkart Green Kurti", "brand": "Flipkart", "color": "green", "category": "kurti", "gender": "female", "price": 799, "rating": 4.0},
-            {"name": "Zara Navy Kurti", "brand": "Zara", "color": "navy", "category": "kurti", "gender": "female", "price": 1599, "rating": 4.3},
-            {"name": "H&M Pink Kurti", "brand": "H&M", "color": "pink", "category": "kurti", "gender": "female", "price": 1199, "rating": 4.1},
+            {"name": "Myntra Blue Kurti", "brand": "Myntra", "color": "blue", "category": "kurti", "gender": "female", "price": 449, "rating": 4.2},
+            {"name": "Flipkart Green Kurti", "brand": "Flipkart", "color": "green", "category": "kurti", "gender": "female", "price": 399, "rating": 4.0},
+            {"name": "Zara Navy Kurti", "brand": "Zara", "color": "navy", "category": "kurti", "gender": "female", "price": 799, "rating": 4.3},
+            {"name": "H&M Pink Kurti", "brand": "H&M", "color": "pink", "category": "kurti", "gender": "female", "price": 599, "rating": 4.1},
             # Female sarees
-            {"name": "Myntra Red Saree", "brand": "Myntra", "color": "red", "category": "saree", "gender": "female", "price": 2499, "rating": 4.4},
-            {"name": "Flipkart Gold Saree", "brand": "Flipkart", "color": "gold", "category": "saree", "gender": "female", "price": 1999, "rating": 4.2},
-            {"name": "ASOS Maroon Saree", "brand": "ASOS", "color": "maroon", "category": "saree", "gender": "female", "price": 3999, "rating": 4.5},
+            {"name": "Myntra Red Saree", "brand": "Myntra", "color": "red", "category": "saree", "gender": "female", "price": 1099, "rating": 4.4},
+            {"name": "Flipkart Gold Saree", "brand": "Flipkart", "color": "gold", "category": "saree", "gender": "female", "price": 899, "rating": 4.2},
+            {"name": "ASOS Maroon Saree", "brand": "ASOS", "color": "maroon", "category": "saree", "gender": "female", "price": 1299, "rating": 4.5},
             # Female lehenga
-            {"name": "Zara Purple Lehenga", "brand": "Zara", "color": "purple", "category": "lehenga", "gender": "female", "price": 4999, "rating": 4.6},
-            {"name": "Myntra Pink Lehenga", "brand": "Myntra", "color": "pink", "category": "lehenga", "gender": "female", "price": 3499, "rating": 4.3},
+            {"name": "Zara Purple Lehenga", "brand": "Zara", "color": "purple", "category": "lehenga", "gender": "female", "price": 1599, "rating": 4.6},
+            {"name": "Myntra Pink Lehenga", "brand": "Myntra", "color": "pink", "category": "lehenga", "gender": "female", "price": 1199, "rating": 4.3},
             # Female skirts
-            {"name": "H&M Black Skirt", "brand": "H&M", "color": "black", "category": "skirt", "gender": "female", "price": 1499, "rating": 4.2},
-            {"name": "Forever 21 Blue Skirt", "brand": "Forever 21", "color": "blue", "category": "skirt", "gender": "female", "price": 999, "rating": 4.0},
+            {"name": "H&M Black Skirt", "brand": "H&M", "color": "black", "category": "skirt", "gender": "female", "price": 699, "rating": 4.2},
+            {"name": "Forever 21 Blue Skirt", "brand": "Forever 21", "color": "blue", "category": "skirt", "gender": "female", "price": 499, "rating": 4.0},
             
             # === UNISEX / NEUTRAL ITEMS ===
-            {"name": "Gap Beige Top", "brand": "Gap", "color": "beige", "category": "top", "gender": "unisex", "price": 1999, "rating": 4.3},
-            {"name": "Uniqlo White T-Shirt", "brand": "Uniqlo", "color": "white", "category": "top", "gender": "unisex", "price": 699, "rating": 4.4},
+            {"name": "Gap Beige Top", "brand": "Gap", "color": "beige", "category": "top", "gender": "unisex", "price": 699, "rating": 4.3},
+            {"name": "Uniqlo White T-Shirt", "brand": "Uniqlo", "color": "white", "category": "top", "gender": "unisex", "price": 349, "rating": 4.4},
         ]
         
         imported_count = 0

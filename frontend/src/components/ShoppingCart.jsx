@@ -79,6 +79,11 @@ function ShoppingCart({ onClose, onProceedToCheckout, isOpen }) {
               <div className="flex-1">
                 <h3 className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>{item.name}</h3>
                 <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-600'}`}>{item.brand}</p>
+                {item.color && (
+                  <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
+                    Color: <span className={isDark ? 'text-white/60' : 'text-gray-700'}>{item.color}</span>
+                  </p>
+                )}
                 <p className={`text-xs font-semibold mt-1 ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>₹{item.price}</p>
               </div>
 

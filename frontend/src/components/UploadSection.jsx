@@ -284,7 +284,10 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       }
       
       console.log("[UploadSection] Analysis successful!");
-      onAnalysisComplete({ ...res.data, gender: mode === 'seasonal' ? 'seasonal' : gender, seasonalGender: gender, bodyType, occasion, budget, eyeColor });
+      // Pass correct gender: use 'seasonal' only if mode is seasonal, otherwise pass actual gender (male/female)
+      const finalGender = mode === 'seasonal' ? 'seasonal' : gender;
+      console.log("[UploadSection] Passing gender:", finalGender, "to ResultsDisplay");
+      onAnalysisComplete({ ...res.data, gender: finalGender, seasonalGender: mode === 'seasonal' ? gender : 'male', bodyType, occasion, budget, eyeColor });
     } catch (err) {
       console.error("[UploadSection] Analysis error:", err);
       if (err.code === 'ECONNABORTED') {
