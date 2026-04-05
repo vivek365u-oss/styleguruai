@@ -845,13 +845,45 @@ class ProductSchema(BaseModel):
     affiliate_link: str = ""
     category: str = "top"  # top, bottom, dress, saree, etc
 
+@app.get("/api/products/debug/count")
+async def debug_product_count():
+    """Debug endpoint to check product count in Firestore."""
+    try:
+        db = get_firestore_db()
+        docs = db.collection("products").limit(1).stream()
+        count = len(list(db.collection("products").stream()))
+        
+        # Get sample product for debugging
+        sample = db.collection("products").limit(1).stream()
+        sample_data = None
+        for doc in sample:
+            sample_data = doc.to_dict()
+            sample_data["id"] = doc.id
+            break
+        
+        return {
+            "success": True,
+            "total_products": count,
+            "sample_product": sample_data,
+            "message": f"Total {count} products in database"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Error counting products - collection may be empty or doesn't exist"
+        }
+
 @app.get("/api/products/by-color/{color_name}")
 async def get_products_by_color(color_name: str, limit: int = 50):
     """Get products matching a color category (for shopping feature)."""
     try:
         db = get_firestore_db()
-        # Query products collection by color
-        docs = db.collection("products").where("best_for_tone", "array-contains", color_name).limit(limit).stream()
+        # Normalize color_name for comparison
+        normalized_color = color_name.lower().strip()
+        
+        # Query products collection by color field
+        docs = db.collection("products").where("color", "==", normalized_color).limit(limit).stream()
         
         products = []
         for doc in docs:
@@ -866,6 +898,7 @@ async def get_products_by_color(color_name: str, limit: int = 50):
             "products": products
         }
     except Exception as e:
+        print(f"Products query error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch products: {str(e)}")
 
 @app.get("/api/products/{product_id}")
