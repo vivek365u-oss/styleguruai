@@ -3,6 +3,8 @@ import { auth, googleProvider, db } from '../firebase';
 export { auth };
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, signInAnonymously } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, limit, deleteDoc, increment } from 'firebase/firestore';
+import { compressImage, validateImageFile } from '../utils/imageCompression';
+import { retryRequest, startKeepAlive, healthCheck } from '../utils/apiRetry';
 
 const API = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000' });
 
@@ -15,6 +17,9 @@ API.interceptors.request.use(async (config) => {
   }
   return config;
 });
+
+// Start keep-alive system on API initialization
+startKeepAlive(() => healthCheck(API));
 
 // ============================================
 // FIREBASE AUTH
@@ -114,56 +119,103 @@ export const getHistory = async () => {
 };
 
 // ============================================
-// ANALYSIS APIs
+// ANALYSIS APIs (WITH COMPRESSION & RETRY)
 // ============================================
 
-export const analyzeImage = (file, lang = 'en', onProgress) => {
-  const formData = new FormData();
-  formData.append('file', file);
-  return API.post(`/api/analyze?lang=${lang}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-    onUploadProgress: (e) => {
-      if (onProgress) onProgress(Math.round((e.loaded * 100) / e.total));
-    },
-    timeout: 30000,
-  });
+export const analyzeImage = async (file, lang = 'en', onProgress) => {
+  try {
+    validateImageFile(file);
+    // Compress image before upload
+    const compressedFile = await compressImage(file);
+    console.log(`✓ Image compressed: ${(file.size / 1024).toFixed(2)}KB → ${(compressedFile.size / 1024).toFixed(2)}KB`);
+    
+    return await retryRequest(async () => {
+      const formData = new FormData();
+      formData.append('file', compressedFile);
+      return API.post(`/api/analyze?lang=${lang}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (e) => {
+          if (onProgress) onProgress(Math.round((e.loaded * 100) / e.total));
+        },
+        timeout: 60000,
+      });
+    }, 3, 1000);
+  } catch (error) {
+    console.error('Image analysis failed:', error);
+    throw error;
+  }
 };
 
-export const analyzeImageFemale = (file, lang = 'en', onProgress) => {
-  const formData = new FormData();
-  formData.append('file', file);
-  return API.post(`/api/analyze/female?lang=${lang}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-    onUploadProgress: (e) => {
-      if (onProgress) onProgress(Math.round((e.loaded * 100) / e.total));
-    },
-    timeout: 30000,
-  });
+export const analyzeImageFemale = async (file, lang = 'en', onProgress) => {
+  try {
+    validateImageFile(file);
+    const compressedFile = await compressImage(file);
+    console.log(`✓ Image compressed: ${(file.size / 1024).toFixed(2)}KB → ${(compressedFile.size / 1024).toFixed(2)}KB`);
+    
+    return await retryRequest(async () => {
+      const formData = new FormData();
+      formData.append('file', compressedFile);
+      return API.post(`/api/analyze/female?lang=${lang}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (e) => {
+          if (onProgress) onProgress(Math.round((e.loaded * 100) / e.total));
+        },
+        timeout: 60000,
+      });
+    }, 3, 1000);
+  } catch (error) {
+    console.error('Female image analysis failed:', error);
+    throw error;
+  }
 };
 
-export const analyzeImageSeasonal = (file, season, lang = 'en', onProgress) => {
-  const formData = new FormData();
-  formData.append('file', file);
-  return API.post(`/api/analyze/seasonal?season=${season}&lang=${lang}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-    onUploadProgress: (e) => {
-      if (onProgress) onProgress(Math.round((e.loaded * 100) / e.total));
-    },
-    timeout: 30000,
-  });
+export const analyzeImageSeasonal = async (file, season, lang = 'en', onProgress) => {
+  try {
+    validateImageFile(file);
+    const compressedFile = await compressImage(file);
+    console.log(`✓ Image compressed: ${(file.size / 1024).toFixed(2)}KB → ${(compressedFile.size / 1024).toFixed(2)}KB`);
+    
+    return await retryRequest(async () => {
+      const formData = new FormData();
+      formData.append('file', compressedFile);
+      return API.post(`/api/analyze/seasonal?season=${season}&lang=${lang}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (e) => {
+          if (onProgress) onProgress(Math.round((e.loaded * 100) / e.total));
+        },
+        timeout: 60000,
+      });
+    }, 3, 1000);
+  } catch (error) {
+    console.error('Seasonal image analysis failed:', error);
+    throw error;
+  }
 };
 
-export const checkOutfitCompatibility = (selfieFile, outfitFile, lang = 'en', onProgress) => {
-  const formData = new FormData();
-  formData.append('selfie', selfieFile);
-  formData.append('outfit', outfitFile);
-  return API.post(`/api/outfit/check?lang=${lang}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-    onUploadProgress: (e) => {
-      if (onProgress) onProgress(Math.round((e.loaded * 100) / e.total));
-    },
-    timeout: 30000,
-  });
+export const checkOutfitCompatibility = async (selfieFile, outfitFile, lang = 'en', onProgress) => {
+  try {
+    validateImageFile(selfieFile);
+    validateImageFile(outfitFile);
+    const compressedSelfie = await compressImage(selfieFile);
+    const compressedOutfit = await compressImage(outfitFile);
+    console.log(`✓ Images compressed`);
+    
+    return await retryRequest(async () => {
+      const formData = new FormData();
+      formData.append('selfie', compressedSelfie);
+      formData.append('outfit', compressedOutfit);
+      return API.post(`/api/outfit/check?lang=${lang}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (e) => {
+          if (onProgress) onProgress(Math.round((e.loaded * 100) / e.total));
+        },
+        timeout: 60000,
+      });
+    }, 3, 1000);
+  } catch (error) {
+    console.error('Outfit compatibility check failed:', error);
+    throw error;
+  }
 };
 
 

@@ -4,6 +4,7 @@ import { auth, logout, loadProfile, guestLogin } from './api/styleApi';
 import { onAuthStateChanged } from 'firebase/auth';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { PlanProvider } from './context/PlanContext';
+import SplashScreen from './components/SplashScreen';
 
 // Eagerly loaded components for fast initial render
 import LandingPage from './components/LandingPage';
@@ -112,10 +113,10 @@ function AppRoutes({ user, setUser }) {
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
   const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('tonefit_theme');
-    if (saved) return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    // Always start with light mode by default
+    return 'light';
   });
 
   useEffect(() => {
@@ -171,6 +172,10 @@ function App() {
   }, []);
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+  }
 
   if (loading) {
     return <LoadingFallback />;
