@@ -551,6 +551,10 @@ function Dashboard({ user, onLogout }) {
   const [showProfileSettings, setShowProfileSettings] = useState(false);
   const showToast = (msg) => setToast(msg);
 
+  // Define analysisCount and savedCount for profile tab display
+  const analysisCount = user ? parseInt(localStorage.getItem('sg_analysis_count') || '0') : 0;
+  const savedCount = user ? (() => { try { return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]').length; } catch { return 0; } })() : 0;
+
   const handleUpgradeSuccess = async () => {
     try {
       if (auth.currentUser) {
