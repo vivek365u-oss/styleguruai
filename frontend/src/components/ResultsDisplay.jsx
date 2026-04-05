@@ -155,8 +155,14 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
     } catch { return false; }
   });
 
+  const isGuest = auth.currentUser?.isAnonymous;
+
   const toggleSave = (e) => {
     e.stopPropagation();
+    if (isGuest) {
+      // Prompt for login (maybe trigger a toast or just show the heart in a disabled state)
+      return; 
+    }
     try {
       const s = JSON.parse(localStorage.getItem('sg_saved_colors') || '[]');
       let updated;
@@ -188,8 +194,9 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
         </div>
         <button
           onClick={toggleSave}
-          className={`text-lg transition-transform hover:scale-125 ${saved ? 'text-pink-400' : isDark ? 'text-white/20 hover:text-pink-400' : 'text-gray-300 hover:text-pink-400'}`}
-          title={saved ? 'Remove from saved' : 'Save color'}
+          disabled={isGuest}
+          className={`text-lg transition-transform hover:scale-125 ${isGuest ? 'opacity-30 cursor-not-allowed' : (saved ? 'text-pink-400' : isDark ? 'text-white/20 hover:text-pink-400' : 'text-gray-300 hover:text-pink-400')}`}
+          title={isGuest ? 'Login to save colors' : (saved ? 'Remove from saved' : 'Save color')}
         >
           {saved ? '❤️' : '🤍'}
         </button>
@@ -1071,6 +1078,11 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         
         <button
           onClick={async () => {
+            if (auth.currentUser?.isAnonymous) {
+              // Redirection to profile tab to login
+              onReset(); // Go back to start if needed, or just let them know
+              return;
+            }
             if (shareStatus === 'success') return;
             setShareStatus('loading');
             try {

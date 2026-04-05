@@ -185,15 +185,35 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
   const gndr = lastAnalysis?.fullData?.gender || genderPref;
   const tone = (typeof lastAnalysis?.skinTone === 'string' ? lastAnalysis?.skinTone : lastAnalysis?.skinTone?.category || 'medium')?.toLowerCase();
   const todayTip = getLocalizedTip(gndr, tone, language);
-  const firstName = user?.name?.split(' ')[0] || t('guestName');
+  const isLoggedIn = user && !user.isAnonymous;
+
   return (
     <div className="pb-4 space-y-6">
+      {/* Guest Hero — Prominent Login Call-to-Action */}
+      {!isLoggedIn && (
+        <div className={`rounded-3xl p-6 border-2 border-dashed animate-pulse-slow ${isDark ? 'bg-purple-900/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-2xl shadow-lg">✨</div>
+            <div className="flex-1">
+              <h3 className={`font-black text-lg ${isDark ? 'text-white' : 'text-purple-900'}`}>Unlock Full Features</h3>
+              <p className={`text-xs ${isDark ? 'text-purple-300/70' : 'text-purple-700/70'}`}>Save your history, wardrobe & get a pro style score.</p>
+            </div>
+          </div>
+          <button 
+            onClick={() => onTabChange('profile')}
+            className="mt-4 w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-black text-sm shadow-lg transition-transform active:scale-95"
+          >
+            Join StyleGuru Now
+          </button>
+        </div>
+      )}
+
       {showDailyDrop && <DailyDropModal lastAnalysis={lastAnalysis} isDark={isDark} onClose={() => setShowDailyDrop(false)} />}
         <div className="pt-2 flex justify-between items-start">
         <div>
           <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{t('goodDay')}</p>
           <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {user?.name ? t('welcomeHey').replace('{name}', firstName) : t('welcomeNew')}
+            {isLoggedIn ? t('welcomeHey').replace('{name}', firstName) : t('welcomeNew')}
           </h2>
           <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('discoverPerfect')}</p>
         </div>
@@ -320,8 +340,8 @@ function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro
     date: lastAnalysis.date,
   } : null;
 
-  // Check if user is logged in (has email with proper format)
-  const isLoggedIn = user?.email && !user.email.includes('@guest');
+  // Check if user is logged in
+  const isLoggedIn = user && !user.isAnonymous;
 
   return (
     <div className="space-y-4 pt-2">
@@ -346,14 +366,35 @@ function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro
       <div className={`rounded-3xl p-6 border text-center ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
         <div className="inline-block mb-4 relative">
           <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
-            <span className="text-5xl text-white font-black">{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
+            <span className="text-5xl text-white font-black">
+              {isLoggedIn ? (user?.name?.charAt(0).toUpperCase() || 'U') : '👤'}
+            </span>
           </div>
+          {!isLoggedIn && (
+            <div className="absolute -bottom-1 -right-1 bg-purple-600 text-white text-[8px] font-black px-2 py-1 rounded-full border-2 border-[#050816] uppercase tracking-tighter">
+              Guest
+            </div>
+          )}
         </div>
-        <h2 className={`text-2xl font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{user?.name}</h2>
-        <p className={`text-sm mb-4 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{user?.email}</p>
-        <button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 font-semibold transition-all text-sm">
-          ✏️ Edit Profile
-        </button>
+        <h2 className={`text-2xl font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          {isLoggedIn ? user?.name : 'Guest Mode'}
+        </h2>
+        <p className={`text-sm mb-4 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
+          {isLoggedIn ? user?.email : 'Login to sync your profile'}
+        </p>
+        
+        {isLoggedIn ? (
+          <button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 font-semibold transition-all text-sm">
+            ✏️ Edit Profile
+          </button>
+        ) : (
+          <button 
+            onClick={() => navigate('/login')}
+            className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-black text-sm shadow-lg transition-transform active:scale-95 pulse-glow"
+          >
+            Login to Save Progress
+          </button>
+        )}
       </div>
 
       {/* Stats */}
@@ -376,9 +417,18 @@ function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro
           </div>
         </div>
       ) : (
-        <div className={`rounded-2xl p-6 text-center border border-dashed ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-300'}`}>
-          <p className="text-3xl mb-2">📊</p>
-          <p className={`font-bold text-sm ${isDark ? 'text-white/70' : 'text-gray-600'}`}>Login to see your analysis stats & score</p>
+        <div className={`rounded-3xl p-8 text-center border-2 border-dashed ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-300'}`}>
+          <div className="w-16 h-16 rounded-full bg-purple-500/10 flex items-center justify-center mx-auto mb-4">
+            <span className="text-3xl">📊</span>
+          </div>
+          <p className={`font-black text-lg mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Unlock Your Style Stats</p>
+          <p className={`text-sm mb-6 ${isDark ? 'text-white/50' : 'text-gray-600'}`}>Login to see your analysis history, saved colors, and personalized style score.</p>
+          <button 
+            onClick={() => navigate('/login')}
+            className={`px-6 py-2.5 rounded-xl font-black text-xs transition-all ${isDark ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg' : 'bg-purple-500 hover:bg-purple-600 text-white shadow-sm'}`}
+          >
+            Show My Stats
+          </button>
         </div>
       )}
 
@@ -412,29 +462,31 @@ function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro
       )}
 
       {/* Plan Status */}
-      <div className={`rounded-3xl p-6 border ${isPro ? (isDark ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-500/30' : 'bg-gradient-to-br from-purple-100 to-pink-100 border-purple-300') : (isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm')}`}>
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <h3 className={`text-lg font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{isPro ? '⚡ PRO' : '🆓 Free'}</h3>
-            {isPro && (
-              <p className={`text-sm ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>Premium unlocked ✓</p>
-            )}
-          </div>
-        </div>
-        {!isPro && (
-          <div className="space-y-2">
+      {isLoggedIn && (
+        <div className={`rounded-3xl p-6 border ${isPro ? (isDark ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-500/30' : 'bg-gradient-to-br from-purple-100 to-pink-100 border-purple-300') : (isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm')}`}>
+          <div className="flex items-start justify-between mb-3">
             <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span className={isDark ? 'text-white/50' : 'text-gray-500'}>Analyses</span>
-                <span className={isDark ? 'text-white/70' : 'text-gray-700'}>{usage?.analyses_count || 0}/6</span>
-              </div>
-              <div className={`h-2 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
-                <div className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500" style={{ width: `${Math.min(100, ((usage?.analyses_count || 0) / 6) * 100)}%` }} />
-              </div>
+              <h3 className={`text-lg font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{isPro ? '⚡ PRO' : '🆓 Free'}</h3>
+              {isPro && (
+                <p className={`text-sm ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>Premium unlocked ✓</p>
+              )}
             </div>
           </div>
-        )}
-      </div>
+          {!isPro && (
+            <div className="space-y-2">
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className={isDark ? 'text-white/50' : 'text-gray-500'}>Analyses</span>
+                  <span className={isDark ? 'text-white/70' : 'text-gray-700'}>{usage?.analyses_count || 0}/6</span>
+                </div>
+                <div className={`h-2 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
+                  <div className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500" style={{ width: `${Math.min(100, ((usage?.analyses_count || 0) / 6) * 100)}%` }} />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Settings Button */}
       <button
@@ -753,7 +805,7 @@ function SettingsScreen({ user, onLogout }) {
 
       {/* Logout */}
       <button onClick={onLogout} className={`w-full py-3 rounded-2xl font-black border transition ${isDark ? 'bg-red-500/10 hover:bg-red-500/20 text-red-500 border-red-500/20' : 'bg-red-100 hover:bg-red-200 text-red-700 border-red-300'}`}>
-        🚪 {t('logout')}
+        {user?.isAnonymous ? '🚪 Exit Guest Mode' : `🚪 ${t('logout')}`}
       </button>
     </div>
   );
