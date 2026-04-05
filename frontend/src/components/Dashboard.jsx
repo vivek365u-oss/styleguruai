@@ -309,7 +309,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro }) {
   );
 }
 
-function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro, usage, onShowSettings }) {
+function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro, usage, onShowSettings, navigate }) {
   const { t } = useLanguage();
   const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
   const wardrobeStats = lastAnalysis ? {
@@ -331,11 +331,11 @@ function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro
           <p className={`text-xs font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>✅ Logged In</p>
         </div>
       ) : (
-        <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-200'}`}>
-          <p className={`text-xs font-bold mb-2 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>👤 Guest Mode</p>
+        <div className={`rounded-2xl p-3 text-center border ${isDark ? 'bg-purple-500/10 border-purple-500/20' : 'bg-purple-50 border-purple-200'}`}>
+          <p className={`text-xs font-bold mb-2 ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>👤 Guest Mode</p>
           <button
             onClick={() => navigate('/login')}
-            className={`w-full px-3 py-2 rounded-lg font-bold text-xs transition-all ${isDark ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+            className={`w-full px-3 py-2 rounded-lg font-bold text-xs transition-all ${isDark ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg' : 'bg-purple-500 hover:bg-purple-600 text-white shadow-sm'}`}
           >
             Login to Save Progress
           </button>
@@ -432,13 +432,6 @@ function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro
         ⚙️ Settings & Preferences
       </button>
 
-      {/* Website Link */}
-      <button
-        onClick={() => window.open('https://styleguruai.in', '_blank')}
-        className={`w-full p-4 rounded-2xl font-black border transition-all text-base ${isDark ? 'bg-blue-600/20 border-blue-500/30 hover:bg-blue-600/40 text-blue-300' : 'bg-blue-100 border-blue-300 hover:bg-blue-200 text-blue-700'}`}
-      >
-        🌐 Visit Website
-      </button>
     </div>
   );
 }
@@ -606,51 +599,7 @@ function SettingsScreen({ user, onLogout }) {
         </div>
       )}
 
-      {/* Plan Status */}
-      <div className={`rounded-2xl p-4 border ${isPro ? (isDark ? 'bg-gradient-to-r from-purple-900/40 to-pink-900/40 border-purple-500/30' : 'bg-purple-50 border-purple-300') : (isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm')}`}>
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className={`font-black text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              {isPro ? `⚡ ${t('proMember')} ✓` : `🆓 ${t('freePlan')}`}
-            </p>
-            {isPro && validUntil && (
-              <p className={`text-xs mt-0.5 ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>
-                {t('validUntilLabel')} {new Date(validUntil).toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-              </p>
-            )}
-          </div>
-          {!isPro && (
-            <button
-              onClick={() => setPaywallOpen(true)}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-black px-4 py-2 rounded-xl hover:from-purple-500 hover:to-pink-500 transition"
-            >
-              {t('upgrade')} ₹59/mo
-            </button>
-          )}
-        </div>
-        {!isPro && (
-          <div className="space-y-2">
-            <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span className={isDark ? 'text-white/50' : 'text-gray-500'}>{t('analyses')}</span>
-                <span className={isDark ? 'text-white/70' : 'text-gray-700'}>{usage.analyses_count || 0}/6</span>
-              </div>
-              <div className={`h-1.5 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
-                <div className="h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all" style={{ width: `${Math.min(100, ((usage.analyses_count || 0) / 6) * 100)}%` }} />
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between text-xs mb-1">
-                <span className={isDark ? 'text-white/50' : 'text-gray-500'}>{t('outfitTitle')}</span>
-                <span className={isDark ? 'text-white/70' : 'text-gray-700'}>{usage.outfit_checks_count || 0}/10</span>
-              </div>
-              <div className={`h-1.5 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
-                <div className="h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all" style={{ width: `${Math.min(100, ((usage.outfit_checks_count || 0) / 10) * 100)}%` }} />
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+
 
       {/* Appearance - Theme & Language */}
       <div className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
@@ -1055,6 +1004,7 @@ function Dashboard({ user, onLogout }) {
                 isPro={isPro}
                 usage={usage}
                 onShowSettings={() => setShowProfileSettings(true)}
+                navigate={navigate}
               />
             ) : (
               <div>
@@ -1078,11 +1028,17 @@ function Dashboard({ user, onLogout }) {
             <button
               key={item.id}
               onClick={() => handleTabChange(item.id)}
-              className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${activeTab === item.id ? 'text-purple-500' : theme === 'dark' ? 'text-white/30 hover:text-white/60' : 'text-gray-600 hover:text-gray-900'}`}
+              className={`flex-shrink-0 flex flex-col items-center gap-1.5 px-4 py-2 rounded-2xl transition-all ${
+                activeTab === item.id 
+                  ? (isDark ? 'text-purple-400 bg-white/5' : 'text-purple-600 bg-purple-100') 
+                  : (isDark ? 'text-white/40 hover:text-white/60 hover:bg-white/5' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200')
+              }`}
             >
-              <span className={`text-xl transition-transform ${activeTab === item.id ? 'scale-110' : ''}`}>{item.emoji}</span>
-              <span className={`text-[10px] font-semibold ${activeTab === item.id ? 'text-purple-400' : theme === 'dark' ? 'text-white/30' : 'text-gray-700'}`}>{item.label}</span>
-              {activeTab === item.id && <div className="w-1 h-1 rounded-full bg-purple-400 nav-dot" />}
+              <span className={`text-xl transition-transform ${activeTab === item.id ? 'scale-110 drop-shadow-[0_0_8px_rgba(168,85,247,0.4)]' : ''}`}>{item.emoji}</span>
+              <span className={`text-[10px] uppercase tracking-tighter font-black ${
+                activeTab === item.id ? (isDark ? 'text-purple-400' : 'text-purple-700') : (isDark ? 'text-white/30' : 'text-slate-500')
+              }`}>{item.label}</span>
+              {activeTab === item.id && <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 nav-dot shadow-[0_0_8px_rgba(168,85,247,0.6)]" />}
             </button>
           ))}
         </div>
