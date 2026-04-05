@@ -7,6 +7,7 @@ import CoupleResults from './CoupleResults';
 import HistoryPanel from './HistoryPanel';
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
+import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import AdSense from '../AdSense';
 import { saveProfile, auth, incrementUsage } from '../api/styleApi';
 import WardrobePanel from './WardrobePanel';
@@ -35,38 +36,7 @@ function Toast({ message, onClose }) {
   );
 }
 
-function LoadingScreen() {
-  const { t } = useLanguage();
-  const [step, setStep] = useState(0);
-  const steps = [
-    { emoji: '🔍', text: t('loadingScan'), sub: t('loadingQuality') },
-    { emoji: '👤', text: t('loadingFace'), sub: t('loadingFaceSub') },
-    { emoji: '🎨', text: t('loadingSkin'), sub: t('loadingSkinSub') },
-    { emoji: '👔', text: t('loadingRecs'), sub: t('loadingRecsSub') },
-    { emoji: '✨', text: t('loadingDone'), sub: t('loadingDoneSub') },
-  ];
-  useEffect(() => {
-    const interval = setInterval(() => setStep(p => p < steps.length - 1 ? p + 1 : p), 900);
-    return () => clearInterval(interval);
-  }, []);
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh]">
-      <div className="relative w-24 h-24 mb-6">
-        <div className="absolute inset-0 rounded-full border-4 border-purple-500/20" />
-        <div className="absolute inset-0 rounded-full border-4 border-purple-500 border-t-transparent animate-spin" />
-        <div className="absolute inset-2 rounded-full border-2 border-pink-500/30 border-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
-        <div className="absolute inset-0 flex items-center justify-center text-3xl">{steps[step].emoji}</div>
-      </div>
-      <p className="text-white font-bold text-lg mb-1">{steps[step].text}</p>
-      <p className="text-purple-300/70 text-sm">{steps[step].sub}</p>
-      <div className="flex gap-2 mt-5">
-        {steps.map((_, i) => (
-          <div key={i} className={`h-1.5 rounded-full transition-all duration-500 ${i <= step ? 'bg-purple-500 w-6' : 'bg-white/20 w-2'}`} />
-        ))}
-      </div>
-    </div>
-  );
-}
+
 
 function DailyDropModal({ lastAnalysis, isDark, onClose }) {
   const { t } = useLanguage();
@@ -788,6 +758,7 @@ function Dashboard({ user, onLogout }) {
   const isDark = theme === 'dark';
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
@@ -978,13 +949,14 @@ function Dashboard({ user, onLogout }) {
                   setLoading={setLoading} 
                   setError={setError} 
                   setUploadedImage={setUploadedImage} 
+                  setUploadProgress={setUploadProgress}
                   currentGender={currentGender}
                   setCurrentGender={setCurrentGender}
                   isPro={isPro}
                   usage={usage}
                 />
               )}
-              {loading && <LoadingScreen />}
+              {loading && <LoadingScreenWithProgress progress={uploadProgress} />}
               {error && (
                 <div className="mt-8 rounded-2xl p-6 text-center border bg-red-500/10 border-red-500/30">
                   <div className="text-4xl mb-3">😕</div>

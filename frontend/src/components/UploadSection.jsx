@@ -227,13 +227,13 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
   );
 }
 
-function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSelected, onGenderChange }) {
+function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSelected, onGenderChange, setUploadProgress }) {
   const { theme } = useContext(ThemeContext);
   const { t, language } = useLanguage();
   const isDark = theme === 'dark';
   const [preview, setPreview] = useState(null);
   const [dragActive, setDragActive] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadProgress, setUploadProgress_internal] = useState(0);
   const [gender, setGender] = useState('male');
   const [mode, setMode] = useState('normal');
   const [season, setSeason] = useState('summer');
@@ -253,6 +253,12 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   const partner1Ref = useRef(null);
   const partner2Ref = useRef(null);
 
+  // Sync progress to parent if provided
+  const handleProgress = (progress) => {
+    setUploadProgress_internal(progress);
+    if (setUploadProgress) setUploadProgress(progress);
+  };
+
   const handleGenderChange = (newGender) => {
     setGender(newGender);
     if (onGenderChange) onGenderChange(newGender);
@@ -270,11 +276,11 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     try {
       let res;
       if (mode === 'seasonal') {
-        res = await analyzeImageSeasonal(file, season, language, setUploadProgress);
+        res = await analyzeImageSeasonal(file, season, language, handleProgress);
       } else if (gender === 'female') {
-        res = await analyzeImageFemale(file, language, setUploadProgress);
+        res = await analyzeImageFemale(file, language, handleProgress);
       } else {
-        res = await analyzeImage(file, language, setUploadProgress);
+        res = await analyzeImage(file, language, handleProgress);
       }
       
       console.log("[UploadSection] Analysis successful!");
@@ -308,11 +314,11 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       const file1 = dataURLtoFile(partner1, 'partner1.jpg');
       const file2 = dataURLtoFile(partner2, 'partner2.jpg');
 
-      setUploadProgress(10);
+      handleProgress(10);
       const res1 = partner1Gender === 'female' ? await analyzeImageFemale(file1, language, () => {}) : await analyzeImage(file1, language, () => {});
-      setUploadProgress(50);
+      handleProgress(50);
       const res2 = partner2Gender === 'female' ? await analyzeImageFemale(file2, language, () => {}) : await analyzeImage(file2, language, () => {});
-      setUploadProgress(100);
+      handleProgress(100);
 
       onImageSelected([partner1, partner2]);
       onAnalysisComplete({
