@@ -120,6 +120,43 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
     }
   };
 
+  const handleSkip = () => {
+    // Skip to next question without answering
+    if (step < questions.length - 1) {
+      setStep(s => s + 1);
+    } else {
+      // Generate result with only answered questions
+      const tone = answers.tone || 'medium';
+      const undertone = answers.undertone || 'neutral';
+      const bodyType = answers.bodyType || 'average';
+      const rec = RECS[tone]?.[undertone] || RECS[tone]?.neutral || RECS.medium.neutral;
+      const bodyTips = BODY_TYPE_TIPS[bodyType] || BODY_TYPE_TIPS.average;
+      const mockResult = {
+        gender,
+        bodyType,
+        eyeColor: answers.eyeColor || 'brown',
+        analysis: {
+          skin_color: { hex: '#C68642', rgb: { r: 198, g: 134, b: 66 } },
+          skin_tone: { category: tone, undertone, color_season: undertone === 'warm' ? 'Autumn' : undertone === 'cool' ? 'Winter' : 'Spring', confidence: 'medium', description: rec.summary },
+        },
+        recommendations: {
+          summary: rec.summary,
+          best_shirt_colors: rec.best_shirt_colors,
+          best_pant_colors: rec.best_pant_colors,
+          colors_to_avoid: rec.colors_to_avoid,
+          style_tips: [...rec.style_tips, ...bodyTips],
+          outfit_combinations: rec.outfit_combinations,
+          occasion_advice: rec.occasion_advice,
+          ethnic_wear: rec.ethnic_wear,
+          accent_colors: [],
+        },
+        photo_quality: { warnings: [] },
+      };
+      onResult(mockResult);
+      setOpen(false);
+    }
+  };
+
   const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
   const headingCls = isDark ? 'text-white' : 'text-gray-800';
   const subCls = isDark ? 'text-white/50' : 'text-gray-500';
@@ -147,20 +184,45 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
           ))}
         </div>
       </div>
-      <p className={`text-sm font-semibold mb-3 ${headingCls}`}>{q.q}</p>
-      <div className="space-y-2">
-        {q.options.map((opt) => (
-          <button
-            key={opt.value}
-            onClick={() => handleAnswer(q.key, opt.value)}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all hover:border-purple-500/50 hover:scale-[1.01] ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-gray-50 border-gray-200 hover:bg-purple-50'}`}
-          >
-            {opt.color && <div className="w-8 h-8 rounded-lg flex-shrink-0 border border-white/20" style={{ backgroundColor: opt.color }} />}
-            <span className={`text-sm font-medium ${headingCls}`}>{opt.label}</span>
-          </button>
-        ))}
+      <p className={`text-sm font-semibold mb-4 ${headingCls}`}>{q.q}</p>
+      <div className="space-y-2 mb-4">
+        {q.options.map((opt) => {
+          const isSelected = answers[q.key] === opt.value;
+          return (
+            <button
+              key={opt.value}
+              onClick={() => handleAnswer(q.key, opt.value)}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all transform hover:scale-[1.02] ${
+                isSelected
+                  ? isDark 
+                    ? 'bg-purple-600/30 border-purple-500 shadow-lg shadow-purple-500/20' 
+                    : 'bg-purple-100 border-purple-500 shadow-lg shadow-purple-500/20'
+                  : isDark
+                    ? 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-purple-500/30'
+                    : 'bg-white border-gray-200 hover:bg-purple-50 hover:border-purple-300 shadow-sm'
+              }`}
+            >
+              {opt.color && <div className="w-8 h-8 rounded-lg flex-shrink-0 border border-white/20 shadow-md" style={{ backgroundColor: opt.color }} />}
+              <span className={`text-sm font-semibold flex-1 text-left ${headingCls}`}>{opt.label}</span>
+              {isSelected && <span className="text-lg">✓</span>}
+            </button>
+          );
+        })}
       </div>
-      <button onClick={() => { setOpen(false); setStep(0); setAnswers({}); }} className={`mt-3 text-xs ${subCls} hover:text-purple-400 transition`}>✕ Cancel</button>
+      <div className="flex gap-2">
+        <button 
+          onClick={handleSkip}
+          className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all ${isDark ? 'bg-white/10 hover:bg-white/15 text-white/60 hover:text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
+        >
+          ⏭️ Skip
+        </button>
+        <button 
+          onClick={() => { setOpen(false); setStep(0); setAnswers({}); }}
+          className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all ${isDark ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400' : 'bg-red-50 hover:bg-red-100 text-red-600'}`}
+        >
+          ✕ Cancel
+        </button>
+      </div>
     </div>
   );
 }
