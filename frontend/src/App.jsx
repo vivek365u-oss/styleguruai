@@ -62,7 +62,7 @@ function AppRoutes({ user, setUser }) {
       'sg_saved_colors',
       'sg_wardrobe_queue'
     ];
-    keysToClear.forEach(key => localStorage.removeItem(key));
+    localStorage.removeItem('tonefit_user_status');
     navigate('/');
   };
 
@@ -148,8 +148,10 @@ function App() {
         } catch (e) {
           console.error('loadProfile on login error:', e);
         }
+        localStorage.setItem('tonefit_user_status', firebaseUser.isAnonymous ? 'guest' : 'logged_in');
       } else {
         setUser(null);
+        localStorage.setItem('tonefit_user_status', 'guest');
       }
       setLoading(false);
     });
