@@ -14,6 +14,7 @@ import WardrobePanel from './WardrobePanel';
 import { saveWardrobeItem, activateProSubscription } from '../api/styleApi';
 import { usePlan } from '../context/PlanContext';
 import PaywallModal from './PaywallModal';
+import { PlansUpgradeScreen } from './PlansUpgradeScreen';
 import OOTDCard from './OOTDCard';
 import WeatherTip from './WeatherTip';
 import ColorScanner from './ColorScanner';
@@ -575,7 +576,7 @@ function SettingsScreen({ user, onLogout }) {
           </div>
           {!isPro && (
             <button
-              onClick={() => setPaywallOpen(true)}
+              onClick={() => setShowPlansScreen(true)}
               className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-black px-4 py-2 rounded-xl hover:from-purple-500 hover:to-pink-500 transition"
             >
               {t('upgrade')} ₹59/mo
@@ -1073,7 +1074,7 @@ function Dashboard({ user, onLogout }) {
           )}
           <CartButton cartOpen={cartOpen} setCartOpen={setCartOpen} />
           {!isPro ? (
-            <button onClick={() => setPaywallOpen(true)} className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1.5 rounded-xl shadow-md transition hover:scale-105 active:scale-95">
+            <button onClick={() => setShowPlansScreen(true)} className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1.5 rounded-xl shadow-md transition hover:scale-105 active:scale-95">
               <span>✨</span> PRO
             </button>
           ) : (
@@ -1200,6 +1201,18 @@ function Dashboard({ user, onLogout }) {
         </div>
       </nav>
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+      {showPlansScreen && (
+        <PlansUpgradeScreen
+          isDark={theme === 'dark'}
+          onSelectPlan={(plan) => {
+            setSelectedPlan(plan);
+            setShowPlansScreen(false);
+            // Open payment modal with selected plan
+            setPaywallOpen(true);
+          }}
+          onClose={() => setShowPlansScreen(false)}
+        />
+      )}
       <PaywallModal isOpen={paywallOpen} onClose={() => setPaywallOpen(false)} onUpgrade={handleUpgradeSuccess} isDark={theme === 'dark'} />
       <ShoppingCart isOpen={cartOpen} onClose={() => setCartOpen(false)} onProceedToCheckout={handleCheckoutClick} isDark={isDark} />
       <StyleBot />

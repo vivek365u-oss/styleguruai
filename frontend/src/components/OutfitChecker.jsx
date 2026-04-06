@@ -3,6 +3,8 @@ import { checkOutfitCompatibility, saveWardrobeItem, auth, incrementUsage } from
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
+import { useAnalysisProgress } from '../hooks/useAnalysisProgress';
+import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import { compressImage, saveLocalWardrobeImage } from '../utils/indexedDB';
 import PaywallModal from './PaywallModal';
 
@@ -122,6 +124,8 @@ function OutfitChecker() {
   const [wardrobeSaved, setWardrobeSaved] = useState(false);
   const [wardrobeSaving, setWardrobeSaving] = useState(false);
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
+  const { progress, startProgress, completeProgress, setError: setProgressError, reset: resetProgress } = useAnalysisProgress();
 
   const selfieRef = useRef(null);
   const outfitRef = useRef(null);
@@ -147,21 +151,30 @@ function OutfitChecker() {
       setPaywallOpen(true);
       return;
     }
-    console.log("[OutfitChecker] Starting outfit check...");
+    console.log("[OutfitChecker] Starting outfit check with progress...");
     setLoading(true); setError(null); setResult(null);
+    setShowProgress(true);
+    startProgress(); // Start fake progressive loading
     try {
       const res = await checkOutfitCompatibility(selfieFile, outfitFile, language);
       console.log("[OutfitChecker] Analysis successful!");
-      setResult(res.data);
-      // Increment usage for free users
-      const uid = auth.currentUser?.uid;
-      if (uid && !isPro) {
-        incrementUsage(uid, 'outfit_checks_count').then(() => {
-          setUsage(prev => ({ ...prev, outfit_checks_count: (prev.outfit_checks_count || 0) + 1 }));
-        });
-      }
+      completeProgress(); // Complete progress animation
+      
+      // Wait for animation to finish, then show results
+      setTimeout(() => {
+        setResult(res.data);
+        setShowProgress(false);
+        // Increment usage for free users
+        const uid = auth.currentUser?.uid;
+        if (uid && !isPro) {
+          incrementUsage(uid, 'outfit_checks_count').then(() => {
+            setUsage(prev => ({ ...prev, outfit_checks_count: (prev.outfit_checks_count || 0) + 1 }));
+          });
+        }
+      }, 800); // 800ms for fade-out animation
     } catch (err) {
       console.error("[OutfitChecker] Analysis error:", err);
+      setShowProgress(false);
       if (err.code === 'ECONNABORTED') {
         setError('Analysis is taking too long. Server is busy, please try again later.');
       } else {
@@ -179,6 +192,8 @@ function OutfitChecker() {
     setSelfieFile(null); setOutfitFile(null);
     setResult(null); setError(null);
     setWardrobeSaved(false); setWardrobeSaving(false);
+    setShowProgress(false);
+    resetProgress();
   };
 
   const handleSaveToWardrobe = async () => {
@@ -228,8 +243,11 @@ function OutfitChecker() {
 
   return (
     <div className="mt-4 space-y-6">
+      {showProgress && <LoadingScreenWithProgress progress={progress} isDark={isDark} />}
 
-      {/* Hero */}
+      {!showProgress && (
+        <>
+          {/* Hero */}
       <div className="text-center mb-6">
         <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 mb-4 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
           <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></span>
@@ -493,6 +511,8 @@ function OutfitChecker() {
             🔄 {t('checkAgain')}
           </button>
         </div>
+      )}
+        </>
       )}
       <PaywallModal
         isOpen={paywallOpen}
