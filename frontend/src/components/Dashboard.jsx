@@ -281,7 +281,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro, lastAna
   );
 }
 
-function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro, usage, onShowSettings, onLogout, lastAnalysis }) {
+function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro, usage, onShowSettings, onOpenPayment, onLogout, lastAnalysis }) {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const wardrobeStats = lastAnalysis ? {
@@ -576,7 +576,7 @@ function SettingsScreen({ user, onLogout }) {
           </div>
           {!isPro && (
             <button
-              onClick={() => setShowPlansScreen(true)}
+              onClick={() => onOpenPayment && onOpenPayment()}
               className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-black px-4 py-2 rounded-xl hover:from-purple-500 hover:to-pink-500 transition"
             >
               {t('upgrade')} ₹59/mo
@@ -1161,17 +1161,18 @@ function Dashboard({ user, onLogout }) {
           {activeTab === 'profile' && (
             <>
               {!showProfileSettings ? (
-                <ProfileScreenComponent 
-                  user={user} 
-                  isDark={isDark} 
-                  analysisCount={analysisCount}
-                  savedCount={savedCount}
-                  isPro={isPro}
-                  usage={usage}
-                  onShowSettings={() => setShowProfileSettings(true)}
-                  onLogout={onLogout}
-                  lastAnalysis={lastAnalysis}
-                />
+              <ProfileScreenComponent 
+                user={user} 
+                isDark={isDark} 
+                analysisCount={analysisCount}
+                savedCount={savedCount}
+                isPro={isPro}
+                usage={usage}
+                onShowSettings={() => setShowProfileSettings(true)}
+                onOpenPayment={() => setShowPlansScreen(true)}
+                onLogout={onLogout}
+                lastAnalysis={lastAnalysis}
+              />
               ) : (
                 <div>
                   <button
