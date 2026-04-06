@@ -1,0 +1,13 @@
+{
+  "name": "StyleGuru AI",
+  "short_name": "StyleGuru",
+  "description": "AI-powered fashion advisor based on your skin tone",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050816",
+  "theme_color": "#a855f7",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

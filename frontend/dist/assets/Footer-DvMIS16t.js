@@ -1,0 +1,313 @@
+import{r as e}from"./chunk-DECur_0Z.js";import{d as t,r as n,t as r}from"./jsx-runtime-ChdCe7CR.js";var i={en:{login:`Login`,register:`Register`,fullName:`Full Name`,email:`Email`,password:`Password`,namePlaceholder:`Your name`,loginBtn:`Login`,registerBtn:`Create Account`,googleLogin:`Continue with Google`,orEmail:`or with email`,noAccount:`No account found with this email.`,wrongPassword:`Incorrect password.`,emailInUse:`This email is already registered.`,weakPassword:`Password must be at least 6 characters.`,somethingWrong:`Something went wrong. Please try again.`,googleFailed:`Google login failed. Please try again.`,tagline:`AI-Powered Fashion for All Skin Tones`,footer:`Made with 💜 • Your photos are never stored`,analyze:`Analyze`,outfitCheck:`Outfit Check`,history:`History`,settings:`Settings`,logout:`Logout`,darkMode:`Dark Mode`,lightMode:`Light Mode`,switchTheme:`Switch theme`,systemTheme:`Also switches automatically based on your system theme!`,account:`Account`,tryAgain:`Try Again`,aiPowered:`AI-Powered • 95%+ Accuracy`,discoverStyle:`Discover Your`,perfectStyle:`Perfect`,styleWord:`Style`,uploadSubtitle:`Upload a selfie — get personalized fashion recommendations based on your skin tone`,normal:`Normal`,seasonal:`Seasonal`,male:`Male`,female:`Female`,chooseSeason:`Choose a season:`,dropSelfie:`Drop Your Selfie Here`,orBrowse:`or click to browse`,choosePhoto:`Choose Photo`,photoNote:`JPG, PNG, WebP • Max 10MB • Photos are never stored`,analyzingPhoto:`Analyzing your photo...`,naturalLight:`Natural Light`,naturalLightDesc:`Take selfie near a window — best results`,faceForward:`Face Forward`,faceForwardDesc:`Look directly at the camera`,clearFace:`Clear Face`,clearFaceDesc:`Remove sunglasses or mask`,skinTones:`We support all skin tones 🌍`,maleMode:`Male mode: Shirt, Pant & Ethnic wear suggestions included!`,femaleMode:`Female mode: Dress, Saree, Suit & Makeup suggestions included!`,newPhoto:`← New Photo`,analyzeNewPhoto:`Analyze New Photo`,eachSelfie:`Each selfie gives better results!`,styleSummary:`Style Summary`,highConfidence:`✓ High Confidence`,mediumConfidence:`~ Medium Confidence`,detectedSkinColor:`Detected Skin Color`,photoTips:`💡 Photo Tips:`,colorsToAvoid:`Colors to Avoid`,completeOutfitIdeas:`Complete Outfit Ideas`,styleTips:`Style Tips Just For You`,whatToWear:`What to Wear & When?`,ethnicWear:`Ethnic Wear`,sareeEthnic:`Saree & Ethnic Wear`,accessories:`Accessories & Jewellery`,accessoriesFor:`Accessories For You`,makeupSuggestions:`Makeup Suggestions`,sareeSuits:`Saree & Suits Suggestions`,bestShirtColors:`Best Shirt Colors`,bestPantColors:`Best Pant Colors`,bestDressColors:`Best Dress Colors`,bestTopColors:`Best Top Colors`,bestKurtiColors:`Best Kurti Colors`,bestLehengaColors:`Best Lehenga Colors`,bestBottomColors:`Best Bottom Colors`,seasonBestColors:`Season Best Colors`,seasonOutfitMale:`Season Outfit Ideas — Male`,seasonOutfitFemale:`Season Outfit Ideas — Female`,bestFabrics:`Best Fabrics`,avoidFabrics:`Avoid Fabrics`,seasonStyleTips:`Season Style Tips:`,shopThisColor:`Shop This Color`,yourHistory:`Your History`,noHistory:`No History Yet`,noHistoryDesc:`Analyze your first selfie — history will appear here!`,loadingHistory:`Loading history...`,loadingDetails:`Loading details...`,backToHistory:`← Back to History`,failedHistory:`Failed to load history. Please try again.`,failedDetails:`Failed to load details.`,outfitTitle:`Will This Outfit`,outfitSubtitle:`Look Good On You?`,outfitDesc:`Upload your selfie + outfit photo — AI will check the compatibility!`,yourSelfie:`Your Selfie`,clearFacePhoto:`Clear face photo`,outfitPhoto:`Outfit Photo`,outfitCheckDesc:`The outfit you want to check`,checkCompatibility:`Check Compatibility`,aiChecking:`AI Checking...`,checkAgain:`Check Again`,uploadBoth:`Please upload both photos!`,selfieTips:`Selfie Tips:`,outfitTips:`Outfit Tips:`,yourSkinTone:`Your Skin Tone`,outfitColor:`Outfit Color`,betterAlternatives:`Better Alternatives`,clearFacePhotoTip:`Clear face photo`,goodLighting:`Good lighting`,noSunglasses:`No sunglasses`,plainBackground:`Plain background`,fullOutfitVisible:`Full outfit visible`,clearBrightPhoto:`Clear and bright photo`,language:`Language`,languageLabel:`App Language`,community:`Community`,liveFeed:`Live Style Feed`,postOOTD:`Post your OOTD`,trending:`Trending 2025`,celebMatch:`Celebrity Skin Match`,styleScore:`Style Score`,compareSkin:`Compare your skin tone with top celebrities`,tools:`Smart Tools`,calendar:`Style Calendar`,wardrobe:`My Wardrobe`,loadingScan:`Scanning photo...`,loadingQuality:`Checking quality`,loadingFace:`Detecting face...`,loadingFaceSub:`Face detection running`,loadingSkin:`Analyzing skin tone...`,loadingSkinSub:`ITA + Lab color space`,loadingRecs:`Building recommendations...`,loadingRecsSub:`25+ fashion rules`,loadingDone:`Almost done...`,loadingDoneSub:`Preparing your style guide`,goodDay:`Good day,`,welcomeHey:`Hey {name} 👋`,welcomeNew:`Welcome to StyleGuru AI ✨`,discoverPerfect:`Discover your perfect style with AI`,analyzeBtn:`✨ Analyze Your Style`,profilesCreated:`style profiles created`,welcomeGuru:`👋 Welcome to StyleGuru AI!`,step1:`Tap "Analyze Your Style" and upload a selfie`,step2:`AI detects your skin tone in seconds`,step3:`Get your personal color palette + outfit ideas`,getStarted:`Get Started →`,styleTipDay:`💡 Style Tip of the Day`,rateMyFit:`📸 Rate My Fit`,rateMyFitSub:`Wear your Outfit & get your daily Style Score 🔥`,scanFit:`Scan Fit`,completeLook:`Complete the Look`,yourSkinTone:`Your Skin Tone`,outfitColor:`Outfit Color`,betterAlternatives:`Better Alternatives — Shop Now`,avoidThese:`Avoid These`,dressColors:`Dress Colors`,topColors:`Top Colors`,kurtiColors:`Kurti Colors`,lehengaColors:`Lehenga Colors`,bottomColors:`Bottom Colors`,sareeSuits:`Saree & Suits`,whatToWear:`What to Wear When`,styleTips:`Style Tips`,ethnicWear:`Ethnic Wear`,outfitCombos:`Outfit Combos`,settings:`Settings`,analyses:`Analyses`,savedColors:`Saved Colors`,proMember:`Pro Member`,freePlan:`Free Plan`,upgrade:`Upgrade`,languageLabel:`Language`,appLanguage:`App language`,logout:`Logout`,stats:`Stats`,toolsHeader:`Tools & Utilities`,aiStyleBot:`AI StyleBot`,styleBotDesc:`Chat & advice`,outfitChecker:`Outfit Checker`,outfitCheckerDesc:`Rate my fit`,aiCalendar:`AI Calendar`,calendarDesc:`Weekly Drops`,colorScanner:`Color Scanner`,scannerDesc:`Scan real clothes using camera`,contrastChecker:`Color Contrast Checker`,contrastDesc:`Check if 2 colors look good together`,trendingNow:`Trending Now`,backTools:`Back to Tools`,shopOn:`Shop on:`,community:`Community`,couldNotLoadFeed:`Could not load community feed. Try again later.`,completeAnalysisFirst:`Please complete a color analysis first!`,timeAgoUnknown:`Unknown`,timeAgoYear:`y`,timeAgoMonth:`mo`,timeAgoDay:`d`,timeAgoHour:`h`,timeAgoMinute:`m`,timeAgoSecond:`s`,monday:`Monday`,tuesday:`Tuesday`,wednesday:`Wednesday`,thursday:`Thursday`,friday:`Friday`,saturday:`Saturday`,sunday:`Sunday`,officeFormal:`Office/Formal`,casualTech:`Casual Tech`,midWeekBrunch:`Mid-week Brunch`,clientMeeting:`Client Meeting`,partyNight:`Party Night`,weekendTrip:`Weekend Trip`,dateDine:`Date/Dine`,sunny:`Sunny`,chilly:`Chilly`,warm:`Warm`,cloudy:`Cloudy`,breezy:`Breezy`,pleasant:`Pleasant`,smartWeeklyDrops:`Smart Weekly Drops`,back:`Back`,findOnMarket:`Find on Market`,smartLogicNote:`Smart logic ensures colors contrast perfectly with your unique skin tone.`,premiumTop:`Premium Top`,recommendedPant:`Recommended Pant`,dropSuffix:`'s Drop`,sampleText:`Sample Text Preview`,contrastRatio:`Contrast Ratio`,greatCombo:`Great combo!`,okayForLarge:`Okay for large text`,poorContrast:`Poor contrast`,color1:`Color 1`,color2:`Color 2`,yourHistory:`Your Style History`,noHistory:`No History Yet`,noHistoryDesc:`Your analyzed styles will appear here.`,loadingHistory:`Loading your style journey...`,loadingDetails:`Fetching details...`,backToHistory:`← Back to History`,failedHistory:`Failed to load history.`,failedDetails:`Failed to load details.`,bestShirtColors:`Best Shirt Colors`,outfitIdeas:`Outfit Ideas`,botTitle:`StyleGuru Bot`,botSub:`Your AI fashion assistant`,botPlaceholder:`Type your style question...`,botInitial:`Hey! 👋 I'm your StyleGuru assistant.
+
+Ask me about outfits, colors, accessories, or type "help" to see what I can do!`,botHelp:`🤖 I can help with:
+
+👔 Outfit suggestions for any occasion
+🎨 Color advice based on your skin tone
+💇 Hair color recommendations
+✨ Accessory matching tips
+☀️ Season-specific styling
+💰 Budget-friendly shopping
+📷 How to use the color scanner
+
+Just type your question!`,botDefault:`🤔 I'm not sure about that one! Try asking about:
+
+- Wedding outfits
+- Office style
+- Date night looks
+- Best colors for you
+- Accessories
+- Budget shopping
+
+Or type "help" to see all options!`,botReplyGreeting:`Hey! 👋 I'm your StyleGuru AI assistant. Ask me about colors, outfits, or styling tips! What do you need help with?`,botReplyWedding:`💍 For a wedding:
+
+👨 Men: Go for a sherwani in gold, maroon, or royal blue. Pair with mojari shoes and a brooch.
+
+👩 Women: A silk saree in jewel tones (emerald, ruby red, royal purple) with gold jewellery is classic.
+
+💡 Tip: Match your outfit to the wedding's color theme for photos!`,botReplyOffice:`💼 Office Style Guide:
+
+👨 Men: Solid color shirt (navy, white, light blue) + dark trousers. Avoid loud patterns.
+
+👩 Women: A well-fitted kurti with straight pants, or a blazer with trousers.
+
+💡 Tip: Your skin tone's neutral colors work best for formal settings!`,botReplyDate:`❤️ Date Night Tips:
+
+👨 Men: Dark jeans + solid polo or henley in your best color. Brown loafers.
+
+👩 Women: A dress or coord set in your power color. Minimal jewelry.
+
+💡 Tip: Wear the color that scores highest in your Virtual Try-On!`,botReplyParty:`🎉 Party Outfit:
+
+👨 Men: Black jeans + bold colored shirt or oversized graphic tee. Chunky sneakers.
+
+👩 Women: Statement dress or coord set. Bold lipstick + statement earrings.
+
+💡 Tip: This is when you go BOLD with your best colors!`,botReplyCasual:`😎 Casual Style:
+
+Keep it simple but intentional:
+- Oversized tee + joggers/jeans
+- Your best color polo + chinos
+- Coord set for an effortless put-together look
+
+💡 Tip: Even casual outfits look 10x better in your skin tone's colors!`,botReplySummer:`☀️ Summer Dressing:
+
+- Light cotton & linen fabrics
+- Pastel and light colors reflect heat
+- Avoid dark colors (absorb heat)
+- Loose fits for air circulation
+
+💡 Best summer colors for most Indian skin tones: sky blue, mint, peach, white!`,botReplyWinter:`❄️ Winter Style:
+
+- Layer up: tee → hoodie → jacket
+- Dark colors absorb warmth (navy, burgundy, forest green)
+- Accessorize: muffler, beanie, gloves
+- Invest in a good quality jacket
+
+💡 Rich jewel tones look amazing in winter light!`,botReplyMonsoon:`🌧️ Monsoon Style:
+
+- Quick-dry fabrics (avoid cotton — takes forever to dry)
+- Dark colors hide splash marks
+- Waterproof footwear
+- Carry a compact umbrella
+
+💡 Navy, charcoal, and dark green are best for rainy days!`,botReplySkinTone:`🎨 To find your best colors:
+
+1. Upload a selfie on the Analyze page
+2. AI detects your exact skin tone, undertone, and season
+3. Get 10+ personalized colors + outfits!
+
+💡 Tap the "Analyze" tab to start — it takes just 10 seconds!`,botReplyHair:`💇 Hair Color Tips by Skin Tone:
+
+🟡 Warm undertone: Caramel, honey, copper highlights
+🔵 Cool undertone: Ash brown, burgundy, plum
+🟢 Neutral: You can pull off almost anything!
+
+💡 Indian skin tones look amazing with subtle highlights over full color!`,botReplyAccessories:`✨ Accessory Guide:
+
+🟡 Warm skin: Gold jewelry, brown leather, amber sunglasses
+🔵 Cool skin: Silver jewelry, black leather, grey sunglasses
+🟠 Medium/olive: Both gold and silver work!
+
+💡 Rule of thumb: Warm undertone = gold, Cool undertone = silver!`,botReplyBudget:`💰 Budget Shopping Tips:
+
+- Meesho: Best for under ₹500 finds
+- Amazon: Good deals with ₹500-1000 range
+- Myntra: Sales have great steals
+- Flipkart: Budget + quality combo
+
+💡 Use the budget filter in your results — tap ₹500/₹1000/₹2000!`,botReplyThanks:`🙏 You're welcome! Happy to help with your style journey.
+
+Remember: Confidence is the best accessory! 💪
+
+Anything else you want to know?`,landingHeroTitle:`Smart Fashion`,landingHeroSub:`Advisor`,landingTagline:`Get outfit recommendations based on your skin tone using AI.
+Upload a selfie and discover your {perfectColors}.`,perfectColors:`perfect colors`,tryNowFree:`Try Now — It's Free`,loginArrow:`Login →`,noCreditCard:`No credit card`,instantResults:`Instant results`,fullyFree:`100% free`,madeForIndia:`Made for India`,happyUsers:`Happy Users`,accuracy:`Accuracy`,skinToneCategories:`Skin Tones`,whyToneFit:`Why StyleGuru AI?`,featureSkinTitle:`Skin Tone Detection`,featureSkinDesc:`AI-powered analysis using advanced CIELAB color science.`,featureOutfitTitle:`Outfit Recommendations`,featureOutfitDesc:`Personalized color palettes for shirts, pants & accessories.`,featureAdviceTitle:`Fashion Advice`,featureAdviceDesc:`Style tips, occasion advice & ethnic wear suggestions.`,featureEaseTitle:`Easy to Use`,featureEaseDesc:`Upload a selfie — get instant results in seconds.`,howItWorks:`How It Works`,howItWorksSubTitle:`3 Simple Steps to Your {perfectStyle}`,perfectStyle:`Perfect Style`,step1Title:`Upload Your Selfie`,step1Desc:`Take a clear selfie in natural light. Our AI works best with a front-facing photo without sunglasses.`,step2Title:`AI Analyzes Skin Tone`,step2Desc:`Our advanced CIELAB color science detects your exact skin tone category and undertone in seconds.`,step3Title:`Get Personalized Results`,step3Desc:`Receive color palettes, outfit combos, shopping links, and style tips tailored specifically for you.`,whatYouGet:`What You Get`,startJourneyToday:`Start your fashion journey today`,joinThousands:`Join thousands discovering their perfect style with AI.`,getStartedFree:`Get Started — Free ✨`,whatUsersSay:`What Users {areSaying}`,areSaying:`Are Saying`,faqTitle:`Frequently Asked {questions}`,questions:`Questions`,login:`Login`,register:`Register`,signingIn:`Signing in...`,googleLogin:`Continue with Google`,orEmail:`OR EMAIL`,fullName:`Full Name`,emailLabel:`Email`,passwordLabel:`Password`,processing:`Processing...`,loginBtn:`Login`,registerBtn:`Register`,skipGuest:`Skip & Explore as Guest →`,enterDetails:`Please enter both email and password.`,enterName:`Please enter your full name.`,proTitle:`TONEFIT PRO`,proSub:`Unlock the ultimate AI stylist`,perMonth:`/month`,featureCalendarTitle:`Ultimate Outfit Calendar`,featureCalendarDesc:`7-day AI outfit generator based on weather`,featureBotTitle:`Unlimited AI StyleBot`,featureBotDesc:`Chat with your personal AI stylist endlessly`,featureFeedTitle:`Priority Feed OOTD`,featureFeedDesc:`Boost your social feed posts to the top`,featureAdsTitle:`Ad-Free Experience`,featureAdsDesc:`Zero interruptions`,upgradeNow:`Upgrade Now ✨`,processingPayment:`Processing Payment...`,secureRazorpay:`Secure payment powered by Razorpay.
+This is currently running in TEST MODE.`,myWardrobe:`My Wardrobe`,savedColors:`Saved Colors`,savedOutfits:`Saved Outfits`,outfits:`Outfits`,colors:`Colors`,history:`History`,noSavedColors:`No saved colors yet`,tapToSaveColor:`Tap 🤍 on any color to save it`,clearAllColors:`Clear All Colors`,wardrobeLimitNote:`Login to save and view your outfits`,wardrobeFull:`Wardrobe is full ({current}/{limit}). Delete older outfits to save new ones.`,noOutfitsSaved:`No outfits saved yet`,analyzeToSave:`Analyze your style and save outfits you love`,removeFromWardrobe:`Remove from Wardrobe`,deleting:`Deleting...`,outfitRemoved:`Outfit removed from wardrobe`,deleteFailed:`Delete failed — please try again`,expertWeatherTip:`Expert Weather Tip`,bestFabricsToday:`Best fabrics today:`,weatherStyleTip:`Weather Style Tip`,enterCity:`Enter your city (e.g. Delhi, Mumbai)`,set:`Set`,dailyDropReady:`Your Daily Drop is Ready!`,dailyDropSub:`We prepared today's perfect outfit based on the weather and your {skinTone} skin tone.`,unlockOutfit:`Unlock Outfit 🔓`,skipToday:`Skip for today`,unlockingWardrobe:`Unlocking your wardrobe...`,"Shah Rukh Khan":`Shah Rukh Khan`,"Ranbir Kapoor":`Ranbir Kapoor`,"Deepika Padukone":`Deepika Padukone`,"Hrithik Roshan":`Hrithik Roshan`,"Alia Bhatt":`Alia Bhatt`,"Salman Khan":`Salman Khan`,footerRights:`© 2025 StyleGuru AI. All rights reserved.`,footerAffiliate:`StyleGuru AI is a participant in the Amazon Associates Programme, an affiliate advertising programme designed to provide a means for sites to earn advertising fees by advertising and linking to amazon.in.`,navHome:`Home`,navAbout:`About`,navPrivacy:`Privacy Policy`,navContact:`Contact`,navTerms:`Terms`,navBlog:`Blog`,test1Review:`Finally an app that understands Indian skin tones! The color recommendations are spot on. I wore the suggested teal kurta to a wedding and got so many compliments.`,test2Review:`The outfit checker feature is amazing. I uploaded my shirt and it told me exactly which pants would look good. Saved me from a fashion disaster!`,test3Review:`I never knew my undertone was cool until StyleGuru AI told me. Now I understand why navy and purple always looked better on me than orange.`,test4Review:`As someone with dark skin, I always struggled to find colors that suited me. This app recommended cobalt blue and white — and wow, the difference is incredible!`,test5Review:`The lehenga color recommendations for my sister's wedding were perfect. I went with the suggested deep burgundy and everyone loved it.`,test6Review:`The body type tips combined with skin tone recommendations are super helpful. I'm slim and the app suggested horizontal stripes — looks great on me!`,faq1Q:`What is StyleGuru AI?`,faq1A:`StyleGuru AI is a free AI-powered fashion advisor that analyzes your skin tone from a selfie and recommends the best outfit colors, clothing combinations, and style tips personalized for you.`,faq2Q:`How does skin tone analysis work?`,faq2A:`Our AI uses advanced CIELAB color science and ITA (Individual Typology Angle) method to detect your skin tone category (fair, light, medium, olive, brown, dark) and undertone (warm, cool, neutral) from your photo.`,faq3Q:`Is my photo stored or shared?`,faq3A:`No. Your uploaded photos are processed in real-time for analysis only and are immediately deleted. We never store or share your images.`,faq4Q:`Which skin tones does StyleGuru AI support?`,faq4A:`StyleGuru AI supports all 6 major skin tone categories: Fair, Light, Medium/Wheatish, Olive/Dusky, Brown, and Dark. It works for all Indian and global skin tones.`,faq5Q:`Is StyleGuru AI free to use?`,faq5A:`Yes, StyleGuru AI is completely free. You can analyze your skin tone, get outfit recommendations, and shop for clothes — all at no cost.`,faq6Q:`Can I use StyleGuru AI without uploading a photo?`,faq6A:`Yes! You can use our Skin Tone Quiz feature to get recommendations without uploading a photo. Simply answer 2 questions about your skin tone and undertone.`,faq7Q:`Does it work for both men and women?`,faq7A:`Yes. StyleGuru AI provides separate recommendations for men (t-shirts, cargo pants, kurtas) and women (dresses, coord sets, kurtis, lehengas, sarees, makeup).`,faq8Q:`How accurate is the AI analysis?`,faq8A:`Our AI achieves 95%+ accuracy in controlled conditions. For best results, take a selfie in natural light, face the camera directly, and avoid sunglasses or heavy filters.`,blog1Title:`Best Colors for Your Skin Tone`,blog1Excerpt:`Discover which colors complement your skin tone — from fair to dark, find your perfect palette.`,blog2Title:`How to Choose the Perfect Outfit`,blog2Excerpt:`Master outfit selection based on occasion, color coordination, and seasonal trends.`,blog3Title:`How AI is Changing Fashion`,blog3Excerpt:`Explore how AI is revolutionizing fashion with personalized styling and smart recommendations.`,readMore:`Read More →`,viewAllArticles:`View All Articles →`,navHome:`Home`,navAnalyze:`Analyze`,navWardrobe:`Wardrobe`,navTools:`Tools`,navProfile:`Profile`,navNew:`← New`,guestName:`there`,validUntilLabel:`Valid until `,notifications:`Notifications`,notifEnabled:`Enabled ✓`,notifBlocked:`Blocked in browser`,notifWeekly:`Weekly style tips`,disable:`Disable`,enable:`Enable`,unblock:`Unblock →`},hinglish:{login:`Login`,register:`Register`,fullName:`Full Name`,email:`Email`,password:`Password`,namePlaceholder:`Apna naam likho`,loginBtn:`Login Karo`,registerBtn:`Account Banao`,googleLogin:`Google se Login Karo`,orEmail:`ya email se`,noAccount:`Yeh email registered nahi hai.`,wrongPassword:`Password galat hai.`,emailInUse:`Yeh email already registered hai.`,weakPassword:`Password kam se kam 6 characters ka hona chahiye.`,somethingWrong:`Kuch galat hua. Dobara try karo.`,googleFailed:`Google login mein problem aayi. Dobara try karo.`,tagline:`AI-Powered Fashion for Indian Skin Tones`,footer:`Made with 💜 India ke liye • Photos store nahi hoti`,analyze:`Analyze`,outfitCheck:`Outfit Check`,history:`History`,settings:`Settings`,logout:`Logout`,darkMode:`Dark Mode`,lightMode:`Light Mode`,switchTheme:`Theme switch karo`,systemTheme:`System theme ke hisaab se bhi automatically switch hoga!`,account:`Account`,tryAgain:`Dobara Try Karo`,aiPowered:`AI-Powered • 95%+ Accuracy`,discoverStyle:`Apna Perfect`,perfectStyle:`Style`,styleWord:`Discover Karo`,uploadSubtitle:`Selfie upload karo — skin tone ke hisaab se personalized fashion recommendations pao`,normal:`Normal`,seasonal:`Seasonal`,male:`Male`,female:`Female`,chooseSeason:`Season choose karo:`,dropSelfie:`Selfie Drop Karo Yahan`,orBrowse:`ya click karke browse karo`,choosePhoto:`Photo Choose Karo`,photoNote:`JPG, PNG, WebP • Max 10MB • Photo store nahi hoti`,analyzingPhoto:`Tumhari photo analyze ho rahi hai...`,naturalLight:`Natural Light`,naturalLightDesc:`Window ke paas selfie lo — best results`,faceForward:`Seedha Dekho`,faceForwardDesc:`Camera ko directly face karo`,clearFace:`Chehra Clear Ho`,clearFaceDesc:`Sunglasses ya mask mat pehno`,skinTones:`Hum in sabhi skin tones ke liye kaam karte hain 🇮🇳`,maleMode:`Male mode: Shirts, Pants, Ethnic wear suggestions milenge!`,femaleMode:`Female mode: Dresses, Sarees, Suits, Makeup suggestions milenge!`,newPhoto:`← Nayi Photo`,analyzeNewPhoto:`Nayi Photo Analyze Karo`,eachSelfie:`Har selfie mein better results aate hain!`,styleSummary:`Style Summary`,highConfidence:`✓ High Confidence`,mediumConfidence:`~ Medium Confidence`,detectedSkinColor:`Detected Skin Color`,photoTips:`💡 Photo Tips:`,colorsToAvoid:`Yeh Colors Avoid Karo`,completeOutfitIdeas:`Complete Outfit Ideas`,styleTips:`Style Tips Sirf Tumhare Liye`,whatToWear:`Kya Pehno Kab?`,ethnicWear:`Ethnic Wear`,sareeEthnic:`Saree & Ethnic Wear`,accessories:`Accessories & Jewellery`,accessoriesFor:`Tumhare Liye Accessories`,makeupSuggestions:`Makeup Suggestions`,sareeSuits:`Saree & Suits Suggestions`,bestShirtColors:`Best Shirt Colors`,bestPantColors:`Best Pant Colors`,bestDressColors:`Best Dress Colors`,bestTopColors:`Best Top Colors`,bestKurtiColors:`Best Kurti Colors`,bestLehengaColors:`Best Lehenga Colors`,bestBottomColors:`Best Bottom Colors`,seasonBestColors:`Season Best Colors`,seasonOutfitMale:`Season Outfit Ideas — Male`,seasonOutfitFemale:`Season Outfit Ideas — Female`,bestFabrics:`Best Fabrics`,avoidFabrics:`Avoid Fabrics`,seasonStyleTips:`Season Style Tips:`,shopThisColor:`Yeh Color Shop Karo`,yourHistory:`Tumhari History`,noHistory:`Abhi Koi History Nahi`,noHistoryDesc:`Pehli selfie analyze karo — phir history yahan dikhegi!`,loadingHistory:`History load ho rahi hai...`,loadingDetails:`Details load ho rahi hain...`,backToHistory:`← History pe Wapas Jao`,failedHistory:`History load nahi hui. Dobara try karo.`,failedDetails:`Details load nahi hui.`,outfitTitle:`Kya Yeh Outfit`,outfitSubtitle:`Tumpe Acha Lagega?`,outfitDesc:`Apni selfie + kapde ki photo upload karo — AI check karega compatibility!`,yourSelfie:`Apni Selfie`,clearFacePhoto:`Clear face wali photo`,outfitPhoto:`Kapde Ki Photo`,outfitCheckDesc:`Jo outfit check karni hai`,checkCompatibility:`Check Karo — Acha Lagega?`,aiChecking:`AI Check Kar Raha Hai...`,checkAgain:`Dobara Check Karo`,uploadBoth:`Dono photos upload karo!`,selfieTips:`Selfie Tips:`,outfitTips:`Outfit Tips:`,yourSkinTone:`Tumhari Skin Tone`,outfitColor:`Outfit Color`,betterAlternatives:`Better Alternatives`,clearFacePhotoTip:`Clear face wali photo`,goodLighting:`Good lighting mein`,noSunglasses:`Sunglasses mat pehno`,plainBackground:`Plain background pe photo lo`,fullOutfitVisible:`Poora kapda dikhe`,clearBrightPhoto:`Clear aur bright photo`,language:`Language`,languageLabel:`App Language`,community:`Community`,liveFeed:`Live Style Feed`,postOOTD:`Apna OOTD post karo`,trending:`Trending 2025`,celebMatch:`Celebrity Skin Match`,styleScore:`Style Score`,compareSkin:`Apna skin tone top celebrities ke saath compare karein`,tools:`Smart Tools`,calendar:`Style Calendar`,wardrobe:`Mera Wardrobe`,loadingScan:`Photo scan ho rahi hai...`,loadingQuality:`Quality check ho rahi hai`,loadingFace:`Chehra pehchana raha hai...`,loadingFaceSub:`Face detection on hai`,loadingSkin:`Skin tone analysis...`,loadingSkinSub:`ITA + Lab color space`,loadingRecs:`Suggestions ready ho rahe hain...`,loadingRecsSub:`25+ fashion rules`,loadingDone:`Bas thoda aur...`,loadingDoneSub:`Style guide ready hai`,goodDay:`Namaste,`,welcomeHey:`Namaste {name} 👋`,welcomeNew:`StyleGuru AI mein swagat hai ✨`,discoverPerfect:`AI ke saath apna perfect style discover karo`,analyzeBtn:`✨ Apna Style Check Karo`,profilesCreated:`style profiles ban gaye`,welcomeGuru:`👋 StyleGuru AI mein swagat hai!`,step1:`"Apna Style Check Karo" pe tap karo aur selfie upload karo`,step2:`AI seconds mein tumhari skin tone pehchan lega`,step3:`Apna personal color palette + outfit ideas pao`,getStarted:`Shuru Karo →`,styleTipDay:`💡 Aaj ka Style Tip`,rateMyFit:`📸 Mere Fit ko Rate Karo`,rateMyFitSub:`Apna outfit pehno aur daily style score pao 🔥`,scanFit:`Fit Scan Karo`,completeLook:`Look ko complete karo`,yourSkinTone:`Tumhari Skin Tone`,outfitColor:`Outfit ka Color`,betterAlternatives:`Better alternatives — abhi buy karo`,avoidThese:`Inse bacho`,dressColors:`Dress Colors`,topColors:`Top Colors`,kurtiColors:`Kurti Colors`,lehengaColors:`Lehenga Colors`,bottomColors:`Bottom Colors`,sareeSuits:`Saree & Suits`,whatToWear:`Kab Kya Pehno`,styleTips:`Style Tips`,ethnicWear:`Ethnic Wear`,outfitCombos:`Outfit Combos`,analyses:`Analyses`,savedColors:`Saved Colors`,proMember:`PRO Member`,freePlan:`Free Plan`,upgrade:`Upgrade Karo`,languageLabel:`Language`,appLanguage:`App ki bhasha`,logout:`Logout`,stats:`Stats`,toolsHeader:`Tools & Utilities`,aiStyleBot:`AI StyleBot`,styleBotDesc:`Chat & Advice`,outfitChecker:`Outfit Checker`,outfitCheckerDesc:`Style Score jaano`,aiCalendar:`AI Calendar`,calendarDesc:`Weekly Drops`,colorScanner:`Color Scanner`,scannerDesc:`Camera se kapde scan karo`,contrastChecker:`Color Contrast Checker`,contrastDesc:`Colors ka match check karo`,trendingNow:`Trending`,backTools:`Peeche jao`,shopOn:`Yahan se buy karo:`,couldNotLoadFeed:`Community feed load nahi ho saki. Baad mein try karo.`,completeAnalysisFirst:`Pehle color analysis complete karo!`,timeAgoUnknown:`unknown`,timeAgoYear:`saal`,timeAgoMonth:`mahina`,timeAgoDay:`din`,timeAgoHour:`ghanta`,timeAgoMinute:`minute`,timeAgoSecond:`second`,monday:`Monday`,tuesday:`Tuesday`,wednesday:`Wednesday`,thursday:`Thursday`,friday:`Friday`,saturday:`Saturday`,sunday:`Sunday`,officeFormal:`Office/Formal`,casualTech:`Casual Tech`,midWeekBrunch:`Mid-week Brunch`,clientMeeting:`Client Meeting`,partyNight:`Party Night`,weekendTrip:`Weekend Trip`,dateDine:`Date/Dine`,sunny:`Sunny`,chilly:`Chilly`,warm:`Warm`,cloudy:`Cloudy`,breezy:`Breezy`,pleasant:`Pleasant`,smartWeeklyDrops:`Smart Weekly Drops`,back:`Back`,findOnMarket:`Market mein dhundo`,smartLogicNote:`Smart logic se colors tumhari skin tone se perfectly match honge.`,premiumTop:`Premium Top`,recommendedPant:`Recommended Pant`,dropSuffix:` ka Outfit`,sampleText:`Sample Text Preview`,contrastRatio:`Contrast Ratio`,greatCombo:`Great Combo!`,okayForLarge:`Bade text ke liye theek hai`,poorContrast:`Poor Contrast`,color1:`Color 1`,color2:`Color 2`,yourHistory:`Tumhari Style History`,noHistory:`No history yet`,noHistoryDesc:`Analyze kiye gaye styles yahan dikhenge.`,loadingHistory:`Tumhari style journey load ho rahi hai...`,loadingDetails:`Details load ho rahi hain...`,backToHistory:`← History pe wapas jao`,failedHistory:`History load nahi hui.`,failedDetails:`Details load nahi hui.`,outfitIdeas:`Outfit Ideas`,botTitle:`StyleGuru Bot`,botSub:`Tumhara AI Fashion Assistant`,botPlaceholder:`Apna fashion sawal poocho...`,botInitial:`Namaste! 👋 Main tumhara StyleGuru assistant hoon.
+
+Mujhse outfits, colors, accessories ke baare mein poocho ya kya kar sakta hoon dekhne ke liye "help" type karo!`,botHelp:`🤖 Main in cheezon mein help kar sakta hoon:
+
+👔 Kisi bhi occasion ke liye outfit suggestions
+🎨 Tumhari skin tone ke hisaab se colors advice
+💇 Hair color suggestions
+✨ Accessory matching tips
+☀️ Mausam ke hisaab se styling
+💰 Budget-friendly shopping
+📷 Color scanner ka use kaise karein
+
+Bas apna sawal type karo!`,botDefault:`🤔 Mujhe iske baare mein pakka nahi pata! Please in cheezon ke baare mein poocho:
+
+- Shaadi ke outfits
+- Office style
+- Date night looks
+- Tumhare liye best colors
+- Accessories
+- Budget shopping
+
+Ya saare options dekhne ke liye "help" type karo!`,botReplyGreeting:`Namaste! 👋 Main tumhara StyleGuru AI assistant hoon. Mujhse colors, outfits ya styling tips ke baare mein poocho! Main tumhari kya help kar sakta hoon?`,botReplyWedding:`💍 Shaadi ke liye:
+
+👨 Male: Gold, Maroon ya Royal Blue sherwani choose karo. Mojari aur brooch ke saath pehno.
+
+👩 Female: Jewel tones (Emerald, Ruby Red, Royal Purple) mein silk saree gold jewellery ke saath classic hai.
+
+💡 Tip: Photo ke liye apne outfit ko wedding theme se match karo!`,botReplyOffice:`💼 Office Style Guide:
+
+👨 Male: Solid color shirts (Navy, White, Light Blue) + Dark trousers. Loud patterns avoid karo.
+
+👩 Female: Well-fitted kurti with straight pants, ya blazer with trousers.
+
+💡 Tip: Tumhari skin tone ke neutral colors formal settings ke liye best hain!`,botReplyDate:`❤️ Date Night Tips:
+
+👨 Male: Dark jeans + tumhare best color ki solid polo ya henley. Brown loafers.
+
+👩 Female: Dress ya co-ord set tumhare power color mein. Minimal jewellery.
+
+💡 Tip: Wo color pehno jo tumhare virtual try-on mein highest score karta hai!`,botReplyParty:`🎉 Party Outfit:
+
+👨 Male: Black jeans + bold color shirt ya oversized graphic tee. Chunky sneakers.
+
+👩 Female: Statement dress ya co-ord set. Bold lipstick + statement earrings.
+
+💡 Tip: Yeh time hai best colors ke saath bold hone ka!`,botReplyCasual:`😎 Casual Style:
+
+Keep it simple but effective:
+- Oversized tee + joggers/jeans
+- Tumhara best color polo + chinos
+- Co-ord set for a stylish look
+
+💡 Tip: Casual outfits bhi tumhari skin tone ke colors mein 10x better lagte hain!`,botReplySummer:`☀️ Summer ke liye:
+
+- Light cotton aur linen fabrics
+- Pastels aur light colors heat kam absorb karte hain
+- Dark colors (absorb heat) avoid karo
+- Airy fits choose karo
+
+💡 Indian skin tones ke liye best summer colors: Sky blue, Mint, Peach, White!`,botReplyWinter:`❄️ Winter ke liye:
+
+- Layering karo: Tee → Hoodie → Jacket
+- Deep colors heat retain karte hain (Navy, Burgundy, Forest Green)
+- Accessorize: Mufflers, Beanies, Gloves
+- Good quality jacket choose karo
+
+💡 Winter light mein jewel tones amazing lagte hain!`,botReplyMonsoon:`🌧️ Monsoon Style:
+
+- Quick-dry fabrics (Cotton avoid karo — takes time to dry)
+- Dark colors splashes ke marks hide karte hain
+- Waterproof footwear use karo
+- Compact umbrella saath rakho
+
+💡 Navy, Charcoal aur Dark Green rainy days ke liye best hain!`,botReplySkinTone:`🎨 Apne best colors paane ke liye:
+
+1. Analyze page pe selfie upload karo
+2. AI tumhari exact skin tone, undertone aur season detect karta hai
+3. 10+ personalized colors + outfit suggestions pao!
+
+💡 Shuru karne ke liye "Analyze" tab pe tap karo — it only takes 10 seconds!`,botReplyHair:`💇 Skin tone ke hisaab se hair colors:
+
+🟡 Warm Undertone: Caramel, Honey, Copper highlights
+🔵 Cool Undertone: Ash brown, Burgundy, Plum
+🟢 Neutral: Tum almost kuch bhi try kar sakte ho!
+
+💡 Indian skin tones subtle highlights ke saath amazing lagte hain instead of full color!`,botReplyAccessories:`✨ Accessory Guide:
+
+🟡 Warm Skin: Gold jewellery, Brown leather, Amber sunglasses
+🔵 Cool Skin: Silver jewellery, Black leather, Grey sunglasses
+🟠 Medium/Olive: Gold aur Silver dono chalte hain!
+
+💡 Rule: Warm Undertone = Gold, Cool Undertone = Silver!`,botReplyBudget:`💰 Budget Shopping Tips:
+
+- Meesho: Best for under ₹500 options
+- Amazon: Good deals in ₹500-1000 range
+- Myntra: Best branded options in sale
+- Flipkart: Combo of budget + quality
+
+💡 Apne results mein budget filter use karo — tap on ₹500/₹1000/₹2000!`,botReplyThanks:`🙏 You're welcome! Tumhari style journey mein help karke khushi hui.
+
+Yaad rakhna: Confidence sabse badhiya accessory hai! 💪
+
+Kya tum kuch aur jaana chahte ho?`,landingHeroTitle:`Smart Fashion`,landingHeroSub:`Advisor`,landingTagline:`AI ki help se apni skin tone ke hisaab se outfit recommendations pao.
+Selfie upload karo aur discover karo apne {perfectColors}.`,perfectColors:`Perfect Colors`,tryNowFree:`Abhi Try Karo — It's Free`,loginArrow:`Login Karo →`,noCreditCard:`No credit card needed`,instantResults:`Instant results`,fullyFree:`100% Free`,madeForIndia:`India ke liye bana hai`,happyUsers:`Happy Users`,accuracy:`Accuracy`,skinToneCategories:`Skin Tones`,whyToneFit:`StyleGuru AI kyun?`,featureSkinTitle:`Skin Tone Detection`,featureSkinDesc:`Advanced CIELAB color science use karke AI-powered analysis.`,featureOutfitTitle:`Outfit Recommendations`,featureOutfitDesc:`Shirts, pants aur accessories ke liye personalized color palettes.`,featureAdviceTitle:`Fashion Advice`,featureAdviceDesc:`Style tips, occasion advice aur ethnic wear suggestions.`,featureEaseTitle:`Easy to Use`,featureEaseDesc:`Selfie upload karo — seconds mein results pao.`,howItWorks:`Kaise kaam karta hai`,howItWorksSubTitle:`3 Simple Steps tumhare {perfectStyle} ke liye`,perfectStyle:`Perfect Style`,step1Title:`Selfie Upload Karo`,step1Desc:`Natural light mein clear selfie lo. Hamara AI front-facing photo ke saath best kaam karta hai.`,step2Title:`AI Skin Tone Analyze Karta Hai`,step2Desc:`Hamari advanced CIELAB color science seconds mein tumhari skin tone detect kar leti hai.`,step3Title:`Personalized Results Pao`,step3Desc:`Tumhare liye tailored color palettes, outfit combos aur style tips receive karo.`,whatYouGet:`Tumhe kya milta hai`,startJourneyToday:`Aaj hi apni fashion journey shuru karo`,joinThousands:`Thousands ke saath judo jo AI se apna style discover kar rahe hain.`,getStartedFree:`Shuru Karo — Free ✨`,whatUsersSay:`Users {areSaying}`,areSaying:`Kya Keh Rahe Hain`,faqTitle:`Aksar Pooche Jaane Waale {questions}`,questions:`Sawalaat`,signingIn:`Sign in ho raha hai...`,processing:`Process ho raha hai...`,skipGuest:`Skip karo aur Guest bano →`,enterDetails:`Please email aur password dono enter karo.`,enterName:`Please apna poora naam enter karo.`,proTitle:`STYLEGURU PRO`,proSub:`Best AI Stylist Unlock Karo`,perMonth:`/month`,featureCalendarTitle:`Ultimate Outfit Calendar`,featureCalendarDesc:`Weather ke hisaab se 7-day AI outfit generator`,featureBotTitle:`Unlimited AI Style-Bot`,featureBotDesc:`Apne personal AI stylist ke saath unlimited chat`,featureFeedTitle:`Priority Feed OOTD`,featureFeedDesc:`Apne posts ko social feed mein top pe payein`,featureAdsTitle:`Ad-free Experience`,featureAdsDesc:`Bina kisi interruption ke`,upgradeNow:`Abhi Upgrade Karo ✨`,processingPayment:`Payment process ho rahi hai...`,secureRazorpay:`Razorpay secure payment.
+Yeh currently test mode mein hai.`,myWardrobe:`Mera Wardrobe`,savedColors:`Saved Colors`,savedOutfits:`Saved Outfits`,outfits:`Outfits`,colors:`Colors`,history:`History`,noSavedColors:`Abhi koi colors saved nahi hain`,tapToSaveColor:`Kisi bhi color pe 🤍 tap karke save karo`,clearAllColors:`Saare colors hatao`,wardrobeLimitNote:`Login karo apne outfits dekhne aur save karne ke liye`,wardrobeFull:`Wardrobe full hai ({current}/{limit}). Purane outfits delete karo naye save karne ke liye.`,noOutfitsSaved:`Abhi koi outfits saved nahi hain`,analyzeToSave:`Apna style analyze karo aur favourite outfits save karo`,removeFromWardrobe:`Wardrobe se hatao`,deleting:`Delete ho raha hai...`,outfitRemoved:`Outfit wardrobe se hat gaya`,deleteFailed:`Delete fail hua — please try again`,expertWeatherTip:`Expert Weather Tip`,bestFabricsToday:`Aaj ke liye best fabrics:`,weatherStyleTip:`Weather Style Tip`,enterCity:`Apni city enter karo (e.g. Delhi, Mumbai)`,set:`Set karo`,dailyDropReady:`Tumhara Daily Drop Ready Hai!`,dailyDropSub:`Humne mausam aur tumhari {skinTone} skin tone ke hisaab se aaj ka outfit ready kiya hai.`,unlockOutfit:`Outfit Unlock Karo 🔓`,skipToday:`Aaj ke liye skip karo`,unlockingWardrobe:`Wardrobe khul raha hai...`,"Shah Rukh Khan":`Shah Rukh Khan`,"Ranbir Kapoor":`Ranbir Kapoor`,"Deepika Padukone":`Deepika Padukone`,"Hrithik Roshan":`Hrithik Roshan`,"Alia Bhatt":`Alia Bhatt`,"Salman Khan":`Salman Khan`,"Shahid Kapoor":`Shahid Kapoor`,"Amitabh Bachchan":`Amitabh Bachchan`,footerRights:`© 2025 StyleGuru AI. All rights reserved.`,footerAffiliate:`StyleGuru AI Amazon Associates Programme ka part hai, jo advertising fees earn karne ka ek zariya hai.`,navHome:`Home`,navAbout:`About`,navPrivacy:`Privacy Policy`,navContact:`Contact`,navTerms:`Terms`,navBlog:`Blog`,test1Review:`Finally koi aisa app mila jo Indian skin tones ko samajhta hai! Color recommendations ekdum sahi hain.`,test2Review:`Outfit checker feature amazing hai. Maine apni shirt upload ki aur isne perfectly match bata diya.`,test3Review:`Mujhe kabhi nahi pata tha mera undertone cool hai. Ab samajh aaya Navy mujhpe kyu acha lagta hai.`,test4Review:`Dark skin hone ki wajah se colors dhundne mein problem hoti thi. Cobalt blue suggestion was perfect!`,test5Review:`Sister ki shaadi ke liye lehenga suggestions perfect the. Deep burgundy was a hit!`,test6Review:`Body type aur skin tone dono tips bahut helpful hain. Horizontal stripes mujhpe bahut achi lagti hain!`,faq1Q:`StyleGuru AI kya hai?`,faq1A:`StyleGuru AI ek free AI-powered fashion advisor hai jo tumhari selfie analyze karke best outfit colors suggest karta hai.`,faq2Q:`Skin tone analysis kaise kaam karta hai?`,faq2A:`Humara AI advanced CIELAB color science use karke tumhari skin tone aur undertone seconds mein detect kar leta hai.`,faq3Q:`Kya meri photo store hoti hai?`,faq3A:`Nahi. Tumhari photos sirf real-time analysis ke liye use hoti hain aur turant delete kar di jaati hain.`,faq4Q:`Yeh kin skin tones ko support karta hai?`,faq4A:`StyleGuru AI saari 6 major skin tone categories ko support karta hai, specifically Indian skin tones ke liye.`,faq5Q:`Kya yeh use karne ke liye free hai?`,faq5A:`Haan, StyleGuru AI 100% free hai. Tum analysis aur suggestions bina kisi cost ke pa sakte ho.`,faq6Q:`Bina photo ke use kar sakte hain?`,faq6A:`Haan! Tum hamara Skin Tone Quiz use kar sakte ho recommendations ke liye bina photo upload kiye.`,faq7Q:`Kya yeh Men aur Women dono ke liye hai?`,faq7A:`Haan. StyleGuru AI Men aur Women dono ke liye alag aur perfect recommendations deta hai.`,faq8Q:`AI analysis kitna accurate hai?`,faq8A:`Humara AI 95%+ accuracy deta hai. Best results ke liye natural light mein clear selfie lo.`,blog1Title:`Tumhari Skin Tone ke liye Best Colors`,blog1Excerpt:`Janiye kaunse colors tumhari skin tone ko compliment karte hain.`,blog2Title:`Perfect Outfit kaise choose karein`,blog2Excerpt:`Occasion aur color coordination ke hisaab se outfit matching seekhein.`,blog3Title:`AI se badal rahi hai Fashion Duniya`,blog3Excerpt:`Dekhiye kaise AI personalized styling mein revolution laa raha hai.`,readMore:`Read More →`,viewAllArticles:`Saare Articles Dekho →`,navHome:`Home`,navAnalyze:`Analyze`,navWardrobe:`Wardrobe`,navTools:`Tools`,navProfile:`Profile`,navNew:`← Naya`,guestName:`Dost`,validUntilLabel:`Tak valid hai `,notifications:`Notifications`,notifEnabled:`On hai ✓`,notifBlocked:`Browser mein blocked hai`,notifWeekly:`Weekly style tips milenge`,disable:`Off karo`,enable:`On karo`,unblock:`Unblock karo →`},hi:{login:`लॉग इन`,register:`रजिस्टर करें`,fullName:`पूरा नाम`,email:`ईमेल`,password:`पासवर्ड`,namePlaceholder:`अपना नाम दर्ज करें`,loginBtn:`लॉग इन करें`,registerBtn:`खाता बनाएं`,googleLogin:`Google से जारी रखें`,orEmail:`या ईमेल के साथ`,noAccount:`इस ईमेल से कोई खाता नहीं मिला।`,wrongPassword:`गलत पासवर्ड।`,emailInUse:`यह ईमेल पहले से पंजीकृत है।`,weakPassword:`पासवर्ड कम से कम 6 अक्षरों का होना चाहिए।`,somethingWrong:`कुछ गलत हो गया। कृपया पुन: प्रयास करें।`,googleFailed:`Google लॉगिन विफल रहा। कृपया पुन: प्रयास करें।`,tagline:`सभी प्रकार की त्वचा के लिए AI-आधारित फैशन`,footer:`💜 के साथ निर्मित • आपकी तस्वीरें कभी स्टोर नहीं की जातीं`,analyze:`विश्लेषण`,outfitCheck:`आउटफिट चेक`,history:`इतिहास`,settings:`सेटिंग्स`,logout:`लॉग आउट`,darkMode:`डार्क मोड`,lightMode:`लाइट मोड`,switchTheme:`थीम बदलें`,systemTheme:`आपके सिस्टम थीम के अनुसार स्वचालित रूप से बदलता है!`,account:`खाता`,tryAgain:`पुनः प्रयास करें`,aiPowered:`AI-आधारित • 95%+ सटीकता`,discoverStyle:`अपनी`,perfectStyle:`परफेक्ट`,styleWord:`स्टाइल खोजें`,uploadSubtitle:`सेल्फी अपलोड करें — अपनी त्वचा के रंग के अनुसार व्यक्तिगत फैशन सुझाव प्राप्त करें`,normal:`सामान्य`,seasonal:`मौसमी`,male:`पुरुष`,female:`महिला`,chooseSeason:`मौसम चुनें:`,dropSelfie:`सेल्फी यहाँ ड्रॉप करें`,orBrowse:`या ब्राउज़ करने के लिए क्लिक करें`,choosePhoto:`फोटो चुनें`,photoNote:`JPG, PNG, WebP • अधिकतम 10MB • तस्वीरें स्टोर नहीं की जातीं`,analyzingPhoto:`आपकी फोटो का विश्लेषण हो रहा है...`,naturalLight:`प्राकृतिक रोशनी`,naturalLightDesc:`खिड़की के पास सेल्फी लें — सर्वोत्तम परिणाम`,faceForward:`सीधे देखें`,faceForwardDesc:`सीधे कैमरे की ओर देखें`,clearFace:`स्पष्ट चेहरा`,clearFaceDesc:`धूप का चश्मा या मास्क हटा दें`,skinTones:`हम सभी प्रकार की त्वचा का समर्थन करते हैं 🇮🇳`,maleMode:`पुरुष मोड: शर्ट, पैंट और एथनिक वियर सुझाव शामिल!`,femaleMode:`महिला मोड: ड्रेस, साड़ी, सूट और मेकअप सुझाव शामिल!`,newPhoto:`← नई फोटो`,analyzeNewPhoto:`नई फोटो का विश्लेषण करें`,eachSelfie:`हर सेल्फी बेहतर परिणाम देती है!`,styleSummary:`स्टाइल सारांश`,highConfidence:`✓ उच्च विश्वास`,mediumConfidence:`~ मध्यम विश्वास`,detectedSkinColor:`पहचाना गया त्वचा का रंग`,photoTips:`💡 फोटो टिप्स:`,colorsToAvoid:`इन रंगों से बचें`,completeOutfitIdeas:`संपूर्ण पोशाक विचार`,styleTips:`स्टाइल टिप्स सिर्फ आपके लिए`,whatToWear:`क्या पहनें और कब?`,ethnicWear:`एथनिक वियर (पारंपरिक कपड़े)`,sareeEthnic:`साड़ी और एथनिक वियर`,accessories:`एक्सेसरीज़ और ज्वैलरी`,accessoriesFor:`आपके लिए एक्सेसरीज़`,makeupSuggestions:`मेकअप सुझाव`,sareeSuits:`साड़ी और सूट सुझाव`,bestShirtColors:`सर्वश्रेष्ठ शर्ट के रंग`,bestPantColors:`सर्वश्रेष्ठ पैंट के रंग`,bestDressColors:`सर्वश्रेष्ठ ड्रेस के रंग`,bestTopColors:`सर्वश्रेष्ठ टॉप के रंग`,bestKurtiColors:`सर्वश्रेष्ठ कुर्ती के रंग`,bestLehengaColors:`सर्वश्रेष्ठ लहंगे के रंग`,bestBottomColors:`सर्वश्रेष्ठ बॉटम के रंग`,seasonBestColors:`मौसम के सर्वश्रेष्ठ रंग`,seasonOutfitMale:`मौसम के पोशाक विचार — पुरुष`,seasonOutfitFemale:`मौसम के पोशाक विचार — महिला`,bestFabrics:`सर्वश्रेष्ठ कपड़े (फैब्रिक)`,avoidFabrics:`इन कपड़ों से बचें`,seasonStyleTips:`मौसम के स्टाइल टिप्स:`,shopThisColor:`यह रंग खरीदें`,yourHistory:`आपका इतिहास`,noHistory:`अभी कोई इतिहास नहीं है`,noHistoryDesc:`अपनी पहली सेल्फी का विश्लेषण करें — इतिहास यहाँ दिखाई देगा!`,loadingHistory:`इतिहास लोड हो रहा है...`,loadingDetails:`विवरण लोड हो रहा है...`,backToHistory:`← इतिहास पर वापस जाएं`,failedHistory:`इतिहास लोड करने में विफल। कृपया पुन: प्रयास करें।`,failedDetails:`विवरण लोड करने में विफल।`,outfitTitle:`क्या यह पोशाक`,outfitSubtitle:`आप पर अच्छी लगेगी?`,outfitDesc:`अपनी सेल्फी + कपड़े की फोटो अपलोड करें — AI अनुकूलता की जांच करेगा!`,yourSelfie:`आपकी सेल्फी`,clearFacePhoto:`स्पष्ट चेहरे वाली फोटो`,outfitPhoto:`पोशाक की फोटो`,outfitCheckDesc:`वह पोशाक जिसकी आप जांच करना चाहते हैं`,checkCompatibility:`अनुकूलता की जांच करें`,aiChecking:`AI जांच कर रहा है...`,checkAgain:`पुनः जांचें`,uploadBoth:`कृपया दोनों तस्वीरें अपलोड करें!`,selfieTips:`सेल्फी टिप्स:`,outfitTips:`पोशाक टिप्स:`,yourSkinTone:`आपकी त्वचा का रंग`,outfitColor:`पोशाक का रंग`,betterAlternatives:`बेहतर विकल्प`,clearFacePhotoTip:`स्पष्ट चेहरे वाली फोटो`,goodLighting:`अच्छी रोशनी`,noSunglasses:`कोई धूप का चश्मा नहीं`,plainBackground:`सादा बैकग्राउंड`,fullOutfitVisible:`पूरी पोशाक दिखाई दे`,clearBrightPhoto:`स्पष्ट और उज्ज्वल फोटो`,language:`भाषा`,languageLabel:`ऐप की भाषा`,community:`कम्युनिटी`,liveFeed:`लाइव स्टाइल फीड`,postOOTD:`अपना OOTD पोस्ट करें`,trending:`ट्रेंडिंग 2025`,celebMatch:`सेलिब्रिटी स्किन मैच`,styleScore:`स्टाइल स्कोर`,compareSkin:`शीर्ष हस्तियों के साथ अपनी त्वचा के रंग की तुलना करें`,tools:`स्मार्ट टूल्स`,calendar:`स्टाइल कैलेंडर`,wardrobe:`मेरा वार्डरोब`,loadingScan:`फोटो स्कैन हो रही है...`,loadingQuality:`क्वालिटी चेक हो रही है`,loadingFace:`चेहरा पहचाना जा रहा है...`,loadingFaceSub:`फेस डिटेक्शन चालू है`,loadingSkin:`स्किन टोन का विश्लेषण...`,loadingSkinSub:`ITA + Lab कलर स्पेस`,loadingRecs:`सुझाव तैयार हो रहे हैं...`,loadingRecsSub:`25+ फैशन नियम`,loadingDone:`बस थोड़ा और...`,loadingDoneSub:`स्टाइल गाइड तैयार है`,goodDay:`नमस्ते,`,welcomeHey:`नमस्ते {name} 👋`,welcomeNew:`StyleGuru AI में आपका स्वागत है ✨`,discoverPerfect:`AI के साथ अपना परफेक्ट स्टाइल खोजें`,analyzeBtn:`✨ अपना स्टाइल चेक करें`,profilesCreated:`स्टाइल प्रोफाइल बनाए गए`,welcomeGuru:`👋 StyleGuru AI में आपका स्वागत है!`,step1:`"अपना स्टाइल चेक करें" पर टैप करें और सेल्फी अपलोड करें`,step2:`AI सेकंडों में आपकी स्किन टोन पहचानता है`,step3:`अपना पर्सनल कलर पैलेट + आउटफिट आइडिया पाएं`,getStarted:`शुरू करें →`,styleTipDay:`💡 आज का स्टाइल टिप`,rateMyFit:`📸 मेरे फिट को रेट करें`,rateMyFitSub:`अपना आउटफिट पहनें और डेली स्टाइल स्कोर पाएं 🔥`,scanFit:`फिट स्कैन करें`,completeLook:`लुक को पूरा करें`,yourSkinTone:`आपकी स्किन टोन`,outfitColor:`आउटफिट का रंग`,betterAlternatives:`बेहतर विकल्प — अभी खरीदें`,avoidThese:`इनसे बचें`,dressColors:`ड्रेस के रंग`,topColors:`टॉप के रंग`,kurtiColors:`कुर्ती के रंग`,lehengaColors:`लहंगा के रंग`,bottomColors:`बॉटम के रंग`,sareeSuits:`साड़ी और सूट`,whatToWear:`कब क्या पहनें`,styleTips:`स्टाइल टिप्स`,ethnicWear:`एथनिक वियर`,outfitCombos:`आउटफिट कॉम्बो`,settings:`सेटिंग्स`,analyses:`विश्लेषण`,savedColors:`सेव किए गए रंग`,proMember:`प्रो सदस्य`,freePlan:`फ्री प्लान`,upgrade:`अपग्रेड करें`,languageLabel:`भाषा (Language)`,appLanguage:`ऐप की भाषा`,logout:`लॉगआउट`,stats:`आंकड़े`,toolsHeader:`टूल्स और यूटिलिटीज`,aiStyleBot:`AI स्टाइलबॉट`,styleBotDesc:`चैट और सलाह`,outfitChecker:`आउटफिट चेकर`,outfitCheckerDesc:`स्टाइल स्कोर जानें`,aiCalendar:`AI कैलेंडर`,calendarDesc:`साप्ताहिक ड्रॉप्स`,colorScanner:`कलर स्कैनर`,scannerDesc:`कैमरे से कपड़े स्कैन करें`,contrastChecker:`कलर कंट्रास्ट चेकर`,contrastDesc:`रंगों का तालमेल चेक करें`,trendingNow:`ट्रेंडिंग`,backTools:`पीछे हटें`,shopOn:`यहाँ से खरीदें:`,community:`कम्युनिटी`,couldNotLoadFeed:`कम्युनिटी फीड लोड नहीं हो सका। बाद में प्रयास करें।`,completeAnalysisFirst:`कृपया पहले कलर विश्लेषण पूरा करें!`,timeAgoUnknown:`अज्ञात`,timeAgoYear:`साल`,timeAgoMonth:`महीना`,timeAgoDay:`दिन`,timeAgoHour:`घंटा`,timeAgoMinute:`मिनट`,timeAgoSecond:`सेकंड`,monday:`सोमवार`,tuesday:`मंगलवार`,wednesday:`बुधवार`,thursday:`गुरुवार`,friday:`शुक्रवार`,saturday:`शनिवार`,sunday:`रविवार`,officeFormal:`ऑफिस/फॉर्मल`,casualTech:`कैजुअल टेक`,midWeekBrunch:`मिड-वीक ब्रंच`,clientMeeting:`क्लाइंट मीटिंग`,partyNight:`पार्टी नाइट`,weekendTrip:`वीकेंड ट्रिप`,dateDine:`डेट/डाइन`,sunny:`धूप`,chilly:`ठंड`,warm:`गर्म`,cloudy:`बादल`,breezy:`हवादार`,pleasant:`सुहावना`,smartWeeklyDrops:`स्मार्ट साप्ताहिक ड्रॉप्स`,back:`पीछे`,findOnMarket:`मार्केट में ढूंढें`,smartLogicNote:`स्मार्ट लॉजिक यह सुनिश्चित करता है कि रंग आपकी स्किन टोन के साथ बिल्कुल मेल खाएं।`,premiumTop:`प्रीमियम टॉप`,recommendedPant:`अनुशंसित पैंट`,dropSuffix:` का ऑउटफिट`,sampleText:`सैंपल टेक्स्ट प्रीव्यू`,contrastRatio:`कंट्रास्ट रेशियो`,greatCombo:`शानदार कॉम्बो!`,okayForLarge:`बड़े टेक्स्ट के लिए ठीक है`,poorContrast:`कम कंट्रास्ट`,color1:`रंग 1`,color2:`रंग 2`,yourHistory:`आपकी स्टाइल हिस्ट्री`,noHistory:`अभी तक कोई हिस्ट्री नहीं है`,noHistoryDesc:`आपके द्वारा विश्लेषण किए गए स्टाइल यहाँ दिखाई देंगे।`,loadingHistory:`आपकी स्टाइल यात्रा लोड हो रही है...`,loadingDetails:`विवरण लोड हो रहा है...`,backToHistory:`← हिस्ट्री पर वापस जाएं`,failedHistory:`हिस्ट्री लोड नहीं हो सकी।`,failedDetails:`विवरण लोड नहीं हो सका।`,bestShirtColors:`शर्ट के बेहतरीन रंग`,outfitIdeas:`आउटफिट आइडियाज`,botTitle:`StyleGuru बॉट`,botSub:`आपका AI फैशन सहायक`,botPlaceholder:`अपना फै़शन सवाल पूछें...`,botInitial:`नमस्ते! 👋 मैं आपका StyleGuru सहायक हूँ।
+
+मुझसे आउटफिट, रंग, एक्सेसरीज के बारे में पूछें या क्या कर सकता हूँ यह देखने के लिए "help" टाइप करें!`,botHelp:`🤖 मैं निम्न में मदद कर सकता हूँ:
+
+👔 किसी भी अवसर के लिए आउटफिट सुझाव
+🎨 आपकी स्किन टोन के आधार पर रंगों की सलाह
+💇 बालों के रंग के सुझाव
+✨ एक्सेसरी मैचिंग टिप्स
+☀️ मौसम के अनुसार स्टाइलिंग
+💰 बजट-फ्रेंडली शॉपिंग
+📷 कलर स्कैनर का उपयोग कैसे करें
+
+बस अपना सवाल टाइप करें!`,botDefault:`🤔 मुझे इसके बारे में पक्का नहीं पता! कृपया इनके बारे में पूछें:
+
+- शादी के आउटफिट
+- ऑफिस स्टाइल
+- डेट नाइट लुक्स
+- आपके लिए बेहतरीन रंग
+- एक्सेसरीज
+- बजट शॉपिंग
+
+या सभी विकल्प देखने के लिए "help" टाइप करें!`,botReplyGreeting:`नमस्ते! 👋 मैं आपका StyleGuru AI सहायक हूँ। मुझसे रंगों, आउटफिट्स या स्टाइलिंग टिप्स के बारे में पूछें! मैं आपकी क्या मदद कर सकता हूँ?`,botReplyWedding:`💍 शादी के लिए:
+
+👨 पुरुष: गोल्ड, मैरून या रॉयल ब्लू शेरवानी चुनें। मोजरी और ब्रोच के साथ पहनें।
+
+👩 महिला: ज्वेल टोन्स (एमराल्ड, रूबी रेड, रॉयल पर्पल) में सिल्क साड़ी गोल्ड ज्वेलरी के साथ क्लासिक है।
+
+💡 टिप: फोटो के लिए अपने आउटफिट को शादी की थीम से मैच करें!`,botReplyOffice:`💼 ऑफिस स्टाइल गाइड:
+
+👨 पुरुष: सॉलिड रंग की शर्ट (नेवी, सफेद, लाइट ब्लू) + डार्क पतलून। गहरे पैटर्न से बचें।
+
+👩 महिला: सीधी पैंट के साथ अच्छी फिटिंग वाली कुर्ती, या ट्राउजर के साथ ब्लेज़र।
+
+💡 टिप: आपकी स्किन टोन के न्यूट्रल रंग फॉर्मल सेटिंग्स के लिए सबसे अच्छे हैं!`,botReplyDate:`❤️ डेट नाइट टिप्स:
+
+👨 पुरुष: डार्क जींस + आपके सबसे अच्छे रंग की सॉलिड पोलो या हेनले। ब्राउन लोफर्स।
+
+👩 महिला: आपके पावर कलर में ड्रेस या को-ऑर्ड सेट। कम गहने।
+
+💡 टिप: वह रंग पहनें जो आपके वर्चुअल ट्राई-ऑन में सबसे ज्यादा स्कोर करता हो!`,botReplyParty:`🎉 पार्टी आउटफिट:
+
+👨 पुरुष: ब्लैक जींस + बोल्ड कलर की शर्ट या ओवरसाइज़्ड ग्राफिक टी। चंकी स्नीकर्स।
+
+👩 महिला: स्टेटमेंट ड्रेस या को-ऑर्ड सेट। बोल्ड लिपस्टिक + स्टेटमेंट ईयरिंग्स।
+
+💡 टिप: यह वह समय है जब आप अपने बेहतरीन रंगों के साथ बोल्ड होते हैं!`,botReplyCasual:`😎 कैजुअल स्टाइल:
+
+इसे सरल रखें लेकिन प्रभावशाली:
+- ओवरसाइज़्ड टी + जॉगर्स/जींस
+- आपका सबसे अच्छा कलर पोलो + चिनोस
+- एक स्टाइलिश लुक के लिए को-ऑर्ड सेट
+
+💡 टिप: कैजुअल आउटफिट भी आपकी स्किन टोन के रंगों में 10 गुना बेहतर लगते हैं!`,botReplySummer:`☀️ गर्मियों के लिए:
+
+- हल्का कॉटन और लिनन फैब्रिक
+- पेस्टल और हल्के रंग गर्मी को कम सोखते हैं
+- गहरे रंगों (गर्मी सोखते हैं) से बचें
+- हवादार फिटिंग चुनें
+
+💡 भारतीय स्किन टोन के लिए बेहतरीन समर कलर्स: स्काई ब्लू, मिंट, पीच, सफेद!`,botReplyWinter:`❄️ सर्दियों के लिए:
+
+- लेयरिंग करें: टी → हुडी → जैकेट
+- गहरे रंग गर्मी सोखते हैं (नेवी, बरगंडी, फॉरेस्ट ग्रीन)
+- डेकोर करें: मफलर, बीनी, ग्लव्स
+- अच्छी क्वालिटी की जैकेट चुनें
+
+💡 सर्दियों की रोशनी में ज्वेल टोन्स कमाल के लगते हैं!`,botReplyMonsoon:`🌧️ मानसून स्टाइल:
+
+- क्विक-ड्राय फैब्रिक (कॉटन से बचें — सूखने में समय लगता है)
+- गहरे रंग छींटों के निशान छुपाते हैं
+- वाटरप्रूफ फुटवियर का उपयोग करें
+- एक कॉम्पैक्ट छाता रखें
+
+💡 नेवी, चारकोल और डार्क ग्रीन बारिश के दिनों के लिए सबसे अच्छे हैं!`,botReplySkinTone:`🎨 अपने बेहतरीन कलर्स पाने के लिए:
+
+1. एनालाइज पेज पर एक सेल्फी अपलोड करें
+2. AI आपकी सटीक स्किन टोन, अंडरटोन और सीजन का पता लगाता है
+3. 10+ व्यक्तिगत रंग + आउटफिट सुझाव पाएं!
+
+💡 शुरू करने के लिए "Analyze" टैब पर टैप करें — इसमें केवल 10 सेकंड लगते हैं!`,botReplyHair:`💇 स्किन टोन के अनुसार बालों के रंग:
+
+🟡 वार्म अंडरटोन: कारमेल, हनी, कॉपर हाइलाइट्स
+🔵 कूल अंडरटोन: ऐश ब्राउन, बरगंडी, प्लम
+🟢 न्यूट्रल: आप लगभग कुछ भी पहन सकते हैं!
+
+💡 भारतीय स्किन टोन फुल कलर के बजाय सूक्ष्म हाइलाइट्स के साथ कमाल के लगते हैं!`,botReplyAccessories:`✨ एक्सेसरी गाइड:
+
+🟡 वार्म स्किन: गोल्ड ज्वेलरी, ब्राउन लेदर, एम्बर सनग्लासेस
+🔵 कूल स्किन: सिल्वर ज्वेलरी, ब्लैक लेदर, ग्रे सनग्लासेस
+🟠 मीडियम/ओलिव: गोल्ड और सिल्वर दोनों चलते हैं!
+
+💡 नियम: वार्म अंडरटोन = गोल्ड, कूल अंडरटोन = सिल्वर!`,botReplyBudget:`💰 बजट शॉपिंग टिप्स:
+
+- Meesho: ₹500 के अंदर के विकल्पों के लिए सर्वश्रेष्ठ
+- Amazon: ₹500-1000 की रेंज में अच्छे सौदे
+- Myntra: सेल में बेहतरीन विकल्प
+- Flipkart: बजट + क्वालिटी का कॉम्बो
+
+💡 अपने रिजल्ट्स में बजट फिल्टर का उपयोग करें — ₹500/₹1000/₹2000 पर टैप करें!`,botReplyThanks:`🙏 आपका स्वागत है! आपकी स्टाइल यात्रा में मदद करके खुशी हुई।
+
+याद रखें: आत्मविश्वास सबसे अच्छी एक्सेसरी है! 💪
+
+क्या आप कुछ और जानना चाहते हैं?`,landingHeroTitle:`स्मार्ट फैशन`,landingHeroSub:`सहाएक`,landingTagline:`AI की मदद से अपनी स्किन टोन के आधार पर आउटफिट सुझाव प्राप्त करें।
+सेल्फी अपलोड करें और अपने {perfectColors} खोजें।`,perfectColors:`बेहतरीन रंगों को`,tryNowFree:`अभी आज़माएं — यह मुफ़्त है`,loginArrow:`लॉगिन करें →`,noCreditCard:`क्रेडिट कार्ड की आवश्यकता नहीं`,instantResults:`त्वरित परिणाम`,fullyFree:`100% मुफ़्त`,madeForIndia:`भारत के लिए निर्मित`,happyUsers:`खुश उपयोगकर्ता`,accuracy:`सटीकता`,skinToneCategories:`स्किन टोन्स`,whyToneFit:`StyleGuru AI ही क्यों?`,featureSkinTitle:`स्किन टोन डिटेक्शन`,featureSkinDesc:`उन्नत CIELAB कलर साइंस का उपयोग करके AI-संचालित विश्लेषण।`,featureOutfitTitle:`आउटफिट सुझाव`,featureOutfitDesc:`शर्ट, पैंट और एक्सेसरीज के लिए व्यक्तिगत कलर पैलेट।`,featureAdviceTitle:`फैशन सलाह`,featureAdviceDesc:`स्टाइल टिप्स, अवसर आधारित सलाह और एथनिक वियर सुझाव।`,featureEaseTitle:`उपयोग में आसान`,featureEaseDesc:`सेल्फी अपलोड करें — सेकंडों में तुरंत परिणाम पाएं।`,howItWorks:`यह कैसे काम करता है`,howItWorksSubTitle:`आपकी {perfectStyle} के लिए 3 सरल कदम`,perfectStyle:`बेहतरीन स्टाइल`,step1Title:`अपनी सेल्फी अपलोड करें`,step1Desc:`प्राकृतिक रोशनी में एक साफ़ सेल्फी लें। हमारा AI बिना सनग्लासेस वाली फोटो के साथ सबसे अच्छा काम करता है।`,step2Title:`AI स्किन टोन का विश्लेषण करता है`,step2Desc:`हमारा उन्नत CIELAB कलर साइंस सेकंडों में आपकी स्किन टोन श्रेणी का पता लगाता है।`,step3Title:`व्यक्तिगत परिणाम प्राप्त करें`,step3Desc:`विशेष रूप से आपके लिए तैयार किए गए कलर पैलेट, आउटफिट कॉम्बो और स्टाइल टिप्स प्राप्त करें।`,whatYouGet:`आपको क्या मिलता है`,startJourneyToday:`आज ही अपनी फैशन यात्रा शुरू करें`,joinThousands:`AI के साथ अपनी बेहतरीन स्टाइल खोजने वाले हजारों लोगों में शामिल हों।`,getStartedFree:`शुरू करें — मुफ़्त ✨`,whatUsersSay:`उपयोगकर्ता {areSaying}`,areSaying:`क्या कह रहे हैं`,faqTitle:`अक्सर पूछे जाने वाले {questions}`,questions:`प्रश्न`,login:`लॉगिन`,register:`रजिस्टर`,signingIn:`साइन इन हो रहा है...`,googleLogin:`Google के साथ जारी रखें`,orEmail:`या ईमेल के साथ`,fullName:`पूरा नाम`,emailLabel:`ईमेल`,passwordLabel:`पासवर्ड`,processing:`प्रोसेस हो रहा है...`,loginBtn:`लॉगिन`,registerBtn:`रजिस्टर`,skipGuest:`छोड़ें और गेस्ट के रूप में देखें →`,enterDetails:`कृपया ईमेल और पासवर्ड दोनों दर्ज करें।`,enterName:`कृपया अपना पूरा नाम दर्ज करें।`,proTitle:`TONEFIT प्रो`,proSub:`सर्वश्रेष्ठ AI स्टाइलिस्ट को अनलॉक करें`,perMonth:`/महीना`,featureCalendarTitle:`अल्टीमेट आउटफिट कैलेंडर`,featureCalendarDesc:`मौसम के आधार पर 7-दिवसीय AI आउटफिट जनरेटर`,featureBotTitle:`अनलिमिटेड AI स्टाइल-बॉट`,featureBotDesc:`अपने निजी AI स्टाइलिस्ट के साथ अंतहीन चैट करें`,featureFeedTitle:`प्रायोरिटी फीड OOTD`,featureFeedDesc:`अपने सोशल फीड पोस्ट को सबसे ऊपर दिखाएं`,featureAdsTitle:`विज्ञापन-मुक्त अनुभव`,featureAdsDesc:`बिना किसी रुकावट के`,upgradeNow:`अभी अपग्रेड करें ✨`,processingPayment:`भुगतान प्रोसेस हो रहा है...`,secureRazorpay:`Razorpay द्वारा सुरक्षित भुगतान।
+यह वर्तमान में टेस्ट मोड में चल रहा है।`,myWardrobe:`मेरी वार्डरोब`,savedColors:`सेव किए गए रंग`,savedOutfits:`सेव किए गए आउटफिट`,outfits:`आउटफिट्स`,colors:`रंग`,history:`हिस्ट्री`,noSavedColors:`अभी तक कोई रंग सेव नहीं किया गया है`,tapToSaveColor:`किसी भी रंग को सेव करने के लिए 🤍 पर टैप करें`,clearAllColors:`सभी रंग हटाएँ`,wardrobeLimitNote:`अपने आउटफिट देखने और सेव करने के लिए लॉगिन करें`,wardrobeFull:`वार्डरोब फुल है ({current}/{limit})। नए आउटफिट सेव करने के लिए पुराने डिलीट करें।`,noOutfitsSaved:`अभी तक कोई आउटफिट सेव नहीं किया गया है`,analyzeToSave:`अपनी स्टाइल का विश्लेषण करें और मनपसंद आउटफिट सेव करें`,removeFromWardrobe:`वार्डरोब से हटाएँ`,deleting:`हटाया जा रहा है...`,outfitRemoved:`आउटफिट वार्डरोब से हटा दिया गया`,deleteFailed:`हटाने में विफल — कृपया पुनः प्रयास करें`,expertWeatherTip:`एक्सपर्ट वेदर टिप`,bestFabricsToday:`आज के लिए बेहतरीन फैब्रिक:`,weatherStyleTip:`वेदर स्टाइल टिप`,enterCity:`अपना शहर दर्ज करें (जैसे दिल्ली, मुंबई)`,set:`सेट करें`,dailyDropReady:`आपका डेली ड्रॉप तैयार है!`,dailyDropSub:`हमने मौसम और आपके {skinTone} स्किन टोन के आधार पर आज का आउटफिट तैयार किया है।`,unlockOutfit:`आउटफिट अनलॉक करें 🔓`,skipToday:`आज के लिए छोड़ें`,unlockingWardrobe:`आपका वार्डरोब खुल रहा है...`,"Shah Rukh Khan":`शाहरुख खान`,"Ranbir Kapoor":`रणबीर कपूर`,"Deepika Padukone":`दीपिका पादुकोण`,"Hrithik Roshan":`ऋतिक रोशन`,"Alia Bhatt":`आलिया भट्ट`,"Salman Khan":`सलमान खान`,"Shahid Kapoor":`शाहिद कपूर`,"Amitabh Bachchan":`अमिताभ बच्चन`,footerRights:`© 2025 StyleGuru AI. सर्वाधिकार सुरक्षित।`,footerAffiliate:`StyleGuru AI उन सहबद्ध (affiliate) कार्यक्रमों में भाग लेता है जिन्हें विज्ञापनों द्वारा आय अर्जित करने हेतु बनाया गया है।`,navHome:`होम`,navAbout:`अबाउट`,navPrivacy:`प्राइवेसी पॉलिसी`,navContact:`कांटेक्ट`,navTerms:`नियम एवं शर्तें`,navBlog:`ब्लॉग`,test1Review:`अंत में एक ऐसा ऐप जो भारतीय स्किन टोन को समझता है! रंग सुझाव एकदम सटीक हैं। मैंने शादी में सुझाव दिया गया कोरल कुर्ता पहना और बहुत तारीफें मिलीं।`,test2Review:`आउटफिट चेकर फीचर कमाल का है। मैंने अपनी शर्ट अपलोड की और इसने मुझे बताया कि कौन सी पैंट अच्छी लगेगी। मुझे फैशन डिजास्टर से बचा लिया!`,test3Review:`मुझे कभी नहीं पता था कि मेरा अंडरटोन कूल है जब तक कि StyleGuru AI ने मुझे नहीं बताया। अब मैं समझती हूँ कि नेवी और पर्पल मुझ पर क्यों जचते हैं।`,test4Review:`गहरी त्वचा होने के कारण, मुझे अपने अनुकूल रंग ढूंढने में हमेशा संघर्ष करना पड़ता था। इस ऐप ने कोबाल्ट ब्लू और सफेद की सलाह दी — और परिणाम अविश्वसनीय है!`,test5Review:`मेरी बहन की शादी के लिए लहंगे के रंग के सुझाव बिल्कुल सही थे। मैं गहरी बरगंडी के साथ गई और सभी को यह बहुत पसंद आया।`,test6Review:`स्किन टोन और बॉडी टाइप टिप्स बहुत मददगार हैं। मैं दुबला हूँ और ऐप ने हॉरिजॉन्टल स्ट्राइप्स का सुझाव दिया — यह मुझ पर बहुत अच्छा लगता है!`,faq1Q:`StyleGuru AI क्या है?`,faq1A:`StyleGuru AI एक मुफ़्त AI-संचालित फैशन सलाहकार है जो सेल्फी से आपकी स्किन टोन का विश्लेषण करता है और बेहतरीन रंगों और स्टाइल टिप्स की सलाह देता है।`,faq2Q:`स्किन टोन विश्लेषण कैसे काम करता है?`,faq2A:`हमारा AI उन्नत CIELAB कलर साइंस और ITA विधि का उपयोग करके आपकी स्किन टोन श्रेणी और अंडरटोन का पता लगाता है।`,faq3Q:`क्या मेरी फोटो स्टोर की जाती है?`,faq3A:`नहीं। आपकी अपलोड की गई तस्वीरें केवल वास्तविक समय विश्लेषण के लिए उपयोग की जाती हैं और तुरंत हटा दी जाती हैं।`,faq4Q:`यह किन स्किन टोन्स का समर्थन करता है?`,faq4A:`StyleGuru AI सभी 6 प्रमुख स्किन टोन श्रेणियों का समर्थन करता है: गोरा, हल्का, मध्यम/गेहुंआ, सांवला और गहरा।`,faq5Q:`क्या यह मुफ़्त है?`,faq5A:`हाँ, StyleGuru AI पूरी तरह से मुफ़्त है। आप बिना किसी शुल्क के विश्लेषण कर सकते हैं और सुझाव पा सकते हैं।`,faq6Q:`बिना फोटो के सुझाव मिल सकते हैं?`,faq6A:`हाँ! आप हमारे स्किन टोन क्विज़ का उपयोग करके बिना फोटो के भी सुझाव प्राप्त कर सकते हैं।`,faq7Q:`क्या यह पुरुषों और महिलाओं दोनों के लिए है?`,faq7A:`हाँ। StyleGuru AI पुरुषों और महिलाओं दोनों के लिए अलग-अलग और सटीक सुझाव प्रदान करता है।`,faq8Q:`AI विश्लेषण कितना सटीक है?`,faq8A:`हमारा AI 95%+ सटीकता प्राप्त करता है। सर्वोत्तम परिणामों के लिए, प्राकृतिक रोशनी में साफ़ सेल्फी लें।`,blog1Title:`आपकी स्किन टोन के लिए बेहतरीन रंग`,blog1Excerpt:`जानें कि कौन से रंग आपकी त्वचा के पूरक हैं — अपनी बेहतरीन कलर पैलेट खोजें।`,blog2Title:`बेहतरीन आउटफिट कैसे चुनें`,blog2Excerpt:`अवसर और रंगों के तालमेल के आधार पर आउटफिट चुनने की कला में महारत हासिल करें।`,blog3Title:`AI फैशन को कैसे बदल रहा है`,blog3Excerpt:`जानें कि कैसे AI व्यक्तिगत स्टाइलिंग और स्मार्ट सुझावों के साथ फैशन में क्रांति ला रहा है।`,readMore:`और पढ़ें →`,viewAllArticles:`सभी लेख देखें →`,navHome:`होम`,navAnalyze:`विश्लेषण`,navWardrobe:`वार्डरोब`,navTools:`टूल्स`,navProfile:`प्रोफाइल`,navNew:`← नया`,guestName:`दोस्त`,validUntilLabel:`तक वैध `,notifications:`सूचनाएं (Notifications)`,notifEnabled:`सक्षम ✓`,notifBlocked:`ब्राउज़र में ब्लॉक है`,notifWeekly:`साप्ताहिक स्टाइल टिप्स`,disable:`अक्षम करें`,enable:`सक्षम करें`,unblock:`अनब्लॉक →`}},a=e(t(),1),o=r(),s=(0,a.createContext)();function c({children:e}){let[t,n]=(0,a.useState)(()=>localStorage.getItem(`styleguru_lang`)||`hinglish`);return(0,o.jsx)(s.Provider,{value:{language:t,changeLanguage:e=>{n(e),localStorage.setItem(`styleguru_lang`,e)},t:e=>i[t]?.[e]||i.en?.[e]||e},children:e})}var l=()=>(0,a.useContext)(s);function u({title:e,description:t}){return(0,a.useEffect)(()=>{let t=document.title;return document.title=e,()=>{document.title=t}},[e]),(0,a.useEffect)(()=>{let e=document.querySelector(`meta[name="description"]`),n=!1;e||(e=document.createElement(`meta`),e.setAttribute(`name`,`description`),document.head.appendChild(e),n=!0);let r=e.getAttribute(`content`);return e.setAttribute(`content`,t),()=>{n?document.head.removeChild(e):e.setAttribute(`content`,r||``)}},[t]),null}function d(){let{t:e}=l(),t=[{label:e(`navHome`),to:`/`},{label:e(`navAbout`),to:`/about`},{label:e(`navPrivacy`),to:`/privacy`},{label:e(`navContact`),to:`/contact`},{label:e(`navTerms`),to:`/terms`},{label:e(`navBlog`),to:`/blog`}];return(0,o.jsxs)(`footer`,{className:`relative z-10 border-t border-gray-800/50 bg-[#050816] px-6 py-10 text-center`,children:[(0,o.jsxs)(`div`,{className:`flex items-center justify-center gap-2 mb-4`,children:[(0,o.jsx)(`div`,{className:`w-6 h-6 rounded-md bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold text-white`,children:`S`}),(0,o.jsx)(`span`,{className:`font-semibold text-gray-300`,children:`StyleGuru AI`})]}),(0,o.jsx)(`div`,{className:`flex justify-center flex-wrap gap-4 sm:gap-8 text-sm text-gray-500 mb-4`,children:t.map(e=>(0,o.jsx)(n,{to:e.to,className:`hover:text-purple-400 transition`,children:e.label},e.to))}),(0,o.jsx)(`p`,{className:`text-gray-600 text-xs`,children:e(`footerRights`)}),(0,o.jsx)(`p`,{className:`text-gray-600 text-xs mt-2`,children:e(`footerAffiliate`)})]})}export{l as i,u as n,c as r,d as t};
