@@ -102,7 +102,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 # ============================================
 # APP INIT
 # ============================================
-app = FastAPI(title="StyleGuru API", version="1.2.0")  # Payment Safety System: Idempotency + Logs
+app = FastAPI(title="StyleGuru API", version="1.2.1")  # Payment Safety System: Idempotency + Logs (Force Deploy)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
