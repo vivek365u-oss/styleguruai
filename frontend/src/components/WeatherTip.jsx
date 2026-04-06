@@ -3,7 +3,7 @@
 // Uses wttr.in (no API key needed) for weather data
 // ============================================================
 import { useState, useEffect, useContext } from 'react';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalizedWeatherTip } from '../data/weatherTips';
 

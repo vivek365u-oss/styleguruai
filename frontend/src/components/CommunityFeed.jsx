@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import { getCommunityFeed, likeCommunityPost, publishToCommunityFeed, auth } from '../api/styleApi';
 import { logEvent, EVENTS } from '../utils/analytics';
 import { useLanguage } from '../i18n/LanguageContext';

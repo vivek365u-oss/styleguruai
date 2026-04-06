@@ -1,6 +1,5 @@
 export const translations = {
   en: {
-    // Auth
     login: "Login",
     register: "Register",
     fullName: "Full Name",
@@ -8,9 +7,9 @@ export const translations = {
     password: "Password",
     namePlaceholder: "Your name",
     loginBtn: "Login",
-    registerBtn: "Create Account",
+    registerBtn: "Register",
     googleLogin: "Continue with Google",
-    orEmail: "or with email",
+    orEmail: "OR EMAIL",
     noAccount: "No account found with this email.",
     wrongPassword: "Incorrect password.",
     emailInUse: "This email is already registered.",
@@ -19,8 +18,6 @@ export const translations = {
     googleFailed: "Google login failed. Please try again.",
     tagline: "AI-Powered Fashion for All Skin Tones",
     footer: "Made with 💜 • Your photos are never stored",
-
-    // Dashboard tabs
     analyze: "Analyze",
     outfitCheck: "Outfit Check",
     history: "History",
@@ -32,11 +29,9 @@ export const translations = {
     systemTheme: "Also switches automatically based on your system theme!",
     account: "Account",
     tryAgain: "Try Again",
-
-    // Upload
     aiPowered: "AI-Powered • 95%+ Accuracy",
     discoverStyle: "Discover Your",
-    perfectStyle: "Perfect",
+    perfectStyle: "Perfect Style",
     styleWord: "Style",
     uploadSubtitle: "Upload a selfie — get personalized fashion recommendations based on your skin tone",
     normal: "Normal",
@@ -58,8 +53,6 @@ export const translations = {
     skinTones: "We support all skin tones 🌍",
     maleMode: "Male mode: Shirt, Pant & Ethnic wear suggestions included!",
     femaleMode: "Female mode: Dress, Saree, Suit & Makeup suggestions included!",
-
-    // Results
     newPhoto: "← New Photo",
     analyzeNewPhoto: "Analyze New Photo",
     eachSelfie: "Each selfie gives better results!",
@@ -70,14 +63,14 @@ export const translations = {
     photoTips: "💡 Photo Tips:",
     colorsToAvoid: "Colors to Avoid",
     completeOutfitIdeas: "Complete Outfit Ideas",
-    styleTips: "Style Tips Just For You",
-    whatToWear: "What to Wear & When?",
+    styleTips: "Style Tips",
+    whatToWear: "What to Wear When",
     ethnicWear: "Ethnic Wear",
     sareeEthnic: "Saree & Ethnic Wear",
     accessories: "Accessories & Jewellery",
     accessoriesFor: "Accessories For You",
     makeupSuggestions: "Makeup Suggestions",
-    sareeSuits: "Saree & Suits Suggestions",
+    sareeSuits: "Saree & Suits",
     bestShirtColors: "Best Shirt Colors",
     bestPantColors: "Best Pant Colors",
     bestDressColors: "Best Dress Colors",
@@ -92,18 +85,14 @@ export const translations = {
     avoidFabrics: "Avoid Fabrics",
     seasonStyleTips: "Season Style Tips:",
     shopThisColor: "Shop This Color",
-
-    // History
-    yourHistory: "Your History",
+    yourHistory: "Your Style History",
     noHistory: "No History Yet",
-    noHistoryDesc: "Analyze your first selfie — history will appear here!",
-    loadingHistory: "Loading history...",
-    loadingDetails: "Loading details...",
+    noHistoryDesc: "Your analyzed styles will appear here.",
+    loadingHistory: "Loading your style journey...",
+    loadingDetails: "Fetching details...",
     backToHistory: "← Back to History",
-    failedHistory: "Failed to load history. Please try again.",
+    failedHistory: "Failed to load history.",
     failedDetails: "Failed to load details.",
-
-    // Outfit Checker
     outfitTitle: "Will This Outfit",
     outfitSubtitle: "Look Good On You?",
     outfitDesc: "Upload your selfie + outfit photo — AI will check the compatibility!",
@@ -119,19 +108,15 @@ export const translations = {
     outfitTips: "Outfit Tips:",
     yourSkinTone: "Your Skin Tone",
     outfitColor: "Outfit Color",
-    betterAlternatives: "Better Alternatives",
+    betterAlternatives: "Better Alternatives — Shop Now",
     clearFacePhotoTip: "Clear face photo",
     goodLighting: "Good lighting",
     noSunglasses: "No sunglasses",
     plainBackground: "Plain background",
     fullOutfitVisible: "Full outfit visible",
     clearBrightPhoto: "Clear and bright photo",
-
-    // Language
     language: "Language",
-    languageLabel: "App Language",
-
-    // New labels
+    languageLabel: "Language",
     community: "Community",
     liveFeed: "Live Style Feed",
     postOOTD: "Post your OOTD",
@@ -142,8 +127,6 @@ export const translations = {
     tools: "Smart Tools",
     calendar: "Style Calendar",
     wardrobe: "My Wardrobe",
-
-    // Loading steps
     loadingScan: "Scanning photo...",
     loadingQuality: "Checking quality",
     loadingFace: "Detecting face...",
@@ -154,8 +137,6 @@ export const translations = {
     loadingRecsSub: "25+ fashion rules",
     loadingDone: "Almost done...",
     loadingDoneSub: "Preparing your style guide",
-
-    // Home
     goodDay: "Good day,",
     welcomeHey: "Hey {name} 👋",
     welcomeNew: "Welcome to StyleGuru AI ✨",
@@ -171,37 +152,21 @@ export const translations = {
     rateMyFit: "📸 Rate My Fit",
     rateMyFitSub: "Wear your Outfit & get your daily Style Score 🔥",
     scanFit: "Scan Fit",
-
-    // Results
     completeLook: "Complete the Look",
-    yourSkinTone: "Your Skin Tone",
-    outfitColor: "Outfit Color",
-    betterAlternatives: "Better Alternatives — Shop Now",
     avoidThese: "Avoid These",
     dressColors: "Dress Colors",
     topColors: "Top Colors",
     kurtiColors: "Kurti Colors",
     lehengaColors: "Lehenga Colors",
     bottomColors: "Bottom Colors",
-    sareeSuits: "Saree & Suits",
-    whatToWear: "What to Wear When",
-    styleTips: "Style Tips",
-    ethnicWear: "Ethnic Wear",
     outfitCombos: "Outfit Combos",
-
-    // Settings
-    settings: "Settings",
     analyses: "Analyses",
     savedColors: "Saved Colors",
     proMember: "Pro Member",
     freePlan: "Free Plan",
     upgrade: "Upgrade",
-    languageLabel: "Language",
     appLanguage: "App language",
-    logout: "Logout",
     stats: "Stats",
-
-    // Tools
     toolsHeader: "Tools & Utilities",
     aiStyleBot: "AI StyleBot",
     styleBotDesc: "Chat & advice",
@@ -216,9 +181,6 @@ export const translations = {
     trendingNow: "Trending Now",
     backTools: "Back to Tools",
     shopOn: "Shop on:",
-
-    // Community
-    community: "Community",
     couldNotLoadFeed: "Could not load community feed. Try again later.",
     completeAnalysisFirst: "Please complete a color analysis first!",
     timeAgoUnknown: "Unknown",
@@ -228,8 +190,6 @@ export const translations = {
     timeAgoHour: "h",
     timeAgoMinute: "m",
     timeAgoSecond: "s",
-
-    // Calendar & Weekdays
     monday: "Monday",
     tuesday: "Tuesday",
     wednesday: "Wednesday",
@@ -257,8 +217,6 @@ export const translations = {
     premiumTop: "Premium Top",
     recommendedPant: "Recommended Pant",
     dropSuffix: "'s Drop",
-
-    // Tools detail
     sampleText: "Sample Text Preview",
     contrastRatio: "Contrast Ratio",
     greatCombo: "Great combo!",
@@ -266,27 +224,13 @@ export const translations = {
     poorContrast: "Poor contrast",
     color1: "Color 1",
     color2: "Color 2",
-
-    // History
-    yourHistory: "Your Style History",
-    noHistory: "No History Yet",
-    noHistoryDesc: "Your analyzed styles will appear here.",
-    loadingHistory: "Loading your style journey...",
-    loadingDetails: "Fetching details...",
-    backToHistory: "← Back to History",
-    failedHistory: "Failed to load history.",
-    failedDetails: "Failed to load details.",
-    bestShirtColors: "Best Shirt Colors",
     outfitIdeas: "Outfit Ideas",
-
-    // Bot
     botTitle: "StyleGuru Bot",
     botSub: "Your AI fashion assistant",
     botPlaceholder: "Type your style question...",
     botInitial: "Hey! 👋 I'm your StyleGuru assistant.\n\nAsk me about outfits, colors, accessories, or type \"help\" to see what I can do!",
     botHelp: "🤖 I can help with:\n\n👔 Outfit suggestions for any occasion\n🎨 Color advice based on your skin tone\n💇 Hair color recommendations\n✨ Accessory matching tips\n☀️ Season-specific styling\n💰 Budget-friendly shopping\n📷 How to use the color scanner\n\nJust type your question!",
     botDefault: "🤔 I'm not sure about that one! Try asking about:\n\n- Wedding outfits\n- Office style\n- Date night looks\n- Best colors for you\n- Accessories\n- Budget shopping\n\nOr type \"help\" to see all options!",
-
     botReplyGreeting: "Hey! 👋 I'm your StyleGuru AI assistant. Ask me about colors, outfits, or styling tips! What do you need help with?",
     botReplyWedding: "💍 For a wedding:\n\n👨 Men: Go for a sherwani in gold, maroon, or royal blue. Pair with mojari shoes and a brooch.\n\n👩 Women: A silk saree in jewel tones (emerald, ruby red, royal purple) with gold jewellery is classic.\n\n💡 Tip: Match your outfit to the wedding's color theme for photos!",
     botReplyOffice: "💼 Office Style Guide:\n\n👨 Men: Solid color shirt (navy, white, light blue) + dark trousers. Avoid loud patterns.\n\n👩 Women: A well-fitted kurti with straight pants, or a blazer with trousers.\n\n💡 Tip: Your skin tone's neutral colors work best for formal settings!",
@@ -301,8 +245,6 @@ export const translations = {
     botReplyAccessories: "✨ Accessory Guide:\n\n🟡 Warm skin: Gold jewelry, brown leather, amber sunglasses\n🔵 Cool skin: Silver jewelry, black leather, grey sunglasses\n🟠 Medium/olive: Both gold and silver work!\n\n💡 Rule of thumb: Warm undertone = gold, Cool undertone = silver!",
     botReplyBudget: "💰 Budget Shopping Tips:\n\n- Meesho: Best for under ₹500 finds\n- Amazon: Good deals with ₹500-1000 range\n- Myntra: Sales have great steals\n- Flipkart: Budget + quality combo\n\n💡 Use the budget filter in your results — tap ₹500/₹1000/₹2000!",
     botReplyThanks: "🙏 You're welcome! Happy to help with your style journey.\n\nRemember: Confidence is the best accessory! 💪\n\nAnything else you want to know?",
-
-    // Landing Page
     landingHeroTitle: "Smart Fashion",
     landingHeroSub: "Advisor",
     landingTagline: "Get outfit recommendations based on your skin tone using AI.\nUpload a selfie and discover your {perfectColors}.",
@@ -327,7 +269,6 @@ export const translations = {
     featureEaseDesc: "Upload a selfie — get instant results in seconds.",
     howItWorks: "How It Works",
     howItWorksSubTitle: "3 Simple Steps to Your {perfectStyle}",
-    perfectStyle: "Perfect Style",
     step1Title: "Upload Your Selfie",
     step1Desc: "Take a clear selfie in natural light. Our AI works best with a front-facing photo without sunglasses.",
     step2Title: "AI Analyzes Skin Tone",
@@ -342,24 +283,13 @@ export const translations = {
     areSaying: "Are Saying",
     faqTitle: "Frequently Asked {questions}",
     questions: "Questions",
-
-    // Auth
-    login: "Login",
-    register: "Register",
     signingIn: "Signing in...",
-    googleLogin: "Continue with Google",
-    orEmail: "OR EMAIL",
-    fullName: "Full Name",
     emailLabel: "Email",
     passwordLabel: "Password",
     processing: "Processing...",
-    loginBtn: "Login",
-    registerBtn: "Register",
     skipGuest: "Skip & Explore as Guest →",
     enterDetails: "Please enter both email and password.",
     enterName: "Please enter your full name.",
-
-    // Paywall
     proTitle: "TONEFIT PRO",
     proSub: "Unlock the ultimate AI stylist",
     perMonth: "/month",
@@ -374,14 +304,10 @@ export const translations = {
     upgradeNow: "Upgrade Now ✨",
     processingPayment: "Processing Payment...",
     secureRazorpay: "Secure payment powered by Razorpay.\nThis is currently running in TEST MODE.",
-
-    // Wardrobe
     myWardrobe: "My Wardrobe",
-    savedColors: "Saved Colors",
     savedOutfits: "Saved Outfits",
     outfits: "Outfits",
     colors: "Colors",
-    history: "History",
     noSavedColors: "No saved colors yet",
     tapToSaveColor: "Tap 🤍 on any color to save it",
     clearAllColors: "Clear All Colors",
@@ -393,30 +319,22 @@ export const translations = {
     deleting: "Deleting...",
     outfitRemoved: "Outfit removed from wardrobe",
     deleteFailed: "Delete failed — please try again",
-
-    // Weather Tip
     expertWeatherTip: "Expert Weather Tip",
     bestFabricsToday: "Best fabrics today:",
     weatherStyleTip: "Weather Style Tip",
     enterCity: "Enter your city (e.g. Delhi, Mumbai)",
     set: "Set",
-
-    // Daily Drop
     dailyDropReady: "Your Daily Drop is Ready!",
     dailyDropSub: "We prepared today's perfect outfit based on the weather and your {skinTone} skin tone.",
     unlockOutfit: "Unlock Outfit 🔓",
     skipToday: "Skip for today",
     unlockingWardrobe: "Unlocking your wardrobe...",
-
-    // Celebs
     "Shah Rukh Khan": "Shah Rukh Khan",
     "Ranbir Kapoor": "Ranbir Kapoor",
     "Deepika Padukone": "Deepika Padukone",
     "Hrithik Roshan": "Hrithik Roshan",
     "Alia Bhatt": "Alia Bhatt",
     "Salman Khan": "Salman Khan",
-
-    // Footer
     footerRights: "© 2025 StyleGuru AI. All rights reserved.",
     footerAffiliate: "StyleGuru AI is a participant in the Amazon Associates Programme, an affiliate advertising programme designed to provide a means for sites to earn advertising fees by advertising and linking to amazon.in.",
     navHome: "Home",
@@ -425,16 +343,12 @@ export const translations = {
     navContact: "Contact",
     navTerms: "Terms",
     navBlog: "Blog",
-
-    // Testimonials
     test1Review: "Finally an app that understands Indian skin tones! The color recommendations are spot on. I wore the suggested teal kurta to a wedding and got so many compliments.",
     test2Review: "The outfit checker feature is amazing. I uploaded my shirt and it told me exactly which pants would look good. Saved me from a fashion disaster!",
     test3Review: "I never knew my undertone was cool until StyleGuru AI told me. Now I understand why navy and purple always looked better on me than orange.",
     test4Review: "As someone with dark skin, I always struggled to find colors that suited me. This app recommended cobalt blue and white — and wow, the difference is incredible!",
     test5Review: "The lehenga color recommendations for my sister's wedding were perfect. I went with the suggested deep burgundy and everyone loved it.",
     test6Review: "The body type tips combined with skin tone recommendations are super helpful. I'm slim and the app suggested horizontal stripes — looks great on me!",
-
-    // FAQ
     faq1Q: "What is StyleGuru AI?",
     faq1A: "StyleGuru AI is a free AI-powered fashion advisor that analyzes your skin tone from a selfie and recommends the best outfit colors, clothing combinations, and style tips personalized for you.",
     faq2Q: "How does skin tone analysis work?",
@@ -451,8 +365,6 @@ export const translations = {
     faq7A: "Yes. StyleGuru AI provides separate recommendations for men (t-shirts, cargo pants, kurtas) and women (dresses, coord sets, kurtis, lehengas, sarees, makeup).",
     faq8Q: "How accurate is the AI analysis?",
     faq8A: "Our AI achieves 95%+ accuracy in controlled conditions. For best results, take a selfie in natural light, face the camera directly, and avoid sunglasses or heavy filters.",
-
-    // Blog
     blog1Title: "Best Colors for Your Skin Tone",
     blog1Excerpt: "Discover which colors complement your skin tone — from fair to dark, find your perfect palette.",
     blog2Title: "How to Choose the Perfect Outfit",
@@ -461,9 +373,6 @@ export const translations = {
     blog3Excerpt: "Explore how AI is revolutionizing fashion with personalized styling and smart recommendations.",
     readMore: "Read More →",
     viewAllArticles: "View All Articles →",
-
-    // Dashboard UI
-    navHome: "Home",
     navAnalyze: "Analyze",
     navWardrobe: "Wardrobe",
     navTools: "Tools",
@@ -479,9 +388,7 @@ export const translations = {
     enable: "Enable",
     unblock: "Unblock →",
   },
-
   hinglish: {
-    // Auth
     login: "Login",
     register: "Register",
     fullName: "Full Name",
@@ -500,8 +407,6 @@ export const translations = {
     googleFailed: "Google login mein problem aayi. Dobara try karo.",
     tagline: "AI-Powered Fashion for Indian Skin Tones",
     footer: "Made with 💜 India ke liye • Photos store nahi hoti",
-
-    // Dashboard tabs
     analyze: "Analyze",
     outfitCheck: "Outfit Check",
     history: "History",
@@ -513,11 +418,9 @@ export const translations = {
     systemTheme: "System theme ke hisaab se bhi automatically switch hoga!",
     account: "Account",
     tryAgain: "Dobara Try Karo",
-
-    // Upload
     aiPowered: "AI-Powered • 95%+ Accuracy",
     discoverStyle: "Apna Perfect",
-    perfectStyle: "Style",
+    perfectStyle: "Perfect Style",
     styleWord: "Discover Karo",
     uploadSubtitle: "Selfie upload karo — skin tone ke hisaab se personalized fashion recommendations pao",
     normal: "Normal",
@@ -539,8 +442,6 @@ export const translations = {
     skinTones: "Hum in sabhi skin tones ke liye kaam karte hain 🇮🇳",
     maleMode: "Male mode: Shirts, Pants, Ethnic wear suggestions milenge!",
     femaleMode: "Female mode: Dresses, Sarees, Suits, Makeup suggestions milenge!",
-
-    // Results
     newPhoto: "← Nayi Photo",
     analyzeNewPhoto: "Nayi Photo Analyze Karo",
     eachSelfie: "Har selfie mein better results aate hain!",
@@ -551,14 +452,14 @@ export const translations = {
     photoTips: "💡 Photo Tips:",
     colorsToAvoid: "Yeh Colors Avoid Karo",
     completeOutfitIdeas: "Complete Outfit Ideas",
-    styleTips: "Style Tips Sirf Tumhare Liye",
-    whatToWear: "Kya Pehno Kab?",
+    styleTips: "Style Tips",
+    whatToWear: "Kab Kya Pehno",
     ethnicWear: "Ethnic Wear",
     sareeEthnic: "Saree & Ethnic Wear",
     accessories: "Accessories & Jewellery",
     accessoriesFor: "Tumhare Liye Accessories",
     makeupSuggestions: "Makeup Suggestions",
-    sareeSuits: "Saree & Suits Suggestions",
+    sareeSuits: "Saree & Suits",
     bestShirtColors: "Best Shirt Colors",
     bestPantColors: "Best Pant Colors",
     bestDressColors: "Best Dress Colors",
@@ -573,18 +474,14 @@ export const translations = {
     avoidFabrics: "Avoid Fabrics",
     seasonStyleTips: "Season Style Tips:",
     shopThisColor: "Yeh Color Shop Karo",
-
-    // History
-    yourHistory: "Tumhari History",
-    noHistory: "Abhi Koi History Nahi",
-    noHistoryDesc: "Pehli selfie analyze karo — phir history yahan dikhegi!",
-    loadingHistory: "History load ho rahi hai...",
+    yourHistory: "Tumhari Style History",
+    noHistory: "No history yet",
+    noHistoryDesc: "Analyze kiye gaye styles yahan dikhenge.",
+    loadingHistory: "Tumhari style journey load ho rahi hai...",
     loadingDetails: "Details load ho rahi hain...",
-    backToHistory: "← History pe Wapas Jao",
-    failedHistory: "History load nahi hui. Dobara try karo.",
+    backToHistory: "← History pe wapas jao",
+    failedHistory: "History load nahi hui.",
     failedDetails: "Details load nahi hui.",
-
-    // Outfit Checker
     outfitTitle: "Kya Yeh Outfit",
     outfitSubtitle: "Tumpe Acha Lagega?",
     outfitDesc: "Apni selfie + kapde ki photo upload karo — AI check karega compatibility!",
@@ -599,20 +496,16 @@ export const translations = {
     selfieTips: "Selfie Tips:",
     outfitTips: "Outfit Tips:",
     yourSkinTone: "Tumhari Skin Tone",
-    outfitColor: "Outfit Color",
-    betterAlternatives: "Better Alternatives",
+    outfitColor: "Outfit ka Color",
+    betterAlternatives: "Better alternatives — abhi buy karo",
     clearFacePhotoTip: "Clear face wali photo",
     goodLighting: "Good lighting mein",
     noSunglasses: "Sunglasses mat pehno",
     plainBackground: "Plain background pe photo lo",
     fullOutfitVisible: "Poora kapda dikhe",
     clearBrightPhoto: "Clear aur bright photo",
-
-    // Language
     language: "Language",
-    languageLabel: "App Language",
-
-    // New labels
+    languageLabel: "Language",
     community: "Community",
     liveFeed: "Live Style Feed",
     postOOTD: "Apna OOTD post karo",
@@ -623,8 +516,6 @@ export const translations = {
     tools: "Smart Tools",
     calendar: "Style Calendar",
     wardrobe: "Mera Wardrobe",
-
-    // Loading steps
     loadingScan: "Photo scan ho rahi hai...",
     loadingQuality: "Quality check ho rahi hai",
     loadingFace: "Chehra pehchana raha hai...",
@@ -635,8 +526,6 @@ export const translations = {
     loadingRecsSub: "25+ fashion rules",
     loadingDone: "Bas thoda aur...",
     loadingDoneSub: "Style guide ready hai",
-
-    // Home
     goodDay: "Namaste,",
     welcomeHey: "Namaste {name} 👋",
     welcomeNew: "StyleGuru AI mein swagat hai ✨",
@@ -652,36 +541,21 @@ export const translations = {
     rateMyFit: "📸 Mere Fit ko Rate Karo",
     rateMyFitSub: "Apna outfit pehno aur daily style score pao 🔥",
     scanFit: "Fit Scan Karo",
-
-    // Results
     completeLook: "Look ko complete karo",
-    yourSkinTone: "Tumhari Skin Tone",
-    outfitColor: "Outfit ka Color",
-    betterAlternatives: "Better alternatives — abhi buy karo",
     avoidThese: "Inse bacho",
     dressColors: "Dress Colors",
     topColors: "Top Colors",
     kurtiColors: "Kurti Colors",
     lehengaColors: "Lehenga Colors",
     bottomColors: "Bottom Colors",
-    sareeSuits: "Saree & Suits",
-    whatToWear: "Kab Kya Pehno",
-    styleTips: "Style Tips",
-    ethnicWear: "Ethnic Wear",
     outfitCombos: "Outfit Combos",
-
-    // Settings
     analyses: "Analyses",
     savedColors: "Saved Colors",
     proMember: "PRO Member",
     freePlan: "Free Plan",
     upgrade: "Upgrade Karo",
-    languageLabel: "Language",
     appLanguage: "App ki bhasha",
-    logout: "Logout",
     stats: "Stats",
-
-    // Tools
     toolsHeader: "Tools & Utilities",
     aiStyleBot: "AI StyleBot",
     styleBotDesc: "Chat & Advice",
@@ -696,8 +570,6 @@ export const translations = {
     trendingNow: "Trending",
     backTools: "Peeche jao",
     shopOn: "Yahan se buy karo:",
-
-    // Community
     couldNotLoadFeed: "Community feed load nahi ho saki. Baad mein try karo.",
     completeAnalysisFirst: "Pehle color analysis complete karo!",
     timeAgoUnknown: "unknown",
@@ -707,8 +579,6 @@ export const translations = {
     timeAgoHour: "ghanta",
     timeAgoMinute: "minute",
     timeAgoSecond: "second",
-
-    // Calendar
     monday: "Monday",
     tuesday: "Tuesday",
     wednesday: "Wednesday",
@@ -736,8 +606,6 @@ export const translations = {
     premiumTop: "Premium Top",
     recommendedPant: "Recommended Pant",
     dropSuffix: " ka Outfit",
-
-    // Tools detail
     sampleText: "Sample Text Preview",
     contrastRatio: "Contrast Ratio",
     greatCombo: "Great Combo!",
@@ -745,19 +613,7 @@ export const translations = {
     poorContrast: "Poor Contrast",
     color1: "Color 1",
     color2: "Color 2",
-
-    // History (Hinglish)
-    yourHistory: "Tumhari Style History",
-    noHistory: "No history yet",
-    noHistoryDesc: "Analyze kiye gaye styles yahan dikhenge.",
-    loadingHistory: "Tumhari style journey load ho rahi hai...",
-    loadingDetails: "Details load ho rahi hain...",
-    backToHistory: "← History pe wapas jao",
-    failedHistory: "History load nahi hui.",
-    failedDetails: "Details load nahi hui.",
     outfitIdeas: "Outfit Ideas",
-
-    // Bot
     botTitle: "StyleGuru Bot",
     botSub: "Tumhara AI Fashion Assistant",
     botPlaceholder: "Apna fashion sawal poocho...",
@@ -778,8 +634,6 @@ export const translations = {
     botReplyAccessories: "✨ Accessory Guide:\n\n🟡 Warm Skin: Gold jewellery, Brown leather, Amber sunglasses\n🔵 Cool Skin: Silver jewellery, Black leather, Grey sunglasses\n🟠 Medium/Olive: Gold aur Silver dono chalte hain!\n\n💡 Rule: Warm Undertone = Gold, Cool Undertone = Silver!",
     botReplyBudget: "💰 Budget Shopping Tips:\n\n- Meesho: Best for under ₹500 options\n- Amazon: Good deals in ₹500-1000 range\n- Myntra: Best branded options in sale\n- Flipkart: Combo of budget + quality\n\n💡 Apne results mein budget filter use karo — tap on ₹500/₹1000/₹2000!",
     botReplyThanks: "🙏 You're welcome! Tumhari style journey mein help karke khushi hui.\n\nYaad rakhna: Confidence sabse badhiya accessory hai! 💪\n\nKya tum kuch aur jaana chahte ho?",
-
-    // Landing Page
     landingHeroTitle: "Smart Fashion",
     landingHeroSub: "Advisor",
     landingTagline: "AI ki help se apni skin tone ke hisaab se outfit recommendations pao.\nSelfie upload karo aur discover karo apne {perfectColors}.",
@@ -804,7 +658,6 @@ export const translations = {
     featureEaseDesc: "Selfie upload karo — seconds mein results pao.",
     howItWorks: "Kaise kaam karta hai",
     howItWorksSubTitle: "3 Simple Steps tumhare {perfectStyle} ke liye",
-    perfectStyle: "Perfect Style",
     step1Title: "Selfie Upload Karo",
     step1Desc: "Natural light mein clear selfie lo. Hamara AI front-facing photo ke saath best kaam karta hai.",
     step2Title: "AI Skin Tone Analyze Karta Hai",
@@ -819,15 +672,11 @@ export const translations = {
     areSaying: "Kya Keh Rahe Hain",
     faqTitle: "Aksar Pooche Jaane Waale {questions}",
     questions: "Sawalaat",
-
-    // Auth
     signingIn: "Sign in ho raha hai...",
     processing: "Process ho raha hai...",
     skipGuest: "Skip karo aur Guest bano →",
     enterDetails: "Please email aur password dono enter karo.",
     enterName: "Please apna poora naam enter karo.",
-
-    // Paywall
     proTitle: "STYLEGURU PRO",
     proSub: "Best AI Stylist Unlock Karo",
     perMonth: "/month",
@@ -842,14 +691,10 @@ export const translations = {
     upgradeNow: "Abhi Upgrade Karo ✨",
     processingPayment: "Payment process ho rahi hai...",
     secureRazorpay: "Razorpay secure payment.\nYeh currently test mode mein hai.",
-
-    // Wardrobe
     myWardrobe: "Mera Wardrobe",
-    savedColors: "Saved Colors",
     savedOutfits: "Saved Outfits",
     outfits: "Outfits",
     colors: "Colors",
-    history: "History",
     noSavedColors: "Abhi koi colors saved nahi hain",
     tapToSaveColor: "Kisi bhi color pe 🤍 tap karke save karo",
     clearAllColors: "Saare colors hatao",
@@ -861,22 +706,16 @@ export const translations = {
     deleting: "Delete ho raha hai...",
     outfitRemoved: "Outfit wardrobe se hat gaya",
     deleteFailed: "Delete fail hua — please try again",
-
-    // Weather Tip
     expertWeatherTip: "Expert Weather Tip",
     bestFabricsToday: "Aaj ke liye best fabrics:",
     weatherStyleTip: "Weather Style Tip",
     enterCity: "Apni city enter karo (e.g. Delhi, Mumbai)",
     set: "Set karo",
-
-    // Daily Drop
     dailyDropReady: "Tumhara Daily Drop Ready Hai!",
     dailyDropSub: "Humne mausam aur tumhari {skinTone} skin tone ke hisaab se aaj ka outfit ready kiya hai.",
     unlockOutfit: "Outfit Unlock Karo 🔓",
     skipToday: "Aaj ke liye skip karo",
     unlockingWardrobe: "Wardrobe khul raha hai...",
-
-    // Celebs
     "Shah Rukh Khan": "Shah Rukh Khan",
     "Ranbir Kapoor": "Ranbir Kapoor",
     "Deepika Padukone": "Deepika Padukone",
@@ -885,8 +724,6 @@ export const translations = {
     "Salman Khan": "Salman Khan",
     "Shahid Kapoor": "Shahid Kapoor",
     "Amitabh Bachchan": "Amitabh Bachchan",
-
-    // Footer
     footerRights: "© 2025 StyleGuru AI. All rights reserved.",
     footerAffiliate: "StyleGuru AI Amazon Associates Programme ka part hai, jo advertising fees earn karne ka ek zariya hai.",
     navHome: "Home",
@@ -895,16 +732,12 @@ export const translations = {
     navContact: "Contact",
     navTerms: "Terms",
     navBlog: "Blog",
-
-    // Testimonials
     test1Review: "Finally koi aisa app mila jo Indian skin tones ko samajhta hai! Color recommendations ekdum sahi hain.",
     test2Review: "Outfit checker feature amazing hai. Maine apni shirt upload ki aur isne perfectly match bata diya.",
     test3Review: "Mujhe kabhi nahi pata tha mera undertone cool hai. Ab samajh aaya Navy mujhpe kyu acha lagta hai.",
     test4Review: "Dark skin hone ki wajah se colors dhundne mein problem hoti thi. Cobalt blue suggestion was perfect!",
     test5Review: "Sister ki shaadi ke liye lehenga suggestions perfect the. Deep burgundy was a hit!",
     test6Review: "Body type aur skin tone dono tips bahut helpful hain. Horizontal stripes mujhpe bahut achi lagti hain!",
-
-    // FAQ
     faq1Q: "StyleGuru AI kya hai?",
     faq1A: "StyleGuru AI ek free AI-powered fashion advisor hai jo tumhari selfie analyze karke best outfit colors suggest karta hai.",
     faq2Q: "Skin tone analysis kaise kaam karta hai?",
@@ -921,8 +754,6 @@ export const translations = {
     faq7A: "Haan. StyleGuru AI Men aur Women dono ke liye alag aur perfect recommendations deta hai.",
     faq8Q: "AI analysis kitna accurate hai?",
     faq8A: "Humara AI 95%+ accuracy deta hai. Best results ke liye natural light mein clear selfie lo.",
-
-    // Blog Hinglish
     blog1Title: "Tumhari Skin Tone ke liye Best Colors",
     blog1Excerpt: "Janiye kaunse colors tumhari skin tone ko compliment karte hain.",
     blog2Title: "Perfect Outfit kaise choose karein",
@@ -931,9 +762,6 @@ export const translations = {
     blog3Excerpt: "Dekhiye kaise AI personalized styling mein revolution laa raha hai.",
     readMore: "Read More →",
     viewAllArticles: "Saare Articles Dekho →",
-
-    // Dashboard UI
-    navHome: "Home",
     navAnalyze: "Analyze",
     navWardrobe: "Wardrobe",
     navTools: "Tools",
@@ -949,18 +777,16 @@ export const translations = {
     enable: "On karo",
     unblock: "Unblock karo →",
   },
-
   hi: {
-    // Auth
-    login: "लॉग इन",
-    register: "रजिस्टर करें",
+    login: "लॉगिन",
+    register: "रजिस्टर",
     fullName: "पूरा नाम",
     email: "ईमेल",
     password: "पासवर्ड",
     namePlaceholder: "अपना नाम दर्ज करें",
-    loginBtn: "लॉग इन करें",
-    registerBtn: "खाता बनाएं",
-    googleLogin: "Google से जारी रखें",
+    loginBtn: "लॉगिन",
+    registerBtn: "रजिस्टर",
+    googleLogin: "Google के साथ जारी रखें",
     orEmail: "या ईमेल के साथ",
     noAccount: "इस ईमेल से कोई खाता नहीं मिला।",
     wrongPassword: "गलत पासवर्ड।",
@@ -970,24 +796,20 @@ export const translations = {
     googleFailed: "Google लॉगिन विफल रहा। कृपया पुन: प्रयास करें।",
     tagline: "सभी प्रकार की त्वचा के लिए AI-आधारित फैशन",
     footer: "💜 के साथ निर्मित • आपकी तस्वीरें कभी स्टोर नहीं की जातीं",
-
-    // Dashboard tabs
     analyze: "विश्लेषण",
     outfitCheck: "आउटफिट चेक",
-    history: "इतिहास",
+    history: "हिस्ट्री",
     settings: "सेटिंग्स",
-    logout: "लॉग आउट",
+    logout: "लॉगआउट",
     darkMode: "डार्क मोड",
     lightMode: "लाइट मोड",
     switchTheme: "थीम बदलें",
     systemTheme: "आपके सिस्टम थीम के अनुसार स्वचालित रूप से बदलता है!",
     account: "खाता",
     tryAgain: "पुनः प्रयास करें",
-
-    // Upload
     aiPowered: "AI-आधारित • 95%+ सटीकता",
     discoverStyle: "अपनी",
-    perfectStyle: "परफेक्ट",
+    perfectStyle: "बेहतरीन स्टाइल",
     styleWord: "स्टाइल खोजें",
     uploadSubtitle: "सेल्फी अपलोड करें — अपनी त्वचा के रंग के अनुसार व्यक्तिगत फैशन सुझाव प्राप्त करें",
     normal: "सामान्य",
@@ -1009,8 +831,6 @@ export const translations = {
     skinTones: "हम सभी प्रकार की त्वचा का समर्थन करते हैं 🇮🇳",
     maleMode: "पुरुष मोड: शर्ट, पैंट और एथनिक वियर सुझाव शामिल!",
     femaleMode: "महिला मोड: ड्रेस, साड़ी, सूट और मेकअप सुझाव शामिल!",
-
-    // Results
     newPhoto: "← नई फोटो",
     analyzeNewPhoto: "नई फोटो का विश्लेषण करें",
     eachSelfie: "हर सेल्फी बेहतर परिणाम देती है!",
@@ -1021,15 +841,15 @@ export const translations = {
     photoTips: "💡 फोटो टिप्स:",
     colorsToAvoid: "इन रंगों से बचें",
     completeOutfitIdeas: "संपूर्ण पोशाक विचार",
-    styleTips: "स्टाइल टिप्स सिर्फ आपके लिए",
-    whatToWear: "क्या पहनें और कब?",
-    ethnicWear: "एथनिक वियर (पारंपरिक कपड़े)",
+    styleTips: "स्टाइल टिप्स",
+    whatToWear: "कब क्या पहनें",
+    ethnicWear: "एथनिक वियर",
     sareeEthnic: "साड़ी और एथनिक वियर",
     accessories: "एक्सेसरीज़ और ज्वैलरी",
     accessoriesFor: "आपके लिए एक्सेसरीज़",
     makeupSuggestions: "मेकअप सुझाव",
-    sareeSuits: "साड़ी और सूट सुझाव",
-    bestShirtColors: "सर्वश्रेष्ठ शर्ट के रंग",
+    sareeSuits: "साड़ी और सूट",
+    bestShirtColors: "शर्ट के बेहतरीन रंग",
     bestPantColors: "सर्वश्रेष्ठ पैंट के रंग",
     bestDressColors: "सर्वश्रेष्ठ ड्रेस के रंग",
     bestTopColors: "सर्वश्रेष्ठ टॉप के रंग",
@@ -1043,18 +863,14 @@ export const translations = {
     avoidFabrics: "इन कपड़ों से बचें",
     seasonStyleTips: "मौसम के स्टाइल टिप्स:",
     shopThisColor: "यह रंग खरीदें",
-
-    // History
-    yourHistory: "आपका इतिहास",
-    noHistory: "अभी कोई इतिहास नहीं है",
-    noHistoryDesc: "अपनी पहली सेल्फी का विश्लेषण करें — इतिहास यहाँ दिखाई देगा!",
-    loadingHistory: "इतिहास लोड हो रहा है...",
+    yourHistory: "आपकी स्टाइल हिस्ट्री",
+    noHistory: "अभी तक कोई हिस्ट्री नहीं है",
+    noHistoryDesc: "आपके द्वारा विश्लेषण किए गए स्टाइल यहाँ दिखाई देंगे।",
+    loadingHistory: "आपकी स्टाइल यात्रा लोड हो रही है...",
     loadingDetails: "विवरण लोड हो रहा है...",
-    backToHistory: "← इतिहास पर वापस जाएं",
-    failedHistory: "इतिहास लोड करने में विफल। कृपया पुन: प्रयास करें।",
-    failedDetails: "विवरण लोड करने में विफल।",
-
-    // Outfit Checker
+    backToHistory: "← हिस्ट्री पर वापस जाएं",
+    failedHistory: "हिस्ट्री लोड नहीं हो सकी।",
+    failedDetails: "विवरण लोड नहीं हो सका।",
     outfitTitle: "क्या यह पोशाक",
     outfitSubtitle: "आप पर अच्छी लगेगी?",
     outfitDesc: "अपनी सेल्फी + कपड़े की फोटो अपलोड करें — AI अनुकूलता की जांच करेगा!",
@@ -1068,21 +884,17 @@ export const translations = {
     uploadBoth: "कृपया दोनों तस्वीरें अपलोड करें!",
     selfieTips: "सेल्फी टिप्स:",
     outfitTips: "पोशाक टिप्स:",
-    yourSkinTone: "आपकी त्वचा का रंग",
-    outfitColor: "पोशाक का रंग",
-    betterAlternatives: "बेहतर विकल्प",
+    yourSkinTone: "आपकी स्किन टोन",
+    outfitColor: "आउटफिट का रंग",
+    betterAlternatives: "बेहतर विकल्प — अभी खरीदें",
     clearFacePhotoTip: "स्पष्ट चेहरे वाली फोटो",
     goodLighting: "अच्छी रोशनी",
     noSunglasses: "कोई धूप का चश्मा नहीं",
     plainBackground: "सादा बैकग्राउंड",
     fullOutfitVisible: "पूरी पोशाक दिखाई दे",
     clearBrightPhoto: "स्पष्ट और उज्ज्वल फोटो",
-
-    // Language
     language: "भाषा",
-    languageLabel: "ऐप की भाषा",
-
-    // New labels
+    languageLabel: "भाषा (Language)",
     community: "कम्युनिटी",
     liveFeed: "लाइव स्टाइल फीड",
     postOOTD: "अपना OOTD पोस्ट करें",
@@ -1093,8 +905,6 @@ export const translations = {
     tools: "स्मार्ट टूल्स",
     calendar: "स्टाइल कैलेंडर",
     wardrobe: "मेरा वार्डरोब",
-
-    // Loading steps
     loadingScan: "फोटो स्कैन हो रही है...",
     loadingQuality: "क्वालिटी चेक हो रही है",
     loadingFace: "चेहरा पहचाना जा रहा है...",
@@ -1105,8 +915,6 @@ export const translations = {
     loadingRecsSub: "25+ फैशन नियम",
     loadingDone: "बस थोड़ा और...",
     loadingDoneSub: "स्टाइल गाइड तैयार है",
-
-    // Home
     goodDay: "नमस्ते,",
     welcomeHey: "नमस्ते {name} 👋",
     welcomeNew: "StyleGuru AI में आपका स्वागत है ✨",
@@ -1122,37 +930,21 @@ export const translations = {
     rateMyFit: "📸 मेरे फिट को रेट करें",
     rateMyFitSub: "अपना आउटफिट पहनें और डेली स्टाइल स्कोर पाएं 🔥",
     scanFit: "फिट स्कैन करें",
-
-    // Results
     completeLook: "लुक को पूरा करें",
-    yourSkinTone: "आपकी स्किन टोन",
-    outfitColor: "आउटफिट का रंग",
-    betterAlternatives: "बेहतर विकल्प — अभी खरीदें",
     avoidThese: "इनसे बचें",
     dressColors: "ड्रेस के रंग",
     topColors: "टॉप के रंग",
     kurtiColors: "कुर्ती के रंग",
     lehengaColors: "लहंगा के रंग",
     bottomColors: "बॉटम के रंग",
-    sareeSuits: "साड़ी और सूट",
-    whatToWear: "कब क्या पहनें",
-    styleTips: "स्टाइल टिप्स",
-    ethnicWear: "एथनिक वियर",
     outfitCombos: "आउटफिट कॉम्बो",
-
-    // Settings
-    settings: "सेटिंग्स",
     analyses: "विश्लेषण",
     savedColors: "सेव किए गए रंग",
     proMember: "प्रो सदस्य",
     freePlan: "फ्री प्लान",
     upgrade: "अपग्रेड करें",
-    languageLabel: "भाषा (Language)",
     appLanguage: "ऐप की भाषा",
-    logout: "लॉगआउट",
     stats: "आंकड़े",
-
-    // Tools
     toolsHeader: "टूल्स और यूटिलिटीज",
     aiStyleBot: "AI स्टाइलबॉट",
     styleBotDesc: "चैट और सलाह",
@@ -1167,9 +959,6 @@ export const translations = {
     trendingNow: "ट्रेंडिंग",
     backTools: "पीछे हटें",
     shopOn: "यहाँ से खरीदें:",
-
-    // Community
-    community: "कम्युनिटी",
     couldNotLoadFeed: "कम्युनिटी फीड लोड नहीं हो सका। बाद में प्रयास करें।",
     completeAnalysisFirst: "कृपया पहले कलर विश्लेषण पूरा करें!",
     timeAgoUnknown: "अज्ञात",
@@ -1179,8 +968,6 @@ export const translations = {
     timeAgoHour: "घंटा",
     timeAgoMinute: "मिनट",
     timeAgoSecond: "सेकंड",
-
-    // Calendar & Weekdays
     monday: "सोमवार",
     tuesday: "मंगलवार",
     wednesday: "बुधवार",
@@ -1208,8 +995,6 @@ export const translations = {
     premiumTop: "प्रीमियम टॉप",
     recommendedPant: "अनुशंसित पैंट",
     dropSuffix: " का ऑउटफिट",
-
-    // Tools detail
     sampleText: "सैंपल टेक्स्ट प्रीव्यू",
     contrastRatio: "कंट्रास्ट रेशियो",
     greatCombo: "शानदार कॉम्बो!",
@@ -1217,27 +1002,13 @@ export const translations = {
     poorContrast: "कम कंट्रास्ट",
     color1: "रंग 1",
     color2: "रंग 2",
-
-    // History
-    yourHistory: "आपकी स्टाइल हिस्ट्री",
-    noHistory: "अभी तक कोई हिस्ट्री नहीं है",
-    noHistoryDesc: "आपके द्वारा विश्लेषण किए गए स्टाइल यहाँ दिखाई देंगे।",
-    loadingHistory: "आपकी स्टाइल यात्रा लोड हो रही है...",
-    loadingDetails: "विवरण लोड हो रहा है...",
-    backToHistory: "← हिस्ट्री पर वापस जाएं",
-    failedHistory: "हिस्ट्री लोड नहीं हो सकी।",
-    failedDetails: "विवरण लोड नहीं हो सका।",
-    bestShirtColors: "शर्ट के बेहतरीन रंग",
     outfitIdeas: "आउटफिट आइडियाज",
-
-    // Bot
     botTitle: "StyleGuru बॉट",
     botSub: "आपका AI फैशन सहायक",
     botPlaceholder: "अपना फै़शन सवाल पूछें...",
     botInitial: "नमस्ते! 👋 मैं आपका StyleGuru सहायक हूँ।\n\nमुझसे आउटफिट, रंग, एक्सेसरीज के बारे में पूछें या क्या कर सकता हूँ यह देखने के लिए \"help\" टाइप करें!",
     botHelp: "🤖 मैं निम्न में मदद कर सकता हूँ:\n\n👔 किसी भी अवसर के लिए आउटफिट सुझाव\n🎨 आपकी स्किन टोन के आधार पर रंगों की सलाह\n💇 बालों के रंग के सुझाव\n✨ एक्सेसरी मैचिंग टिप्स\n☀️ मौसम के अनुसार स्टाइलिंग\n💰 बजट-फ्रेंडली शॉपिंग\n📷 कलर स्कैनर का उपयोग कैसे करें\n\nबस अपना सवाल टाइप करें!",
     botDefault: "🤔 मुझे इसके बारे में पक्का नहीं पता! कृपया इनके बारे में पूछें:\n\n- शादी के आउटफिट\n- ऑफिस स्टाइल\n- डेट नाइट लुक्स\n- आपके लिए बेहतरीन रंग\n- एक्सेसरीज\n- बजट शॉपिंग\n\nया सभी विकल्प देखने के लिए \"help\" टाइप करें!",
-
     botReplyGreeting: "नमस्ते! 👋 मैं आपका StyleGuru AI सहायक हूँ। मुझसे रंगों, आउटफिट्स या स्टाइलिंग टिप्स के बारे में पूछें! मैं आपकी क्या मदद कर सकता हूँ?",
     botReplyWedding: "💍 शादी के लिए:\n\n👨 पुरुष: गोल्ड, मैरून या रॉयल ब्लू शेरवानी चुनें। मोजरी और ब्रोच के साथ पहनें।\n\n👩 महिला: ज्वेल टोन्स (एमराल्ड, रूबी रेड, रॉयल पर्पल) में सिल्क साड़ी गोल्ड ज्वेलरी के साथ क्लासिक है।\n\n💡 टिप: फोटो के लिए अपने आउटफिट को शादी की थीम से मैच करें!",
     botReplyOffice: "💼 ऑफिस स्टाइल गाइड:\n\n👨 पुरुष: सॉलिड रंग की शर्ट (नेवी, सफेद, लाइट ब्लू) + डार्क पतलून। गहरे पैटर्न से बचें।\n\n👩 महिला: सीधी पैंट के साथ अच्छी फिटिंग वाली कुर्ती, या ट्राउजर के साथ ब्लेज़र।\n\n💡 टिप: आपकी स्किन टोन के न्यूट्रल रंग फॉर्मल सेटिंग्स के लिए सबसे अच्छे हैं!",
@@ -1252,8 +1023,6 @@ export const translations = {
     botReplyAccessories: "✨ एक्सेसरी गाइड:\n\n🟡 वार्म स्किन: गोल्ड ज्वेलरी, ब्राउन लेदर, एम्बर सनग्लासेस\n🔵 कूल स्किन: सिल्वर ज्वेलरी, ब्लैक लेदर, ग्रे सनग्लासेस\n🟠 मीडियम/ओलिव: गोल्ड और सिल्वर दोनों चलते हैं!\n\n💡 नियम: वार्म अंडरटोन = गोल्ड, कूल अंडरटोन = सिल्वर!",
     botReplyBudget: "💰 बजट शॉपिंग टिप्स:\n\n- Meesho: ₹500 के अंदर के विकल्पों के लिए सर्वश्रेष्ठ\n- Amazon: ₹500-1000 की रेंज में अच्छे सौदे\n- Myntra: सेल में बेहतरीन विकल्प\n- Flipkart: बजट + क्वालिटी का कॉम्बो\n\n💡 अपने रिजल्ट्स में बजट फिल्टर का उपयोग करें — ₹500/₹1000/₹2000 पर टैप करें!",
     botReplyThanks: "🙏 आपका स्वागत है! आपकी स्टाइल यात्रा में मदद करके खुशी हुई।\n\nयाद रखें: आत्मविश्वास सबसे अच्छी एक्सेसरी है! 💪\n\nक्या आप कुछ और जानना चाहते हैं?",
-
-    // Landing Page
     landingHeroTitle: "स्मार्ट फैशन",
     landingHeroSub: "सहाएक",
     landingTagline: "AI की मदद से अपनी स्किन टोन के आधार पर आउटफिट सुझाव प्राप्त करें।\nसेल्फी अपलोड करें और अपने {perfectColors} खोजें।",
@@ -1278,7 +1047,6 @@ export const translations = {
     featureEaseDesc: "सेल्फी अपलोड करें — सेकंडों में तुरंत परिणाम पाएं।",
     howItWorks: "यह कैसे काम करता है",
     howItWorksSubTitle: "आपकी {perfectStyle} के लिए 3 सरल कदम",
-    perfectStyle: "बेहतरीन स्टाइल",
     step1Title: "अपनी सेल्फी अपलोड करें",
     step1Desc: "प्राकृतिक रोशनी में एक साफ़ सेल्फी लें। हमारा AI बिना सनग्लासेस वाली फोटो के साथ सबसे अच्छा काम करता है।",
     step2Title: "AI स्किन टोन का विश्लेषण करता है",
@@ -1293,24 +1061,13 @@ export const translations = {
     areSaying: "क्या कह रहे हैं",
     faqTitle: "अक्सर पूछे जाने वाले {questions}",
     questions: "प्रश्न",
-
-    // Auth
-    login: "लॉगिन",
-    register: "रजिस्टर",
     signingIn: "साइन इन हो रहा है...",
-    googleLogin: "Google के साथ जारी रखें",
-    orEmail: "या ईमेल के साथ",
-    fullName: "पूरा नाम",
     emailLabel: "ईमेल",
     passwordLabel: "पासवर्ड",
     processing: "प्रोसेस हो रहा है...",
-    loginBtn: "लॉगिन",
-    registerBtn: "रजिस्टर",
     skipGuest: "छोड़ें और गेस्ट के रूप में देखें →",
     enterDetails: "कृपया ईमेल और पासवर्ड दोनों दर्ज करें।",
     enterName: "कृपया अपना पूरा नाम दर्ज करें।",
-
-    // Paywall
     proTitle: "TONEFIT प्रो",
     proSub: "सर्वश्रेष्ठ AI स्टाइलिस्ट को अनलॉक करें",
     perMonth: "/महीना",
@@ -1325,14 +1082,10 @@ export const translations = {
     upgradeNow: "अभी अपग्रेड करें ✨",
     processingPayment: "भुगतान प्रोसेस हो रहा है...",
     secureRazorpay: "Razorpay द्वारा सुरक्षित भुगतान।\nयह वर्तमान में टेस्ट मोड में चल रहा है।",
-
-    // Wardrobe
     myWardrobe: "मेरी वार्डरोब",
-    savedColors: "सेव किए गए रंग",
     savedOutfits: "सेव किए गए आउटफिट",
     outfits: "आउटफिट्स",
     colors: "रंग",
-    history: "हिस्ट्री",
     noSavedColors: "अभी तक कोई रंग सेव नहीं किया गया है",
     tapToSaveColor: "किसी भी रंग को सेव करने के लिए 🤍 पर टैप करें",
     clearAllColors: "सभी रंग हटाएँ",
@@ -1344,22 +1097,16 @@ export const translations = {
     deleting: "हटाया जा रहा है...",
     outfitRemoved: "आउटफिट वार्डरोब से हटा दिया गया",
     deleteFailed: "हटाने में विफल — कृपया पुनः प्रयास करें",
-
-    // Weather Tip
     expertWeatherTip: "एक्सपर्ट वेदर टिप",
     bestFabricsToday: "आज के लिए बेहतरीन फैब्रिक:",
     weatherStyleTip: "वेदर स्टाइल टिप",
     enterCity: "अपना शहर दर्ज करें (जैसे दिल्ली, मुंबई)",
     set: "सेट करें",
-
-    // Daily Drop
     dailyDropReady: "आपका डेली ड्रॉप तैयार है!",
     dailyDropSub: "हमने मौसम और आपके {skinTone} स्किन टोन के आधार पर आज का आउटफिट तैयार किया है।",
     unlockOutfit: "आउटफिट अनलॉक करें 🔓",
     skipToday: "आज के लिए छोड़ें",
     unlockingWardrobe: "आपका वार्डरोब खुल रहा है...",
-
-    // Celebs
     "Shah Rukh Khan": "शाहरुख खान",
     "Ranbir Kapoor": "रणबीर कपूर",
     "Deepika Padukone": "दीपिका पादुकोण",
@@ -1368,8 +1115,6 @@ export const translations = {
     "Salman Khan": "सलमान खान",
     "Shahid Kapoor": "शाहिद कपूर",
     "Amitabh Bachchan": "अमिताभ बच्चन",
-
-    // Footer
     footerRights: "© 2025 StyleGuru AI. सर्वाधिकार सुरक्षित।",
     footerAffiliate: "StyleGuru AI उन सहबद्ध (affiliate) कार्यक्रमों में भाग लेता है जिन्हें विज्ञापनों द्वारा आय अर्जित करने हेतु बनाया गया है।",
     navHome: "होम",
@@ -1378,16 +1123,12 @@ export const translations = {
     navContact: "कांटेक्ट",
     navTerms: "नियम एवं शर्तें",
     navBlog: "ब्लॉग",
-
-    // Testimonials
     test1Review: "अंत में एक ऐसा ऐप जो भारतीय स्किन टोन को समझता है! रंग सुझाव एकदम सटीक हैं। मैंने शादी में सुझाव दिया गया कोरल कुर्ता पहना और बहुत तारीफें मिलीं।",
     test2Review: "आउटफिट चेकर फीचर कमाल का है। मैंने अपनी शर्ट अपलोड की और इसने मुझे बताया कि कौन सी पैंट अच्छी लगेगी। मुझे फैशन डिजास्टर से बचा लिया!",
     test3Review: "मुझे कभी नहीं पता था कि मेरा अंडरटोन कूल है जब तक कि StyleGuru AI ने मुझे नहीं बताया। अब मैं समझती हूँ कि नेवी और पर्पल मुझ पर क्यों जचते हैं।",
     test4Review: "गहरी त्वचा होने के कारण, मुझे अपने अनुकूल रंग ढूंढने में हमेशा संघर्ष करना पड़ता था। इस ऐप ने कोबाल्ट ब्लू और सफेद की सलाह दी — और परिणाम अविश्वसनीय है!",
     test5Review: "मेरी बहन की शादी के लिए लहंगे के रंग के सुझाव बिल्कुल सही थे। मैं गहरी बरगंडी के साथ गई और सभी को यह बहुत पसंद आया।",
     test6Review: "स्किन टोन और बॉडी टाइप टिप्स बहुत मददगार हैं। मैं दुबला हूँ और ऐप ने हॉरिजॉन्टल स्ट्राइप्स का सुझाव दिया — यह मुझ पर बहुत अच्छा लगता है!",
-
-    // FAQ
     faq1Q: "StyleGuru AI क्या है?",
     faq1A: "StyleGuru AI एक मुफ़्त AI-संचालित फैशन सलाहकार है जो सेल्फी से आपकी स्किन टोन का विश्लेषण करता है और बेहतरीन रंगों और स्टाइल टिप्स की सलाह देता है।",
     faq2Q: "स्किन टोन विश्लेषण कैसे काम करता है?",
@@ -1404,8 +1145,6 @@ export const translations = {
     faq7A: "हाँ। StyleGuru AI पुरुषों और महिलाओं दोनों के लिए अलग-अलग और सटीक सुझाव प्रदान करता है।",
     faq8Q: "AI विश्लेषण कितना सटीक है?",
     faq8A: "हमारा AI 95%+ सटीकता प्राप्त करता है। सर्वोत्तम परिणामों के लिए, प्राकृतिक रोशनी में साफ़ सेल्फी लें।",
-
-    // Blog
     blog1Title: "आपकी स्किन टोन के लिए बेहतरीन रंग",
     blog1Excerpt: "जानें कि कौन से रंग आपकी त्वचा के पूरक हैं — अपनी बेहतरीन कलर पैलेट खोजें।",
     blog2Title: "बेहतरीन आउटफिट कैसे चुनें",
@@ -1414,9 +1153,6 @@ export const translations = {
     blog3Excerpt: "जानें कि कैसे AI व्यक्तिगत स्टाइलिंग और स्मार्ट सुझावों के साथ फैशन में क्रांति ला रहा है।",
     readMore: "और पढ़ें →",
     viewAllArticles: "सभी लेख देखें →",
-
-    // Dashboard UI
-    navHome: "होम",
     navAnalyze: "विश्लेषण",
     navWardrobe: "वार्डरोब",
     navTools: "टूल्स",

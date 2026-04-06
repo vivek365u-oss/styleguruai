@@ -1,9 +1,9 @@
 import React, { useState, useEffect, createContext, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { auth, logout } from './api/styleApi';
-import { LanguageProvider } from './i18n/LanguageContext';
-import { PlanProvider } from './context/PlanContext';
-import { CartProvider } from './context/CartContext';
+import { LanguageProvider } from './i18n/LanguageProvider';
+import { PlanProvider } from './context/PlanProvider';
+import { CartProvider } from './context/CartProvider';
 import SplashScreen from './components/SplashScreen';
 import { useAuthState } from './hooks/useAuthState';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -77,10 +77,10 @@ function AppRoutes({ user, setUser }) {
     setUser(null);
     // Clear fashion data on logout to prevent persistence for the next user/guest
     const keysToClear = [
-      'sg_last_analysis', 
-      'sg_analysis_count', 
-      'sg_streak_count', 
-      'sg_last_checkin', 
+      'sg_last_analysis',
+      'sg_analysis_count',
+      'sg_streak_count',
+      'sg_last_checkin',
       'sg_daily_drop_date',
       'sg_analysis_history',
       'sg_saved_colors',
@@ -136,8 +136,8 @@ function App() {
     return localStorage.getItem('tonefit_theme') || 'light';
   });
 
-  const user = authState.user ? 
-    { name: authState.user.name, email: authState.user.email } 
+  const user = authState.user ?
+    { name: authState.user.name, email: authState.user.email }
     : null;
 
   const setUser = (newUser) => {

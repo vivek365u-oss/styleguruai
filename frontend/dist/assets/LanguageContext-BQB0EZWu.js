@@ -1,0 +1,1 @@
+import{r as e}from"./chunk-DECur_0Z.js";import{n as t}from"./jsx-runtime-CP2iHdEU.js";var n=e(t(),1),r=(0,n.createContext)(),i=()=>(0,n.useContext)(r)||{language:`en`,t:e=>e,changeLanguage:()=>{}};export{i as n,r as t};

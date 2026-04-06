@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, useRef } from 'react';
 import { getWardrobe, deleteWardrobeItem, getWardrobeCount, getSavedColors, deleteSavedColor, deleteAllSavedColors } from '../api/styleApi';
 import { auth } from '../api/styleApi';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
 import { getLocalWardrobeImage, deleteLocalWardrobeImage } from '../utils/indexedDB';

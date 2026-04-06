@@ -3,7 +3,7 @@
 // Daily outfit suggestion based on skin tone + gender
 // ============================================================
 import { useState, useEffect, useContext } from 'react';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import { auth, saveWardrobeItem } from '../api/styleApi';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalizedOOTD } from '../data/ootdOutfits';

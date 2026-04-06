@@ -40,9 +40,9 @@ function AdminDashboard() {
           try {
             const wSnap = await getCountFromServer(collection(db, `users/${userDoc.id}/wardrobe`));
             wardrobeCount += wSnap.data().count;
-          } catch {}
+          } catch { }
         }
-      } catch {}
+      } catch { }
 
       // Recent profiles (last 20)
       const profilesQuery = query(collection(db, 'users'), orderBy('profile.analyzed_at', 'desc'), limit(20));
@@ -75,7 +75,7 @@ function AdminDashboard() {
             if (validDate > new Date()) proCount++;
           }
         }
-      } catch {}
+      } catch { }
 
       setStats({
         totalUsers,

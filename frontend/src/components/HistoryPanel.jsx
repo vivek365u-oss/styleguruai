@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { getHistory, testTone } from '../api/styleApi';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
 

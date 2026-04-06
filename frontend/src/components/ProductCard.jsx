@@ -3,7 +3,7 @@
 // Individual product with Add to Cart button
 // ============================================================
 import { useState, useContext } from 'react';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import { useCart } from '../context/CartContext';
 
 function ProductCard({ product }) {

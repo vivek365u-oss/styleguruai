@@ -3,7 +3,7 @@
 // Camera-based real-time color detection & palette matching
 // ============================================================
 import { useState, useRef, useEffect, useContext, useCallback } from 'react';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 
 function hexToRgb(hex) {
   if (!hex || hex.length < 7) return { r: 128, g: 128, b: 128 };
@@ -89,7 +89,7 @@ function ColorScanner({ savedPalette = [], skinTone, onClose }) {
         await track.applyConstraints({ advanced: [{ torch: !torchOn }] });
         setTorchOn(!torchOn);
       }
-    } catch {}
+    } catch { }
   };
 
   // Color detection loop
@@ -218,13 +218,11 @@ function ColorScanner({ savedPalette = [], skinTone, onClose }) {
         {/* Controls */}
         <div className="absolute bottom-3 right-3 flex gap-2">
           <button onClick={toggleTorch}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center backdrop-blur-md border transition-all ${
-              torchOn ? 'bg-yellow-500/40 border-yellow-400 text-yellow-200' : 'bg-black/40 border-white/10 text-white/70'
-            }`}>🔦</button>
+            className={`w-10 h-10 rounded-xl flex items-center justify-center backdrop-blur-md border transition-all ${torchOn ? 'bg-yellow-500/40 border-yellow-400 text-yellow-200' : 'bg-black/40 border-white/10 text-white/70'
+              }`}>🔦</button>
           <button onClick={toggleFreeze}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center backdrop-blur-md border transition-all ${
-              frozen ? 'bg-blue-500/40 border-blue-400 text-blue-200' : 'bg-black/40 border-white/10 text-white/70'
-            }`}>{frozen ? '▶️' : '⏸'}</button>
+            className={`w-10 h-10 rounded-xl flex items-center justify-center backdrop-blur-md border transition-all ${frozen ? 'bg-blue-500/40 border-blue-400 text-blue-200' : 'bg-black/40 border-white/10 text-white/70'
+              }`}>{frozen ? '▶️' : '⏸'}</button>
         </div>
 
         {!cameraReady && (
@@ -239,18 +237,16 @@ function ColorScanner({ savedPalette = [], skinTone, onClose }) {
 
       {/* Match Result */}
       {matchResult && (
-        <div className={`rounded-2xl p-4 border ${
-          matchResult.match
+        <div className={`rounded-2xl p-4 border ${matchResult.match
             ? isDark ? 'bg-green-500/10 border-green-500/20' : 'bg-green-50 border-green-200'
             : isDark ? 'bg-red-500/10 border-red-500/20' : 'bg-red-50 border-red-200'
-        }`}>
+          }`}>
           <div className="flex items-center justify-between mb-2">
             <span className={`text-lg font-bold ${matchResult.match ? 'text-green-400' : isDark ? 'text-red-300' : 'text-red-600'}`}>
               {matchResult.verdict}
             </span>
-            <span className={`text-xs font-black px-2 py-1 rounded-full ${
-              matchResult.score >= 60 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-            }`}>{matchResult.score}%</span>
+            <span className={`text-xs font-black px-2 py-1 rounded-full ${matchResult.score >= 60 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+              }`}>{matchResult.score}%</span>
           </div>
 
           {/* Harmony bar */}

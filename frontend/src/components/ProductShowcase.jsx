@@ -3,7 +3,7 @@
 // Fetch and display products from /api/products/by-color
 // ============================================================
 import { useState, useEffect, useContext } from 'react';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import ProductCard from './ProductCard';
 import axios from 'axios';
 

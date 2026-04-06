@@ -4,7 +4,7 @@
  */
 
 import React, { useContext, useEffect, useState } from 'react';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 
 // Stage definitions shown as step pills

@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 
 function hexToRGB(hex) {
   const r = parseInt(hex.slice(1, 3), 16);

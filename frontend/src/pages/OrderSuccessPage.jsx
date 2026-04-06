@@ -83,7 +83,7 @@ function OrderSuccessPage() {
           <h2 className={`text-lg font-black mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
             🛍️ Your Items to Purchase
           </h2>
-          
+
           <div className="space-y-3">
             {items && items.map((item, idx) => (
               <div key={idx} className={`rounded-xl p-4 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200'}`}>

@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useContext } from 'react';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 
 export function PlansUpgradeScreen({ isDark = false, onSelectPlan, onClose }) {

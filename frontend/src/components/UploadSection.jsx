@@ -1,6 +1,6 @@
 import { useState, useRef, useContext } from 'react';
 import { analyzeImage, analyzeImageFemale, analyzeImageSeasonal } from '../api/styleApi';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import { useAnalysisProgress } from '../hooks/useAnalysisProgress';

@@ -47,12 +47,12 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   };
 
   const product = getProductCategory();
-  
+
   // 2. Build Myntra dynamic slug (e.g., navy-shirt)
   // Myntra search logic: slug works best for popular combos, /search?q= for everything else.
   // The user requested: myntra.com/color-product
   const myntraUrl = `https://www.myntra.com/${colorSlug}-${product}`;
-  
+
   // 3. Other platforms (updated to match same categories)
   const amzKw = `${colorDisplay} ${gender} ${product} trending 2025`;
   const fkKw = `${colorDisplay} ${gender} ${product}`;
@@ -63,10 +63,10 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   const myntraPriceParam = budget?.myntraMax ? `&p=price%5B0%5D%3D0%20TO%20${budget.myntraMax}` : '';
 
   const links = [
-    { name: 'Amazon',   url: `https://www.amazon.in/s?k=${encodeURIComponent(amzKw)}&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, icon: '🛒', bg: isDark ? 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' : 'bg-orange-50 hover:bg-orange-100 border-orange-300 text-orange-700 font-bold' },
+    { name: 'Amazon', url: `https://www.amazon.in/s?k=${encodeURIComponent(amzKw)}&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, icon: '🛒', bg: isDark ? 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' : 'bg-orange-50 hover:bg-orange-100 border-orange-300 text-orange-700 font-bold' },
     { name: 'Flipkart', url: `https://www.flipkart.com/search?q=${encodeURIComponent(fkKw)}&sort=popularity_desc${fkPriceParam}`, icon: '🏪', bg: isDark ? 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700 font-bold' },
-    { name: 'Myntra',   url: `${myntraUrl}${myntraUrl.includes('?') ? '&' : '?'}${myntraPriceParam.slice(1)}`, icon: '👗', bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold' },
-    { name: 'Meesho',   url: `https://meesho.com/search?q=${encodeURIComponent(meeKw)}`, icon: '🛍️', bg: isDark ? 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' : 'bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700 font-bold' },
+    { name: 'Myntra', url: `${myntraUrl}${myntraUrl.includes('?') ? '&' : '?'}${myntraPriceParam.slice(1)}`, icon: '👗', bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold' },
+    { name: 'Meesho', url: `https://meesho.com/search?q=${encodeURIComponent(meeKw)}`, icon: '🛍️', bg: isDark ? 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' : 'bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700 font-bold' },
   ];
 
   return (
@@ -77,11 +77,10 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
           <button
             key={b.label}
             onClick={(e) => { e.stopPropagation(); setBudget(b.label === 'Any' ? null : b); }}
-            className={`px-2 py-0.5 rounded-full text-xs font-bold border transition-all ${
-              (b.label === 'Any' && !budget) || budget?.label === b.label
+            className={`px-2 py-0.5 rounded-full text-xs font-bold border transition-all ${(b.label === 'Any' && !budget) || budget?.label === b.label
                 ? isDark ? 'bg-purple-500/40 border-purple-400 text-purple-200' : 'bg-purple-600 border-purple-600 text-white shadow-sm'
                 : isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70' : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
-            }`}
+              }`}
           >
             {b.label}
           </button>
@@ -90,7 +89,7 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
       {/* Shop links */}
       <div className="flex gap-1.5 flex-wrap">
         {links.map((link) => (
-          <AffiliateLink 
+          <AffiliateLink
             key={link.name}
             href={link.url}
             color={colorName}
@@ -119,7 +118,7 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
     e.stopPropagation();
     if (!isLoggedIn) {
       alert('Please login to save colors');
-      return; 
+      return;
     }
 
     setSavingColor(true);
@@ -132,10 +131,10 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
         console.log('Unsaving color:', color.name);
       } else {
         // Save new color
-        await saveSavedColor(auth.currentUser.uid, { 
-          name: color.name, 
-          hex: color.hex, 
-          category, 
+        await saveSavedColor(auth.currentUser.uid, {
+          name: color.name,
+          hex: color.hex,
+          category,
           gender,
           reason: color.reason || ''
         });
@@ -151,7 +150,7 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
 
   const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
   const nameCls = isDark ? 'text-white' : 'text-gray-800';
-  const hexCls  = isDark ? 'text-white/30' : 'text-gray-400';
+  const hexCls = isDark ? 'text-white/30' : 'text-gray-400';
   const chevronCls = isDark ? 'text-white/30' : 'text-gray-400';
   const hexBorderCls = isDark ? 'border-white/10' : 'border-gray-200';
   const dividerCls = isDark ? 'border-white/5' : 'border-gray-100';
@@ -267,7 +266,7 @@ function downloadPalette(colors, skinTone) {
 // ── Celebrity Skin Match ─────────────────────────────────────
 const CELEBRITY_MAP = {
   fair: {
-    male:   [
+    male: [
       { name: 'Ranbir Kapoor', tip: 'Navy, burgundy, olive green, charcoal' },
       { name: 'Shahid Kapoor', tip: 'Deep maroon, forest green, royal blue' },
       { name: 'Hrithik Roshan', tip: 'White, navy, teal, mustard' },
@@ -279,7 +278,7 @@ const CELEBRITY_MAP = {
     ],
   },
   light: {
-    male:   [
+    male: [
       { name: 'Varun Dhawan', tip: 'Sky blue, olive, rust, maroon' },
       { name: 'Tiger Shroff', tip: 'White, navy, coral, forest green' },
       { name: 'Kartik Aaryan', tip: 'Mustard, teal, burgundy, sky blue' },
@@ -291,7 +290,7 @@ const CELEBRITY_MAP = {
     ],
   },
   medium: {
-    male:   [
+    male: [
       { name: 'Shah Rukh Khan', tip: 'White, navy, maroon, olive green' },
       { name: 'Salman Khan', tip: 'Sky blue, white, rust, forest green' },
       { name: 'Ranveer Singh', tip: 'Bold colors — coral, mustard, teal' },
@@ -303,7 +302,7 @@ const CELEBRITY_MAP = {
     ],
   },
   olive: {
-    male:   [
+    male: [
       { name: 'Ajay Devgn', tip: 'White, sky blue, olive, rust' },
       { name: 'Akshay Kumar', tip: 'Bright colors — yellow, coral, white' },
       { name: 'Anil Kapoor', tip: 'White, royal blue, coral, cream' },
@@ -315,7 +314,7 @@ const CELEBRITY_MAP = {
     ],
   },
   brown: {
-    male:   [
+    male: [
       { name: 'Nawazuddin Siddiqui', tip: 'White, sky blue, cobalt, bright yellow' },
       { name: 'Irrfan Khan', tip: 'White, royal blue, emerald, cream' },
       { name: 'Manoj Bajpayee', tip: 'White, bright blue, coral, gold' },
@@ -327,7 +326,7 @@ const CELEBRITY_MAP = {
     ],
   },
   dark: {
-    male:   [
+    male: [
       { name: 'Vijay (Thalapathy)', tip: 'White, bright yellow, royal blue, gold' },
       { name: 'Rajinikanth', tip: 'White, cream, bright colors, gold' },
       { name: 'Dhanush', tip: 'White, cobalt blue, bright yellow, coral' },
@@ -395,11 +394,10 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
           <div className="flex flex-wrap gap-1.5 mt-2">
             <span className={`text-xs px-2 py-0.5 rounded-full border capitalize ${isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-200' : 'bg-purple-100 border-purple-400 text-purple-800 font-semibold'}`}>{analysis.skin_tone.undertone}</span>
             <span className={`text-xs px-2 py-0.5 rounded-full border ${isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-200' : 'bg-pink-100 border-pink-400 text-pink-800 font-semibold'}`}>🍂 {analysis.skin_tone.color_season}</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full border ${
-              analysis.skin_tone.confidence === "high"
+            <span className={`text-xs px-2 py-0.5 rounded-full border ${analysis.skin_tone.confidence === "high"
                 ? isDark ? "bg-green-500/20 border-green-500/30 text-green-300" : "bg-green-100 border-green-500 text-green-800 font-semibold"
                 : isDark ? "bg-yellow-500/20 border-yellow-500/30 text-yellow-300" : "bg-yellow-100 border-yellow-500 text-yellow-800 font-semibold"
-            }`}>
+              }`}>
               {analysis.skin_tone.confidence === "high" ? "✓ High" : "~ Medium"}
             </span>
           </div>
@@ -533,8 +531,8 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
           { name: '👗 Myntra', url: `https://www.myntra.com/${isFemale ? 'co-ords' : 'tshirts'}?rawQuery=${shirtColor.name.toLowerCase().replace(/\s+/g, '%20')}%20${isFemale ? 'women%20coord%20set' : 'men%20oversized'}`, bg: isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300' : 'bg-pink-50 border-pink-300 text-pink-700 font-bold' },
           { name: '🛍️ Meesho', url: `https://meesho.com/search?q=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit'))}`, bg: isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-300' : 'bg-purple-50 border-purple-300 text-purple-700 font-bold' },
         ].map(link => (
-          <AffiliateLink 
-            key={link.name} 
+          <AffiliateLink
+            key={link.name}
             href={link.url}
             color={shirtColor.name}
             category={isFemale ? 'coord set' : 'outfit set'}
@@ -622,7 +620,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
         <div>
           <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>👕 T-Shirt / Top Colors</p>
           <div className="grid grid-cols-1 gap-2">
-            {shirtColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} className={`stagger-${Math.min(i+1,6)}`} />)}
+            {shirtColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} className={`stagger-${Math.min(i + 1, 6)}`} />)}
           </div>
         </div>
       )}
@@ -893,7 +891,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const normalizedData = useMemo(() => {
     if (!data) return null;
     let base = { ...data };
-    
+
     // If skin_tone is at root, move it into analysis wrapper for consistency
     if (!base.analysis && base.skin_tone) {
       base.analysis = {
@@ -902,7 +900,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         description: base.description || base.summary
       };
     }
-    
+
     // Ensure recommendations is at root if it was nested
     if (!base.recommendations && base.analysis?.recommendations) {
       base.recommendations = base.analysis.recommendations;
@@ -912,7 +910,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
     if (base.recommendations) {
       base.recommendations = translateBackendObject(base.recommendations, language);
     }
-    
+
     return base;
   }, [data, language]);
 
@@ -949,10 +947,10 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const BUDGET_LABELS = { any: 'Any Budget', '500': 'Under ₹500', '1000': 'Under ₹1000', '2000': 'Under ₹2000' };
 
   const BODY_TYPE_TIPS = {
-    slim:     ['Layering adds visual bulk — try oversized tees over shirts', 'Horizontal stripes and bold patterns work great for you', 'Baggy jeans and cargo pants suit your frame perfectly'],
+    slim: ['Layering adds visual bulk — try oversized tees over shirts', 'Horizontal stripes and bold patterns work great for you', 'Baggy jeans and cargo pants suit your frame perfectly'],
     athletic: ['V-neck tees highlight your shoulders beautifully', 'Slim-fit or straight-cut pants balance your proportions', 'Polo shirts and fitted tees are your best friends'],
-    average:  ['You can wear almost any silhouette — experiment freely', 'Both oversized and fitted styles suit you well', 'Monochromatic outfits create a sleek, elongated look'],
-    plus:     ['Dark colors and vertical patterns create a slimming effect', 'Well-fitted clothes look better than very loose or very tight', 'High-waist bottoms define your waist beautifully'],
+    average: ['You can wear almost any silhouette — experiment freely', 'Both oversized and fitted styles suit you well', 'Monochromatic outfits create a sleek, elongated look'],
+    plus: ['Dark colors and vertical patterns create a slimming effect', 'Well-fitted clothes look better than very loose or very tight', 'High-waist bottoms define your waist beautifully'],
   };
   const bodyTypeTips = bodyType ? BODY_TYPE_TIPS[bodyType] || [] : [];
   const effectiveGender = isSeasonal ? seasonalGender : (isFemale ? 'female' : 'male');
@@ -965,10 +963,10 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const ethnicWear = recommendations.ethnic_wear || sareeSuggestions;
 
   const tabs = [
-    { id: 'colors',      label: 'Colors',      emoji: '🎨' },
-    { id: 'outfits',     label: 'Outfits',     emoji: '👔' },
+    { id: 'colors', label: 'Colors', emoji: '🎨' },
+    { id: 'outfits', label: 'Outfits', emoji: '👔' },
     { id: 'accessories', label: 'Accessories', emoji: '✨' },
-    { id: 'shopping',    label: 'Shop',        emoji: '🛍️' },
+    { id: 'shopping', label: 'Shop', emoji: '🛍️' },
   ];
 
   const tabBarBg = isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200';
@@ -985,7 +983,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
               Your Style Profile is Ready!
             </p>
           </div>
-          {['🎨','✨','💜','🌟','👗'].map((e, i) => (
+          {['🎨', '✨', '💜', '🌟', '👗'].map((e, i) => (
             <span key={i} className="confetti absolute text-2xl"
               style={{ left: `${15 + i * 18}%`, animationDelay: `${i * 0.15}s` }}>{e}</span>
           ))}
@@ -1057,7 +1055,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             </button>
           );
         })()}
-        
+
         <button
           onClick={async () => {
             // Always allow saving as user is now always authenticated
@@ -1085,22 +1083,21 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             }
           }}
           disabled={shareStatus === 'loading' || shareStatus === 'success'}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all hover:scale-[1.02] shadow-sm ${
-            shareStatus === 'success' 
-            ? 'bg-green-500 text-white border-green-500' 
-            : shareStatus === 'error'
-            ? 'bg-red-500 text-white border-red-500'
-            : isDark 
-              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-transparent hover:from-purple-500 hover:to-pink-500' 
-              : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-transparent hover:from-purple-600 hover:to-pink-600'
-          }`}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all hover:scale-[1.02] shadow-sm ${shareStatus === 'success'
+              ? 'bg-green-500 text-white border-green-500'
+              : shareStatus === 'error'
+                ? 'bg-red-500 text-white border-red-500'
+                : isDark
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-transparent hover:from-purple-500 hover:to-pink-500'
+                  : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-transparent hover:from-purple-600 hover:to-pink-600'
+            }`}
         >
           {shareStatus === 'loading' ? (
-             <span className="animate-spin text-sm">↻</span>
+            <span className="animate-spin text-sm">↻</span>
           ) : shareStatus === 'success' ? (
-             <span>✅ Shared!</span>
+            <span>✅ Shared!</span>
           ) : shareStatus === 'error' ? (
-             <span>Error</span>
+            <span>Error</span>
           ) : (
             <>
               <span>🌍</span>
@@ -1116,11 +1113,10 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl text-[10px] font-bold transition-all min-w-0 ${
-              activeTab === tab.id
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl text-[10px] font-bold transition-all min-w-0 ${activeTab === tab.id
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
                 : inactiveTabCls
-            }`}
+              }`}
           >
             <span className="text-sm">{tab.emoji}</span>
             <span className="truncate w-full text-center px-0.5">{tab.label}</span>
@@ -1220,11 +1216,11 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
       {(() => {
         const skinTone = analysis?.skin_tone?.category;
         const blogs = [
-          { slug: 'skin-tone-colors', title: 'Best Colors for Your Skin Tone', emoji: '🎨', relevantFor: ['fair','light','medium','olive','brown','dark'] },
-          { slug: 'outfit-guide', title: 'How to Choose the Perfect Outfit', emoji: '👔', relevantFor: ['fair','light','medium','olive','brown','dark'] },
-          { slug: 'ai-fashion', title: 'How AI is Changing Fashion', emoji: '🤖', relevantFor: ['fair','light','medium','olive','brown','dark'] },
-          { slug: 'wardrobe-essentials', title: 'Wardrobe Essentials Every Indian Should Own', emoji: '👗', relevantFor: ['fair','light','medium','olive','brown','dark'] },
-          { slug: 'accessorizing-guide', title: 'The Art of Accessorizing', emoji: '✨', relevantFor: ['fair','light','medium','olive','brown','dark'] },
+          { slug: 'skin-tone-colors', title: 'Best Colors for Your Skin Tone', emoji: '🎨', relevantFor: ['fair', 'light', 'medium', 'olive', 'brown', 'dark'] },
+          { slug: 'outfit-guide', title: 'How to Choose the Perfect Outfit', emoji: '👔', relevantFor: ['fair', 'light', 'medium', 'olive', 'brown', 'dark'] },
+          { slug: 'ai-fashion', title: 'How AI is Changing Fashion', emoji: '🤖', relevantFor: ['fair', 'light', 'medium', 'olive', 'brown', 'dark'] },
+          { slug: 'wardrobe-essentials', title: 'Wardrobe Essentials Every Indian Should Own', emoji: '👗', relevantFor: ['fair', 'light', 'medium', 'olive', 'brown', 'dark'] },
+          { slug: 'accessorizing-guide', title: 'The Art of Accessorizing', emoji: '✨', relevantFor: ['fair', 'light', 'medium', 'olive', 'brown', 'dark'] },
         ];
         const relevant = blogs.filter(b => b.relevantFor.includes(skinTone)).slice(0, 3);
         if (!relevant.length) return null;

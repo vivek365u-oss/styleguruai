@@ -1,0 +1,141 @@
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\api\styleApi.js
+  4:111  error  'signInAnonymously' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\AffiliateAnalytics.jsx
+  14:10  error    'timeline' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                           no-unused-vars
+  27:6   warning  React Hook useEffect has a missing dependency: 'fetchAnalytics'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\AffiliateLink.jsx
+  16:3   error  'isDark' is assigned a value but never used  no-unused-vars
+  72:16  error  'e' is defined but never used                no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\AuthPage.jsx
+   5:37  error  'onSkip' is defined but never used  no-unused-vars
+  45:14  error  'err' is defined but never used     no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\ColorRecommendationsShop.jsx
+    5:20  error  'useContext' is defined but never used. Allowed unused vars must match /^[A-Z_]/u         no-unused-vars
+   11:11  error  't' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u         no-unused-vars
+  153:9   error  'isFemale' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\ColorScanner.jsx
+   5:51  error  'useCallback' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  40:44  error  'skinTone' is defined but never used                                                no-unused-vars
+  92:13  error  Empty block statement                                                               no-empty
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\CommunityFeed.jsx
+  17:6   warning  React Hook useEffect has a missing dependency: 'loadFeed'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  25:14  error    'e' is defined but never used                                                                                no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\Dashboard.jsx
+   12:29   error  'incrementUsage' is defined but never used. Allowed unused vars must match /^[A-Z_]/u         no-unused-vars
+   88:40   error  'onTabChange' is defined but never used                                                       no-unused-vars
+   88:53   error  'onShowResult' is defined but never used                                                      no-unused-vars
+  117:18   error  'setStreak' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  280:106  error  'onOpenPayment' is defined but never used                                                     no-unused-vars
+  281:11   error  't' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u             no-unused-vars
+  787:10   error  'selectedPlan' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  804:14   error  'e' is defined but never used                                                                 no-unused-vars
+  947:13   error  Empty block statement                                                                         no-empty
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\ErrorBoundary.jsx
+  19:35  error  'error' is defined but never used  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\HistoryPanel.jsx
+  28:13  error    Empty block statement                                                                                                                 no-empty
+  30:6   warning  React Hook useEffect has missing dependencies: 'fetchHistory' and 'historyLimit'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  36:14  error    'err' is defined but never used                                                                                                       no-unused-vars
+  43:9   error    'viewDetails' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                           no-unused-vars
+  48:14  error    'err' is defined but never used                                                                                                       no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\LoadingScreenWithProgress.jsx
+    8:10  error  'useLanguage' is defined but never used. Allowed unused vars must match /^[A-Z_]/u         no-unused-vars
+  116:19  error  'isPending' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\OOTDCard.jsx
+   5:20  error  'useEffect' is defined but never used. Allowed unused vars must match /^[A-Z_]/u   no-unused-vars
+   5:31  error  'useContext' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  46:14  error  'e' is defined but never used                                                      no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\OutfitCalendar.jsx
+  4:51  error  'gender' is defined but never used                                                        no-unused-vars
+  5:14  error  'language' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\OutfitChecker.jsx
+   15:9   error  'colorDisplay' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u      no-unused-vars
+  128:64  error  'setProgressError' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  231:15  error  Empty block statement                                                                             no-empty
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\PlansUpgradeScreen.jsx
+   7:27  error  'useContext' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  12:11  error  't' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\ProductShowcase.jsx
+   15:39  error    'category' is assigned a value but never used                                                              no-unused-vars
+  132:6   warning  React Hook useEffect has a missing dependency: 'gender'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\ResultsDisplay.jsx
+  1079:22  error  'e' is defined but never used  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\ShoppingCart.jsx
+  15:11  error  't' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u             no-unused-vars
+  17:10  error  'showCheckout' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\StyleBot.jsx
+  74:14  error  'language' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\ToolsTab.jsx
+   16:14  error  'language' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  133:21  error  'onShowResult' is defined but never used                                                  no-unused-vars
+  133:50  error  'uploadedImage' is defined but never used                                                 no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\UploadSection.jsx
+  164:9   error  'subCls' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u            no-unused-vars
+  240:64  error  'setProgressError' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  240:89  error  'resetProgress' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\WardrobePanel.jsx
+   28:6   warning  React Hook useEffect has a missing dependency: 't'. Either include it or remove the dependency array                                    react-hooks/exhaustive-deps
+  152:50  error    'isDark' is defined but never used                                                                                                      no-unused-vars
+  246:6   warning  React Hook useEffect has missing dependencies: 'loading', 't', and 'wardrobeLimit'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\WeatherTip.jsx
+   5:31  error  'useContext' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  31:80  error  Empty block statement                                                              no-empty
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\context\PlanProvider.jsx
+  18:14  error  'e' is defined but never used  no-unused-vars
+  18:17  error  Empty block statement          no-empty
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\hooks\useAnalysisProgress.js
+  93:6  warning  React Hook useCallback has a missing dependency: 'stages'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\hooks\useAuthState.js
+  6:31  error  'useCallback' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\i18n\LanguageProvider.jsx
+  1:20  error  'useEffect' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\pages\AdminDashboard.jsx
+   8:88  error  'where' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  43:19  error  Empty block statement                                                         no-empty
+  45:15  error  Empty block statement                                                         no-empty
+  78:15  error  Empty block statement                                                         no-empty
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\pages\OrderSuccessPage.jsx
+  12:11  error  't' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u             no-unused-vars
+  13:10  error  'searchParams' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\pages\ProfilePage.jsx
+  12:11  error  't' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u        no-unused-vars
+  18:10  error  'profile' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\pages\SettingsPage.jsx
+  1:20  error  'useEffect' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\utils\apiRetry.js
+  72:12  error  'error' is defined but never used  no-unused-vars
+
+Γ£û 74 problems (67 errors, 7 warnings)
+

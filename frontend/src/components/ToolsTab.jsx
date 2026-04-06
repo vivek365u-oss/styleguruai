@@ -1,6 +1,6 @@
 import { useState, useContext } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import OutfitChecker from './OutfitChecker';
 import CommunityFeed from './CommunityFeed';
 import HistoryPanel from './HistoryPanel';

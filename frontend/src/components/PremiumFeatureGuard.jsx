@@ -3,7 +3,7 @@
 // Wraps premium-only features with upgrade prompt
 // ============================================================
 import { useContext } from 'react';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import { usePlan } from '../context/PlanContext';
 
 function PremiumFeatureGuard({ children, featureName = 'Feature', onUpgradeClick, lock = true }) {

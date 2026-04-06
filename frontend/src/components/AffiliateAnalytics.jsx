@@ -3,7 +3,7 @@
 // Shows sales metrics, earnings, and click analytics
 // ============================================================
 import { useState, useEffect, useContext } from 'react';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import axios from 'axios';
 
 function AffiliateAnalytics() {

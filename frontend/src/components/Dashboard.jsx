@@ -61,7 +61,7 @@ function DailyDropModal({ lastAnalysis, isDark, onClose }) {
               <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-purple-700'}`}>{t('dailyDropReady')}</h2>
               <p className={`text-sm mt-2 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>{t('dailyDropSub').replace('{skinTone}', lastAnalysis?.skinTone)}</p>
             </div>
-            <button 
+            <button
               onClick={handleReveal}
               className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-2xl text-white font-black text-lg shadow-lg pulse-glow"
             >
@@ -74,7 +74,7 @@ function DailyDropModal({ lastAnalysis, isDark, onClose }) {
             <span className="text-5xl">✨</span>
             <h2 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('unlockingWardrobe')}</h2>
             <div className="flex gap-2 justify-center">
-              {[1,2,3].map(i => <div key={i} className="w-3 h-3 rounded-full bg-purple-500 animate-bounce" style={{animationDelay: `${i*0.15}s`}}/>)}
+              {[1, 2, 3].map(i => <div key={i} className="w-3 h-3 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />)}
             </div>
           </div>
         )}
@@ -161,7 +161,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro, lastAna
   return (
     <div className="pb-4 space-y-6">
       {showDailyDrop && <DailyDropModal lastAnalysis={lastAnalysis} isDark={isDark} onClose={() => setShowDailyDrop(false)} />}
-        <div className="pt-2 flex justify-between items-start">
+      <div className="pt-2 flex justify-between items-start">
         <div>
           <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{t('goodDay')}</p>
           <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
@@ -172,7 +172,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro, lastAna
         <div className="flex flex-col items-end gap-2">
           {/* Gender Toggle */}
           {!lastAnalysis && (
-            <button 
+            <button
               onClick={toggleGenderPref}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white' : 'bg-white border-purple-100 text-purple-600 shadow-sm'}`}
             >
@@ -199,8 +199,8 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro, lastAna
       {/* Social proof */}
       <div className={`flex items-center justify-center gap-2 py-2 rounded-xl ${isDark ? 'bg-white/5' : 'bg-purple-50'}`}>
         <div className="flex -space-x-1.5">
-          {['#F5DEB3','#C68642','#7B4F2E','#4A2C0A'].map((c,i) => (
-            <div key={i} className="w-6 h-6 rounded-full border-2 border-white/30" style={{backgroundColor: c}} />
+          {['#F5DEB3', '#C68642', '#7B4F2E', '#4A2C0A'].map((c, i) => (
+            <div key={i} className="w-6 h-6 rounded-full border-2 border-white/30" style={{ backgroundColor: c }} />
           ))}
         </div>
         <p className={`text-xs font-semibold ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
@@ -251,7 +251,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro, lastAna
             gender={lastAnalysis.fullData?.gender || genderPref}
             isDark={isDark}
           />
-          
+
           {/* Rate My Fit - Hook mechanics */}
           <div className={`rounded-2xl p-4 border flex items-center gap-3 justify-between ${isDark ? 'bg-gradient-to-r from-orange-900/40 to-red-900/40 border-orange-700/30' : 'bg-gradient-to-r from-orange-50 to-red-50 border-orange-200'}`}>
             <div>
@@ -757,7 +757,7 @@ function SettingsScreen({ user, onOpenPayment, onLogout }) {
 function CartButton({ cartOpen, setCartOpen }) {
   const { cart } = useCart();
   const itemCount = cart.length;
-  
+
   return (
     <button
       onClick={() => setCartOpen(true)}
@@ -828,7 +828,7 @@ function Dashboard({ user, onLogout }) {
       // Get token for API request
       const token = await auth.currentUser.getIdToken();
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      
+
       // Create order on backend
       console.log('[Checkout] Creating order at:', apiUrl);
       const response = await fetch(`${apiUrl}/api/orders/create-checkout`, {
@@ -869,7 +869,7 @@ function Dashboard({ user, onLogout }) {
             // Generate idempotency key to prevent duplicate charges
             const idempotencyKey = `${auth.currentUser.uid}_${response.razorpay_payment_id}_${Date.now()}`;
             console.log('[Checkout] Idempotency Key:', idempotencyKey);
-            
+
             // Verify payment on backend
             console.log('[Checkout] Verifying payment...');
             const verifyResponse = await fetch(`${apiUrl}/api/orders/verify-payment`, {
@@ -889,7 +889,7 @@ function Dashboard({ user, onLogout }) {
             if (verifyResponse.ok) {
               const result = await verifyResponse.json();
               console.log('[Checkout] ✅ Payment verified:', result);
-              
+
               // Save order data to localStorage for success page
               const orderData = {
                 order_id: response.razorpay_order_id,
@@ -900,13 +900,13 @@ function Dashboard({ user, onLogout }) {
                 timestamp: new Date().toISOString()
               };
               localStorage.setItem('sg_last_order', JSON.stringify(orderData));
-              
+
               showToast(`✅ Order placed! Commission: ₹${result.commission_earned.toFixed(0)}`);
-              
+
               // Clear cart after successful purchase
               clearCart();
               setCartOpen(false);
-              
+
               // Redirect to order success page after 1 second
               setTimeout(() => {
                 navigate('/order-success');
@@ -949,38 +949,38 @@ function Dashboard({ user, onLogout }) {
       const uid = auth.currentUser.uid;
       Promise.all(queue.map(item => saveWardrobeItem(uid, item)))
         .then(() => localStorage.removeItem('sg_wardrobe_queue'))
-        .catch(() => {}); // silently fail, will retry next time
-    } catch {}
+        .catch(() => { }); // silently fail, will retry next time
+    } catch { }
   }, []);
 
   const handleReset = () => { setResults(null); setError(null); setUploadedImage(null); };
   const handleAnalysisComplete = (data) => {
     if (!data) return;
-    
+
     // Normalize: Ensure skin_tone is accessible either at root or inside analysis
     const skinToneObj = data.analysis?.skin_tone || data.skin_tone;
     const skinColorObj = data.analysis?.skin_color || data.skin_color;
     const recsObj = data.recommendations || data.analysis?.recommendations;
-    
-    const enriched = { 
-      ...data, 
+
+    const enriched = {
+      ...data,
       gender: data.gender || currentGender,
       // Ensure the structure matches what the UI expects
-      analysis: data.analysis || { 
-        skin_tone: skinToneObj, 
-        skin_color: skinColorObj 
+      analysis: data.analysis || {
+        skin_tone: skinToneObj,
+        skin_color: skinColorObj
       },
       recommendations: recsObj
     };
-    
+
     setResults(enriched);
     setLoading(false);
-    
+
     // Save to history (last 5) + increment count
     try {
       const count = parseInt(localStorage.getItem('sg_analysis_count') || '0') + 1;
       localStorage.setItem('sg_analysis_count', count.toString());
-      
+
       const newEntry = {
         id: Date.now(),
         skinTone: skinToneObj?.category || 'medium',
@@ -993,7 +993,7 @@ function Dashboard({ user, onLogout }) {
         fullData: enriched,
       };
       localStorage.setItem('sg_last_analysis', JSON.stringify(newEntry));
-      
+
       // Keep last 5 analyses
       const history = JSON.parse(localStorage.getItem('sg_analysis_history') || '[]');
       const updated = [newEntry, ...history].slice(0, 5);
@@ -1038,11 +1038,11 @@ function Dashboard({ user, onLogout }) {
   };
 
   const navItems = [
-    { id: 'home',      emoji: '🏠', label: t('navHome') },
-    { id: 'analyze',   emoji: '📸', label: t('navAnalyze') },
-    { id: 'wardrobe',  emoji: '👗', label: t('navWardrobe') },
-    { id: 'tools',     emoji: '🛠️', label: t('navTools') },
-    { id: 'profile',   emoji: '❤️', label: t('navProfile') }
+    { id: 'home', emoji: '🏠', label: t('navHome') },
+    { id: 'analyze', emoji: '📸', label: t('navAnalyze') },
+    { id: 'wardrobe', emoji: '👗', label: t('navWardrobe') },
+    { id: 'tools', emoji: '🛠️', label: t('navTools') },
+    { id: 'profile', emoji: '❤️', label: t('navProfile') }
   ];
 
   const handleTabChange = (tab) => {
@@ -1077,15 +1077,7 @@ function Dashboard({ user, onLogout }) {
               <span>🪙</span> {coins}
             </div>
           )}
-          {!isPro ? (
-            <button onClick={() => setShowPlansScreen(true)} className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1.5 rounded-xl shadow-md transition hover:scale-105 active:scale-95">
-              <span>👑</span> GET PRO
-            </button>
-          ) : (
-            <div className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider border border-purple-500/30 text-purple-600 px-3 py-1.5 rounded-xl shadow-sm bg-purple-50/50">
-              <span className="text-purple-500">👑</span> PRO
-            </div>
-          )}
+
           <button onClick={toggleTheme} className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-sm">
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
@@ -1095,20 +1087,20 @@ function Dashboard({ user, onLogout }) {
       <main className="relative z-10 max-w-lg mx-auto px-4 pt-4 pb-24">
         <div className="tab-content" key={activeTab}>
           {activeTab === 'home' && (
-            <HomeScreen 
-              user={user} 
-              lastAnalysis={lastAnalysis} 
-              onAnalyze={() => setActiveTab('analyze')} 
-              onTabChange={handleTabChange} 
-              onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} 
-              isPro={isPro} 
+            <HomeScreen
+              user={user}
+              lastAnalysis={lastAnalysis}
+              onAnalyze={() => setActiveTab('analyze')}
+              onTabChange={handleTabChange}
+              onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }}
+              isPro={isPro}
             />
           )}
 
           {activeTab === 'analyze' && (
             <>
               {!results && !loading && !error && (
-                <UploadSection 
+                <UploadSection
                   onLoadingStart={() => setLoading(true)}
                   onAnalysisComplete={handleAnalysisComplete}
                   onError={setError}
@@ -1142,15 +1134,15 @@ function Dashboard({ user, onLogout }) {
           )}
 
           {activeTab === 'wardrobe' && <WardrobePanel user={user} onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
-          
+
           {activeTab === 'tools' && <ToolsTab uploadedImage={uploadedImage} analysisData={results} onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} onOpenScanner={() => setActiveTab('scanner')} />}
-          
+
           {activeTab === 'scanner' && (
             <ColorScanner
               savedPalette={(() => {
                 try {
                   return lastAnalysis?.fullData?.recommendations?.best_shirt_colors ||
-                         lastAnalysis?.fullData?.recommendations?.best_dress_colors || [];
+                    lastAnalysis?.fullData?.recommendations?.best_dress_colors || [];
                 } catch { return []; }
               })()}
               skinTone={lastAnalysis?.skinTone || ''}
@@ -1161,18 +1153,18 @@ function Dashboard({ user, onLogout }) {
           {activeTab === 'profile' && (
             <>
               {!showProfileSettings ? (
-              <ProfileScreenComponent 
-                user={user} 
-                isDark={isDark} 
-                analysisCount={analysisCount}
-                savedCount={savedCount}
-                isPro={isPro}
-                usage={usage}
-                onShowSettings={() => setShowProfileSettings(true)}
-                onOpenPayment={() => setShowPlansScreen(true)}
-                onLogout={onLogout}
-                lastAnalysis={lastAnalysis}
-              />
+                <ProfileScreenComponent
+                  user={user}
+                  isDark={isDark}
+                  analysisCount={analysisCount}
+                  savedCount={savedCount}
+                  isPro={isPro}
+                  usage={usage}
+                  onShowSettings={() => setShowProfileSettings(true)}
+                  onOpenPayment={() => setShowPlansScreen(true)}
+                  onLogout={onLogout}
+                  lastAnalysis={lastAnalysis}
+                />
               ) : (
                 <div>
                   <button
@@ -1198,18 +1190,16 @@ function Dashboard({ user, onLogout }) {
                 key={item.id}
                 onClick={() => handleTabChange(item.id)}
                 style={{ flex: '1 1 0', minWidth: 0 }}
-                className={`flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl transition-all min-h-[56px] ${
-                  activeTab === item.id
+                className={`flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl transition-all min-h-[56px] ${activeTab === item.id
                     ? 'text-purple-500 bg-purple-500/10'
                     : theme === 'dark'
                       ? 'text-white/40 hover:text-white/70 hover:bg-white/5'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'
-                }`}
+                  }`}
               >
                 <span className={`text-[22px] leading-none transition-transform duration-200 ${activeTab === item.id ? 'scale-110' : ''}`}>{item.emoji}</span>
-                <span className={`text-[9px] font-bold leading-tight text-center truncate w-full px-1 ${
-                  activeTab === item.id ? 'text-purple-400' : theme === 'dark' ? 'text-white/40' : 'text-gray-600'
-                }`}>{item.label}</span>
+                <span className={`text-[9px] font-bold leading-tight text-center truncate w-full px-1 ${activeTab === item.id ? 'text-purple-400' : theme === 'dark' ? 'text-white/40' : 'text-gray-600'
+                  }`}>{item.label}</span>
                 {activeTab === item.id && <div className="w-4 h-0.5 rounded-full bg-purple-400 mt-0.5" />}
               </button>
             ))}

@@ -3,7 +3,7 @@
 // Display cart items and checkout
 // ============================================================
 import { useContext, useState } from 'react';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';

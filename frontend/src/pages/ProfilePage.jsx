@@ -172,9 +172,8 @@ function ProfilePage() {
                 type="text"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
-                className={`w-full px-4 py-3 rounded-xl border text-center text-lg font-black ${
-                  isDark ? 'bg-white/10 border-white/20 text-white' : 'bg-white border-gray-300 text-gray-900'
-                }`}
+                className={`w-full px-4 py-3 rounded-xl border text-center text-lg font-black ${isDark ? 'bg-white/10 border-white/20 text-white' : 'bg-white border-gray-300 text-gray-900'
+                  }`}
                 placeholder="Enter your name"
               />
               <div className="flex gap-3">
@@ -299,9 +298,8 @@ function ProfilePage() {
           <div className="space-y-3">
             <button
               onClick={() => navigate('/dashboard')}
-              className={`w-full text-left p-4 rounded-2xl transition-all flex items-center justify-between ${
-                isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
-              }`}
+              className={`w-full text-left p-4 rounded-2xl transition-all flex items-center justify-between ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
+                }`}
             >
               <div className="flex items-center gap-3">
                 <span className="text-xl">📸</span>
@@ -315,9 +313,8 @@ function ProfilePage() {
 
             <button
               onClick={() => navigate('/dashboard')}
-              className={`w-full text-left p-4 rounded-2xl transition-all flex items-center justify-between ${
-                isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
-              }`}
+              className={`w-full text-left p-4 rounded-2xl transition-all flex items-center justify-between ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
+                }`}
             >
               <div className="flex items-center gap-3">
                 <span className="text-xl">👗</span>
@@ -331,9 +328,8 @@ function ProfilePage() {
 
             <button
               onClick={() => navigate('/dashboard')}
-              className={`w-full text-left p-4 rounded-2xl transition-all flex items-center justify-between ${
-                isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
-              }`}
+              className={`w-full text-left p-4 rounded-2xl transition-all flex items-center justify-between ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
+                }`}
             >
               <div className="flex items-center gap-3">
                 <span className="text-xl">🛠️</span>
@@ -347,9 +343,8 @@ function ProfilePage() {
 
             <button
               onClick={() => navigate('/privacy')}
-              className={`w-full text-left p-4 rounded-2xl transition-all flex items-center justify-between ${
-                isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
-              }`}
+              className={`w-full text-left p-4 rounded-2xl transition-all flex items-center justify-between ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
+                }`}
             >
               <div className="flex items-center gap-3">
                 <span className="text-xl">🔐</span>
@@ -363,9 +358,8 @@ function ProfilePage() {
 
             <button
               onClick={() => navigate('/terms')}
-              className={`w-full text-left p-4 rounded-2xl transition-all flex items-center justify-between ${
-                isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
-              }`}
+              className={`w-full text-left p-4 rounded-2xl transition-all flex items-center justify-between ${isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-gray-50 hover:bg-gray-100'
+                }`}
             >
               <div className="flex items-center gap-3">
                 <span className="text-xl">⚖️</span>
@@ -396,9 +390,8 @@ function ProfilePage() {
                 }).catch(err => console.error('Logout failed:', err));
               }
             }}
-            className={`w-full px-4 py-3 font-black rounded-2xl transition-all ${
-              isDark ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200'
-            }`}
+            className={`w-full px-4 py-3 font-black rounded-2xl transition-all ${isDark ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200'
+              }`}
           >
             🚪 Logout
           </button>

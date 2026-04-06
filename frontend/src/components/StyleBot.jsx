@@ -3,7 +3,7 @@
 // Floating chat button with conversational styling advice
 // ============================================================
 import { useState, useRef, useEffect, useContext } from 'react';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 
 const getResponses = (t) => ({
@@ -116,22 +116,21 @@ function StyleBot({ inline = false }) {
       {/* Floating button (only if not inline) */}
       {!inline && (
         <button
-        onClick={() => setOpen(!open)}
-        className={`fixed bottom-24 right-4 z-40 w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${
-          open
-            ? 'bg-gray-700 rotate-0'
-            : 'bg-gradient-to-br from-purple-600 to-pink-600 animate-pulse'
-        }`}
-        style={{ boxShadow: open ? 'none' : '0 0 25px rgba(168,85,247,0.4)' }}
-      >
-        <span className="text-2xl">{open ? '✕' : '🤖'}</span>
+          onClick={() => setOpen(!open)}
+          className={`fixed bottom-24 right-4 z-40 w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${open
+              ? 'bg-gray-700 rotate-0'
+              : 'bg-gradient-to-br from-purple-600 to-pink-600 animate-pulse'
+            }`}
+          style={{ boxShadow: open ? 'none' : '0 0 25px rgba(168,85,247,0.4)' }}
+        >
+          <span className="text-2xl">{open ? '✕' : '🤖'}</span>
         </button>
       )}
 
       {/* Chat panel */}
       {(open || inline) && (
         <div className={
-          inline 
+          inline
             ? `flex-1 flex flex-col w-full h-full ${isDark ? 'bg-transparent' : 'bg-transparent'}`
             : `fixed bottom-40 right-4 z-40 w-[320px] max-h-[60vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden ${isDark ? 'bg-[#0f0a2e] border-purple-700/40' : 'bg-white border-gray-200'}`
         }>
@@ -148,11 +147,10 @@ function StyleBot({ inline = false }) {
           <div className="flex-1 overflow-y-auto p-3 space-y-3 max-h-[300px]">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed whitespace-pre-line ${
-                  msg.role === 'user'
+                <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed whitespace-pre-line ${msg.role === 'user'
                     ? 'bg-purple-600 text-white rounded-br-sm'
                     : isDark ? 'bg-white/10 text-white/80 rounded-bl-sm' : 'bg-gray-100 text-gray-800 rounded-bl-sm'
-                }`}>
+                  }`}>
                   {msg.text}
                 </div>
               </div>
@@ -166,9 +164,8 @@ function StyleBot({ inline = false }) {
               <button
                 key={qa}
                 onClick={() => { setInput(qa.split(' ').slice(1).join(' ')); setTimeout(sendMessage, 100); }}
-                className={`flex-shrink-0 px-2 py-1 rounded-full text-[10px] font-bold border transition-all ${
-                  isDark ? 'bg-white/5 border-white/10 text-white/50 hover:text-white' : 'bg-gray-50 border-gray-200 text-gray-500 hover:text-gray-800'
-                }`}
+                className={`flex-shrink-0 px-2 py-1 rounded-full text-[10px] font-bold border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/50 hover:text-white' : 'bg-gray-50 border-gray-200 text-gray-500 hover:text-gray-800'
+                  }`}
               >{qa}</button>
             ))}
           </div>
@@ -181,9 +178,8 @@ function StyleBot({ inline = false }) {
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKey}
               placeholder={t('botPlaceholder')}
-              className={`flex-1 px-3 py-2 rounded-xl text-xs border ${
-                isDark ? 'bg-white/5 border-white/10 text-white placeholder-white/30' : 'bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400'
-              }`}
+              className={`flex-1 px-3 py-2 rounded-xl text-xs border ${isDark ? 'bg-white/5 border-white/10 text-white placeholder-white/30' : 'bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400'
+                }`}
             />
             <button onClick={sendMessage}
               className="px-3 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold hover:bg-purple-500 transition-all">
