@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: styleguruai-backend
+    runtime: python
+    pythonVersion: '3.10'
+    buildCommand: 'pip install -r Backend/requirements.txt'
+    startCommand: 'cd Backend && uvicorn main:app --host 0.0.0.0 --port $PORT'
+    envVars:
+      - key: PYTHON_VERSION
+        value: '3.10.14'
+      - key: SENTRY_DSN
+        sync: false
+      - key: FIREBASE_CREDENTIALS_JSON
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: BACKEND_URL
+        value: https://styleguruai-backend.onrender.com
