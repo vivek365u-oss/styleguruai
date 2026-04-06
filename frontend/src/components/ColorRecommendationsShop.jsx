@@ -64,31 +64,44 @@ function ColorRecommendationsShop({ recommendations, gender = 'male', isDark = f
           </button>
         </div>
 
-        {/* Color Tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          {recommendedColors.map((color, idx) => (
-            <button
-              key={idx}
-              onClick={() => setActiveColorTab(idx)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg font-semibold text-sm whitespace-nowrap transition-all ${
-                activeColorTab === idx
-                  ? isDark
-                    ? 'bg-purple-500/40 border border-purple-400 text-purple-100'
-                    : 'bg-purple-600 border border-purple-600 text-white shadow-md'
-                  : isDark
-                  ? 'border border-white/20 bg-white/5 text-white/70 hover:text-white'
-                  : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              {color.hex && (
-                <div
-                  className="w-4 h-4 rounded-full border-2 border-current"
-                  style={{ backgroundColor: color.hex }}
-                />
-              )}
-              <span>{color.name}</span>
-            </button>
-          ))}
+        {/* Color Tabs - Responsive Horizontal Scroll */}
+        <div className="relative">
+          <div 
+            className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide scroll-smooth snap-x snap-mandatory"
+            id="colorTabsScroll"
+          >
+            {recommendedColors.map((color, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveColorTab(idx)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-semibold text-sm whitespace-nowrap transition-all flex-shrink-0 snap-center ${
+                  activeColorTab === idx
+                    ? isDark
+                      ? 'bg-purple-500/40 border border-purple-400 text-purple-100 shadow-lg'
+                      : 'bg-purple-600 border border-purple-600 text-white shadow-md'
+                    : isDark
+                    ? 'border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10'
+                    : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {color.hex && (
+                  <div
+                    className="w-4 h-4 rounded-full border-2 border-current flex-shrink-0"
+                    style={{ backgroundColor: color.hex }}
+                  />
+                )}
+                <span>{color.name}</span>
+              </button>
+            ))}
+          </div>
+          {/* Gradient fade on right for visual hint to scroll */}
+          {recommendedColors.length > 3 && (
+            <div className={`absolute right-0 top-0 bottom-0 w-8 pointer-events-none ${
+              isDark 
+                ? 'bg-gradient-to-l from-gray-900 to-transparent' 
+                : 'bg-gradient-to-l from-white to-transparent'
+            }`} />
+          )}
         </div>
 
         {/* Why this color? */}
