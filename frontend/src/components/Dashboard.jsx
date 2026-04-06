@@ -398,7 +398,7 @@ function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro
   );
 }
 
-function SettingsScreen({ user, onLogout }) {
+function SettingsScreen({ user, onOpenPayment, onLogout }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t, language, changeLanguage } = useLanguage();
   const { isPro, plan, usage, validUntil } = usePlan();
@@ -1181,7 +1181,7 @@ function Dashboard({ user, onLogout }) {
                   >
                     ← Back to Profile
                   </button>
-                  <SettingsScreen user={user} onLogout={onLogout} />
+                  <SettingsScreen user={user} onOpenPayment={() => setShowPlansScreen(true)} onLogout={onLogout} />
                 </div>
               )}
             </>
