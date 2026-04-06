@@ -2,6 +2,8 @@ import { useState, useRef, useContext } from 'react';
 import { analyzeImage, analyzeImageFemale, analyzeImageSeasonal } from '../api/styleApi';
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
+import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
+import { useAnalysisProgress } from '../hooks/useAnalysisProgress';
 
 // ── Skin Tone Quiz ────────────────────────────────────────────
 function SkinToneQuiz({ isDark, onResult, gender }) {
@@ -234,6 +236,8 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   const [preview, setPreview] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [uploadProgress, setUploadProgress_internal] = useState(0);
+  const [showProgress, setShowProgress] = useState(false);
+  const { progress, startProgress, completeProgress, setError: setProgressError, reset: resetProgress } = useAnalysisProgress();
   const [gender, setGender] = useState('male');
   const [mode, setMode] = useState('normal');
   const [season, setSeason] = useState('summer');
