@@ -26,12 +26,14 @@ API.interceptors.request.use(async (config) => {
 function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState('monthly');
   const isMountedRef = useRef(true);
 
   useEffect(() => {
     if (isOpen) {
       logEvent(EVENTS.PAYWALL_VIEW);
+      setPaymentError(null);
       // Load Razorpay script once when modal opens
       if (!window.Razorpay) {
         const script = document.createElement('script');
@@ -52,21 +54,30 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
     };
   }, []);
 
-  const handlePayment = async (plan) => {
+  const handlePayment = async (plan, retryCount = 0) => {
     if (!isMountedRef.current) return;
     
     logEvent(EVENTS.UPGRADE_CLICK, { plan });
     setLoading(true);
+    setPaymentError(null);
     
     const user = auth.currentUser;
     if (!user) {
-      if (isMountedRef.current) setLoading(false);
+      if (isMountedRef.current) {
+        setPaymentError('Please log in first to upgrade.');
+        setLoading(false);
+      }
       return;
     }
 
     // Wait for Razorpay to be available
     if (!window.Razorpay) {
-      setTimeout(() => handlePayment(plan), 500);
+      if (retryCount > 6) {
+         setPaymentError('Payment gateway blocked. Please disable AdBlocker or try another browser.');
+         setLoading(false);
+         return;
+      }
+      setTimeout(() => handlePayment(plan, retryCount + 1), 500);
       return;
     }
 
@@ -110,8 +121,10 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
             setTimeout(() => onUpgrade?.(), 500);
           } catch (err) {
             console.error('[Payment] ❌ Error:', err.response?.data || err.message);
-            alert('Payment verification failed. If money was deducted, contact support.');
-            if (isMountedRef.current) setLoading(false);
+            if (isMountedRef.current) {
+               setPaymentError('Payment verification failed. If money was deducted, contact support.');
+               setLoading(false);
+            }
           }
         },
         modal: {
@@ -127,14 +140,19 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
       // Handle edge cases where Razorpay fails to open
       razorpay.on('payment.failed', function (response){
         console.error('[Payment] Failed event:', response.error.description);
-        if (isMountedRef.current) setLoading(false);
+        if (isMountedRef.current) {
+           setPaymentError(`Payment failed: ${response.error.description}`);
+           setLoading(false);
+        }
       });
       
       razorpay.open();
     } catch (err) {
       console.error('Payment initialization error:', err);
-      alert('Could not initiate payment. Please try again later.');
-      if (isMountedRef.current) setLoading(false);
+      if (isMountedRef.current) {
+         setPaymentError('Could not initialize payment. Server may be starting, try again in 30 seconds.');
+         setLoading(false);
+      }
     }
   };
 
@@ -222,6 +240,15 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
             <FeatureItem icon="📥" title="Download Outfits" desc="Save outfits as PNG images" isDark={isDark} />
             <FeatureItem icon="🚫" title="No Ads" desc="Clean, distraction-free experience" isDark={isDark} />
           </div>
+
+          {/* Inline Error Message */}
+          {paymentError && (
+            <div className={`mb-4 p-2.5 rounded-lg text-xs font-bold text-center border animate-bounce-short ${
+              isDark ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-red-50 border-red-200 text-red-600'
+            }`}>
+              ⚠️ {paymentError}
+            </div>
+          )}
 
           {/* Checkout Button */}
           <button 
