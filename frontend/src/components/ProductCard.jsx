@@ -23,16 +23,21 @@ function ProductCard({ product }) {
       isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-gray-200 hover:bg-gray-50'
     }`}>
       {/* Product Image */}
-      <div className="relative w-full h-32 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center overflow-hidden">
+      <div className="relative w-full h-40 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center overflow-hidden">
         {product.image_url ? (
           <img
             src={product.image_url}
             alt={product.name}
-            className="w-full h-full object-cover"
-            onError={(e) => { e.target.style.display = 'none'; }}
+            className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+            loading="lazy"
+            onError={(e) => { 
+              console.warn(`[ProductCard] Failed to load image: ${product.image_url}`);
+              e.target.style.display = 'none'; 
+              e.target.parentElement.innerHTML = '<span class="text-4xl">👕</span>';
+            }}
           />
         ) : (
-          <span className="text-3xl">👕</span>
+          <span className="text-4xl">👕</span>
         )}
         
         {/* Rating Badge */}

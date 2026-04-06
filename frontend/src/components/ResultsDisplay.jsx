@@ -533,10 +533,18 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
           { name: '👗 Myntra', url: `https://www.myntra.com/${isFemale ? 'co-ords' : 'tshirts'}?rawQuery=${shirtColor.name.toLowerCase().replace(/\s+/g, '%20')}%20${isFemale ? 'women%20coord%20set' : 'men%20oversized'}`, bg: isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300' : 'bg-pink-50 border-pink-300 text-pink-700 font-bold' },
           { name: '🛍️ Meesho', url: `https://meesho.com/search?q=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit'))}`, bg: isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-300' : 'bg-purple-50 border-purple-300 text-purple-700 font-bold' },
         ].map(link => (
-          <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer"
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}>
+          <AffiliateLink 
+            key={link.name} 
+            href={link.url}
+            color={shirtColor.name}
+            category={isFemale ? 'coord set' : 'outfit set'}
+            brand={link.name.replace(/[🛒🏪👗🛍️ ]/g, '')}
+            platform={link.name.toLowerCase().replace(/[^a-z]/g, '')}
+            isDark={isDark}
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}
+          >
             {link.name}
-          </a>
+          </AffiliateLink>
         ))}
       </div>
     </div>

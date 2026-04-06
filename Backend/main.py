@@ -1248,7 +1248,7 @@ async def perform_seeding():
                 "name": product_info['name'],
                 "brand": product_info['brand'],
                 "price": product_info['price'],
-                "image_url": f"https://dummyimage.com/300x300/cccccc/ffffff?text={product_info['category'].title()}",
+                "image_url": f"https://images.unsplash.com/photo-1595777707802-e1989620046d?w=300&h=300&fit=crop&q=80",  # realistic clothing image from unsplash
                 "best_for_tone": ["fair", "medium"],
                 "rating": product_info['rating'],
                 "product_url": f"https://example.com/product/{product_id}",
