@@ -71,14 +71,22 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
     }
 
     try {
-      const amount = plan === 'monthly' ? 5900 : 49900; // in paise
+      // 1. Create Order on Backend first
+      const orderRes = await API.post('/api/subscriptions/create-checkout', { plan });
+      if (!orderRes.data.success) {
+        throw new Error('Failed to create order');
+      }
+
+      const { order_id, amount, currency } = orderRes.data;
       const planName = plan === 'monthly' ? '₹59/month' : '₹499/year';
       
       const options = {
-        key: process.env.REACT_APP_RAZORPAY_KEY_ID || 'rzp_test_12345',
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_BKnG5mzHD4nH0p', // Using correct env var config
         amount: amount,
-        currency: 'INR',
-        description: `StyleGuru AI Premium - ${planName}`,
+        currency: currency,
+        order_id: order_id, // CRITICAL: Pass order_id to enable signature verification later
+        name: 'StyleGuru Premium',
+        description: `Premium Subscription - ${planName}`,
         prefill: {
           email: user.email || '',
           name: user.displayName || 'User',
@@ -87,7 +95,7 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
           try {
             console.log('[Payment] Processing payment response...');
             
-            // Call backend with axios (uses proper API URL + auth token)
+            // 2. Call backend to verify and activate
             const res = await API.post('/api/subscriptions/activate', {
               uid: user.uid,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -98,24 +106,34 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
             
             console.log('[Payment] ✅ Subscription activated:', res.data);
             if (isMountedRef.current) setLoading(false);
-            // Small delay before upgrade to show success
+            // Wait briefly before invoking success callback
             setTimeout(() => onUpgrade?.(), 500);
           } catch (err) {
             console.error('[Payment] ❌ Error:', err.response?.data || err.message);
+            alert('Payment verification failed. If money was deducted, contact support.');
             if (isMountedRef.current) setLoading(false);
           }
         },
         modal: {
           ondismiss: () => {
+            console.log('[Payment] Modal dismissed by user');
             if (isMountedRef.current) setLoading(false);
           }
         }
       };
       
       const razorpay = new window.Razorpay(options);
+      
+      // Handle edge cases where Razorpay fails to open
+      razorpay.on('payment.failed', function (response){
+        console.error('[Payment] Failed event:', response.error.description);
+        if (isMountedRef.current) setLoading(false);
+      });
+      
       razorpay.open();
     } catch (err) {
       console.error('Payment initialization error:', err);
+      alert('Could not initiate payment. Please try again later.');
       if (isMountedRef.current) setLoading(false);
     }
   };

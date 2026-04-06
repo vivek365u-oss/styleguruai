@@ -840,6 +840,47 @@ class ActivateSubscriptionRequest(BaseModel):
     razorpay_signature: str
     plan: str  # 'monthly' or 'yearly'
 
+class CreateSubscriptionCheckoutRequest(BaseModel):
+    plan: str  # 'monthly' or 'yearly'
+
+@app.post("/api/subscriptions/create-checkout")
+async def create_subscription_checkout(
+    request: CreateSubscriptionCheckoutRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Create a Razorpay order for subscription upgrade."""
+    client = get_razorpay_client()
+    if not client:
+        raise HTTPException(
+            status_code=503,
+            detail="Payment service is not configured. Please try again later."
+        )
+    
+    uid = current_user["uid"]
+    amount_paise = 5900 if request.plan == 'monthly' else 49900
+    
+    try:
+        order = client.order.create({
+            "amount": amount_paise,
+            "currency": "INR",
+            "payment_capture": 1,
+            "notes": {
+                "user_id": uid,
+                "plan": request.plan,
+                "type": "subscription"
+            }
+        })
+        
+        return {
+            "success": True,
+            "order_id": order["id"],
+            "amount": amount_paise,
+            "currency": "INR"
+        }
+    except Exception as e:
+        print(f"Failed to create subscription order: {e}")
+        raise HTTPException(status_code=500, detail="Failed to initiate payment")
+
 @app.post("/api/subscriptions/activate")
 async def activate_subscription(request: ActivateSubscriptionRequest):
     """Verify Razorpay payment and activate premium subscription."""
@@ -1269,7 +1310,7 @@ async def perform_seeding():
                 "name": product_info['name'],
                 "brand": product_info['brand'],
                 "price": product_info['price'],
-                "image_url": f"https://images.unsplash.com/photo-1595777707802-e1989620046d?w=300&h=300&fit=crop&q=80",  # realistic clothing image from unsplash
+                "image_url": f"https://dummyimage.com/400x500/f3e8ff/9333ea.jpg&text={product_info['category']}",  # reliable placeholder
                 "best_for_tone": ["fair", "medium"],
                 "rating": product_info['rating'],
                 "product_url": f"https://example.com/product/{product_id}",
