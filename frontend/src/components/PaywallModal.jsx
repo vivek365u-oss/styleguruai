@@ -27,7 +27,8 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
-  const [selectedPlan, setSelectedPlan] = useState('monthly');
+  const [tab, setTab] = useState('coins');
+  const [selectedPlan, setSelectedPlan] = useState('coins_25');
   const isMountedRef = useRef(true);
 
   useEffect(() => {
@@ -172,7 +173,9 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
       }`}>
         
         {/* Header Graphic */}
-        <div className="relative h-40 bg-gradient-to-br from-purple-600 to-pink-600 flex flex-col items-center justify-center overflow-hidden">
+        <div className={`relative h-40 flex flex-col items-center justify-center overflow-hidden transition-all duration-500 ${
+          tab === 'coins' ? 'bg-gradient-to-br from-amber-500 to-orange-600' : 'bg-gradient-to-br from-purple-600 to-pink-600'
+        }`}>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white/20 rounded-full blur-3xl animate-pulse" />
           <button 
             onClick={onClose}
@@ -182,50 +185,105 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
           </button>
           
           <div className="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center mb-2 z-10 rotate-3">
-            <span className="text-2xl font-black bg-gradient-to-br from-purple-600 to-pink-600 text-transparent bg-clip-text">PRO</span>
+            <span className={`text-3xl font-black text-transparent bg-clip-text ${
+              tab === 'coins' ? 'bg-gradient-to-br from-amber-500 to-orange-600' : 'bg-gradient-to-br from-purple-600 to-pink-600'
+            }`}>
+              {tab === 'coins' ? '🪙' : 'PRO'}
+            </span>
           </div>
-          <h2 className="text-white text-xl font-black tracking-widest z-10 drop-shadow-md">{t('proTitle')}</h2>
+          <h2 className="text-white text-xl font-black tracking-widest z-10 drop-shadow-md">
+            {tab === 'coins' ? 'TOP-UP COINS' : t('proTitle')}
+          </h2>
         </div>
 
         {/* Content */}
         <div className="p-6 relative z-10 bg-inherit">
+          {/* Main Tab Switcher */}
+          <div className={`flex p-1 rounded-xl mb-6 shadow-inner ${isDark ? 'bg-[#1a1c30]' : 'bg-gray-100'}`}>
+            <button
+              onClick={() => { setTab('coins'); setSelectedPlan('coins_25'); }}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                tab === 'coins' ? 'bg-white text-orange-600 shadow-sm' : isDark ? 'text-white/50' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              🪙 Pay-as-you-go
+            </button>
+            <button
+              onClick={() => { setTab('subs'); setSelectedPlan('weekly'); }}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                tab === 'subs' ? 'bg-white text-purple-600 shadow-sm' : isDark ? 'text-white/50' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              👑 Unlimited Sub
+            </button>
+          </div>
+
           <div className="text-center mb-6">
-            <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-500'}`}>Unlock Unlimited Analyses</p>
             
-            {/* Plan Selector Tabs */}
-            <div className="flex gap-2 justify-center mt-4 mb-4">
-              <button
-                onClick={() => setSelectedPlan('monthly')}
-                className={`px-4 py-2 rounded-lg font-bold text-xs transition-all ${
-                  selectedPlan === 'monthly'
-                    ? 'bg-purple-600 text-white'
-                    : isDark ? 'bg-white/5 border border-white/10 text-white/50 hover:text-white/80' : 'bg-gray-100 border border-gray-200 text-gray-600'
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setSelectedPlan('yearly')}
-                className={`px-4 py-2 rounded-lg font-bold text-xs transition-all relative ${
-                  selectedPlan === 'yearly'
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
-                    : isDark ? 'bg-white/5 border border-white/10 text-white/50 hover:text-white/80' : 'bg-gray-100 border border-gray-200 text-gray-600'
-                }`}
-              >
-                Yearly
-                <span className={`absolute -top-2 right-0 text-[9px] font-black px-1.5 py-0.5 rounded-full ${
-                  selectedPlan === 'yearly' ? 'bg-yellow-400 text-yellow-900' : 'bg-yellow-100 text-yellow-800'
-                }`}>Save 16%</span>
-              </button>
-            </div>
+            {/* Plan Selectors */}
+            {tab === 'coins' ? (
+              <div className="flex gap-2 justify-center mb-4">
+                <button
+                  onClick={() => setSelectedPlan('coins_10')}
+                  className={`px-3 py-2 rounded-lg font-bold text-xs transition-all ${
+                    selectedPlan === 'coins_10'
+                      ? 'bg-orange-500 text-white'
+                      : isDark ? 'bg-white/5 text-white/50' : 'bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  10 Coins
+                </button>
+                <button
+                  onClick={() => setSelectedPlan('coins_25')}
+                  className={`px-3 py-2 rounded-lg font-bold text-xs transition-all relative ${
+                    selectedPlan === 'coins_25'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md'
+                      : isDark ? 'bg-white/5 text-white/50' : 'bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  25 Coins
+                  <span className="absolute -top-2 -right-2 text-[8px] font-black px-1.5 py-0.5 rounded-full bg-yellow-400 text-yellow-900 border border-yellow-200">Bonus</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-1.5 justify-center mb-4">
+                <button
+                  onClick={() => setSelectedPlan('weekly')}
+                  className={`px-2 py-2 rounded-lg font-bold text-[10px] transition-all ${
+                    selectedPlan === 'weekly' ? 'bg-purple-600 text-white' : isDark ? 'bg-white/5 text-white/50' : 'bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  Weekly
+                </button>
+                <button
+                  onClick={() => setSelectedPlan('monthly')}
+                  className={`px-2 py-2 rounded-lg font-bold text-[10px] transition-all ${
+                    selectedPlan === 'monthly' ? 'bg-purple-600 text-white' : isDark ? 'bg-white/5 text-white/50' : 'bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  Monthly
+                </button>
+                <button
+                  onClick={() => setSelectedPlan('yearly')}
+                  className={`px-2 py-2 rounded-lg font-bold text-[10px] transition-all relative ${
+                    selectedPlan === 'yearly' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' : isDark ? 'bg-white/5 text-white/50' : 'bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  Yearly
+                  <span className={`absolute -top-2 right-0 text-[8px] font-black px-1 py-0.5 rounded-full ${selectedPlan === 'yearly' ? 'bg-yellow-400 text-yellow-900' : 'bg-yellow-100 text-yellow-800'}`}>Save 16%</span>
+                </button>
+              </div>
+            )}
             
             {/* Price Display */}
             <div className="mt-3 flex items-end justify-center gap-1 leading-none">
               <span className={`text-5xl tracking-tighter font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                {selectedPlan === 'monthly' ? '₹59' : '₹499'}
+                {selectedPlan === 'coins_10' || selectedPlan === 'weekly' ? '₹29' :
+                 selectedPlan === 'coins_25' ? '₹49' :
+                 selectedPlan === 'monthly' ? '₹59' : '₹499'}
               </span>
               <span className={`text-sm mb-1 font-bold ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
-                {selectedPlan === 'monthly' ? '/month' : '/year'}
+                {tab === 'coins' ? 'once' : selectedPlan === 'weekly' ? '/week' : selectedPlan === 'monthly' ? '/month' : '/year'}
               </span>
             </div>
             {selectedPlan === 'yearly' && (
@@ -234,11 +292,21 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
           </div>
 
           {/* Features */}
-          <div className="space-y-4 mb-8">
-            <FeatureItem icon="♾️" title="Unlimited Analyses" desc="Analyze colors as many times as you need" isDark={isDark} />
-            <FeatureItem icon="🛍️" title="Full Shopping" desc="50+ product suggestions per color" isDark={isDark} />
-            <FeatureItem icon="📥" title="Download Outfits" desc="Save outfits as PNG images" isDark={isDark} />
-            <FeatureItem icon="🚫" title="No Ads" desc="Clean, distraction-free experience" isDark={isDark} />
+          <div className="space-y-4 mb-6">
+            {tab === 'coins' ? (
+              <>
+                <FeatureItem icon="✅" title="No Subscriptions" desc="Pay once, use whenever you like" isDark={isDark} />
+                <FeatureItem icon="📸" title="1 Coin = 1 Solo Scan" desc="Analyze skin to get color palettes" isDark={isDark} />
+                <FeatureItem icon="👩‍❤️‍👨" title="2 Coins = Couple Match" desc="Compare colors with your partner" isDark={isDark} />
+                <FeatureItem icon="♾️" title="No Expiry" desc="Your coins last forever" isDark={isDark} />
+              </>
+            ) : (
+              <>
+                <FeatureItem icon="♾️" title="Unlimited Analyses" desc="Analyze colors as many times as you need" isDark={isDark} />
+                <FeatureItem icon="🛍️" title="Full Ad-Free Shopping" desc="Zero interruptions anywhere" isDark={isDark} />
+                <FeatureItem icon="📚" title="Unlimited History" desc="Access all your past analyses forever" isDark={isDark} />
+              </>
+            )}
           </div>
 
           {/* Inline Error Message */}
@@ -254,23 +322,25 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
           <button 
             onClick={() => handlePayment(selectedPlan)}
             disabled={loading}
-            className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-wider transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg ${
+            className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 ${
               loading 
-                ? 'bg-gray-500 text-white cursor-wait'
-                : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-500/30'
+                ? 'bg-gray-500 text-white cursor-wait opacity-80'
+                : tab === 'coins'
+                   ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:shadow-orange-500/50'
+                   : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-purple-500/50'
             }`}
           >
             {loading ? (
-              <span className="flex items-center justify-center gap-2">
+              <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Processing Payment...
-              </span>
+                Processing...
+              </>
             ) : (
-              `Upgrade Now with Razorpay`
+              `Get ${tab === 'coins' ? 'Coins' : 'PRO'} with Razorpay`
             )}
           </button>
           
-          <p className={`text-[9px] text-center mt-4 font-medium leading-relaxed ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
+          <p className={`text-[9px] text-center mt-3 font-medium leading-relaxed ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
             Secure payment powered by Razorpay • Cancel anytime • No hidden charges
           </p>
         </div>

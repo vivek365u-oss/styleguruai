@@ -838,17 +838,17 @@ class ActivateSubscriptionRequest(BaseModel):
     razorpay_payment_id: str
     razorpay_order_id: str
     razorpay_signature: str
-    plan: str  # 'monthly' or 'yearly'
+    plan: str  # 'weekly', 'monthly', 'yearly', 'coins_10', 'coins_25'
 
 class CreateSubscriptionCheckoutRequest(BaseModel):
-    plan: str  # 'monthly' or 'yearly'
+    plan: str
 
 @app.post("/api/subscriptions/create-checkout")
 async def create_subscription_checkout(
     request: CreateSubscriptionCheckoutRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    """Create a Razorpay order for subscription upgrade."""
+    """Create a Razorpay order for subscription or coin upgrade."""
     client = get_razorpay_client()
     if not client:
         raise HTTPException(
@@ -857,7 +857,14 @@ async def create_subscription_checkout(
         )
     
     uid = current_user["uid"]
-    amount_paise = 5900 if request.plan == 'monthly' else 49900
+    price_map = {
+        'weekly': 2900,
+        'monthly': 5900,
+        'yearly': 49900,
+        'coins_10': 2900,
+        'coins_25': 4900
+    }
+    amount_paise = price_map.get(request.plan, 5900)
     
     try:
         order = client.order.create({
@@ -867,7 +874,7 @@ async def create_subscription_checkout(
             "notes": {
                 "user_id": uid,
                 "plan": request.plan,
-                "type": "subscription"
+                "type": "hybrid_upgrade"
             }
         })
         
@@ -878,17 +885,16 @@ async def create_subscription_checkout(
             "currency": "INR"
         }
     except Exception as e:
-        print(f"Failed to create subscription order: {e}")
+        print(f"Failed to create upgrade order: {e}")
         raise HTTPException(status_code=500, detail="Failed to initiate payment")
 
 @app.post("/api/subscriptions/activate")
 async def activate_subscription(request: ActivateSubscriptionRequest):
-    """Verify Razorpay payment and activate premium subscription."""
+    """Verify Razorpay payment and activate premium OR credit coins."""
     import hmac
     import hashlib
     from datetime import timedelta
     
-    # Get Razorpay key secret
     RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
     if not RAZORPAY_KEY_SECRET:
         raise HTTPException(status_code=500, detail="Payment service not configured.")
@@ -904,35 +910,125 @@ async def activate_subscription(request: ActivateSubscriptionRequest):
     if not hmac.compare_digest(expected, request.razorpay_signature):
         raise HTTPException(status_code=400, detail="Payment verification failed.")
 
-    # Update Firestore subscription
     try:
         db = get_firestore_db()
         uid = request.uid
+        user_ref = db.collection("users").document(uid)
         
-        # Calculate expiry based on plan
-        if request.plan == 'monthly':
-            valid_until = (datetime.utcnow() + timedelta(days=30)).isoformat() + "Z"
-        else:  # yearly
-            valid_until = (datetime.utcnow() + timedelta(days=365)).isoformat() + "Z"
-        
-        # Save subscription data
-        db.collection("users").document(uid).set({
-            "tier": "premium",
-            "subscription_plan": request.plan,
-            "premium_until": valid_until,
-            "payment_id": request.razorpay_payment_id,
-            "activated_at": datetime.utcnow().isoformat() + "Z",
-        }, merge=True)
-        
-        return {
-            "success": True,
-            "tier": "premium",
-            "plan": request.plan,
-            "premium_until": valid_until,
-        }
+        if request.plan.startswith('coins_'):
+            coins_added = 10 if request.plan == 'coins_10' else 25
+            user_doc = user_ref.get()
+            current_coins = user_doc.to_dict().get("coins_balance", 2) if user_doc.exists else 2
+            
+            user_ref.set({
+                "coins_balance": current_coins + coins_added,
+                "payment_id": request.razorpay_payment_id,
+                "last_coin_purchase": datetime.utcnow().isoformat() + "Z"
+            }, merge=True)
+            
+            return {"success": True, "type": "coins", "coins_balance": current_coins + coins_added}
+        else:
+            if request.plan == 'weekly':
+                days = 7
+            elif request.plan == 'monthly':
+                days = 30
+            else:
+                days = 365
+                
+            valid_until = (datetime.utcnow() + timedelta(days=days)).isoformat() + "Z"
+            
+            user_ref.set({
+                "tier": "premium",
+                "subscription_plan": request.plan,
+                "premium_until": valid_until,
+                "payment_id": request.razorpay_payment_id,
+                "activated_at": datetime.utcnow().isoformat() + "Z",
+            }, merge=True)
+            
+            return {
+                "success": True,
+                "tier": "premium",
+                "plan": request.plan,
+                "premium_until": valid_until,
+            }
     except Exception as e:
         print(f"Subscription activation error: {e}")
-        raise HTTPException(status_code=500, detail="Subscription activation failed.")
+        raise HTTPException(status_code=500, detail="Activation failed.")
+
+# ============================================
+# PHASE 1.3: FREEMIUM USER ENDPOINTS
+# ============================================
+
+@app.get("/api/users/profile")
+async def get_user_profile(current_user: dict = Depends(get_current_user)):
+    """Fetch user's coin balance and premium status."""
+    db = get_firestore_db()
+    uid = current_user["uid"]
+    user_ref = db.collection("users").document(uid)
+    doc = user_ref.get()
+    
+    # Initialize if missing
+    if not doc.exists:
+        default_data = {
+            "coins_balance": 2,
+            "created_at": datetime.utcnow().isoformat() + "Z",
+            "tier": "free"
+        }
+        user_ref.set(default_data)
+        return {"success": True, "data": default_data}
+        
+    data = doc.to_dict()
+    # Grant fallback 2 coins if property never existed
+    if "coins_balance" not in data:
+        data["coins_balance"] = 2
+        user_ref.set({"coins_balance": 2}, merge=True)
+        
+    # Check premium
+    premium_active = False
+    premium_until = data.get("premium_until")
+    if premium_until:
+        try:
+            from dateutil import parser
+            dt = parser.isoparse(premium_until).replace(tzinfo=None)
+            if datetime.utcnow() < dt:
+                premium_active = True
+        except:
+            pass
+            
+    data["is_pro"] = premium_active
+    return {"success": True, "data": data}
+
+class ConsumeCoinRequest(BaseModel):
+    cost: int = 1
+
+@app.post("/api/users/consume-coin")
+async def consume_coin(request: ConsumeCoinRequest, current_user: dict = Depends(get_current_user)):
+    """Deduct coins. Ignored if user is PRO."""
+    db = get_firestore_db()
+    uid = current_user["uid"]
+    user_ref = db.collection("users").document(uid)
+    doc = user_ref.get()
+    if not doc.exists:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    data = doc.to_dict()
+    premium_until = data.get("premium_until")
+    if premium_until:
+        try:
+            from dateutil import parser
+            dt = parser.isoparse(premium_until).replace(tzinfo=None)
+            if datetime.utcnow() < dt:
+                return {"success": True, "is_pro": True, "remaining_coins": data.get("coins_balance", 0)}
+        except:
+            pass
+            
+    current_coins = data.get("coins_balance", 2)
+    if current_coins < request.cost:
+        raise HTTPException(status_code=402, detail="Insufficient coins. Please recharge or upgrade to PRO.")
+        
+    new_coins = current_coins - request.cost
+    user_ref.set({"coins_balance": new_coins}, merge=True)
+    return {"success": True, "is_pro": False, "remaining_coins": new_coins}
 
 # ============================================
 # PRODUCTS — PHASE 1 REVENUE

@@ -11,7 +11,7 @@ import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import AdSense from '../AdSense';
 import { saveProfile, auth, incrementUsage } from '../api/styleApi';
 import WardrobePanel from './WardrobePanel';
-import { saveWardrobeItem, activateProSubscription } from '../api/styleApi';
+import { saveWardrobeItem, activateProSubscription, consumeCoin } from '../api/styleApi';
 import { usePlan } from '../context/PlanContext';
 import PaywallModal from './PaywallModal';
 import { PlansUpgradeScreen } from './PlansUpgradeScreen';
@@ -777,7 +777,7 @@ function Dashboard({ user, onLogout }) {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t } = useLanguage();
-  const { isPro, usage, setUsage } = usePlan();
+  const { isPro, usage, setUsage, coins, setCoins } = usePlan();
   const { cart, clearCart } = useCart();
   const isDark = theme === 'dark';
   const [results, setResults] = useState(null);
@@ -976,17 +976,6 @@ function Dashboard({ user, onLogout }) {
       const count = parseInt(localStorage.getItem('sg_analysis_count') || '0') + 1;
       localStorage.setItem('sg_analysis_count', count.toString());
       
-      // PHASE 1.2: Show paywall after 3rd free analysis (non-pro users)
-      // Only trigger if exactly on 3rd and not already shown
-      if (!isPro && count === 3) {
-        // Use a flag to prevent multiple triggers
-        const paywallShown = localStorage.getItem('sg_paywall_shown_' + (new Date()).toDateString());
-        if (!paywallShown) {
-          localStorage.setItem('sg_paywall_shown_' + (new Date()).toDateString(), 'true');
-          setTimeout(() => setPaywallOpen(true), 1000); // Show after results display
-        }
-      }
-      
       const newEntry = {
         id: Date.now(),
         skinTone: skinToneObj?.category || 'medium',
@@ -1008,14 +997,17 @@ function Dashboard({ user, onLogout }) {
       console.error('Error saving analysis to local history:', e);
     }
 
-    // Save profile to Firestore
+    // Save profile and Deduct Coins to Firestore
     const uid = auth.currentUser?.uid;
     if (uid) {
-      // Increment usage for free users
+      // Deduct usage constraint for free users dynamically
       if (!isPro) {
-        incrementUsage(uid, 'analyses_count').catch(() => {
-          // Silently fail, will sync on next load
-        });
+        const cost = enriched.type === 'couple' ? 2 : 1;
+        consumeCoin(cost).then((res) => {
+          if (res.data && res.data.success) {
+            setCoins(res.data.remaining_coins);
+          }
+        }).catch((err) => console.log('Coin sink failed to flush', err));
       }
       logEvent(EVENTS.STYLE_ANALYSIS_SUCCESS, {
         skin_tone: enriched.analysis?.skin_tone?.category,
@@ -1075,13 +1067,18 @@ function Dashboard({ user, onLogout }) {
             </button>
           )}
           <CartButton cartOpen={cartOpen} setCartOpen={setCartOpen} />
+          {!isPro && (
+            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider border border-orange-500/30 text-amber-500 px-3 py-1.5 rounded-xl shadow-sm bg-orange-900/10 hover:bg-orange-900/20 transition cursor-pointer" onClick={() => setShowPlansScreen(true)}>
+              <span>🪙</span> {coins}
+            </div>
+          )}
           {!isPro ? (
             <button onClick={() => setShowPlansScreen(true)} className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1.5 rounded-xl shadow-md transition hover:scale-105 active:scale-95">
-              <span>✨</span> PRO
+              <span>👑</span> GET PRO
             </button>
           ) : (
             <div className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider border border-purple-500/30 text-purple-600 px-3 py-1.5 rounded-xl shadow-sm bg-purple-50/50">
-              <span className="text-purple-500">✨</span> PRO
+              <span className="text-purple-500">👑</span> PRO
             </div>
           )}
           <button onClick={toggleTheme} className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-sm">
@@ -1116,6 +1113,8 @@ function Dashboard({ user, onLogout }) {
                   setCurrentGender={setCurrentGender}
                   isPro={isPro}
                   usage={usage}
+                  coins={coins}
+                  onCoinEmpty={() => setShowPlansScreen(true)}
                 />
               )}
               {loading && <LoadingScreenWithProgress progress={uploadProgress} />}

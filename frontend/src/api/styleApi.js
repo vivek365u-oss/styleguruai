@@ -148,7 +148,14 @@ export const getHistory = async () => {
 };
 
 // ============================================
-// ANALYSIS APIs (WITH COMPRESSION & RETRY)
+// COINS — FIRESTORE
+// ============================================
+
+export const consumeCoin = async (cost = 1) => {
+  return await API.post('/api/users/consume-coin', { cost });
+};
+
+// ============================================
 // ============================================
 
 export const analyzeImage = async (file, lang = 'en', onProgress) => {
