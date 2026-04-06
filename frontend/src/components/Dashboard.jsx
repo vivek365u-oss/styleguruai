@@ -789,6 +789,8 @@ function Dashboard({ user, onLogout }) {
   const [currentGender, setCurrentGender] = useState('male');
   const [toast, setToast] = useState(null);
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [showPlansScreen, setShowPlansScreen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
   const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
