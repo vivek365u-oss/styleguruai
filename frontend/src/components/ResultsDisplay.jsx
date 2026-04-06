@@ -1110,31 +1110,58 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         </button>
       </div>
 
-      {/* Tab bar */}
-      <div className={`flex ${tabBarBg} rounded-2xl p-1 gap-1`}>
+      {/* Tab bar — equal distribution, all 4 tabs including Shop */}
+      <div className={`flex ${tabBarBg} rounded-2xl p-1 gap-0.5`}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl text-[10px] font-bold transition-all min-w-0 ${
               activeTab === tab.id
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
                 : inactiveTabCls
             }`}
           >
-            <span>{tab.emoji}</span>
-            <span>{tab.label}</span>
+            <span className="text-sm">{tab.emoji}</span>
+            <span className="truncate w-full text-center px-0.5">{tab.label}</span>
           </button>
         ))}
       </div>
 
-      {/* Tab content — swipe support */}
+      {/* Tab content — swipe support with gesture direction detection */}
       <div
         className="tab-content"
-        onTouchStart={(e) => { window._touchStartX = e.touches[0].clientX; }}
+        onTouchStart={(e) => {
+          window._tabTouchStartX = e.touches[0].clientX;
+          window._tabTouchStartY = e.touches[0].clientY;
+          window._tabSwipeBlocked = false;
+        }}
+        onTouchMove={(e) => {
+          // Detect if this is a horizontal scroll inside a child (e.g. color list)
+          // If the event target or any ancestor has overflowX scrollable, block parent
+          const dx = Math.abs(e.touches[0].clientX - window._tabTouchStartX);
+          const dy = Math.abs(e.touches[0].clientY - window._tabTouchStartY);
+          if (dx > dy) {
+            // Primarily horizontal — check if a child is scrollable horizontally
+            let el = e.target;
+            while (el && el !== e.currentTarget) {
+              const style = window.getComputedStyle(el);
+              const overflowX = style.overflowX;
+              if ((overflowX === 'auto' || overflowX === 'scroll') && el.scrollWidth > el.clientWidth) {
+                window._tabSwipeBlocked = true;
+                break;
+              }
+              el = el.parentElement;
+            }
+          }
+        }}
         onTouchEnd={(e) => {
-          const diff = window._touchStartX - e.changedTouches[0].clientX;
-          const tabOrder = ['colors', 'outfits', 'accessories'];
+          if (window._tabSwipeBlocked) return;
+          const diff = window._tabTouchStartX - e.changedTouches[0].clientX;
+          const dy = Math.abs(e.changedTouches[0].clientY - window._tabTouchStartY);
+          // Only swipe horizontally if mainly horizontal gesture
+          if (Math.abs(diff) < dy * 0.8) return;
+          const tabOrder = ['colors', 'outfits', 'accessories', 'shopping'];
           const idx = tabOrder.indexOf(activeTab);
           if (diff > 50 && idx < tabOrder.length - 1) setActiveTab(tabOrder[idx + 1]);
           if (diff < -50 && idx > 0) setActiveTab(tabOrder[idx - 1]);

@@ -1,107 +1,173 @@
 /**
- * Enhanced Loading Screen with Real Progress Tracking
+ * Enhanced Loading Screen — Real Multi-Stage Progress Animation
+ * Production-level UX: staged steps, animated ring, fade-in/out
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
 
+// Stage definitions shown as step pills
+const STAGE_STEPS = [
+  { key: 'upload',     emoji: '📤', label: 'Uploading...',        threshold: 0  },
+  { key: 'detect',     emoji: '🔬', label: 'Detecting colors...',  threshold: 20 },
+  { key: 'analyze',    emoji: '🎨', label: 'Analyzing skin tone...',threshold: 40 },
+  { key: 'match',      emoji: '👔', label: 'Matching outfits...',  threshold: 70 },
+  { key: 'finalize',   emoji: '✨', label: 'Generating results...', threshold: 90 },
+];
+
 export function LoadingScreenWithProgress({ progress }) {
   const { theme } = useContext(ThemeContext);
-  const { t } = useLanguage();
   const isDark = theme === 'dark';
+  const [displayedPercent, setDisplayedPercent] = useState(0);
 
-  const progressPercent = progress?.percent || 0;
-  const timeRemaining = progress?.timeRemaining;
+  // Normalize: support both object {percent, label} and raw number
+  const rawPercent = typeof progress === 'number'
+    ? progress
+    : (progress?.percent ?? 0);
+  const label = typeof progress === 'object' && progress !== null
+    ? (progress.label || 'Analyzing your style...')
+    : 'Analyzing your style...';
+  const activeEmoji = typeof progress === 'object' && progress !== null
+    ? (progress.emoji || '🔍')
+    : '🔍';
+  const isError = typeof progress === 'object' && progress !== null && progress.isError;
 
-  const formatTime = (seconds) => {
-    if (!seconds) return '';
-    if (seconds < 60) return `${seconds}s remaining`;
-    const mins = Math.ceil(seconds / 60);
-    return `${mins}m remaining`;
-  };
+  // Smooth counter animation
+  useEffect(() => {
+    let frame;
+    const animate = () => {
+      setDisplayedPercent(prev => {
+        if (prev < rawPercent) {
+          const step = Math.max(1, Math.ceil((rawPercent - prev) / 6));
+          return Math.min(prev + step, rawPercent);
+        }
+        return prev;
+      });
+      frame = requestAnimationFrame(animate);
+    };
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, [rawPercent]);
+
+  // SVG circle progress (128x128, r=54)
+  const RADIUS = 54;
+  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+  const strokeDashoffset = CIRCUMFERENCE * (1 - displayedPercent / 100);
+
+  // Active stage
+  const activeStageIdx = STAGE_STEPS.reduce((acc, stage, i) => {
+    return displayedPercent >= stage.threshold ? i : acc;
+  }, 0);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-      {/* Animated loader */}
-      <div className="relative w-32 h-32 mb-8">
-        {/* Outer ring */}
-        <div className="absolute inset-0 rounded-full border-4 border-purple-500/20" />
-        
-        {/* Progress circle */}
-        <svg className="absolute inset-0 w-full h-full transform -rotate-90" style={{ view: '0 0 100 100' }}>
-          <circle
-            cx="64"
-            cy="64"
-            r="60"
-            fill="none"
-            stroke="url(#gradient)"
-            strokeWidth="4"
-            strokeDasharray={`${2 * Math.PI * 60 * (progressPercent / 100)} ${2 * Math.PI * 60}`}
-            strokeLinecap="round"
-            style={{ transition: 'stroke-dasharray 0.3s ease' }}
-          />
+    <div className={`flex flex-col items-center justify-center min-h-[65vh] px-6 py-8 animate-fadeIn`}>
+
+      {/* Circular progress ring */}
+      <div className="relative w-36 h-36 mb-6" style={{ filter: 'drop-shadow(0 0 20px rgba(168,85,247,0.35))' }}>
+        {/* Background track */}
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 128 128">
+          <circle cx="64" cy="64" r={RADIUS} fill="none"
+            stroke={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}
+            strokeWidth="8" />
+        </svg>
+        {/* Progress arc */}
+        <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 128 128">
           <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id="pgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#a855f7" />
               <stop offset="100%" stopColor="#ec4899" />
             </linearGradient>
           </defs>
+          <circle
+            cx="64" cy="64" r={RADIUS}
+            fill="none"
+            stroke="url(#pgGrad)"
+            strokeWidth="8"
+            strokeLinecap="round"
+            strokeDasharray={CIRCUMFERENCE}
+            strokeDashoffset={strokeDashoffset}
+            style={{ transition: 'stroke-dashoffset 0.3s ease' }}
+          />
         </svg>
-
-        {/* Center emoji */}
-        <div className="absolute inset-0 flex items-center justify-center text-5xl">
-          {progress?.emoji || '🔍'}
-        </div>
-
-        {/* Percentage text */}
-        <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 text-sm font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
-          {progressPercent}%
+        {/* Center emoji + percent */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-4xl mb-0.5 animate-bounce-subtle">{isError ? '❌' : activeEmoji}</span>
+          <span className={`text-sm font-black tabular-nums ${isDark ? 'text-white' : 'text-gray-800'}`}>
+            {displayedPercent}%
+          </span>
         </div>
       </div>
 
-      {/* Status label */}
-      <h2 className={`text-2xl font-black mb-2 text-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
-        {progress?.label || 'Processing...'}
+      {/* Title */}
+      <h2 className={`text-xl font-black mb-1 text-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
+        {isError ? 'Analysis Failed' : label}
       </h2>
+      <p className={`text-sm mb-6 text-center ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
+        {isError ? 'Please try again with a clearer photo' : 'StyleGuru AI is crafting your style profile...'}
+      </p>
 
-      {/* Stage indicators */}
-      <div className="flex gap-2 mb-6">
-        {['upload', 'detection', 'extraction', 'recommendation'].map((stage, i) => {
-          const stageOrder = { upload: 0, detection: 1, extraction: 2, recommendation: 3 };
-          const isActive = stageOrder[stage] * 25 <= progressPercent;
-          const isComplete = stageOrder[stage] * 25 < progressPercent;
-
-          return (
-            <div
-              key={stage}
-              className={`h-2 rounded-full transition-all ${
-                isComplete
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 w-8'
-                  : isActive
-                  ? 'bg-purple-500 w-6'
-                  : isDark
-                  ? 'bg-white/10 w-4'
-                  : 'bg-gray-300 w-4'
-              }`}
-            />
-          );
-        })}
-      </div>
-
-      {/* Time remaining */}
-      {timeRemaining && (
-        <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
-          {formatTime(timeRemaining)}
-        </p>
+      {/* Stage step pills */}
+      {!isError && (
+        <div className="flex items-center gap-1.5 flex-wrap justify-center mb-6">
+          {STAGE_STEPS.map((stage, i) => {
+            const isDone    = i < activeStageIdx;
+            const isActive  = i === activeStageIdx;
+            const isPending = i > activeStageIdx;
+            return (
+              <div
+                key={stage.key}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border transition-all duration-300 ${
+                  isDone
+                    ? isDark
+                      ? 'bg-green-500/20 border-green-500/30 text-green-300'
+                      : 'bg-green-100 border-green-400 text-green-700'
+                    : isActive
+                      ? isDark
+                        ? 'bg-purple-500/30 border-purple-500/50 text-purple-200 scale-105 shadow-md shadow-purple-500/20'
+                        : 'bg-purple-100 border-purple-500 text-purple-700 scale-105 shadow-sm'
+                      : isDark
+                        ? 'bg-white/5 border-white/10 text-white/30'
+                        : 'bg-gray-100 border-gray-200 text-gray-400'
+                }`}
+              >
+                <span>{isDone ? '✅' : isActive ? stage.emoji : '○'}</span>
+                <span>{stage.label.replace('...', '')}</span>
+              </div>
+            );
+          })}
+        </div>
       )}
 
-      {/* Error state */}
-      {progress?.isError && (
-        <div className={`mt-4 p-3 rounded-lg border text-center ${isDark ? 'bg-red-500/10 border-red-500/30' : 'bg-red-50 border-red-300'}`}>
+      {/* Progress bar (supplemental) */}
+      {!isError && (
+        <div className={`w-full max-w-xs h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300"
+            style={{ width: `${displayedPercent}%` }}
+          />
+        </div>
+      )}
+
+      {/* Error detail */}
+      {isError && (
+        <div className={`mt-4 px-4 py-3 rounded-2xl border text-center ${isDark ? 'bg-red-500/10 border-red-500/30' : 'bg-red-50 border-red-300'}`}>
           <p className={`text-sm font-semibold ${isDark ? 'text-red-300' : 'text-red-600'}`}>
-            {progress.label}
+            {progress?.label || 'Analysis failed. Please try again.'}
           </p>
+        </div>
+      )}
+
+      {/* Subtle pulse dots */}
+      {!isError && (
+        <div className="flex gap-2 mt-6">
+          {[0, 1, 2].map(i => (
+            <div
+              key={i}
+              className="w-2 h-2 rounded-full bg-purple-500/60 animate-pulse"
+              style={{ animationDelay: `${i * 0.2}s` }}
+            />
+          ))}
         </div>
       )}
     </div>

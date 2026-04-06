@@ -1185,18 +1185,27 @@ function Dashboard({ user, onLogout }) {
       </main>
 
       <nav className={`fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t ${theme === 'dark' ? 'bg-[#050816]/95 border-white/10' : 'bg-slate-100/95 border-purple-200 shadow-lg'}`}>
-        {/* Nav Container: Equal distribution using flex with proper spacing */}
-        <div className="max-w-lg mx-auto px-4 py-2">
-          <div className="flex justify-around items-stretch gap-1">
+        {/* Nav Container: Perfect equal distribution — each item gets exact 20% */}
+        <div className="max-w-lg mx-auto px-2 py-2">
+          <div className="flex w-full">
             {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => handleTabChange(item.id)}
-                className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 px-2 rounded-lg transition-all min-h-[56px] ${activeTab === item.id ? 'text-purple-500 bg-purple-500/10' : theme === 'dark' ? 'text-white/40 hover:text-white/70 hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'}`}
+                style={{ flex: '1 1 0', minWidth: 0 }}
+                className={`flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl transition-all min-h-[56px] ${
+                  activeTab === item.id
+                    ? 'text-purple-500 bg-purple-500/10'
+                    : theme === 'dark'
+                      ? 'text-white/40 hover:text-white/70 hover:bg-white/5'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'
+                }`}
               >
-                <span className={`text-xl transition-transform duration-200 ${activeTab === item.id ? 'scale-110' : ''}`}>{item.emoji}</span>
-                <span className={`text-[10px] font-semibold leading-tight text-center ${activeTab === item.id ? 'text-purple-400' : theme === 'dark' ? 'text-white/40' : 'text-gray-700'}`}>{item.label}</span>
-                {activeTab === item.id && <div className="w-1 h-0.5 rounded-full bg-purple-400 mt-1 nav-dot" />}
+                <span className={`text-[22px] leading-none transition-transform duration-200 ${activeTab === item.id ? 'scale-110' : ''}`}>{item.emoji}</span>
+                <span className={`text-[9px] font-bold leading-tight text-center truncate w-full px-1 ${
+                  activeTab === item.id ? 'text-purple-400' : theme === 'dark' ? 'text-white/40' : 'text-gray-600'
+                }`}>{item.label}</span>
+                {activeTab === item.id && <div className="w-4 h-0.5 rounded-full bg-purple-400 mt-0.5" />}
               </button>
             ))}
           </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { getWardrobe, deleteWardrobeItem, getWardrobeCount, getSavedColors, deleteSavedColor, deleteAllSavedColors } from '../api/styleApi';
 import { auth } from '../api/styleApi';
 import { ThemeContext } from '../App';
@@ -17,13 +17,9 @@ function SavedColorsTab({ isDark, user, onViewHistory }) {
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
-    
     setLoading(true);
     getSavedColors(auth.currentUser.uid)
-      .then(data => {
-        setSaved(data);
-        setLoading(false);
-      })
+      .then(data => { setSaved(data); setLoading(false); })
       .catch(err => {
         console.error('Failed to load saved colors:', err);
         setError(t('somethingWrong'));
@@ -34,14 +30,10 @@ function SavedColorsTab({ isDark, user, onViewHistory }) {
   const remove = async (colorId) => {
     if (!auth.currentUser) return;
     setDeletingId(colorId);
-    
-    // Optimistic removal
     setSaved(prev => prev.filter(c => c.id !== colorId));
-    
     try {
       await deleteSavedColor(auth.currentUser.uid, colorId);
     } catch {
-      // Restore on failure
       getSavedColors(auth.currentUser.uid).then(setSaved);
     } finally {
       setDeletingId(null);
@@ -51,14 +43,10 @@ function SavedColorsTab({ isDark, user, onViewHistory }) {
   const clearAll = async () => {
     if (!auth.currentUser) return;
     if (!window.confirm(t('confirmClearAllColors') || 'Are you sure you want to delete all saved colors?')) return;
-    
-    // Optimistic clear
     setSaved([]);
-    
     try {
       await deleteAllSavedColors(auth.currentUser.uid);
     } catch {
-      // Restore on failure
       getSavedColors(auth.currentUser.uid).then(setSaved);
     }
   };
@@ -124,12 +112,11 @@ function SavedColorsTab({ isDark, user, onViewHistory }) {
           <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>🎨 {t('savedColors')}</h2>
           <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{saved.length} {t('colors')}</p>
         </div>
-        {/* Quick link to history of analysis */}
         <button
           onClick={onViewHistory}
           className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border ${
-            isDark 
-              ? 'bg-indigo-500/20 hover:bg-indigo-500/30 border-indigo-500/30 text-indigo-300 hover:text-indigo-200' 
+            isDark
+              ? 'bg-indigo-500/20 hover:bg-indigo-500/30 border-indigo-500/30 text-indigo-300 hover:text-indigo-200'
               : 'bg-indigo-50 hover:bg-indigo-100 border-indigo-300 text-indigo-600 hover:text-indigo-700'
           }`}
         >
@@ -143,8 +130,8 @@ function SavedColorsTab({ isDark, user, onViewHistory }) {
             <p className={`${nameCls} font-bold text-sm`}>{color.name || 'Color'}</p>
             <p className={`${hexCls} text-xs font-mono`}>{color.hex}</p>
           </div>
-          <button 
-            onClick={() => remove(color.id)} 
+          <button
+            onClick={() => remove(color.id)}
             disabled={deletingId === color.id}
             className="text-red-400/60 hover:text-red-400 text-2xl transition-colors px-2 disabled:opacity-50"
           >
@@ -205,7 +192,21 @@ function WardrobePanel({ user, onShowResult }) {
   const { isPro } = usePlan();
   const wardrobeLimit = isPro ? 50 : 10;
   const isDark = theme === 'dark';
-  const [activeSubTab, setActiveSubTab] = useState('saved'); // 'saved' or 'history'
+
+  // Sub-tab state & swipe support
+  const [activeSubTab, setActiveSubTab] = useState('saved'); // 'saved' | 'colors' | 'history'
+  const wardrobeSwipeRef = useRef({ startX: 0, startY: 0 });
+  const subTabOrder = ['saved', 'colors', 'history'];
+
+  const handleWardrobeSwipe = (endX, endY) => {
+    const diff = wardrobeSwipeRef.current.startX - endX;
+    const dy = Math.abs(endY - wardrobeSwipeRef.current.startY);
+    if (Math.abs(diff) < dy * 0.8 || Math.abs(diff) < 50) return;
+    const idx = subTabOrder.indexOf(activeSubTab);
+    if (diff > 0 && idx < subTabOrder.length - 1) setActiveSubTab(subTabOrder[idx + 1]);
+    if (diff < 0 && idx > 0) setActiveSubTab(subTabOrder[idx - 1]);
+  };
+
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -248,16 +249,12 @@ function WardrobePanel({ user, onShowResult }) {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
     setDeletingId(item.id);
-    // Optimistic removal
     setItems(prev => prev.filter(i => i.id !== item.id));
     try {
       await deleteWardrobeItem(uid, item.id);
-      if (item.imageId) {
-        await deleteLocalWardrobeImage(item.imageId);
-      }
+      if (item.imageId) await deleteLocalWardrobeImage(item.imageId);
       showToast(t('outfitRemoved'));
     } catch {
-      // Restore on failure
       setItems(prev => [item, ...prev].sort((a, b) => new Date(b.saved_at) - new Date(a.saved_at)));
       showToast(t('deleteFailed'));
     } finally {
@@ -302,22 +299,15 @@ function WardrobePanel({ user, onShowResult }) {
 
   return (
     <div className="mt-4 pb-4">
-      {/* Sub-Tabs Nav - Responsive Horizontal Scroll with Proper Spacing */}
+      {/* Sub-Tab Nav — equal distribution, no overflow scroll needed */}
       <div className="mb-6">
-        <div 
-          className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide scroll-smooth snap-x snap-mandatory px-0"
+        <div
+          className={`flex rounded-2xl p-1 gap-1 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}
           role="tablist"
-          style={{
-            WebkitOverflowScrolling: 'touch', // Smooth momentum scrolling on iOS
-            scrollBehavior: 'smooth'
-          }}
         >
-          {/* Left padding spacer */}
-          <div className="flex-shrink-0 w-0" />
-          
           {[
-            { id: 'saved', label: t('outfits'), icon: '👗' },
-            { id: 'colors', label: t('colors'), icon: '🎨' },
+            { id: 'saved',   label: t('outfits'), icon: '👗' },
+            { id: 'colors',  label: t('colors'),  icon: '🎨' },
             { id: 'history', label: t('history'), icon: '📋' },
           ].map(tab => (
             <button
@@ -325,161 +315,132 @@ function WardrobePanel({ user, onShowResult }) {
               role="tab"
               aria-selected={activeSubTab === tab.id}
               onClick={() => setActiveSubTab(tab.id)}
-              className={`px-4 py-2 text-sm font-bold rounded-lg transition-all whitespace-nowrap flex-shrink-0 snap-center ${
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                 activeSubTab === tab.id
                   ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
-                  : isDark ? 'text-white/60 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  : isDark ? 'text-white/60 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
               }`}
             >
-              {tab.icon} {tab.label}
+              <span>{tab.icon}</span>
+              <span className="truncate">{tab.label}</span>
             </button>
           ))}
-          
-          {/* Right padding spacer */}
-          <div className="flex-shrink-0 w-0" />
         </div>
       </div>
 
-      {activeSubTab === 'history' ? (
-        <HistoryPanel onShowResult={onShowResult} />
-      ) : activeSubTab === 'colors' ? (
-        <SavedColorsTab isDark={isDark} user={user} onViewHistory={() => setActiveSubTab('history')} />
-      ) : (
-        <>
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-            <div>
-              <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>👗 {t('myWardrobe')}</h2>
-              <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{items.length} {t('outfits')}</p>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* Quick link to history */}
-              <button
-                onClick={() => setActiveSubTab('history')}
-                className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border ${
-                  isDark 
-                    ? 'bg-blue-500/20 hover:bg-blue-500/30 border-blue-500/30 text-blue-300 hover:text-blue-200' 
-                    : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-600 hover:text-blue-700'
-                }`}
-              >
-                📋 {t('history')}
-              </button>
-              <div className={`rounded-xl px-3 py-2 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
-                <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{items.length}/{wardrobeLimit}</span>
+      {/* Swipeable tab content */}
+      <div
+        onTouchStart={(e) => {
+          wardrobeSwipeRef.current = { startX: e.touches[0].clientX, startY: e.touches[0].clientY };
+        }}
+        onTouchEnd={(e) => handleWardrobeSwipe(e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
+      >
+        {activeSubTab === 'history' ? (
+          <HistoryPanel onShowResult={onShowResult} />
+        ) : activeSubTab === 'colors' ? (
+          <SavedColorsTab isDark={isDark} user={user} onViewHistory={() => setActiveSubTab('history')} />
+        ) : (
+          <>
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+              <div>
+                <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>👗 {t('myWardrobe')}</h2>
+                <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{items.length} {t('outfits')}</p>
               </div>
-            </div>
-          </div>
-
-      {capWarning && (
-        <div className={`rounded-2xl p-3 mb-4 border flex items-center gap-3 ${isDark ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-yellow-50 border-yellow-200'}`}>
-          <span className="text-xl">⚠️</span>
-          <p className={`text-xs ${isDark ? 'text-yellow-300' : 'text-yellow-700'}`}>{t('wardrobeFull', { current: items.length, limit: wardrobeLimit })}</p>
-        </div>
-      )}
-
-      {items.length === 0 ? (
-        <div className="mt-8 text-center">
-          <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
-            <span className="text-4xl">👗</span>
-          </div>
-          <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('noOutfitsSaved')}</h3>
-          <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('analyzeToSave')}</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {items.map(item => (
-            <div key={item.id} className={`rounded-2xl border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-              {/* Card header */}
-              <div
-                className="flex items-center gap-4 p-4 cursor-pointer"
-                onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
-              >
-                <WardrobeImage imageId={item.imageId} fallbackColor={item.skin_hex} isDark={isDark} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className={`font-bold text-sm capitalize ${isDark ? 'text-white' : 'text-gray-800'}`}>
-                      {item.outfit_data?.shirt || item.outfit_data?.dress || 'Outfit'}
-                    </span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                      item.source === 'outfit_checker'
-                        ? isDark ? 'bg-blue-500/20 text-blue-300 border-blue-500/20' : 'bg-blue-100 text-blue-700 border-blue-300'
-                        : isDark ? 'bg-purple-500/20 text-purple-300 border-purple-500/20' : 'bg-purple-100 text-purple-700 border-purple-300'
-                    }`}>
-                      {item.source === 'outfit_checker' ? t('checked') : t('analyzed')}
-                    </span>
-                  </div>
-                  <p className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{formatDate(item.saved_at)}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{expandedId === item.id ? '▲' : '▼'}</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  onClick={() => setActiveSubTab('history')}
+                  className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border ${
+                    isDark
+                      ? 'bg-blue-500/20 hover:bg-blue-500/30 border-blue-500/30 text-blue-300 hover:text-blue-200'
+                      : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-600 hover:text-blue-700'
+                  }`}
+                >
+                  📋 {t('history')}
+                </button>
+                <div className={`rounded-xl px-3 py-2 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
+                  <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{items.length}/{wardrobeLimit}</span>
                 </div>
               </div>
+            </div>
 
-              {/* Expanded detail */}
-              {expandedId === item.id && (
-                <div className={`px-4 pb-4 border-t ${isDark ? 'border-white/5' : 'border-gray-100'}`}>
-                  <div className="pt-3 space-y-2">
-                    {item.outfit_data?.shirt && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">👕</span>
-                        <p className={`text-xs ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{item.outfit_data.shirt}</p>
+            {capWarning && (
+              <div className={`rounded-2xl p-3 mb-4 border flex items-center gap-3 ${isDark ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-yellow-50 border-yellow-200'}`}>
+                <span className="text-xl">⚠️</span>
+                <p className={`text-xs ${isDark ? 'text-yellow-300' : 'text-yellow-700'}`}>{t('wardrobeFull', { current: items.length, limit: wardrobeLimit })}</p>
+              </div>
+            )}
+
+            {items.length === 0 ? (
+              <div className="mt-8 text-center">
+                <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
+                  <span className="text-4xl">👗</span>
+                </div>
+                <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('noOutfitsSaved')}</h3>
+                <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('analyzeToSave')}</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {items.map(item => (
+                  <div key={item.id} className={`rounded-2xl border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+                    <div
+                      className="flex items-center gap-4 p-4 cursor-pointer"
+                      onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
+                    >
+                      <WardrobeImage imageId={item.imageId} fallbackColor={item.skin_hex} isDark={isDark} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <span className={`font-bold text-sm capitalize ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                            {item.outfit_data?.shirt || item.outfit_data?.dress || 'Outfit'}
+                          </span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                            item.source === 'outfit_checker'
+                              ? isDark ? 'bg-blue-500/20 text-blue-300 border-blue-500/20' : 'bg-blue-100 text-blue-700 border-blue-300'
+                              : isDark ? 'bg-purple-500/20 text-purple-300 border-purple-500/20' : 'bg-purple-100 text-purple-700 border-purple-300'
+                          }`}>
+                            {item.source === 'outfit_checker' ? t('checked') : t('analyzed')}
+                          </span>
+                        </div>
+                        <p className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{formatDate(item.saved_at)}</p>
                       </div>
-                    )}
-                    {item.outfit_data?.dress && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">👗</span>
-                        <p className={`text-xs ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{item.outfit_data.dress}</p>
-                      </div>
-                    )}
-                    {item.outfit_data?.pant && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">👖</span>
-                        <p className={`text-xs ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{item.outfit_data.pant}</p>
-                      </div>
-                    )}
-                    {item.outfit_data?.shoes && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">👟</span>
-                        <p className={`text-xs ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{item.outfit_data.shoes}</p>
-                      </div>
-                    )}
-                    {item.outfit_data?.occasion && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">📅</span>
-                        <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{item.outfit_data.occasion}</p>
-                      </div>
-                    )}
-                    {item.compatibility_score !== undefined && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">🎯</span>
-                        <p className={`text-xs font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>{item.compatibility_score}% compatible</p>
+                      <span className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{expandedId === item.id ? '▲' : '▼'}</span>
+                    </div>
+
+                    {expandedId === item.id && (
+                      <div className={`px-4 pb-4 border-t ${isDark ? 'border-white/5' : 'border-gray-100'}`}>
+                        <div className="pt-3 space-y-2">
+                          {item.outfit_data?.shirt && (<div className="flex items-center gap-2"><span className="text-sm">👕</span><p className={`text-xs ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{item.outfit_data.shirt}</p></div>)}
+                          {item.outfit_data?.dress && (<div className="flex items-center gap-2"><span className="text-sm">👗</span><p className={`text-xs ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{item.outfit_data.dress}</p></div>)}
+                          {item.outfit_data?.pant && (<div className="flex items-center gap-2"><span className="text-sm">👖</span><p className={`text-xs ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{item.outfit_data.pant}</p></div>)}
+                          {item.outfit_data?.shoes && (<div className="flex items-center gap-2"><span className="text-sm">👟</span><p className={`text-xs ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{item.outfit_data.shoes}</p></div>)}
+                          {item.outfit_data?.occasion && (<div className="flex items-center gap-2"><span className="text-sm">📅</span><p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{item.outfit_data.occasion}</p></div>)}
+                          {item.compatibility_score !== undefined && (<div className="flex items-center gap-2"><span className="text-sm">🎯</span><p className={`text-xs font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>{item.compatibility_score}% compatible</p></div>)}
+                        </div>
+                        <button
+                          onClick={() => handleDelete(item)}
+                          disabled={deletingId === item.id}
+                          className={`mt-3 w-full py-2 rounded-xl text-xs font-bold border transition-all ${
+                            isDark
+                              ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
+                              : 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'
+                          } disabled:opacity-50`}
+                        >
+                          {deletingId === item.id ? t('deleting') : t('removeFromWardrobe')}
+                        </button>
                       </div>
                     )}
                   </div>
-                  <button
-                    onClick={() => handleDelete(item)}
-                    disabled={deletingId === item.id}
-                    className={`mt-3 w-full py-2 rounded-xl text-xs font-bold border transition-all ${
-                      isDark
-                        ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
-                        : 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'
-                    } disabled:opacity-50`}
-                  >
-                    {deletingId === item.id ? t('deleting') : t('removeFromWardrobe')}
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Toast */}
       {toast && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg border border-white/10">
           {toast}
         </div>
-      )}
-        </>
       )}
     </div>
   );
