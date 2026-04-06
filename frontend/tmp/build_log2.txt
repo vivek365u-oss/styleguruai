@@ -1,0 +1,31 @@
+
+> frontend@0.0.0 build
+> vite build
+
+[36mvite v8.0.1 [32mbuilding client environment for production...[36m[39m
+[2K
+transforming...Γ£ô 376 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                             3.79 kB Γöé gzip:   1.28 kB
+dist/assets/index-DioUdBrL.css             84.93 kB Γöé gzip:  13.53 kB
+dist/assets/ThemeContext-Dy0IdlNT.js        0.00 kB Γöé gzip:   0.02 kB
+dist/assets/NotFoundPage-v5M4hjyx.js        0.46 kB Γöé gzip:   0.31 kB
+dist/assets/chunk-DECur_0Z.js               0.68 kB Γöé gzip:   0.41 kB
+dist/assets/ContactPage-Do4sIj2v.js         2.51 kB Γöé gzip:   0.99 kB
+dist/assets/TermsPage-DQauWqg8.js           2.54 kB Γöé gzip:   1.06 kB
+dist/assets/PrivacyPage-odmYi3zN.js         2.70 kB Γöé gzip:   1.12 kB
+dist/assets/AboutPage-wbS6fJOy.js           3.09 kB Γöé gzip:   1.19 kB
+dist/assets/BlogListPage-z0Finv49.js        3.14 kB Γöé gzip:   1.23 kB
+dist/assets/BlogPostPage-_nYNivOE.js        4.27 kB Γöé gzip:   1.54 kB
+dist/assets/OrderSuccessPage-DjuL86fq.js    5.36 kB Γöé gzip:   1.66 kB
+dist/assets/AdminDashboard-h6pySIqR.js      7.20 kB Γöé gzip:   2.42 kB
+dist/assets/ProfilePage-k_k3fyfQ.js        15.11 kB Γöé gzip:   3.26 kB
+dist/assets/SettingsPage-B90go2_X.js       19.01 kB Γöé gzip:   4.53 kB
+dist/assets/jsx-runtime-ChdCe7CR.js        49.34 kB Γöé gzip:  17.47 kB
+dist/assets/blogPosts-CqUqu6sM.js          53.61 kB Γöé gzip:  17.77 kB
+dist/assets/index-HJ3co6fY.js             284.98 kB Γöé gzip:  86.51 kB
+dist/assets/Dashboard-D6fbX31u.js         357.10 kB Γöé gzip:  85.87 kB
+dist/assets/styleApi-DpxxeDpY.js          414.65 kB Γöé gzip: 128.65 kB
+
+[32mΓ£ô built in 1.02s[39m

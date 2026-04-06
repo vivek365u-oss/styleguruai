@@ -1,0 +1,96 @@
+
+> frontend@0.0.0 build
+> vite build
+
+[36mvite v8.0.1 [32mbuilding client environment for production...[36m[39m
+[2K
+transforming...Γ£ô 368 modules transformed.
+Γ£ù Build failed in 853ms
+error during build:
+Build failed with 16 errors:
+
+[UNRESOLVED_IMPORT] Error: Could not resolve '../context/ThemeContext' in src/components/AffiliateAnalytics.jsx
+   Γò¡ΓöÇ[ src/components/AffiliateAnalytics.jsx:2:30 ]
+   Γöé
+ 2 Γöé import { ThemeContext } from "../context/ThemeContext";
+   Γöé                              ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   Γöé                                          Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Module not found.
+   Γöé 
+   Γöé Help: 'src/components/AffiliateAnalytics.jsx' is imported by the following path:
+   Γöé         - src/components/AffiliateAnalytics.jsx
+   Γöé         - src/pages/SettingsPage.jsx
+   Γöé         - src/App.jsx
+   Γöé         - src/main.jsx
+   Γöé         - index.html
+ΓöÇΓöÇΓöÇΓò»
+
+[UNRESOLVED_IMPORT] Error: Could not resolve '../context/ThemeContext' in src/components/ShoppingCart.jsx
+   Γò¡ΓöÇ[ src/components/ShoppingCart.jsx:2:30 ]
+   Γöé
+ 2 Γöé import { ThemeContext } from "../context/ThemeContext";
+   Γöé                              ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   Γöé                                          Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Module not found.
+   Γöé 
+   Γöé Help: 'src/components/ShoppingCart.jsx' is imported by the following path:
+   Γöé         - src/components/ShoppingCart.jsx
+   Γöé         - src/components/Dashboard.jsx
+   Γöé         - src/App.jsx
+   Γöé         - src/main.jsx
+   Γöé         - index.html
+ΓöÇΓöÇΓöÇΓò»
+
+[UNRESOLVED_IMPORT] Error: Could not resolve '../context/ThemeContext' in src/components/OutfitChecker.jsx
+   Γò¡ΓöÇ[ src/components/OutfitChecker.jsx:3:30 ]
+   Γöé
+ 3 Γöé import { ThemeContext } from "../context/ThemeContext";
+   Γöé                              ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   Γöé                                          Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Module not found.
+   Γöé 
+   Γöé Help: 'src/components/OutfitChecker.jsx' is imported by the following path:
+   Γöé         - src/components/OutfitChecker.jsx
+   Γöé         - src/components/Dashboard.jsx
+   Γöé         - src/App.jsx
+   Γöé         - src/main.jsx
+   Γöé         - index.html
+ΓöÇΓöÇΓöÇΓò»
+
+[UNRESOLVED_IMPORT] Error: Could not resolve '../context/ThemeContext' in src/components/UploadSection.jsx
+   Γò¡ΓöÇ[ src/components/UploadSection.jsx:3:30 ]
+   Γöé
+ 3 Γöé import { ThemeContext } from "../context/ThemeContext";
+   Γöé                              ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   Γöé                                          Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Module not found.
+   Γöé 
+   Γöé Help: 'src/components/UploadSection.jsx' is imported by the following path:
+   Γöé         - src/components/UploadSection.jsx
+   Γöé         - src/components/Dashboard.jsx
+   Γöé         - src/App.jsx
+   Γöé         - src/main.jsx
+   Γöé         - index.html
+ΓöÇΓöÇΓöÇΓò»
+
+[UNRESOLVED_IMPORT] Error: Could not resolve '../context/ThemeContext' in src/components/HistoryPanel.jsx
+   Γò¡ΓöÇ[ src/components/HistoryPanel.jsx:3:30 ]
+   Γöé
+ 3 Γöé import { ThemeContext } from "../context/ThemeContext";
+   Γöé                              ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+   Γöé                                          Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Module not found.
+   Γöé 
+   Γöé Help: 'src/components/HistoryPanel.jsx' is imported by the following path:
+   Γöé         - src/components/HistoryPanel.jsx
+   Γöé         - src/components/Dashboard.jsx
+   Γöé         - src/App.jsx
+   Γöé         - src/main.jsx
+   Γöé         - index.html
+ΓöÇΓöÇΓöÇΓò»
+
+...
+    at aggregateBindingErrorsIntoJsError (file:///C:/Users/VIVEK/OneDrive/Desktop/ToneFit/frontend/node_modules/rolldown/dist/shared/error-BO4SlZV_.mjs:48:18)
+    at unwrapBindingResult (file:///C:/Users/VIVEK/OneDrive/Desktop/ToneFit/frontend/node_modules/rolldown/dist/shared/error-BO4SlZV_.mjs:18:128)
+    at #build (file:///C:/Users/VIVEK/OneDrive/Desktop/ToneFit/frontend/node_modules/rolldown/dist/shared/rolldown-build-yQC7KN8K.mjs:3311:34)
+    at async buildEnvironment (file:///C:/Users/VIVEK/OneDrive/Desktop/ToneFit/frontend/node_modules/vite/dist/node/chunks/node.js:32817:64)
+    at async Object.build (file:///C:/Users/VIVEK/OneDrive/Desktop/ToneFit/frontend/node_modules/vite/dist/node/chunks/node.js:33239:19)
+    at async Object.buildApp (file:///C:/Users/VIVEK/OneDrive/Desktop/ToneFit/frontend/node_modules/vite/dist/node/chunks/node.js:33236:153)
+    at async CAC.<anonymous> (file:///C:/Users/VIVEK/OneDrive/Desktop/ToneFit/frontend/node_modules/vite/dist/node/cli.js:778:3) {
+  errors: [Getter/Setter]
+}

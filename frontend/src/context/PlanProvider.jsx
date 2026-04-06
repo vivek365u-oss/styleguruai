@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useContext, useState, useEffect, useCallback } from 'react';
 import { auth, getSubscription, getUsage } from '../api/styleApi';
 import axios from 'axios';
 
@@ -78,10 +78,3 @@ export function PlanProvider({ children }) {
   );
 }
 
-export function usePlan() {
-  const ctx = useContext(PlanContext);
-  if (!ctx) throw new Error('usePlan must be used within PlanProvider');
-  return ctx;
-}
-
-export default PlanContext;
