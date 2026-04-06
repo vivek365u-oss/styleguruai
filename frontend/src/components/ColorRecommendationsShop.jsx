@@ -64,17 +64,31 @@ function ColorRecommendationsShop({ recommendations, gender = 'male', isDark = f
           </button>
         </div>
 
-        {/* Color Tabs - Responsive Horizontal Scroll */}
-        <div className="relative">
+        {/* Color Tabs - Responsive Horizontal Scroll with Nested Scrolling Support */}
+        <div className="relative -mx-4 px-4">
           <div 
-            className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide scroll-smooth snap-x snap-mandatory"
+            className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide scroll-smooth snap-x snap-mandatory"
             id="colorTabsScroll"
+            role="tablist"
+            style={{
+              WebkitOverflowScrolling: 'touch', // Smooth momentum scrolling on iOS
+              scrollBehavior: 'smooth',
+            }}
+            onTouchMove={(e) => {
+              // Allow child scroll to work independently on touch
+              e.stopPropagation();
+            }}
           >
+            {/* Left spacing for edge items visibility */}
+            <div className="flex-shrink-0 w-0" />
+            
             {recommendedColors.map((color, idx) => (
               <button
                 key={idx}
+                role="tab"
+                aria-selected={activeColorTab === idx}
                 onClick={() => setActiveColorTab(idx)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-semibold text-sm whitespace-nowrap transition-all flex-shrink-0 snap-center ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm whitespace-nowrap transition-all flex-shrink-0 snap-center ${
                   activeColorTab === idx
                     ? isDark
                       ? 'bg-purple-500/40 border border-purple-400 text-purple-100 shadow-lg'
@@ -93,15 +107,10 @@ function ColorRecommendationsShop({ recommendations, gender = 'male', isDark = f
                 <span>{color.name}</span>
               </button>
             ))}
+            
+            {/* Right spacing for edge items visibility */}
+            <div className="flex-shrink-0 w-0" />
           </div>
-          {/* Gradient fade on right for visual hint to scroll */}
-          {recommendedColors.length > 3 && (
-            <div className={`absolute right-0 top-0 bottom-0 w-8 pointer-events-none ${
-              isDark 
-                ? 'bg-gradient-to-l from-gray-900 to-transparent' 
-                : 'bg-gradient-to-l from-white to-transparent'
-            }`} />
-          )}
         </div>
 
         {/* Why this color? */}

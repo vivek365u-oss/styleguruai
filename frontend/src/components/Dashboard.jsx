@@ -1182,18 +1182,21 @@ function Dashboard({ user, onLogout }) {
       </main>
 
       <nav className={`fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t ${theme === 'dark' ? 'bg-[#050816]/95 border-white/10' : 'bg-slate-100/95 border-purple-200 shadow-lg'}`}>
-        <div className="max-w-lg mx-auto flex gap-2 sm:justify-around overflow-x-auto scrollbar-hide px-3 py-2">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => handleTabChange(item.id)}
-              className={`flex-shrink-0 flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${activeTab === item.id ? 'text-purple-500' : theme === 'dark' ? 'text-white/30 hover:text-white/60' : 'text-gray-600 hover:text-gray-900'}`}
-            >
-              <span className={`text-xl transition-transform ${activeTab === item.id ? 'scale-110' : ''}`}>{item.emoji}</span>
-              <span className={`text-[10px] font-semibold ${activeTab === item.id ? 'text-purple-400' : theme === 'dark' ? 'text-white/30' : 'text-gray-700'}`}>{item.label}</span>
-              {activeTab === item.id && <div className="w-1 h-1 rounded-full bg-purple-400 nav-dot" />}
-            </button>
-          ))}
+        {/* Nav Container: Equal distribution using flex with proper spacing */}
+        <div className="max-w-lg mx-auto px-4 py-2">
+          <div className="flex justify-around items-stretch gap-1">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleTabChange(item.id)}
+                className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 px-2 rounded-lg transition-all min-h-[56px] ${activeTab === item.id ? 'text-purple-500 bg-purple-500/10' : theme === 'dark' ? 'text-white/40 hover:text-white/70 hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'}`}
+              >
+                <span className={`text-xl transition-transform duration-200 ${activeTab === item.id ? 'scale-110' : ''}`}>{item.emoji}</span>
+                <span className={`text-[10px] font-semibold leading-tight text-center ${activeTab === item.id ? 'text-purple-400' : theme === 'dark' ? 'text-white/40' : 'text-gray-700'}`}>{item.label}</span>
+                {activeTab === item.id && <div className="w-1 h-0.5 rounded-full bg-purple-400 mt-1 nav-dot" />}
+              </button>
+            ))}
+          </div>
         </div>
       </nav>
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}

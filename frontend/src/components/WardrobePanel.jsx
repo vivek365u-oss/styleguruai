@@ -302,15 +302,19 @@ function WardrobePanel({ user, onShowResult }) {
 
   return (
     <div className="mt-4 pb-4">
-      {/* Sub-Tabs Nav - Horizontal Scroll */}
-      <div className="relative mb-6">
+      {/* Sub-Tabs Nav - Responsive Horizontal Scroll with Proper Spacing */}
+      <div className="mb-6">
         <div 
-          className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide scroll-smooth snap-x snap-mandatory rounded-full p-1 border"
+          className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide scroll-smooth snap-x snap-mandatory px-0"
+          role="tablist"
           style={{
-            backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f3f4f6',
-            borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb',
+            WebkitOverflowScrolling: 'touch', // Smooth momentum scrolling on iOS
+            scrollBehavior: 'smooth'
           }}
         >
+          {/* Left padding spacer */}
+          <div className="flex-shrink-0 w-0" />
+          
           {[
             { id: 'saved', label: t('outfits'), icon: '👗' },
             { id: 'colors', label: t('colors'), icon: '🎨' },
@@ -318,23 +322,22 @@ function WardrobePanel({ user, onShowResult }) {
           ].map(tab => (
             <button
               key={tab.id}
+              role="tab"
+              aria-selected={activeSubTab === tab.id}
               onClick={() => setActiveSubTab(tab.id)}
-              className={`px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-full transition-all whitespace-nowrap flex-shrink-0 snap-center ${
+              className={`px-4 py-2 text-sm font-bold rounded-lg transition-all whitespace-nowrap flex-shrink-0 snap-center ${
                 activeSubTab === tab.id
                   ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
-                  : isDark ? 'text-white/50 hover:text-white hover:bg-white/10' : 'text-gray-500 hover:text-gray-800 hover:bg-white'
+                  : isDark ? 'text-white/60 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}
             >
               {tab.icon} {tab.label}
             </button>
           ))}
+          
+          {/* Right padding spacer */}
+          <div className="flex-shrink-0 w-0" />
         </div>
-        {/* Gradient fade hint */}
-        <div className={`absolute right-0 top-0 bottom-0 w-8 pointer-events-none rounded-r-full ${
-          isDark 
-            ? 'bg-gradient-to-l from-gray-900 to-transparent' 
-            : 'bg-gradient-to-l from-white to-transparent'
-        }`} />
       </div>
 
       {activeSubTab === 'history' ? (
