@@ -8,7 +8,7 @@ import { getLocalWardrobeImage, deleteLocalWardrobeImage } from '../utils/indexe
 import HistoryPanel from './HistoryPanel';
 
 // ── Saved Colors Tab ─────────────────────────────────────────
-function SavedColorsTab({ isDark, user }) {
+function SavedColorsTab({ isDark, user, onViewHistory }) {
   const { t } = useLanguage();
   const [saved, setSaved] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -119,11 +119,22 @@ function SavedColorsTab({ isDark, user }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div>
           <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>🎨 {t('savedColors')}</h2>
           <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{saved.length} {t('colors')}</p>
         </div>
+        {/* Quick link to history of analysis */}
+        <button
+          onClick={onViewHistory}
+          className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border ${
+            isDark 
+              ? 'bg-indigo-500/20 hover:bg-indigo-500/30 border-indigo-500/30 text-indigo-300 hover:text-indigo-200' 
+              : 'bg-indigo-50 hover:bg-indigo-100 border-indigo-300 text-indigo-600 hover:text-indigo-700'
+          }`}
+        >
+          📋 {t('viewHistory')}
+        </button>
       </div>
       {saved.map((color) => (
         <div key={color.id} className={`${cardCls} rounded-2xl p-4 flex items-center gap-4`}>
@@ -291,41 +302,67 @@ function WardrobePanel({ user, onShowResult }) {
 
   return (
     <div className="mt-4 pb-4">
-      {/* Sub-Tabs Nav */}
-      <div className={`flex rounded-full mb-6 p-1 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
-        <button
-          onClick={() => setActiveSubTab('saved')}
-          className={`flex-1 py-1.5 text-xs sm:text-sm sm:py-2 font-bold rounded-full transition-all ${activeSubTab === 'saved' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}
+      {/* Sub-Tabs Nav - Horizontal Scroll */}
+      <div className="relative mb-6">
+        <div 
+          className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide scroll-smooth snap-x snap-mandatory rounded-full p-1 border"
+          style={{
+            backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f3f4f6',
+            borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#e5e7eb',
+          }}
         >
-          👗 {t('outfits')}
-        </button>
-        <button
-          onClick={() => setActiveSubTab('colors')}
-          className={`flex-1 py-1.5 text-xs sm:text-sm sm:py-2 font-bold rounded-full transition-all ${activeSubTab === 'colors' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}
-        >
-          🎨 {t('colors')}
-        </button>
-        <button
-          onClick={() => setActiveSubTab('history')}
-          className={`flex-1 py-1.5 text-xs sm:text-sm sm:py-2 font-bold rounded-full transition-all ${activeSubTab === 'history' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md' : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'}`}
-        >
-          📋 {t('history')}
-        </button>
+          {[
+            { id: 'saved', label: t('outfits'), icon: '👗' },
+            { id: 'colors', label: t('colors'), icon: '🎨' },
+            { id: 'history', label: t('history'), icon: '📋' },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveSubTab(tab.id)}
+              className={`px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-full transition-all whitespace-nowrap flex-shrink-0 snap-center ${
+                activeSubTab === tab.id
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
+                  : isDark ? 'text-white/50 hover:text-white hover:bg-white/10' : 'text-gray-500 hover:text-gray-800 hover:bg-white'
+              }`}
+            >
+              {tab.icon} {tab.label}
+            </button>
+          ))}
+        </div>
+        {/* Gradient fade hint */}
+        <div className={`absolute right-0 top-0 bottom-0 w-8 pointer-events-none rounded-r-full ${
+          isDark 
+            ? 'bg-gradient-to-l from-gray-900 to-transparent' 
+            : 'bg-gradient-to-l from-white to-transparent'
+        }`} />
       </div>
 
       {activeSubTab === 'history' ? (
         <HistoryPanel onShowResult={onShowResult} />
       ) : activeSubTab === 'colors' ? (
-        <SavedColorsTab isDark={isDark} user={user} />
+        <SavedColorsTab isDark={isDark} user={user} onViewHistory={() => setActiveSubTab('history')} />
       ) : (
         <>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
             <div>
               <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>👗 {t('myWardrobe')}</h2>
               <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{items.length} {t('outfits')}</p>
             </div>
-            <div className={`rounded-xl px-3 py-2 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
-              <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{items.length}/{wardrobeLimit}</span>
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Quick link to history */}
+              <button
+                onClick={() => setActiveSubTab('history')}
+                className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border ${
+                  isDark 
+                    ? 'bg-blue-500/20 hover:bg-blue-500/30 border-blue-500/30 text-blue-300 hover:text-blue-200' 
+                    : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-600 hover:text-blue-700'
+                }`}
+              >
+                📋 {t('history')}
+              </button>
+              <div className={`rounded-xl px-3 py-2 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
+                <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{items.length}/{wardrobeLimit}</span>
+              </div>
             </div>
           </div>
 
