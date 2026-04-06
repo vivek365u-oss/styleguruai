@@ -26,16 +26,32 @@ from skin_tone_classifier import SkinToneClassifier
 from recommendation_engine import RecommendationEngine
 
 # ============================================
-# FIREBASE INIT
+# FIREBASE INIT (Graceful handling)
 # ============================================
+FIREBASE_INITIALIZED = False
 if not firebase_admin._apps:
-    firebase_creds_json = os.environ.get("FIREBASE_CREDENTIALS_JSON")
-    if firebase_creds_json:
-        import json
-        cred = credentials.Certificate(json.loads(firebase_creds_json))
-    else:
-        cred = credentials.Certificate("firebase-credentials.json")
-    firebase_admin.initialize_app(cred)
+    try:
+        firebase_creds_json = os.environ.get("FIREBASE_CREDENTIALS_JSON")
+        if firebase_creds_json:
+            import json
+            cred = credentials.Certificate(json.loads(firebase_creds_json))
+            firebase_admin.initialize_app(cred)
+            FIREBASE_INITIALIZED = True
+            print("✅ Firebase initialized from environment variable")
+        else:
+            # Try local file if env var not set
+            cred_path = Path("firebase-credentials.json")
+            if cred_path.exists():
+                cred = credentials.Certificate(str(cred_path))
+                firebase_admin.initialize_app(cred)
+                FIREBASE_INITIALIZED = True
+                print("✅ Firebase initialized from local file")
+            else:
+                print("⚠️  FIREBASE NOT INITIALIZED - Set FIREBASE_CREDENTIALS_JSON env var or add firebase-credentials.json")
+                print("⚠️  App will start but Firebase auth features will be disabled")
+    except Exception as e:
+        print(f"❌ Firebase initialization failed: {str(e)}")
+        print("⚠️  Continuing without Firebase - some features may not work")
 
 # ============================================
 # SECURITY & MONITORING INIT
@@ -64,13 +80,18 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
+    if not FIREBASE_INITIALIZED:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Firebase authentication not configured. Please set FIREBASE_CREDENTIALS_JSON environment variable.",
+        )
     try:
         decoded = firebase_auth.verify_id_token(token)
         uid = decoded["uid"]
         email = decoded.get("email", "")
         name = decoded.get("name", email)
         return {"uid": uid, "email": email, "full_name": name}
-    except Exception:
+    except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Session expired or invalid. Please login again.",
