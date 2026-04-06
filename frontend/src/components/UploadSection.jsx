@@ -277,6 +277,8 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     reader.readAsDataURL(file);
     console.log("[UploadSection] Starting analysis for mode:", mode, "gender:", gender);
     onLoadingStart();
+    setShowProgress(true);
+    startProgress();
     try {
       let res;
       if (mode === 'seasonal') {
@@ -288,12 +290,16 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       }
       
       console.log("[UploadSection] Analysis successful!");
-      // Pass correct gender: use 'seasonal' only if mode is seasonal, otherwise pass actual gender (male/female)
-      const finalGender = mode === 'seasonal' ? 'seasonal' : gender;
-      console.log("[UploadSection] Passing gender:", finalGender, "to ResultsDisplay");
-      onAnalysisComplete({ ...res.data, gender: finalGender, seasonalGender: mode === 'seasonal' ? gender : 'male', bodyType, occasion, budget, eyeColor });
+      completeProgress();
+      setTimeout(() => {
+        const finalGender = mode === 'seasonal' ? 'seasonal' : gender;
+        console.log("[UploadSection] Passing gender:", finalGender, "to ResultsDisplay");
+        onAnalysisComplete({ ...res.data, gender: finalGender, seasonalGender: mode === 'seasonal' ? gender : 'male', bodyType, occasion, budget, eyeColor });
+        setShowProgress(false);
+      }, 800);
     } catch (err) {
       console.error("[UploadSection] Analysis error:", err);
+      setShowProgress(false);
       if (err.code === 'ECONNABORTED') {
         onError('Analysis is taking too long. Server is busy, please try again later.');
       } else {
@@ -317,6 +323,8 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     };
     
     onLoadingStart();
+    setShowProgress(true);
+    startProgress();
     try {
       const file1 = dataURLtoFile(partner1, 'partner1.jpg');
       const file2 = dataURLtoFile(partner2, 'partner2.jpg');
@@ -327,14 +335,20 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       const res2 = partner2Gender === 'female' ? await analyzeImageFemale(file2, language, () => {}) : await analyzeImage(file2, language, () => {});
       handleProgress(100);
 
-      onImageSelected([partner1, partner2]);
-      onAnalysisComplete({
-        type: 'couple',
-        partner1: { ...res1.data, gender: partner1Gender },
-        partner2: { ...res2.data, gender: partner2Gender },
-        occasion
-      });
+      completeProgress();
+      setTimeout(() => {
+        onImageSelected([partner1, partner2]);
+        onAnalysisComplete({
+          type: 'couple',
+          partner1: { ...res1.data, gender: partner1Gender },
+          partner2: { ...res2.data, gender: partner2Gender },
+          occasion
+        });
+        setShowProgress(false);
+      }, 800);
     } catch (err) {
+      console.error("[UploadSection] Couple analysis error:", err);
+      setShowProgress(false);
       onError('Couple analysis failed. Ensure both photos have clear faces.');
     }
   };
@@ -355,8 +369,13 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
 
   return (
     <div className="mt-4">
-
-      {/* Hero */}
+      {showProgress && (
+        <LoadingScreenWithProgress progress={progress} isDark={isDark} />
+      )}
+      
+      {!showProgress && (
+        <>
+          {/* Hero */}
       <div className="text-center mb-8">
         <div className={`inline-flex items-center gap-2 rounded-full px-4 py-2 mb-4 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-100 border-purple-300 shadow-sm'}`}>
           <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></span>
@@ -882,6 +901,8 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
 
       {/* Skin Tone Quiz */}
       <SkinToneQuiz isDark={isDark} onResult={onAnalysisComplete} gender={gender} />
+        </>
+      )}
     </div>
   );
 }
