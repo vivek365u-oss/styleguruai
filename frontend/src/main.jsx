@@ -18,6 +18,22 @@ if (import.meta.env.VITE_SENTRY_DSN) {
   });
 }
 
+// ============================================
+// LOAD RAZORPAY SCRIPT GLOBALLY (Fallback)
+// ============================================
+if (!window.Razorpay) {
+  const script = document.createElement('script');
+  script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+  script.async = true;
+  script.onload = () => {
+    console.log('[App] ✅ Global Razorpay script loaded');
+  };
+  script.onerror = () => {
+    console.warn('[App] ⚠️ Global Razorpay script failed (may retry when modal opens)');
+  };
+  document.head.appendChild(script);
+}
+
 // Register Service Worker for PWA + Push Notifications
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

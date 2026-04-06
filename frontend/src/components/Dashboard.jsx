@@ -866,13 +866,18 @@ function Dashboard({ user, onLogout }) {
         },
         handler: async (response) => {
           try {
+            // Generate idempotency key to prevent duplicate charges
+            const idempotencyKey = `${auth.currentUser.uid}_${response.razorpay_payment_id}_${Date.now()}`;
+            console.log('[Checkout] Idempotency Key:', idempotencyKey);
+            
             // Verify payment on backend
             console.log('[Checkout] Verifying payment...');
             const verifyResponse = await fetch(`${apiUrl}/api/orders/verify-payment`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Idempotency-Key': idempotencyKey,
               },
               body: JSON.stringify({
                 razorpay_order_id: response.razorpay_order_id,

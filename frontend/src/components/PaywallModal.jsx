@@ -35,13 +35,8 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
     if (isOpen) {
       logEvent(EVENTS.PAYWALL_VIEW);
       setPaymentError(null);
-      // Load Razorpay script once when modal opens
-      if (!window.Razorpay) {
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.async = true;
-        document.body.appendChild(script);
-      }
+      // Note: Razorpay script loading moved to handlePayment to ensure 
+      // it loads only when user clicks payment button (more efficient)
     }
 
     return () => {
@@ -58,12 +53,14 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
   const handlePayment = async (plan, retryCount = 0) => {
     if (!isMountedRef.current) return;
     
+    console.log(`[Payment] Starting payment for plan: ${plan}`);
     logEvent(EVENTS.UPGRADE_CLICK, { plan });
     setLoading(true);
     setPaymentError(null);
     
     const user = auth.currentUser;
     if (!user) {
+      console.error('[Payment] No user logged in');
       if (isMountedRef.current) {
         setPaymentError('Please log in first to upgrade.');
         setLoading(false);
@@ -71,34 +68,32 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
       return;
     }
 
-    // Wait for Razorpay to be available
-    if (!window.Razorpay) {
-      if (retryCount > 6) {
-         setPaymentError('Payment gateway blocked. Please disable AdBlocker or try another browser.');
-         setLoading(false);
-         return;
-      }
-      setTimeout(() => handlePayment(plan, retryCount + 1), 500);
-      return;
-    }
-
     try {
       // 1. Create Order on Backend first
+      console.log('[Payment] Creating order on backend...');
       const orderRes = await API.post('/api/subscriptions/create-checkout', { plan });
       if (!orderRes.data.success) {
         throw new Error('Failed to create order');
       }
 
       const { order_id, amount, currency } = orderRes.data;
-      const planName = plan === 'monthly' ? '₹59/month' : '₹499/year';
+      console.log('[Payment] Order created:', { order_id, amount, currency });
+      
+      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+      console.log('[Payment] Using Razorpay key:', razorpayKey ? `${razorpayKey.substring(0, 15)}...` : 'UNDEFINED');
+      
+      if (!razorpayKey) {
+        console.error('[Payment] ❌ VITE_RAZORPAY_KEY_ID is not set in environment');
+        throw new Error('Razorpay key not configured. Contact support.');
+      }
       
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_BKnG5mzHD4nH0p', // Using correct env var config
+        key: razorpayKey,
         amount: amount,
         currency: currency,
-        order_id: order_id, // CRITICAL: Pass order_id to enable signature verification later
+        order_id: order_id,
         name: 'StyleGuru Premium',
-        description: `Premium Subscription - ${planName}`,
+        description: plan.startsWith('coins_') ? `Coin Purchase - ${plan}` : `Premium Subscription - ${plan}`,
         prefill: {
           email: user.email || '',
           name: user.displayName || 'User',
@@ -107,51 +102,124 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
           try {
             console.log('[Payment] Processing payment response...');
             
-            // 2. Call backend to verify and activate
+            // Generate idempotency key to prevent duplicate charges
+            const idempotencyKey = `${user.uid}_${response.razorpay_payment_id}_${Date.now()}`;
+            console.log('[Payment] Idempotency Key:', idempotencyKey);
+            
+            // 2. Call backend to verify and activate with idempotency
             const res = await API.post('/api/subscriptions/activate', {
               uid: user.uid,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
               plan: plan,
+              idempotency_key: idempotencyKey,
+            }, {
+              headers: {
+                'Idempotency-Key': idempotencyKey,  // Also send in headers
+              }
             });
             
             console.log('[Payment] ✅ Subscription activated:', res.data);
-            if (isMountedRef.current) setLoading(false);
+            const paymentId = response.razorpay_payment_id;
+            const supportCode = paymentId.substring(0, 20);
+            
+            if (isMountedRef.current) {
+              setLoading(false);
+              // Show success with support code for reference
+              setPaymentError(null);
+            }
+            
             // Wait briefly before invoking success callback
-            setTimeout(() => onUpgrade?.(), 500);
+            setTimeout(() => {
+              onUpgrade?.();
+            }, 500);
           } catch (err) {
             console.error('[Payment] ❌ Error:', err.response?.data || err.message);
+            
             if (isMountedRef.current) {
-               setPaymentError('Payment verification failed. If money was deducted, contact support.');
-               setLoading(false);
+              const paymentId = response?.razorpay_payment_id;
+              const supportCode = paymentId ? paymentId.substring(0, 20) : 'UNKNOWN';
+              const errorData = err.response?.data;
+              
+              if (err.response?.status === 500 || err.response?.status === 503) {
+                // Server error - payment MIGHT have gone through on Razorpay side
+                setPaymentError(
+                  `⚠️ Payment processing issue!\n\n` +
+                  `Don't worry - your money is safe.\n\n` +
+                  `Status: Check in 30 seconds\n` +
+                  `Support Code: ${supportCode}\n\n` +
+                  `If still not working, contact support with this code.`
+                );
+              } else {
+                setPaymentError(
+                  `❌ ${errorData?.message || 'Payment failed'}\n\n` +
+                  `Support Code: ${supportCode}\n\n` +
+                  `Contact support if this persists.`
+                );
+              }
+              
+              setLoading(false);
             }
           }
         },
         modal: {
           ondismiss: () => {
             console.log('[Payment] Modal dismissed by user');
-            if (isMountedRef.current) setLoading(false);
+            if (isMountedRef.current) {
+              setLoading(false);
+              setPaymentError(null);
+            }
           }
         }
       };
-      
-      const razorpay = new window.Razorpay(options);
-      
-      // Handle edge cases where Razorpay fails to open
-      razorpay.on('payment.failed', function (response){
-        console.error('[Payment] Failed event:', response.error.description);
-        if (isMountedRef.current) {
-           setPaymentError(`Payment failed: ${response.error.description}`);
-           setLoading(false);
-        }
-      });
-      
-      razorpay.open();
+
+      // ✅ KEY FIX: Load Razorpay script with onload handler (same as Cart checkout)
+      // Check if already loaded globally (from main.jsx)
+      const loadRazorpay = () => {
+        return new Promise((resolve, reject) => {
+          if (window.Razorpay) {
+            console.log('[Payment] ✅ Razorpay already loaded globally');
+            resolve();
+            return;
+          }
+
+          console.log('[Payment] Loading Razorpay script...');
+          const script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.async = true;
+
+          script.onload = () => {
+            console.log('[Payment] ✅ Razorpay script loaded');
+            resolve();
+          };
+
+          script.onerror = () => {
+            console.error('[Payment] ❌ Failed to load Razorpay script from CDN');
+            reject(new Error('Failed to load Razorpay CDN'));
+          };
+
+          document.head.appendChild(script);
+        });
+      };
+
+      // Wait for Razorpay to load, then open payment
+      await loadRazorpay();
+
+      if (!window.Razorpay) {
+        throw new Error('Razorpay not available after loading');
+      }
+
+      console.log('[Payment] Creating Razorpay instance...');
+      const rzp = new window.Razorpay(options);
+      console.log('[Payment] Opening Razorpay modal...');
+      rzp.open();
+      console.log('[Payment] ✅ Razorpay modal opened');
+
     } catch (err) {
-      console.error('Payment initialization error:', err);
+      console.error('[Payment] ❌ Payment error:', err);
       if (isMountedRef.current) {
-         setPaymentError('Could not initialize payment. Server may be starting, try again in 30 seconds.');
+         setPaymentError(`Payment error: ${err.message}`);
          setLoading(false);
       }
     }

@@ -839,6 +839,7 @@ class ActivateSubscriptionRequest(BaseModel):
     razorpay_order_id: str
     razorpay_signature: str
     plan: str  # 'weekly', 'monthly', 'yearly', 'coins_10', 'coins_25'
+    idempotency_key: str = None  # For preventing duplicate charges
 
 class CreateSubscriptionCheckoutRequest(BaseModel):
     plan: str
@@ -890,7 +891,7 @@ async def create_subscription_checkout(
 
 @app.post("/api/subscriptions/activate")
 async def activate_subscription(request: ActivateSubscriptionRequest):
-    """Verify Razorpay payment and activate premium OR credit coins."""
+    """Verify Razorpay payment and activate premium OR credit coins with idempotency protection."""
     import hmac
     import hashlib
     from datetime import timedelta
@@ -899,7 +900,40 @@ async def activate_subscription(request: ActivateSubscriptionRequest):
     if not RAZORPAY_KEY_SECRET:
         raise HTTPException(status_code=500, detail="Payment service not configured.")
 
-    # Verify HMAC-SHA256 signature
+    db = get_firestore_db()
+    payment_id = request.razorpay_payment_id
+    uid = request.uid
+    
+    # ✅ STEP 1: CHECK IDEMPOTENCY - Has this payment already been processed?
+    payment_log_ref = db.collection("payment_logs").document(payment_id)
+    existing_log = payment_log_ref.get()
+    
+    if existing_log.exists:
+        log_data = existing_log.to_dict()
+        if log_data.get("status") == "success":
+            # ✅ Already processed! Return cached result
+            print(f"[PAYMENT SAFETY] ✅ Idempotent request: {payment_id} already processed")
+            if request.plan.startswith('coins_'):
+                return {
+                    "success": True,
+                    "type": "coins",
+                    "coins_balance": log_data.get("coins_balance"),
+                    "payment_id": payment_id,
+                    "cached": True,
+                    "message": "Payment already processed - this is a duplicate request"
+                }
+            else:
+                return {
+                    "success": True,
+                    "tier": "premium",
+                    "plan": log_data.get("plan"),
+                    "premium_until": log_data.get("premium_until"),
+                    "payment_id": payment_id,
+                    "cached": True,
+                    "message": "Subscription already activated - this is a duplicate request"
+                }
+
+    # ✅ STEP 2: VERIFY SIGNATURE
     msg = f"{request.razorpay_order_id}|{request.razorpay_payment_id}"
     expected = hmac.new(
         RAZORPAY_KEY_SECRET.encode(),
@@ -908,26 +942,72 @@ async def activate_subscription(request: ActivateSubscriptionRequest):
     ).hexdigest()
 
     if not hmac.compare_digest(expected, request.razorpay_signature):
-        raise HTTPException(status_code=400, detail="Payment verification failed.")
+        # Log failed payment
+        payment_log_ref.set({
+            "razorpay_payment_id": payment_id,
+            "razorpay_order_id": request.razorpay_order_id,
+            "uid": uid,
+            "plan": request.plan,
+            "status": "failed",
+            "error_message": "Signature verification failed",
+            "created_at": datetime.utcnow().isoformat() + "Z",
+            "support_code": payment_id[:20]
+        }, merge=True)
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "success": False,
+                "error": "signature_failed",
+                "message": "Payment verification failed. Contact support.",
+                "support_code": payment_id[:20],
+                "payment_id": payment_id
+            }
+        )
 
+    # ✅ STEP 3: PROCESS PAYMENT (New transaction)
     try:
-        db = get_firestore_db()
-        uid = request.uid
         user_ref = db.collection("users").document(uid)
         
         if request.plan.startswith('coins_'):
             coins_added = 10 if request.plan == 'coins_10' else 25
             user_doc = user_ref.get()
             current_coins = user_doc.to_dict().get("coins_balance", 2) if user_doc.exists else 2
+            new_coins = current_coins + coins_added
             
             user_ref.set({
-                "coins_balance": current_coins + coins_added,
-                "payment_id": request.razorpay_payment_id,
+                "coins_balance": new_coins,
+                "payment_id": payment_id,
                 "last_coin_purchase": datetime.utcnow().isoformat() + "Z"
             }, merge=True)
             
-            return {"success": True, "type": "coins", "coins_balance": current_coins + coins_added}
+            # Log successful payment
+            payment_log_ref.set({
+                "razorpay_payment_id": payment_id,
+                "razorpay_order_id": request.razorpay_order_id,
+                "uid": uid,
+                "plan": request.plan,
+                "status": "success",
+                "type": "coins",
+                "coins_added": coins_added,
+                "coins_balance": new_coins,
+                "created_at": datetime.utcnow().isoformat() + "Z",
+                "processed_at": datetime.utcnow().isoformat() + "Z",
+                "error_message": None,
+                "retry_count": 0,
+                "support_code": payment_id[:20]
+            })
+            
+            print(f"[PAYMENT SUCCESS] ✅ Coins: {coins_added} added to user {uid}")
+            return {
+                "success": True,
+                "type": "coins",
+                "coins_balance": new_coins,
+                "coins_added": coins_added,
+                "payment_id": payment_id,
+                "message": f"{coins_added} coins credited successfully!"
+            }
         else:
+            # Subscription plan
             if request.plan == 'weekly':
                 days = 7
             elif request.plan == 'monthly':
@@ -941,19 +1021,132 @@ async def activate_subscription(request: ActivateSubscriptionRequest):
                 "tier": "premium",
                 "subscription_plan": request.plan,
                 "premium_until": valid_until,
-                "payment_id": request.razorpay_payment_id,
+                "payment_id": payment_id,
                 "activated_at": datetime.utcnow().isoformat() + "Z",
             }, merge=True)
             
+            # Log successful payment
+            payment_log_ref.set({
+                "razorpay_payment_id": payment_id,
+                "razorpay_order_id": request.razorpay_order_id,
+                "uid": uid,
+                "plan": request.plan,
+                "status": "success",
+                "type": "subscription",
+                "premium_until": valid_until,
+                "created_at": datetime.utcnow().isoformat() + "Z",
+                "processed_at": datetime.utcnow().isoformat() + "Z",
+                "error_message": None,
+                "retry_count": 0,
+                "support_code": payment_id[:20]
+            })
+            
+            print(f"[PAYMENT SUCCESS] ✅ Subscription: {request.plan} activated for user {uid}")
             return {
                 "success": True,
                 "tier": "premium",
                 "plan": request.plan,
                 "premium_until": valid_until,
+                "payment_id": payment_id,
+                "message": f"Premium {request.plan} activated successfully!"
             }
     except Exception as e:
-        print(f"Subscription activation error: {e}")
-        raise HTTPException(status_code=500, detail="Activation failed.")
+        error_msg = str(e)
+        print(f"[PAYMENT ERROR] ❌ Subscription activation error: {error_msg}")
+        
+        # Log failed attempt
+        existing_retry_count = existing_log.to_dict().get("retry_count", 0) if existing_log.exists else 0
+        payment_log_ref.set({
+            "status": "failed",
+            "error_message": error_msg,
+            "retry_count": existing_retry_count + 1,
+            "last_error_at": datetime.utcnow().isoformat() + "Z",
+            "support_code": payment_id[:20]
+        }, merge=True)
+        
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "success": False,
+                "error": "activation_failed",
+                "message": "Payment received but activation failed. We're retrying automatically. Please refresh in 30 seconds.",
+                "support_code": payment_id[:20],
+                "payment_id": payment_id,
+                "can_retry": True
+            }
+        )
+
+# ============================================
+# PAYMENT STATUS CHECK ENDPOINT
+# ============================================
+
+@app.get("/api/payments/status/{payment_id}")
+async def check_payment_status(
+    payment_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Check if a payment was processed and what happened (safety check)."""
+    db = get_firestore_db()
+    
+    payment_log = db.collection("payment_logs").document(payment_id).get()
+    
+    if not payment_log.exists:
+        print(f"[PAYMENT CHECK] ⚠️  Payment {payment_id} not found in logs")
+        return {
+            "success": False,
+            "status": "not_found",
+            "payment_id": payment_id,
+            "message": "Payment record not found. It may still be processing.",
+            "can_retry": True
+        }
+    
+    data = payment_log.to_dict()
+    status = data.get("status")
+    
+    if status == "success":
+        response = {
+            "success": True,
+            "status": "success",
+            "payment_id": payment_id,
+            "created_at": data.get("created_at"),
+            "processed_at": data.get("processed_at"),
+            "plan": data.get("plan"),
+            "type": data.get("type"),
+            "message": "✅ Payment processed successfully!"
+        }
+        
+        # Add type-specific info
+        if data.get("type") == "coins":
+            response["coins_added"] = data.get("coins_added")
+            response["coins_balance"] = data.get("coins_balance")
+        else:
+            response["premium_until"] = data.get("premium_until")
+            response["subscription_plan"] = data.get("plan")
+        
+        return response
+    
+    elif status == "failed":
+        return {
+            "success": False,
+            "status": "failed",
+            "payment_id": payment_id,
+            "created_at": data.get("created_at"),
+            "error": data.get("error_message"),
+            "retry_count": data.get("retry_count", 0),
+            "support_code": data.get("support_code"),
+            "message": "❌ Payment processing failed. Contact support.",
+            "can_retry": data.get("retry_count", 0) < 3
+        }
+    
+    else:
+        return {
+            "success": False,
+            "status": "pending",
+            "payment_id": payment_id,
+            "created_at": data.get("created_at"),
+            "message": "⏳ Payment still being processed. Please wait...",
+            "can_retry": False
+        }
 
 # ============================================
 # PHASE 1.3: FREEMIUM USER ENDPOINTS
@@ -1523,14 +1716,37 @@ async def verify_product_payment(
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Verify Razorpay payment signature for product order.
+    Verify Razorpay payment signature for product order with idempotency protection.
     Update order status to completed and store affiliate commission.
     """
     if not RAZORPAY_KEY_SECRET:
         raise HTTPException(status_code=500, detail="Payment service not configured.")
 
+    db = get_firestore_db()
+    payment_id = request.razorpay_payment_id
+    
+    # ✅ STEP 1: CHECK IDEMPOTENCY
+    payment_log_ref = db.collection("payment_logs").document(payment_id)
+    existing_log = payment_log_ref.get()
+    
+    if existing_log.exists:
+        log_data = existing_log.to_dict()
+        if log_data.get("status") == "success" and log_data.get("type") == "product_order":
+            # Already processed! Return cached result
+            print(f"[PAYMENT SAFETY] ✅ Idempotent product order: {payment_id} already processed")
+            return {
+                "success": True,
+                "status": "success",
+                "order_id": log_data.get("razorpay_order_id"),
+                "payment_id": payment_id,
+                "commission_earned": log_data.get("commission_earned"),
+                "total_amount": log_data.get("total_amount"),
+                "cached": True,
+                "message": "Order already verified - this is a duplicate request"
+            }
+
     try:
-        # Verify HMAC-SHA256 signature
+        # ✅ STEP 2: VERIFY SIGNATURE
         msg = f"{request.razorpay_order_id}|{request.razorpay_payment_id}"
         expected = hmac.new(
             RAZORPAY_KEY_SECRET.encode(),
@@ -1539,13 +1755,28 @@ async def verify_product_payment(
         ).hexdigest()
 
         if not hmac.compare_digest(expected, request.razorpay_signature):
+            # Log failed payment
+            payment_log_ref.set({
+                "razorpay_payment_id": payment_id,
+                "razorpay_order_id": request.razorpay_order_id,
+                "status": "failed",
+                "type": "product_order",
+                "error_message": "Signature verification failed",
+                "created_at": datetime.utcnow().isoformat() + "Z",
+                "support_code": payment_id[:20]
+            }, merge=True)
             raise HTTPException(status_code=400, detail="Payment verification failed")
 
+        # ✅ STEP 3: PROCESS ORDER
         # Get order from Firestore
-        db = get_firestore_db()
         order_doc = db.collection("orders").document(request.razorpay_order_id).get()
         
         if not order_doc.exists:
+            payment_log_ref.set({
+                "status": "failed",
+                "error_message": "Order not found",
+                "support_code": payment_id[:20]
+            }, merge=True)
             raise HTTPException(status_code=404, detail="Order not found")
         
         order_data = order_doc.to_dict()
@@ -1575,19 +1806,51 @@ async def verify_product_payment(
             "items_purchased": len(cart_items),
             "purchased_at": datetime.utcnow().isoformat()
         })
-
+        
+        # Log successful product order payment
+        payment_log_ref.set({
+            "razorpay_payment_id": payment_id,
+            "razorpay_order_id": request.razorpay_order_id,
+            "uid": uid,
+            "status": "success",
+            "type": "product_order",
+            "total_amount": total_amount,
+            "commission_earned": commission_amount,
+            "items_count": len(cart_items),
+            "created_at": datetime.utcnow().isoformat() + "Z",
+            "processed_at": datetime.utcnow().isoformat() + "Z",
+            "error_message": None,
+            "retry_count": 0,
+            "support_code": payment_id[:20]
+        })
+        
+        print(f"[PAYMENT SUCCESS] ✅ Product order: {request.razorpay_order_id} completed")
         return {
+            "success": True,
             "status": "success",
             "order_id": request.razorpay_order_id,
             "payment_id": request.razorpay_payment_id,
             "commission_earned": commission_amount,
-            "total_amount": total_amount
+            "total_amount": total_amount,
+            "message": "Order verified successfully!"
         }
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Payment verification error: {e}")
-        raise HTTPException(status_code=500, detail=f"Verification failed: {str(e)}")
+        error_msg = str(e)
+        print(f"[PAYMENT ERROR] ❌ Product order verification error: {error_msg}")
+        
+        # Log failed attempt
+        existing_retry_count = existing_log.to_dict().get("retry_count", 0) if existing_log.exists else 0
+        payment_log_ref.set({
+            "status": "failed",
+            "error_message": error_msg,
+            "retry_count": existing_retry_count + 1,
+            "last_error_at": datetime.utcnow().isoformat() + "Z",
+            "support_code": payment_id[:20]
+        }, merge=True)
+        
+        raise HTTPException(status_code=500, detail=f"Verification failed: {error_msg}")
 
 # ============================================
 # AFFILIATE TRACKING (Phase 2)
