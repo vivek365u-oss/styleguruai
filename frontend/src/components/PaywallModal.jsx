@@ -50,7 +50,7 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
     };
   }, []);
 
-  const handlePayment = async (plan, retryCount = 0) => {
+  const handlePayment = async (plan) => {
     if (!isMountedRef.current) return;
     
     console.log(`[Payment] Starting payment for plan: ${plan}`);
@@ -121,12 +121,10 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
             });
             
             console.log('[Payment] ✅ Subscription activated:', res.data);
-            const paymentId = response.razorpay_payment_id;
-            const supportCode = paymentId.substring(0, 20);
+            console.log('[Payment] Payment ID for reference:', response.razorpay_payment_id);
             
             if (isMountedRef.current) {
               setLoading(false);
-              // Show success with support code for reference
               setPaymentError(null);
             }
             
