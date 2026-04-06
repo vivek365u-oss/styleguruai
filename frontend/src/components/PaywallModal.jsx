@@ -270,19 +270,23 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
           <div className={`flex p-1 rounded-xl mb-6 shadow-inner ${isDark ? 'bg-[#1a1c30]' : 'bg-gray-100'}`}>
             <button
               onClick={() => { setTab('coins'); setSelectedPlan('coins_25'); }}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
-                tab === 'coins' ? 'bg-white text-orange-600 shadow-sm' : isDark ? 'text-white/50' : 'text-gray-500 hover:text-gray-700'
+              className={`flex-1 py-3 px-2 text-[10px] font-black rounded-lg transition-all border-2 ${
+                tab === 'coins' ? `border-amber-400 ${isDark ? 'bg-amber-500/20 text-amber-300' : 'bg-amber-50 text-amber-900'} shadow-lg` : isDark ? 'border-white/10 text-white/50 bg-white/5' : 'border-gray-200 text-gray-600'
               }`}
             >
-              🪙 Pay-as-you-go
+              <span className="text-lg mb-1 block">🪙</span>
+              ONE-TIME COINS
+              <span className="block text-[9px] mt-0.5 opacity-70 font-normal">Pay once, use anytime</span>
             </button>
             <button
               onClick={() => { setTab('subs'); setSelectedPlan('weekly'); }}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
-                tab === 'subs' ? 'bg-white text-purple-600 shadow-sm' : isDark ? 'text-white/50' : 'text-gray-500 hover:text-gray-700'
+              className={`flex-1 py-3 px-2 text-[10px] font-black rounded-lg transition-all border-2 ${
+                tab === 'subs' ? `border-purple-400 ${isDark ? 'bg-purple-500/20 text-purple-300' : 'bg-purple-50 text-purple-900'} shadow-lg` : isDark ? 'border-white/10 text-white/50 bg-white/5' : 'border-gray-200 text-gray-600'
               }`}
             >
-              👑 Unlimited Sub
+              <span className="text-lg mb-1 block">👑</span>
+              SUBSCRIPTION
+              <span className="block text-[9px] mt-0.5 opacity-70 font-normal">Auto-renew each period</span>
             </button>
           </div>
 
@@ -357,6 +361,37 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
             {selectedPlan === 'yearly' && (
               <p className={`text-xs mt-1 ${isDark ? 'text-green-400' : 'text-green-600'}`}>₹41/month billed annually</p>
             )}
+
+            {/* Amount Confirmation Badge */}
+            <div className={`mt-4 p-3 rounded-2xl border-2 text-center ${
+              tab === 'coins' 
+                ? isDark ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-300'
+                : isDark ? 'bg-purple-500/10 border-purple-500/30' : 'bg-purple-50 border-purple-300'
+            }`}>
+              <p className={`text-[10px] font-black uppercase tracking-wide mb-1 ${
+                tab === 'coins' 
+                  ? isDark ? 'text-amber-300' : 'text-amber-600'
+                  : isDark ? 'text-purple-300' : 'text-purple-600'
+              }`}>
+                ✓ You will pay:
+              </p>
+              <p className={`text-sm font-black ${
+                tab === 'coins' 
+                  ? isDark ? 'text-amber-200' : 'text-amber-900'
+                  : isDark ? 'text-purple-200' : 'text-purple-900'
+              }`}>
+                ₹{selectedPlan === 'coins_10' || selectedPlan === 'weekly' ? '29' :
+                   selectedPlan === 'coins_25' ? '49' :
+                   selectedPlan === 'monthly' ? '59' : '499'}
+              </p>
+              <p className={`text-[9px] font-semibold mt-1 ${
+                tab === 'coins' 
+                  ? isDark ? 'text-amber-300/70' : 'text-amber-600/70'
+                  : isDark ? 'text-purple-300/70' : 'text-purple-600/70'
+              }`}>
+                {tab === 'coins' ? '🪙 One-time coin purchase' : '👑 Auto-renews ' + (selectedPlan === 'weekly' ? 'weekly' : selectedPlan === 'monthly' ? 'monthly' : 'yearly')}
+              </p>
+            </div>
           </div>
 
           {/* Features */}

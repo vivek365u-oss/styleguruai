@@ -858,6 +858,16 @@ async def create_subscription_checkout(
         )
     
     uid = current_user["uid"]
+    
+    # Validate plan type
+    VALID_PLANS = ['weekly', 'monthly', 'yearly', 'coins_10', 'coins_25']
+    if request.plan not in VALID_PLANS:
+        print(f"[PAYMENT] ❌ Invalid plan received: {request.plan}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid plan: {request.plan}. Must be one of {VALID_PLANS}"
+        )
+    
     price_map = {
         'weekly': 2900,
         'monthly': 5900,
@@ -865,7 +875,15 @@ async def create_subscription_checkout(
         'coins_10': 2900,
         'coins_25': 4900
     }
+    
     amount_paise = price_map.get(request.plan, 5900)
+    amount_rupees = round(amount_paise / 100, 2)
+    
+    # Determine plan type
+    plan_type = 'subscription' if request.plan in ['weekly', 'monthly', 'yearly'] else 'coins'
+    
+    # Log payment request for debugging
+    print(f"[PAYMENT] ℹ️ Request | User: {uid} | Plan: {request.plan} ({plan_type}) | Amount: ₹{amount_rupees}")
     
     try:
         order = client.order.create({
@@ -875,18 +893,24 @@ async def create_subscription_checkout(
             "notes": {
                 "user_id": uid,
                 "plan": request.plan,
-                "type": "hybrid_upgrade"
+                "type": plan_type,
+                "amount_rupees": amount_rupees
             }
         })
+        
+        # Log successful order creation
+        print(f"[PAYMENT] ✅ Order Created | Order ID: {order['id']} | Amount: ₹{amount_rupees} | Plan: {request.plan}")
         
         return {
             "success": True,
             "order_id": order["id"],
             "amount": amount_paise,
-            "currency": "INR"
+            "currency": "INR",
+            "plan_type": plan_type,
+            "amount_rupees": amount_rupees
         }
     except Exception as e:
-        print(f"Failed to create upgrade order: {e}")
+        print(f"[PAYMENT] ❌ Failed to create order | User: {uid} | Error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to initiate payment")
 
 @app.post("/api/subscriptions/activate")
@@ -904,6 +928,9 @@ async def activate_subscription(request: ActivateSubscriptionRequest):
     payment_id = request.razorpay_payment_id
     uid = request.uid
     
+    # Log payment activation request
+    print(f"[PAYMENT] ℹ️ Activation Request | User: {uid} | Payment: {payment_id[:15]}... | Plan: {request.plan}")
+    
     # ✅ STEP 1: CHECK IDEMPOTENCY - Has this payment already been processed?
     payment_log_ref = db.collection("payment_logs").document(payment_id)
     existing_log = payment_log_ref.get()
@@ -912,7 +939,7 @@ async def activate_subscription(request: ActivateSubscriptionRequest):
         log_data = existing_log.to_dict()
         if log_data.get("status") == "success":
             # ✅ Already processed! Return cached result
-            print(f"[PAYMENT SAFETY] ✅ Idempotent request: {payment_id} already processed")
+            print(f"[PAYMENT] ℹ️ Idempotent | Duplicate request for {payment_id[:15]}... (already processed)")
             if request.plan.startswith('coins_'):
                 return {
                     "success": True,
@@ -943,6 +970,7 @@ async def activate_subscription(request: ActivateSubscriptionRequest):
 
     if not hmac.compare_digest(expected, request.razorpay_signature):
         # Log failed payment
+        print(f"[PAYMENT] ❌ Signature Verification Failed | User: {uid} | Payment: {payment_id[:15]}...")
         payment_log_ref.set({
             "razorpay_payment_id": payment_id,
             "razorpay_order_id": request.razorpay_order_id,
@@ -997,7 +1025,7 @@ async def activate_subscription(request: ActivateSubscriptionRequest):
                 "support_code": payment_id[:20]
             })
             
-            print(f"[PAYMENT SUCCESS] ✅ Coins: {coins_added} added to user {uid}")
+            print(f"[PAYMENT] ✅ Coins Successfully | User: {uid} | Plan: {request.plan} | Added: {coins_added} | Total: {new_coins}")
             return {
                 "success": True,
                 "type": "coins",
@@ -1041,7 +1069,7 @@ async def activate_subscription(request: ActivateSubscriptionRequest):
                 "support_code": payment_id[:20]
             })
             
-            print(f"[PAYMENT SUCCESS] ✅ Subscription: {request.plan} activated for user {uid}")
+            print(f"[PAYMENT] ✅ Subscription Successfully | User: {uid} | Plan: {request.plan} | Days: {days} | Until: {valid_until[:10]}")
             return {
                 "success": True,
                 "tier": "premium",
