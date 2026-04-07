@@ -525,6 +525,8 @@ function WardrobeSyncButton({ analysis, recommendations, isDark }) {
       };
       await saveWardrobeItem(auth.currentUser.uid, item);
       setSynced(true);
+      // Trigger global update for Navigator
+      window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
     } catch (err) {
       console.error('Failed to sync to wardrobe:', err);
     } finally {

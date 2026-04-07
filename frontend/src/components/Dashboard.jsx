@@ -147,16 +147,23 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
     localStorage.setItem('sg_gender_pref', next);
   };
 
+  // Global Profile Lock Priority
+  const primaryProfile = JSON.parse(localStorage.getItem('sg_primary_profile') || 'null');
+  const activeProfile = primaryProfile || lastAnalysis;
+  const hasProfile = !!activeProfile;
+
   // Daily Drop Logic 🎁
   const [showDailyDrop, setShowDailyDrop] = useState(() => {
     const today = new Date().toLocaleDateString('en-CA');
     const lastDrop = localStorage.getItem('sg_daily_drop_date');
-    const hasAnalysis = !!lastAnalysis;
-    return hasAnalysis && lastDrop !== today;
+    return hasProfile && lastDrop !== today;
   });
 
-  const gndr = lastAnalysis?.fullData?.gender || genderPref;
-  const tone = (typeof lastAnalysis?.skinTone === 'string' ? lastAnalysis?.skinTone : lastAnalysis?.skinTone?.category || 'medium')?.toLowerCase();
+  const gndr = activeProfile?.fullData?.gender || activeProfile?.gender || genderPref;
+  const tone = (typeof (activeProfile?.skinTone || activeProfile?.skin_tone?.category) === 'string' 
+    ? (activeProfile?.skinTone || activeProfile?.skin_tone?.category) 
+    : 'medium')?.toLowerCase();
+    
   const todayTip = getLocalizedTip(gndr, tone, language);
   const firstName = user?.name?.split(' ')[0] || '';
   return (
@@ -245,11 +252,11 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
       </div>
 
       {/* OOTD & Hook — Outfit of the Day */}
-      {lastAnalysis && (
+      {activeProfile && (
         <div className="space-y-3">
           <OOTDCard
-            skinTone={lastAnalysis.skinTone}
-            gender={lastAnalysis.fullData?.gender || genderPref}
+            skinTone={activeProfile.skinTone || activeProfile.skin_tone?.category}
+            gender={activeProfile.fullData?.gender || activeProfile.gender || genderPref}
             isDark={isDark}
           />
 

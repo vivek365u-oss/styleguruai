@@ -72,10 +72,10 @@ class SkinToneResult:
     """
     category: str              # fair, light, medium, olive, brown, dark
     subcategory: str           # warm, cool, neutral (undertone)
-    brightness_score: float
-    warmth_score: float
-    description: str
-    confidence: str
+    brightness_score: float = 50.0
+    warmth_score: float = 0.0
+    description: str = ""
+    confidence: str = "high"
 
     # Extended fields (new)
     ita_angle: float = 0.0

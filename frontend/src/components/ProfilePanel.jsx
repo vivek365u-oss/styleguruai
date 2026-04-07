@@ -60,21 +60,24 @@ export default function ProfilePanel({ hideHeader = false }) {
         const historyCount = historyRes?.data?.total || 0;
         const savedColorsCount = colorsRes?.length || 0;
         
-        // Dynamic Style Score & XP Calculation (Simple logic for now)
+        // Priority logic for Global Profile Lock
+        const primaryProfile = JSON.parse(localStorage.getItem('sg_primary_profile') || 'null');
         const lastAnalysis = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
+        const activeProfile = primaryProfile || lastAnalysis;
+
         let calculatedScore = 0;
         let xp = (historyCount * 20) + (savedColorsCount * 10);
         let level = Math.floor(xp / 100) + 1;
         
-        if (lastAnalysis) {
+        if (activeProfile) {
           setWardrobeStats({
-            skinTone: lastAnalysis.skinTone,
-            undertone: lastAnalysis.undertone,
-            season: lastAnalysis.season,
-            skinHex: lastAnalysis.skinHex,
-            date: lastAnalysis.date,
+            skinTone: activeProfile.skinTone || activeProfile.skin_tone?.category,
+            undertone: activeProfile.undertone || activeProfile.skin_tone?.undertone,
+            season: activeProfile.season || activeProfile.skin_tone?.color_season,
+            skinHex: activeProfile.skinHex || activeProfile.skin_color?.hex || '#C68642',
+            date: activeProfile.date || activeProfile.locked_at || new Date().toISOString(),
           });
-          calculatedScore = lastAnalysis.confidence === 'high' ? 95 : 82;
+          calculatedScore = activeProfile.confidence === 'high' ? 95 : 82;
         }
 
         setStats({
@@ -267,7 +270,6 @@ export default function ProfilePanel({ hideHeader = false }) {
 
   const TABS = [
     { id: 'overview', label: 'Overview', icon: '✨' },
-    { id: 'wardrobe', label: 'Wardrobe', icon: '👕' },
     { id: 'preferences', label: 'My Style', icon: '🎨' },
     { id: 'support', label: 'Support', icon: '👋' }
   ];
@@ -451,27 +453,6 @@ export default function ProfilePanel({ hideHeader = false }) {
             </motion.div>
           )}
 
-          {/* TAB: WARDROBE */}
-          {activeTab === 'wardrobe' && (
-            <motion.div 
-              key="wardrobe"
-              initial={{ opacity: 0, scale: 0.98 }} 
-              animate={{ opacity: 1, scale: 1 }} 
-              exit={{ opacity: 0, scale: 0.98 }}
-              className="space-y-6"
-            >
-              <div className={`rounded-3xl p-8 border ${cardCls}`}>
-                 <div className="flex items-center justify-between mb-8">
-                    <h3 className={`text-[11px] font-black uppercase tracking-[0.2em] opacity-60 ${headingCls}`}>Wardrobe Hub</h3>
-                    <button onClick={() => navigate('/dashboard')} className="text-[10px] font-black text-purple-500 uppercase tracking-widest">History</button>
-                 </div>
-                 <div className="flex flex-col items-center justify-center py-10 opacity-60">
-                    <div className="text-5xl mb-6">👔</div>
-                    <p className={`text-sm font-bold text-center ${headingCls}`}>Your personalized wardrobe is synced and ready</p>
-                 </div>
-              </div>
-            </motion.div>
-          )}
 
           {/* TAB: PREFERENCES */}
           {activeTab === 'preferences' && (
