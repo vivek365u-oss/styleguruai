@@ -18,6 +18,12 @@ export default function ProfilePanel({ hideHeader = false }) {
   const [activeTab, setActiveTab] = useState('overview'); // overview, wardrobe, preferences, support
   const [userPrefs, setUserPrefs] = useState({ height: '', build: '', fit: '', aesthetic: '' });
   const [stats, setStats] = useState({ analyses: 0, colors: 0, score: 0, level: 1, xp: 0 });
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [wardrobeStats, setWardrobeStats] = useState(null);
 
   // Notification State
   const [notifStatus, setNotifStatus] = useState(() => {
