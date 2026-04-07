@@ -293,6 +293,31 @@ export const loadProfile = async (uid) => {
   }
 };
 
+export const saveUserPreferences = async (uid, preferences) => {
+  if (!auth.currentUser) return null;
+  try {
+    await setDoc(doc(db, 'users', uid, 'profile', 'preferences'), {
+      ...preferences,
+      updated_at: new Date().toISOString(),
+    }, { merge: true });
+    return true;
+  } catch (e) {
+    console.error('Error saving user preferences:', e);
+    return false;
+  }
+};
+
+export const loadUserPreferences = async (uid) => {
+  if (!auth.currentUser) return null;
+  try {
+    const snap = await getDoc(doc(db, 'users', uid, 'profile', 'preferences'));
+    return snap.exists() ? snap.data() : null;
+  } catch (e) {
+    console.error('Error loading user preferences:', e);
+    return null;
+  }
+};
+
 // ============================================
 // WARDROBE — FIRESTORE
 // ============================================
