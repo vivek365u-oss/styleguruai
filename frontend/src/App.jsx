@@ -23,7 +23,6 @@ const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
-const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage'));
 
 import { ThemeContext } from './context/ThemeContext';
@@ -108,11 +107,7 @@ function AppRoutes({ user, setUser }) {
             <ProfilePage />
           </PrivateRoute>
         } />
-        <Route path="/settings" element={
-          <PrivateRoute user={user}>
-            <SettingsPage />
-          </PrivateRoute>
-        } />
+        <Route path="/settings" element={<Navigate to="/profile" replace />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/contact" element={<ContactPage />} />
@@ -168,7 +163,11 @@ function App() {
   return (
     <ErrorBoundary>
       <LanguageProvider>
-        <ThemeContext.Provider value={{ theme, toggleTheme: () => setTheme(prev => prev === 'dark' ? 'light' : 'dark') }}>
+        <ThemeContext.Provider value={{ theme, setTheme, toggleTheme: () => setTheme(prev => {
+          const next = prev === 'dark' ? 'light' : 'dark';
+          localStorage.setItem('tonefit_theme', next);
+          return next;
+        }) }}>
           <PlanProvider>
             <CartProvider>
               <div className="min-h-screen">
