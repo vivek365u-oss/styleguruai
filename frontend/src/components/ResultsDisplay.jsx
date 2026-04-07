@@ -4,7 +4,7 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../App';
-import { publishToCommunityFeed, auth, saveSavedColor, deleteSavedColor } from '../api/styleApi';
+import { publishToCommunityFeed, auth, saveSavedColor, saveHistory } from '../api/styleApi';
 import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';
 import ColorRecommendationsShop from './ColorRecommendationsShop';
@@ -12,7 +12,6 @@ import AffiliateLink from './AffiliateLink';
 
 // ── Shopping Links ───────────────────────────────────────────
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
-  const { t } = useLanguage();
   const isFemale = gender === "female";
   const colorDisplay = colorName.toLowerCase().replace(/\s+/g, ' ');
   const colorSlug = colorName.toLowerCase().replace(/\s+/g, '-');
@@ -536,7 +535,7 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
             href={link.url}
             color={shirtColor.name}
             category={isFemale ? 'coord set' : 'outfit set'}
-            brand={link.name.replace(/[🛒🏪👗🛍️ ]/g, '')}
+            brand={link.name.replace(/[^A-Za-z]/g, '')}
             platform={link.name.toLowerCase().replace(/[^a-z]/g, '')}
             isDark={isDark}
             className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}
@@ -550,7 +549,7 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
 }
 
 // ── Colors Tab ───────────────────────────────────────────────
-function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shirtCategory, pantCategory, isDark }) {
+function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shirtCategory, isDark }) {
   const { t } = useLanguage();
   const avoidColors = recommendations.colors_to_avoid || [];
   const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
@@ -776,7 +775,6 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
 
 // ── Accessories Tab ──────────────────────────────────────────
 function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }) {
-  const { t } = useLanguage();
   const accessories = recommendations.accessories || [];
   const accentColors = recommendations.accent_colors || [];
 
@@ -795,7 +793,6 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }
 
   const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
   const cardBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
-  const headingCls = isDark ? 'text-white' : 'text-gray-800';
   const subCls = isDark ? 'text-white/50' : 'text-gray-500';
   const mutedCls = isDark ? 'text-white/30' : 'text-gray-400';
   const emptyTextCls = isDark ? 'text-white/40' : 'text-gray-400';
@@ -1070,14 +1067,14 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
                 skinTone: analysis.skin_tone.category,
                 undertone: analysis.skin_tone.undertone || '',
                 colorSeason: analysis.skin_tone.color_season || '',
-                gender: result.gender || 'male',
+                gender: analysis?.gender || 'male',
                 bestColors: [
                   ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || recommendations.seasonal_colors || []),
                 ].slice(0, 5)
               };
               await publishToCommunityFeed(auth.currentUser?.uid || 'anon', paletteData);
               setShareStatus('success');
-            } catch (e) {
+            } catch {
               setShareStatus('error');
               setTimeout(() => setShareStatus(null), 3000);
             }

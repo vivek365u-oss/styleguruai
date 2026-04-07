@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 
-function OutfitCalendar({ bestColors, pantColors, gender, isDark, onClose }) {
-  const { t, language } = useLanguage();
+function OutfitCalendar({ bestColors, pantColors, isDark, onClose }) {
+  const { t } = useLanguage();
   const [selectedDay, setSelectedDay] = useState(0);
 
   const WEEKDAYS = [

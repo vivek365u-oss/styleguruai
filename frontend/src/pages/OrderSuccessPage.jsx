@@ -3,32 +3,26 @@
 // Show order confirmation and product shopping links
 // ============================================================
 import { useEffect, useState, useContext } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../App';
-import { useLanguage } from '../i18n/LanguageContext';
 
 function OrderSuccessPage() {
   const { theme } = useContext(ThemeContext);
-  const { t } = useLanguage();
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const isDark = theme === 'dark';
-  const [orderData, setOrderData] = useState(null);
-
-  useEffect(() => {
-    // Parse order data from localStorage (set during checkout)
+  const [orderData] = useState(() => {
     const savedOrder = localStorage.getItem('sg_last_order');
     if (savedOrder) {
-      try {
-        setOrderData(JSON.parse(savedOrder));
-      } catch (e) {
-        console.error('Error parsing order:', e);
-        navigate('/');
-      }
-    } else {
+      try { return JSON.parse(savedOrder); } catch { return null; }
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (!orderData) {
       navigate('/');
     }
-  }, []);
+  }, [orderData, navigate]);
 
   if (!orderData) {
     return <div className="text-center p-8">Loading...</div>;

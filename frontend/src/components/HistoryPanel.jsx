@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { getHistory, testTone } from '../api/styleApi';
+import { getHistory } from '../api/styleApi';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
@@ -13,8 +13,6 @@ function HistoryPanel({ onShowResult }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [detailLoading, setDetailLoading] = useState(false);
 
   useEffect(() => {
     // Load from localStorage first (instant)
@@ -25,30 +23,19 @@ function HistoryPanel({ onShowResult }) {
         setLoading(false);
         return;
       }
-    } catch {}
+    } catch { /* ignore */ }
     fetchHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchHistory = async () => {
     try {
       const res = await getHistory();
       setHistory(res.data.history || []);
-    } catch (err) {
+    } catch {
       setError(t('failedHistory'));
     } finally {
       setLoading(false);
-    }
-  };
-
-  const viewDetails = async (item) => {
-    setDetailLoading(true);
-    try {
-      const res = await testTone(item.skin_tone, item.undertone);
-      setSelectedItem({ ...item, recommendations: res.data });
-    } catch (err) {
-      setError(t('failedDetails'));
-    } finally {
-      setDetailLoading(false);
     }
   };
 
@@ -57,10 +44,7 @@ function HistoryPanel({ onShowResult }) {
     olive: '#A0724A', brown: '#7B4F2E', dark: '#4A2C0A',
   };
 
-  const formatDate = (iso) => {
-    const d = new Date(iso);
-    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-  };
+
 
   if (loading) {
     return (
@@ -87,85 +71,6 @@ function HistoryPanel({ onShowResult }) {
         </div>
         <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('noHistory')}</h3>
         <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('noHistoryDesc')}</p>
-      </div>
-    );
-  }
-
-  if (selectedItem) {
-    const rec = selectedItem.recommendations;
-    return (
-      <div className="mt-4 space-y-6">
-        <button
-          onClick={() => setSelectedItem(null)}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all text-sm border ${isDark ? 'bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border-white/10' : 'bg-gray-100 hover:bg-gray-200 text-gray-600 border-gray-200'}`}
-        >
-          {t('backToHistory')}
-        </button>
-
-        <div className={`bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-3xl p-6`}>
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl border-2 border-white/20 shadow-lg" style={{ backgroundColor: toneColors[selectedItem.skin_tone] }} />
-            <div>
-              <p className={`text-xs uppercase tracking-widest ${isDark ? 'text-white/40' : 'text-purple-400'}`}>Style Profile</p>
-              <h2 className={`text-2xl font-black capitalize ${isDark ? 'text-white' : 'text-gray-900'}`}>{t(selectedItem.skin_tone)} {language === 'hi' ? 'त्वचा' : 'Skin'}</h2>
-              <div className="flex gap-2 mt-1 flex-wrap">
-                <span className="bg-purple-500/20 text-purple-300 text-xs px-2 py-1 rounded-full border border-purple-500/20 capitalize">{t(selectedItem.undertone)} {language === 'hi' ? 'अंडरटोन' : 'undertone'}</span>
-                <span className="bg-pink-500/20 text-pink-300 text-xs px-2 py-1 rounded-full border border-pink-500/20">{t(selectedItem.color_season)}</span>
-                <span className="bg-green-500/20 text-green-300 text-xs px-2 py-1 rounded-full border border-green-500/20">{selectedItem.quality_score}% {language === 'hi' ? 'क्वालिटी' : 'quality'}</span>
-              </div>
-              <p className={`text-xs mt-1 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{formatDate(selectedItem.date)}</p>
-            </div>
-          </div>
-          <div className={`mt-4 rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/60 border-white/40'}`}>
-            <p className={`text-sm leading-relaxed ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{rec?.summary}</p>
-          </div>
-        </div>
-
-        <div className={`rounded-3xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-          <h3 className={`font-black text-lg mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
-            <span>👔</span> {t('bestShirtColors')}
-          </h3>
-          <div className="space-y-3">
-            {(rec?.best_shirt_colors || []).map((color, i) => (
-              <div key={i} className={`flex items-center gap-3 rounded-xl p-3 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
-                <div className="w-10 h-10 rounded-lg border border-white/20 flex-shrink-0" style={{ backgroundColor: color.hex }} />
-                <div>
-                  <p className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{color.name}</p>
-                  <p className={`text-xs font-mono ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{color.hex}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className={`rounded-3xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-          <h3 className={`font-black text-lg mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
-            <span>🧥</span> {t('outfitIdeas')}
-          </h3>
-          <div className="space-y-3">
-            {(rec?.outfit_combinations || []).map((combo, i) => (
-              <div key={i} className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
-                <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{combo.shirt}</p>
-                <p className={`text-xs mt-1 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>👖 {combo.pant} • 👟 {combo.shoes}</p>
-                <span className="text-purple-500 text-xs">{combo.occasion}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className={`rounded-3xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-          <h3 className={`font-black text-lg mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
-            <span>💡</span> {t('styleTips')}
-          </h3>
-          <div className="space-y-2">
-            {(rec?.style_tips || []).map((tip, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <span className="text-purple-400">✦</span>
-                <p className={`text-sm ${isDark ? 'text-white/70' : 'text-gray-600'}`}>{tip}</p>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     );
   }
@@ -238,14 +143,6 @@ function HistoryPanel({ onShowResult }) {
         </div>
       )}
 
-      {detailLoading && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className={`rounded-2xl p-8 text-center ${isDark ? 'bg-slate-800' : 'bg-white'}`}>
-            <div className="w-10 h-10 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-            <p className={isDark ? 'text-white' : 'text-gray-800'}>{t('loadingDetails')}</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

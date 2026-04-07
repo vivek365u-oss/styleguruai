@@ -2,7 +2,7 @@
 // StyleGuru — Weather-Based Style Tip
 // Uses wttr.in (no API key needed) for weather data
 // ============================================================
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalizedWeatherTip } from '../data/weatherTips';
@@ -28,7 +28,7 @@ function WeatherTip({ city, isDark }) {
     if (!userCity) { setLoading(false); return; }
     const cached = sessionStorage.getItem(`sg_weather_${userCity}`);
     if (cached) {
-      try { setWeather(JSON.parse(cached)); setLoading(false); return; } catch {}
+      try { setWeather(JSON.parse(cached)); setLoading(false); return; } catch { /* ignore parsing errors */ }
     }
     fetchWeather(userCity);
   }, [userCity]);

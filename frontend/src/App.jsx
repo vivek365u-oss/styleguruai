@@ -1,6 +1,6 @@
-import React, { useState, useEffect, createContext, Suspense, lazy } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { auth, logout } from './api/styleApi';
+import { logout } from './api/styleApi';
 import { LanguageProvider } from './i18n/LanguageProvider';
 import { PlanProvider } from './context/PlanProvider';
 import { CartProvider } from './context/CartProvider';
@@ -26,7 +26,7 @@ const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage'));
 
-export const ThemeContext = createContext();
+export { ThemeContext } from './context/ThemeContext';
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-gradient-to-br from-[#050816] via-purple-950 to-[#050816] flex flex-col items-center justify-center relative overflow-hidden">
@@ -86,6 +86,7 @@ function AppRoutes({ user, setUser }) {
       'sg_saved_colors',
       'sg_wardrobe_queue'
     ];
+    keysToClear.forEach(key => localStorage.removeItem(key));
     localStorage.removeItem('tonefit_user_status');
     navigate('/');
   };

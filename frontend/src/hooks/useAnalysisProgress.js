@@ -5,6 +5,15 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
+const stages = [
+  { label: 'Uploading image...', percent: 0, emoji: '📤', duration: 400 },
+  { label: 'Detecting colors...', percent: 20, emoji: '🎨', duration: 800 },
+  { label: 'Analyzing skin tone...', percent: 40, emoji: '🔬', duration: 1000 },
+  { label: 'Extracting undertone...', percent: 60, emoji: '🎭', duration: 800 },
+  { label: 'Matching outfits...', percent: 75, emoji: '👔', duration: 600 },
+  { label: 'Generating recommendations...', percent: 90, emoji: '✨', duration: 400 },
+];
+
 export function useAnalysisProgress() {
   const [progress, setProgress] = useState({
     percent: 0,
@@ -18,15 +27,6 @@ export function useAnalysisProgress() {
   const progressIntervalRef = useRef(null);
   const startTimeRef = useRef(null);
   const totalDurationRef = useRef(4000); // 4 seconds total simulation
-
-  const stages = [
-    { label: 'Uploading image...', percent: 0, emoji: '📤', duration: 400 },
-    { label: 'Detecting colors...', percent: 20, emoji: '🎨', duration: 800 },
-    { label: 'Analyzing skin tone...', percent: 40, emoji: '🔬', duration: 1000 },
-    { label: 'Extracting undertone...', percent: 60, emoji: '🎭', duration: 800 },
-    { label: 'Matching outfits...', percent: 75, emoji: '👔', duration: 600 },
-    { label: 'Generating recommendations...', percent: 90, emoji: '✨', duration: 400 },
-  ];
 
   const startProgress = useCallback(() => {
     setProgress({

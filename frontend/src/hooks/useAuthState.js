@@ -3,7 +3,7 @@
  * Prevents race conditions and ensures consistent state
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, loadProfile } from '../api/styleApi';
 

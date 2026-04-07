@@ -2,7 +2,7 @@
 // StyleGuru — Outfit of the Day (OOTD)
 // Daily outfit suggestion based on skin tone + gender
 // ============================================================
-import { useState, useEffect, useContext } from 'react';
+import { useState } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { auth, saveWardrobeItem } from '../api/styleApi';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -43,7 +43,7 @@ function OOTDCard({ skinTone, gender, isDark }) {
       });
       setSaved(true);
       showToast(t('✅ Saved to wardrobe!'));
-    } catch (e) { 
+    } catch { 
       showToast(t('❌ Could not save')); 
     }
   };

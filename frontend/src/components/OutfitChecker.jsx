@@ -12,7 +12,6 @@ import PaywallModal from './PaywallModal';
 function OutfitShopCard({ color, isDark, gender = 'male' }) {
   const [budget, setBudget] = useState(null);
   const AMAZON_TAG = 'styleguruai-21';
-  const colorDisplay = color.name.toLowerCase();
 
   const budgets = [
     { label: '₹500', max: 500 },
@@ -125,7 +124,7 @@ function OutfitChecker() {
   const [wardrobeSaving, setWardrobeSaving] = useState(false);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
-  const { progress, startProgress, completeProgress, setError: setProgressError, reset: resetProgress } = useAnalysisProgress();
+  const { progress, startProgress, completeProgress, reset: resetProgress } = useAnalysisProgress();
 
   const selfieRef = useRef(null);
   const outfitRef = useRef(null);
@@ -228,7 +227,9 @@ function OutfitChecker() {
         queue.push({ source: 'outfit_checker', imageId: null, outfit_data: { colors: [] }, skin_tone: result.skin_analysis?.skin_tone || '', skin_hex: result.skin_analysis?.skin_color_hex || '#C68642', compatibility_score: score, saved_at: new Date().toISOString() });
         localStorage.setItem('sg_wardrobe_queue', JSON.stringify(queue));
         setWardrobeSaved(true); 
-      } catch {}
+      } catch {
+        // ignore IDB error
+      }
     } finally {
       setWardrobeSaving(false);
     }

@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../App';
-import { useLanguage } from '../i18n/LanguageContext';
+
 import { usePlan } from '../context/PlanContext';
 import { auth, loadProfile } from '../api/styleApi';
 import { updateProfile } from 'firebase/auth';
@@ -9,13 +9,11 @@ import { logout } from '../api/styleApi';
 
 function ProfilePage() {
   const { theme } = useContext(ThemeContext);
-  const { t } = useLanguage();
   const { isPro, usage } = usePlan();
   const navigate = useNavigate();
   const isDark = theme === 'dark';
 
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState('');
@@ -39,11 +37,8 @@ function ProfilePage() {
         });
         setEditName(currentUser.displayName || '');
 
-        // Load profile data
-        const profileData = await loadProfile(currentUser.uid);
-        if (profileData) {
-          setProfile(profileData);
-        }
+        // Load profile data (currently unused, but kept for future fetch)
+        await loadProfile(currentUser.uid);
 
         // Load wardrobe stats
         const lastAnalysis = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');

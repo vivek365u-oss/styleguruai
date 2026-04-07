@@ -13,7 +13,6 @@ function AffiliateLink({
   platform, 
   productId, 
   price,
-  isDark = false,
   className = ""
 }) {
   const [loading, setLoading] = useState(false);
@@ -69,7 +68,8 @@ function AffiliateLink({
       // Fallback: try to open link if initial open failed
       try {
         window.open(href, '_blank');
-      } catch (e) {
+      } catch {
+        // ignore fallback error
         console.error('[Affiliate] Fallback open also failed');
       }
     } finally {

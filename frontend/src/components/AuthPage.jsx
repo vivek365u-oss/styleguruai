@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { registerUser, loginUser, saveAuth, googleLogin } from '../api/styleApi';
 import { useLanguage } from '../i18n/LanguageContext';
 
-function AuthPage({ onLoginSuccess, onSkip }) {
+function AuthPage({ onLoginSuccess, }) {
   const { t } = useLanguage();
   const [mode, setMode] = useState('login');
   const [form, setForm] = useState({ email: '', password: '', full_name: '' });
@@ -42,7 +42,7 @@ function AuthPage({ onLoginSuccess, onSkip }) {
       const user = await googleLogin();
       saveAuth({ user_name: user.name, email: user.email });
       onLoginSuccess({ name: user.name, email: user.email });
-    } catch (err) {
+    } catch {
       setError(t('googleFailed'));
     } finally {
       setGoogleLoading(false);

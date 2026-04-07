@@ -2,20 +2,17 @@
 // StyleGuru — Shopping Cart Component
 // Display cart items and checkout
 // ============================================================
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { useCart } from '../context/CartContext';
-import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
 
 function ShoppingCart({ onClose, onProceedToCheckout, isOpen }) {
   const { theme } = useContext(ThemeContext);
   const { cart, removeFromCart, updateQuantity, totals } = useCart();
   const { isPro } = usePlan();
-  const { t } = useLanguage();
-  const isDark = theme === 'dark';
-  const [showCheckout, setShowCheckout] = useState(false);
-
+    const isDark = theme === 'dark';
+  
   if (!onClose || !isOpen) return null; // Cart only shows in modal when isOpen is true
 
   // Handle backdrop click
@@ -150,7 +147,6 @@ function ShoppingCart({ onClose, onProceedToCheckout, isOpen }) {
           </button>
           <button
             onClick={() => {
-              setShowCheckout(true);
               onProceedToCheckout?.(totals);
             }}
             disabled={cart.length === 0}

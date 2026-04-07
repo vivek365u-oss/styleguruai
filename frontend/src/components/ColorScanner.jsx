@@ -37,7 +37,7 @@ function getColorName(hex) {
   if (h < 330) return 'Purple'; return 'Red';
 }
 
-function ColorScanner({ savedPalette = [], skinTone, onClose }) {
+function ColorScanner({ savedPalette = [], onClose }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const videoRef = useRef(null);
@@ -89,13 +89,15 @@ function ColorScanner({ savedPalette = [], skinTone, onClose }) {
         await track.applyConstraints({ advanced: [{ torch: !torchOn }] });
         setTorchOn(!torchOn);
       }
-    } catch { }
+    } catch {
+      // ignore empty catch
+    }
   };
 
   // Color detection loop
-  const detectColor = useCallback(() => {
+  const detectColor = useCallback(function loop() {
     if (frozen || !videoRef.current || !canvasRef.current || !cameraReady) {
-      animRef.current = requestAnimationFrame(detectColor);
+      animRef.current = requestAnimationFrame(loop);
       return;
     }
 
@@ -142,7 +144,7 @@ function ColorScanner({ savedPalette = [], skinTone, onClose }) {
       });
     }
 
-    animRef.current = requestAnimationFrame(detectColor);
+    animRef.current = requestAnimationFrame(loop);
   }, [frozen, cameraReady, savedPalette]);
 
   useEffect(() => {

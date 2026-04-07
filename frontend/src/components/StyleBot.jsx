@@ -71,7 +71,7 @@ const getResponses = (t) => ({
 
 function StyleBot({ inline = false }) {
   const { theme } = useContext(ThemeContext);
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
   const [open, setOpen] = useState(inline);
   const [messages, setMessages] = useState([
@@ -104,7 +104,7 @@ function StyleBot({ inline = false }) {
     setTimeout(() => {
       const reply = findResponse(userMsg);
       setMessages(prev => [...prev, { role: 'bot', text: reply }]);
-    }, 400 + Math.random() * 600);
+    }, 600);
   };
 
   const handleKey = (e) => { if (e.key === 'Enter') sendMessage(); };

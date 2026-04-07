@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { auth, getSubscription, getUsage } from '../api/styleApi';
 import axios from 'axios';
 
@@ -16,7 +16,7 @@ API.interceptors.request.use(async (config) => {
     try {
       const token = await user.getIdToken();
       config.headers.Authorization = `Bearer ${token}`;
-    } catch (e) { }
+    } catch { /* token fetch failed silently */ }
   }
   return config;
 });

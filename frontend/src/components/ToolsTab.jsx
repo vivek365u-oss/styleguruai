@@ -13,7 +13,7 @@ function ColorContrastChecker({ isDark }) {
   const [color2, setColor2] = useState('#f9a8d4');
   const [open, setOpen] = useState(false);
 
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const hexToRgb = (hex) => {
     const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
     return [r,g,b];
@@ -130,7 +130,7 @@ function TrendingCard({ item, isDark, AMAZON_TAG }) {
 }
 // ------------------------------------------
 
-function ToolsTab({ onShowResult, onOpenScanner, uploadedImage, analysisData }) {
+function ToolsTab({ onOpenScanner, analysisData }) {
   const { t } = useLanguage();
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';

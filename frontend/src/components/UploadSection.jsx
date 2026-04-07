@@ -161,7 +161,6 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
 
   const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
   const headingCls = isDark ? 'text-white' : 'text-gray-800';
-  const subCls = isDark ? 'text-white/50' : 'text-gray-500';
 
   if (!open) {
     return (
@@ -237,7 +236,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   const [dragActive, setDragActive] = useState(false);
   const [uploadProgress, setUploadProgress_internal] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
-  const { progress, startProgress, completeProgress, setError: setProgressError, reset: resetProgress } = useAnalysisProgress();
+  const { progress, startProgress, completeProgress } = useAnalysisProgress();
   const [gender, setGender] = useState('male');
   const [mode, setMode] = useState('normal');
   const [season, setSeason] = useState('summer');

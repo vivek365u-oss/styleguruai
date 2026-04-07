@@ -25,7 +25,7 @@ function SavedColorsTab({ isDark, user, onViewHistory }) {
         setError(t('somethingWrong'));
         setLoading(false);
       });
-  }, [user]);
+  }, [user, t]);
 
   const remove = async (colorId) => {
     if (!auth.currentUser) return;
@@ -149,7 +149,7 @@ function SavedColorsTab({ isDark, user, onViewHistory }) {
   );
 }
 
-function WardrobeImage({ imageId, fallbackColor, isDark }) {
+function WardrobeImage({ imageId, fallbackColor }) {
   const [src, setSrc] = useState(null);
 
   useEffect(() => {
@@ -243,7 +243,8 @@ function WardrobePanel({ user, onShowResult }) {
     });
 
     return () => clearTimeout(timeout);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t, wardrobeLimit]);
 
   const handleDelete = async (item) => {
     const uid = auth.currentUser?.uid;

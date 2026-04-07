@@ -11,7 +11,6 @@ function AffiliateAnalytics() {
   const isDark = theme === 'dark';
 
   const [stats, setStats] = useState(null);
-  const [timeline, setTimeline] = useState(null);
   const [topProducts, setTopProducts] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,6 +23,7 @@ function AffiliateAnalytics() {
 
   useEffect(() => {
     fetchAnalytics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeframe]);
 
   const fetchAnalytics = async () => {
@@ -39,14 +39,13 @@ function AffiliateAnalytics() {
 
       API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-      const [summaryRes, timelineRes, topRes] = await Promise.all([
+      const [summaryRes, , topRes] = await Promise.all([
         API.get('/api/affiliate/analytics/summary'),
         API.get(`/api/affiliate/analytics/timeline?days=${timeframe}`),
         API.get('/api/affiliate/top-products?limit=10')
       ]);
 
       setStats(summaryRes.data);
-      setTimeline(timelineRes.data);
       setTopProducts(topRes.data);
       setError(null);
     } catch (err) {

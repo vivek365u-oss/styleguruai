@@ -1,0 +1,13 @@
+
+> frontend@0.0.0 lint
+> eslint .
+
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\Dashboard.jsx
+   750:23  error  'cartOpen' is defined but never used  no-unused-vars
+  1001:13  error  'setCoins' is not defined             no-undef
+  1147:34  error  'analysisCount' is not defined        no-undef
+  1148:31  error  'savedCount' is not defined           no-undef
+
+✖ 4 problems (4 errors, 0 warnings)
+

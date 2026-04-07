@@ -4,13 +4,10 @@
  * Flow: Profile → Upgrade Screen → Payment
  */
 
-import React, { useState, useContext } from 'react';
-import { ThemeContext } from '../context/ThemeContext';
-import { useLanguage } from '../i18n/LanguageContext';
+import React, { useState } from 'react';
 
 export function PlansUpgradeScreen({ isDark = false, onSelectPlan, onClose }) {
-  const { t } = useLanguage();
-  const [selectedPlan, setSelectedPlan] = useState(null);
+    const [selectedPlan, setSelectedPlan] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const plans = [

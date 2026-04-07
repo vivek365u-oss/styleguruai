@@ -69,7 +69,7 @@ export const healthCheck = async (apiInstance) => {
   try {
     const response = await apiInstance.get('/health', { timeout: 5000 });
     return !!response.data;
-  } catch (error) {
+  } catch {
     return false;
   }
 };

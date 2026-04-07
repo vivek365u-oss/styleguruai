@@ -1,3 +1,5 @@
+/* eslint-env serviceworker */
+/* global clients */
 // StyleGuru AI — Service Worker for Push Notifications
 self.addEventListener('push', function(event) {
   const data = event.data ? event.data.json() : {};

@@ -9,7 +9,7 @@ import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import AdSense from '../AdSense';
-import { saveProfile, auth, incrementUsage } from '../api/styleApi';
+import { saveProfile, auth } from '../api/styleApi';
 import WardrobePanel from './WardrobePanel';
 import { saveWardrobeItem, activateProSubscription, consumeCoin } from '../api/styleApi';
 import { usePlan } from '../context/PlanContext';
@@ -85,13 +85,10 @@ function DailyDropModal({ lastAnalysis, isDark, onClose }) {
 
 // ------------------------------------------
 
-function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro, lastAnalysis }) {
+function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
   const { theme } = useContext(ThemeContext);
   const { t, language } = useLanguage();
   const isDark = theme === 'dark';
-  const analysisCount = parseInt(localStorage.getItem('sg_analysis_count') || '0');
-  const savedCount = (() => { try { return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]').length; } catch { return 0; } })();
-  const toneColors = { fair: "#F5DEB3", light: "#D2A679", medium: "#C68642", olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A" };
 
   // First visit onboarding
   const [showOnboarding, setShowOnboarding] = useState(() => {
@@ -117,8 +114,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro, lastAna
   }, []);
 
   // Daily Streak Logic 🔥
-  const [streak, setStreak] = useState(0);
-  useEffect(() => {
+  const [streak] = useState(() => {
     const today = new Date().toLocaleDateString('en-CA');
     const lastCheckin = localStorage.getItem('sg_last_checkin');
     let currentStreak = parseInt(localStorage.getItem('sg_streak_count') || '0');
@@ -135,8 +131,8 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro, lastAna
       localStorage.setItem('sg_streak_count', currentStreak.toString());
       localStorage.setItem('sg_last_checkin', today);
     }
-    setStreak(currentStreak);
-  }, []);
+    return currentStreak;
+  });
 
   // Gender Preference Logic
   const [genderPref, setGenderPref] = useState(() => localStorage.getItem('sg_gender_pref') || 'male');
@@ -281,9 +277,7 @@ function HomeScreen({ user, onAnalyze, onTabChange, onShowResult, isPro, lastAna
   );
 }
 
-function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro, usage, onShowSettings, onOpenPayment, onLogout, lastAnalysis }) {
-  const { t } = useLanguage();
-  const navigate = useNavigate();
+function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro, usage, onShowSettings, onLogout, lastAnalysis }) {
   const wardrobeStats = lastAnalysis ? {
     skinTone: lastAnalysis.skinTone,
     undertone: lastAnalysis.undertone,
@@ -401,8 +395,7 @@ function ProfileScreenComponent({ user, isDark, analysisCount, savedCount, isPro
 function SettingsScreen({ user, onOpenPayment, onLogout }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t, language, changeLanguage } = useLanguage();
-  const { isPro, plan, usage, validUntil } = usePlan();
-  const [paywallOpen, setPaywallOpen] = useState(false);
+  const { isPro, usage, validUntil } = usePlan();
   const isDark = theme === 'dark';
   const [notifStatus, setNotifStatus] = useState(() => {
     if (typeof Notification === 'undefined' || !('PushManager' in window)) return 'unsupported';
@@ -754,7 +747,7 @@ function SettingsScreen({ user, onOpenPayment, onLogout }) {
 }
 
 // ── Cart Button Component ────────────────────────────────────
-function CartButton({ cartOpen, setCartOpen }) {
+function CartButton({ setCartOpen }) {
   const { cart } = useCart();
   const itemCount = cart.length;
 
@@ -777,7 +770,7 @@ function Dashboard({ user, onLogout }) {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t } = useLanguage();
-  const { isPro, usage, setUsage, coins, setCoins } = usePlan();
+  const { isPro, usage, coins, setCoins } = usePlan();
   const { cart, clearCart } = useCart();
   const isDark = theme === 'dark';
   const [results, setResults] = useState(null);
@@ -790,7 +783,6 @@ function Dashboard({ user, onLogout }) {
   const [toast, setToast] = useState(null);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [showPlansScreen, setShowPlansScreen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
   const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
@@ -807,7 +799,7 @@ function Dashboard({ user, onLogout }) {
         // Refresh the context to unlock the app
         window.location.reload(); // Quickest way to hard refresh React context states for Pro bounds
       }
-    } catch (e) {
+    } catch {
       showToast('❌ Upgrade failed to sync');
     }
   };
@@ -950,7 +942,7 @@ function Dashboard({ user, onLogout }) {
       Promise.all(queue.map(item => saveWardrobeItem(uid, item)))
         .then(() => localStorage.removeItem('sg_wardrobe_queue'))
         .catch(() => { }); // silently fail, will retry next time
-    } catch { }
+    } catch { /* ignore */ }
   }, []);
 
   const handleReset = () => { setResults(null); setError(null); setUploadedImage(null); };
@@ -1210,10 +1202,9 @@ function Dashboard({ user, onLogout }) {
       {showPlansScreen && (
         <PlansUpgradeScreen
           isDark={theme === 'dark'}
-          onSelectPlan={(plan) => {
-            setSelectedPlan(plan);
+          onSelectPlan={() => {
             setShowPlansScreen(false);
-            // Open payment modal with selected plan
+            // Open payment modal
             setPaywallOpen(true);
           }}
           onClose={() => setShowPlansScreen(false)}

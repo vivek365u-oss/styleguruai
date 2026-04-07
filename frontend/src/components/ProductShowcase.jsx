@@ -12,7 +12,7 @@ const API = axios.create({
   timeout: 30000
 });
 
-function ProductShowcase({ colorName, category = "shirt", gender = "male", count = 10 }) {
+function ProductShowcase({ colorName, gender = "male", count = 10 }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [products, setProducts] = useState([]);
@@ -129,7 +129,7 @@ function ProductShowcase({ colorName, category = "shirt", gender = "male", count
     };
 
     fetchProducts();
-  }, [colorName, count, autoSeeded]);
+  }, [colorName, gender, count, autoSeeded]);
 
   if (loading) {
     return (

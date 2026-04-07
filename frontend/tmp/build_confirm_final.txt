@@ -1,0 +1,30 @@
+
+> frontend@0.0.0 build
+> vite build
+
+[36mvite v8.0.1 [32mbuilding client environment for production...[36m[39m
+[2K
+transforming...✓ 376 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                             3.79 kB │ gzip:   1.28 kB
+dist/assets/index-DvSf2YMC.css             84.85 kB │ gzip:  13.52 kB
+dist/assets/NotFoundPage-DMlfMMJ8.js        0.46 kB │ gzip:   0.31 kB
+dist/assets/chunk-DECur_0Z.js               0.68 kB │ gzip:   0.41 kB
+dist/assets/ContactPage-BypHFQOE.js         2.51 kB │ gzip:   0.99 kB
+dist/assets/TermsPage-DswhUUCk.js           2.54 kB │ gzip:   1.06 kB
+dist/assets/PrivacyPage-B8GO8mwy.js         2.70 kB │ gzip:   1.13 kB
+dist/assets/AboutPage-DrUALNvU.js           3.09 kB │ gzip:   1.19 kB
+dist/assets/BlogListPage-DEvMqFFX.js        3.14 kB │ gzip:   1.23 kB
+dist/assets/BlogPostPage-Dg38leqV.js        4.27 kB │ gzip:   1.54 kB
+dist/assets/OrderSuccessPage-B-JbMkz0.js    5.31 kB │ gzip:   1.61 kB
+dist/assets/AdminDashboard-B9jGvlE1.js      7.19 kB │ gzip:   2.42 kB
+dist/assets/ProfilePage-BA_g5Vmt.js        15.05 kB │ gzip:   3.23 kB
+dist/assets/SettingsPage-CQzAI9qX.js       18.87 kB │ gzip:   4.49 kB
+dist/assets/jsx-runtime-CqSaOr_D.js        48.49 kB │ gzip:  17.14 kB
+dist/assets/blogPosts-Db8TlM-n.js          53.61 kB │ gzip:  17.77 kB
+dist/assets/index-Det38X5N.js             285.14 kB │ gzip:  86.58 kB
+dist/assets/Dashboard-Bhm7YhT5.js         351.41 kB │ gzip:  85.00 kB
+dist/assets/styleApi-CtFDEo95.js          414.79 kB │ gzip: 128.71 kB
+
+[32m✓ built in 904ms[39m

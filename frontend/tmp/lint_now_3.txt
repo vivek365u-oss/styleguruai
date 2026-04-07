@@ -1,0 +1,45 @@
+
+> frontend@0.0.0 lint
+> eslint .
+
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\public\sw.js
+  18:19  error  'clients' is not defined  no-undef
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\AffiliateAnalytics.jsx
+  42:26  error  'timelineRes' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\ColorRecommendationsShop.jsx
+  146:40  error  'gender' is assigned a value but never used  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\Dashboard.jsx
+  1206:13  error  'setSelectedPlan' is not defined  no-undef
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\ErrorBoundary.jsx
+  19:35  error  '_error' is defined but never used  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\HistoryPanel.jsx
+  47:9  error  'formatDate' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\LoadingScreenWithProgress.jsx
+  8:10  error  'useLanguage' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\OOTDCard.jsx
+   5:20  error  'useContext' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  46:14  error  '_e' is defined but never used                                                     no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\components\WardrobePanel.jsx
+  246:6  warning  React Hook useEffect has a missing dependency: 'loading'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\pages\OrderSuccessPage.jsx
+  13:21  error  'setOrderData' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\pages\ProfilePage.jsx
+  4:10  error  'useLanguage' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\VIVEK\OneDrive\Desktop\ToneFit\frontend\src\pages\SettingsPage.jsx
+   1:20  error  'useEffect' is defined but never used. Allowed unused vars must match /^[A-Z_]/u         no-unused-vars
+  19:16  error  'setUser' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+✖ 14 problems (13 errors, 1 warning)
+

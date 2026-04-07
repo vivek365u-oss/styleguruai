@@ -5,7 +5,7 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
-import { useLanguage } from '../i18n/LanguageContext';
+
 
 // Stage definitions shown as step pills
 const STAGE_STEPS = [
@@ -113,7 +113,6 @@ export function LoadingScreenWithProgress({ progress }) {
           {STAGE_STEPS.map((stage, i) => {
             const isDone    = i < activeStageIdx;
             const isActive  = i === activeStageIdx;
-            const isPending = i > activeStageIdx;
             return (
               <div
                 key={stage.key}

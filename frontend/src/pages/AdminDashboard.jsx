@@ -5,7 +5,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { ThemeContext } from '../App';
 import { auth } from '../api/styleApi';
-import { getFirestore, collection, query, orderBy, limit, getDocs, getCountFromServer, where } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, limit, getDocs, getCountFromServer } from 'firebase/firestore';
 
 const ADMIN_UID = 'RFZW5MFDdLbelxskQpmhq2iTc6A3';
 
@@ -40,9 +40,9 @@ function AdminDashboard() {
           try {
             const wSnap = await getCountFromServer(collection(db, `users/${userDoc.id}/wardrobe`));
             wardrobeCount += wSnap.data().count;
-          } catch { }
+          } catch { /* ignore */ }
         }
-      } catch { }
+      } catch { /* ignore */ }
 
       // Recent profiles (last 20)
       const profilesQuery = query(collection(db, 'users'), orderBy('profile.analyzed_at', 'desc'), limit(20));
@@ -75,7 +75,7 @@ function AdminDashboard() {
             if (validDate > new Date()) proCount++;
           }
         }
-      } catch { }
+      } catch { /* ignore */ }
 
       setStats({
         totalUsers,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../App';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -16,14 +16,8 @@ function SettingsPage() {
     tips: JSON.parse(localStorage.getItem('sg_notif_tips') || 'true'),
   });
 
-  const [user, setUser] = useState(null);
+  const user = auth?.currentUser || null;
   const [activeTab, setActiveTab] = useState('settings'); // 'settings' or 'affiliate'
-
-  useEffect(() => {
-    if (auth.currentUser) {
-      setUser(auth.currentUser);
-    }
-  }, []);
 
   const handleThemeChange = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';

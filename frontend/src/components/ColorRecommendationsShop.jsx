@@ -2,13 +2,10 @@
 // Color Recommendations Shop Component (Phase 1.4)
 // Shows multiple recommended colors with products + outfit combos
 // ============================================================
-import { useState, useContext } from 'react';
-import { useLanguage } from '../i18n/LanguageContext';
-import { ThemeContext } from '../context/ThemeContext';
+import { useState } from 'react';
 import ProductShowcase from './ProductShowcase';
 
 function ColorRecommendationsShop({ recommendations, gender = 'male', isDark = false }) {
-  const { t } = useLanguage();
   const [activeColorTab, setActiveColorTab] = useState(0);
   const [showOutfits, setShowOutfits] = useState(false);
 
@@ -146,11 +143,10 @@ function ColorRecommendationsShop({ recommendations, gender = 'male', isDark = f
 // ============================================================
 // Outfit Combinations Sub-Component with Related Colors
 // ============================================================
-function OutfitCombinations({ outfits, gender = 'male', isDark = false }) {
+function OutfitCombinations({ outfits, isDark = false }) {
   const [expandedIdx, setExpandedIdx] = useState(0);
 
   const outfit = outfits[expandedIdx];
-  const isFemale = gender === 'female';
 
   // Format outfit display based on data structure
   const formatOutfitDisplay = (outfitData) => {

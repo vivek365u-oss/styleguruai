@@ -14,6 +14,7 @@ function CommunityFeed() {
 
   useEffect(() => {
     loadFeed();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadFeed = async () => {
@@ -22,7 +23,7 @@ function CommunityFeed() {
     try {
       const data = await getCommunityFeed(30);
       setFeed(data);
-    } catch (e) {
+    } catch {
       setError(t('couldNotLoadFeed'));
     } finally {
       setLoading(false);

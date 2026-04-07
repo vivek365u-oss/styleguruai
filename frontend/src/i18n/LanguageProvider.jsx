@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { translations, defaultLanguage } from './translations';
 import { LanguageContext } from './LanguageContext';
 

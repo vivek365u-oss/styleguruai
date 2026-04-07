@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { auth, googleProvider, db } from '../firebase';
 export { auth };
-import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, signInAnonymously } from 'firebase/auth';
+import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, limit, deleteDoc, increment } from 'firebase/firestore';
 import { compressImage, validateImageFile } from '../utils/imageCompression';
 import { retryRequest, startKeepAlive, healthCheck } from '../utils/apiRetry';
