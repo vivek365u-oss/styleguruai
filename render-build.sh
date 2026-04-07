@@ -1,10 +1,10 @@
 #!/bin/bash
 set -e
 
-echo "Installing Python dependencies..."
+# Update pip
 pip install --upgrade pip
-cd backend
+
+# Install dependencies from root requirements.txt (which points to backend/requirements.txt)
 pip install -r requirements.txt
-cd ..
 
 echo "Build complete!"
