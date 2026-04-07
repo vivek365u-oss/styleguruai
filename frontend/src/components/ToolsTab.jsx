@@ -132,7 +132,7 @@ function TrendingCard({ item, isDark, AMAZON_TAG }) {
 }
 // ------------------------------------------
 
-function ToolsTab({ onOpenScanner, analysisData }) {
+function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
   const { t } = useLanguage();
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
