@@ -188,6 +188,10 @@ function OutfitChecker() {
 
   const [selectedCat, setSelectedCat] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
+  const [selectedFit, setSelectedFit] = useState('fit_regular');
+  const [selectedFabric, setSelectedFabric] = useState('fabric_cotton');
+  const [selectedPattern, setSelectedPattern] = useState('pattern_solid');
+  const [selectedMood, setSelectedMood] = useState('mood_minimal');
 
   const toggleTag = (tag) => {
     setSelectedTags(prev => 
@@ -214,6 +218,10 @@ function OutfitChecker() {
         source: 'outfit_checker',
         category: cat,
         tags: selectedTags,
+        fit: selectedFit,
+        fabric: selectedFabric,
+        pattern: selectedPattern,
+        mood: selectedMood,
         gender: result.gender || gender || 'male',
         imageId: imageId,
         hex: result.outfit_analysis?.dominant_color_hex || '#888888',
@@ -238,6 +246,10 @@ function OutfitChecker() {
           imageId: null, 
           hex: result.outfit_analysis?.dominant_color_hex || '#888888',
           color_name: result.outfit_analysis?.color_name || 'Detected Color',
+          fit: selectedFit,
+          fabric: selectedFabric,
+          pattern: selectedPattern,
+          mood: selectedMood,
           outfit_data: { colors: [] }, 
           skin_tone: result.skin_analysis?.skin_tone || '', 
           skin_hex: result.skin_analysis?.skin_color_hex || '#C68642', 
@@ -464,7 +476,7 @@ function OutfitChecker() {
                             <button
                               key={cat}
                               onClick={() => setSelectedCat(cat)}
-                              className={`px-4 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-tight border transition-all ${
+                              className={`px-4 py-3 rounded-2xl text-[11px] font-black uppercase tracking-tight border transition-all ${
                                 isDark 
                                   ? 'bg-white/10 border-white/10 text-white/70 hover:bg-purple-500/20' 
                                   : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-purple-300'
@@ -475,45 +487,81 @@ function OutfitChecker() {
                           ))}
                         </div>
                       ) : (
-                        <div className="space-y-4">
-                          <div className="flex flex-wrap gap-2">
-                            {['tag_campus', 'tag_office', 'tag_party', 'tag_weekend', 'tag_traditional', 'tag_gym'].map(tag => (
-                              <button
-                                key={tag}
-                                onClick={() => toggleTag(tag)}
-                                className={`px-3 py-2 rounded-xl text-[10px] font-bold border transition-all ${
-                                  selectedTags.includes(tag)
-                                    ? 'bg-purple-600 border-transparent text-white shadow-lg'
-                                    : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-slate-50 border-slate-200 text-slate-500'
-                                }`}
-                              >
-                                {t(tag)}
-                              </button>
-                            ))}
-                          </div>
-                          <div className="h-px bg-white/5" />
-                          <div className="flex flex-wrap gap-2">
-                            {['tag_oversized', 'tag_slim', 'tag_regular', 'tag_washjeans'].map(tag => (
-                              <button
-                                key={tag}
-                                onClick={() => toggleTag(tag)}
-                                className={`px-3 py-2 rounded-xl text-[10px] font-bold border transition-all ${
-                                  selectedTags.includes(tag)
-                                    ? 'bg-pink-600 border-transparent text-white shadow-lg'
-                                    : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-slate-50 border-slate-200 text-slate-500'
-                                }`}
-                              >
-                                {t(tag)}
-                              </button>
-                            ))}
-                          </div>
-                          <button
-                            onClick={() => handleSaveToWardrobe(selectedCat)}
-                            disabled={wardrobeSaving}
-                            className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl text-white font-black text-xs shadow-lg shadow-purple-900/20 hover:scale-[1.02] active:scale-95 transition-all mt-2"
-                          >
-                            {wardrobeSaving ? '⌛ SYNCING...' : 'SAVE TO SMART CLOSET 🚀'}
-                          </button>
+                        <div className="space-y-6">
+                           {/* STEP: Vibe & Occasion */}
+                           <div className="space-y-3">
+                              <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Choose Vibes</p>
+                              <div className="flex flex-wrap gap-2">
+                                {['tag_campus', 'tag_office', 'tag_party', 'tag_weekend', 'tag_traditional', 'tag_gym'].map(tag => (
+                                  <button
+                                    key={tag}
+                                    onClick={() => toggleTag(tag)}
+                                    className={`px-3 py-2 rounded-xl text-[10px] font-bold border transition-all ${
+                                      selectedTags.includes(tag)
+                                        ? 'bg-purple-600 border-transparent text-white shadow-lg'
+                                        : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-slate-50 border-slate-200 text-slate-500'
+                                    }`}
+                                  >
+                                    {t(tag)}
+                                  </button>
+                                ))}
+                              </div>
+                           </div>
+
+                           {/* STEP: Physical Details (Fit, Fabric, Pattern) */}
+                           <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-3">
+                                 <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Fit Type</p>
+                                 <select 
+                                    value={selectedFit} 
+                                    onChange={(e) => setSelectedFit(e.target.value)}
+                                    className={`w-full p-3 rounded-xl text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                                  >
+                                    {['fit_slim', 'fit_regular', 'fit_relaxed', 'fit_oversized'].map(f => <option key={f} value={f}>{t(f)}</option>)}
+                                 </select>
+                              </div>
+                              <div className="space-y-3">
+                                 <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Fabric</p>
+                                 <select 
+                                    value={selectedFabric} 
+                                    onChange={(e) => setSelectedFabric(e.target.value)}
+                                    className={`w-full p-3 rounded-xl text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                                  >
+                                    {['fabric_cotton', 'fabric_denim', 'fabric_linen', 'fabric_silk', 'fabric_wool'].map(f => <option key={f} value={f}>{t(f)}</option>)}
+                                 </select>
+                              </div>
+                           </div>
+
+                           <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-3">
+                                 <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Pattern</p>
+                                 <select 
+                                    value={selectedPattern} 
+                                    onChange={(e) => setSelectedPattern(e.target.value)}
+                                    className={`w-full p-3 rounded-xl text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                                  >
+                                    {['pattern_solid', 'pattern_striped', 'pattern_checked', 'pattern_printed'].map(f => <option key={f} value={f}>{t(f)}</option>)}
+                                 </select>
+                              </div>
+                              <div className="space-y-3">
+                                 <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Style Mood</p>
+                                 <select 
+                                    value={selectedMood} 
+                                    onChange={(e) => setSelectedMood(e.target.value)}
+                                    className={`w-full p-3 rounded-xl text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                                  >
+                                    {['mood_comfort', 'mood_confidence', 'mood_minimal', 'mood_attention'].map(f => <option key={f} value={f}>{t(f)}</option>)}
+                                 </select>
+                              </div>
+                           </div>
+
+                           <button
+                             onClick={() => handleSaveToWardrobe(selectedCat)}
+                             disabled={wardrobeSaving}
+                             className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl text-white font-black text-xs shadow-lg shadow-purple-900/40 hover:scale-[1.02] active:scale-95 transition-all mt-4"
+                           >
+                             {wardrobeSaving ? '⌛ SYNCING DEEP METADATA...' : 'SAVE TO SMART CLOSET 🚀'}
+                           </button>
                         </div>
                       )}
                     </div>

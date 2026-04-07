@@ -369,6 +369,33 @@ export const loadUserPreferences = async (uid) => {
   }
 };
 
+export const updateUserFeedback = async (uid, category, value, signal) => {
+  if (!auth.currentUser) return null;
+  try {
+    const prefRef = doc(db, 'users', uid, 'profile', 'preferences');
+    const signalField = signal === 'like' ? 'feedback_likes' : 'feedback_rejects';
+    
+    // We increment/append to the feedback object
+    const snap = await getDoc(prefRef);
+    let prefs = snap.exists() ? snap.data() : {};
+    let feedback = prefs[signalField] || {};
+    
+    feedback[category] = (feedback[category] || []);
+    if (!feedback[category].includes(value)) {
+        feedback[category].push(value);
+    }
+    
+    await setDoc(prefRef, {
+      [signalField]: feedback,
+      updated_at: new Date().toISOString(),
+    }, { merge: true });
+    return true;
+  } catch (e) {
+    console.error('Error updating feedback:', e);
+    return false;
+  }
+};
+
 // ============================================
 // WARDROBE — FIRESTORE
 // ============================================

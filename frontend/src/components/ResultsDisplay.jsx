@@ -538,6 +538,10 @@ function WardrobeSyncButton({ analysis, recommendations, isDark }) {
         type: 'analysis_result',
         category: selectedCat,
         tags: selectedTags, // Array of localized tag keys
+        fit: selectedFit,
+        fabric: selectedFabric,
+        pattern: selectedPattern,
+        mood: selectedMood,
         undertone: analysis.skin_tone.undertone,
         hex: analysis.skin_color?.hex || '#C68642',
         color_name: recommendations.best_shirt_colors?.[0]?.name || 'N/A',
@@ -567,7 +571,7 @@ function WardrobeSyncButton({ analysis, recommendations, isDark }) {
       <div className={`p-4 rounded-3xl border ${isDark ? 'bg-white/5 border-white/10 shadow-2xl' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/10'}`}>
         <div className="flex items-center justify-between mb-4">
           <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
-            {syncStep === 'category' ? t('chooseCategory') : t('chooseVibe')}
+            {syncStep === 'category' ? t('chooseCategory') : 'Step 2: Choose Attributes'}
           </p>
           <button onClick={() => { setShowPicker(false); setSyncStep('category'); }} className="text-xs font-bold opacity-40">✕</button>
         </div>
@@ -577,7 +581,7 @@ function WardrobeSyncButton({ analysis, recommendations, isDark }) {
             {categories.map(cat => (
               <button
                 key={cat}
-                onClick={() => { setSelectedCat(cat); setSyncStep('tags'); }}
+                onClick={() => { setSelectedCat(cat); setSyncStep('attributes'); }}
                 className={`px-4 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-tight border transition-all ${
                   isDark 
                     ? 'bg-white/5 border-white/10 text-white/70 hover:bg-purple-500/20 hover:border-purple-500/40' 
@@ -589,44 +593,80 @@ function WardrobeSyncButton({ analysis, recommendations, isDark }) {
             ))}
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              {VIBE_TAGS.map(tag => (
-                <button
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className={`px-3 py-2 rounded-xl text-[10px] font-bold border transition-all ${
-                    selectedTags.includes(tag)
-                      ? 'bg-purple-600 border-transparent text-white shadow-lg'
-                      : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-slate-50 border-slate-200 text-slate-500'
-                  }`}
-                >
-                  {t(tag)}
-                </button>
-              ))}
+          <div className="space-y-6">
+            {/* STEP: Vibe & Occasion */}
+            <div className="space-y-3">
+              <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Choose Vibes</p>
+              <div className="flex flex-wrap gap-2">
+                {['tag_campus', 'tag_office', 'tag_party', 'tag_weekend', 'tag_traditional', 'tag_gym'].map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={`px-3 py-2 rounded-xl text-[10px] font-bold border transition-all ${
+                      selectedTags.includes(tag)
+                        ? 'bg-purple-600 border-transparent text-white shadow-lg'
+                        : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-slate-50 border-slate-200 text-slate-500'
+                    }`}
+                  >
+                    {t(tag)}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="h-px bg-white/5" />
-            <div className="flex flex-wrap gap-2">
-              {FIT_TAGS.map(tag => (
-                <button
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className={`px-3 py-2 rounded-xl text-[10px] font-bold border transition-all ${
-                    selectedTags.includes(tag)
-                      ? 'bg-pink-600 border-transparent text-white shadow-lg'
-                      : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-slate-50 border-slate-200 text-slate-500'
-                  }`}
+
+            {/* STEP: Physical Details (Fit, Fabric, Pattern) */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Fit Type</p>
+                <select 
+                  value={selectedFit} 
+                  onChange={(e) => setSelectedFit(e.target.value)}
+                  className={`w-full p-3 rounded-xl text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
                 >
-                  {t(tag)}
-                </button>
-              ))}
+                  {['fit_slim', 'fit_regular', 'fit_relaxed', 'fit_oversized'].map(f => <option key={f} value={f}>{t(f)}</option>)}
+                </select>
+              </div>
+              <div className="space-y-3">
+                <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Fabric</p>
+                <select 
+                  value={selectedFabric} 
+                  onChange={(e) => setSelectedFabric(e.target.value)}
+                  className={`w-full p-3 rounded-xl text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                >
+                  {['fabric_cotton', 'fabric_denim', 'fabric_linen', 'fabric_silk', 'fabric_wool'].map(f => <option key={f} value={f}>{t(f)}</option>)}
+                </select>
+              </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Pattern</p>
+                <select 
+                  value={selectedPattern} 
+                  onChange={(e) => setSelectedPattern(e.target.value)}
+                  className={`w-full p-3 rounded-xl text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                >
+                  {['pattern_solid', 'pattern_striped', 'pattern_checked', 'pattern_printed'].map(f => <option key={f} value={f}>{t(f)}</option>)}
+                </select>
+              </div>
+              <div className="space-y-3">
+                <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Style Mood</p>
+                <select 
+                  value={selectedMood} 
+                  onChange={(e) => setSelectedMood(e.target.value)}
+                  className={`w-full p-3 rounded-xl text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
+                >
+                  {['mood_comfort', 'mood_confidence', 'mood_minimal', 'mood_attention'].map(f => <option key={f} value={f}>{t(f)}</option>)}
+                </select>
+              </div>
+            </div>
+
             <button
                onClick={finalizeSync}
                disabled={syncing}
-               className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl text-white font-black text-xs shadow-lg shadow-purple-900/20 hover:scale-[1.02] active:scale-95 transition-all mt-2"
+               className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl text-white font-black text-xs shadow-lg shadow-purple-900/40 hover:scale-[1.02] active:scale-95 transition-all mt-4"
             >
-               {syncing ? '⌛ SYNCING...' : 'SAVE TO SMART CLOSET 🚀'}
+               {syncing ? '⌛ SYNCING DEEP METADATA...' : 'SAVE TO SMART CLOSET 🚀'}
             </button>
           </div>
         )}

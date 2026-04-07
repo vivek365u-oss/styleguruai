@@ -263,47 +263,37 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
 
               {expandedId === item.id && (
                 <div className={`px-5 pb-5 border-t animate-fade-in ${isDark ? 'border-white/5' : 'border-slate-50'}`}>
-                  <div className="pt-4 grid grid-cols-2 gap-4">
-                    <div className="space-y-3">
-                        <p className={`text-[9px] font-black uppercase tracking-widest opacity-40 ${isDark ? 'text-white' : 'text-slate-900'}`}>Attributes</p>
-                        {item.hex && (
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.hex }} />
-                                <div className="flex flex-col">
-                                    <p className={`text-[11px] font-black uppercase tracking-tighter ${isDark ? 'text-white/70' : 'text-slate-700'}`}>{item.color_name || 'Detected Color'}</p>
-                                    <p className={`text-[9px] font-bold opacity-30 ${isDark ? 'text-white' : 'text-black'}`}>{item.hex}</p>
-                                </div>
-                            </div>
-                        )}
-                        {item.compatibility_score !== undefined && (<div className="flex items-center gap-2"><p className={`text-[11px] font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>🎯 {item.compatibility_score}% Match</p></div>)}
-                    </div>
-                    
-                    <div className="space-y-3">
-                        <p className={`text-[9px] font-black uppercase tracking-widest opacity-40 ${isDark ? 'text-white' : 'text-slate-900'}`}>Metadata</p>
-                        {item.tags && item.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5">
-                                {item.tags.map((tag, idx) => (
-                                    <span key={idx} className={`px-2 py-1 rounded-lg text-[9px] font-bold ${isDark ? 'bg-white/5 text-white/60 border border-white/10' : 'bg-slate-50 text-slate-500 border border-slate-100'}`}>
-                                        {t(tag)}
-                                    </span>
-                                ))}
-                            </div>
-                        )}
-                        {!item.tags && <p className="text-[10px] opacity-20 italic">No tags assigned</p>}
-                    </div>
-                  </div>
+                    <div className="space-y-4 pt-4">
+                        <p className={`text-[9px] font-black uppercase tracking-widest opacity-40 ${isDark ? 'text-white' : 'text-slate-900'}`}>Smart Attributes</p>
+                        <div className="flex flex-wrap gap-2">
+                           {item.fit && <span className={`px-2 py-1 rounded-lg text-[9px] font-bold border ${isDark ? 'bg-purple-500/10 border-purple-500/20 text-purple-300' : 'bg-purple-50 border-purple-100 text-purple-600'}`}>{t(item.fit)}</span>}
+                           {item.fabric && <span className={`px-2 py-1 rounded-lg text-[9px] font-bold border ${isDark ? 'bg-blue-500/10 border-blue-500/20 text-blue-300' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>{t(item.fabric)}</span>}
+                           {item.pattern && <span className={`px-2 py-1 rounded-lg text-[9px] font-bold border ${isDark ? 'bg-pink-500/10 border-pink-500/20 text-pink-300' : 'bg-pink-50 border-pink-100 text-pink-600'}`}>{t(item.pattern)}</span>}
+                           {item.mood && <span className={`px-2 py-1 rounded-lg text-[9px] font-bold border ${isDark ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-300' : 'bg-indigo-50 border-indigo-100 text-indigo-600'}`}>{t(item.mood)}</span>}
+                        </div>
+                        
+                        <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                           <div className="flex items-center gap-2">
+                              {item.hex && <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.hex }} />}
+                              <p className={`text-[10px] font-black uppercase tracking-tighter ${isDark ? 'text-white/60' : 'text-slate-500'}`}>{item.color_name || 'Item Color'}</p>
+                           </div>
+                           {item.compatibility_score !== undefined && (
+                              <p className={`text-[10px] font-black ${isDark ? 'text-green-400' : 'text-green-600'}`}>🎯 {item.compatibility_score}%</p>
+                           )}
+                        </div>
 
-                  <button
-                    onClick={() => handleDelete(item)}
-                    disabled={deletingId === item.id}
-                    className={`mt-6 w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${
-                      isDark
-                        ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
-                        : 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'
-                    } disabled:opacity-50 active:scale-95`}
-                  >
-                    {deletingId === item.id ? t('deleting') : `🗑️ ${t('removeFromWardrobe')}`}
-                  </button>
+                        <button
+                          onClick={() => handleDelete(item)}
+                          disabled={deletingId === item.id}
+                          className={`mt-4 w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                            isDark
+                              ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
+                              : 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'
+                          } disabled:opacity-50 active:scale-95`}
+                        >
+                          {deletingId === item.id ? t('deleting') : `🗑️ ${t('removeFromWardrobe')}`}
+                        </button>
+                    </div>
                 </div>
               )}
             </div>
