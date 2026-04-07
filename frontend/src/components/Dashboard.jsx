@@ -672,7 +672,7 @@ function Dashboard({ user, onLogout }) {
           )}
 
           {activeTab === 'profile' && (
-            <ProfilePanel hideHeader />
+            <ProfilePanel hideHeader onOpenUpgrade={() => setShowPlansScreen(true)} />
           )}
         </div>
       </main>

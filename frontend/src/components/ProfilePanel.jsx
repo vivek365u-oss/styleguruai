@@ -8,10 +8,10 @@ import { updateProfile, deleteUser } from 'firebase/auth';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
-export default function ProfilePanel({ hideHeader = false }) {
+export default function ProfilePanel({ hideHeader = false, onOpenUpgrade }) {
   const { theme, setTheme } = useContext(ThemeContext);
   const { isPro, usage, validUntil } = usePlan();
-  const { language, setLanguage, t } = useLanguage();
+  const { language, changeLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const isDark = theme === 'dark';
 
@@ -91,8 +91,7 @@ export default function ProfilePanel({ hideHeader = false }) {
   };
 
   const handleLanguageChange = (lang) => {
-    setLanguage(lang);
-    localStorage.setItem('sg_language', lang);
+    changeLanguage(lang);
   };
 
   // Push Notification Logic
@@ -309,7 +308,7 @@ export default function ProfilePanel({ hideHeader = false }) {
             <p className={`text-xs opacity-60 ${isDark ? 'text-white/60' : 'text-gray-500'}`}>{isPro ? `Valid until ${validUntil ? new Date(validUntil).toLocaleDateString() : '...'}` : 'Limited Features'}</p>
           </div>
           {!isPro && (
-            <button onClick={() => navigate('/dashboard')} className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-[10px] font-black uppercase text-white">
+            <button onClick={onOpenUpgrade} className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-[10px] font-black uppercase text-white">
               Upgrade
             </button>
           )}
