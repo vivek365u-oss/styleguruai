@@ -123,6 +123,7 @@ function OutfitChecker() {
   const [wardrobeSaved, setWardrobeSaved] = useState(false);
   const [wardrobeSaving, setWardrobeSaving] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const { progress, startProgress, completeProgress, reset: resetProgress } = useAnalysisProgress();
 
   const selfieRef = useRef(null);
