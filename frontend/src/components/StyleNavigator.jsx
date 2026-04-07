@@ -312,10 +312,13 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                             )}
                                         </div>
                                         <div>
-                                            <p className={`font-black text-xs line-clamp-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                                {match ? (match.category ? t(`cat_${match.category}`) : slot.color) : slot.color}
+                                            <p className={`font-black text-sm line-clamp-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                                {match ? (match.category ? t(`cat_${match.category}`) : slot.color) : (slot.color || 'Style Item')}
                                             </p>
-                                            <p className="text-[9px] font-bold opacity-40 uppercase tracking-tighter">
+                                            <p className={`text-[10px] font-black uppercase tracking-tighter ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
+                                                {slot.color || 'Recommended'}
+                                            </p>
+                                            <p className="text-[9px] font-bold opacity-40 uppercase tracking-tighter mt-1">
                                                 {match ? `Your ${t(`cat_${match.category}`) || 'Item'}` : slot.label}
                                             </p>
                                         </div>

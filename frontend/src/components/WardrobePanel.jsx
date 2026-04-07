@@ -266,8 +266,15 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
                   <div className="pt-4 grid grid-cols-2 gap-4">
                     <div className="space-y-3">
                         <p className={`text-[9px] font-black uppercase tracking-widest opacity-40 ${isDark ? 'text-white' : 'text-slate-900'}`}>Attributes</p>
-                        {item.category && (<div className="flex items-center gap-2"><p className={`text-[11px] font-bold capitalize ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>🏷️ {t(`cat_${item.category}`) || item.category}</p></div>)}
-                        {item.hex && (<div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.hex }} /><p className={`text-[11px] font-bold uppercase tracking-tighter ${isDark ? 'text-white/70' : 'text-slate-700'}`}>{item.hex}</p></div>)}
+                        {item.hex && (
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.hex }} />
+                                <div className="flex flex-col">
+                                    <p className={`text-[11px] font-black uppercase tracking-tighter ${isDark ? 'text-white/70' : 'text-slate-700'}`}>{item.color_name || 'Detected Color'}</p>
+                                    <p className={`text-[9px] font-bold opacity-30 ${isDark ? 'text-white' : 'text-black'}`}>{item.hex}</p>
+                                </div>
+                            </div>
+                        )}
                         {item.compatibility_score !== undefined && (<div className="flex items-center gap-2"><p className={`text-[11px] font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>🎯 {item.compatibility_score}% Match</p></div>)}
                     </div>
                     

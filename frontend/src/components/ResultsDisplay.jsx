@@ -540,6 +540,7 @@ function WardrobeSyncButton({ analysis, recommendations, isDark }) {
         tags: selectedTags, // Array of localized tag keys
         undertone: analysis.skin_tone.undertone,
         hex: analysis.skin_color?.hex || '#C68642',
+        color_name: recommendations.best_shirt_colors?.[0]?.name || 'N/A',
         top_recommendation: recommendations.best_shirt_colors?.[0]?.name || 'N/A',
         harmony_score: 95, 
         season: analysis.skin_tone.color_season,
