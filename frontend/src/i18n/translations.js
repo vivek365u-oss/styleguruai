@@ -392,6 +392,9 @@ export const translations = {
     disable: "Disable",
     enable: "Enable",
     unblock: "Unblock →",
+    syncedToWardrobe: "Synced to Wardrobe",
+    addToWardrobe: "Add to My Wardrobe",
+    primaryProfileLocked: "Locked as Primary",
   },
   hinglish: {
     login: "Login",
@@ -786,6 +789,9 @@ export const translations = {
     disable: "Off karo",
     enable: "On karo",
     unblock: "Unblock karo →",
+    syncedToWardrobe: "Wardrobe mein Save ho gaya",
+    addToWardrobe: "Mera Wardrobe mein Add karo",
+    primaryProfileLocked: "Primary Style Locked",
   },
   hi: {
     login: "लॉगिन",
@@ -1182,6 +1188,9 @@ export const translations = {
     disable: "अक्षम करें",
     enable: "सक्षम करें",
     unblock: "अनब्लॉक →",
+    syncedToWardrobe: "वॉर्डरोब में सेव हो गया",
+    addToWardrobe: "वॉर्डरोब में जोड़ें",
+    primaryProfileLocked: "मुख्य प्रोफाइल लॉक है",
   },
 };
 

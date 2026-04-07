@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
-import { auth, getStyleInsights, getWardrobe } from '../api/styleApi';
+import { auth, getStyleInsights, getWardrobe, loadPrimaryProfile, savePrimaryProfile } from '../api/styleApi';
 
 const infoCls = "w-5 h-5 rounded-full flex items-center justify-center text-[10px] cursor-help transition-all";
 
@@ -14,6 +14,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
     const [loading, setLoading] = useState(true);
     const [insights, setInsights] = useState(null);
     const [profile, setProfile] = useState(null);
+    const [isPrimary, setIsPrimary] = useState(false);
     const [error, setError] = useState(null);
     const [showInfo, setShowInfo] = useState(null); // 'harmony' | 'gap' | null
 
@@ -25,17 +26,29 @@ const StyleNavigator = ({ user, onAnalyze }) => {
             }
 
             try {
-                const lastAnalysis = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
-                if (!lastAnalysis) {
+                // Check for Primary Profile first (Locked Home Tone)
+                const uid = auth.currentUser.uid;
+                const primary = await loadPrimaryProfile(uid);
+                
+                let activeProfile = primary;
+                if (primary) {
+                    setIsPrimary(true);
+                } else {
+                    // Fallback to most recent analysis
+                    activeProfile = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
+                    setIsPrimary(false);
+                }
+
+                if (!activeProfile) {
                     setLoading(false);
                     return;
                 }
-                setProfile(lastAnalysis);
+                setProfile(activeProfile);
 
-                const wardrobe = await getWardrobe(auth.currentUser.uid);
+                const wardrobe = await getWardrobe(uid);
                 const data = await getStyleInsights(
-                    lastAnalysis.skinTone,
-                    lastAnalysis.undertone,
+                    activeProfile.skinTone,
+                    activeProfile.undertone,
                     wardrobe,
                     language
                 );
@@ -53,6 +66,22 @@ const StyleNavigator = ({ user, onAnalyze }) => {
 
         loadInitialData();
     }, [language]);
+
+    const handleTogglePrimary = async () => {
+        if (!auth.currentUser || !profile) return;
+        try {
+            if (isPrimary) {
+                // Unlock logic (delete from firestore if needed, but for now we just toggle local)
+                setIsPrimary(false);
+                localStorage.removeItem('sg_primary_profile');
+            } else {
+                await savePrimaryProfile(auth.currentUser.uid, profile);
+                setIsPrimary(true);
+            }
+        } catch (e) {
+            console.error('Failed to toggle primary profile:', e);
+        }
+    };
 
     const findOnMyntra = (color) => {
         const query = `${color} shirt for men`; // Simple query logic
@@ -113,14 +142,25 @@ const StyleNavigator = ({ user, onAnalyze }) => {
             <div className={`relative overflow-hidden rounded-[2.5rem] p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/5'}`}>
                 <div className="relative z-10 flex items-center gap-5">
                     <div
-                        className="w-20 h-20 rounded-2xl border-4 border-white/20 shadow-2xl"
+                        className="w-20 h-20 rounded-2xl border-4 border-white/20 shadow-2xl relative group overflow-hidden"
                         style={{ backgroundColor: profile?.skinHex || '#C68642' }}
-                    />
+                    >
+                         <button 
+                            onClick={handleTogglePrimary}
+                            className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all ${isPrimary ? 'bg-green-500/20' : 'bg-black/40'}`}
+                            title={isPrimary ? "Locked as Home Tone" : "Click to Lock as Home"}
+                         >
+                            <span className="text-2xl">{isPrimary ? '🏠' : '🔒'}</span>
+                         </button>
+                    </div>
                     <div>
-                        <p className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>Style DNA</p>
+                        <div className="flex items-center gap-2 mb-1">
+                            <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>Style DNA</p>
+                            {isPrimary && <span className="bg-green-500 w-1.5 h-1.5 rounded-full animate-pulse" title="Locked as Primary" />}
+                        </div>
                         <h3 className={`text-2xl font-black capitalize ${isDark ? 'text-white' : 'text-slate-900'}`}>{profile?.skinTone} {profile?.undertone}</h3>
                         <div className="flex items-center gap-2 mt-1">
-                             <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10 text-white/50' : 'bg-purple-50 border-purple-100 text-purple-700'}`}>
+                             <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50 border-purple-100 text-purple-700'}`}>
                                 {profile?.season || 'Spring'} Edition
                              </span>
                         </div>

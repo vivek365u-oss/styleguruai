@@ -4,7 +4,7 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../context/ThemeContext';
-import { publishToCommunityFeed, auth, saveSavedColor, saveHistory } from '../api/styleApi';
+import { publishToCommunityFeed, auth, saveSavedColor, saveHistory, saveWardrobeItem } from '../api/styleApi';
 import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';
 import ColorRecommendationsShop from './ColorRecommendationsShop';
@@ -434,6 +434,15 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
         </div>
       )}
 
+      {/* Direct Add to Wardrobe Button */}
+      <div className="mt-4">
+        <WardrobeSyncButton 
+           analysis={analysis} 
+           recommendations={recommendations} 
+           isDark={isDark} 
+        />
+      </div>
+
       {/* WhatsApp Share + Download Style Card */}
       <div className="flex gap-2 mt-3">
         <button
@@ -490,6 +499,54 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
         </button>
       </div>
     </div>
+  );
+}
+
+// ── Wardrobe Sync Helper ────────────────────────────────────
+function WardrobeSyncButton({ analysis, recommendations, isDark }) {
+  const { t } = useLanguage();
+  const [synced, setSynced] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const isLoggedIn = !!auth.currentUser;
+
+  const handleSync = async (e) => {
+    e.stopPropagation();
+    if (!isLoggedIn) return;
+    setSyncing(true);
+    try {
+      const item = {
+        type: 'analysis_result',
+        category: analysis.skin_tone.category,
+        undertone: analysis.skin_tone.undertone,
+        hex: analysis.skin_color?.hex || '#C68642',
+        top_recommendation: recommendations.best_shirt_colors?.[0]?.name || 'N/A',
+        harmony_score: 95, 
+        season: analysis.skin_tone.color_season
+      };
+      await saveWardrobeItem(auth.currentUser.uid, item);
+      setSynced(true);
+    } catch (err) {
+      console.error('Failed to sync to wardrobe:', err);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleSync}
+      disabled={synced || syncing || !isLoggedIn}
+      className={`w-full py-3 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all ${
+        synced 
+          ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+          : isDark 
+            ? 'bg-white text-slate-900 shadow-lg' 
+            : 'bg-slate-900 text-white shadow-lg'
+      } ${syncing ? 'opacity-50' : 'hover:scale-[1.02] active:scale-[0.98]'}`}
+    >
+      <span>{synced ? '✅' : syncing ? '⌛' : '📦'}</span>
+      <span>{synced ? t('syncedToWardrobe') || 'Synced to Wardrobe' : t('addToWardrobe') || 'Add to My Wardrobe'}</span>
+    </button>
   );
 }
 

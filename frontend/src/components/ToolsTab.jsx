@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../context/ThemeContext';
 import OutfitChecker from './OutfitChecker';
@@ -6,6 +6,7 @@ import CommunityFeed from './CommunityFeed';
 import HistoryPanel from './HistoryPanel';
 import StyleBot from './StyleBot';
 import OutfitCalendar from './OutfitCalendar';
+import { getWardrobe, auth } from '../api/styleApi';
 
 // --- Extracted from Dashboard.jsx ---
 function ColorContrastChecker({ isDark }) {
@@ -135,6 +136,13 @@ function ToolsTab({ onOpenScanner, analysisData }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [activeTool, setActiveTool] = useState(null); // 'outfit', 'community', 'stylebot', 'tryon'
+  const [wardrobe, setWardrobe] = useState([]);
+
+  useEffect(() => {
+    if (auth.currentUser) {
+      getWardrobe(auth.currentUser.uid).then(setWardrobe);
+    }
+  }, []);
 
   const trendingStyles = [
     { emoji: '👕', label: 'Oversized Tee', tag: '🔥 Male', gender: 'male', category: 'oversized tshirt', myntraUrl: 'https://www.myntra.com/men-oversized-tshirt', flipkartUrl: 'https://www.flipkart.com/search?q=men+oversized+tshirt', meeshoQ: 'men oversized tshirt' },
@@ -199,6 +207,7 @@ function ToolsTab({ onOpenScanner, analysisData }) {
           const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
           return data?.gender || 'male';
         })()}
+        wardrobe={wardrobe}
       />
     );
   }

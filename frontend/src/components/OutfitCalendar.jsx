@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 
-function OutfitCalendar({ bestColors, pantColors, isDark, onClose }) {
+function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe }) {
   const { t } = useLanguage();
   const [selectedDay, setSelectedDay] = useState(0);
 
@@ -25,13 +25,28 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose }) {
     { day: 'Sun', label: t('dateDine'), icon: '🍝', weather: t('pleasant') }
   ];
 
-  // Simple deterministic outfit generator
+  // Helper to find closest item in wardrobe to a hex
+  const findInWardrobe = (hex, type) => {
+    if (!wardrobe || wardrobe.length === 0) return null;
+    // Simple filter: if hex exists or color name matches
+    return wardrobe.find(item => item.hex === hex && (type === 'top' ? item.category !== 'pant' : item.category === 'pant'));
+  };
+
   const getOutfitForDay = (index) => {
-    const top = bestColors[index % bestColors.length] || { name: t('premiumTop'), hex: '#FFFFFF' };
-    const bottom = pantColors[(index + 2) % pantColors.length] || { name: t('recommendedPant'), hex: '#1e3a8a' };
+    const suggestedTop = bestColors[index % bestColors.length] || { name: t('premiumTop'), hex: '#FFFFFF' };
+    const suggestedBottom = pantColors[(index + 2) % pantColors.length] || { name: t('recommendedPant'), hex: '#1e3a8a' };
     const occasion = OCCASIONS[index];
     
-    return { top, bottom, occasion };
+    // Check wardrobe for matches
+    const wardrobeTop = findInWardrobe(suggestedTop.hex, 'top');
+    const wardrobeBottom = findInWardrobe(suggestedBottom.hex, 'bottom');
+
+    return { 
+      top: wardrobeTop || suggestedTop, 
+      bottom: wardrobeBottom || suggestedBottom, 
+      occasion,
+      isFromWardrobe: !!(wardrobeTop || wardrobeBottom)
+    };
   };
 
   const currentOutfit = getOutfitForDay(selectedDay);
@@ -85,11 +100,17 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose }) {
           {/* Top */}
           <div className="w-full flex flex-col items-center group">
             <div 
-              className="w-16 h-16 rounded-2xl border-4 border-white/20 shadow-xl transition-transform group-hover:scale-110" 
+              className="w-16 h-16 rounded-2xl border-4 border-white/20 shadow-xl transition-transform group-hover:scale-110 relative" 
               style={{ backgroundColor: currentOutfit.top.hex }}
-            />
+            >
+              {currentOutfit.top.type === 'analysis_result' && (
+                <span className="absolute -top-2 -right-2 bg-green-500 text-[8px] font-black px-1.5 py-0.5 rounded-full text-white shadow-lg">OWNED</span>
+              )}
+            </div>
             <span className="mt-3 font-black text-sm uppercase tracking-wider">{currentOutfit.top.name}</span>
-            <span className="text-[10px] opacity-50 uppercase font-bold tracking-widest">Premium Top</span>
+            <span className="text-[10px] opacity-50 uppercase font-bold tracking-widest">
+              {currentOutfit.top.type === 'analysis_result' ? 'From Wardrobe' : 'Premium Top'}
+            </span>
           </div>
 
           <div className="w-6 h-0.5 bg-current opacity-10 rounded-full" />
@@ -97,11 +118,17 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose }) {
           {/* Bottom */}
           <div className="w-full flex flex-col items-center group">
             <div 
-              className="w-16 h-16 rounded-2xl border-4 border-white/20 shadow-xl transition-transform group-hover:scale-110" 
+              className="w-16 h-16 rounded-2xl border-4 border-white/20 shadow-xl transition-transform group-hover:scale-110 relative" 
               style={{ backgroundColor: currentOutfit.bottom.hex }}
-            />
+            >
+              {currentOutfit.bottom.type === 'analysis_result' && (
+                <span className="absolute -top-2 -right-2 bg-green-500 text-[8px] font-black px-1.5 py-0.5 rounded-full text-white shadow-lg">OWNED</span>
+              )}
+            </div>
             <span className="mt-3 font-black text-sm uppercase tracking-wider">{currentOutfit.bottom.name}</span>
-            <span className="text-[10px] opacity-50 uppercase font-bold tracking-widest">Recommended Pant</span>
+            <span className="text-[10px] opacity-50 uppercase font-bold tracking-widest">
+              {currentOutfit.bottom.type === 'analysis_result' ? 'From Wardrobe' : 'Recommended Pant'}
+            </span>
           </div>
         </div>
 

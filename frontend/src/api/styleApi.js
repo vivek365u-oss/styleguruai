@@ -308,6 +308,40 @@ export const loadProfile = async (uid) => {
   }
 };
 
+export const savePrimaryProfile = async (uid, profileData) => {
+  if (!auth.currentUser) return;
+  try {
+    await setDoc(doc(db, 'users', uid, 'profile', 'primary'), {
+      ...profileData,
+      locked_at: new Date().toISOString(),
+    });
+    localStorage.setItem('sg_primary_profile', JSON.stringify(profileData));
+  } catch (e) {
+    handleFirestoreError('savePrimaryProfile', e);
+    throw e;
+  }
+};
+
+export const loadPrimaryProfile = async (uid) => {
+  if (!auth.currentUser) return null;
+  try {
+    // Check cache first
+    const cached = localStorage.getItem('sg_primary_profile');
+    if (cached) return JSON.parse(cached);
+
+    const snap = await getDoc(doc(db, 'users', uid, 'profile', 'primary'));
+    if (snap.exists()) {
+      const data = snap.data();
+      localStorage.setItem('sg_primary_profile', JSON.stringify(data));
+      return data;
+    }
+    return null;
+  } catch (e) {
+    handleFirestoreError('loadPrimaryProfile', e);
+    return null;
+  }
+};
+
 export const saveUserPreferences = async (uid, preferences) => {
   if (!auth.currentUser) return null;
   try {
