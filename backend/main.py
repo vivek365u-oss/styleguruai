@@ -6,7 +6,7 @@ import traceback
 import numpy as np
 from pathlib import Path
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Dict
 
 import firebase_admin
 from firebase_admin import credentials, auth as firebase_auth
@@ -1358,6 +1358,49 @@ async def get_top_affiliate_products(limit: int = 10, current_user: dict = Depen
     except Exception as e:
         print(f"[Affiliate] Error getting top products: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get top products: {str(e)}")
+
+# ============================================
+# STYLE NAVIGATOR API (Core Engagement)
+# ============================================
+
+class NavigatorInsightsRequest(BaseModel):
+    skin_tone: str
+    undertone: str
+    wardrobe_items: List[Dict]
+    lang: Optional[str] = "en"
+
+@app.post("/api/v1/style/navigator/insights")
+async def get_navigator_insights(
+    data: NavigatorInsightsRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Provides deep style insights, harmony scoring, and OOTD suggestions"""
+    try:
+        from skin_tone_classifier import SkinToneResult
+        engine = RecommendationEngine()
+        
+        # Convert raw strings to SkinToneResult object for the engine
+        st_obj = SkinToneResult(
+            category=data.skin_tone.lower(),
+            subcategory=data.undertone.lower(),
+            confidence="high" # Derived from profile
+        )
+        
+        insights = engine.get_smart_wardrobe_insights(
+            skin_tone=st_obj,
+            wardrobe_items=data.wardrobe_items,
+            lang=data.lang
+        )
+        
+        return {
+            "success": True,
+            "insights": insights,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        print(f"❌ Style Navigator Error: {str(e)}")
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Insights failure: {str(e)}")
 
 # ============================================
 # RUN

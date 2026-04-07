@@ -1152,3 +1152,87 @@ class RecommendationEngine:
                 "penalty": avoid_penalty,
             }
         }
+
+    def get_harmony_score(self, skin_tone: SkinToneResult, color_hex: str) -> int:
+        """Calculates a 0-100 harmony score for a color against a skin tone."""
+        try:
+            h = color_hex.lstrip('#')
+            r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+            res = self.check_outfit_compatibility(skin_tone, {"hex": color_hex, "r": r, "g": g, "b": b})
+            return res.get("compatibility_score", 50)
+        except:
+            return 50
+
+    def get_smart_wardrobe_insights(self, skin_tone: SkinToneResult, wardrobe_items: List[Dict], lang: str = "en") -> Dict:
+        """Analyzes a full wardrobe for harmony, gaps, and daily suggestions."""
+        self.lang = lang if lang in MESSAGES else "en"
+        category = skin_tone.category
+        undertone = skin_tone.subcategory
+
+        if not wardrobe_items:
+            return {
+                "overall_harmony": 0,
+                "wardrobe_gap": "No items in wardrobe",
+                "daily_suggestion": None,
+                "stats": {"items": 0, "categories": 0}
+            }
+
+        total_score = 0
+        categories = set()
+        for item in wardrobe_items:
+            h = item.get("skin_hex") or item.get("outfit_data", {}).get("hex") or "#000000"
+            score = self.get_harmony_score(skin_tone, h)
+            total_score += score
+            d = item.get("outfit_data", {})
+            if d.get("shirt"): categories.add("top")
+            if d.get("pant"): categories.add("bottom")
+            if d.get("dress"): categories.add("full")
+
+        avg_harmony = int(total_score / len(wardrobe_items))
+
+        tops = [i for i in wardrobe_items if i.get("outfit_data", {}).get("shirt")]
+        bottoms = [i for i in wardrobe_items if i.get("outfit_data", {}).get("pant")]
+        
+        daily_suggestion = None
+        if tops and bottoms:
+            best_top = sorted(tops, key=lambda x: self.get_harmony_score(skin_tone, x.get("skin_hex") or "#000000"), reverse=True)[0]
+            best_bottom = sorted(bottoms, key=lambda x: self.get_harmony_score(skin_tone, x.get("skin_hex") or "#000000"), reverse=True)[0]
+            daily_suggestion = {
+                "title": "Today's Power Combo",
+                "top": best_top.get("outfit_data", {}).get("shirt"),
+                "bottom": best_bottom.get("outfit_data", {}).get("pant"),
+                "score": int((self.get_harmony_score(skin_tone, best_top.get("skin_hex") or "#000000") + self.get_harmony_score(skin_tone, best_bottom.get("skin_hex") or "#000000")) / 2)
+            }
+        elif wardrobe_items:
+            best_item = sorted(wardrobe_items, key=lambda x: self.get_harmony_score(skin_tone, x.get("skin_hex") or "#000000"), reverse=True)[0]
+            daily_suggestion = {
+                "title": "Today's Best Piece",
+                "top": best_item.get("outfit_data", {}).get("shirt") or best_item.get("outfit_data", {}).get("dress"),
+                "bottom": best_item.get("outfit_data", {}).get("pant"),
+                "score": self.get_harmony_score(skin_tone, best_item.get("skin_hex") or "#000000")
+            }
+
+        best_palette = self._get_shirt_colors(category, undertone)
+        held_colors_hex = [str(i.get("skin_hex") or "").lower() for i in wardrobe_items]
+        
+        missing_piece = None
+        for p in best_palette:
+            if p["hex"].lower() not in held_colors_hex:
+                missing_piece = {
+                    "color_name": p["name"],
+                    "hex": p["hex"],
+                    "reason": p["reason"],
+                    "impact": "Unlocks high-harmony contrast with your tone"
+                }
+                break
+
+        return {
+            "overall_harmony": avg_harmony,
+            "daily_suggestion": daily_suggestion,
+            "missing_piece": missing_piece,
+            "stats": {
+                "total_items": len(wardrobe_items),
+                "unique_categories": len(categories),
+                "top_score_item": daily_suggestion["score"] if daily_suggestion else 0
+            }
+        }

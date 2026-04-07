@@ -18,6 +18,7 @@ import WeatherTip from './WeatherTip';
 import ColorScanner from './ColorScanner';
 import StyleBot from './StyleBot';
 import ToolsTab from './ToolsTab';
+import StyleNavigator from './StyleNavigator';
 import { getLocalizedTip } from '../data/localTips';
 import { logEvent, EVENTS } from '../utils/analytics';
 import { useCart } from '../context/CartContext';
@@ -547,6 +548,7 @@ function Dashboard({ user, onLogout }) {
     { id: 'home', emoji: '🏠', label: t('navHome') },
     { id: 'analyze', emoji: '📸', label: t('navAnalyze') },
     { id: 'wardrobe', emoji: '👗', label: t('navWardrobe') },
+    { id: 'navigator', emoji: '🧭', label: t('navNavigator') || 'Navigator' },
     { id: 'tools', emoji: '🛠️', label: t('navTools') },
     { id: 'profile', emoji: '❤️', label: t('navProfile') }
   ];
@@ -635,6 +637,8 @@ function Dashboard({ user, onLogout }) {
           )}
 
           {activeTab === 'wardrobe' && <WardrobePanel user={user} onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
+
+          {activeTab === 'navigator' && <StyleNavigator user={user} onAnalyze={() => setActiveTab('analyze')} />}
 
           {activeTab === 'tools' && <ToolsTab uploadedImage={uploadedImage} analysisData={results} onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} onOpenScanner={() => setActiveTab('scanner')} />}
 

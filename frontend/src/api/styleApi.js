@@ -253,6 +253,21 @@ export const checkOutfitCompatibility = async (selfieFile, outfitFile, lang = 'e
 export const testTone = (tone, undertone = 'warm') =>
   API.get(`/api/test/${tone}?undertone=${undertone}`);
 
+export const getStyleInsights = async (skinTone, undertone, wardrobeItems, lang = 'en') => {
+  try {
+    const res = await API.post('/api/v1/style/navigator/insights', {
+      skin_tone: skinTone,
+      undertone: undertone,
+      wardrobe_items: wardrobeItems,
+      lang: lang
+    });
+    return res.data;
+  } catch (error) {
+    console.error('Failed to get style insights:', error);
+    throw error;
+  }
+};
+
 
 // ============================================
 // ERROR HELPERS
