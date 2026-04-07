@@ -507,25 +507,34 @@ function WardrobeSyncButton({ analysis, recommendations, isDark }) {
   const { t } = useLanguage();
   const [synced, setSynced] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
   const isLoggedIn = !!auth.currentUser;
 
-  const handleSync = async (e) => {
-    e.stopPropagation();
-    if (!isLoggedIn) return;
+  const categories = analysis.gender === 'female' 
+    ? ['tops', 'kurti', 'saree', 'suits', 'dresses', 'bottoms', 'jewelry']
+    : ['shirts', 'tshirts', 'pants', 'ethnic', 'formal', 'shoes'];
+
+  const handleSync = async (cat) => {
+    if (!isLoggedIn || syncing) return;
     setSyncing(true);
     try {
       const item = {
         type: 'analysis_result',
-        category: analysis.skin_tone.category,
+        category: cat,
         undertone: analysis.skin_tone.undertone,
         hex: analysis.skin_color?.hex || '#C68642',
         top_recommendation: recommendations.best_shirt_colors?.[0]?.name || 'N/A',
         harmony_score: 95, 
-        season: analysis.skin_tone.color_season
+        season: analysis.skin_tone.color_season,
+        outfit_data: {
+          shirt: recommendations.best_shirt_colors?.[0]?.name,
+          pant: recommendations.best_pant_colors?.[0]?.name,
+          dress: recommendations.best_dress_colors?.[0]?.name
+        }
       };
       await saveWardrobeItem(auth.currentUser.uid, item);
       setSynced(true);
-      // Trigger global update for Navigator
+      setShowPicker(false);
       window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
     } catch (err) {
       console.error('Failed to sync to wardrobe:', err);
@@ -534,9 +543,36 @@ function WardrobeSyncButton({ analysis, recommendations, isDark }) {
     }
   };
 
+  if (showPicker && !synced) {
+    return (
+      <div className={`p-4 rounded-2xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200 shadow-inner'}`}>
+        <div className="flex items-center justify-between mb-3">
+          <p className={`text-xs font-black uppercase tracking-widest ${isDark ? 'text-white/40' : 'text-gray-500'}`}>🏷️ {t('chooseCategory') || 'Choose Category'}</p>
+          <button onClick={() => setShowPicker(false)} className="text-xs font-bold text-red-100 bg-red-500/20 px-1.5 py-0.5 rounded-full">✕</button>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => handleSync(cat)}
+              disabled={syncing}
+              className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tight border transition-all ${
+                isDark 
+                  ? 'bg-white/10 border-white/10 text-white/70 hover:bg-white/20' 
+                  : 'bg-white border-gray-200 text-gray-700 hover:border-purple-300'
+              }`}
+            >
+              {t(`cat_${cat}`) || cat}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <button
-      onClick={handleSync}
+      onClick={() => setShowPicker(true)}
       disabled={synced || syncing || !isLoggedIn}
       className={`w-full py-3 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all ${
         synced 

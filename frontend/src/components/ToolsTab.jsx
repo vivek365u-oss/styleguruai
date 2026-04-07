@@ -217,7 +217,13 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
         <button onClick={() => setActiveTool(null)} className={`text-sm font-bold flex items-center gap-2 ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
           ← {t('backTools')}
         </button>
-        <WardrobePanel onShowResult={onShowResult} />
+        <WardrobePanel 
+          onShowResult={onShowResult} 
+          gender={(() => {
+            const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
+            return data?.gender || 'male';
+          })()}
+        />
       </div>
     );
   }

@@ -185,7 +185,7 @@ function OutfitChecker() {
     resetProgress();
   };
 
-  const handleSaveToWardrobe = async () => {
+  const handleSaveToWardrobe = async (cat) => {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
     setWardrobeSaving(true);
@@ -202,6 +202,7 @@ function OutfitChecker() {
 
       await saveWardrobeItem(uid, {
         source: 'outfit_checker',
+        category: cat,
         imageId: imageId,
         outfit_data: {
           colors: result.outfit_analysis?.color_name ? [{ name: result.outfit_analysis.color_name, hex: result.outfit_analysis.dominant_color_hex }] : [],
@@ -211,12 +212,13 @@ function OutfitChecker() {
         compatibility_score: score,
       });
       setWardrobeSaved(true);
+      setShowCategoryPicker(false);
       // Trigger global update for Navigator
       window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
     } catch {
       try {
         const queue = JSON.parse(localStorage.getItem('sg_wardrobe_queue') || '[]');
-        queue.push({ source: 'outfit_checker', imageId: null, outfit_data: { colors: [] }, skin_tone: result.skin_analysis?.skin_tone || '', skin_hex: result.skin_analysis?.skin_color_hex || '#C68642', compatibility_score: score, saved_at: new Date().toISOString() });
+        queue.push({ source: 'outfit_checker', category: cat, imageId: null, outfit_data: { colors: [] }, skin_tone: result.skin_analysis?.skin_tone || '', skin_hex: result.skin_analysis?.skin_color_hex || '#C68642', compatibility_score: score, saved_at: new Date().toISOString() });
         localStorage.setItem('sg_wardrobe_queue', JSON.stringify(queue));
         setWardrobeSaved(true); 
       } catch {
@@ -407,17 +409,54 @@ function OutfitChecker() {
           {score >= 20 && (
             <div className="flex gap-2">
               {auth.currentUser ? (
-                <button
-                  onClick={handleSaveToWardrobe}
-                  disabled={wardrobeSaved || wardrobeSaving}
-                  className={`flex-1 py-3 rounded-2xl text-sm font-bold border transition-all ${
-                    wardrobeSaved
-                      ? isDark ? 'bg-green-500/20 border-green-500/30 text-green-400' : 'bg-green-50 border-green-300 text-green-600'
-                      : isDark ? 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10' : 'bg-white border-gray-200 text-gray-700 hover:border-purple-400 shadow-sm'
-                  } disabled:cursor-not-allowed`}
-                >
-                  {wardrobeSaved ? '✓ Saved to Wardrobe' : wardrobeSaving ? 'Saving...' : '👗 Save to Wardrobe'}
-                </button>
+                <div className="flex-1 space-y-3">
+                  {(!wardrobeSaved && !showCategoryPicker) && (
+                    <button
+                      onClick={() => setShowCategoryPicker(true)}
+                      className={`w-full py-3 rounded-2xl text-sm font-bold border transition-all ${
+                        isDark ? 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10' : 'bg-white border-gray-200 text-gray-700 hover:border-purple-400 shadow-sm'
+                      }`}
+                    >
+                      👗 {t('addToWardrobe') || 'Add to Wardrobe'}
+                    </button>
+                  )}
+
+                  {showCategoryPicker && !wardrobeSaved && (
+                    <div className={`p-4 rounded-3xl border ${isDark ? 'bg-white/5 border-white/10 shadow-lg' : 'bg-gray-50 border-gray-200'}`}>
+                      <div className="flex items-center justify-between mb-3">
+                        <p className={`text-xs font-black uppercase tracking-widest ${isDark ? 'text-white/40' : 'text-gray-500'}`}>🏷️ {t('chooseCategory') || 'Choose Category'}</p>
+                        <button onClick={() => setShowCategoryPicker(false)} className="text-red-400 text-xs">✕</button>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {(result.gender === 'female' 
+                          ? ['tops', 'kurti', 'saree', 'suits', 'dresses', 'bottoms', 'jewelry']
+                          : ['shirts', 'tshirts', 'pants', 'ethnic', 'formal', 'shoes']
+                        ).map(cat => (
+                          <button
+                            key={cat}
+                            onClick={() => handleSaveToWardrobe(cat)}
+                            disabled={wardrobeSaving}
+                            className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tight border transition-all ${
+                              isDark 
+                                ? 'bg-white/10 border-white/10 text-white/70 hover:bg-white/20' 
+                                : 'bg-white border-gray-200 text-gray-700 hover:border-purple-300'
+                            }`}
+                          >
+                            {t(`cat_${cat}`) || cat}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {wardrobeSaved && (
+                    <div className={`w-full py-3 rounded-2xl text-sm font-bold border text-center ${
+                      isDark ? 'bg-green-500/20 border-green-500/30 text-green-400' : 'bg-green-50 border-green-300 text-green-600'
+                    }`}>
+                      ✅ {t('syncedToWardrobe') || 'Saved to Wardrobe'}
+                    </div>
+                  )}
+                </div>
               ) : (
                 <p className={`flex-1 text-center text-xs py-3 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Login to save this outfit</p>
               )}
