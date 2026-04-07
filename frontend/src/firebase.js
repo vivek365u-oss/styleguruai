@@ -22,3 +22,4 @@ export const analytics = typeof window !== 'undefined' ? initializeAnalytics(app
   }
 }) : null;
 export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
