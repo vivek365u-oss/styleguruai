@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-all'; // Fixed later by multi_replace if needed, but let's just use existing imports
 import { useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
