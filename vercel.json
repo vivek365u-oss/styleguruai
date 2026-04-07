@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "backend/main.py"
+    },
+    {
+      "source": "/auth/(.*)",
+      "destination": "backend/main.py"
+    },
+    {
+      "source": "/health",
+      "destination": "backend/main.py"
+    },
+    {
+      "source": "/",
+      "destination": "backend/main.py"
+    }
+  ],
+  "functions": {
+    "backend/main.py": {
+      "runtime": "@vercel/python"
+    }
+  }
+}

@@ -3,7 +3,7 @@ set -e
 
 echo "Installing Python dependencies..."
 pip install --upgrade pip
-cd Backend
+cd backend
 pip install -r requirements.txt
 cd ..
 
