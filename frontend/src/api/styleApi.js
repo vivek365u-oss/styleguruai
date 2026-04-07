@@ -253,13 +253,15 @@ export const checkOutfitCompatibility = async (selfieFile, outfitFile, lang = 'e
 export const testTone = (tone, undertone = 'warm') =>
   API.get(`/api/test/${tone}?undertone=${undertone}`);
 
-export const getStyleInsights = async (skinTone, undertone, wardrobeItems, lang = 'en') => {
+export const getStyleInsights = async (skinTone, undertone, wardrobeItems, lang = 'en', lifestyle = 'other', gender = 'men') => {
   try {
     const res = await API.post('/api/v1/style/navigator/insights', {
       skin_tone: skinTone,
       undertone: undertone,
       wardrobe_items: wardrobeItems,
-      lang: lang
+      lang: lang,
+      lifestyle: lifestyle,
+      gender: gender
     });
     return res.data;
   } catch (error) {
@@ -376,6 +378,7 @@ export const saveWardrobeItem = async (uid, item) => {
   try {
     const ref = await addDoc(collection(db, 'users', uid, 'wardrobe'), {
       ...item,
+      tags: item.tags || [], // New: Supports vibe/fit tags
       saved_at: new Date().toISOString(),
     });
     return ref.id;
@@ -633,6 +636,42 @@ export const getCommunityFeed = async (limitCount = 20) => {
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (e) {
     console.error('getCommunityFeed failed', e);
+    return [];
+  }
+};
+
+// ============================================
+// OUTFIT LOGS — FIRESTORE
+// ============================================
+
+export const logDailyOutfit = async (uid, outfitData) => {
+  if (!auth.currentUser) return null;
+  const today = new Date().toLocaleDateString('en-CA');
+  try {
+    await setDoc(doc(db, 'users', uid, 'outfit_logs', today), {
+      ...outfitData,
+      logged_at: new Date().toISOString(),
+      date: today
+    });
+    return true;
+  } catch (e) {
+    handleFirestoreError('logDailyOutfit', e);
+    return false;
+  }
+};
+
+export const getDailyOutfitLogs = async (uid, limitCount = 31) => {
+  if (!auth.currentUser) return [];
+  try {
+    const q = query(
+      collection(db, 'users', uid, 'outfit_logs'),
+      orderBy('date', 'desc'),
+      limit(limitCount)
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    handleFirestoreError('getDailyOutfitLogs', e);
     return [];
   }
 };

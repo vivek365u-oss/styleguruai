@@ -2,7 +2,16 @@ import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
-import { auth, getStyleInsights, getWardrobe, loadPrimaryProfile, savePrimaryProfile } from '../api/styleApi';
+import { 
+    auth, 
+    getStyleInsights, 
+    getWardrobe, 
+    loadPrimaryProfile, 
+    savePrimaryProfile,
+    logDailyOutfit,
+    getDailyOutfitLogs,
+    loadUserPreferences 
+} from '../api/styleApi';
 
 const infoCls = "w-5 h-5 rounded-full flex items-center justify-center text-[10px] cursor-help transition-all";
 
@@ -14,9 +23,13 @@ const StyleNavigator = ({ user, onAnalyze }) => {
     const [loading, setLoading] = useState(true);
     const [insights, setInsights] = useState(null);
     const [profile, setProfile] = useState(null);
+    const [prefs, setPrefs] = useState(null);
     const [isPrimary, setIsPrimary] = useState(false);
     const [error, setError] = useState(null);
     const [showInfo, setShowInfo] = useState(null); // 'harmony' | 'gap' | null
+    const [wardrobe, setWardrobe] = useState([]);
+    const [isWorn, setIsWorn] = useState(false);
+    const [logging, setLogging] = useState(false);
 
     useEffect(() => {
         const loadInitialData = async () => {
@@ -26,15 +39,18 @@ const StyleNavigator = ({ user, onAnalyze }) => {
             }
 
             try {
-                // Check for Primary Profile first (Locked Home Tone)
                 const uid = auth.currentUser.uid;
-                const primary = await loadPrimaryProfile(uid);
+                const [primary, userPrefs, userWardrobe, logs] = await Promise.all([
+                    loadPrimaryProfile(uid),
+                    loadUserPreferences(uid),
+                    getWardrobe(uid),
+                    getDailyOutfitLogs(uid, 1)
+                ]);
                 
                 let activeProfile = primary;
                 if (primary) {
                     setIsPrimary(true);
                 } else {
-                    // Fallback to most recent analysis
                     activeProfile = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
                     setIsPrimary(false);
                 }
@@ -44,13 +60,22 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                     return;
                 }
                 setProfile(activeProfile);
+                setPrefs(userPrefs);
+                setWardrobe(userWardrobe);
 
-                const wardrobe = await getWardrobe(uid);
+                // Check if already worn today
+                const today = new Date().toLocaleDateString('en-CA');
+                if (logs.length > 0 && logs[0].date === today) {
+                    setIsWorn(true);
+                }
+
                 const data = await getStyleInsights(
-                    activeProfile.skinTone,
-                    activeProfile.undertone,
-                    wardrobe,
-                    language
+                    activeProfile.skinTone || activeProfile.skin_tone?.category,
+                    activeProfile.undertone || activeProfile.skin_tone?.undertone,
+                    userWardrobe,
+                    language,
+                    userPrefs?.lifestyle || 'other',
+                    activeProfile.gender || userPrefs?.gender || 'men'
                 );
 
                 if (data.success) {
@@ -65,17 +90,45 @@ const StyleNavigator = ({ user, onAnalyze }) => {
         };
 
         loadInitialData();
-
-        // Listen for wardrobe updates to re-sync stats in real-time
         window.addEventListener('sg_wardrobe_updated', loadInitialData);
         return () => window.removeEventListener('sg_wardrobe_updated', loadInitialData);
     }, [language]);
+
+    const handleWearToday = async () => {
+        if (!auth.currentUser || !insights?.daily_suggestion || isWorn) return;
+        setLogging(true);
+        try {
+            const success = await logDailyOutfit(auth.currentUser.uid, {
+                title: insights.daily_suggestion.title,
+                top: insights.daily_suggestion.top,
+                bottom: insights.daily_suggestion.bottom,
+                vibe: prefs?.lifestyle || 'casual'
+            });
+            if (success) {
+                setIsWorn(true);
+                 window.dispatchEvent(new CustomEvent('sg_calendar_updated'));
+            }
+        } catch (e) {
+            console.error('Failed to log outfit:', e);
+        } finally {
+            setLogging(false);
+        }
+    };
+
+    const isOwned = (colorName) => {
+        if (!colorName || !wardrobe.length) return false;
+        const low = colorName.toLowerCase();
+        return wardrobe.some(item => {
+            const outfitColors = item.outfit_data?.colors || [];
+            return outfitColors.some(c => c.name.toLowerCase().includes(low)) || 
+                   (item.category && item.category.toLowerCase().includes(low));
+        });
+    };
 
     const handleTogglePrimary = async () => {
         if (!auth.currentUser || !profile) return;
         try {
             if (isPrimary) {
-                // Unlock logic (delete from firestore if needed, but for now we just toggle local)
                 setIsPrimary(false);
                 localStorage.removeItem('sg_primary_profile');
             } else {
@@ -88,13 +141,14 @@ const StyleNavigator = ({ user, onAnalyze }) => {
     };
 
     const findOnMyntra = (color) => {
-        const query = `${color} shirt for men`; // Simple query logic
+        const gender = profile?.gender || 'men';
+        const query = `${color} outfit for ${gender}`; 
         window.open(`https://www.myntra.com/${query.replace(/ /g, '-')}`, '_blank');
     };
 
     if (!auth.currentUser) {
         return (
-            <div className="text-center py-20">
+            <div className="text-center py-20 animate-fade-in">
                 <div className="w-20 h-20 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
                     <span className="text-4xl text-purple-400">🔐</span>
                 </div>
@@ -108,7 +162,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
 
     if (!profile && !loading) {
         return (
-            <div className="text-center py-20 px-4">
+            <div className="text-center py-20 px-4 animate-fade-in">
                 <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-purple-500/10">
                     <span className="text-5xl animate-bounce">📸</span>
                 </div>
@@ -128,13 +182,15 @@ const StyleNavigator = ({ user, onAnalyze }) => {
 
     if (loading) {
         return (
-            <div className="space-y-6 pt-4">
+            <div className="space-y-6 pt-4 animate-fade-in">
                 <div className={`h-48 rounded-3xl animate-pulse ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} />
                 <div className={`h-64 rounded-3xl animate-pulse ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} />
                 <div className={`h-40 rounded-3xl animate-pulse ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} />
             </div>
         );
     }
+
+    const lifestyleKey = prefs?.lifestyle ? `lifestyle_${prefs.lifestyle}` : 'lifestyle_other';
 
     return (
         <motion.div
@@ -144,7 +200,6 @@ const StyleNavigator = ({ user, onAnalyze }) => {
         >
             {/* ── Section 1: Style DNA Card ──────────────────────── */}
             <div className={`relative overflow-hidden rounded-[2.5rem] p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/5'}`}>
-                {/* Profile Lock Header Action */}
                 <div className="absolute top-6 right-6 z-20">
                     <button 
                         onClick={handleTogglePrimary}
@@ -162,16 +217,18 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                 <div className="relative z-10 flex items-center gap-5 pt-2">
                     <div
                         className="w-20 h-20 rounded-2xl border-4 border-white/20 shadow-2xl overflow-hidden"
-                        style={{ backgroundColor: profile?.skinHex || '#C68642' }}
+                        style={{ backgroundColor: profile?.skinHex || profile?.skin_color?.hex || '#C68642' }}
                     />
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>Style DNA</p>
                         </div>
-                        <h3 className={`text-2xl font-black capitalize ${isDark ? 'text-white' : 'text-slate-900'}`}>{profile?.skinTone} {profile?.undertone}</h3>
+                        <h3 className={`text-2xl font-black capitalize ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                            {profile?.skinTone || profile?.skin_tone?.category} {profile?.undertone || profile?.skin_tone?.undertone}
+                        </h3>
                         <div className="flex items-center gap-2 mt-1">
                              <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50 border-purple-100 text-purple-700'}`}>
-                                {profile?.season || 'Spring'} Edition
+                                {profile?.season || profile?.skin_tone?.color_season || 'Spring'} Edition
                              </span>
                         </div>
                     </div>
@@ -199,37 +256,71 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                     <div className={`p-4 rounded-3xl border relative ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100/50 border-slate-200'}`}>
                         <p className={`text-[10px] font-bold uppercase mb-1 ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Items Synced</p>
                         <div className="flex items-end gap-2">
-                            <span className={`text-2xl font-black ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>+{insights?.stats?.total_items || 0}</span>
+                            <span className={`text-2xl font-black ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>+{wardrobe.length || 0}</span>
                             <button onClick={onAnalyze} className={`ml-auto text-[9px] font-black px-2 py-1 rounded-lg ${isDark ? 'bg-orange-500/20 text-orange-400' : 'bg-orange-100 text-orange-700'}`}>SYNC 📸</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* ── Section 2: Daily Style Rotation ─────────── */}
+            {/* ── Section 2: Daily Style Rotation (LIFESTYLE AWARE) ─────────── */}
             <AnimatePresence>
                 {insights?.daily_suggestion && (
-                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className={`rounded-[2.5rem] p-6 border ${isDark ? 'bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border-purple-700/30' : 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200'}`}>
-                        <div className="flex items-center justify-between mb-6">
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className={`rounded-[2.5rem] p-7 border relative overflow-hidden ${isDark ? 'bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border-purple-700/30' : 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200 shadow-lg shadow-purple-900/5'}`}>
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-[60px] pointer-events-none" />
+                        
+                        <div className="flex items-center justify-between mb-8">
                             <div>
-                                <p className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-purple-300' : 'text-purple-800'}`}>Today's Power Combo</p>
-                                <h4 className={`text-xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{insights.daily_suggestion.title}</h4>
+                                <p className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${isDark ? 'text-purple-300' : 'text-purple-800'}`}>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+                                    {t(lifestyleKey)} Rotation
+                                </p>
+                                <h4 className={`text-2xl font-black mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>{insights.daily_suggestion.title}</h4>
                             </div>
-                            <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-xl">✨</div>
+                            <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-2xl shadow-xl">✨</div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                                <div className={`w-full aspect-square rounded-2xl flex items-center justify-center text-3xl mb-2 ${isDark ? 'bg-white/5' : 'bg-white shadow-sm'}`}>👕</div>
-                                <p className={`font-bold text-[11px] truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{insights.daily_suggestion.top}</p>
+                        <div className="grid grid-cols-2 gap-5 mb-8">
+                            <div className="space-y-3">
+                                <div className={`aspect-square rounded-[2rem] flex items-center justify-center text-4xl relative ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white shadow-xl shadow-purple-900/5 border border-purple-100'}`}>
+                                    👕
+                                    {isOwned(insights.daily_suggestion.top) && (
+                                        <span className="absolute top-3 right-3 bg-green-500 text-[8px] font-black px-2 py-0.5 rounded-full text-white shadow-lg pulse-glow">OWNED</span>
+                                    )}
+                                </div>
+                                <div>
+                                    <p className={`font-black text-xs ${isDark ? 'text-white' : 'text-slate-900'}`}>{insights.daily_suggestion.top}</p>
+                                    <p className="text-[9px] font-bold opacity-40 uppercase tracking-tighter">Recommended Top</p>
+                                </div>
                             </div>
                             {insights.daily_suggestion.bottom && (
-                                <div className="space-y-1">
-                                    <div className={`w-full aspect-square rounded-2xl flex items-center justify-center text-3xl mb-2 ${isDark ? 'bg-white/5' : 'bg-white shadow-sm'}`}>👖</div>
-                                    <p className={`font-bold text-[11px] truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{insights.daily_suggestion.bottom}</p>
+                                <div className="space-y-3">
+                                    <div className={`aspect-square rounded-[2rem] flex items-center justify-center text-4xl relative ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white shadow-xl shadow-purple-900/5 border border-purple-100'}`}>
+                                        👖
+                                        {isOwned(insights.daily_suggestion.bottom) && (
+                                            <span className="absolute top-3 right-3 bg-green-500 text-[8px] font-black px-2 py-0.5 rounded-full text-white shadow-lg pulse-glow">OWNED</span>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <p className={`font-black text-xs ${isDark ? 'text-white' : 'text-slate-900'}`}>{insights.daily_suggestion.bottom}</p>
+                                        <p className="text-[9px] font-bold opacity-40 uppercase tracking-tighter">Perfect Match</p>
+                                    </div>
                                 </div>
                             )}
                         </div>
+
+                        <button 
+                            onClick={handleWearToday}
+                            disabled={isWorn || logging}
+                            className={`w-full py-4 rounded-2xl text-xs font-black shadow-xl transition-all flex items-center justify-center gap-3 ${
+                                isWorn 
+                                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                    : 'bg-white text-purple-900 hover:scale-[1.02] active:scale-95'
+                            }`}
+                        >
+                            <span>{isWorn ? '🔥' : '🥋'}</span>
+                            {logging ? 'LOGGING...' : isWorn ? t('alreadyWorn') : t('wearToday')}
+                        </button>
                     </motion.div>
                 )}
             </AnimatePresence>

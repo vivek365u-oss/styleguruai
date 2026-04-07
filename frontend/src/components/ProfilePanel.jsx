@@ -501,6 +501,66 @@ export default function ProfilePanel({ hideHeader = false }) {
                       />
                     </button>
                   </div>
+
+                  <div className="pt-4 space-y-4">
+                    <p className={`text-[10px] font-black uppercase tracking-widest opacity-40 ${labelCls}`}>Lifestyle & Vibe</p>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { id: 'student', label: 'College Student', icon: '🎓' },
+                        { id: 'pro', label: 'Corporate Pro', icon: '💼' },
+                        { id: 'creative', label: 'Freelancer', icon: '🎨' },
+                        { id: 'other', label: 'Other', icon: '✨' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            const newPrefs = { ...userPrefs, lifestyle: item.id };
+                            setUserPrefs(newPrefs);
+                            saveUserPreferences(auth.currentUser.uid, newPrefs);
+                            window.dispatchEvent(new CustomEvent('sg_calendar_updated'));
+                          }}
+                          className={`px-4 py-3 rounded-2xl border transition-all flex items-center gap-2 ${
+                            userPrefs.lifestyle === item.id 
+                              ? 'bg-purple-600 border-transparent text-white shadow-lg' 
+                              : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-white border-gray-200 text-slate-500'
+                          }`}
+                        >
+                          <span className="text-sm">{item.icon}</span>
+                          <span className="text-[10px] font-black uppercase">{item.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-4 space-y-4">
+                    <p className={`text-[10px] font-black uppercase tracking-widest opacity-40 ${labelCls}`}>Identity Lock</p>
+                    <div className="flex gap-2">
+                       {[
+                         { id: 'male', label: 'Male', icon: '👨' },
+                         { id: 'female', label: 'Female', icon: '👩' }
+                       ].map(item => (
+                         <button
+                           key={item.id}
+                           onClick={() => {
+                             const newPrefs = { ...userPrefs, gender: item.id };
+                             setUserPrefs(newPrefs);
+                             saveUserPreferences(auth.currentUser.uid, newPrefs);
+                             // Force global reload for Navigator/Shop links
+                             localStorage.setItem('sg_gender_pref', item.id);
+                             window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
+                           }}
+                           className={`flex-1 py-4 rounded-2xl border transition-all flex flex-col items-center gap-1 ${
+                             userPrefs.gender === item.id 
+                               ? 'bg-pink-600 border-transparent text-white shadow-lg' 
+                               : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-white border-gray-200 text-slate-500'
+                           }`}
+                         >
+                           <span className="text-xl">{item.icon}</span>
+                           <span className="text-[9px] font-black uppercase tracking-widest">{item.label}</span>
+                         </button>
+                       ))}
+                    </div>
+                  </div>
                 </div>
               </div>
 

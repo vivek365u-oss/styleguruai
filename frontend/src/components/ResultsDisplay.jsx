@@ -508,24 +508,42 @@ function WardrobeSyncButton({ analysis, recommendations, isDark }) {
   const [synced, setSynced] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
+  const [syncStep, setSyncStep] = useState('category'); // 'category' | 'tags'
+  const [selectedCat, setSelectedCat] = useState('');
+  const [selectedTags, setSelectedTags] = useState([]);
   const isLoggedIn = !!auth.currentUser;
+
+  const VIBE_TAGS = [
+    'tag_campus', 'tag_office', 'tag_party', 'tag_weekend', 'tag_traditional', 'tag_gym'
+  ];
+  const FIT_TAGS = [
+    'tag_oversized', 'tag_slim', 'tag_regular', 'tag_washjeans'
+  ];
 
   const categories = analysis.gender === 'female' 
     ? ['tops', 'kurti', 'saree', 'suits', 'dresses', 'bottoms', 'jewelry']
     : ['shirts', 'tshirts', 'pants', 'ethnic', 'formal', 'shoes'];
 
-  const handleSync = async (cat) => {
+  const toggleTag = (tag) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const finalizeSync = async () => {
     if (!isLoggedIn || syncing) return;
     setSyncing(true);
     try {
       const item = {
         type: 'analysis_result',
-        category: cat,
+        category: selectedCat,
+        tags: selectedTags, // Array of localized tag keys
         undertone: analysis.skin_tone.undertone,
         hex: analysis.skin_color?.hex || '#C68642',
         top_recommendation: recommendations.best_shirt_colors?.[0]?.name || 'N/A',
         harmony_score: 95, 
         season: analysis.skin_tone.color_season,
+        gender: analysis.gender,
         outfit_data: {
           shirt: recommendations.best_shirt_colors?.[0]?.name,
           pant: recommendations.best_pant_colors?.[0]?.name,
@@ -545,27 +563,72 @@ function WardrobeSyncButton({ analysis, recommendations, isDark }) {
 
   if (showPicker && !synced) {
     return (
-      <div className={`p-4 rounded-2xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200 shadow-inner'}`}>
-        <div className="flex items-center justify-between mb-3">
-          <p className={`text-xs font-black uppercase tracking-widest ${isDark ? 'text-white/40' : 'text-gray-500'}`}>🏷️ {t('chooseCategory') || 'Choose Category'}</p>
-          <button onClick={() => setShowPicker(false)} className="text-xs font-bold text-red-100 bg-red-500/20 px-1.5 py-0.5 rounded-full">✕</button>
+      <div className={`p-4 rounded-3xl border ${isDark ? 'bg-white/5 border-white/10 shadow-2xl' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/10'}`}>
+        <div className="flex items-center justify-between mb-4">
+          <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
+            {syncStep === 'category' ? t('chooseCategory') : t('chooseVibe')}
+          </p>
+          <button onClick={() => { setShowPicker(false); setSyncStep('category'); }} className="text-xs font-bold opacity-40">✕</button>
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {categories.map(cat => (
+
+        {syncStep === 'category' ? (
+          <div className="flex flex-wrap gap-2">
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => { setSelectedCat(cat); setSyncStep('tags'); }}
+                className={`px-4 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-tight border transition-all ${
+                  isDark 
+                    ? 'bg-white/5 border-white/10 text-white/70 hover:bg-purple-500/20 hover:border-purple-500/40' 
+                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-purple-300'
+                }`}
+              >
+                {t(`cat_${cat}`) || cat}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              {VIBE_TAGS.map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={`px-3 py-2 rounded-xl text-[10px] font-bold border transition-all ${
+                    selectedTags.includes(tag)
+                      ? 'bg-purple-600 border-transparent text-white shadow-lg'
+                      : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-slate-50 border-slate-200 text-slate-500'
+                  }`}
+                >
+                  {t(tag)}
+                </button>
+              ))}
+            </div>
+            <div className="h-px bg-white/5" />
+            <div className="flex flex-wrap gap-2">
+              {FIT_TAGS.map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={`px-3 py-2 rounded-xl text-[10px] font-bold border transition-all ${
+                    selectedTags.includes(tag)
+                      ? 'bg-pink-600 border-transparent text-white shadow-lg'
+                      : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-slate-50 border-slate-200 text-slate-500'
+                  }`}
+                >
+                  {t(tag)}
+                </button>
+              ))}
+            </div>
             <button
-              key={cat}
-              onClick={() => handleSync(cat)}
-              disabled={syncing}
-              className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tight border transition-all ${
-                isDark 
-                  ? 'bg-white/10 border-white/10 text-white/70 hover:bg-white/20' 
-                  : 'bg-white border-gray-200 text-gray-700 hover:border-purple-300'
-              }`}
+               onClick={finalizeSync}
+               disabled={syncing}
+               className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl text-white font-black text-xs shadow-lg shadow-purple-900/20 hover:scale-[1.02] active:scale-95 transition-all mt-2"
             >
-              {t(`cat_${cat}`) || cat}
+               {syncing ? '⌛ SYNCING...' : 'SAVE TO SMART CLOSET 🚀'}
             </button>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -574,16 +637,16 @@ function WardrobeSyncButton({ analysis, recommendations, isDark }) {
     <button
       onClick={() => setShowPicker(true)}
       disabled={synced || syncing || !isLoggedIn}
-      className={`w-full py-3 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all ${
+      className={`w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 transition-all ${
         synced 
           ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
           : isDark 
             ? 'bg-white text-slate-900 shadow-lg' 
-            : 'bg-slate-900 text-white shadow-lg'
+            : 'bg-slate-900 text-white shadow-lg shadow-slate-900/20'
       } ${syncing ? 'opacity-50' : 'hover:scale-[1.02] active:scale-[0.98]'}`}
     >
       <span>{synced ? '✅' : syncing ? '⌛' : '📦'}</span>
-      <span>{synced ? t('syncedToWardrobe') || 'Synced to Wardrobe' : t('addToWardrobe') || 'Add to My Wardrobe'}</span>
+      <span>{synced ? t('syncedToWardrobe') || 'Synced to Wardrobe' : t('addToWardrobe') || 'Add to Smart Closet'}</span>
     </button>
   );
 }

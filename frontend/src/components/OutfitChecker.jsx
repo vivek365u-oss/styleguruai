@@ -185,6 +185,15 @@ function OutfitChecker() {
     resetProgress();
   };
 
+  const [selectedCat, setSelectedCat] = useState('');
+  const [selectedTags, setSelectedTags] = useState([]);
+
+  const toggleTag = (tag) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
+
   const handleSaveToWardrobe = async (cat) => {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
@@ -203,6 +212,8 @@ function OutfitChecker() {
       await saveWardrobeItem(uid, {
         source: 'outfit_checker',
         category: cat,
+        tags: selectedTags,
+        gender: result.gender,
         imageId: imageId,
         outfit_data: {
           colors: result.outfit_analysis?.color_name ? [{ name: result.outfit_analysis.color_name, hex: result.outfit_analysis.dominant_color_hex }] : [],
@@ -413,44 +424,89 @@ function OutfitChecker() {
                   {(!wardrobeSaved && !showCategoryPicker) && (
                     <button
                       onClick={() => setShowCategoryPicker(true)}
-                      className={`w-full py-3 rounded-2xl text-sm font-bold border transition-all ${
-                        isDark ? 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10' : 'bg-white border-gray-200 text-gray-700 hover:border-purple-400 shadow-sm'
+                      className={`w-full py-4 rounded-2xl text-sm font-black border transition-all ${
+                        isDark ? 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10' : 'bg-white border-gray-200 text-gray-700 hover:border-purple-400 shadow-lg shadow-purple-900/5'
                       }`}
                     >
-                      👗 {t('addToWardrobe') || 'Add to Wardrobe'}
+                      👗 {t('addToWardrobe') || 'Add to Smart Closet'}
                     </button>
                   )}
 
                   {showCategoryPicker && !wardrobeSaved && (
-                    <div className={`p-4 rounded-3xl border ${isDark ? 'bg-white/5 border-white/10 shadow-lg' : 'bg-gray-50 border-gray-200'}`}>
-                      <div className="flex items-center justify-between mb-3">
-                        <p className={`text-xs font-black uppercase tracking-widest ${isDark ? 'text-white/40' : 'text-gray-500'}`}>🏷️ {t('chooseCategory') || 'Choose Category'}</p>
-                        <button onClick={() => setShowCategoryPicker(false)} className="text-red-400 text-xs">✕</button>
+                    <div className={`p-5 rounded-[2rem] border ${isDark ? 'bg-white/5 border-white/10 shadow-2xl' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/10'}`}>
+                      <div className="flex items-center justify-between mb-4">
+                        <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
+                          {!selectedCat ? t('chooseCategory') : t('chooseVibe')}
+                        </p>
+                        <button onClick={() => { setShowCategoryPicker(false); setSelectedCat(''); setSelectedTags([]); }} className="text-red-400 text-xs">✕</button>
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {(result.gender === 'female' 
-                          ? ['tops', 'kurti', 'saree', 'suits', 'dresses', 'bottoms', 'jewelry']
-                          : ['shirts', 'tshirts', 'pants', 'ethnic', 'formal', 'shoes']
-                        ).map(cat => (
+
+                      {!selectedCat ? (
+                        <div className="flex flex-wrap gap-2">
+                          {(result.gender === 'female' 
+                            ? ['tops', 'kurti', 'saree', 'suits', 'dresses', 'bottoms', 'jewelry']
+                            : ['shirts', 'tshirts', 'pants', 'ethnic', 'formal', 'shoes']
+                          ).map(cat => (
+                            <button
+                              key={cat}
+                              onClick={() => setSelectedCat(cat)}
+                              className={`px-4 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-tight border transition-all ${
+                                isDark 
+                                  ? 'bg-white/10 border-white/10 text-white/70 hover:bg-purple-500/20' 
+                                  : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-purple-300'
+                              }`}
+                            >
+                              {t(`cat_${cat}`) || cat}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="flex flex-wrap gap-2">
+                            {['tag_campus', 'tag_office', 'tag_party', 'tag_weekend', 'tag_traditional', 'tag_gym'].map(tag => (
+                              <button
+                                key={tag}
+                                onClick={() => toggleTag(tag)}
+                                className={`px-3 py-2 rounded-xl text-[10px] font-bold border transition-all ${
+                                  selectedTags.includes(tag)
+                                    ? 'bg-purple-600 border-transparent text-white shadow-lg'
+                                    : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-slate-50 border-slate-200 text-slate-500'
+                                }`}
+                              >
+                                {t(tag)}
+                              </button>
+                            ))}
+                          </div>
+                          <div className="h-px bg-white/5" />
+                          <div className="flex flex-wrap gap-2">
+                            {['tag_oversized', 'tag_slim', 'tag_regular', 'tag_washjeans'].map(tag => (
+                              <button
+                                key={tag}
+                                onClick={() => toggleTag(tag)}
+                                className={`px-3 py-2 rounded-xl text-[10px] font-bold border transition-all ${
+                                  selectedTags.includes(tag)
+                                    ? 'bg-pink-600 border-transparent text-white shadow-lg'
+                                    : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-slate-50 border-slate-200 text-slate-500'
+                                }`}
+                              >
+                                {t(tag)}
+                              </button>
+                            ))}
+                          </div>
                           <button
-                            key={cat}
-                            onClick={() => handleSaveToWardrobe(cat)}
+                            onClick={() => handleSaveToWardrobe(selectedCat)}
                             disabled={wardrobeSaving}
-                            className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tight border transition-all ${
-                              isDark 
-                                ? 'bg-white/10 border-white/10 text-white/70 hover:bg-white/20' 
-                                : 'bg-white border-gray-200 text-gray-700 hover:border-purple-300'
-                            }`}
+                            className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl text-white font-black text-xs shadow-lg shadow-purple-900/20 hover:scale-[1.02] active:scale-95 transition-all mt-2"
                           >
-                            {t(`cat_${cat}`) || cat}
+                            {wardrobeSaving ? '⌛ SYNCING...' : 'SAVE TO SMART CLOSET 🚀'}
                           </button>
-                        ))}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
                   {wardrobeSaved && (
-                    <div className={`w-full py-3 rounded-2xl text-sm font-bold border text-center ${
+                    <div className={`w-full py-4 rounded-2xl text-sm font-black border text-center ${
                       isDark ? 'bg-green-500/20 border-green-500/30 text-green-400' : 'bg-green-50 border-green-300 text-green-600'
                     }`}>
                       ✅ {t('syncedToWardrobe') || 'Saved to Wardrobe'}

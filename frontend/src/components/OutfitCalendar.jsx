@@ -1,9 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { auth, getDailyOutfitLogs, loadUserPreferences } from '../api/styleApi';
 
 function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe }) {
   const { t } = useLanguage();
   const [selectedDay, setSelectedDay] = useState(0);
+  const [logs, setLogs] = useState([]);
+  const [lifestyle, setLifestyle] = useState('other');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadContext = async () => {
+      if (!auth.currentUser) return;
+      try {
+        const [userLogs, prefs] = await Promise.all([
+          getDailyOutfitLogs(auth.currentUser.uid, 14),
+          loadUserPreferences(auth.currentUser.uid)
+        ]);
+        setLogs(userLogs);
+        if (prefs?.lifestyle) setLifestyle(prefs.lifestyle);
+      } catch (e) {
+        console.error('Failed to load calendar context:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadContext();
+    window.addEventListener('sg_calendar_updated', loadContext);
+    return () => window.removeEventListener('sg_calendar_updated', loadContext);
+  }, []);
 
   const WEEKDAYS = [
     { key: 'monday', label: t('monday') },
@@ -15,29 +40,73 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe }) {
     { key: 'sunday', label: t('sunday') }
   ];
 
-  const OCCASIONS = [
-    { day: 'Mon', label: t('officeFormal'), icon: '💼', weather: t('sunny') },
-    { day: 'Tue', label: t('casualTech'), icon: '💻', weather: t('chilly') },
-    { day: 'Wed', label: t('midWeekBrunch'), icon: '☕', weather: t('warm') },
-    { day: 'Thu', label: t('clientMeeting'), icon: '🤝', weather: t('cloudy') },
-    { day: 'Fri', label: t('partyNight'), icon: '🕺', weather: t('breezy') },
-    { day: 'Sat', label: t('weekendTrip'), icon: '🚗', weather: t('sunny') },
-    { day: 'Sun', label: t('dateDine'), icon: '🍝', weather: t('pleasant') }
-  ];
+  // Dynamic Occasions based on Lifestyle
+  const getOccasions = () => {
+    if (lifestyle === 'student') {
+        return [
+            { day: 'Mon', label: 'Campus Lectures', icon: '🎓', weather: 'Sunny' },
+            { day: 'Tue', label: 'Lab Sessions', icon: '🔬', weather: 'Chilly' },
+            { day: 'Wed', label: 'Late Night Study', icon: '🦉', weather: 'Warm' },
+            { day: 'Thu', label: 'Campus Canteen', icon: '🍔', weather: 'Cloudy' },
+            { day: 'Fri', label: 'College Fest', icon: '🎸', weather: 'Breezy' },
+            { day: 'Sat', label: 'Weekend Chill', icon: '🍿', weather: 'Sunny' },
+            { day: 'Sun', label: 'Date Prep', icon: '❤️', weather: 'Pleasant' }
+        ];
+    }
+    if (lifestyle === 'pro') {
+        return [
+            { day: 'Mon', label: 'Board Meeting', icon: '💼', weather: 'Sunny' },
+            { day: 'Tue', label: 'Client Visit', icon: '🤝', weather: 'Chilly' },
+            { day: 'Wed', label: 'Deep Focus', icon: '🧠', weather: 'Warm' },
+            { day: 'Thu', label: 'Networking', icon: '🥂', weather: 'Cloudy' },
+            { day: 'Fri', label: 'Desk Lunch', icon: '💻', weather: 'Breezy' },
+            { day: 'Sat', label: 'Family Outing', icon: '🌳', weather: 'Sunny' },
+            { day: 'Sun', label: 'Self Care', icon: '🫧', weather: 'Pleasant' }
+        ];
+    }
+    return [
+        { day: 'Mon', label: t('officeFormal'), icon: '💼', weather: t('sunny') },
+        { day: 'Tue', label: t('casualTech'), icon: '💻', weather: t('chilly') },
+        { day: 'Wed', label: t('midWeekBrunch'), icon: '☕', weather: t('warm') },
+        { day: 'Thu', label: t('clientMeeting'), icon: '🤝', weather: t('cloudy') },
+        { day: 'Fri', label: t('partyNight'), icon: '🕺', weather: t('breezy') },
+        { day: 'Sat', label: t('weekendTrip'), icon: '🚗', weather: t('sunny') },
+        { day: 'Sun', label: t('dateDine'), icon: '🍝', weather: t('pleasant') }
+    ];
+  };
 
-  // Helper to find closest item in wardrobe to a hex
+  const OCCASIONS = getOccasions();
+
+  const getLogForDay = (weekdayIndex) => {
+    // This is simplified: it looks for a log in the last week that matches the weekday name
+    // A better way would be actual date matching
+    const dayName = WEEKDAYS[weekdayIndex].label.toLowerCase();
+    return logs.find(log => {
+        const logDate = new Date(log.date);
+        return logDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() === dayName;
+    });
+  };
+
   const findInWardrobe = (hex, type) => {
     if (!wardrobe || wardrobe.length === 0) return null;
-    // Simple filter: if hex exists or color name matches
     return wardrobe.find(item => item.hex === hex && (type === 'top' ? item.category !== 'pant' : item.category === 'pant'));
   };
 
   const getOutfitForDay = (index) => {
+    const log = getLogForDay(index);
+    if (log) {
+        return {
+            top: { name: log.top, type: 'executed' },
+            bottom: { name: log.bottom, type: 'executed' },
+            occasion: OCCASIONS[index],
+            isExecuted: true
+        };
+    }
+
     const suggestedTop = bestColors[index % bestColors.length] || { name: t('premiumTop'), hex: '#FFFFFF' };
     const suggestedBottom = pantColors[(index + 2) % pantColors.length] || { name: t('recommendedPant'), hex: '#1e3a8a' };
     const occasion = OCCASIONS[index];
     
-    // Check wardrobe for matches
     const wardrobeTop = findInWardrobe(suggestedTop.hex, 'top');
     const wardrobeBottom = findInWardrobe(suggestedBottom.hex, 'bottom');
 
@@ -45,11 +114,18 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe }) {
       top: wardrobeTop || suggestedTop, 
       bottom: wardrobeBottom || suggestedBottom, 
       occasion,
-      isFromWardrobe: !!(wardrobeTop || wardrobeBottom)
+      isFromWardrobe: !!(wardrobeTop || wardrobeBottom),
+      isExecuted: false
     };
   };
 
   const currentOutfit = getOutfitForDay(selectedDay);
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-full">
+        <div className="w-8 h-8 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
+    </div>
+  );
 
   return (
     <div className={`flex flex-col h-full animate-fade-in ${isDark ? 'text-white' : 'text-gray-900'}`}>
@@ -59,91 +135,108 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe }) {
         </button>
         <div className="text-right">
           <h2 className="text-xl font-black uppercase tracking-tight">{t('aiCalendar')}</h2>
-          <p className="text-[10px] opacity-60 uppercase font-black tracking-widest leading-none">{t('smartWeeklyDrops')}</p>
+          <p className="text-[10px] opacity-60 uppercase font-black tracking-widest leading-none">{lifestyle.toUpperCase()} LIFESTYLE</p>
         </div>
       </div>
 
-      {/* Horizontal Day Picker */}
       <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-4 mb-6">
-        {WEEKDAYS.map((day, i) => (
-          <button
-            key={day.key}
-            onClick={() => setSelectedDay(i)}
-            className={`flex flex-col items-center justify-center min-w-[70px] py-4 rounded-2xl border transition-all ${
-              selectedDay === i 
-                ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white border-transparent shadow-lg scale-105' 
-                : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-gray-100 border-gray-200 text-gray-400'
-            }`}
-          >
-            <span className="text-[10px] font-bold uppercase tracking-widest">{day.label.slice(0, 3)}</span>
-            <span className="text-xl mt-1">{OCCASIONS[i].icon}</span>
-          </button>
-        ))}
+        {WEEKDAYS.map((day, i) => {
+          const hasLog = !!getLogForDay(i);
+          return (
+            <button
+                key={day.key}
+                onClick={() => setSelectedDay(i)}
+                className={`flex flex-col items-center justify-center min-w-[75px] py-4 rounded-2xl border transition-all relative ${
+                selectedDay === i 
+                    ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white border-transparent shadow-lg scale-105' 
+                    : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-gray-100 border-gray-200 text-gray-400'
+                }`}
+            >
+                {hasLog && (
+                    <span className="absolute -top-1 -right-1 bg-green-500 w-4 h-4 rounded-full flex items-center justify-center text-[8px] text-white border-2 border-white shadow-lg">✓</span>
+                )}
+                <span className="text-[10px] font-bold uppercase tracking-widest">{day.label.slice(0, 3)}</span>
+                <span className="text-xl mt-1">{OCCASIONS[i].icon}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Outfit Card */}
-      <div className={`flex-1 rounded-[32px] p-6 border relative overflow-hidden flex flex-col items-center justify-center text-center ${
-        isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'
+      <div className={`flex-1 rounded-[32px] p-7 border relative overflow-hidden flex flex-col items-center justify-center text-center transition-all ${
+        currentOutfit.isExecuted 
+            ? 'bg-gradient-to-br from-green-900/40 to-emerald-900/40 border-green-500/30 shadow-2xl shadow-green-900/20'
+            : isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'
       }`}>
-        {/* Glow effect */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-purple-500/20 blur-[80px] pointer-events-none" />
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 blur-[80px] pointer-events-none ${
+            currentOutfit.isExecuted ? 'bg-green-500/20' : 'bg-purple-500/20'
+        }`} />
         
-        <div className="relative z-10 mb-4">
+        <div className="relative z-10 mb-6">
+           {currentOutfit.isExecuted && (
+               <div className="bg-green-500 text-white text-[9px] font-black px-3 py-1 rounded-full w-fit mx-auto mb-4 animate-pulse">MISSION ACCOMPLISHED 🏆</div>
+           )}
            <span className="text-xs font-bold uppercase tracking-[0.2em] opacity-40 mb-2 block italic">
              {OCCASIONS[selectedDay].label} · {OCCASIONS[selectedDay].weather}
            </span>
-           <h3 className="text-2xl font-black mb-6">{WEEKDAYS[selectedDay].label}{t('dropSuffix')}</h3>
+           <h3 className="text-2xl font-black mb-2">{WEEKDAYS[selectedDay].label}{t('dropSuffix')}</h3>
         </div>
 
-        {/* Visual Composition */}
         <div className="flex flex-col items-center gap-10 w-full max-w-[240px]">
-          {/* Top */}
           <div className="w-full flex flex-col items-center group">
             <div 
-              className="w-16 h-16 rounded-2xl border-4 border-white/20 shadow-xl transition-transform group-hover:scale-110 relative" 
+              className={`w-20 h-20 rounded-2xl border-4 border-white/20 shadow-xl transition-transform group-hover:scale-110 relative flex items-center justify-center text-3xl ${
+                  currentOutfit.isExecuted ? 'bg-white/10' : ''
+              }`} 
               style={{ backgroundColor: currentOutfit.top.hex }}
             >
-              {currentOutfit.top.type === 'analysis_result' && (
-                <span className="absolute -top-2 -right-2 bg-green-500 text-[8px] font-black px-1.5 py-0.5 rounded-full text-white shadow-lg">OWNED</span>
+              {currentOutfit.isExecuted ? '👔' : ''}
+              {(currentOutfit.top.type === 'analysis_result' || currentOutfit.isExecuted) && (
+                <span className={`absolute -top-2 -right-2 text-[8px] font-black px-2 py-0.5 rounded-full text-white shadow-lg ${
+                    currentOutfit.isExecuted ? 'bg-blue-500' : 'bg-green-500'
+                }`}>
+                    {currentOutfit.isExecuted ? 'LOGGED' : 'OWNED'}
+                </span>
               )}
             </div>
-            <span className="mt-3 font-black text-sm uppercase tracking-wider">{currentOutfit.top.name}</span>
-            <span className="text-[10px] opacity-50 uppercase font-bold tracking-widest">
-              {currentOutfit.top.type === 'analysis_result' ? 'From Wardrobe' : 'Premium Top'}
-            </span>
+            <span className="mt-4 font-black text-xs uppercase tracking-wider">{currentOutfit.top.name}</span>
           </div>
 
-          <div className="w-6 h-0.5 bg-current opacity-10 rounded-full" />
+          <div className={`w-8 h-0.5 rounded-full ${currentOutfit.isExecuted ? 'bg-green-400/20' : 'bg-current opacity-10'}`} />
 
-          {/* Bottom */}
           <div className="w-full flex flex-col items-center group">
             <div 
-              className="w-16 h-16 rounded-2xl border-4 border-white/20 shadow-xl transition-transform group-hover:scale-110 relative" 
+              className={`w-20 h-20 rounded-2xl border-4 border-white/20 shadow-xl transition-transform group-hover:scale-110 relative flex items-center justify-center text-3xl ${
+                  currentOutfit.isExecuted ? 'bg-white/10' : ''
+              }`} 
               style={{ backgroundColor: currentOutfit.bottom.hex }}
             >
-              {currentOutfit.bottom.type === 'analysis_result' && (
-                <span className="absolute -top-2 -right-2 bg-green-500 text-[8px] font-black px-1.5 py-0.5 rounded-full text-white shadow-lg">OWNED</span>
+              {currentOutfit.isExecuted ? '👖' : ''}
+              {(currentOutfit.bottom.type === 'analysis_result' || currentOutfit.isExecuted) && (
+                <span className={`absolute -top-2 -right-2 text-[8px] font-black px-2 py-0.5 rounded-full text-white shadow-lg ${
+                    currentOutfit.isExecuted ? 'bg-blue-500' : 'bg-green-500'
+                }`}>
+                    {currentOutfit.isExecuted ? 'LOGGED' : 'OWNED'}
+                </span>
               )}
             </div>
-            <span className="mt-3 font-black text-sm uppercase tracking-wider">{currentOutfit.bottom.name}</span>
-            <span className="text-[10px] opacity-50 uppercase font-bold tracking-widest">
-              {currentOutfit.bottom.type === 'analysis_result' ? 'From Wardrobe' : 'Recommended Pant'}
-            </span>
+            <span className="mt-4 font-black text-xs uppercase tracking-wider">{currentOutfit.bottom.name}</span>
           </div>
         </div>
 
-        <button 
-          onClick={() => {
-            const query = `${currentOutfit.top.name} ${currentOutfit.bottom.name}`.replace(/\s+/g, '%20');
-            window.open(`https://www.myntra.com/search?rawQuery=${query}`, '_blank');
-          }}
-          className="mt-10 px-8 py-3 bg-white/5 border border-white/10 rounded-full text-xs font-bold hover:bg-white/10 transition"
-        >
-          🛒 {t('findOnMarket')}
-        </button>
+        {!currentOutfit.isExecuted && (
+            <button 
+                onClick={() => {
+                    const query = `${currentOutfit.top.name} ${currentOutfit.bottom.name} for ${lifestyle}`.replace(/\s+/g, '%20');
+                    window.open(`https://www.myntra.com/search?rawQuery=${query}`, '_blank');
+                }}
+                className="mt-12 px-8 py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black hover:bg-white/10 transition-all uppercase tracking-widest shadow-xl"
+            >
+                🛒 {t('findOnMarket')}
+            </button>
+        )}
       </div>
 
-      <p className="mt-4 text-[10px] text-center opacity-40 font-medium italic">
+      <p className="mt-6 text-[10px] text-center opacity-30 font-black italic uppercase tracking-wider">
         "{t('smartLogicNote')}"
       </p>
     </div>
