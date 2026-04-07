@@ -65,6 +65,10 @@ const StyleNavigator = ({ user, onAnalyze }) => {
         };
 
         loadInitialData();
+
+        // Listen for wardrobe updates to re-sync stats in real-time
+        window.addEventListener('sg_wardrobe_updated', loadInitialData);
+        return () => window.removeEventListener('sg_wardrobe_updated', loadInitialData);
     }, [language]);
 
     const handleTogglePrimary = async () => {
@@ -140,23 +144,29 @@ const StyleNavigator = ({ user, onAnalyze }) => {
         >
             {/* ── Section 1: Style DNA Card ──────────────────────── */}
             <div className={`relative overflow-hidden rounded-[2.5rem] p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/5'}`}>
-                <div className="relative z-10 flex items-center gap-5">
-                    <div
-                        className="w-20 h-20 rounded-2xl border-4 border-white/20 shadow-2xl relative group overflow-hidden"
-                        style={{ backgroundColor: profile?.skinHex || '#C68642' }}
+                {/* Profile Lock Header Action */}
+                <div className="absolute top-6 right-6 z-20">
+                    <button 
+                        onClick={handleTogglePrimary}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black transition-all ${
+                            isPrimary 
+                                ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                                : isDark ? 'bg-white/10 text-white/60 hover:bg-white/20' : 'bg-slate-100 text-slate-500 hover:bg-slate-200 border border-slate-200'
+                        }`}
                     >
-                         <button 
-                            onClick={handleTogglePrimary}
-                            className={`absolute inset-0 flex items-center justify-center backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all ${isPrimary ? 'bg-green-500/20' : 'bg-black/40'}`}
-                            title={isPrimary ? "Locked as Home Tone" : "Click to Lock as Home"}
-                         >
-                            <span className="text-2xl">{isPrimary ? '🏠' : '🔒'}</span>
-                         </button>
-                    </div>
+                        <span>{isPrimary ? '🏠' : '🔓'}</span>
+                        <span>{isPrimary ? (t('primaryProfileLocked') || 'Home Profile') : (t('setAsHomeTone') || 'Set as Home Tone')}</span>
+                    </button>
+                </div>
+
+                <div className="relative z-10 flex items-center gap-5 pt-2">
+                    <div
+                        className="w-20 h-20 rounded-2xl border-4 border-white/20 shadow-2xl overflow-hidden"
+                        style={{ backgroundColor: profile?.skinHex || '#C68642' }}
+                    />
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>Style DNA</p>
-                            {isPrimary && <span className="bg-green-500 w-1.5 h-1.5 rounded-full animate-pulse" title="Locked as Primary" />}
                         </div>
                         <h3 className={`text-2xl font-black capitalize ${isDark ? 'text-white' : 'text-slate-900'}`}>{profile?.skinTone} {profile?.undertone}</h3>
                         <div className="flex items-center gap-2 mt-1">

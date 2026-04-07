@@ -1177,45 +1177,87 @@ class RecommendationEngine:
                 "stats": {"items": 0, "categories": 0}
             }
 
+        processed_items = []
         total_score = 0
         categories = set()
+
         for item in wardrobe_items:
-            h = item.get("skin_hex") or item.get("outfit_data", {}).get("hex") or "#000000"
+            # 1. Robust Hex Extraction
+            h = "#000000"
+            outfit_data = item.get("outfit_data", {})
+            
+            # Case A: Outfit Checker (Direct array)
+            if item.get("source") == "outfit_checker":
+                colors = outfit_data.get("colors", [])
+                if colors: h = colors[0].get("hex")
+            # Case B: Analysis Result (Direct hex)
+            elif item.get("type") == "analysis_result":
+                h = item.get("hex") or outfit_data.get("hex")
+            # Case C: Generic fallback
+            else:
+                h = outfit_data.get("hex") or item.get("hex") or item.get("skin_hex") or "#000000"
+
             score = self.get_harmony_score(skin_tone, h)
             total_score += score
-            d = item.get("outfit_data", {})
-            if d.get("shirt"): categories.add("top")
-            if d.get("pant"): categories.add("bottom")
-            if d.get("dress"): categories.add("full")
+            
+            # 2. Extract Category
+            cat = "top" # Default
+            item_source = item.get("source") or item.get("type")
+            
+            if item.get("category") in ["pant", "bottom"]: cat = "bottom"
+            elif item.get("category") in ["full", "dress"]: cat = "full"
+            elif outfit_data.get("pant") or "pant" in str(item).lower(): cat = "bottom"
+            elif outfit_data.get("dress") or "dress" in str(item).lower(): cat = "full"
+            
+            categories.add(cat)
+            
+            processed_items.append({
+                "item": item,
+                "hex": h,
+                "score": score,
+                "category": cat
+            })
 
         avg_harmony = int(total_score / len(wardrobe_items))
 
-        tops = [i for i in wardrobe_items if i.get("outfit_data", {}).get("shirt")]
-        bottoms = [i for i in wardrobe_items if i.get("outfit_data", {}).get("pant")]
+        # 3. Smart Daily Suggestion
+        tops = [i for i in processed_items if i["category"] == "top"]
+        bottoms = [i for i in processed_items if i["category"] == "bottom"]
+        fulls = [i for i in processed_items if i["category"] == "full"]
         
         daily_suggestion = None
         if tops and bottoms:
-            best_top = sorted(tops, key=lambda x: self.get_harmony_score(skin_tone, x.get("skin_hex") or "#000000"), reverse=True)[0]
-            best_bottom = sorted(bottoms, key=lambda x: self.get_harmony_score(skin_tone, x.get("skin_hex") or "#000000"), reverse=True)[0]
+            best_top = sorted(tops, key=lambda x: x["score"], reverse=True)[0]
+            best_bottom = sorted(bottoms, key=lambda x: x["score"], reverse=True)[0]
             daily_suggestion = {
                 "title": "Today's Power Combo",
-                "top": best_top.get("outfit_data", {}).get("shirt"),
-                "bottom": best_bottom.get("outfit_data", {}).get("pant"),
-                "score": int((self.get_harmony_score(skin_tone, best_top.get("skin_hex") or "#000000") + self.get_harmony_score(skin_tone, best_bottom.get("skin_hex") or "#000000")) / 2)
+                "top": best_top["item"].get("outfit_data", {}).get("shirt") or best_top["hex"],
+                "bottom": best_bottom["item"].get("outfit_data", {}).get("pant") or best_bottom["hex"],
+                "score": int((best_top["score"] + best_bottom["score"]) / 2)
             }
-        elif wardrobe_items:
-            best_item = sorted(wardrobe_items, key=lambda x: self.get_harmony_score(skin_tone, x.get("skin_hex") or "#000000"), reverse=True)[0]
+        elif fulls:
+            best_full = sorted(fulls, key=lambda x: x["score"], reverse=True)[0]
             daily_suggestion = {
-                "title": "Today's Best Piece",
-                "top": best_item.get("outfit_data", {}).get("shirt") or best_item.get("outfit_data", {}).get("dress"),
-                "bottom": best_item.get("outfit_data", {}).get("pant"),
-                "score": self.get_harmony_score(skin_tone, best_item.get("skin_hex") or "#000000")
+                "title": "Today's Best Look",
+                "top": best_full["item"].get("outfit_data", {}).get("shirt") or best_full["item"].get("outfit_data", {}).get("dress") or best_full["hex"],
+                "bottom": None,
+                "score": best_full["score"]
+            }
+        elif processed_items:
+            best_item = sorted(processed_items, key=lambda x: x["score"], reverse=True)[0]
+            daily_suggestion = {
+                "title": "Today's Hero Piece",
+                "top": best_item["item"].get("outfit_data", {}).get("shirt") or best_item["item"].get("outfit_data", {}).get("dress") or best_item["hex"],
+                "bottom": best_item["item"].get("outfit_data", {}).get("pant"),
+                "score": best_item["score"]
             }
 
+        # 4. Gaps
         best_palette = self._get_shirt_colors(category, undertone)
-        held_colors_hex = [str(i.get("skin_hex") or "").lower() for i in wardrobe_items]
+        held_colors_hex = [i["hex"].lower() for i in processed_items]
         
         missing_piece = None
+
         for p in best_palette:
             if p["hex"].lower() not in held_colors_hex:
                 missing_piece = {

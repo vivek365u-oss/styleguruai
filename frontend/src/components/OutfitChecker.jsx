@@ -211,6 +211,8 @@ function OutfitChecker() {
         compatibility_score: score,
       });
       setWardrobeSaved(true);
+      // Trigger global update for Navigator
+      window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
     } catch {
       try {
         const queue = JSON.parse(localStorage.getItem('sg_wardrobe_queue') || '[]');
@@ -402,7 +404,7 @@ function OutfitChecker() {
             <p className={`text-sm max-w-md mx-auto ${isDark ? 'text-white/70' : 'text-gray-600'}`}>{compatibility?.message}</p>
           </div>
 
-          {score >= 70 && (
+          {score >= 20 && (
             <div className="flex gap-2">
               {auth.currentUser ? (
                 <button
