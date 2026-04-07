@@ -1,29 +1,14 @@
+import { useNavigate } from 'react-router-all'; // Fixed later by multi_replace if needed, but let's just use existing imports
 import { useNavigate } from 'react-router-dom';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import ProfilePanel from '../components/ProfilePanel';
-import { PlansUpgradeScreen } from '../components/PlansUpgradeScreen';
-import PaywallModal from '../components/PaywallModal';
-import { auth, activateProSubscription } from '../api/styleApi';
+import { auth } from '../api/styleApi';
 
 function ProfilePage() {
   const { theme } = useContext(ThemeContext);
   const navigate = useNavigate();
   const isDark = theme === 'dark';
-
-  const [showPlansScreen, setShowPlansScreen] = useState(false);
-  const [paywallOpen, setPaywallOpen] = useState(false);
-
-  const handleUpgradeSuccess = async () => {
-    try {
-      if (auth.currentUser) {
-        await activateProSubscription(auth.currentUser.uid);
-        window.location.reload(); 
-      }
-    } catch (err) {
-      console.error('Upgrade failed:', err);
-    }
-  };
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 text-white' : 'bg-gray-50 text-gray-900'}`}>
@@ -39,20 +24,8 @@ function ProfilePage() {
       </div>
 
       <div className="max-w-xl mx-auto px-6 pt-8 pb-10">
-        <ProfilePanel onOpenUpgrade={() => setShowPlansScreen(true)} />
+        <ProfilePanel />
       </div>
-
-      {showPlansScreen && (
-        <PlansUpgradeScreen
-          isDark={isDark}
-          onSelectPlan={() => {
-            setShowPlansScreen(false);
-            setPaywallOpen(true);
-          }}
-          onClose={() => setShowPlansScreen(false)}
-        />
-      )}
-      <PaywallModal isOpen={paywallOpen} onClose={() => setPaywallOpen(false)} onUpgrade={handleUpgradeSuccess} isDark={isDark} />
     </div>
   );
 }

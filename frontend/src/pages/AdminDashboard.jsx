@@ -63,24 +63,9 @@ function AdminDashboard() {
         if (p?.skin_tone) toneDist[p.skin_tone] = (toneDist[p.skin_tone] || 0) + 1;
       });
 
-      // Pro subscribers
-      let proCount = 0;
-      try {
-        const subQuery = query(collection(db, 'users'), limit(500));
-        const subDocs = await getDocs(subQuery);
-        for (const doc of subDocs.docs) {
-          const sub = doc.data().subscription;
-          if (sub?.plan === 'pro' && sub?.valid_until) {
-            const validDate = new Date(sub.valid_until);
-            if (validDate > new Date()) proCount++;
-          }
-        }
-      } catch { /* ignore */ }
-
       setStats({
         totalUsers,
         wardrobeCount,
-        proCount,
         recentProfiles,
         toneDist,
       });
@@ -140,7 +125,6 @@ function AdminDashboard() {
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: 'Total Users', value: stats.totalUsers, emoji: '👥', color: 'text-purple-400' },
-          { label: 'Pro Subs', value: stats.proCount, emoji: '💳', color: 'text-green-400' },
           { label: 'Wardrobe Items', value: stats.wardrobeCount, emoji: '👗', color: 'text-pink-400' },
         ].map(kpi => (
           <div key={kpi.label} className={`rounded-2xl p-3 text-center ${cardBg}`}>
@@ -151,18 +135,7 @@ function AdminDashboard() {
         ))}
       </div>
 
-      {/* Revenue estimate */}
-      <div className={`rounded-2xl p-4 border ${isDark ? 'bg-green-500/10 border-green-500/20' : 'bg-green-50 border-green-200'}`}>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className={`text-xs font-bold ${isDark ? 'text-green-300' : 'text-green-700'}`}>💰 Est. Monthly Revenue</p>
-            <p className={`text-[10px] ${labelCls}`}>Pro subs × ₹31/mo</p>
-          </div>
-          <p className={`text-2xl font-black ${isDark ? 'text-green-400' : 'text-green-700'}`}>
-            ₹{(stats.proCount * 31).toLocaleString()}
-          </p>
-        </div>
-      </div>
+      {/* Revenue block removed */}
 
       {/* Skin Tone Distribution */}
       <div className={`rounded-2xl p-4 ${cardBg}`}>
@@ -202,22 +175,7 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* Conversion Rate */}
-      <div className={`rounded-2xl p-4 ${cardBg}`}>
-        <p className={`text-xs font-bold mb-2 ${headingCls}`}>📈 Conversion Rate</p>
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <div className={`h-3 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
-              <div className="h-full rounded-full bg-gradient-to-r from-green-500 to-emerald-500"
-                style={{ width: `${stats.totalUsers > 0 ? ((stats.proCount / stats.totalUsers) * 100).toFixed(1) : 0}%` }} />
-            </div>
-          </div>
-          <span className={`text-sm font-black ${isDark ? 'text-green-400' : 'text-green-700'}`}>
-            {stats.totalUsers > 0 ? ((stats.proCount / stats.totalUsers) * 100).toFixed(1) : 0}%
-          </span>
-        </div>
-        <p className={`text-[10px] mt-1 ${labelCls}`}>Free → Pro conversion</p>
-      </div>
+      {/* Conversion Rate removed */}
 
       <button onClick={fetchStats}
         className="w-full py-2.5 rounded-xl text-xs font-bold bg-purple-600 text-white hover:bg-purple-500 transition-all">

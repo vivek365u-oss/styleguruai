@@ -6,7 +6,7 @@ import { usePlan } from '../context/PlanContext';
 import { useAnalysisProgress } from '../hooks/useAnalysisProgress';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import { compressImage, saveLocalWardrobeImage } from '../utils/indexedDB';
-import PaywallModal from './PaywallModal';
+// PaywallModal import removed
 
 // ── Outfit Shop Card — same style as analyze results ─────────
 function OutfitShopCard({ color, isDark, gender = 'male' }) {
@@ -122,7 +122,6 @@ function OutfitChecker() {
   const [error, setError] = useState(null);
   const [wardrobeSaved, setWardrobeSaved] = useState(false);
   const [wardrobeSaving, setWardrobeSaving] = useState(false);
-  const [paywallOpen, setPaywallOpen] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   const { progress, startProgress, completeProgress, reset: resetProgress } = useAnalysisProgress();
 
@@ -146,10 +145,7 @@ function OutfitChecker() {
   const handleCheck = async () => {
     if (!selfieFile || !outfitFile) { setError(t('uploadBoth')); return; }
     // Plan gate
-    if (!isPro && usage.outfit_checks_count >= 10) {
-      setPaywallOpen(true);
-      return;
-    }
+    // Usage limit removed
     console.log("[OutfitChecker] Starting outfit check with progress...");
     setLoading(true); setError(null); setResult(null);
     setShowProgress(true);
@@ -163,13 +159,7 @@ function OutfitChecker() {
       setTimeout(() => {
         setResult(res.data);
         setShowProgress(false);
-        // Increment usage for free users
-        const uid = auth.currentUser?.uid;
-        if (uid && !isPro) {
-          incrementUsage(uid, 'outfit_checks_count').then(() => {
-            setUsage(prev => ({ ...prev, outfit_checks_count: (prev.outfit_checks_count || 0) + 1 }));
-          });
-        }
+        // Usage logging removed
       }, 800); // 800ms for fade-out animation
     } catch (err) {
       console.error("[OutfitChecker] Analysis error:", err);
@@ -515,11 +505,7 @@ function OutfitChecker() {
       )}
         </>
       )}
-      <PaywallModal
-        isOpen={paywallOpen}
-        onClose={() => setPaywallOpen(false)}
-        triggerMessage="10 checks used this month. Upgrade to Pro for unlimited."
-      />
+      {/* PaywallModal removed */}
     </div>
   );
 }

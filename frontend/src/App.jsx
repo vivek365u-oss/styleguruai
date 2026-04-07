@@ -23,7 +23,7 @@ const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
-const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage'));
+// OrderSuccessPage lazy import removed
 
 import { ThemeContext } from './context/ThemeContext';
 
@@ -97,11 +97,7 @@ function AppRoutes({ user, setUser }) {
         <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} />} />
         <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
-        <Route path="/order-success" element={
-          <PrivateRoute user={user}>
-            <OrderSuccessPage />
-          </PrivateRoute>
-        } />
+        {/* OrderSuccess route removed */}
         <Route path="/profile" element={
           <PrivateRoute user={user}>
             <ProfilePage />
