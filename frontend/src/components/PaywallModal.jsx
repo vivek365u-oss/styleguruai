@@ -10,6 +10,8 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
   const [tab, setTab] = useState('coins');
   const [selectedPlan, setSelectedPlan] = useState('coins_25');
   const isMountedRef = useRef(true);
+  const headingCls = isDark ? 'text-white' : 'text-gray-900';
+  const labelCls = isDark ? 'text-white/40' : 'text-gray-400';
 
   useEffect(() => {
     if (isOpen) {
@@ -214,185 +216,155 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
       />
       
       {/* Modal Content */}
-      <div className={`relative w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl animate-fade-in z-10 ${
+      <div className={`relative w-full max-w-sm max-h-[90vh] flex flex-col rounded-3xl overflow-hidden shadow-2xl animate-fade-in z-10 ${
         isDark ? 'bg-[#0f1123] border border-white/10' : 'bg-white border border-gray-200'
       }`}>
         
-        {/* Header Graphic */}
-        <div className={`relative h-40 flex flex-col items-center justify-center overflow-hidden transition-all duration-500 ${
+        {/* Header Graphic - More compact */}
+        <div className={`relative h-32 flex-shrink-0 flex flex-col items-center justify-center overflow-hidden transition-all duration-500 ${
           tab === 'coins' ? 'bg-gradient-to-br from-amber-500 to-orange-600' : 'bg-gradient-to-br from-purple-600 to-pink-600'
         }`}>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white/20 rounded-full blur-3xl animate-pulse" />
           <button 
             onClick={onClose}
-            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/20 text-white flex items-center justify-center backdrop-blur-md hover:bg-black/40 transition"
+            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/20 text-white flex items-center justify-center backdrop-blur-md hover:bg-black/40 transition z-20"
           >
             ✕
           </button>
           
-          <div className="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center mb-2 z-10 rotate-3">
-            <span className={`text-3xl font-black text-transparent bg-clip-text ${
+          <div className="w-12 h-12 bg-white rounded-xl shadow-xl flex items-center justify-center mb-1 z-10 rotate-3">
+            <span className={`text-2xl font-black text-transparent bg-clip-text ${
               tab === 'coins' ? 'bg-gradient-to-br from-amber-500 to-orange-600' : 'bg-gradient-to-br from-purple-600 to-pink-600'
             }`}>
               {tab === 'coins' ? '🪙' : 'PRO'}
             </span>
           </div>
-          <h2 className="text-white text-xl font-black tracking-widest z-10 drop-shadow-md">
+          <h2 className="text-white text-lg font-black tracking-widest z-10 drop-shadow-md">
             {tab === 'coins' ? 'TOP-UP COINS' : t('proTitle')}
           </h2>
         </div>
 
-        {/* Content */}
-        <div className="p-6 relative z-10 bg-inherit">
+        {/* Content - Scrollable if needed */}
+        <div className={`p-5 flex-1 overflow-y-auto scrollbar-hide relative z-10 ${isDark ? 'bg-[#0f1123]' : 'bg-white'}`}>
           {/* Main Tab Switcher */}
-          <div className={`flex p-1 rounded-xl mb-6 shadow-inner ${isDark ? 'bg-[#1a1c30]' : 'bg-gray-100'}`}>
+          <div className={`flex p-1 rounded-xl mb-5 shadow-inner ${isDark ? 'bg-[#1a1c30]' : 'bg-gray-100'}`}>
             <button
               onClick={() => { setTab('coins'); setSelectedPlan('coins_25'); }}
-              className={`flex-1 py-3 px-2 text-[10px] font-black rounded-lg transition-all border-2 ${
-                tab === 'coins' ? `border-amber-400 ${isDark ? 'bg-amber-500/20 text-amber-300' : 'bg-amber-50 text-amber-900'} shadow-lg` : isDark ? 'border-white/10 text-white/50 bg-white/5' : 'border-gray-200 text-gray-600'
+              className={`flex-1 py-2.5 px-1 text-[9px] font-black rounded-lg transition-all border-2 ${
+                tab === 'coins' ? `border-amber-400 ${isDark ? 'bg-amber-500/20 text-amber-300' : 'bg-amber-50 text-amber-900'} shadow-lg` : isDark ? 'border-white/10 text-white/50 bg-white/5' : 'border-gray-200 text-gray-500'
               }`}
             >
-              <span className="text-lg mb-1 block">🪙</span>
-              ONE-TIME COINS
-              <span className="block text-[9px] mt-0.5 opacity-70 font-normal">Pay once, use anytime</span>
+              <span className="text-base mb-0.5 block">🪙</span>
+              COINS
             </button>
             <button
               onClick={() => { setTab('subs'); setSelectedPlan('weekly'); }}
-              className={`flex-1 py-3 px-2 text-[10px] font-black rounded-lg transition-all border-2 ${
-                tab === 'subs' ? `border-purple-400 ${isDark ? 'bg-purple-500/20 text-purple-300' : 'bg-purple-50 text-purple-900'} shadow-lg` : isDark ? 'border-white/10 text-white/50 bg-white/5' : 'border-gray-200 text-gray-600'
+              className={`flex-1 py-2.5 px-1 text-[9px] font-black rounded-lg transition-all border-2 ${
+                tab === 'subs' ? `border-purple-400 ${isDark ? 'bg-purple-500/20 text-purple-300' : 'bg-purple-50 text-purple-900'} shadow-lg` : isDark ? 'border-white/10 text-white/50 bg-white/5' : 'border-gray-200 text-gray-500'
               }`}
             >
-              <span className="text-lg mb-1 block">👑</span>
+              <span className="text-base mb-0.5 block">👑</span>
               SUBSCRIPTION
-              <span className="block text-[9px] mt-0.5 opacity-70 font-normal">Auto-renew each period</span>
             </button>
           </div>
 
-          <div className="text-center mb-6">
-            
-            {/* Plan Selectors */}
+          <div className="text-center mb-5">
+            {/* Plan Selectors - Improved tap areas */}
             {tab === 'coins' ? (
-              <div className="flex gap-2 justify-center mb-4">
+              <div className="flex gap-2 justify-center mb-3">
                 <button
                   onClick={() => setSelectedPlan('coins_10')}
-                  className={`px-3 py-2 rounded-lg font-bold text-xs transition-all ${
+                  className={`flex-1 py-2 rounded-lg font-bold text-[10px] uppercase transition-all ${
                     selectedPlan === 'coins_10'
-                      ? 'bg-orange-500 text-white'
-                      : isDark ? 'bg-white/5 text-white/50' : 'bg-gray-100 text-gray-600'
+                      ? 'bg-orange-500 text-white shadow-md'
+                      : isDark ? 'bg-white/5 text-white/40' : 'bg-gray-100 text-gray-500'
                   }`}
                 >
                   10 Coins
                 </button>
                 <button
                   onClick={() => setSelectedPlan('coins_25')}
-                  className={`px-3 py-2 rounded-lg font-bold text-xs transition-all relative ${
+                  className={`flex-1 py-2 rounded-lg font-bold text-[10px] uppercase transition-all relative ${
                     selectedPlan === 'coins_25'
                       ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-md'
-                      : isDark ? 'bg-white/5 text-white/50' : 'bg-gray-100 text-gray-600'
+                      : isDark ? 'bg-white/5 text-white/40' : 'bg-gray-100 text-gray-500'
                   }`}
                 >
                   25 Coins
-                  <span className="absolute -top-2 -right-2 text-[8px] font-black px-1.5 py-0.5 rounded-full bg-yellow-400 text-yellow-900 border border-yellow-200">Bonus</span>
+                  <span className="absolute -top-2 -right-1 text-[7px] font-black px-1 py-0.5 rounded-full bg-yellow-400 text-yellow-900 border border-yellow-200">+5 Free</span>
                 </button>
               </div>
             ) : (
-              <div className="flex gap-1.5 justify-center mb-4">
-                <button
-                  onClick={() => setSelectedPlan('weekly')}
-                  className={`px-2 py-2 rounded-lg font-bold text-[10px] transition-all ${
-                    selectedPlan === 'weekly' ? 'bg-purple-600 text-white' : isDark ? 'bg-white/5 text-white/50' : 'bg-gray-100 text-gray-600'
-                  }`}
-                >
-                  Weekly
-                </button>
-                <button
-                  onClick={() => setSelectedPlan('monthly')}
-                  className={`px-2 py-2 rounded-lg font-bold text-[10px] transition-all ${
-                    selectedPlan === 'monthly' ? 'bg-purple-600 text-white' : isDark ? 'bg-white/5 text-white/50' : 'bg-gray-100 text-gray-600'
-                  }`}
-                >
-                  Monthly
-                </button>
-                <button
-                  onClick={() => setSelectedPlan('yearly')}
-                  className={`px-2 py-2 rounded-lg font-bold text-[10px] transition-all relative ${
-                    selectedPlan === 'yearly' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' : isDark ? 'bg-white/5 text-white/50' : 'bg-gray-100 text-gray-600'
-                  }`}
-                >
-                  Yearly
-                  <span className={`absolute -top-2 right-0 text-[8px] font-black px-1 py-0.5 rounded-full ${selectedPlan === 'yearly' ? 'bg-yellow-400 text-yellow-900' : 'bg-yellow-100 text-yellow-800'}`}>Save 16%</span>
-                </button>
+              <div className="flex gap-1.5 justify-center mb-3">
+                {['weekly', 'monthly', 'yearly'].map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setSelectedPlan(p)}
+                    className={`flex-1 py-2 rounded-lg font-bold text-[9px] uppercase transition-all relative ${
+                      selectedPlan === p ? 'bg-purple-600 text-white shadow-md' : isDark ? 'bg-white/5 text-white/40' : 'bg-gray-100 text-gray-500'
+                    }`}
+                  >
+                    {p}
+                    {p === 'yearly' && <span className="absolute -top-2 right-0 text-[7px] font-black px-1 py-0.5 rounded-full bg-yellow-400 text-yellow-900">Save 17%</span>}
+                  </button>
+                ))}
               </div>
             )}
             
             {/* Price Display */}
-            <div className="mt-3 flex items-end justify-center gap-1 leading-none">
-              <span className={`text-5xl tracking-tighter font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            <div className="mt-2 flex items-end justify-center gap-1 leading-none">
+              <span className={`text-4xl tracking-tighter font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 {selectedPlan === 'coins_10' || selectedPlan === 'weekly' ? '₹29' :
                  selectedPlan === 'coins_25' ? '₹49' :
                  selectedPlan === 'monthly' ? '₹59' : '₹499'}
               </span>
-              <span className={`text-sm mb-1 font-bold ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
+              <span className={`text-[10px] mb-1 font-bold opacity-50 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 {tab === 'coins' ? 'once' : selectedPlan === 'weekly' ? '/week' : selectedPlan === 'monthly' ? '/month' : '/year'}
               </span>
             </div>
-            {selectedPlan === 'yearly' && (
-              <p className={`text-xs mt-1 ${isDark ? 'text-green-400' : 'text-green-600'}`}>₹41/month billed annually</p>
-            )}
 
-            {/* Amount Confirmation Badge */}
-            <div className={`mt-4 p-3 rounded-2xl border-2 text-center ${
+            {/* Confirmation Box (Compact) */}
+            <div className={`mt-4 p-2.5 rounded-xl border flex items-center justify-between gap-3 text-left ${
               tab === 'coins' 
-                ? isDark ? 'bg-amber-500/10 border-amber-500/30' : 'bg-amber-50 border-amber-300'
-                : isDark ? 'bg-purple-500/10 border-purple-500/30' : 'bg-purple-50 border-purple-300'
+                ? isDark ? 'bg-amber-500/5 border-amber-500/20' : 'bg-amber-50/50 border-amber-200'
+                : isDark ? 'bg-purple-500/5 border-purple-500/20' : 'bg-purple-50/50 border-purple-200'
             }`}>
-              <p className={`text-[10px] font-black uppercase tracking-wide mb-1 ${
-                tab === 'coins' 
-                  ? isDark ? 'text-amber-300' : 'text-amber-600'
-                  : isDark ? 'text-purple-300' : 'text-purple-600'
-              }`}>
-                ✓ You will pay:
-              </p>
-              <p className={`text-sm font-black ${
-                tab === 'coins' 
-                  ? isDark ? 'text-amber-200' : 'text-amber-900'
-                  : isDark ? 'text-purple-200' : 'text-purple-900'
-              }`}>
-                ₹{selectedPlan === 'coins_10' || selectedPlan === 'weekly' ? '29' :
-                   selectedPlan === 'coins_25' ? '49' :
-                   selectedPlan === 'monthly' ? '59' : '499'}
-              </p>
-              <p className={`text-[9px] font-semibold mt-1 ${
-                tab === 'coins' 
-                  ? isDark ? 'text-amber-300/70' : 'text-amber-600/70'
-                  : isDark ? 'text-purple-300/70' : 'text-purple-600/70'
-              }`}>
-                {tab === 'coins' ? '🪙 One-time coin purchase' : '👑 Auto-renews ' + (selectedPlan === 'weekly' ? 'weekly' : selectedPlan === 'monthly' ? 'monthly' : 'yearly')}
-              </p>
+              <div>
+                <p className={`text-[8px] font-black uppercase opacity-60 ${headingCls}`}>Total Amount</p>
+                <p className={`text-xs font-black ${headingCls}`}>
+                  ₹{selectedPlan === 'coins_10' || selectedPlan === 'weekly' ? '29' :
+                     selectedPlan === 'coins_25' ? '49' :
+                     selectedPlan === 'monthly' ? '59' : '499'}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className={`text-[10px] font-bold ${tab === 'coins' ? 'text-amber-500' : 'text-purple-500'}`}>
+                  {tab === 'coins' ? '🪙 Coin Top-up' : '👑 Pro Access'}
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Features */}
-          <div className="space-y-4 mb-6">
+          {/* Features - More compact */}
+          <div className="space-y-3 mb-6">
             {tab === 'coins' ? (
               <>
-                <FeatureItem icon="✅" title="No Subscriptions" desc="Pay once, use whenever you like" isDark={isDark} />
-                <FeatureItem icon="📸" title="1 Coin = 1 Solo Scan" desc="Analyze skin to get color palettes" isDark={isDark} />
-                <FeatureItem icon="👩‍❤️‍👨" title="2 Coins = Couple Match" desc="Compare colors with your partner" isDark={isDark} />
-                <FeatureItem icon="♾️" title="No Expiry" desc="Your coins last forever" isDark={isDark} />
+                <CompactFeatureItem icon="📸" title="1 Coin = 1 Scan" />
+                <CompactFeatureItem icon="👩‍❤️‍👨" title="2 Coins = Couple Match" />
+                <CompactFeatureItem icon="♾️" title="No Expiry" />
               </>
             ) : (
               <>
-                <FeatureItem icon="♾️" title="Unlimited Analyses" desc="Analyze colors as many times as you need" isDark={isDark} />
-                <FeatureItem icon="🛍️" title="Full Ad-Free Shopping" desc="Zero interruptions anywhere" isDark={isDark} />
-                <FeatureItem icon="📚" title="Unlimited History" desc="Access all your past analyses forever" isDark={isDark} />
+                <CompactFeatureItem icon="♾️" title="Unlimited Analyses" />
+                <CompactFeatureItem icon="🛍️" title="Ad-Free Shopping" />
+                <CompactFeatureItem icon="📚" title="Full Wardrobe History" />
               </>
             )}
           </div>
 
           {/* Inline Error Message */}
           {paymentError && (
-            <div className={`mb-4 p-2.5 rounded-lg text-xs font-bold text-center border animate-bounce-short ${
+            <div className={`mb-4 p-2 rounded-lg text-[10px] font-bold text-center border animate-bounce-short ${
               isDark ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-red-50 border-red-200 text-red-600'
             }`}>
               ⚠️ {paymentError}
@@ -400,11 +372,11 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
           )}
 
           {/* Checkout Button */}
-          <div className="space-y-3 mt-2">
+          <div className="space-y-2 sticky bottom-0 pt-2 pb-1 bg-inherit">
             <button 
               onClick={() => handlePayment(selectedPlan)}
               disabled={loading}
-              className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 ${
+              className={`w-full py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 ${
                 loading 
                   ? 'bg-gray-500 text-white cursor-wait opacity-80'
                   : tab === 'coins'
@@ -414,27 +386,27 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
             >
               {loading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   Processing...
                 </>
               ) : (
-                `Get ${tab === 'coins' ? 'Coins' : 'PRO'} with Razorpay`
+                `Pay ₹${selectedPlan === 'coins_10' || selectedPlan === 'weekly' ? '29' : selectedPlan === 'coins_25' ? '49' : selectedPlan === 'monthly' ? '59' : '499'} with Razorpay`
               )}
             </button>
 
             <button 
               onClick={onClose}
               disabled={loading}
-              className={`w-full py-3 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all ${
-                isDark ? 'text-white/40 hover:text-white/60 bg-white/5' : 'text-gray-400 hover:text-gray-600 bg-gray-100'
+              className={`w-full py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all ${
+                isDark ? 'text-white/30 hover:text-white/50 bg-white/5' : 'text-gray-400 hover:text-gray-500 bg-gray-50'
               }`}
             >
-              Cancel & Go Back
+              Cancel
             </button>
           </div>
           
-          <p className={`text-[9px] text-center mt-3 font-medium leading-relaxed ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
-            Secure payment powered by Razorpay • Cancel anytime • No hidden charges
+          <p className={`text-[8px] text-center mt-2 font-medium opacity-40 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            Secure payment powered by Razorpay • No hidden charges
           </p>
         </div>
       </div>
@@ -442,16 +414,11 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
   );
 }
 
-function FeatureItem({ icon, title, desc, isDark }) {
+function CompactFeatureItem({ icon, title }) {
   return (
-    <div className="flex gap-4 items-start">
-      <div className={`w-9 h-9 rounded-2xl flex items-center justify-center shrink-0 text-base shadow-sm ${isDark ? 'bg-white/10 border border-white/20' : 'bg-purple-50 border border-purple-100'}`}>
-        {icon}
-      </div>
-      <div>
-        <h4 className={`text-sm font-black ${isDark ? 'text-white/90' : 'text-gray-800'}`}>{title}</h4>
-        <p className={`text-[10px] leading-tight mt-0.5 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{desc}</p>
-      </div>
+    <div className="flex items-center gap-2.5">
+      <span className="text-base">{icon}</span>
+      <span className="text-[11px] font-bold opacity-80">{title}</span>
     </div>
   );
 }
