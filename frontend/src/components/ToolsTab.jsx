@@ -6,6 +6,7 @@ import CommunityFeed from './CommunityFeed';
 import HistoryPanel from './HistoryPanel';
 import StyleBot from './StyleBot';
 import OutfitCalendar from './OutfitCalendar';
+import WardrobePanel from './WardrobePanel';
 import { getWardrobe, auth } from '../api/styleApi';
 
 // --- Extracted from Dashboard.jsx ---
@@ -135,7 +136,7 @@ function ToolsTab({ onOpenScanner, analysisData }) {
   const { t } = useLanguage();
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const [activeTool, setActiveTool] = useState(null); // 'outfit', 'community', 'stylebot', 'tryon'
+  const [activeTool, setActiveTool] = useState(null); // 'outfit', 'community', 'stylebot', 'calendar', 'wardrobe'
   const [wardrobe, setWardrobe] = useState([]);
 
   useEffect(() => {
@@ -210,11 +211,16 @@ function ToolsTab({ onOpenScanner, analysisData }) {
         wardrobe={wardrobe}
       />
     );
+  }  if (activeTool === 'wardrobe') {
+    return (
+      <div className="space-y-4 pt-2 pb-10">
+        <button onClick={() => setActiveTool(null)} className={`text-sm font-bold flex items-center gap-2 ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
+          ← {t('backTools')}
+        </button>
+        <WardrobePanel onShowResult={onShowResult} />
+      </div>
+    );
   }
-
-
-
-
   return (
     <div className="space-y-6 pt-2">
       <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>🛠️ {t('toolsHeader')}</h2>
@@ -243,6 +249,14 @@ function ToolsTab({ onOpenScanner, analysisData }) {
           <span className="text-3xl mb-1 mt-1">📅</span>
           <span className={`font-bold text-sm mt-1 ${isDark ? 'text-amber-100' : 'text-amber-900'}`}>{t('aiCalendar')}</span>
           <span className={`text-[10px] ${isDark ? 'text-amber-300/60' : 'text-amber-600/60'}`}>{t('calendarDesc')}</span>
+        </button>
+
+        <button 
+          onClick={() => setActiveTool('wardrobe')}
+          className={`flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-pink-900/40 to-rose-900/40 border-pink-500/30' : 'bg-gradient-to-br from-pink-50 to-rose-50 border-pink-200 shadow-sm'}`}>
+          <span className="text-3xl mb-1 mt-1">👗</span>
+          <span className={`font-bold text-sm mt-1 ${isDark ? 'text-pink-100' : 'text-pink-900'}`}>{t('navWardrobe')}</span>
+          <span className={`text-[10px] ${isDark ? 'text-pink-300/60' : 'text-pink-600/60'}`}>{t('wardrobeDesc') || 'Manage Closet'}</span>
         </button>
 
         <button 

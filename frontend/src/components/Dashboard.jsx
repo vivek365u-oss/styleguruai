@@ -554,7 +554,7 @@ function Dashboard({ user, onLogout }) {
   const navItems = [
     { id: 'home', emoji: '🏠', label: t('navHome') },
     { id: 'analyze', emoji: '📸', label: t('navAnalyze') },
-    { id: 'wardrobe', emoji: '👗', label: t('navWardrobe') },
+    { id: 'history', emoji: '⌛', label: t('navHistory') },
     { id: 'navigator', emoji: '🧭', label: t('navNavigator') || 'Navigator' },
     { id: 'tools', emoji: '🛠️', label: t('navTools') },
     { id: 'profile', emoji: '❤️', label: t('navProfile') }
@@ -643,7 +643,7 @@ function Dashboard({ user, onLogout }) {
             </>
           )}
 
-          {activeTab === 'wardrobe' && <WardrobePanel user={user} onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
+          {activeTab === 'history' && <HistoryPanel onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
 
           {activeTab === 'navigator' && <StyleNavigator user={user} onAnalyze={() => setActiveTab('analyze')} />}
 

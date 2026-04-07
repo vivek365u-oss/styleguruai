@@ -214,6 +214,7 @@ function WardrobePanel({ user, onShowResult }) {
   const [expandedId, setExpandedId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [toast, setToast] = useState(null);
+  const [filter, setFilter] = useState('all'); // 'all' | 'tops' | 'bottoms' | 'sets'
 
   const showToast = (msg) => {
     setToast(msg);
@@ -245,6 +246,15 @@ function WardrobePanel({ user, onShowResult }) {
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t, wardrobeLimit]);
+
+  const filteredItems = items.filter(item => {
+    if (filter === 'all') return true;
+    const data = item.outfit_data || {};
+    if (filter === 'tops') return !!(data.shirt || data.top || data.kurti);
+    if (filter === 'bottoms') return !!(data.pant || data.bottom || data.jeans);
+    if (filter === 'sets') return !!(data.dress || data.saree || data.suite || data.lehenga);
+    return true;
+  });
 
   const handleDelete = async (item) => {
     const uid = auth.currentUser?.uid;
@@ -347,21 +357,32 @@ function WardrobePanel({ user, onShowResult }) {
                 <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>👗 {t('myWardrobe')}</h2>
                 <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{items.length} {t('outfits')}</p>
               </div>
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className={`rounded-xl px-3 py-2 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
+                <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{items.length}/{wardrobeLimit}</span>
+              </div>
+            </div>
+
+            {/* Closet Filters */}
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+              {[
+                { id: 'all', label: t('all') || 'All', icon: '🌈' },
+                { id: 'tops', label: t('tops') || 'Tops', icon: '👕' },
+                { id: 'bottoms', label: t('bottoms') || 'Bottoms', icon: '👖' },
+                { id: 'sets', label: t('sets') || 'Sets', icon: '👗' },
+              ].map(f => (
                 <button
-                  onClick={() => setActiveSubTab('history')}
-                  className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border ${
-                    isDark
-                      ? 'bg-blue-500/20 hover:bg-blue-500/30 border-blue-500/30 text-blue-300 hover:text-blue-200'
-                      : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-600 hover:text-blue-700'
+                  key={f.id}
+                  onClick={() => setFilter(f.id)}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-tight transition-all border whitespace-nowrap ${
+                    filter === f.id
+                      ? 'bg-purple-500 border-purple-500 text-white shadow-lg'
+                      : isDark ? 'bg-white/5 border-white/10 text-white/50 hover:text-white' : 'bg-white border-gray-200 text-gray-500 hover:border-purple-300'
                   }`}
                 >
-                  📋 {t('history')}
+                  <span>{f.icon}</span>
+                  {f.label}
                 </button>
-                <div className={`rounded-xl px-3 py-2 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
-                  <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{items.length}/{wardrobeLimit}</span>
-                </div>
-              </div>
+              ))}
             </div>
 
             {capWarning && (
@@ -381,7 +402,7 @@ function WardrobePanel({ user, onShowResult }) {
               </div>
             ) : (
               <div className="space-y-3">
-                {items.map(item => (
+                {filteredItems.map(item => (
                   <div key={item.id} className={`rounded-2xl border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
                     <div
                       className="flex items-center gap-4 p-4 cursor-pointer"
