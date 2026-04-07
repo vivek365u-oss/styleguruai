@@ -214,7 +214,7 @@ function OutfitChecker() {
         source: 'outfit_checker',
         category: cat,
         tags: selectedTags,
-        gender: result.gender,
+        gender: result.gender || gender || 'male',
         imageId: imageId,
         outfit_data: {
           colors: result.outfit_analysis?.color_name ? [{ name: result.outfit_analysis.color_name, hex: result.outfit_analysis.dominant_color_hex }] : [],

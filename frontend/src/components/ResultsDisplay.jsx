@@ -543,7 +543,7 @@ function WardrobeSyncButton({ analysis, recommendations, isDark }) {
         top_recommendation: recommendations.best_shirt_colors?.[0]?.name || 'N/A',
         harmony_score: 95, 
         season: analysis.skin_tone.color_season,
-        gender: analysis.gender,
+        gender: analysis.gender || 'male',
         outfit_data: {
           shirt: recommendations.best_shirt_colors?.[0]?.name,
           pant: recommendations.best_pant_colors?.[0]?.name,
