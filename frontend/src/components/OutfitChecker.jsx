@@ -216,6 +216,7 @@ function OutfitChecker() {
         tags: selectedTags,
         gender: result.gender || gender || 'male',
         imageId: imageId,
+        hex: result.outfit_analysis?.dominant_color_hex || '#888888',
         color_name: result.outfit_analysis?.color_name || 'Detected Color',
         outfit_data: {
           colors: result.outfit_analysis?.color_name ? [{ name: result.outfit_analysis.color_name, hex: result.outfit_analysis.dominant_color_hex }] : [],
@@ -231,7 +232,18 @@ function OutfitChecker() {
     } catch {
       try {
         const queue = JSON.parse(localStorage.getItem('sg_wardrobe_queue') || '[]');
-        queue.push({ source: 'outfit_checker', category: cat, imageId: null, outfit_data: { colors: [] }, skin_tone: result.skin_analysis?.skin_tone || '', skin_hex: result.skin_analysis?.skin_color_hex || '#C68642', compatibility_score: score, saved_at: new Date().toISOString() });
+        queue.push({ 
+          source: 'outfit_checker', 
+          category: cat, 
+          imageId: null, 
+          hex: result.outfit_analysis?.dominant_color_hex || '#888888',
+          color_name: result.outfit_analysis?.color_name || 'Detected Color',
+          outfit_data: { colors: [] }, 
+          skin_tone: result.skin_analysis?.skin_tone || '', 
+          skin_hex: result.skin_analysis?.skin_color_hex || '#C68642', 
+          compatibility_score: score, 
+          saved_at: new Date().toISOString() 
+        });
         localStorage.setItem('sg_wardrobe_queue', JSON.stringify(queue));
         setWardrobeSaved(true); 
       } catch {
