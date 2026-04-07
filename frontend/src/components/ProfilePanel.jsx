@@ -253,7 +253,7 @@ export default function ProfilePanel({ hideHeader = false }) {
     ? 'bg-[#0f1123]/80 backdrop-blur-3xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)]' 
     : 'bg-white/90 backdrop-blur-xl border border-purple-500/10 shadow-[0_8px_32px_rgba(31,38,135,0.07)]';
     
-  const labelCls = isDark ? 'text-white/40' : 'text-purple-950/60';
+  const labelCls = isDark ? 'text-white/40' : 'text-purple-950/80';
   const headingCls = isDark ? 'text-white' : 'text-slate-900';
   const accentCls = 'text-purple-500';
 
@@ -320,7 +320,7 @@ export default function ProfilePanel({ hideHeader = false }) {
               <div className="space-y-1">
                 <h2 className={`text-3xl font-black tracking-tight ${headingCls}`}>{user?.name}</h2>
                 <div className="flex items-center justify-center md:justify-start gap-2">
-                  <p className={`text-xs ${labelCls} font-bold opacity-60 tracking-tight`}>{user?.email}</p>
+                  <p className={`text-xs ${labelCls} font-bold tracking-tight`}>{user?.email}</p>
                 </div>
                 <div className="pt-2 flex flex-wrap gap-2 justify-center md:justify-start">
                   <button 
@@ -347,7 +347,7 @@ export default function ProfilePanel({ hideHeader = false }) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 min-w-[90px] py-3.5 rounded-[1.5rem] flex flex-col items-center gap-1 transition-all duration-300 relative ${activeTab === tab.id ? 'text-purple-500 scale-[1.02]' : 'text-gray-500 opacity-40 hover:opacity-100'}`}
+            className={`flex-1 min-w-[90px] py-3.5 rounded-[1.5rem] flex flex-col items-center gap-1 transition-all duration-300 relative ${activeTab === tab.id ? 'text-purple-500 scale-[1.02]' : isDark ? 'text-white opacity-40 hover:opacity-100' : 'text-slate-600 opacity-60 hover:opacity-100'}`}
           >
             {activeTab === tab.id && (
                <div className={`absolute inset-0 rounded-[1.5rem] shadow-inner ${isDark ? 'bg-gradient-to-br from-purple-500/20 to-transparent' : 'bg-purple-50'}`} />
@@ -375,26 +375,26 @@ export default function ProfilePanel({ hideHeader = false }) {
                  <div className={`rounded-3xl p-6 border text-center ${cardCls} bg-gradient-to-br from-purple-500/5 to-transparent`}>
                     <div className="text-3xl mb-2">📸</div>
                     <div className={`text-2xl font-black ${headingCls}`}>{stats.analyses}</div>
-                    <div className={`text-[10px] uppercase font-black tracking-widest opacity-60 ${labelCls}`}>Analyses</div>
+                    <div className={`text-[10px] uppercase font-black tracking-widest ${labelCls}`}>Analyses</div>
                  </div>
                  <div className={`rounded-3xl p-6 border text-center ${cardCls} bg-gradient-to-br from-pink-500/5 to-transparent`}>
                     <div className="text-3xl mb-2">🎨</div>
                     <div className={`text-2xl font-black ${headingCls}`}>{stats.colors}</div>
-                    <div className={`text-[10px] uppercase font-black tracking-widest opacity-60 ${labelCls}`}>Items Saved</div>
+                    <div className={`text-[10px] uppercase font-black tracking-widest ${labelCls}`}>Items Saved</div>
                  </div>
               </div>
 
               {wardrobeStats ? (
                 <div className={`rounded-[2.5rem] p-8 border relative overflow-hidden group transition-all duration-500 ${cardCls} ${isDark ? 'from-indigo-500/5' : 'from-indigo-50/50'} bg-gradient-to-br`}>
                   <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-50" />
-                  <h3 className={`text-[11px] font-black uppercase mb-8 tracking-[0.2em] opacity-40 ${headingCls}`}>Your Style DNA</h3>
+                  <h3 className={`text-[11px] font-black uppercase mb-8 tracking-[0.2em] opacity-60 ${headingCls}`}>Your Style DNA</h3>
                   
                   <div className="flex flex-col sm:flex-row items-center gap-10">
                     <div className="space-y-6 flex-1 w-full">
                       <div className="flex items-center gap-5">
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-inner ${isDark ? 'bg-indigo-500/10' : 'bg-indigo-50'}`}>👤</div>
                         <div>
-                          <p className={`text-[10px] uppercase font-black opacity-40 leading-none mb-1 ${labelCls}`}>Tone & Season</p>
+                          <p className={`text-[10px] uppercase font-black leading-none mb-1 ${labelCls}`}>Tone & Season</p>
                           <p className={`text-lg font-black tracking-tight ${headingCls}`}>{wardrobeStats.skinTone} <span className="opacity-20 mx-1">•</span> {wardrobeStats.season}</p>
                         </div>
                       </div>
@@ -402,7 +402,7 @@ export default function ProfilePanel({ hideHeader = false }) {
                       <div className="flex items-center gap-5">
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-inner ${isDark ? 'bg-pink-500/10' : 'bg-pink-50'}`}>📈</div>
                         <div className="flex-1">
-                          <p className={`text-[10px] uppercase font-black opacity-40 leading-none mb-2 ${labelCls}`}>Harmony Insights</p>
+                          <p className={`text-[10px] uppercase font-black leading-none mb-2 ${labelCls}`}>Harmony Insights</p>
                           <div className="flex gap-1 items-end h-8">
                              {[40, 70, 45, 90, 65, 80].map((v, i) => (
                                <motion.div 
@@ -462,12 +462,12 @@ export default function ProfilePanel({ hideHeader = false }) {
             >
               <div className={`rounded-3xl p-8 border ${cardCls}`}>
                  <div className="flex items-center justify-between mb-8">
-                    <h3 className={`text-[11px] font-black uppercase tracking-[0.2em] opacity-40 ${headingCls}`}>Wardrobe Hub</h3>
+                    <h3 className={`text-[11px] font-black uppercase tracking-[0.2em] opacity-60 ${headingCls}`}>Wardrobe Hub</h3>
                     <button onClick={() => navigate('/dashboard')} className="text-[10px] font-black text-purple-500 uppercase tracking-widest">History</button>
                  </div>
-                 <div className="flex flex-col items-center justify-center py-10 opacity-40">
+                 <div className="flex flex-col items-center justify-center py-10 opacity-60">
                     <div className="text-5xl mb-6">👔</div>
-                    <p className="text-sm font-bold text-center">Your personalized wardrobe is synced and ready</p>
+                    <p className={`text-sm font-bold text-center ${headingCls}`}>Your personalized wardrobe is synced and ready</p>
                  </div>
               </div>
             </motion.div>
@@ -483,7 +483,7 @@ export default function ProfilePanel({ hideHeader = false }) {
               className="space-y-6"
             >
               <div className={`rounded-3xl p-8 border ${cardCls}`}>
-                <h3 className={`text-[11px] font-black uppercase mb-8 tracking-[0.2em] opacity-40 ${headingCls}`}>App Personalization</h3>
+                <h3 className={`text-[11px] font-black uppercase mb-8 tracking-[0.2em] opacity-60 ${headingCls}`}>App Personalization</h3>
                 
                 <div className="space-y-8">
                   <div className="flex items-center justify-between">
@@ -524,7 +524,7 @@ export default function ProfilePanel({ hideHeader = false }) {
               </div>
 
               <div className={`rounded-3xl p-8 border ${cardCls} bg-gradient-to-r from-purple-500/5 to-pink-500/5`}>
-                 <h3 className={`text-[11px] font-black uppercase mb-8 tracking-[0.2em] opacity-40 ${headingCls}`}>Physical Profile</h3>
+                 <h3 className={`text-[11px] font-black uppercase mb-8 tracking-[0.2em] opacity-60 ${headingCls}`}>Physical Profile</h3>
                  <div className="space-y-10">
                    {/* HEIGHT SELECTOR */}
                    <div>
