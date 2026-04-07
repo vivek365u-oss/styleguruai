@@ -8,8 +8,9 @@ import { updateProfile, deleteUser } from 'firebase/auth';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
-export default function ProfilePanel({ hideHeader = false, onOpenUpgrade, isDark }) {
+export default function ProfilePanel({ hideHeader = false, onOpenUpgrade }) {
   const { theme, setTheme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const { isPro, usage, validUntil } = usePlan();
   const { language, changeLanguage, t } = useLanguage();
   const navigate = useNavigate();
