@@ -272,11 +272,10 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
       <WeatherTip isDark={isDark} />
 
       {/* AdSense Ad */}
-      {!isPro && (
-        <div className="mt-2">
-          <AdSense />
-        </div>
-      )}
+      <div className="mt-2 text-center py-4 bg-white/5 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-sm">
+        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">StyleGuru AI Partner Content</p>
+        <AdSense />
+      </div>
     </div>
   );
 }

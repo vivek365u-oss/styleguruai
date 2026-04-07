@@ -130,11 +130,9 @@ function ShoppingCart({ onClose, onProceedToCheckout, isOpen }) {
               ₹{totals.total.toFixed(0)}
             </span>
           </div>
-          {!isPro && (
-            <div className={`text-xs p-2 rounded mt-3 ${isDark ? 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-300' : 'bg-yellow-100 border border-yellow-300 text-yellow-700'}`}>
-              💡 Free users: We earn 4% commission to support development
-            </div>
-          )}
+          <div className={`text-xs p-3 rounded-xl mt-4 text-center border animate-pulse-slow ${isDark ? 'bg-purple-500/10 border-purple-500/20 text-purple-300' : 'bg-purple-50' + ' border-purple-100 text-purple-700'}`}>
+            ✨ <span className="font-bold">StyleGuru AI is now completely free!</span> Enjoy unlimited style analysis.
+          </div>
         </div>
 
         {/* Action Buttons */}

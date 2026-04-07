@@ -9,6 +9,7 @@ import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';
 import ColorRecommendationsShop from './ColorRecommendationsShop';
 import AffiliateLink from './AffiliateLink';
+import AdSense from '../AdSense';
 
 // ── Shopping Links ───────────────────────────────────────────
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
