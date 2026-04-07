@@ -218,51 +218,84 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
       ) : (
         <div className="space-y-3">
           {filteredItems.map(item => (
-            <div key={item.id} className={`rounded-2xl border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+            <div key={item.id} className={`rounded-[2rem] border overflow-hidden transition-all duration-300 ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-gray-100 shadow-sm hover:shadow-md'}`}>
               <div
-                className="flex items-center gap-4 p-4 cursor-pointer"
+                className="flex items-center gap-4 p-5 cursor-pointer"
                 onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
               >
-                <WardrobeImage imageId={item.imageId} fallbackColor={item.skin_hex} isDark={isDark} />
+                <div className="relative">
+                    <WardrobeImage imageId={item.imageId} fallbackColor={item.hex || item.skin_hex} />
+                    {item.hex && (
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: item.hex }} />
+                    )}
+                </div>
+                
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className={`font-bold text-sm capitalize ${isDark ? 'text-white' : 'text-gray-800'}`}>
-                      {item.outfit_data?.shirt || item.outfit_data?.top || item.outfit_data?.kurti || item.outfit_data?.dress || item.category || 'Outfit'}
+                    <span className={`font-black text-sm capitalize tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      {item.category ? t(`cat_${item.category}`) : (item.outfit_data?.shirt || item.outfit_data?.top || 'Style Item')}
                     </span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                    <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border border-dashed ${
                       item.source === 'outfit_checker'
-                        ? isDark ? 'bg-blue-500/20 text-blue-300 border-blue-500/20' : 'bg-blue-100 text-blue-700 border-blue-300'
-                        : isDark ? 'bg-purple-500/20 text-purple-300 border-purple-500/20' : 'bg-purple-100 text-purple-700 border-purple-300'
+                        ? isDark ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-blue-50 text-blue-600 border-blue-200'
+                        : isDark ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : 'bg-purple-50 text-purple-600 border-purple-200'
                     }`}>
-                      {item.source === 'outfit_checker' ? t('checked') : t('analyzed')}
+                      {item.source === 'outfit_checker' ? 'CHECK' : 'SCAN'}
                     </span>
                   </div>
-                  <p className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{formatDate(item.saved_at)}</p>
+                  
+                  {/* Tags Preview */}
+                  {item.tags && item.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                          {item.tags.slice(0, 2).map((tag, idx) => (
+                              <span key={idx} className="text-[8px] font-black uppercase opacity-40">#{t(tag)}</span>
+                          ))}
+                          {item.tags.length > 2 && <span className="text-[8px] font-black opacity-40">+{item.tags.length - 2}</span>}
+                      </div>
+                  )}
                 </div>
-                <span className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{expandedId === item.id ? '▲' : '▼'}</span>
+                
+                <div className="text-right">
+                    <p className={`text-[10px] font-bold ${isDark ? 'text-white/20' : 'text-slate-300'}`}>{formatDate(item.saved_at)}</p>
+                    <span className={`text-[10px] mt-1 block ${isDark ? 'text-white/30' : 'text-slate-400'}`}>{expandedId === item.id ? '▲' : '▼'}</span>
+                </div>
               </div>
 
               {expandedId === item.id && (
-                <div className={`px-4 pb-4 border-t ${isDark ? 'border-white/5' : 'border-gray-100'}`}>
-                  <div className="pt-3 space-y-2">
-                    {item.category && (<div className="flex items-center gap-2"><span className="text-sm">🏷️</span><p className={`text-xs font-bold capitalize ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>{item.category}</p></div>)}
-                    {item.outfit_data?.shirt && (<div className="flex items-center gap-2"><span className="text-sm">👕</span><p className={`text-xs ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{item.outfit_data.shirt}</p></div>)}
-                    {item.outfit_data?.dress && (<div className="flex items-center gap-2"><span className="text-sm">👗</span><p className={`text-xs ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{item.outfit_data.dress}</p></div>)}
-                    {item.outfit_data?.pant && (<div className="flex items-center gap-2"><span className="text-sm">👖</span><p className={`text-xs ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{item.outfit_data.pant}</p></div>)}
-                    {item.outfit_data?.shoes && (<div className="flex items-center gap-2"><span className="text-sm">👟</span><p className={`text-xs ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{item.outfit_data.shoes}</p></div>)}
-                    {item.outfit_data?.occasion && (<div className="flex items-center gap-2"><span className="text-sm">📅</span><p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{item.outfit_data.occasion}</p></div>)}
-                    {item.compatibility_score !== undefined && (<div className="flex items-center gap-2"><span className="text-sm">🎯</span><p className={`text-xs font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>{item.compatibility_score}% compatible</p></div>)}
+                <div className={`px-5 pb-5 border-t animate-fade-in ${isDark ? 'border-white/5' : 'border-slate-50'}`}>
+                  <div className="pt-4 grid grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                        <p className={`text-[9px] font-black uppercase tracking-widest opacity-40 ${isDark ? 'text-white' : 'text-slate-900'}`}>Attributes</p>
+                        {item.category && (<div className="flex items-center gap-2"><p className={`text-[11px] font-bold capitalize ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>🏷️ {t(`cat_${item.category}`) || item.category}</p></div>)}
+                        {item.hex && (<div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.hex }} /><p className={`text-[11px] font-bold uppercase tracking-tighter ${isDark ? 'text-white/70' : 'text-slate-700'}`}>{item.hex}</p></div>)}
+                        {item.compatibility_score !== undefined && (<div className="flex items-center gap-2"><p className={`text-[11px] font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>🎯 {item.compatibility_score}% Match</p></div>)}
+                    </div>
+                    
+                    <div className="space-y-3">
+                        <p className={`text-[9px] font-black uppercase tracking-widest opacity-40 ${isDark ? 'text-white' : 'text-slate-900'}`}>Metadata</p>
+                        {item.tags && item.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                                {item.tags.map((tag, idx) => (
+                                    <span key={idx} className={`px-2 py-1 rounded-lg text-[9px] font-bold ${isDark ? 'bg-white/5 text-white/60 border border-white/10' : 'bg-slate-50 text-slate-500 border border-slate-100'}`}>
+                                        {t(tag)}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                        {!item.tags && <p className="text-[10px] opacity-20 italic">No tags assigned</p>}
+                    </div>
                   </div>
+
                   <button
                     onClick={() => handleDelete(item)}
                     disabled={deletingId === item.id}
-                    className={`mt-3 w-full py-2 rounded-xl text-xs font-bold border transition-all ${
+                    className={`mt-6 w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${
                       isDark
                         ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
                         : 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'
-                    } disabled:opacity-50`}
+                    } disabled:opacity-50 active:scale-95`}
                   >
-                    {deletingId === item.id ? t('deleting') : t('removeFromWardrobe')}
+                    {deletingId === item.id ? t('deleting') : `🗑️ ${t('removeFromWardrobe')}`}
                   </button>
                 </div>
               )}
