@@ -79,6 +79,13 @@ function DailyDropModal({ lastAnalysis, isDark, onClose }) {
             </div>
           </div>
         )}
+        {/* Bottom Ad Card — Consolidated to prevent console 400 errors */}
+        {!isPro && (
+          <div className={`mt-8 rounded-3xl p-6 border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-200'}`}>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 text-center">Sponsored Style Content</p>
+            <AdSense />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,24 +2,33 @@ import { useEffect } from "react";
 
 const AdSense = () => {
   useEffect(() => {
-    try {
-      if (window.adsbygoogle) {
-        window.adsbygoogle.push({});
+    // Only push if script is loaded and we haven't already pushed for this element
+    const pushAd = () => {
+      try {
+        if (window.adsbygoogle && window.adsbygoogle.push && !document.querySelector('.adsbygoogle-noablock')) {
+          window.adsbygoogle.push({});
+        }
+      } catch (err) {
+        console.warn("AdSense push ignored:", err.message);
       }
-    } catch (err) {
-      console.log("AdSense error:", err);
-    }
+    };
+
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(pushAd, 500);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
-    <ins
-      className="adsbygoogle"
-      style={{ display: "block" }}
-      data-ad-client="ca-pub-7408587005129335"
-      data-ad-slot="3569732070"
-      data-ad-format="auto"
-      data-full-width-responsive="true"
-    ></ins>
+    <div className="adsense-container" style={{ minHeight: '280px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <ins
+        className="adsbygoogle"
+        style={{ display: "block", minWidth: '250px', minHeight: '280px' }}
+        data-ad-client="ca-pub-7408587005129335"
+        data-ad-slot="3569732070"
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      ></ins>
+    </div>
   );
 };
 
