@@ -11,7 +11,7 @@ import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import AdSense from '../AdSense';
 import { saveProfile, auth } from '../api/styleApi';
 import WardrobePanel from './WardrobePanel';
-import { saveWardrobeItem, activateProSubscription, consumeCoin } from '../api/styleApi';
+import { saveWardrobeItem } from '../api/styleApi';
 import { usePlan } from '../context/PlanContext';
 import OOTDCard from './OOTDCard';
 import WeatherTip from './WeatherTip';
