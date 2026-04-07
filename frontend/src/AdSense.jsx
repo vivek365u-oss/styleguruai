@@ -5,8 +5,10 @@ const AdSense = () => {
     // Only push if script is loaded and we haven't already pushed for this element
     const pushAd = () => {
       try {
-        if (window.adsbygoogle && window.adsbygoogle.push && !document.querySelector('.adsbygoogle-noablock')) {
+        const adElement = document.querySelector('.adsbygoogle:not([data-adsbygoogle-status="done"])');
+        if (window.adsbygoogle && adElement) {
           window.adsbygoogle.push({});
+          adElement.setAttribute('data-adsbygoogle-status', 'done');
         }
       } catch (err) {
         console.warn("AdSense push ignored:", err.message);
@@ -14,7 +16,7 @@ const AdSense = () => {
     };
 
     // Small delay to ensure DOM is ready
-    const timer = setTimeout(pushAd, 500);
+    const timer = setTimeout(pushAd, 1000);
     return () => clearTimeout(timer);
   }, []);
 
