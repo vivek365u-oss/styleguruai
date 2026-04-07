@@ -282,14 +282,17 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     onLoadingStart();
     setShowProgress(true);
     startProgress();
+    // Map language code for backend (hinglish -> en, hi -> hi)
+    const backendLang = language === 'hi' ? 'hi' : 'en';
+    
     try {
       let res;
       if (mode === 'seasonal') {
-        res = await analyzeImageSeasonal(file, season, language, handleProgress);
+        res = await analyzeImageSeasonal(file, season, backendLang, handleProgress);
       } else if (gender === 'female') {
-        res = await analyzeImageFemale(file, language, handleProgress);
+        res = await analyzeImageFemale(file, backendLang, handleProgress);
       } else {
-        res = await analyzeImage(file, language, handleProgress);
+        res = await analyzeImage(file, backendLang, handleProgress);
       }
       
       console.log("[UploadSection] Analysis successful!");
@@ -332,14 +335,17 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     onLoadingStart();
     setShowProgress(true);
     startProgress();
+    // Map language code for backend
+    const backendLang = language === 'hi' ? 'hi' : 'en';
+
     try {
       const file1 = dataURLtoFile(partner1, 'partner1.jpg');
       const file2 = dataURLtoFile(partner2, 'partner2.jpg');
 
       handleProgress(10);
-      const res1 = partner1Gender === 'female' ? await analyzeImageFemale(file1, language, () => {}) : await analyzeImage(file1, language, () => {});
+      const res1 = partner1Gender === 'female' ? await analyzeImageFemale(file1, backendLang, () => {}) : await analyzeImage(file1, backendLang, () => {});
       handleProgress(50);
-      const res2 = partner2Gender === 'female' ? await analyzeImageFemale(file2, language, () => {}) : await analyzeImage(file2, language, () => {});
+      const res2 = partner2Gender === 'female' ? await analyzeImageFemale(file2, backendLang, () => {}) : await analyzeImage(file2, backendLang, () => {});
       handleProgress(100);
 
       completeProgress();

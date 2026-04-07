@@ -101,6 +101,14 @@ export function PlansUpgradeScreen({ isDark = false, onSelectPlan, onClose }) {
             ))}
           </div>
 
+          {/* Close button for confirmation */}
+          <button 
+            onClick={() => setShowConfirmation(false)}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/5 text-gray-500 flex items-center justify-center hover:bg-black/10 transition z-20"
+          >
+            ✕
+          </button>
+
           <div className="flex gap-3">
             <button
               onClick={() => setShowConfirmation(false)}

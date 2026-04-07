@@ -549,7 +549,7 @@ function Dashboard({ user, onLogout }) {
         confidence: enriched.analysis?.skin_tone?.confidence,
         best_colors: enriched.recommendations?.best_shirt_colors?.slice(0, 5) || [],
         gender_mode: enriched.gender || currentGender,
-        language: localStorage.getItem('sg_language') || 'en',
+        language: localStorage.getItem('styleguru_lang') || 'en',
         analyzed_at: new Date().toISOString(),
       };
       saveProfile(uid, profileData).catch(() => {

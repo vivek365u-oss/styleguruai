@@ -1,27 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { logEvent, EVENTS } from '../utils/analytics';
 import { useLanguage } from '../i18n/LanguageContext';
-import { auth } from '../api/styleApi';
-import axios from 'axios';
-
-const API = axios.create({ 
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
-  timeout: 30000
-});
-
-// Add auth interceptor
-API.interceptors.request.use(async (config) => {
-  const user = auth.currentUser;
-  if (user) {
-    try {
-      const token = await user.getIdToken();
-      config.headers.Authorization = `Bearer ${token}`;
-    } catch (e) {
-      console.error('[PaywallModal] Token fetch failed:', e);
-    }
-  }
-  return config;
-});
+import { auth, API } from '../api/styleApi'; // Unified API instance
 
 function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
   const { t } = useLanguage();
@@ -420,26 +400,38 @@ function PaywallModal({ isOpen, onClose, onUpgrade, isDark }) {
           )}
 
           {/* Checkout Button */}
-          <button 
-            onClick={() => handlePayment(selectedPlan)}
-            disabled={loading}
-            className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 ${
-              loading 
-                ? 'bg-gray-500 text-white cursor-wait opacity-80'
-                : tab === 'coins'
-                   ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:shadow-orange-500/50'
-                   : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-purple-500/50'
-            }`}
-          >
-            {loading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Processing...
-              </>
-            ) : (
-              `Get ${tab === 'coins' ? 'Coins' : 'PRO'} with Razorpay`
-            )}
-          </button>
+          <div className="space-y-3 mt-2">
+            <button 
+              onClick={() => handlePayment(selectedPlan)}
+              disabled={loading}
+              className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-2 ${
+                loading 
+                  ? 'bg-gray-500 text-white cursor-wait opacity-80'
+                  : tab === 'coins'
+                     ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:shadow-orange-500/50'
+                     : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-purple-500/50'
+              }`}
+            >
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                `Get ${tab === 'coins' ? 'Coins' : 'PRO'} with Razorpay`
+              )}
+            </button>
+
+            <button 
+              onClick={onClose}
+              disabled={loading}
+              className={`w-full py-3 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all ${
+                isDark ? 'text-white/40 hover:text-white/60 bg-white/5' : 'text-gray-400 hover:text-gray-600 bg-gray-100'
+              }`}
+            >
+              Cancel & Go Back
+            </button>
+          </div>
           
           <p className={`text-[9px] text-center mt-3 font-medium leading-relaxed ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
             Secure payment powered by Razorpay • Cancel anytime • No hidden charges
