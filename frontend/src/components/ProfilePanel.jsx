@@ -5,6 +5,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
 import { auth, loadProfile, logout, getHistory, getSavedColors, saveUserPreferences, loadUserPreferences } from '../api/styleApi';
 import { updateProfile, deleteUser } from 'firebase/auth';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
@@ -248,9 +249,13 @@ export default function ProfilePanel({ hideHeader = false }) {
     }
   };
 
-  const cardCls = isDark ? 'bg-white/5 border border-white/10 shadow-2xl' : 'bg-white border border-gray-100 shadow-xl shadow-gray-200/50';
-  const labelCls = isDark ? 'text-white/40' : 'text-gray-400';
-  const headingCls = isDark ? 'text-white' : 'text-gray-900';
+  const cardCls = isDark 
+    ? 'bg-[#0f1123]/80 backdrop-blur-3xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.36)]' 
+    : 'bg-white/90 backdrop-blur-xl border border-purple-500/10 shadow-[0_8px_32px_rgba(31,38,135,0.07)]';
+    
+  const labelCls = isDark ? 'text-white/40' : 'text-purple-950/60';
+  const headingCls = isDark ? 'text-white' : 'text-slate-900';
+  const accentCls = 'text-purple-500';
 
   if (loading) {
     return (
@@ -354,229 +359,280 @@ export default function ProfilePanel({ hideHeader = false }) {
       </div>
 
       {/* ── TAB CONTENT ────────────────────────────────────────────── */}
-      <div className="min-h-[400px]">
-        
-        {/* TAB: OVERVIEW */}
-        {activeTab === 'overview' && (
-          <div className="space-y-6 animate-slide-up">
-            <div className="grid grid-cols-2 gap-4">
-               <div className={`rounded-3xl p-6 border text-center ${cardCls} bg-gradient-to-br from-purple-500/5 to-transparent`}>
-                  <div className="text-3xl mb-2">📸</div>
-                  <div className={`text-2xl font-black ${headingCls}`}>{stats.analyses}</div>
-                  <div className={`text-[10px] uppercase font-black tracking-widest opacity-60 ${labelCls}`}>Analyses</div>
-               </div>
-               <div className={`rounded-3xl p-6 border text-center ${cardCls} bg-gradient-to-br from-pink-500/5 to-transparent`}>
-                  <div className="text-3xl mb-2">🎨</div>
-                  <div className={`text-2xl font-black ${headingCls}`}>{stats.colors}</div>
-                  <div className={`text-[10px] uppercase font-black tracking-widest opacity-60 ${labelCls}`}>Items Saved</div>
-               </div>
-            </div>
+      <div className="min-h-[400px] relative">
+        <AnimatePresence mode="wait">
+          {/* TAB: OVERVIEW */}
+          {activeTab === 'overview' && (
+            <motion.div 
+              key="overview"
+              initial={{ opacity: 0, y: 15 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.4, ease: "circOut" }}
+              className="space-y-6"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                 <div className={`rounded-3xl p-6 border text-center ${cardCls} bg-gradient-to-br from-purple-500/5 to-transparent`}>
+                    <div className="text-3xl mb-2">📸</div>
+                    <div className={`text-2xl font-black ${headingCls}`}>{stats.analyses}</div>
+                    <div className={`text-[10px] uppercase font-black tracking-widest opacity-60 ${labelCls}`}>Analyses</div>
+                 </div>
+                 <div className={`rounded-3xl p-6 border text-center ${cardCls} bg-gradient-to-br from-pink-500/5 to-transparent`}>
+                    <div className="text-3xl mb-2">🎨</div>
+                    <div className={`text-2xl font-black ${headingCls}`}>{stats.colors}</div>
+                    <div className={`text-[10px] uppercase font-black tracking-widest opacity-60 ${labelCls}`}>Items Saved</div>
+                 </div>
+              </div>
 
-            {wardrobeStats ? (
-              <div className={`rounded-[2.5rem] p-8 border relative overflow-hidden group transition-all duration-500 ${isDark ? 'bg-[#0f1123] border-indigo-500/20' : 'bg-white border-indigo-100 shadow-xl shadow-indigo-500/5'}`}>
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-50" />
-                <h3 className={`text-[11px] font-black uppercase mb-8 tracking-[0.2em] opacity-40 ${headingCls}`}>Your Style DNA</h3>
-                
-                <div className="flex flex-col sm:flex-row items-center gap-10">
-                  <div className="space-y-6 flex-1 w-full">
-                    <div className="flex items-center gap-5">
-                      <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-xl shadow-inner">👤</div>
-                      <div>
-                        <p className={`text-[10px] uppercase font-black opacity-40 leading-none mb-1 ${labelCls}`}>Tone & Season</p>
-                        <p className={`text-lg font-black tracking-tight ${headingCls}`}>{wardrobeStats.skinTone} <span className="opacity-20 mx-1">•</span> {wardrobeStats.season}</p>
+              {wardrobeStats ? (
+                <div className={`rounded-[2.5rem] p-8 border relative overflow-hidden group transition-all duration-500 ${cardCls} ${isDark ? 'from-indigo-500/5' : 'from-indigo-50/50'} bg-gradient-to-br`}>
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-50" />
+                  <h3 className={`text-[11px] font-black uppercase mb-8 tracking-[0.2em] opacity-40 ${headingCls}`}>Your Style DNA</h3>
+                  
+                  <div className="flex flex-col sm:flex-row items-center gap-10">
+                    <div className="space-y-6 flex-1 w-full">
+                      <div className="flex items-center gap-5">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-inner ${isDark ? 'bg-indigo-500/10' : 'bg-indigo-50'}`}>👤</div>
+                        <div>
+                          <p className={`text-[10px] uppercase font-black opacity-40 leading-none mb-1 ${labelCls}`}>Tone & Season</p>
+                          <p className={`text-lg font-black tracking-tight ${headingCls}`}>{wardrobeStats.skinTone} <span className="opacity-20 mx-1">•</span> {wardrobeStats.season}</p>
+                        </div>
                       </div>
-                    </div>
-                    
-                    {/* HARMONY MINI CHART */}
-                    <div className="flex items-center gap-5">
-                      <div className="w-12 h-12 rounded-2xl bg-pink-500/10 flex items-center justify-center text-xl shadow-inner">📈</div>
-                      <div className="flex-1">
-                        <p className={`text-[10px] uppercase font-black opacity-40 leading-none mb-2 ${labelCls}`}>Harmony Insights</p>
-                        <div className="flex gap-1 items-end h-8">
-                           {[40, 70, 45, 90, 65, 80].map((v, i) => (
-                             <div key={i} className="flex-1 bg-gradient-to-t from-pink-500 to-purple-500 rounded-t-sm opacity-60 hover:opacity-100 transition-all cursor-crosshair" style={{ height: `${v}%` }} title={`Trait ${i}: ${v}%`} />
-                           ))}
+                      
+                      <div className="flex items-center gap-5">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-inner ${isDark ? 'bg-pink-500/10' : 'bg-pink-50'}`}>📈</div>
+                        <div className="flex-1">
+                          <p className={`text-[10px] uppercase font-black opacity-40 leading-none mb-2 ${labelCls}`}>Harmony Insights</p>
+                          <div className="flex gap-1 items-end h-8">
+                             {[40, 70, 45, 90, 65, 80].map((v, i) => (
+                               <motion.div 
+                                 key={i} 
+                                 initial={{ height: 0 }}
+                                 animate={{ height: `${v}%` }}
+                                 transition={{ delay: 0.5 + (i * 0.1), duration: 0.8, ease: "anticipate" }}
+                                 className="flex-1 bg-gradient-to-t from-pink-500 to-purple-500 rounded-t-sm opacity-60 hover:opacity-100 transition-all cursor-crosshair" 
+                                 title={`Trait ${i}: ${v}%`} 
+                               />
+                             ))}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="relative group/swatch">
-                    <div className="w-32 h-32 rounded-[2.5rem] shadow-2xl border-8 border-white p-2 swatch-pop relative z-10 overflow-hidden" style={{ backgroundColor: wardrobeStats.skinHex }}>
-                       <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent" />
+                    
+                    <div className="relative group/swatch">
+                      <div className="w-32 h-32 rounded-[2.5rem] shadow-2xl border-8 border-white p-2 swatch-pop relative z-10 overflow-hidden" style={{ backgroundColor: wardrobeStats.skinHex }}>
+                         <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent" />
+                      </div>
+                      <div className="absolute -bottom-4 -right-4 w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center text-2xl z-20 group-hover/swatch:scale-110 transition-transform">💅</div>
                     </div>
-                    <div className="absolute -bottom-4 -right-4 w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center text-2xl z-20 group-hover/swatch:scale-110 transition-transform">💅</div>
+                  </div>
+
+                  <div className="mt-10 pt-8 border-t border-white/5">
+                     <div className="flex justify-between items-end mb-3">
+                        <p className={`text-[10px] font-black uppercase tracking-widest ${labelCls}`}>Overall Harmony</p>
+                        <p className={`text-xl font-black text-indigo-400`}>{stats.score}%</p>
+                     </div>
+                     <div className={`h-2.5 w-full rounded-full overflow-hidden ${isDark ? 'bg-white/5' : 'bg-gray-100'}`}>
+                        <motion.div 
+                          className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full" 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${stats.score}%` }}
+                          transition={{ duration: 1.5, ease: "circOut" }}
+                        />
+                     </div>
                   </div>
                 </div>
+              ) : (
+                <div className={`rounded-[2.5rem] p-12 border text-center border-dashed ${cardCls}`}>
+                   <div className="text-4xl mb-4 opacity-40">📸</div>
+                   <p className={`text-sm font-bold opacity-60 max-w-[200px] mx-auto ${labelCls}`}>Run your first analysis to unlock your Style DNA profile</p>
+                </div>
+              )}
+            </motion.div>
+          )}
 
-                <div className="mt-10 pt-8 border-t border-white/5">
-                   <div className="flex justify-between items-end mb-3">
-                      <p className={`text-[10px] font-black uppercase tracking-widest ${labelCls}`}>Overall Harmony</p>
-                      <p className={`text-xl font-black text-indigo-400`}>{stats.score}%</p>
-                   </div>
-                   <div className={`h-3 w-full rounded-full overflow-hidden ${isDark ? 'bg-white/5' : 'bg-gray-100'}`}>
-                      <div className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full transition-all duration-1000" style={{ width: `${stats.score}%` }} />
-                   </div>
+          {/* TAB: WARDROBE */}
+          {activeTab === 'wardrobe' && (
+            <motion.div 
+              key="wardrobe"
+              initial={{ opacity: 0, scale: 0.98 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              exit={{ opacity: 0, scale: 0.98 }}
+              className="space-y-6"
+            >
+              <div className={`rounded-3xl p-8 border ${cardCls}`}>
+                 <div className="flex items-center justify-between mb-8">
+                    <h3 className={`text-[11px] font-black uppercase tracking-[0.2em] opacity-40 ${headingCls}`}>Wardrobe Hub</h3>
+                    <button onClick={() => navigate('/dashboard')} className="text-[10px] font-black text-purple-500 uppercase tracking-widest">History</button>
+                 </div>
+                 <div className="flex flex-col items-center justify-center py-10 opacity-40">
+                    <div className="text-5xl mb-6">👔</div>
+                    <p className="text-sm font-bold text-center">Your personalized wardrobe is synced and ready</p>
+                 </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* TAB: PREFERENCES */}
+          {activeTab === 'preferences' && (
+            <motion.div 
+              key="preferences"
+              initial={{ opacity: 0, x: 20 }} 
+              animate={{ opacity: 1, x: 0 }} 
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-6"
+            >
+              <div className={`rounded-3xl p-8 border ${cardCls}`}>
+                <h3 className={`text-[11px] font-black uppercase mb-8 tracking-[0.2em] opacity-40 ${headingCls}`}>App Personalization</h3>
+                
+                <div className="space-y-8">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-5">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-sm ${isDark ? 'bg-white/5' : 'bg-white border border-gray-100'}`}>🌐</div>
+                      <span className={`font-black text-sm tracking-tight ${headingCls}`}>Language</span>
+                    </div>
+                    {/* PREMIUM PILL CONTROL */}
+                    <div className={`flex relative p-1 rounded-2xl ${isDark ? 'bg-white/5' : 'bg-gray-100'}`}>
+                      {['en', 'hi', 'hinglish'].map(lang => (
+                        <button
+                          key={lang}
+                          onClick={() => handleLanguageChange(lang)}
+                          className={`relative z-10 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all duration-300 ${language === lang ? 'text-white' : isDark ? 'text-white/40' : 'text-slate-600'}`}
+                        >
+                          {language === lang && (
+                            <motion.div layoutId="lang-pill" className="absolute inset-0 bg-purple-600 rounded-xl -z-10 shadow-lg shadow-purple-500/30" />
+                          )}
+                          {lang.toUpperCase().slice(0, 2)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-5">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-sm ${isDark ? 'bg-white/5' : 'bg-white border border-gray-100'}`}>🌓</div>
+                      <span className={`font-black text-sm tracking-tight ${headingCls}`}>Visual Theme</span>
+                    </div>
+                    <button onClick={handleThemeToggle} className={`w-14 h-8 rounded-full relative transition-all duration-500 ${isDark ? 'bg-purple-600' : 'bg-gray-200'}`}>
+                      <motion.div 
+                        animate={{ x: isDark ? 24 : 4 }}
+                        className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-xl`} 
+                      />
+                    </button>
+                  </div>
                 </div>
               </div>
-            ) : (
-              <div className={`rounded-[2.5rem] p-12 border text-center border-dashed ${cardCls}`}>
-                 <div className="text-4xl mb-4 opacity-40">📸</div>
-                 <p className={`text-sm font-bold opacity-60 max-w-[200px] mx-auto ${labelCls}`}>Run your first analysis to unlock your Style DNA profile</p>
+
+              <div className={`rounded-3xl p-8 border ${cardCls} bg-gradient-to-r from-purple-500/5 to-pink-500/5`}>
+                 <h3 className={`text-[11px] font-black uppercase mb-8 tracking-[0.2em] opacity-40 ${headingCls}`}>Physical Profile</h3>
+                 <div className="space-y-10">
+                   {/* HEIGHT SELECTOR */}
+                   <div>
+                     <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${labelCls}`}>Height Group</p>
+                     <div className="flex flex-wrap gap-2">
+                       {[{id:'petite',i:'📐'},{id:'regular',i:'📏'},{id:'tall',i:'🚀'}].map(h => (
+                         <button 
+                           key={h.id} 
+                           onClick={() => handleUpdatePreference('height', h.id)} 
+                           className={`flex-1 min-w-[80px] p-4 rounded-3xl border transition-all flex flex-col items-center gap-2 ${
+                             userPrefs.height === h.id 
+                               ? 'bg-purple-600 border-purple-600 text-white shadow-xl shadow-purple-600/20' 
+                               : isDark ? 'bg-white/5 border-white/10 text-white/60' : 'bg-white border-purple-100 text-slate-700'
+                           }`}
+                         >
+                           <span className="text-xl">{h.i}</span>
+                           <span className={`text-[9px] font-black uppercase tracking-tighter`}>{h.id}</span>
+                         </button>
+                       ))}
+                     </div>
+                   </div>
+                   
+                   {/* BUILD SELECTOR */}
+                   <div>
+                     <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${labelCls}`}>Body Build</p>
+                     <div className="flex flex-wrap gap-2">
+                       {[{id:'slim',i:'🧘'},{id:'athletic',i:'💪'},{id:'broad',i:'🏛'}].map(b => (
+                         <button 
+                           key={b.id} 
+                           onClick={() => handleUpdatePreference('build', b.id)} 
+                           className={`flex-1 min-w-[80px] p-4 rounded-3xl border transition-all flex flex-col items-center gap-2 ${
+                             userPrefs.build === b.id 
+                               ? 'bg-purple-600 border-purple-600 text-white shadow-xl shadow-purple-600/20' 
+                               : isDark ? 'bg-white/5 border-white/10 text-white/60' : 'bg-white border-purple-100 text-slate-700'
+                           }`}
+                         >
+                           <span className="text-xl">{b.i}</span>
+                           <span className="text-[9px] font-black uppercase tracking-tighter">{b.id}</span>
+                         </button>
+                       ))}
+                     </div>
+                   </div>
+
+                   {/* AESTHETIC SELECTOR */}
+                   <div>
+                     <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${labelCls}`}>Style Aesthetic</p>
+                     <div className="grid grid-cols-2 gap-2">
+                       {[{id:'casual',i:'☕'},{id:'corporate',i:'💼'},{id:'streetwear',i:'🛹'},{id:'ethnic',i:'🕌'}].map(a => (
+                         <button 
+                           key={a.id} 
+                           onClick={() => handleUpdatePreference('aesthetic', a.id)} 
+                           className={`p-4 rounded-3xl border transition-all flex items-center gap-3 ${
+                             userPrefs.aesthetic === a.id 
+                               ? 'bg-purple-600 border-purple-600 text-white shadow-xl shadow-purple-600/20' 
+                               : isDark ? 'bg-white/5 border-white/10 text-white/60' : 'bg-white border-purple-100 text-slate-700'
+                           }`}
+                         >
+                           <span className="text-xl">{a.i}</span>
+                           <span className="text-[9px] font-black uppercase tracking-tighter">{a.id}</span>
+                         </button>
+                       ))}
+                     </div>
+                   </div>
+                 </div>
               </div>
-            )}
-          </div>
-        )}
+            </motion.div>
+          )}
 
-        {/* TAB: WARDROBE */}
-        {activeTab === 'wardrobe' && (
-          <div className="space-y-6 animate-slide-up">
-            <div className={`rounded-3xl p-8 border ${cardCls}`}>
-               <div className="flex items-center justify-between mb-8">
-                  <h3 className={`text-[11px] font-black uppercase tracking-[0.2em] opacity-40 ${headingCls}`}>Wardrobe Hub</h3>
-                  <button onClick={() => navigate('/dashboard')} className="text-[10px] font-black text-purple-500 uppercase tracking-widest">History</button>
-               </div>
-               <div className="flex flex-col items-center justify-center py-10 opacity-40">
-                  <div className="text-5xl mb-6">👔</div>
-                  <p className="text-sm font-bold text-center">Your personalized wardrobe is synced and ready</p>
-               </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB: PREFERENCES */}
-        {activeTab === 'preferences' && (
-          <div className="space-y-6 animate-slide-up">
-            <div className={`rounded-3xl p-8 border ${cardCls}`}>
-              <h3 className={`text-[11px] font-black uppercase mb-8 tracking-[0.2em] opacity-40 ${headingCls}`}>App Personalization</h3>
-              
-              <div className="space-y-8">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-5">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>🌐</div>
-                    <span className={`font-black text-sm tracking-tight ${headingCls}`}>Language</span>
-                  </div>
-                  <div className={`flex rounded-2xl p-1.5 gap-1.5 ${isDark ? 'bg-white/10' : 'bg-gray-100 border border-black/5'}`}>
-                    {['en', 'hi', 'hinglish'].map(lang => (
-                      <button
-                        key={lang}
-                        onClick={() => handleLanguageChange(lang)}
-                        className={`w-12 h-10 rounded-xl flex items-center justify-center text-[10px] font-black transition-all ${language === lang ? 'bg-white text-purple-600 shadow-md' : 'text-gray-500 opacity-40'}`}
-                      >
-                        {lang.toUpperCase().slice(0, 2)}
+          {/* TAB: SUPPORT */}
+          {activeTab === 'support' && (
+            <motion.div 
+              key="support"
+              initial={{ opacity: 0, y: 10 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+               <div className={`rounded-3xl p-2 border ${cardCls}`}>
+                  <div className="space-y-1">
+                    {[
+                      { l: 'Help & FAQ', i: '❓', act: () => handleSupportEmail('help') },
+                      { l: 'Report Issue', i: '🐛', act: () => handleSupportEmail('issue') },
+                      { l: 'Request Feature', i: '💡', act: () => handleSupportEmail('feature') },
+                      { l: 'Community Impact', i: '📈', act: () => alert('Community stats coming soon!') },
+                      { l: 'Share StyleGuru', i: '📱', act: handleShare },
+                    ].map((sub, idx) => (
+                      <button key={idx} onClick={sub.act} className={`w-full flex items-center justify-between p-5 rounded-2xl transition-all ${isDark ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}>
+                        <div className="flex items-center gap-5">
+                          <span className="text-2xl">{sub.i}</span>
+                          <span className={`font-black text-sm tracking-tight ${headingCls}`}>{sub.l}</span>
+                        </div>
+                        <span className="opacity-20 text-xs text-purple-500">→</span>
                       </button>
                     ))}
                   </div>
                 </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-5">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>🌓</div>
-                    <span className={`font-black text-sm tracking-tight ${headingCls}`}>Visual Theme</span>
-                  </div>
-                  <button onClick={handleThemeToggle} className={`w-14 h-8 rounded-full relative transition-all duration-300 ${isDark ? 'bg-purple-600' : 'bg-gray-200'}`}>
-                    <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all shadow-xl ${isDark ? 'right-1' : 'left-1'}`} />
+                <div className={`rounded-[2rem] p-6 border ${cardCls} bg-gradient-to-tr from-purple-500/5 to-transparent`}>
+                  <button onClick={handleDownloadData} className="w-full flex items-center justify-between">
+                    <div className="flex items-center gap-5">
+                      <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-lg">💾</div>
+                      <span className={`font-black text-xs tracking-widest uppercase ${headingCls}`}>Export Profile</span>
+                    </div>
+                    <span className="text-[10px] font-black opacity-30 uppercase">JSON</span>
                   </button>
                 </div>
-
-                {notifStatus !== 'unsupported' && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-5">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${isDark ? 'bg-white/5' : 'bg-gray-50'}`}>🔔</div>
-                      <div>
-                        <span className={`font-black text-sm block tracking-tight ${headingCls}`}>Alerts</span>
-                        <span className={`text-[9px] font-black uppercase tracking-widest ${notifStatus === 'granted' ? 'text-green-500' : 'opacity-40'}`}>
-                          {notifStatus === 'granted' ? 'Enabled' : 'Paused'}
-                        </span>
-                      </div>
-                    </div>
-                    <button onClick={notifStatus === 'granted' ? disableNotification : requestNotification} className={`w-14 h-8 rounded-full relative transition-all duration-300 ${notifStatus === 'granted' ? 'bg-purple-600' : 'bg-gray-200'}`}>
-                      <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all shadow-xl ${notifStatus === 'granted' ? 'right-1' : 'left-1'}`} />
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className={`rounded-3xl p-8 border ${cardCls} bg-gradient-to-r from-purple-500/5 to-pink-500/5`}>
-               <h3 className={`text-[11px] font-black uppercase mb-8 tracking-[0.2em] opacity-40 ${headingCls}`}>Physical Profile</h3>
-               <div className="space-y-10">
-                 <div>
-                   <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${labelCls}`}>Height Group</p>
-                   <div className="grid grid-cols-3 gap-3">
-                     {[{id:'petite',i:'📐'},{id:'regular',i:'📏'},{id:'tall',i:'🚀'}].map(h => (
-                       <button key={h.id} onClick={() => handleUpdatePreference('height', h.id)} className={`p-4 rounded-2xl border transition-all flex flex-col items-center gap-2 ${userPrefs.height === h.id ? 'bg-purple-500 border-purple-500 text-white' : isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'}`}>
-                         <span className="text-xl">{h.i}</span>
-                         <span className="text-[10px] font-black uppercase">{h.id}</span>
-                       </button>
-                     ))}
-                   </div>
-                 </div>
-                 
-                 <div>
-                   <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${labelCls}`}>Body Build</p>
-                   <div className="grid grid-cols-3 gap-3">
-                     {[{id:'slim',i:'🧘'},{id:'athletic',i:'💪'},{id:'broad',i:'🏛'}].map(b => (
-                       <button key={b.id} onClick={() => handleUpdatePreference('build', b.id)} className={`p-4 rounded-2xl border transition-all flex flex-col items-center gap-2 ${userPrefs.build === b.id ? 'bg-purple-500 border-purple-500 text-white' : isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'}`}>
-                         <span className="text-xl">{b.i}</span>
-                         <span className="text-[10px] font-black uppercase">{b.id}</span>
-                       </button>
-                     ))}
-                   </div>
-                 </div>
-
-                 <div>
-                   <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${labelCls}`}>Style Aesthetic</p>
-                   <div className="grid grid-cols-2 gap-3">
-                     {[{id:'casual',i:'☕'},{id:'corporate',i:'💼'},{id:'streetwear',i:'🛹'},{id:'ethnic',i:'🕌'}].map(a => (
-                       <button key={a.id} onClick={() => handleUpdatePreference('aesthetic', a.id)} className={`p-4 rounded-2xl border transition-all flex items-center gap-3 ${userPrefs.aesthetic === a.id ? 'bg-purple-500 border-purple-500 text-white' : isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'}`}>
-                         <span className="text-xl">{a.i}</span>
-                         <span className="text-[10px] font-black uppercase">{a.id}</span>
-                       </button>
-                     ))}
-                   </div>
-                 </div>
-               </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB: SUPPORT */}
-        {activeTab === 'support' && (
-          <div className="space-y-6 animate-slide-up">
-             <div className={`rounded-3xl p-2 border ${cardCls}`}>
-                <div className="space-y-1">
-                  {[
-                    { l: 'Help & FAQ', i: '❓', act: () => handleSupportEmail('help') },
-                    { l: 'Report Issue', i: '🐛', act: () => handleSupportEmail('issue') },
-                    { l: 'Request Feature', i: '💡', act: () => handleSupportEmail('feature') },
-                    { l: 'Community Impact', i: '📈', act: () => alert('Community stats coming soon!') },
-                    { l: 'Share StyleGuru', i: '📱', act: handleShare },
-                  ].map((sub, idx) => (
-                    <button key={idx} onClick={sub.act} className={`w-full flex items-center justify-between p-5 rounded-2xl transition-all ${isDark ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}>
-                      <div className="flex items-center gap-5">
-                        <span className="text-2xl">{sub.i}</span>
-                        <span className={`font-black text-sm tracking-tight ${headingCls}`}>{sub.l}</span>
-                      </div>
-                      <span className="opacity-20 text-xs">→</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className={`rounded-3xl p-2 border ${cardCls}`}>
-                <div className="space-y-1">
-                  <button onClick={handleDownloadData} className={`w-full flex items-center justify-between p-5 rounded-2xl transition-all ${isDark ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}>
-                    <div className="flex items-center gap-5">
-                      <span className="text-2xl">💾</span>
-                      <span className={`font-black text-sm tracking-tight ${headingCls}`}>Export Profile</span>
-                    </div>
-                    <span className="text-[10px] font-black opacity-30 tracking-widest uppercase">JSON</span>
-                  </button>
-                </div>
-              </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* ── FOOTER ACTIONS ─────────────────────────────────────────── */}
