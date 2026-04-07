@@ -27,7 +27,6 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage'));
 
 import { ThemeContext } from './context/ThemeContext';
-export { ThemeContext };
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-gradient-to-br from-[#050816] via-purple-950 to-[#050816] flex flex-col items-center justify-center relative overflow-hidden">

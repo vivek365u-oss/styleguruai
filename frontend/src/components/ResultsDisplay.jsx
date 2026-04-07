@@ -3,7 +3,7 @@
 // ============================================================
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import { publishToCommunityFeed, auth, saveSavedColor, saveHistory } from '../api/styleApi';
 import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';

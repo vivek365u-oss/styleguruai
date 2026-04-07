@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 
 import { usePlan } from '../context/PlanContext';
 import { auth, loadProfile } from '../api/styleApi';

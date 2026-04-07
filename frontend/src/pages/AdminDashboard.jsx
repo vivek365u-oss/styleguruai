@@ -3,7 +3,7 @@
 // Protected: Only accessible by admin UID
 // ============================================================
 import { useState, useEffect, useContext } from 'react';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import { auth } from '../api/styleApi';
 import { getFirestore, collection, query, orderBy, limit, getDocs, getCountFromServer } from 'firebase/firestore';
 

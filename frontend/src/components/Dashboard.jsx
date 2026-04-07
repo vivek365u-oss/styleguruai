@@ -5,7 +5,7 @@ import UploadSection from './UploadSection';
 import ResultsDisplay from './ResultsDisplay';
 import CoupleResults from './CoupleResults';
 import HistoryPanel from './HistoryPanel';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import AdSense from '../AdSense';

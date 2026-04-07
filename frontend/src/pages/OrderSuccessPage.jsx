@@ -4,7 +4,7 @@
 // ============================================================
 import { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ThemeContext } from '../App';
+import { ThemeContext } from '../context/ThemeContext';
 
 function OrderSuccessPage() {
   const { theme } = useContext(ThemeContext);
