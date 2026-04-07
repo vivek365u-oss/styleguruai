@@ -42,7 +42,7 @@ function Toast({ message, onClose }) {
 
 
 
-function DailyDropModal({ lastAnalysis, isDark, onClose }) {
+function DailyDropModal({ lastAnalysis, isDark, onClose, isPro }) {
   const { t } = useLanguage();
   const [revealed, setRevealed] = useState(false);
   const handleReveal = () => {
@@ -164,7 +164,7 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
   const firstName = user?.name?.split(' ')[0] || '';
   return (
     <div className="pb-4 space-y-6">
-      {showDailyDrop && <DailyDropModal lastAnalysis={lastAnalysis} isDark={isDark} onClose={() => setShowDailyDrop(false)} />}
+      {showDailyDrop && <DailyDropModal lastAnalysis={lastAnalysis} isDark={isDark} isPro={isPro} onClose={() => setShowDailyDrop(false)} />}
       <div className="pt-2 flex justify-between items-start">
         <div>
           <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{t('goodDay')}</p>
