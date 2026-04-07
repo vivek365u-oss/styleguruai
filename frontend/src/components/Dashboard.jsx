@@ -13,8 +13,6 @@ import { saveProfile, auth } from '../api/styleApi';
 import WardrobePanel from './WardrobePanel';
 import { saveWardrobeItem, activateProSubscription, consumeCoin } from '../api/styleApi';
 import { usePlan } from '../context/PlanContext';
-import PaywallModal from './PaywallModal';
-import { PlansUpgradeScreen } from './PlansUpgradeScreen';
 import OOTDCard from './OOTDCard';
 import WeatherTip from './WeatherTip';
 import ColorScanner from './ColorScanner';
@@ -42,7 +40,7 @@ function Toast({ message, onClose }) {
 
 
 
-function DailyDropModal({ lastAnalysis, isDark, onClose, isPro }) {
+function DailyDropModal({ lastAnalysis, isDark, onClose }) {
   const { t } = useLanguage();
   const [revealed, setRevealed] = useState(false);
   const handleReveal = () => {
@@ -80,12 +78,10 @@ function DailyDropModal({ lastAnalysis, isDark, onClose, isPro }) {
           </div>
         )}
         {/* Bottom Ad Card — Consolidated to prevent console 400 errors */}
-        {!isPro && (
-          <div className={`mt-8 rounded-3xl p-6 border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-200'}`}>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 text-center">Sponsored Style Content</p>
-            <AdSense />
-          </div>
-        )}
+        <div className={`mt-8 rounded-3xl p-6 border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-200'}`}>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 text-center">Sponsored Style Content</p>
+          <AdSense />
+        </div>
       </div>
     </div>
   );
@@ -322,22 +318,12 @@ function Dashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('home');
   const [currentGender, setCurrentGender] = useState('male');
   const [toast, setToast] = useState(null);
-  const [paywallOpen, setPaywallOpen] = useState(false);
-  const [showPlansScreen, setShowPlansScreen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
   const showToast = (msg) => setToast(msg);
 
   const handleUpgradeSuccess = async () => {
-    try {
-      if (auth.currentUser) {
-        await activateProSubscription(auth.currentUser.uid);
-        // Refresh the context to unlock the app
-        window.location.reload(); // Quickest way to hard refresh React context states for Pro bounds
-      }
-    } catch {
-      showToast('❌ Upgrade failed to sync');
-    }
+    // No longer needed
   };
 
   // Product order checkout handler
@@ -534,14 +520,7 @@ function Dashboard({ user, onLogout }) {
     const uid = auth.currentUser?.uid;
     if (uid) {
       // Deduct usage constraint for free users dynamically
-      if (!isPro) {
-        const cost = enriched.type === 'couple' ? 2 : 1;
-        consumeCoin(cost).then((res) => {
-          if (res.data && res.data.success) {
-            setCoins(res.data.remaining_coins);
-          }
-        }).catch((err) => console.log('Coin sink failed to flush', err));
-      }
+      // Coin deduction removed
       logEvent(EVENTS.STYLE_ANALYSIS_SUCCESS, {
         skin_tone: enriched.analysis?.skin_tone?.category,
         color_season: enriched.analysis?.skin_tone?.color_season,
@@ -600,11 +579,6 @@ function Dashboard({ user, onLogout }) {
             </button>
           )}
           <CartButton cartOpen={cartOpen} setCartOpen={setCartOpen} />
-          {!isPro && (
-            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider border border-orange-500/30 text-amber-500 px-3 py-1.5 rounded-xl shadow-sm bg-orange-900/10 hover:bg-orange-900/20 transition cursor-pointer" onClick={() => setShowPlansScreen(true)}>
-              <span>🪙</span> {coins}
-            </div>
-          )}
 
           <button onClick={toggleTheme} className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-sm">
             {theme === 'dark' ? '☀️' : '🌙'}
@@ -639,7 +613,7 @@ function Dashboard({ user, onLogout }) {
                   isPro={isPro}
                   usage={usage}
                   coins={coins}
-                  onCoinEmpty={() => setShowPlansScreen(true)}
+                  onCoinEmpty={() => {}}
                 />
               )}
               {loading && <LoadingScreenWithProgress progress={uploadProgress} />}
@@ -679,7 +653,7 @@ function Dashboard({ user, onLogout }) {
           )}
 
           {activeTab === 'profile' && (
-            <ProfilePanel hideHeader onOpenUpgrade={() => setShowPlansScreen(true)} />
+            <ProfilePanel hideHeader onOpenUpgrade={() => {}} />
           )}
         </div>
       </main>
@@ -710,18 +684,6 @@ function Dashboard({ user, onLogout }) {
         </div>
       </nav>
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
-      {showPlansScreen && (
-        <PlansUpgradeScreen
-          isDark={theme === 'dark'}
-          onSelectPlan={() => {
-            setShowPlansScreen(false);
-            // Open payment modal
-            setPaywallOpen(true);
-          }}
-          onClose={() => setShowPlansScreen(false)}
-        />
-      )}
-      <PaywallModal isOpen={paywallOpen} onClose={() => setPaywallOpen(false)} onUpgrade={handleUpgradeSuccess} isDark={theme === 'dark'} />
       <ShoppingCart isOpen={cartOpen} onClose={() => setCartOpen(false)} onProceedToCheckout={handleCheckoutClick} isDark={isDark} />
       <StyleBot />
     </div>

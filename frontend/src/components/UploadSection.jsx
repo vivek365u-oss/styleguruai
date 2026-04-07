@@ -228,7 +228,7 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
   );
 }
 
-function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSelected, onGenderChange, setUploadProgress, isPro, coins, onCoinEmpty }) {
+function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSelected, onGenderChange, setUploadProgress }) {
   const { theme } = useContext(ThemeContext);
   const { t, language } = useLanguage();
   const isDark = theme === 'dark';
@@ -268,10 +268,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   };
 
   const handleFile = async (file) => {
-    if (!isPro && coins < 1) {
-      onCoinEmpty();
-      return;
-    }
+    // Coin checks removed
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) { onError('Only JPG, PNG, or WebP images are allowed.'); return; }
     if (file.size > 10 * 1024 * 1024) { onError('Image is too large. Maximum size is 10MB.'); return; }
@@ -317,10 +314,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   };
 
   const handleCoupleAnalysis = async () => {
-    if (!isPro && coins < 2) {
-      onCoinEmpty();
-      return;
-    }
+    // Coin checks removed
     if (!partner1 || !partner2) {
       onError('Please select photos for both partners.');
       return;

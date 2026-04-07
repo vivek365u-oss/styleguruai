@@ -148,13 +148,7 @@ export const getHistory = async () => {
   return { data: { total: history.length, history } };
 };
 
-// ============================================
-// COINS — FIRESTORE
-// ============================================
-
-export const consumeCoin = async (cost = 1) => {
-  return await API.post('/api/users/consume-coin', { cost });
-};
+// Coins logic removed
 
 // ============================================
 // ============================================
@@ -520,66 +514,7 @@ export const logShareEvent = async (uid, skinTone) => {
   }
 };
 
-// ============================================
-// SUBSCRIPTION & USAGE — FIRESTORE
-// ============================================
-
-export const getSubscription = async (uid) => {
-  if (!auth.currentUser) return null;
-  try {
-    const snap = await getDoc(doc(db, 'users', uid, 'subscription', 'data'));
-    return snap.exists() ? snap.data() : null;
-  } catch (e) {
-    console.error('getSubscription error:', e);
-    return null;
-  }
-};
-
-export const activateProSubscription = async (uid) => {
-  if (!auth.currentUser) return;
-  try {
-    const validUntil = new Date();
-    validUntil.setDate(validUntil.getDate() + 30); // 30 days from now
-    await setDoc(doc(db, 'users', uid, 'subscription', 'data'), {
-      plan: 'pro',
-      valid_until: validUntil.toISOString(),
-      updated_at: new Date().toISOString(),
-    });
-  } catch (e) {
-    console.error('activateProSubscription error:', e);
-    throw e;
-  }
-};
-
-export const getUsage = async (uid, monthKey) => {
-  if (!auth.currentUser) return { analyses_count: 0, outfit_checks_count: 0 };
-  try {
-    const snap = await getDoc(doc(db, 'users', uid, 'usage', monthKey));
-    return snap.exists() ? snap.data() : { analyses_count: 0, outfit_checks_count: 0 };
-  } catch (e) {
-    console.error('getUsage error:', e);
-    return { analyses_count: 0, outfit_checks_count: 0 };
-  }
-};
-
-export const incrementUsage = async (uid, field) => {
-  if (!auth.currentUser) return;
-  try {
-    const monthKey = new Date().toISOString().slice(0, 7); // YYYY-MM
-    const ref = doc(db, 'users', uid, 'usage', monthKey);
-    await setDoc(ref, { [field]: increment(1) }, { merge: true });
-  } catch (e) {
-    console.error('incrementUsage error:', e);
-  }
-};
-
-// ============================================
-// PAYMENT — RAZORPAY
-// ============================================
-
-export const createPaymentOrder = () => API.post('/api/payment/create-order');
-
-export const verifyPayment = (payload) => API.post('/api/payment/verify', payload);
+// Subscription and payment logic removed
 
 // ============================================
 // COMMUNITY FEED

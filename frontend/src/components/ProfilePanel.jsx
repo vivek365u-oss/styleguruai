@@ -8,7 +8,7 @@ import { updateProfile, deleteUser } from 'firebase/auth';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
-export default function ProfilePanel({ hideHeader = false, onOpenUpgrade }) {
+export default function ProfilePanel({ hideHeader = false }) {
   const { theme, setTheme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const { isPro, usage, validUntil } = usePlan();
@@ -342,51 +342,6 @@ export default function ProfilePanel({ hideHeader = false, onOpenUpgrade }) {
         </div>
       )}
 
-      {/* My Plan Section */}
-      <div className={`rounded-3xl p-6 border overflow-hidden ${isPro ? (isDark ? 'bg-gradient-to-br from-amber-600/20 to-transparent border-amber-500/30' : 'bg-gradient-to-br from-amber-50 to-white border-amber-200 shadow-lg shadow-amber-500/5') : (cardCls)}`}>
-        <div className="flex justify-between items-start mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className={`text-sm font-black tracking-tight ${isPro ? 'text-amber-500' : headingCls}`}>
-                {isPro ? 'PRO SUBSCRIPTION' : 'FREE VERSION'}
-              </span>
-              {isPro && <span className="text-xs">💎</span>}
-            </div>
-            <p className={`text-[10px] font-bold opacity-60 ${labelCls}`}>
-              {isPro ? `Elite access until ${validUntil ? new Date(validUntil).toLocaleDateString() : '...'}` : 'Standard features active'}
-            </p>
-          </div>
-          {!isPro && (
-            <button 
-              onClick={onOpenUpgrade} 
-              className="px-5 py-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-[9px] font-black uppercase text-white shadow-lg hover:shadow-purple-500/50 transition-all hover:scale-105 active:scale-95"
-            >
-              Unlock Pro
-            </button>
-          )}
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <div className={`flex justify-between text-[9px] uppercase font-black tracking-widest ${labelCls}`}>
-              <span>Analyses Used</span>
-              <span className={headingCls}>{usage?.analyses_count || 0} / 6</span>
-            </div>
-            <div className={`h-2.5 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-100'} overflow-hidden shadow-inner`}>
-              <div className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-1000 ease-out" style={{ width: `${Math.min(100, (usage?.analyses_count / 6) * 100)}%` }} />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className={`flex justify-between text-[9px] uppercase font-black tracking-widest ${labelCls}`}>
-              <span>Compatibility Checks</span>
-              <span className={headingCls}>{usage?.outfit_checks_count || 0} / 10</span>
-            </div>
-            <div className={`h-2.5 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-100'} overflow-hidden shadow-inner`}>
-              <div className="h-full bg-gradient-to-r from-pink-500 to-rose-500 transition-all duration-1000 ease-out" style={{ width: `${Math.min(100, (usage?.outfit_checks_count / 10) * 100)}%` }} />
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Settings Sections */}
       <div className="space-y-4">
