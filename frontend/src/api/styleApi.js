@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { auth, googleProvider, db } from '../firebase';
-export { auth };
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, limit, deleteDoc, increment } from 'firebase/firestore';
 import { compressImage, validateImageFile } from '../utils/imageCompression';
@@ -10,6 +9,8 @@ const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
   timeout: 30000 // 30s global timeout
 });
+
+export { auth, API };
 
 // Auto-attach Firebase token to every request
 API.interceptors.request.use(async (config) => {
