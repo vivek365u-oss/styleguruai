@@ -1,5 +1,5 @@
 import { useState, useRef, useContext } from 'react';
-import { checkOutfitCompatibility, saveWardrobeItem, auth, incrementUsage } from '../api/styleApi';
+import { checkOutfitCompatibility, saveWardrobeItem, auth } from '../api/styleApi';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
