@@ -5,6 +5,7 @@ import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
 import { getLocalWardrobeImage, deleteLocalWardrobeImage } from '../utils/indexedDB';
+import { getFiltersByGender, ALL_CATEGORIES, getCategoryLabel } from '../constants/fashionCategories';
 
 // ── Helpers ──────────────────────────────────────────────────
 function WardrobeImage({ imageId, fallbackColor }) {
@@ -88,24 +89,26 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
   const filteredItems = items.filter(item => {
     if (filter === 'all') return true;
     const cat = (item.category || '').toLowerCase();
-    const data = item.outfit_data || {};
+    
+    // Check if category matches the group
+    if (filter === 'tops') return cat === 'tops' || cat.includes('top') || cat.includes('shirt') || cat.includes('kurti');
+    if (filter === 'bottoms') return cat === 'bottoms' || cat.includes('jeans') || cat.includes('pant') || cat.includes('palazzo') || cat.includes('skirt');
+    if (filter === 'shoes') return cat === 'shoes' || cat.includes('sneakers') || cat.includes('heels');
+    if (filter === 'jewelry') return cat === 'jewelry' || cat.includes('earrings') || cat.includes('neck');
+    
+    // Exact cat matching or sub-category matching
+    if (cat === filter) return true;
+    if (cat.startsWith('cat_')) {
+       const catObj = ALL_CATEGORIES.find(c => c.id === cat);
+       if (catObj) {
+           // This is a bit complex, but if the item was saved as 'cat_sherwani', 
+           // and the filter is 'ethnic', we should show it.
+           // For now, simple includes check
+           return cat.includes(filter);
+       }
+    }
 
-    if (filter === 'shirts') return cat === 'shirts' || !!data.shirt;
-    if (filter === 'tshirts') return cat === 'tshirts' || !!data.tshirt;
-    if (filter === 'tops') return cat === 'tops' || !!data.top;
-    if (filter === 'kurti') return cat === 'kurti' || !!data.kurti;
-    if (filter === 'pants') return cat === 'pants' || !!data.pant;
-    if (filter === 'bottoms') return cat === 'bottoms' || !!data.bottom;
-    if (filter === 'ethnic') return cat === 'ethnic' || !!data.ethnic;
-    if (filter === 'saree') return cat === 'saree' || !!data.saree;
-    if (filter === 'suits') return cat === 'suits' || !!data.suite;
-    if (filter === 'dresses') return cat === 'dresses' || !!data.dress;
-    if (filter === 'formal') return cat === 'formal';
-    if (filter === 'shoes') return cat === 'shoes' || !!data.shoes;
-    if (filter === 'jewelry') return cat === 'jewelry' || !!data.jewelry;
-    if (filter === 'makeup') return cat === 'makeup';
-
-    return true;
+    return cat === filter;
   });
 
   const handleDelete = async (item) => {
@@ -166,25 +169,7 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
 
       {/* Closet Filters - Gender Aware */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-        {[
-          { id: 'all', label: t('cat_all'), icon: '🌈' },
-          ...(gender === 'female' ? [
-            { id: 'tops', label: t('cat_tops'), icon: '👚' },
-            { id: 'kurti', label: t('cat_kurti'), icon: '👗' },
-            { id: 'saree', label: t('cat_saree'), icon: '🥻' },
-            { id: 'suits', label: t('cat_suits'), icon: '👘' },
-            { id: 'dresses', label: t('cat_dresses'), icon: '💃' },
-            { id: 'bottoms', label: t('cat_bottoms'), icon: '👖' },
-            { id: 'jewelry', label: t('cat_jewelry'), icon: '✨' },
-          ] : [
-            { id: 'shirts', label: t('cat_shirts'), icon: '👕' },
-            { id: 'tshirts', label: t('cat_tshirts'), icon: '👕' },
-            { id: 'pants', label: t('cat_pants'), icon: '👖' },
-            { id: 'ethnic', label: t('cat_ethnic'), icon: '🧥' },
-            { id: 'formal', label: t('cat_formal'), icon: '👔' },
-            { id: 'shoes', label: t('cat_shoes'), icon: '👟' },
-          ])
-        ].map(f => (
+        {getFiltersByGender(gender).map(f => (
           <button
             key={f.id}
             onClick={() => setFilter(f.id)}
@@ -195,7 +180,7 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
             }`}
           >
             <span>{f.icon}</span>
-            {f.label}
+            {t(`cat_${f.id}`) || f.label}
           </button>
         ))}
       </div>
@@ -233,7 +218,7 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <span className={`font-black text-sm capitalize tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                      {item.category ? t(`cat_${item.category}`) : (item.outfit_data?.shirt || item.outfit_data?.top || 'Style Item')}
+                      {item.category?.startsWith('cat_') ? getCategoryLabel(item.category) : (item.category ? t(`cat_${item.category}`) : (item.outfit_data?.shirt || item.outfit_data?.top || 'Style Item'))}
                     </span>
                     <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border border-dashed ${
                       item.source === 'outfit_checker'

@@ -6,6 +6,7 @@ import { usePlan } from '../context/PlanContext';
 import { useAnalysisProgress } from '../hooks/useAnalysisProgress';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import { compressImage, saveLocalWardrobeImage } from '../utils/indexedDB';
+import { getCategoriesByGender, getCategoryIcon, ALL_CATEGORIES } from '../constants/fashionCategories';
 // PaywallModal import removed
 
 // ── Outfit Shop Card — same style as analyze results ─────────
@@ -469,20 +470,18 @@ function OutfitChecker() {
 
                       {!selectedCat ? (
                         <div className="flex flex-wrap gap-2">
-                          {(result.gender === 'female' 
-                            ? ['tops', 'kurti', 'saree', 'suits', 'dresses', 'bottoms', 'jewelry']
-                            : ['shirts', 'tshirts', 'pants', 'ethnic', 'formal', 'shoes']
-                          ).map(cat => (
+                          {getCategoriesByGender(result?.gender || gender).map(cat => (
                             <button
-                              key={cat}
-                              onClick={() => setSelectedCat(cat)}
-                              className={`px-4 py-3 rounded-2xl text-[11px] font-black uppercase tracking-tight border transition-all ${
+                              key={cat.id}
+                              onClick={() => setSelectedCat(cat.id)}
+                              className={`flex items-center gap-2 px-4 py-3 rounded-2xl text-[11px] font-black uppercase tracking-tight border transition-all ${
                                 isDark 
                                   ? 'bg-white/10 border-white/10 text-white/70 hover:bg-purple-500/20' 
                                   : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-purple-300'
                               }`}
                             >
-                              {t(`cat_${cat}`) || cat}
+                              <span>{cat.icon}</span>
+                              {cat.label}
                             </button>
                           ))}
                         </div>

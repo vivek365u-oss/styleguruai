@@ -1145,12 +1145,28 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
              const uid = auth.currentUser.uid;
              setShareStatus('loading');
              try {
-                await Promise.all(allColors.map(c => saveWardrobeItem(uid, {
-                    color_name: c.name,
-                    hex: c.hex,
-                    category: c.category || shirtCategory,
-                    source: 'analysis'
-                })));
+                await Promise.all(allColors.map(c => {
+                    let finalCat = c.category || shirtCategory;
+                    
+                    // Smart mapping to Registry IDs
+                    if (isFemale) {
+                        if (finalCat === 'shirt' || finalCat === 'top') finalCat = 'cat_kurti';
+                        if (finalCat === 'dress') finalCat = 'cat_anarkali';
+                        if (finalCat === 'pant' || finalCat === 'bottom') finalCat = 'cat_palazzo';
+                    } else {
+                        if (finalCat === 'shirt' || finalCat === 'top') finalCat = 'cat_casual_shirt';
+                        if (finalCat === 'pant' || finalCat === 'bottom') finalCat = 'cat_jeans';
+                    }
+
+                    return saveWardrobeItem(uid, {
+                        color_name: c.name,
+                        hex: c.hex,
+                        category: finalCat,
+                        gender: isFemale ? 'female' : 'male',
+                        source: 'AIPSE_ANALYSIS',
+                        vibe: 'locked_dna'
+                    });
+                }));
                 setShareStatus('success');
                 window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
                 setTimeout(() => setShareStatus(null), 3000);

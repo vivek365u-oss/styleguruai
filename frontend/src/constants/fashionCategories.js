@@ -68,3 +68,43 @@ export const ALL_CATEGORIES = [
 
 export const getCategoryLabel = (id) => ALL_CATEGORIES.find(c => c.id === id)?.label || 'Other';
 export const getCategoryIcon = (id) => ALL_CATEGORIES.find(c => c.id === id)?.icon || '🛍️';
+
+/**
+ * Returns top-level filters for Wardrobe UX
+ */
+export const getFiltersByGender = (gender) => {
+    if (gender === 'female') {
+        return [
+            { id: 'all', label: 'All', icon: '🌈' },
+            { id: 'ethnic', label: 'Ethnic', icon: '🥻' },
+            { id: 'western', label: 'Western', icon: '👗' },
+            { id: 'tops', label: 'Tops', icon: '👚' },
+            { id: 'bottoms', label: 'Bottoms', icon: '👖' },
+            { id: 'jewelry', label: 'Jewelry', icon: '✨' }
+        ];
+    }
+    return [
+        { id: 'all', label: 'All', icon: '🌈' },
+        { id: 'formal', label: 'Formal', icon: '👔' },
+        { id: 'ethnic', label: 'Ethnic', icon: '🤴' },
+        { id: 'casual', label: 'Casual', icon: '👕' },
+        { id: 'shoes', label: 'Shoes', icon: '👟' }
+    ];
+};
+
+/**
+ * Returns all sub-categories for a specific gender for the Sync Picker
+ */
+export const getCategoriesByGender = (gender) => {
+    if (gender === 'female') {
+        return [
+            ...FASHION_CATEGORIES.FEMALE.ETHNIC,
+            ...FASHION_CATEGORIES.FEMALE.WESTERN
+        ];
+    }
+    return [
+        ...FASHION_CATEGORIES.MALE.ETHNIC,
+        ...FASHION_CATEGORIES.MALE.FORMAL,
+        ...FASHION_CATEGORIES.MALE.CASUAL
+    ];
+};
