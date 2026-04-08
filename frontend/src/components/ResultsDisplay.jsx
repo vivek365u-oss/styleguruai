@@ -4,7 +4,7 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../context/ThemeContext';
-import { publishToCommunityFeed, auth, saveSavedColor, saveHistory, saveWardrobeItem } from '../api/styleApi';
+import { publishToCommunityFeed, auth, saveSavedColor, saveHistory } from '../api/styleApi';
 import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';
 import ColorRecommendationsShop from './ColorRecommendationsShop';
@@ -434,15 +434,6 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
         </div>
       )}
 
-      {/* Direct Add to Wardrobe Button */}
-      <div className="mt-4">
-        <WardrobeSyncButton 
-           analysis={analysis} 
-           recommendations={recommendations} 
-           isDark={isDark} 
-        />
-      </div>
-
       {/* WhatsApp Share + Download Style Card */}
       <div className="flex gap-2 mt-3">
         <button
@@ -502,195 +493,7 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
   );
 }
 
-// ── Wardrobe Sync Helper ────────────────────────────────────
-function WardrobeSyncButton({ analysis, recommendations, isDark }) {
-  const { t } = useLanguage();
-  const [synced, setSynced] = useState(false);
-  const [syncing, setSyncing] = useState(false);
-  const [showPicker, setShowPicker] = useState(false);
-  const [syncStep, setSyncStep] = useState('category'); // 'category' | 'tags'
-  const [selectedCat, setSelectedCat] = useState('');
-  const [selectedTags, setSelectedTags] = useState([]);
-  const isLoggedIn = !!auth.currentUser;
-
-  const VIBE_TAGS = [
-    'tag_campus', 'tag_office', 'tag_party', 'tag_weekend', 'tag_traditional', 'tag_gym'
-  ];
-  const FIT_TAGS = [
-    'tag_oversized', 'tag_slim', 'tag_regular', 'tag_washjeans'
-  ];
-
-  const categories = analysis.gender === 'female' 
-    ? ['tops', 'kurti', 'saree', 'suits', 'dresses', 'bottoms', 'jewelry']
-    : ['shirts', 'tshirts', 'pants', 'ethnic', 'formal', 'shoes'];
-
-  const toggleTag = (tag) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
-    );
-  };
-
-  const finalizeSync = async () => {
-    if (!isLoggedIn || syncing) return;
-    setSyncing(true);
-    try {
-      const item = {
-        type: 'analysis_result',
-        category: selectedCat,
-        tags: selectedTags, // Array of localized tag keys
-        fit: selectedFit,
-        fabric: selectedFabric,
-        pattern: selectedPattern,
-        mood: selectedMood,
-        undertone: analysis.skin_tone.undertone,
-        hex: analysis.skin_color?.hex || '#C68642',
-        color_name: recommendations.best_shirt_colors?.[0]?.name || 'N/A',
-        top_recommendation: recommendations.best_shirt_colors?.[0]?.name || 'N/A',
-        harmony_score: 95, 
-        season: analysis.skin_tone.color_season,
-        gender: analysis.gender || 'male',
-        outfit_data: {
-          shirt: recommendations.best_shirt_colors?.[0]?.name,
-          pant: recommendations.best_pant_colors?.[0]?.name,
-          dress: recommendations.best_dress_colors?.[0]?.name
-        }
-      };
-      await saveWardrobeItem(auth.currentUser.uid, item);
-      setSynced(true);
-      setShowPicker(false);
-      window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
-    } catch (err) {
-      console.error('Failed to sync to wardrobe:', err);
-    } finally {
-      setSyncing(false);
-    }
-  };
-
-  if (showPicker && !synced) {
-    return (
-      <div className={`p-4 rounded-3xl border ${isDark ? 'bg-white/5 border-white/10 shadow-2xl' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/10'}`}>
-        <div className="flex items-center justify-between mb-4">
-          <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
-            {syncStep === 'category' ? t('chooseCategory') : 'Step 2: Choose Attributes'}
-          </p>
-          <button onClick={() => { setShowPicker(false); setSyncStep('category'); }} className="text-xs font-bold opacity-40">✕</button>
-        </div>
-
-        {syncStep === 'category' ? (
-          <div className="flex flex-wrap gap-2">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => { setSelectedCat(cat); setSyncStep('attributes'); }}
-                className={`px-4 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-tight border transition-all ${
-                  isDark 
-                    ? 'bg-white/5 border-white/10 text-white/70 hover:bg-purple-500/20 hover:border-purple-500/40' 
-                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-purple-300'
-                }`}
-              >
-                {t(`cat_${cat}`) || cat}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {/* STEP: Vibe & Occasion */}
-            <div className="space-y-3">
-              <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Choose Vibes</p>
-              <div className="flex flex-wrap gap-2">
-                {['tag_campus', 'tag_office', 'tag_party', 'tag_weekend', 'tag_traditional', 'tag_gym'].map(tag => (
-                  <button
-                    key={tag}
-                    onClick={() => toggleTag(tag)}
-                    className={`px-3 py-2 rounded-xl text-[10px] font-bold border transition-all ${
-                      selectedTags.includes(tag)
-                        ? 'bg-purple-600 border-transparent text-white shadow-lg'
-                        : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-slate-50 border-slate-200 text-slate-500'
-                    }`}
-                  >
-                    {t(tag)}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* STEP: Physical Details (Fit, Fabric, Pattern) */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Fit Type</p>
-                <select 
-                  value={selectedFit} 
-                  onChange={(e) => setSelectedFit(e.target.value)}
-                  className={`w-full p-3 rounded-xl text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
-                >
-                  {['fit_slim', 'fit_regular', 'fit_relaxed', 'fit_oversized'].map(f => <option key={f} value={f}>{t(f)}</option>)}
-                </select>
-              </div>
-              <div className="space-y-3">
-                <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Fabric</p>
-                <select 
-                  value={selectedFabric} 
-                  onChange={(e) => setSelectedFabric(e.target.value)}
-                  className={`w-full p-3 rounded-xl text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
-                >
-                  {['fabric_cotton', 'fabric_denim', 'fabric_linen', 'fabric_silk', 'fabric_wool'].map(f => <option key={f} value={f}>{t(f)}</option>)}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Pattern</p>
-                <select 
-                  value={selectedPattern} 
-                  onChange={(e) => setSelectedPattern(e.target.value)}
-                  className={`w-full p-3 rounded-xl text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
-                >
-                  {['pattern_solid', 'pattern_striped', 'pattern_checked', 'pattern_printed'].map(f => <option key={f} value={f}>{t(f)}</option>)}
-                </select>
-              </div>
-              <div className="space-y-3">
-                <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Style Mood</p>
-                <select 
-                  value={selectedMood} 
-                  onChange={(e) => setSelectedMood(e.target.value)}
-                  className={`w-full p-3 rounded-xl text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-700'}`}
-                >
-                  {['mood_comfort', 'mood_confidence', 'mood_minimal', 'mood_attention'].map(f => <option key={f} value={f}>{t(f)}</option>)}
-                </select>
-              </div>
-            </div>
-
-            <button
-               onClick={finalizeSync}
-               disabled={syncing}
-               className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl text-white font-black text-xs shadow-lg shadow-purple-900/40 hover:scale-[1.02] active:scale-95 transition-all mt-4"
-            >
-               {syncing ? '⌛ SYNCING DEEP METADATA...' : 'SAVE TO SMART CLOSET 🚀'}
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <button
-      onClick={() => setShowPicker(true)}
-      disabled={synced || syncing || !isLoggedIn}
-      className={`w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 transition-all ${
-        synced 
-          ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-          : isDark 
-            ? 'bg-white text-slate-900 shadow-lg' 
-            : 'bg-slate-900 text-white shadow-lg shadow-slate-900/20'
-      } ${syncing ? 'opacity-50' : 'hover:scale-[1.02] active:scale-[0.98]'}`}
-    >
-      <span>{synced ? '✅' : syncing ? '⌛' : '📦'}</span>
-      <span>{synced ? t('syncedToWardrobe') || 'Synced to Wardrobe' : t('addToWardrobe') || 'Add to Smart Closet'}</span>
-    </button>
-  );
-}
+// ── Complete the Look ────────────────────────────────────────
 
 // ── Complete the Look ────────────────────────────────────────
 function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
