@@ -141,9 +141,11 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     """Check products on startup and clear old ones without gender field"""
-    try:
-        db = get_firestore_db()
-        
+    # Skip if Firebase not initialized - the startup check can run on first request instead
+    if not FIREBASE_INITIALIZED:
+        print("[STARTUP] ℹ️  Firebase not initialized - skipping product check (will run on first request)")
+        return
+    
         # Check if products exist
         all_products = list(db.collection("products").limit(1).stream())
         if len(all_products) > 0:
