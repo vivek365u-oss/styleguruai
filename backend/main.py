@@ -191,7 +191,8 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "timestamp": time.time()}
+    """Fast health check endpoint - returns immediately without DB calls"""
+    return {"status": "ok", "timestamp": time.time(), "service": "styleguruai"}
 
 image_processor = ImageProcessor()
 skin_classifier = SkinToneClassifier()

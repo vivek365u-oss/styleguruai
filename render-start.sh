@@ -6,5 +6,6 @@ exec uvicorn main:app \
   --port $PORT \
   --workers 1 \
   --timeout-keep-alive 30 \
-  --timeout-notify 5 \
-  --access-log
+  --timeout-notify 3 \
+  --access-log \
+  --log-level info

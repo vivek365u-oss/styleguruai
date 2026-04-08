@@ -63,13 +63,17 @@ export const stopKeepAlive = () => {
 };
 
 /**
- * Backend health check (ping)
+ * Backend health check (ping) - Fast endpoint for keep-alive
  */
 export const healthCheck = async (apiInstance) => {
   try {
-    const response = await apiInstance.get('/health', { timeout: 5000 });
+    // Health check should be faster - use 10s timeout instead of 5s
+    const response = await apiInstance.get('/health', { 
+      timeout: 10000 // Increased from 5000ms to 10s
+    });
     return !!response.data;
-  } catch {
+  } catch (err) {
+    console.warn('[HealthCheck] Ping failed:', err.message);
     return false;
   }
 };
