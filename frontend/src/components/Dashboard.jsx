@@ -9,7 +9,7 @@ import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import AdSense from '../AdSense';
-import { saveProfile, auth } from '../api/styleApi';
+import { saveProfile, saveHistory, auth } from '../api/styleApi';
 import WardrobePanel from './WardrobePanel';
 import { saveWardrobeItem } from '../api/styleApi';
 import { usePlan } from '../context/PlanContext';
@@ -541,6 +541,11 @@ function Dashboard({ user, onLogout }) {
       
       saveProfile(uid, profileData).catch(() => {
         showToast('Profile not synced — will retry on next login');
+      });
+      
+      // AUTO-SAVE TO HISTORY (FIRESTORE ONLY)
+      saveHistory(enriched).catch(err => {
+        console.error('[API] Auto-save history failed:', err);
       });
     }
   };

@@ -1103,10 +1103,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
 
         <button
           onClick={async () => {
-            // Always allow saving as user is now always authenticated
-            await saveHistory({
-              skinTone: analysis.skin_tone.category,
-            });
+            // saveHistory is now automated in Dashboard.jsx
             if (shareStatus === 'success') return;
             setShareStatus('loading');
             try {
