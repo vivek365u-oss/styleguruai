@@ -33,69 +33,74 @@ export default function ProfilePanel({ hideHeader = false }) {
   });
   const [subId, setSubId] = useState(() => localStorage.getItem('sg_push_sub_id') || null);
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const currentUser = auth.currentUser;
-        if (!currentUser) return;
+  const loadData = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
 
-        setUser({
-          name: currentUser.displayName || 'Anonymous User',
-          email: currentUser.email,
-          photoURL: currentUser.photoURL,
-          uid: currentUser.uid,
+      setUser({
+        name: currentUser.displayName || 'Anonymous User',
+        email: currentUser.email,
+        photoURL: currentUser.photoURL,
+        uid: currentUser.uid,
+      });
+      setEditName(currentUser.displayName || '');
+
+      // Fetch real-time metrics & preferences
+      const [profile, historyRes, colorsRes, prefsRes] = await Promise.all([
+        loadProfile(currentUser.uid),
+        getHistory(),
+        getSavedColors(currentUser.uid),
+        loadUserPreferences(currentUser.uid)
+      ]);
+
+      if (prefsRes) setUserPrefs(prefsRes);
+
+      const historyCount = historyRes?.data?.total || 0;
+      const savedColorsCount = colorsRes?.length || 0;
+      
+      // Priority logic for Global Profile Lock
+      const primaryProfile = JSON.parse(localStorage.getItem('sg_primary_profile') || 'null');
+      const lastAnalysis = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
+      const activeProfile = primaryProfile || lastAnalysis;
+
+      let calculatedScore = 0;
+      let xp = (historyCount * 20) + (savedColorsCount * 10);
+      let level = Math.floor(xp / 100) + 1;
+      
+      if (activeProfile) {
+        setWardrobeStats({
+          skinTone: activeProfile.skinTone || activeProfile.skin_tone?.category,
+          undertone: activeProfile.undertone || activeProfile.skin_tone?.undertone,
+          season: activeProfile.season || activeProfile.skin_tone?.color_season,
+          skinHex: activeProfile.skinHex || activeProfile.skin_color?.hex || '#C68642',
+          date: activeProfile.date || activeProfile.locked_at || new Date().toISOString(),
         });
-        setEditName(currentUser.displayName || '');
-
-        // Fetch real-time metrics & preferences
-        const [profile, historyRes, colorsRes, prefsRes] = await Promise.all([
-          loadProfile(currentUser.uid),
-          getHistory(),
-          getSavedColors(currentUser.uid),
-          loadUserPreferences(currentUser.uid)
-        ]);
-
-        if (prefsRes) setUserPrefs(prefsRes);
-
-        const historyCount = historyRes?.data?.total || 0;
-        const savedColorsCount = colorsRes?.length || 0;
-        
-        // Priority logic for Global Profile Lock
-        const primaryProfile = JSON.parse(localStorage.getItem('sg_primary_profile') || 'null');
-        const lastAnalysis = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
-        const activeProfile = primaryProfile || lastAnalysis;
-
-        let calculatedScore = 0;
-        let xp = (historyCount * 20) + (savedColorsCount * 10);
-        let level = Math.floor(xp / 100) + 1;
-        
-        if (activeProfile) {
-          setWardrobeStats({
-            skinTone: activeProfile.skinTone || activeProfile.skin_tone?.category,
-            undertone: activeProfile.undertone || activeProfile.skin_tone?.undertone,
-            season: activeProfile.season || activeProfile.skin_tone?.color_season,
-            skinHex: activeProfile.skinHex || activeProfile.skin_color?.hex || '#C68642',
-            date: activeProfile.date || activeProfile.locked_at || new Date().toISOString(),
-          });
-          calculatedScore = activeProfile.confidence === 'high' ? 95 : 82;
-        }
-
-        setStats({
-          analyses: historyCount,
-          colors: savedColorsCount,
-          score: calculatedScore || 0,
-          xp,
-          level
-        });
-
-      } catch (err) {
-        console.error('Error loading profile:', err);
-      } finally {
-        setLoading(false);
+        calculatedScore = activeProfile.confidence === 'high' ? 95 : 82;
+      } else {
+        setWardrobeStats(null);
       }
-    };
 
+      setStats({
+        analyses: historyCount,
+        colors: savedColorsCount,
+        score: calculatedScore || 0,
+        xp,
+        level
+      });
+
+    } catch (err) {
+      console.error('Error loading profile:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadData();
+    // Sync listener
+    window.addEventListener('sg_wardrobe_updated', loadData);
+    return () => window.removeEventListener('sg_wardrobe_updated', loadData);
   }, []);
 
   const handleSaveName = async () => {

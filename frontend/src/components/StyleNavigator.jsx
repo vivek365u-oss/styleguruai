@@ -18,6 +18,8 @@ import { scoreWardrobeItem } from '../utils/stylingEngine';
 
 const infoCls = "w-5 h-5 rounded-full flex items-center justify-center text-[10px] cursor-help transition-all";
 
+const TONE_COLORS = { fair: "#F5DEB3", light: "#D2A679", medium: "#C68642", olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A" };
+
 const StyleNavigator = ({ user, onAnalyze }) => {
     const { theme } = useContext(ThemeContext);
     const { t, language } = useLanguage();
@@ -162,6 +164,8 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                 skinTone: editDNA.skinTone,
                 undertone: editDNA.undertone,
                 season: editDNA.season,
+                // Ensure skinHex is updated if manually changed
+                skinHex: TONE_COLORS[editDNA.skinTone] || profile.skinHex,
                 updated_at: new Date().toISOString()
             };
             await savePrimaryProfile(uid, updatedProfile);
@@ -183,6 +187,13 @@ const StyleNavigator = ({ user, onAnalyze }) => {
             alert('Update failed. Please try again.');
         } finally {
             setLogging(false);
+        }
+    };
+
+    const handleReanalyze = () => {
+        if (window.confirm('This will clear your current profile and start a new analysis. Proceed?')) {
+            localStorage.removeItem('sg_primary_profile');
+            onAnalyze();
         }
     };
 
@@ -288,10 +299,15 @@ const StyleNavigator = ({ user, onAnalyze }) => {
         >
             {/* ── SECTION 1: STYLE DNA ──────────────────────── */}
             <div className={`relative overflow-hidden rounded-[2.5rem] p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/5'}`}>
-                <div className="absolute top-6 right-6 z-20">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-2">
+                         <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>Style DNA</p>
+                         <button onClick={() => setIsEditingDNA(true)} className={`text-[9px] font-black px-2 py-0.5 rounded-md ${isDark ? 'bg-white/10 text-white/40 hover:text-white' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}>EDIT ✏️</button>
+                    </div>
+                    
                     <button 
                         onClick={handleTogglePrimary}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black transition-all ${
+                        className={`w-fit flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black transition-all ${
                             isPrimary 
                                 ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
                                 : isDark ? 'bg-white/10 text-white/60 hover:bg-white/20' : 'bg-slate-100 text-slate-500 hover:bg-slate-200 border border-slate-200'
@@ -302,47 +318,49 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                     </button>
                 </div>
 
-                <div className="relative z-10 flex items-center gap-5 pt-2">
+                <div className="relative z-10 flex items-center gap-5">
                     <div
-                        className="w-20 h-20 rounded-2xl border-4 border-white/20 shadow-2xl overflow-hidden flex-shrink-0"
-                        style={{ backgroundColor: profile?.skinHex || profile?.skin_color?.hex || '#C68642' }}
+                        className="w-20 h-20 rounded-2xl border-4 border-white/20 shadow-2xl overflow-hidden flex-shrink-0 transition-colors duration-500"
+                        style={{ backgroundColor: isEditingDNA ? (TONE_COLORS[editDNA.skinTone] || '#C68642') : (profile?.skinHex || profile?.skin_color?.hex || '#C68642') }}
                     />
                     <div className="flex-1 min-w-0">
                         {isEditingDNA ? (
-                            <div className="space-y-2 animate-fade-in">
+                            <div className="space-y-3 animate-fade-in">
                                 <div className="flex gap-2">
                                     <select 
                                         value={editDNA.skinTone} 
                                         onChange={(e) => setEditDNA({...editDNA, skinTone: e.target.value})}
-                                        className={`flex-1 text-[10px] p-2 rounded-xl border bg-transparent font-black ${isDark ? 'border-white/10 text-white' : 'border-purple-200 text-slate-800'}`}
+                                        className={`flex-1 text-[10px] p-2 rounded-xl border font-black focus:outline-none transition-all ${isDark ? 'bg-[#1a1c2e] border-white/10 text-white select-dark-options' : 'bg-white border-purple-200 text-slate-800'}`}
                                     >
-                                        {['fair', 'light', 'medium', 'olive', 'brown', 'dark'].map(t => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+                                        {['fair', 'light', 'medium', 'olive', 'brown', 'dark'].map(t => <option key={t} value={t} className={isDark ? 'bg-[#1a1c2e] text-white' : ''}>{t.toUpperCase()}</option>)}
                                     </select>
                                     <select 
                                         value={editDNA.undertone} 
                                         onChange={(e) => setEditDNA({...editDNA, undertone: e.target.value})}
-                                        className={`flex-1 text-[10px] p-2 rounded-xl border bg-transparent font-black ${isDark ? 'border-white/10 text-white' : 'border-purple-200 text-slate-800'}`}
+                                        className={`flex-1 text-[10px] p-2 rounded-xl border font-black focus:outline-none transition-all ${isDark ? 'bg-[#1a1c2e] border-white/10 text-white select-dark-options' : 'bg-white border-purple-200 text-slate-800'}`}
                                     >
-                                        {['warm', 'cool', 'neutral'].map(u => <option key={u} value={u}>{u.toUpperCase()}</option>)}
+                                        {['warm', 'cool', 'neutral'].map(u => <option key={u} value={u} className={isDark ? 'bg-[#1a1c2e] text-white' : ''}>{u.toUpperCase()}</option>)}
                                     </select>
                                 </div>
                                 <div className="flex gap-2">
                                     <select 
                                         value={editDNA.season} 
                                         onChange={(e) => setEditDNA({...editDNA, season: e.target.value})}
-                                        className={`flex-1 text-[10px] p-2 rounded-xl border bg-transparent font-black ${isDark ? 'border-white/10 text-white' : 'border-purple-200 text-slate-800'}`}
+                                        className={`flex-1 text-[10px] p-2 rounded-xl border font-black focus:outline-none transition-all ${isDark ? 'bg-[#1a1c2e] border-white/10 text-white select-dark-options' : 'bg-white border-purple-200 text-slate-800'}`}
                                     >
-                                        {['Spring', 'Summer', 'Autumn', 'Winter'].map(s => <option key={s} value={s}>{s}</option>)}
+                                        {['Spring', 'Summer', 'Autumn', 'Winter'].map(s => <option key={s} value={s} className={isDark ? 'bg-[#1a1c2e] text-white' : ''}>{s}</option>)}
                                     </select>
-                                    <button onClick={handleUpdateDNA} className="px-4 py-2 bg-purple-600 text-white rounded-xl text-[10px] font-black uppercase">Save</button>
+                                    <button onClick={handleUpdateDNA} className="px-4 py-2 bg-purple-600 text-white rounded-xl text-[10px] font-black uppercase shadow-lg shadow-purple-500/20 active:scale-95 transition-all">Save</button>
                                 </div>
+                                <button 
+                                    onClick={handleReanalyze}
+                                    className={`w-full py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'}`}
+                                >
+                                    📸 Re-analyze Photo
+                                </button>
                             </div>
                         ) : (
                             <>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>Style DNA</p>
-                                    <button onClick={() => setIsEditingDNA(true)} className={`text-[9px] font-black px-2 py-0.5 rounded-md ${isDark ? 'bg-white/10 text-white/40 hover:text-white' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}>EDIT ✏️</button>
-                                </div>
                                 <h3 className={`text-2xl font-black capitalize truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
                                     {profile?.skinTone || profile?.skin_tone?.category} {profile?.undertone || profile?.skin_tone?.undertone}
                                 </h3>
