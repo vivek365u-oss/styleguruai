@@ -5,6 +5,7 @@ services:
     pythonVersion: '3.10'
     buildCommand: './render-build.sh'
     startCommand: './render-start.sh'
+    healthCheckPath: /health
     envVars:
       - key: PYTHONUNBUFFERED
         value: '1'

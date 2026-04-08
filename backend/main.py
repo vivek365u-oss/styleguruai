@@ -335,6 +335,12 @@ async def process_image_core(file: UploadFile):
         f.write(file_content)
     try:
         image = image_processor.load_image(str(temp_path))
+        
+        # Compress image for faster analysis (doesn't affect skin tone accuracy)
+        compressed_image, orig_size, comp_size = image_processor.compress_image_for_analysis(image, output_path=str(temp_path), quality=85)
+        print(f"[COMPRESS] Original: {orig_size:.2f}MB -> Compressed: {comp_size:.2f}MB")
+        image = compressed_image  # Use compressed image for all analysis
+        
         pre_quality = image_processor.analyze_photo_quality(image, face=None)
         if not pre_quality.is_acceptable and pre_quality.quality_score < 30:
             raise HTTPException(status_code=422, detail={

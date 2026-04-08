@@ -58,6 +58,52 @@ class ImageProcessor:
             raise ValueError("Cannot decode the uploaded image")
         return image
 
+    def compress_image_for_analysis(self, image: np.ndarray, output_path: str = None, quality: int = 85) -> tuple:
+        """
+        Compress image for faster analysis without affecting skin tone accuracy.
+        Skin analysis only needs ~1000x1000 px for accurate results.
+        
+        Args:
+            image: Input image (numpy array)
+            output_path: Optional path to save compressed image
+            quality: JPEG quality (1-100, default 85)
+            
+        Returns:
+            (compressed_image, original_size_mb, compressed_size_mb)
+        """
+        original_height, original_width = image.shape[:2]
+        original_size_bytes = image.nbytes
+        
+        # Only compress if image is larger than 2000px in any dimension
+        if original_height > 2000 or original_width > 2000:
+            # Calculate scale factor to keep aspect ratio
+            max_dimension = 2000
+            scale = max_dimension / max(original_height, original_width)
+            new_height = int(original_height * scale)
+            new_width = int(original_width * scale)
+            
+            # Resize image
+            compressed_image = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_AREA)
+            logger.info(f"Image resized from {original_width}x{original_height} to {new_width}x{new_height}")
+        else:
+            compressed_image = image
+        
+        # Save compressed image if output path provided
+        if output_path:
+            # Use JPEG compression for smaller file size
+            cv2.imwrite(output_path, compressed_image, [cv2.IMWRITE_JPEG_QUALITY, quality])
+            import os
+            compressed_size_bytes = os.path.getsize(output_path)
+        else:
+            compressed_size_bytes = compressed_image.nbytes
+        
+        original_size_mb = original_size_bytes / (1024 * 1024)
+        compressed_size_mb = compressed_size_bytes / (1024 * 1024)
+        
+        logger.info(f"Image compression: {original_size_mb:.2f}MB -> {compressed_size_mb:.2f}MB (saved {original_size_mb - compressed_size_mb:.2f}MB)")
+        
+        return compressed_image, original_size_mb, compressed_size_mb
+
     def detect_face(self, image: np.ndarray) -> dict:
         processed_image = self._resize_for_processing(image)
         scale_x = image.shape[1] / processed_image.shape[1]
