@@ -329,29 +329,23 @@ function Dashboard({ user, onLogout }) {
   const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
   const showToast = (msg) => setToast(msg);
 
-  // Keep-alive system: ping health endpoint every 10 minutes
+  // Keep-alive system: ping health endpoint every 10 minutes to prevent sleep
   useEffect(() => {
-    console.log('Keep-alive system started (ping every 10 min)');
-    
     const keepAlive = async () => {
       try {
         const response = await fetch('/health', { method: 'GET' });
         if (response.ok) {
-          console.log('[Keep-Alive] ✅ Ping successful at', new Date().toLocaleTimeString());
-        } else {
-          console.warn('[Keep-Alive] ⚠️  Ping returned status:', response.status);
+          // Success ping - only log in dev or as debug
+          if (import.meta.env.DEV) console.debug('[Keep-Alive] ✅ Backend is active');
         }
       } catch (err) {
-        console.warn('[Keep-Alive] ⚠️  Ping failed:', err.message);
+        // Only log failures
+        console.warn('[Keep-Alive] ⚠️ Background ping failed:', err.message);
       }
     };
 
-    // First ping immediately
     keepAlive();
-
-    // Then ping every 10 minutes (600000 ms)
     const intervalId = setInterval(keepAlive, 600000);
-
     return () => clearInterval(intervalId);
   }, []);
 

@@ -5,6 +5,7 @@ import { useState, useEffect, useContext, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../context/ThemeContext';
 import { publishToCommunityFeed, auth, saveSavedColor, getSavedColors, saveHistory } from '../api/styleApi';
+import { useAuthState } from '../hooks/useAuthState';
 import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';
 import ColorRecommendationsShop from './ColorRecommendationsShop';
@@ -114,23 +115,29 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
   const [savingColor, setSavingColor] = useState(false);
   const [savedColorId, setSavedColorId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const isLoggedIn = !!auth.currentUser;
+  const { user } = useAuthState();
+  const isLoggedIn = !!user;
 
-  // Load saved status when component mounts
+  // Load saved status when component mounts or user changes
   useEffect(() => {
     const loadSavedStatus = async () => {
       if (!isLoggedIn) {
+        setSaved(false);
+        setSavedColorId(null);
         setLoading(false);
         return;
       }
 
       try {
-        const savedColors = await getSavedColors(auth.currentUser.uid);
+        const savedColors = await getSavedColors(user.uid);
         // Check if this color hex is already saved
         const foundColor = savedColors.find(sc => sc.hex === color.hex);
         if (foundColor) {
           setSaved(true);
           setSavedColorId(foundColor.id);
+        } else {
+          setSaved(false);
+          setSavedColorId(null);
         }
       } catch (err) {
         console.error('Error loading saved color status:', err);
@@ -140,7 +147,7 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
     };
 
     loadSavedStatus();
-  }, [color.hex, isLoggedIn]);
+  }, [color.hex, isLoggedIn, user?.uid]);
 
   const toggleSave = async (e) => {
     e.stopPropagation();
@@ -149,20 +156,23 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
       return;
     }
 
+    // Optimistic UI update
+    const wasSaved = saved;
+    const oldId = savedColorId;
+    setSaved(!wasSaved);
     setSavingColor(true);
 
     try {
-      if (saved && savedColorId) {
+      if (wasSaved && oldId) {
         // Delete saved color
         const { db } = await import('../firebase');
         const { deleteDoc, doc } = await import('firebase/firestore');
-        await deleteDoc(doc(db, 'users', auth.currentUser.uid, 'saved_colors', savedColorId));
-        setSaved(false);
+        await deleteDoc(doc(db, 'users', user.uid, 'saved_colors', oldId));
         setSavedColorId(null);
         console.log('Color unsaved:', color.name);
       } else {
         // Save new color
-        const colorId = await saveSavedColor(auth.currentUser.uid, {
+        const colorId = await saveSavedColor(user.uid, {
           name: color.name,
           hex: color.hex,
           category,
@@ -174,7 +184,10 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
       }
     } catch (err) {
       console.error('Error saving color:', err);
-      alert('Failed to save color. Please try again.');
+      // Revert on error
+      setSaved(wasSaved);
+      setSavedColorId(oldId);
+      alert('Failed to update color. Please try again.');
     } finally {
       setSavingColor(false);
     }
