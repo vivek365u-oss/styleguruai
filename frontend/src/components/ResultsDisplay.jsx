@@ -4,7 +4,7 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../context/ThemeContext';
-import { publishToCommunityFeed, auth, saveSavedColor, getSavedColors, saveHistory } from '../api/styleApi';
+import { publishToCommunityFeed, auth, saveSavedColor, getSavedColors, saveHistory, saveWardrobeItem } from '../api/styleApi';
 import { useAuthState } from '../hooks/useAuthState';
 import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';
@@ -1102,14 +1102,45 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             ...(recommendations.best_pant_colors || []),
           ].slice(0, 7);
           if (allColors.length === 0) return null;
+          
+          const handleSyncAll = async () => {
+             if (!auth.currentUser) { alert('Please login to sync'); return; }
+             const uid = auth.currentUser.uid;
+             setShareStatus('loading');
+             try {
+                await Promise.all(allColors.map(c => saveWardrobeItem(uid, {
+                    color_name: c.name,
+                    hex: c.hex,
+                    category: c.category || shirtCategory,
+                    source: 'analysis'
+                })));
+                setShareStatus('success');
+                window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
+                setTimeout(() => setShareStatus(null), 3000);
+             } catch (e) {
+                console.error('Sync failed:', e);
+                setShareStatus('error');
+             }
+          };
+
           return (
-            <button
-              onClick={() => downloadPalette(allColors, analysis.skin_tone.category)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-bold transition-all hover:scale-[1.02] ${isDark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-purple-500/40' : 'bg-white border-gray-200 text-gray-600 hover:border-purple-400 shadow-sm'}`}
-            >
-              <span>🎨</span>
-              <span>Download Palette</span>
-            </button>
+            <div className="flex-1 flex flex-col gap-2">
+                <button
+                    onClick={() => downloadPalette(allColors, analysis.skin_tone.category)}
+                    className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-bold transition-all hover:scale-[1.02] ${isDark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-purple-500/40' : 'bg-white border-gray-200 text-gray-600 hover:border-purple-400 shadow-sm'}`}
+                >
+                    <span>🎨</span>
+                    <span>Download Palette</span>
+                </button>
+                <button
+                    onClick={handleSyncAll}
+                    disabled={shareStatus === 'loading'}
+                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl border text-[10px] font-black uppercase transition-all hover:scale-[1.02] ${isDark ? 'bg-orange-500/20 border-orange-500/40 text-orange-400' : 'bg-orange-50 border-orange-200 text-orange-700'}`}
+                >
+                    <span>📸</span>
+                    {shareStatus === 'loading' ? 'Syncing...' : 'Sync All to Wardrobe'}
+                </button>
+            </div>
           );
         })()}
 

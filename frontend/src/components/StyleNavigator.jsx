@@ -34,6 +34,8 @@ const StyleNavigator = ({ user, onAnalyze }) => {
     const [isWorn, setIsWorn] = useState(false);
     const [logging, setLogging] = useState(false);
     const [mood, setMood] = useState('mood_minimal');
+    const [isEditingDNA, setIsEditingDNA] = useState(false);
+    const [editDNA, setEditDNA] = useState({ skinTone: 'medium', undertone: 'neutral', season: 'Spring' });
 
     useEffect(() => {
         const loadInitialData = async () => {
@@ -66,6 +68,11 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                 setProfile(activeProfile);
                 setPrefs(userPrefs);
                 setWardrobe(userWardrobe);
+                setEditDNA({
+                    skinTone: activeProfile.skinTone || activeProfile.skin_tone?.category || 'medium',
+                    undertone: activeProfile.undertone || activeProfile.skin_tone?.undertone || 'neutral',
+                    season: activeProfile.season || activeProfile.skin_tone?.color_season || 'Spring'
+                });
 
                 // Check if already worn today
                 const today = new Date().toLocaleDateString('en-CA');
@@ -140,6 +147,40 @@ const StyleNavigator = ({ user, onAnalyze }) => {
             }
         } catch (e) {
             console.error('Failed to log outfit:', e);
+        } finally {
+            setLogging(false);
+        }
+    };
+
+    const handleUpdateDNA = async () => {
+        if (!auth.currentUser || !profile) return;
+        setLogging(true);
+        try {
+            const uid = auth.currentUser.uid;
+            const updatedProfile = {
+                ...profile,
+                skinTone: editDNA.skinTone,
+                undertone: editDNA.undertone,
+                season: editDNA.season,
+                updated_at: new Date().toISOString()
+            };
+            await savePrimaryProfile(uid, updatedProfile);
+            setProfile(updatedProfile);
+            setIsEditingDNA(false);
+            // Refresh insights
+            const data = await getStyleInsights(
+                updatedProfile.skinTone,
+                updatedProfile.undertone,
+                wardrobe,
+                language,
+                prefs?.lifestyle || 'other',
+                updatedProfile.gender || prefs?.gender || 'men'
+            );
+            if (data.success) setInsights(data.insights);
+            window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
+        } catch (e) {
+            console.error('Failed to update DNA:', e);
+            alert('Update failed. Please try again.');
         } finally {
             setLogging(false);
         }
@@ -263,21 +304,55 @@ const StyleNavigator = ({ user, onAnalyze }) => {
 
                 <div className="relative z-10 flex items-center gap-5 pt-2">
                     <div
-                        className="w-20 h-20 rounded-2xl border-4 border-white/20 shadow-2xl overflow-hidden"
+                        className="w-20 h-20 rounded-2xl border-4 border-white/20 shadow-2xl overflow-hidden flex-shrink-0"
                         style={{ backgroundColor: profile?.skinHex || profile?.skin_color?.hex || '#C68642' }}
                     />
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>Style DNA</p>
-                        </div>
-                        <h3 className={`text-2xl font-black capitalize ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                            {profile?.skinTone || profile?.skin_tone?.category} {profile?.undertone || profile?.skin_tone?.undertone}
-                        </h3>
-                        <div className="flex items-center gap-2 mt-1">
-                             <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50 border-purple-100 text-purple-700'}`}>
-                                {profile?.season || profile?.skin_tone?.color_season || 'Spring'} Edition
-                             </span>
-                        </div>
+                    <div className="flex-1 min-w-0">
+                        {isEditingDNA ? (
+                            <div className="space-y-2 animate-fade-in">
+                                <div className="flex gap-2">
+                                    <select 
+                                        value={editDNA.skinTone} 
+                                        onChange={(e) => setEditDNA({...editDNA, skinTone: e.target.value})}
+                                        className={`flex-1 text-[10px] p-2 rounded-xl border bg-transparent font-black ${isDark ? 'border-white/10 text-white' : 'border-purple-200 text-slate-800'}`}
+                                    >
+                                        {['fair', 'light', 'medium', 'olive', 'brown', 'dark'].map(t => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+                                    </select>
+                                    <select 
+                                        value={editDNA.undertone} 
+                                        onChange={(e) => setEditDNA({...editDNA, undertone: e.target.value})}
+                                        className={`flex-1 text-[10px] p-2 rounded-xl border bg-transparent font-black ${isDark ? 'border-white/10 text-white' : 'border-purple-200 text-slate-800'}`}
+                                    >
+                                        {['warm', 'cool', 'neutral'].map(u => <option key={u} value={u}>{u.toUpperCase()}</option>)}
+                                    </select>
+                                </div>
+                                <div className="flex gap-2">
+                                    <select 
+                                        value={editDNA.season} 
+                                        onChange={(e) => setEditDNA({...editDNA, season: e.target.value})}
+                                        className={`flex-1 text-[10px] p-2 rounded-xl border bg-transparent font-black ${isDark ? 'border-white/10 text-white' : 'border-purple-200 text-slate-800'}`}
+                                    >
+                                        {['Spring', 'Summer', 'Autumn', 'Winter'].map(s => <option key={s} value={s}>{s}</option>)}
+                                    </select>
+                                    <button onClick={handleUpdateDNA} className="px-4 py-2 bg-purple-600 text-white rounded-xl text-[10px] font-black uppercase">Save</button>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>Style DNA</p>
+                                    <button onClick={() => setIsEditingDNA(true)} className={`text-[9px] font-black px-2 py-0.5 rounded-md ${isDark ? 'bg-white/10 text-white/40 hover:text-white' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}>EDIT ✏️</button>
+                                </div>
+                                <h3 className={`text-2xl font-black capitalize truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                    {profile?.skinTone || profile?.skin_tone?.category} {profile?.undertone || profile?.skin_tone?.undertone}
+                                </h3>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50 border-purple-100 text-purple-700'}`}>
+                                        {profile?.season || profile?.skin_tone?.color_season || 'Spring'} Edition
+                                    </span>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -288,7 +363,15 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                             <button onClick={() => setShowInfo(showInfo === 'harmony' ? null : 'harmony')} className={`${infoCls} ${isDark ? 'bg-white/10 text-white/40' : 'bg-slate-200 text-slate-500'}`}>?</button>
                         </div>
                         <div className="flex items-end gap-2">
-                            <span className={`text-2xl font-black ${isDark ? 'text-green-400' : 'text-green-600'}`}>{insights?.overall_harmony || 0}%</span>
+                             <span className={`text-2xl font-black ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+                                {(() => {
+                                    if (!wardrobe.length || !profile) return '0%';
+                                    const totalScore = wardrobe.reduce((acc, item) => {
+                                        return acc + scoreWardrobeItem(item, { weather: 'sunny' }, profile, [], prefs || {});
+                                    }, 0);
+                                    return Math.round(totalScore / wardrobe.length) + '%';
+                                })()}
+                             </span>
                         </div>
                         
                         <AnimatePresence>
@@ -312,7 +395,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
 
             {/* ── SECTION 2: MOOD & ENGINE ──────────────────────── */}
             <div className="space-y-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Current Styling Intent</p>
+                <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-white/40' : 'text-slate-500/60'}`}>Current Styling Intent</p>
                 <div className="grid grid-cols-4 gap-2">
                     {[
                         { id: 'mood_comfort', label: 'Comfort' },
