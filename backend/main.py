@@ -146,6 +146,9 @@ async def startup_event():
         print("[STARTUP] ℹ️  Firebase not initialized - skipping product check (will run on first request)")
         return
     
+    try:
+        db = get_firestore_db()
+        
         # Check if products exist
         all_products = list(db.collection("products").limit(1).stream())
         if len(all_products) > 0:
