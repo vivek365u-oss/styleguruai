@@ -117,7 +117,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
         const ranked = wardrobe
             .map(item => ({
                 ...item,
-                engineScore: scoreWardrobeItem(item, context, userProfile, [], prefs)
+                engineScore: scoreWardrobeItem(item, context, userProfile, [], prefs || {})
             }))
             .sort((a, b) => b.engineScore - a.engineScore);
 

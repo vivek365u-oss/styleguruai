@@ -53,8 +53,9 @@ export const scoreWardrobeItem = (item, context, profile, history = [], preferen
 
     // 4. Behavioral Preference (Phase 5 Feedback Loop)
     let preferenceScore = 50;
-    const likes = preferences.feedback_likes || {};
-    const rejects = preferences.feedback_rejects || {};
+    const safePrefs = preferences || {};
+    const likes = safePrefs.feedback_likes || {};
+    const rejects = safePrefs.feedback_rejects || {};
 
     // Check Fit/Fabric/Color likes
     if (likes.fit?.includes(item.fit)) preferenceScore += 20;
