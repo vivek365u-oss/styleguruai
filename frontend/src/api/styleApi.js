@@ -144,21 +144,60 @@ export const saveHistory = async (rawDetails) => {
     fullData: rawDetails
   };
 
-  await addDoc(collection(db, 'users', user.uid, 'history'), historyEntry);
+  const entry = { ...historyEntry };
+  
+  try {
+    const docRef = await addDoc(collection(db, 'users', user.uid, 'history'), entry);
+    console.log('[API] History saved successfully:', docRef.id);
+  } catch (err) {
+    console.error('[API] Failed to save history to Firestore:', err);
+    // Fallback: save to localStorage temporarily for this session
+    try {
+      const temp = JSON.parse(localStorage.getItem('sg_temp_history') || '[]');
+      localStorage.setItem('sg_temp_history', JSON.stringify([entry, ...temp].slice(0, 10)));
+    } catch {}
+    throw err;
+  }
 };
 
 export const getHistory = async () => {
   const user = auth.currentUser;
   if (!user) return { data: { total: 0, history: [] } };
 
-  const q = query(
-    collection(db, 'users', user.uid, 'history'),
-    orderBy('date', 'desc'),
-    limit(10)
-  );
-  const snap = await getDocs(q);
-  const history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  return { data: { total: history.length, history } };
+  try {
+    const q = query(
+      collection(db, 'users', user.uid, 'history'),
+      orderBy('date', 'desc'),
+      limit(10)
+    );
+    const snap = await getDocs(q);
+    const history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    // Merge with temp history if any
+    let finalHistory = history;
+    try {
+      const temp = JSON.parse(localStorage.getItem('sg_temp_history') || '[]');
+      if (temp.length > 0) {
+        finalHistory = [...temp, ...history].slice(0, 10);
+      }
+    } catch {}
+
+    return { data: { total: finalHistory.length, history: finalHistory } };
+  } catch (err) {
+    console.error('[API] getHistory failed:', err);
+    // If complex query fails (likely index error), try simple query
+    try {
+      const simpleQ = query(collection(db, 'users', user.uid, 'history'), limit(10));
+      const snap = await getDocs(simpleQ);
+      const history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      // Sort manually
+      history.sort((a, b) => new Date(b.date) - new Date(a.date));
+      return { data: { total: history.length, history } };
+    } catch (e) {
+       console.error('[API] Simple fallback query also failed:', e);
+       return { data: { total: 0, history: [] } };
+    }
+  }
 };
 
 // Coins logic removed

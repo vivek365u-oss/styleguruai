@@ -602,8 +602,20 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
   const avoidColors = recommendations.colors_to_avoid || [];
   const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
 
+  const deduplicateColors = (colors) => {
+    const seen = new Set();
+    return colors.filter(c => {
+      const h = c.hex.toLowerCase();
+      if (seen.has(h)) return false;
+      seen.add(h);
+      return true;
+    });
+  };
+
+  const resultsColors = isSeasonal ? recommendations.seasonal_colors : (isFemale ? [] : recommendations.best_shirt_colors);
+  
   if (isSeasonal) {
-    const seasonalColors = recommendations.seasonal_colors || [];
+    const seasonalColors = deduplicateColors(recommendations.seasonal_colors || []);
     return (
       <div className="space-y-4">
         <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl p-4">
@@ -622,11 +634,11 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 
   if (isFemale) {
     const sections = [
-      { title: 'dressColors', colors: recommendations.best_dress_colors || [], cat: 'dress' },
-      { title: 'topColors', colors: recommendations.best_top_colors || [], cat: 'top' },
-      { title: 'kurtiColors', colors: recommendations.best_kurti_colors || [], cat: 'kurti' },
-      { title: 'lehengaColors', colors: recommendations.best_lehenga_colors || [], cat: 'lehenga' },
-      { title: 'bottomColors', colors: recommendations.best_bottom_colors || recommendations.best_pant_colors || [], cat: 'bottom' },
+      { title: 'dressColors', colors: deduplicateColors(recommendations.best_dress_colors || []), cat: 'dress' },
+      { title: 'topColors', colors: deduplicateColors(recommendations.best_top_colors || []), cat: 'top' },
+      { title: 'kurtiColors', colors: deduplicateColors(recommendations.best_kurti_colors || []), cat: 'kurti' },
+      { title: 'lehengaColors', colors: deduplicateColors(recommendations.best_lehenga_colors || []), cat: 'lehenga' },
+      { title: 'bottomColors', colors: deduplicateColors(recommendations.best_bottom_colors || recommendations.best_pant_colors || []), cat: 'bottom' },
     ].filter(s => s.colors.length > 0);
 
     return (
@@ -643,7 +655,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
           <div>
             <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2">🚫 {t('avoidThese')}</p>
             <div className="grid grid-cols-1 gap-2">
-              {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="dress" gender="female" isDark={isDark} />)}
+              {deduplicateColors(avoidColors).map((color, i) => <ColorCard key={i} color={color} category="dress" gender="female" isDark={isDark} />)}
             </div>
           </div>
         )}
@@ -659,8 +671,8 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
   }
 
   // Male
-  const shirtColors = recommendations.best_shirt_colors || [];
-  const pantColors = recommendations.best_pant_colors || recommendations.base_pant_colors || [];
+  const shirtColors = deduplicateColors(recommendations.best_shirt_colors || []);
+  const pantColors = deduplicateColors(recommendations.best_pant_colors || recommendations.base_pant_colors || []);
   return (
     <div className="space-y-5">
       {shirtColors.length > 0 && (
@@ -683,7 +695,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
         <div>
           <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2">🚫 Avoid These</p>
           <div className="grid grid-cols-1 gap-2">
-            {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} />)}
+            {deduplicateColors(avoidColors).map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} />)}
           </div>
         </div>
       )}

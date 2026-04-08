@@ -314,17 +314,22 @@ const StyleNavigator = ({ user, onAnalyze }) => {
             <div className="space-y-4">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Current Styling Intent</p>
                 <div className="grid grid-cols-4 gap-2">
-                    {['mood_comfort', 'mood_confidence', 'mood_minimal', 'mood_attention'].map(m => (
+                    {[
+                        { id: 'mood_comfort', label: 'Comfort' },
+                        { id: 'mood_confidence', label: 'Confidence' },
+                        { id: 'mood_minimal', label: 'Minimal' },
+                        { id: 'mood_attention', label: 'Attention' }
+                    ].map(m => (
                         <button
-                            key={m}
-                            onClick={() => setMood(m)}
+                            key={m.id}
+                            onClick={() => setMood(m.id)}
                             className={`py-3.5 rounded-2xl border text-[10px] font-black uppercase transition-all ${
-                                mood === m 
+                                mood === m.id 
                                     ? 'bg-purple-600 border-transparent text-white shadow-xl shadow-purple-900/40' 
-                                    : isDark ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white border-gray-200 text-slate-400'
+                                    : isDark ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white border-gray-200 text-slate-400 hover:bg-gray-50'
                             }`}
                         >
-                            {t(m)?.split(' ')[0]}
+                            {m.label}
                         </button>
                     ))}
                 </div>
@@ -442,9 +447,9 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                         </button>
                     </div>
                 ) : (
-                    <div className="py-12 text-center bg-white/5 rounded-[2.5rem] border border-white/10 border-dashed">
+                    <div className={`py-12 text-center rounded-[2.5rem] border border-dashed ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200'}`}>
                          <span className="text-4xl mb-3 block">✨</span>
-                         <p className="text-sm font-black text-white/60 tracking-tight uppercase">Wardrobe Optimization: 100%</p>
+                         <p className={`text-sm font-black tracking-tight uppercase ${isDark ? 'text-white/60' : 'text-slate-400'}`}>Wardrobe Optimization: 100%</p>
                     </div>
                 )}
             </div>
@@ -455,8 +460,8 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                     <div className="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white text-lg">💡</div>
                     <div className="flex-1">
                         <p className={`text-[11px] font-black uppercase tracking-tight mb-0.5 ${isDark ? 'text-teal-400' : 'text-teal-700'}`}>Personalized Hack</p>
-                        <p className={`text-[10px] leading-tight ${isDark ? 'text-white/60' : 'text-teal-800/70'}`}>
-                            {t('smartLogicNote') || 'AIPSE Engine optimizes your look based on current environment and personal skin harmony.'}
+                        <p className={`text-[10px] leading-tight ${isDark ? 'text-white/60' : 'text-teal-900/70'}`}>
+                            {t('smartLogicNote') || 'Smart logic se colors tumhari skin tone se perfectly match honge.'}
                         </p>
                     </div>
                 </div>
