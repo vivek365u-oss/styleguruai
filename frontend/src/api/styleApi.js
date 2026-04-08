@@ -421,6 +421,41 @@ export const loadUserPreferences = async (uid) => {
   }
 };
 
+export const saveStyleInsights = async (uid, insights) => {
+  if (!auth.currentUser) return;
+  try {
+    const data = {
+      ...insights,
+      saved_at: new Date().toISOString()
+    };
+    await setDoc(doc(db, 'users', uid, 'profile', 'insights'), data);
+    localStorage.setItem('sg_locked_insights', JSON.stringify(data));
+  } catch (e) {
+    handleFirestoreError('saveStyleInsights', e);
+    throw e;
+  }
+};
+
+export const loadStyleInsights = async (uid) => {
+  if (!auth.currentUser) return null;
+  try {
+    // Check cache
+    const cached = localStorage.getItem('sg_locked_insights');
+    if (cached) return JSON.parse(cached);
+
+    const snap = await getDoc(doc(db, 'users', uid, 'profile', 'insights'));
+    if (snap.exists()) {
+      const data = snap.data();
+      localStorage.setItem('sg_locked_insights', JSON.stringify(data));
+      return data;
+    }
+    return null;
+  } catch (e) {
+    handleFirestoreError('loadStyleInsights', e);
+    return null;
+  }
+};
+
 export const updateUserFeedback = async (uid, category, value, signal) => {
   if (!auth.currentUser) return null;
   try {

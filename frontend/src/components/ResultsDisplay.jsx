@@ -32,19 +32,54 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   // 1. Correct gender-specific category naming
   const getProductCategory = () => {
     const cat = category.toLowerCase();
-    if (isFemale) {
-      if (cat === 'shirt' || cat === 'top') return 'top';
-      if (cat === 'pant' || cat === 'bottom') return 'jeans';
-      if (cat === 'shoes' || cat === 'footwear') return 'heels';
-      if (cat === 'jewellery') return 'earrings';
-      if (cat === 'bag' || cat === 'handbag') return 'handbag';
-      return cat;
-    } else {
-      if (cat === 'shirt' || cat === 'top') return 'shirt';
-      if (cat === 'pant' || cat === 'bottom') return 'jeans';
-      if (cat === 'shoes' || cat === 'footwear') return 'shoes';
-      return cat;
-    }
+    
+    // Comprehensive mapping for Myntra/Amazon search accuracy
+    const mapping = {
+      female: {
+        cat_saree_silk: 'silk-saree',
+        cat_saree_chiffon: 'chiffon-saree',
+        cat_lehenga: 'lehenga-choli',
+        cat_anarkali: 'anarkali-suit',
+        cat_kurti: 'kurti',
+        cat_sharara: 'sharara-set',
+        cat_crop_top: 'crop-top',
+        cat_blouse: 'blouse',
+        cat_corset: 'corset-top',
+        cat_dress_maxi: 'maxi-dress',
+        cat_dress_mini: 'mini-dress',
+        cat_mom_jeans: 'mom-jeans',
+        cat_skirt: 'skirt',
+        cat_palazzo: 'palazzo',
+        shirt: 'top',
+        top: 'top',
+        pant: 'jeans',
+        bottom: 'jeans',
+        shoes: 'heels',
+        jewellery: 'earrings',
+        bag: 'handbag',
+        handbag: 'handbag'
+      },
+      male: {
+        cat_sherwani: 'sherwani',
+        cat_kurta_set: 'kurta-set',
+        cat_nehru_jacket: 'nehru-jacket',
+        cat_dhoti: 'dhoti-kurta',
+        cat_formal_shirt: 'formal-shirt',
+        cat_blazer: 'blazer',
+        cat_tuxedo: 'tuxedo',
+        cat_formal_trouser: 'formal-trousers',
+        cat_oversized_tee: 'oversized-t-shirt',
+        cat_cargo: 'cargo-pants',
+        cat_hoodie: 'hoodie',
+        shirt: 'shirt',
+        top: 'shirt',
+        pant: 'jeans',
+        bottom: 'jeans',
+        shoes: 'shoes'
+      }
+    };
+
+    return mapping[gender]?.[category] || mapping[gender]?.[cat] || cat;
   };
 
   const product = getProductCategory();
@@ -172,12 +207,14 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
         console.log('Color unsaved:', color.name);
       } else {
         // Save new color
-        const colorId = await saveSavedColor(user.uid, {
+        const colorId = await saveWardrobeItem(user.uid, {
           name: color.name,
           hex: color.hex,
           category,
           gender,
-          reason: color.reason || ''
+          reason: color.reason || '',
+          source: 'AIPSE_ANALYSIS',
+          vibe: 'locked_dna'
         });
         setSaved(true);
         setSavedColorId(colorId);

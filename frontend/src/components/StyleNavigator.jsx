@@ -8,6 +8,8 @@ import {
     getWardrobe, 
     loadPrimaryProfile, 
     savePrimaryProfile,
+    saveStyleInsights,
+    loadStyleInsights,
     logDailyOutfit,
     getDailyOutfitLogs,
     loadUserPreferences,
@@ -82,6 +84,12 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                     setIsWorn(true);
                 }
 
+                // Load locked insights from Firestore first
+                const lockedInsights = await loadStyleInsights(uid);
+                if (lockedInsights) {
+                    setInsights(lockedInsights);
+                }
+
                 const data = await getStyleInsights(
                     activeProfile.skinTone || activeProfile.skin_tone?.category,
                     activeProfile.undertone || activeProfile.skin_tone?.undertone,
@@ -93,6 +101,10 @@ const StyleNavigator = ({ user, onAnalyze }) => {
 
                 if (data.success) {
                     setInsights(data.insights);
+                    // Sync to Firestore for persistence
+                    await saveStyleInsights(uid, data.insights);
+                } else if (!lockedInsights) {
+                    setError('Failed to sync style data');
                 }
             } catch (err) {
                 console.error('Style Navigator load failed:', err);
@@ -117,7 +129,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
         const ranked = wardrobe
             .map(item => ({
                 ...item,
-                engineScore: scoreWardrobeItem(item, context, userProfile, [], prefs || {})
+                engineScore: scoreWardrobeItem(item, context, userProfile, [], prefs || {}, insights)
             }))
             .sort((a, b) => b.engineScore - a.engineScore);
 
@@ -180,7 +192,10 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                 prefs?.lifestyle || 'other',
                 updatedProfile.gender || prefs?.gender || 'men'
             );
-            if (data.success) setInsights(data.insights);
+            if (data.success) {
+                setInsights(data.insights);
+                await saveStyleInsights(uid, data.insights);
+            }
             window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
         } catch (e) {
             console.error('Failed to update DNA:', e);
@@ -193,6 +208,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
     const handleReanalyze = () => {
         if (window.confirm('This will clear your current profile and start a new analysis. Proceed?')) {
             localStorage.removeItem('sg_primary_profile');
+            localStorage.removeItem('sg_locked_insights');
             onAnalyze();
         }
     };
@@ -385,7 +401,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                 {(() => {
                                     if (!wardrobe.length || !profile) return '0%';
                                     const totalScore = wardrobe.reduce((acc, item) => {
-                                        return acc + scoreWardrobeItem(item, { weather: 'sunny' }, profile, [], prefs || {});
+                                        return acc + scoreWardrobeItem(item, { weather: 'sunny' }, profile, [], prefs || {}, insights);
                                     }, 0);
                                     return Math.round(totalScore / wardrobe.length) + '%';
                                 })()}

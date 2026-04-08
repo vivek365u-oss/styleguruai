@@ -8,7 +8,10 @@
  * 4. Behavioral Data (Freshness, Preferences)
  */
 
-export const scoreWardrobeItem = (item, context, profile, history = [], preferences = {}) => {
+export const scoreWardrobeItem = (item, context, profile, history = [], preferences = {}, lockedInsights = null) => {
+    // 0. Gender Filter (Hard Block)
+    if (profile.gender && item.gender && item.gender !== profile.gender) return 0;
+
     let score = 0;
     const weights = {
         color: 35,
@@ -18,7 +21,27 @@ export const scoreWardrobeItem = (item, context, profile, history = [], preferen
     };
 
     // 1. Color Harmony (Skin Tone Match)
-    const colorScore = item.compatibility_score || 70; 
+    let colorScore = item.compatibility_score || 70; 
+
+    // NEW: "Elite" Boost from Locked DNA
+    if (lockedInsights) {
+        const bestColors = [
+            ...(lockedInsights.best_shirt_colors || []),
+            ...(lockedInsights.best_pant_colors || []),
+            ...(lockedInsights.best_dress_colors || []),
+            ...(lockedInsights.best_top_colors || []),
+            ...(lockedInsights.best_kurti_colors || []),
+            ...(lockedInsights.seasonal_colors || [])
+        ];
+        
+        const isEliteMatch = bestColors.some(bc => 
+            item.color_name?.toLowerCase().includes(bc.name?.toLowerCase()) ||
+            (item.hex && bc.hex && item.hex.toLowerCase() === bc.hex.toLowerCase())
+        );
+
+        if (isEliteMatch) colorScore = Math.min(100, colorScore + 40);
+    }
+
     score += (colorScore / 100) * weights.color;
 
     // 2. Context Relevance (Weather & Event)
@@ -71,14 +94,15 @@ export const scoreWardrobeItem = (item, context, profile, history = [], preferen
     return Math.round(score);
 };
 
-export const getTopRecommendations = (wardrobe, context, profile, history) => {
+export const getTopRecommendations = (wardrobe, context, profile, history, preferences, lockedInsights) => {
     if (!wardrobe || wardrobe.length === 0) return [];
     
     return wardrobe
         .map(item => ({
             ...item,
-            engineScore: scoreWardrobeItem(item, context, profile, history)
+            engineScore: scoreWardrobeItem(item, context, profile, history, preferences, lockedInsights)
         }))
+        .filter(item => item.engineScore > 0) // Hide gender-mismatched items
         .sort((a, b) => b.engineScore - a.engineScore)
         .slice(0, 5);
 };
