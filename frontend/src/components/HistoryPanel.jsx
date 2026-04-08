@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
-import { getHistory, getSavedColors, deleteSavedColor, auth } from '../api/styleApi';
+import { getHistory, getSavedColors, deleteSavedColor } from '../api/styleApi';
+import { useAuthState } from '../hooks/useAuthState';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
@@ -9,29 +10,31 @@ function HistoryPanel({ onShowResult }) {
   const { t, language } = useLanguage();
   const historyLimit = 20; // Increased for all users
   const isDark = theme === 'dark';
+  const { user } = useAuthState();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [colorsLoading, setColorsLoading] = useState(false);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('analyses'); // 'analyses' | 'colors'
   const [savedColors, setSavedColors] = useState([]);
   const [deletingColorId, setDeletingColorId] = useState(null);
 
+  // Initial load
   useEffect(() => {
-    // Load from localStorage first (instant)
-    try {
-      const local = JSON.parse(localStorage.getItem('sg_analysis_history') || '[]');
-      if (local.length > 0) {
-        setHistory(local.slice(0, historyLimit));
-        setLoading(false);
-        return;
-      }
-    } catch { /* ignore */ }
-    fetchHistory();
-    if (auth.currentUser) {
-      getSavedColors(auth.currentUser.uid).then(setSavedColors);
+    if (user) {
+      fetchHistory();
+      fetchColors();
+    } else {
+      setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user?.uid]);
+
+  // Re-fetch when switching tabs to ensure freshness
+  useEffect(() => {
+    if (activeTab === 'colors' && user) {
+      fetchColors();
+    }
+  }, [activeTab, user?.uid]);
 
   const fetchHistory = async () => {
     try {
@@ -44,19 +47,33 @@ function HistoryPanel({ onShowResult }) {
     }
   };
 
+  const fetchColors = async () => {
+    if (!user) return;
+    setColorsLoading(true);
+    try {
+      const colors = await getSavedColors(user.uid);
+      setSavedColors(colors || []);
+    } catch (err) {
+      console.error('Failed to fetch saved colors:', err);
+    } finally {
+      setColorsLoading(false);
+    }
+  };
+
   const toneColors = {
     fair: '#F5DEB3', light: '#D2A679', medium: '#C68642',
     olive: '#A0724A', brown: '#7B4F2E', dark: '#4A2C0A',
   };
 
   const removeColor = async (colorId) => {
-    if (!auth.currentUser) return;
+    if (!user) return;
     setDeletingColorId(colorId);
     setSavedColors(prev => prev.filter(c => c.id !== colorId));
     try {
-      await deleteSavedColor(auth.currentUser.uid, colorId);
+      await deleteSavedColor(user.uid, colorId);
     } catch {
-      getSavedColors(auth.currentUser.uid).then(setSavedColors);
+      // Re-fetch on failure to restore state
+      fetchColors();
     } finally {
       setDeletingColorId(null);
     }
@@ -172,7 +189,12 @@ function HistoryPanel({ onShowResult }) {
             </div>
           </div>
 
-          {savedColors.length === 0 ? (
+          {colorsLoading ? (
+            <div className="text-center py-20 flex flex-col items-center">
+               <div className="w-8 h-8 border-2 border-pink-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+               <p className="text-xs opacity-50">Syncing colors...</p>
+            </div>
+          ) : savedColors.length === 0 ? (
             <div className="text-center py-10 mt-4">
               <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
                 <span className="text-4xl">🎨</span>
@@ -188,6 +210,7 @@ function HistoryPanel({ onShowResult }) {
                   <div className="flex-1">
                     <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{color.name || 'Custom Color'}</p>
                     <p className={`text-xs font-mono uppercase ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{color.hex}</p>
+                    {color.category && <p className="text-[10px] opacity-40 uppercase tracking-widest">{color.category} • {color.gender || 'neutral'}</p>}
                   </div>
                   <button
                     onClick={() => removeColor(color.id)}
