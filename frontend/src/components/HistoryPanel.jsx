@@ -81,18 +81,6 @@ function HistoryPanel({ onShowResult }) {
     );
   }
 
-  if (history.length === 0) {
-    return (
-      <div className="mt-8 text-center">
-        <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
-          <span className="text-4xl">📋</span>
-        </div>
-        <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('noHistory')}</h3>
-        <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('noHistoryDesc')}</p>
-      </div>
-    );
-  }
-
   return (
     <div className="mt-4">
       {/* Tab Switcher */}
@@ -123,9 +111,11 @@ function HistoryPanel({ onShowResult }) {
               <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('yourHistory')}</h2>
               <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Total {history.length} analyses</p>
             </div>
-            <div className="bg-purple-500/20 border border-purple-500/30 rounded-xl px-3 py-2">
-              <span className="text-purple-500 text-sm font-medium">{language === 'hi' ? `पिछले ${history.length} परिणाम` : `Last ${history.length} results`}</span>
-            </div>
+            {history.length > 0 && (
+              <div className="bg-purple-500/20 border border-purple-500/30 rounded-xl px-3 py-2">
+                <span className="text-purple-500 text-sm font-medium">{language === 'hi' ? `पिछले ${history.length} परिणाम` : `Last ${history.length} results`}</span>
+              </div>
+            )}
           </div>
 
           {history.length === 0 ? (

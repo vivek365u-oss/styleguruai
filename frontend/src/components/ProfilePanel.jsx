@@ -379,11 +379,11 @@ export default function ProfilePanel({ hideHeader = false }) {
                     <div className={`text-2xl font-black ${headingCls}`}>{stats.analyses}</div>
                     <div className={`text-[10px] uppercase font-black tracking-widest ${labelCls}`}>Analyses</div>
                  </div>
-                 <div className={`rounded-3xl p-6 border text-center ${cardCls} bg-gradient-to-br from-pink-500/5 to-transparent`}>
-                    <div className="text-3xl mb-2">🎨</div>
-                    <div className={`text-2xl font-black ${headingCls}`}>{stats.colors}</div>
-                    <div className={`text-[10px] uppercase font-black tracking-widest ${labelCls}`}>Items Saved</div>
-                 </div>
+                  <div className={`rounded-3xl p-6 border text-center ${cardCls} bg-gradient-to-br from-pink-500/5 to-transparent`}>
+                    <div className="text-3xl mb-2">🏆</div>
+                    <div className={`text-2xl font-black ${headingCls}`}>{stats.xp}</div>
+                    <div className={`text-[10px] uppercase font-black tracking-widest ${labelCls}`}>XP Points</div>
+                  </div>
               </div>
 
               {wardrobeStats ? (
