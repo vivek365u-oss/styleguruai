@@ -4,7 +4,7 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../context/ThemeContext';
-import { publishToCommunityFeed, auth, saveSavedColor, saveHistory } from '../api/styleApi';
+import { publishToCommunityFeed, auth, saveSavedColor, getSavedColors, saveHistory } from '../api/styleApi';
 import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';
 import ColorRecommendationsShop from './ColorRecommendationsShop';
@@ -112,7 +112,35 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
   const [expanded, setExpanded] = useState(false);
   const [saved, setSaved] = useState(false);
   const [savingColor, setSavingColor] = useState(false);
+  const [savedColorId, setSavedColorId] = useState(null);
+  const [loading, setLoading] = useState(true);
   const isLoggedIn = !!auth.currentUser;
+
+  // Load saved status when component mounts
+  useEffect(() => {
+    const loadSavedStatus = async () => {
+      if (!isLoggedIn) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const savedColors = await getSavedColors(auth.currentUser.uid);
+        // Check if this color hex is already saved
+        const foundColor = savedColors.find(sc => sc.hex === color.hex);
+        if (foundColor) {
+          setSaved(true);
+          setSavedColorId(foundColor.id);
+        }
+      } catch (err) {
+        console.error('Error loading saved color status:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSavedStatus();
+  }, [color.hex, isLoggedIn]);
 
   const toggleSave = async (e) => {
     e.stopPropagation();
@@ -124,14 +152,17 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
     setSavingColor(true);
 
     try {
-      if (saved) {
-        // Delete saved color (need to pass colorId, but we don't have it here)
-        // For now, we'll just toggle the UI state
+      if (saved && savedColorId) {
+        // Delete saved color
+        const { db } = await import('../firebase');
+        const { deleteDoc, doc } = await import('firebase/firestore');
+        await deleteDoc(doc(db, 'users', auth.currentUser.uid, 'saved_colors', savedColorId));
         setSaved(false);
-        console.log('Unsaving color:', color.name);
+        setSavedColorId(null);
+        console.log('Color unsaved:', color.name);
       } else {
         // Save new color
-        await saveSavedColor(auth.currentUser.uid, {
+        const colorId = await saveSavedColor(auth.currentUser.uid, {
           name: color.name,
           hex: color.hex,
           category,
@@ -139,6 +170,7 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
           reason: color.reason || ''
         });
         setSaved(true);
+        setSavedColorId(colorId);
       }
     } catch (err) {
       console.error('Error saving color:', err);
@@ -166,7 +198,7 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
         </div>
         <button
           onClick={toggleSave}
-          disabled={!isLoggedIn || savingColor}
+          disabled={!isLoggedIn || savingColor || loading}
           className={`text-lg transition-transform hover:scale-125 ${!isLoggedIn ? 'opacity-30 cursor-not-allowed' : (saved ? 'text-pink-400' : isDark ? 'text-white/20 hover:text-pink-400' : 'text-gray-300 hover:text-pink-400')} ${savingColor ? 'opacity-50' : ''}`}
           title={!isLoggedIn ? 'Login to save colors' : (saved ? 'Remove from saved' : 'Save color')}
         >

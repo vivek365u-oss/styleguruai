@@ -125,7 +125,7 @@ function App() {
   const authState = useAuthState();
   const [showSplash, setShowSplash] = useState(true);
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('tonefit_theme') || 'light';
+    return localStorage.getItem('tonefit_theme') || 'dark';
   });
 
   const user = authState.user ?
