@@ -125,13 +125,26 @@ export const getMe = () => API.get('/auth/me');
 // HISTORY — FIRESTORE
 // ============================================
 
-export const saveHistory = async (historyData) => {
+export const saveHistory = async (rawDetails) => {
   const user = auth.currentUser;
   if (!user) return;
-  await addDoc(collection(db, 'users', user.uid, 'history'), {
-    ...historyData,
-    date: new Date().toISOString()
-  });
+  
+  // Normalize data for UI consistency
+  const skinToneObj = rawDetails.analysis?.skin_tone || rawDetails.skin_tone;
+  const skinColorObj = rawDetails.analysis?.skin_color || rawDetails.skin_color;
+  
+  const historyEntry = {
+    skinTone: skinToneObj?.category || 'medium',
+    undertone: skinToneObj?.undertone || 'neutral',
+    season: skinToneObj?.color_season || 'Spring',
+    confidence: skinToneObj?.confidence || 'medium',
+    skinHex: skinColorObj?.hex || '#C68642',
+    date: new Date().toISOString(),
+    timestamp: Date.now(),
+    fullData: rawDetails
+  };
+
+  await addDoc(collection(db, 'users', user.uid, 'history'), historyEntry);
 };
 
 export const getHistory = async () => {
@@ -425,11 +438,7 @@ const getCachedWardrobe = (uid) => {
 };
 
 const setCachedWardrobe = (uid, items) => {
-  try {
-    localStorage.setItem(getCacheKey(uid, 'wardrobe'), JSON.stringify(items));
-  } catch (e) {
-    console.warn('[Cache] Failed to save wardrobe to localStorage:', e);
-  }
+  // Disabled as per user requirement "nothing locally"
 };
 
 export const getWardrobe = async (uid) => {
@@ -494,11 +503,7 @@ const getCachedColors = (uid) => {
 };
 
 const setCachedColors = (uid, colors) => {
-  try {
-    localStorage.setItem(getCacheKey(uid, 'saved_colors'), JSON.stringify(colors));
-  } catch (e) {
-    console.warn('[Cache] Failed to save colors to localStorage:', e);
-  }
+  // Disabled as per user requirement "nothing locally"
 };
 
 export const saveSavedColor = async (uid, color) => {

@@ -517,43 +517,16 @@ function Dashboard({ user, onLogout }) {
     setResults(enriched);
     setLoading(false);
 
-    // Save to history (last 5) + increment count
-    try {
-      const count = parseInt(localStorage.getItem('sg_analysis_count') || '0') + 1;
-      localStorage.setItem('sg_analysis_count', count.toString());
-
-      const newEntry = {
-        id: Date.now(),
-        skinTone: skinToneObj?.category || 'medium',
-        undertone: skinToneObj?.undertone || 'neutral',
-        season: skinToneObj?.color_season || 'Spring',
-        confidence: skinToneObj?.confidence || 'medium',
-        skinHex: skinColorObj?.hex || '#C68642',
-        date: new Date().toLocaleDateString('en-IN'),
-        timestamp: Date.now(),
-        fullData: enriched,
-      };
-      localStorage.setItem('sg_last_analysis', JSON.stringify(newEntry));
-
-      // Keep last 5 analyses
-      const history = JSON.parse(localStorage.getItem('sg_analysis_history') || '[]');
-      const updated = [newEntry, ...history].slice(0, 5);
-      localStorage.setItem('sg_analysis_history', JSON.stringify(updated));
-    } catch (e) {
-      console.error('Error saving analysis to local history:', e);
-    }
-
-    // Save profile and Deduct Coins to Firestore
+    // Save to Firestore and Log Event
     const uid = auth.currentUser?.uid;
     if (uid) {
-      // Deduct usage constraint for free users dynamically
-      // Coin deduction removed
       logEvent(EVENTS.STYLE_ANALYSIS_SUCCESS, {
         skin_tone: enriched.analysis?.skin_tone?.category,
         color_season: enriched.analysis?.skin_tone?.color_season,
         gender: enriched.gender || currentGender,
         is_pro: isPro,
       });
+      
       const profileData = {
         skin_tone: enriched.analysis?.skin_tone?.category,
         undertone: enriched.analysis?.skin_tone?.undertone,
@@ -565,6 +538,7 @@ function Dashboard({ user, onLogout }) {
         language: localStorage.getItem('styleguru_lang') || 'en',
         analyzed_at: new Date().toISOString(),
       };
+      
       saveProfile(uid, profileData).catch(() => {
         showToast('Profile not synced — will retry on next login');
       });

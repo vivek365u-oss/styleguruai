@@ -149,7 +149,7 @@ function HistoryPanel({ onShowResult }) {
                 const skinTone = item.skinTone || item.skin_tone;
                 const undertone = item.undertone;
                 const season = item.season || item.color_season;
-                const dateStr = item.date || (item.timestamp ? new Date(item.timestamp).toLocaleDateString('en-IN') : '');
+                const dateStr = item.date ? new Date(item.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
                 const hasFullData = !!item.fullData;
 
                 return (
