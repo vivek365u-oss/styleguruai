@@ -684,26 +684,26 @@ function Dashboard({ user, onLogout }) {
         </div>
       </main>
 
-      <nav className={`fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t ${theme === 'dark' ? 'bg-[#050816]/95 border-white/10' : 'bg-slate-100/95 border-purple-200 shadow-lg'}`}>
-        {/* Nav Container: Perfect equal distribution — each item gets exact 20% */}
-        <div className="max-w-lg mx-auto px-2 py-2">
-          <div className="flex w-full">
+      <nav className={`fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t safe-area-bottom ${theme === 'dark' ? 'bg-[#050816]/95 border-white/10' : 'bg-slate-100/95 border-purple-200 shadow-lg'}`}>
+        {/* Nav Container: Perfect equal distribution — each item gets exact 1/6th */}
+        <div className="max-w-md mx-auto px-1 py-1.5">
+          <div className="flex w-full items-end">
             {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => handleTabChange(item.id)}
                 style={{ flex: '1 1 0', minWidth: 0 }}
-                className={`flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl transition-all min-h-[56px] ${activeTab === item.id
+                className={`flex flex-col items-center justify-center gap-0 px-0.5 py-1 rounded-xl transition-all min-h-[50px] ${activeTab === item.id
                     ? 'text-purple-500 bg-purple-500/10'
                     : theme === 'dark'
-                      ? 'text-white/40 hover:text-white/70 hover:bg-white/5'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200/50'
+                      ? 'text-white/30 hover:text-white/60'
+                      : 'text-gray-500'
                   }`}
               >
-                <span className={`text-[22px] leading-none transition-transform duration-200 ${activeTab === item.id ? 'scale-110' : ''}`}>{item.emoji}</span>
-                <span className={`text-[9px] font-bold leading-tight text-center truncate w-full px-1 ${activeTab === item.id ? 'text-purple-400' : theme === 'dark' ? 'text-white/40' : 'text-gray-600'
+                <span className={`text-[20px] leading-none transition-transform duration-200 ${activeTab === item.id ? 'scale-110 mb-0.5' : 'mb-0'}`}>{item.emoji}</span>
+                <span className={`text-[7.5px] font-black uppercase tracking-tighter leading-none text-center truncate w-full px-0.5 ${activeTab === item.id ? 'text-purple-400' : theme === 'dark' ? 'text-white/30' : 'text-gray-500'
                   }`}>{item.label}</span>
-                {activeTab === item.id && <div className="w-4 h-0.5 rounded-full bg-purple-400 mt-0.5" />}
+                {activeTab === item.id && <div className="w-3 h-0.5 rounded-full bg-purple-500 mt-1" />}
               </button>
             ))}
           </div>

@@ -39,6 +39,8 @@ export default function ProfilePanel() {
   const [destroyConfirmText, setDestroyConfirmText] = useState('');
   const [destroying, setDestroying] = useState(false);
 
+  const SUPPORT_EMAIL = 'styleguruai.in@gmail.com';
+
   const loadData = async () => {
     try {
       const currentUser = auth.currentUser;
@@ -124,6 +126,22 @@ export default function ProfilePanel() {
     }
   };
 
+  const handleShare = async () => {
+    const shareData = {
+      title: 'StyleGuru AI',
+      text: 'Check out ToneFit - My AI Style Companion for perfect outfit colors!',
+      url: window.location.origin
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareData.url);
+        alert('Link copied to clipboard!');
+      }
+    } catch (err) {}
+  };
+
   const updatePref = async (key, val) => {
     const newPrefs = { ...userPrefs, [key]: val };
     setUserPrefs(newPrefs);
@@ -164,9 +182,12 @@ export default function ProfilePanel() {
                   <h2 className="text-xl font-black text-white">{user.name}</h2>
                   <p className="text-[10px] font-bold text-white/40 uppercase tracking-tight">{user.email}</p>
                </div>
-               <button onClick={() => setViewMode('edit')} className="p-4 rounded-2xl bg-white/5 text-white/40 hover:text-white transition-colors">
-                  →
-               </button>
+               <div className="flex flex-col items-center gap-1 opacity-40">
+                  <span className="text-[8px] font-black uppercase tracking-tighter">Level {stats.level}</span>
+                  <div className="w-10 h-1 bg-white/10 rounded-full overflow-hidden">
+                     <div className="bg-purple-500 h-full" style={{ width: `${stats.xp % 100}%` }} />
+                  </div>
+               </div>
             </div>
 
             {/* ── SECTIONS ────────────────────────── */}
@@ -183,23 +204,56 @@ export default function ProfilePanel() {
                         </div>
                         <span className="text-white/20 group-hover:text-purple-500 transition-colors">→</span>
                      </button>
-                     <button className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all group opacity-50 cursor-not-allowed">
+
+                     <button onClick={() => window.open(`mailto:${SUPPORT_EMAIL}`)} className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all group">
                         <div className="flex items-center gap-4">
-                           <span className="text-lg">🔒</span>
-                           <span className="text-sm font-bold text-white/80">{t('changePass')}</span>
+                           <span className="text-lg">✉️</span>
+                           <span className="text-sm font-bold text-white/80">{t('contactUs')}</span>
                         </div>
+                        <span className="text-white/20 group-hover:text-purple-500 transition-colors">→</span>
                      </button>
-                     <button className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all group opacity-50 cursor-not-allowed">
+
+                     <button onClick={() => window.open(`mailto:${SUPPORT_EMAIL}?subject=Error Report`)} className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all group">
+                        <div className="flex items-center gap-4">
+                           <span className="text-lg">🐞</span>
+                           <span className="text-sm font-bold text-white/80">{t('reportError')}</span>
+                        </div>
+                        <span className="text-white/20 group-hover:text-purple-500 transition-colors">→</span>
+                     </button>
+
+                     <button className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all group">
                         <div className="flex items-center gap-4">
                            <span className="text-lg">🛡️</span>
                            <span className="text-sm font-bold text-white/80">{t('terms')}</span>
                         </div>
+                        <span className="text-white/20 group-hover:text-indigo-500 transition-colors">→</span>
+                     </button>
+                  </div>
+               </section>
+
+               {/* ── COMMUNITY & SUPPORT ────────────────── */}
+               <section className="space-y-4">
+                  <p className="px-6 text-[10px] font-black uppercase tracking-[0.2em] text-white/30">{t('community')}</p>
+                  <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-2 space-y-1">
+                     <button onClick={handleShare} className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all group">
+                        <div className="flex items-center gap-4">
+                           <span className="text-lg">📢</span>
+                           <span className="text-sm font-bold text-white/80">{t('shareApp')}</span>
+                        </div>
+                        <span className="text-white/20 group-hover:text-purple-500 transition-colors">→</span>
                      </button>
                      <button className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all group opacity-50 cursor-not-allowed">
                         <div className="flex items-center gap-4">
-                           <span className="text-lg">💳</span>
-                           <span className="text-sm font-bold text-white/80">{t('addCard')}</span>
+                           <span className="text-lg">⭐</span>
+                           <span className="text-sm font-bold text-white/80">{t('rateUs')}</span>
                         </div>
+                     </button>
+                     <button onClick={() => window.open(`mailto:${SUPPORT_EMAIL}?subject=Feature Request`)} className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all group">
+                        <div className="flex items-center gap-4">
+                           <span className="text-lg">🚀</span>
+                           <span className="text-sm font-bold text-white/80">{t('featureRequest')}</span>
+                        </div>
+                        <span className="text-white/20 group-hover:text-indigo-500 transition-colors">→</span>
                      </button>
                   </div>
                </section>
@@ -236,14 +290,18 @@ export default function ProfilePanel() {
                             <span className="text-lg">🌐</span>
                             <span className="text-sm font-bold">Language</span>
                          </div>
-                         <div className="flex p-1 bg-black/40 rounded-xl border border-white/5">
-                            {['en', 'hinglish'].map(lang => (
+                         <div className="flex p-0.5 bg-black/40 rounded-xl border border-white/5 overflow-hidden">
+                            {[
+                               { id: 'en', label: 'EN' },
+                               { id: 'hi', label: 'HI' },
+                               { id: 'hinglish', label: 'HIN' }
+                            ].map(lang => (
                                <button 
-                                 key={lang} 
-                                 onClick={() => changeLanguage(lang)}
-                                 className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all ${language === lang ? 'bg-purple-600 text-white' : 'text-white/40'}`}
+                                 key={lang.id} 
+                                 onClick={() => changeLanguage(lang.id)}
+                                 className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all ${language === lang.id ? 'bg-purple-600 text-white' : 'text-white/30 hover:text-white/50'}`}
                                >
-                                 {lang.slice(0, 2)}
+                                 {lang.label}
                                </button>
                             ))}
                          </div>
@@ -258,7 +316,7 @@ export default function ProfilePanel() {
                               { id: 'pro', icon: '💼', label: t('corpPro') },
                               { id: 'creative', icon: '🎨', label: t('creativeFreelancer') },
                               { id: 'social', icon: '📱', label: t('socialCreator') },
-                              { id: 'other', icon: '✨', label: 'Other' }
+                              { id: 'other', icon: '✨', label: t('lifestyle_other') }
                            ].map(item => (
                               <button
                                 key={item.id}
@@ -325,7 +383,7 @@ export default function ProfilePanel() {
                </section>
 
                <div className="text-center pt-4 opacity-20 text-[9px] font-black uppercase tracking-[0.4em] text-white">
-                  ToneFit v4.0 PRO • AI-Engine Enabled
+                  ToneFit v4.1 PRO • AI-Engine Enabled
                </div>
             </div>
           </motion.div>
