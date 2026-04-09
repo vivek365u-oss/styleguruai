@@ -129,7 +129,7 @@ function WeatherTip({ city, isDark, profile, genderPref }) {
 
   if (editMode || !userCity) {
     return (
-      <div className={`rounded-3xl p-6 border transition-all ${isDark ? 'bg-[#0f0a2e]/40 border-purple-500/20 shadow-2xl backdrop-blur-xl' : 'bg-white border-purple-100 shadow-xl'}`}>
+      <div className={`rounded-3xl p-6 border transition-all ${isDark ? glass.card : 'bg-white border-purple-100 shadow-xl'}`}>
         <p className={`text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2 ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
            <span className="text-xl">🌤️</span> {t('weatherStyleBriefing')}
         </p>
@@ -165,7 +165,7 @@ function WeatherTip({ city, isDark, profile, genderPref }) {
   if (!weather || !tip || !ootd) return null;
 
   return (
-    <div className={`rounded-[2.5rem] border overflow-hidden p-6 relative transition-all duration-700 ${isDark ? 'bg-[#0f0a2e]/60 border-purple-500/20 shadow-2xl' : 'bg-white border-purple-100 shadow-xl'}`}>
+    <div className={`rounded-[2.5rem] border overflow-hidden p-6 relative transition-all duration-700 ${isDark ? glass.container : 'bg-white border-purple-100 shadow-xl'}`}>
       <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-[50px] pointer-events-none" />
       
       <div className="relative z-10">
