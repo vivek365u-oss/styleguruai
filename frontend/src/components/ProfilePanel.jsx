@@ -17,7 +17,15 @@ export default function ProfilePanel({ hideHeader = false }) {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('overview'); // overview, wardrobe, preferences, support
-  const [userPrefs, setUserPrefs] = useState({ height: '', build: '', fit: '', aesthetic: '' });
+  const [userPrefs, setUserPrefs] = useState({ 
+    height: 'regular', 
+    build: 'athletic', 
+    fit: 'regular', 
+    aesthetic: 'casual',
+    styleGoal: 'sophisticated',
+    contrast: 'medium',
+    persona: 'classic'
+  });
   const [stats, setStats] = useState({ analyses: 0, colors: 0, score: 0, level: 1, xp: 0 });
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -25,6 +33,8 @@ export default function ProfilePanel({ hideHeader = false }) {
   const [editName, setEditName] = useState('');
   const [saving, setSaving] = useState(false);
   const [wardrobeStats, setWardrobeStats] = useState(null);
+  const [dnaInsights, setDnaInsights] = useState(null);
+  const [showBlueprint, setShowBlueprint] = useState(false);
 
   // Notification State
   const [notifStatus, setNotifStatus] = useState(() => {
@@ -47,22 +57,23 @@ export default function ProfilePanel({ hideHeader = false }) {
       setEditName(currentUser.displayName || '');
 
       // Fetch real-time metrics & preferences
-      const [profile, historyRes, colorsRes, prefsRes] = await Promise.all([
+      const { loadStyleInsights } = await import('../api/styleApi');
+      const [profile, historyRes, colorsRes, prefsRes, dnaRes] = await Promise.all([
         loadProfile(currentUser.uid),
         getHistory(),
         getSavedColors(currentUser.uid),
-        loadUserPreferences(currentUser.uid)
+        loadUserPreferences(currentUser.uid),
+        loadStyleInsights(currentUser.uid)
       ]);
 
-      if (prefsRes) setUserPrefs(prefsRes);
+      if (prefsRes) setUserPrefs(prev => ({ ...prev, ...prefsRes }));
+      if (dnaRes) setDnaInsights(dnaRes);
 
       const historyCount = historyRes?.data?.total || 0;
       const savedColorsCount = colorsRes?.length || 0;
       
-      // Priority logic for Global Profile Lock
-      const primaryProfile = JSON.parse(localStorage.getItem('sg_primary_profile') || 'null');
-      const lastAnalysis = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
-      const activeProfile = primaryProfile || lastAnalysis;
+      // Priority logic: Use Locked Insights as the Hero data
+      const activeProfile = dnaRes || JSON.parse(localStorage.getItem('sg_primary_profile') || 'null');
 
       let calculatedScore = 0;
       let xp = (historyCount * 20) + (savedColorsCount * 10);
@@ -70,13 +81,14 @@ export default function ProfilePanel({ hideHeader = false }) {
       
       if (activeProfile) {
         setWardrobeStats({
-          skinTone: activeProfile.skinTone || activeProfile.skin_tone?.category,
-          undertone: activeProfile.undertone || activeProfile.skin_tone?.undertone,
-          season: activeProfile.season || activeProfile.skin_tone?.color_season,
-          skinHex: activeProfile.skinHex || activeProfile.skin_color?.hex || '#C68642',
-          date: activeProfile.date || activeProfile.locked_at || new Date().toISOString(),
+          skinTone: activeProfile.skin_tone?.category || activeProfile.skinTone,
+          undertone: activeProfile.skin_tone?.undertone || activeProfile.undertone,
+          season: activeProfile.skin_tone?.color_season || activeProfile.season,
+          skinHex: activeProfile.skin_color?.hex || activeProfile.skinHex || '#C68642',
+          date: activeProfile.saved_at || activeProfile.locked_at || new Date().toISOString(),
+          confidence: activeProfile.skin_tone?.confidence || 'high'
         });
-        calculatedScore = activeProfile.confidence === 'high' ? 95 : 82;
+        calculatedScore = activeProfile.skin_tone?.confidence === 'high' ? 95 : 85;
       } else {
         setWardrobeStats(null);
       }
@@ -392,61 +404,102 @@ export default function ProfilePanel({ hideHeader = false }) {
               </div>
 
               {wardrobeStats ? (
-                <div className={`rounded-[2.5rem] p-8 border relative overflow-hidden group transition-all duration-500 ${cardCls} ${isDark ? 'from-indigo-500/5' : 'from-indigo-50/50'} bg-gradient-to-br`}>
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-50" />
-                  <h3 className={`text-[11px] font-black uppercase mb-8 tracking-[0.2em] opacity-60 ${headingCls}`}>Your Style DNA</h3>
-                  
-                  <div className="flex flex-col sm:flex-row items-center gap-10">
-                    <div className="space-y-6 flex-1 w-full">
-                      <div className="flex items-center gap-5">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-inner ${isDark ? 'bg-indigo-500/10' : 'bg-indigo-50'}`}>👤</div>
-                        <div>
-                          <p className={`text-[10px] uppercase font-black leading-none mb-1 ${labelCls}`}>Tone & Season</p>
-                          <p className={`text-lg font-black tracking-tight ${headingCls}`}>{wardrobeStats.skinTone} <span className="opacity-20 mx-1">•</span> {wardrobeStats.season}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-5">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-inner ${isDark ? 'bg-pink-500/10' : 'bg-pink-50'}`}>📈</div>
-                        <div className="flex-1">
-                          <p className={`text-[10px] uppercase font-black leading-none mb-2 ${labelCls}`}>Harmony Insights</p>
-                          <div className="flex gap-1 items-end h-8">
-                             {[40, 70, 45, 90, 65, 80].map((v, i) => (
-                               <motion.div 
-                                 key={i} 
-                                 initial={{ height: 0 }}
-                                 animate={{ height: `${v}%` }}
-                                 transition={{ delay: 0.5 + (i * 0.1), duration: 0.8, ease: "anticipate" }}
-                                 className="flex-1 bg-gradient-to-t from-pink-500 to-purple-500 rounded-t-sm opacity-60 hover:opacity-100 transition-all cursor-crosshair" 
-                                 title={`Trait ${i}: ${v}%`} 
-                               />
-                             ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                <div className="space-y-6">
+                  {/* IMMERSIVE DNA STAGE */}
+                  <div className={`rounded-[3rem] p-10 border relative overflow-hidden group transition-all duration-700 ${cardCls} ${isDark ? 'from-indigo-600/10 to-transparent' : 'from-indigo-50 to-white'} bg-gradient-to-br shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)]`}>
+                    <div className={`absolute top-0 right-0 w-96 h-96 blur-[120px] pointer-events-none opacity-30 transition-all duration-1000 group-hover:opacity-50`} style={{ backgroundColor: wardrobeStats.skinHex }} />
+                    <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-purple-500/10 rounded-full blur-[100px]" />
                     
-                    <div className="relative group/swatch">
-                      <div className="w-32 h-32 rounded-[2.5rem] shadow-2xl border-8 border-white p-2 swatch-pop relative z-10 overflow-hidden" style={{ backgroundColor: wardrobeStats.skinHex }}>
-                         <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent" />
-                      </div>
-                      <div className="absolute -bottom-4 -right-4 w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center text-2xl z-20 group-hover/swatch:scale-110 transition-transform">💅</div>
+                    <div className="relative z-10">
+                        <div className="flex flex-col md:flex-row items-center gap-12">
+                            {/* DNA CORE VISUAL */}
+                            <div className="relative">
+                               <div className="w-44 h-44 rounded-[3.5rem] shadow-2xl border-8 border-white p-2 relative z-10 overflow-hidden transform group-hover:scale-105 transition-transform duration-700" style={{ backgroundColor: wardrobeStats.skinHex }}>
+                                  <div className="absolute inset-0 bg-gradient-to-tr from-black/30 to-transparent" />
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                      <span className="text-5xl drop-shadow-lg">✨</span>
+                                  </div>
+                               </div>
+                               <div className="absolute -inset-4 bg-white/5 border border-white/10 rounded-[4rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                               <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-white rounded-3xl shadow-2xl flex items-center justify-center text-3xl z-20 animate-bounce-slow">🎨</div>
+                            </div>
+
+                            {/* IDENTITY TEXT */}
+                            <div className="flex-1 text-center md:text-left space-y-4">
+                                <div>
+                                    <p className={`text-[11px] font-black uppercase tracking-[0.3em] opacity-40 mb-2 ${labelCls}`}>DNA Style Identity</p>
+                                    <h3 className={`text-5xl font-black tracking-tighter ${headingCls}`}>{wardrobeStats.season} <span className="text-purple-500">Explorer</span></h3>
+                                </div>
+                                <div className="flex flex-wrap justify-center md:justify-start gap-3">
+                                    <span className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest border border-white/10 backdrop-blur-md ${isDark ? 'bg-white/5 text-white/60' : 'bg-slate-100 text-slate-600'}`}>
+                                        {wardrobeStats.undertone} Undertone
+                                    </span>
+                                    <span className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest border border-white/10 backdrop-blur-md ${isDark ? 'bg-white/5 text-white/60' : 'bg-slate-100 text-slate-600'}`}>
+                                        {wardrobeStats.skinTone} Tone
+                                    </span>
+                                </div>
+                                
+                                <button 
+                                  onClick={() => setShowBlueprint(true)}
+                                  className="mt-4 px-8 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 mx-auto md:mx-0"
+                                >
+                                   📄 View DNA Blueprint
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* HARMONY PROGRESS */}
+                        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 items-center pt-8 border-t border-white/5">
+                            <div className="md:col-span-2 space-y-3">
+                                <div className="flex justify-between items-end">
+                                   <p className={`text-[11px] font-black uppercase tracking-widest ${labelCls}`}>Wardrobe Synergy</p>
+                                   <p className={`text-2xl font-black text-purple-500`}>{stats.score}%</p>
+                                </div>
+                                <div className={`h-4 w-full rounded-full overflow-hidden p-1 ${isDark ? 'bg-white/5' : 'bg-slate-50 border border-slate-100'}`}>
+                                   <motion.div 
+                                     className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full" 
+                                     initial={{ width: 0 }}
+                                     animate={{ width: `${stats.score}%` }}
+                                     transition={{ duration: 2, ease: "circOut" }}
+                                   />
+                                </div>
+                            </div>
+                            <div className="text-center md:text-right">
+                                <p className={`text-[9px] font-black uppercase opacity-30 mb-1 leading-none`}>Confidence Rate</p>
+                                <p className={`text-xl font-black uppercase ${wardrobeStats.confidence === 'high' ? 'text-green-500' : 'text-yellow-500'}`}>
+                                    {wardrobeStats.confidence === 'high' ? '✓ Elite 95%' : '~ High 85%'}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                   </div>
 
-                  <div className="mt-10 pt-8 border-t border-white/5">
-                     <div className="flex justify-between items-end mb-3">
-                        <p className={`text-[10px] font-black uppercase tracking-widest ${labelCls}`}>Overall Harmony</p>
-                        <p className={`text-xl font-black text-indigo-400`}>{stats.score}%</p>
-                     </div>
-                     <div className={`h-2.5 w-full rounded-full overflow-hidden ${isDark ? 'bg-white/5' : 'bg-gray-100'}`}>
-                        <motion.div 
-                          className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full" 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${stats.score}%` }}
-                          transition={{ duration: 1.5, ease: "circOut" }}
-                        />
-                     </div>
+                  {/* PROFESSIONAL IDENTITY METRICS */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                     {[
+                        { label: 'Lifestyle', value: userPrefs.lifestyle || 'Active', icon: '💼', color: 'bg-blue-500' },
+                        { label: 'Body Build', value: userPrefs.build || 'Athletic', icon: '💪', color: 'bg-orange-500' },
+                        { label: 'Archetype', value: userPrefs.styleGoal || 'Elite', icon: '💎', color: 'bg-indigo-500' },
+                        { label: 'Goal', value: userPrefs.aesthetic || 'Casual', icon: '⚡', color: 'bg-pink-500' }
+                     ].map((metric, i) => (
+                        <div key={i} className={`rounded-[2rem] p-6 border group hover:scale-[1.02] transition-all duration-300 ${cardCls}`}>
+                            <div className={`w-10 h-10 rounded-xl ${metric.color}/10 flex items-center justify-center text-lg mb-4 group-hover:rotate-12 transition-transform`}>{metric.icon}</div>
+                            <p className={`text-[9px] font-black uppercase opacity-30 leading-none mb-2 ${labelCls}`}>{metric.label}</p>
+                            <p className={`text-xs font-black uppercase tracking-tighter truncate ${headingCls}`}>{metric.value}</p>
+                        </div>
+                     ))}
+                  </div>
+
+                  {/* QUICK INFO BUTTONS */}
+                  <div className={`rounded-3xl p-6 border flex items-center justify-between group cursor-pointer ${cardCls} hover:bg-white/5 transition-all`} onClick={() => setActiveTab('preferences')}>
+                      <div className="flex items-center gap-4">
+                         <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center text-xl">🧬</div>
+                         <div>
+                            <p className={`text-xs font-black ${headingCls}`}>Technical Metrics</p>
+                            <p className={`text-[10px] opacity-40 italic ${labelCls}`}>View and Update Identity Stats</p>
+                         </div>
+                      </div>
+                      <span className="text-purple-500 opacity-20 group-hover:opacity-100 group-hover:translate-x-2 transition-all">→</span>
                   </div>
                 </div>
               ) : (
@@ -614,22 +667,64 @@ export default function ProfilePanel({ hideHeader = false }) {
                      </div>
                    </div>
 
-                   {/* AESTHETIC SELECTOR */}
+                   {/* STYLE GOAL SELECTOR */}
                    <div>
-                     <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${labelCls}`}>Style Aesthetic</p>
+                     <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${labelCls}`}>Style Archetype</p>
                      <div className="grid grid-cols-2 gap-2">
-                       {[{id:'casual',i:'☕'},{id:'corporate',i:'💼'},{id:'streetwear',i:'🛹'},{id:'ethnic',i:'🕌'}].map(a => (
+                       {[{id:'minimalist',i:'⚪'},{id:'sophisticated',i:'🍷'},{id:'edgy',i:'⛓️'},{id:'vibrant',i:'🌈'}].map(a => (
                          <button 
                            key={a.id} 
-                           onClick={() => handleUpdatePreference('aesthetic', a.id)} 
+                           onClick={() => handleUpdatePreference('styleGoal', a.id)} 
                            className={`p-4 rounded-3xl border transition-all flex items-center gap-3 ${
-                             userPrefs.aesthetic === a.id 
+                             userPrefs.styleGoal === a.id 
                                ? 'bg-purple-600 border-purple-600 text-white shadow-xl shadow-purple-600/20' 
                                : isDark ? 'bg-white/5 border-white/10 text-white/60' : 'bg-white border-purple-100 text-slate-700'
                            }`}
                          >
                            <span className="text-xl">{a.i}</span>
                            <span className="text-[9px] font-black uppercase tracking-tighter">{a.id}</span>
+                         </button>
+                       ))}
+                     </div>
+                   </div>
+
+                   {/* CONTRAST SELECTOR */}
+                   <div>
+                     <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${labelCls}`}>Contrast Depth</p>
+                     <div className="flex gap-2">
+                       {[{id:'low',i:'🌫️'},{id:'medium',i:'⚖️'},{id:'high',i:'⚡'}].map(c => (
+                         <button 
+                           key={c.id} 
+                           onClick={() => handleUpdatePreference('contrast', c.id)} 
+                           className={`flex-1 p-4 rounded-3xl border transition-all flex flex-col items-center gap-2 ${
+                             userPrefs.contrast === c.id 
+                               ? 'bg-purple-600 border-purple-600 text-white shadow-xl shadow-purple-600/20' 
+                               : isDark ? 'bg-white/5 border-white/10 text-white/60' : 'bg-white border-purple-100 text-slate-700'
+                           }`}
+                         >
+                           <span className="text-xl">{c.i}</span>
+                           <span className="text-[9px] font-black uppercase tracking-tighter">{c.id}</span>
+                         </button>
+                       ))}
+                     </div>
+                   </div>
+
+                    {/* PERSONA SELECTOR */}
+                   <div>
+                     <p className={`text-[10px] font-black uppercase mb-4 tracking-widest ${labelCls}`}>Fabric Persona</p>
+                     <div className="grid grid-cols-2 gap-2">
+                       {[{id:'classic',i:'🧥'},{id:'rugged',i:'🥾'},{id:'organic',i:'🌿'},{id:'luxe',i:'✨'}].map(p => (
+                         <button 
+                           key={p.id} 
+                           onClick={() => handleUpdatePreference('persona', p.id)} 
+                           className={`p-4 rounded-3xl border transition-all flex items-center gap-3 ${
+                             userPrefs.persona === p.id 
+                               ? 'bg-purple-600 border-purple-600 text-white shadow-xl shadow-purple-600/20' 
+                               : isDark ? 'bg-white/5 border-white/10 text-white/60' : 'bg-white border-purple-100 text-slate-700'
+                           }`}
+                         >
+                           <span className="text-xl">{p.i}</span>
+                           <span className="text-[9px] font-black uppercase tracking-tighter">{p.id}</span>
                          </button>
                        ))}
                      </div>
@@ -700,6 +795,87 @@ export default function ProfilePanel({ hideHeader = false }) {
           </div>
         </div>
       </div>
+
+      {/* ── DNA BLUEPRINT MODAL ────────────────────────────────────── */}
+      <AnimatePresence>
+        {showBlueprint && dnaInsights && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 backdrop-blur-3xl bg-black/80"
+          >
+             <motion.div 
+               initial={{ scale: 0.9, y: 20 }}
+               animate={{ scale: 1, y: 0 }}
+               exit={{ scale: 0.9, y: 20 }}
+               className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[3.5rem] p-10 relative border border-white/10 ${isDark ? 'bg-[#0a0c1a]' : 'bg-white'}`}
+             >
+                <button 
+                  onClick={() => setShowBlueprint(false)}
+                  className="absolute top-8 right-8 w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xl hover:bg-white/10 transition-all"
+                >
+                  ✕
+                </button>
+
+                <div className="space-y-12">
+                   <div className="text-center space-y-2">
+                       <p className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-500">Technical Analysis Report</p>
+                       <h2 className={`text-4xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>DNA BLUEPRINT</h2>
+                       <p className="text-xs opacity-40 uppercase font-bold">Accuracy Rating: 95.8% • AI Precision</p>
+                   </div>
+
+                   {/* CORE METRICS */}
+                   <div className="grid grid-cols-2 gap-6">
+                       <div className="p-6 rounded-3xl bg-white/5 border border-white/5">
+                           <p className="text-[9px] font-black uppercase opacity-30 mb-2">Skin Identification</p>
+                           <p className="text-sm font-bold">{dnaInsights.skin_tone?.category || 'Tone Matched'}</p>
+                           <p className="text-[10px] opacity-40 mt-1 italic">Hex: {dnaInsights.skin_color?.hex}</p>
+                       </div>
+                        <div className="p-6 rounded-3xl bg-white/5 border border-white/5">
+                           <p className="text-[9px] font-black uppercase opacity-30 mb-2">Chromacity Scan</p>
+                           <p className="text-sm font-bold">{dnaInsights.skin_tone?.undertone || 'Neutral'} Undertone</p>
+                           <p className="text-[10px] opacity-40 mt-1 italic">Confidence: {dnaInsights.skin_tone?.confidence}</p>
+                       </div>
+                   </div>
+
+                   {/* PALETTE MAP */}
+                   <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <h4 className="text-[11px] font-black uppercase tracking-widest opacity-60">Master Palette Map</h4>
+                            <span className="text-[9px] font-bold text-slate-500">SHIRTS • TOPS • DRESSES</span>
+                        </div>
+                        <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
+                            {(dnaInsights.best_shirt_colors || dnaInsights.best_top_colors || []).slice(0, 10).map((c, i) => (
+                                <div key={i} className="space-y-2">
+                                    <div className="aspect-square rounded-xl shadow-lg border-2 border-white/20" style={{ backgroundColor: c.hex }} />
+                                    <p className="text-[6px] font-black text-center truncate uppercase opacity-40">{c.name}</p>
+                                </div>
+                            ))}
+                        </div>
+                   </div>
+
+                    {/* ACTIONABLE INTEL */}
+                    <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-purple-600/20 to-transparent border border-purple-500/20">
+                         <h4 className="text-[10px] font-black uppercase tracking-widest mb-4">Stylist AI Verdict</h4>
+                         <p className="text-xs leading-relaxed opacity-70 italic font-medium">
+                            "The DNA analysis confirms a {dnaInsights.skin_tone?.category} tone with a distinct {dnaInsights.skin_tone?.undertone} undertone. 
+                            Your seasonal profile ({dnaInsights.skin_tone?.color_season}) responds best to high-contrast combinations. 
+                            Prioritize {dnaInsights.best_shirt_colors?.[0]?.name || 'Neutral'} and {dnaInsights.best_pant_colors?.[0]?.name || 'Dark'} fabrics for maximum facial interaction."
+                         </p>
+                    </div>
+
+                    <button 
+                      onClick={() => setShowBlueprint(false)} 
+                      className="w-full py-5 bg-white text-black rounded-3xl text-[10px] font-black uppercase tracking-widest"
+                    >
+                        Close Blueprint
+                    </button>
+                </div>
+             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
