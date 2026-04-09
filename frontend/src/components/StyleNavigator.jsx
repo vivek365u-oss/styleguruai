@@ -262,7 +262,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
 
     const handleShopRedirect = (fullItemName, store) => {
         // STRICT GENDER ENFORCEMENT
-        const rawGender = insights?.gender || profile?.gender || profile?.gender_mode || 'female';
+        const rawGender = insights?.gender || profile?.gender || prefs?.gender || 'male';
         const isWomen = rawGender.toLowerCase().includes('female') || rawGender.toLowerCase() === 'women';
         const displayGender = isWomen ? 'women' : 'men';
         
@@ -626,25 +626,26 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                     <div className={`mb-8 p-4 rounded-3xl border border-dashed ${isDark ? 'bg-white/5 border-white/20' : 'bg-slate-50 border-slate-200'}`}>
                                          <p className={`text-[9px] font-black uppercase ${isDark ? 'opacity-40' : 'text-slate-500'} mb-3 tracking-widest`}>Finishing Touches</p>
                                          {(() => {
-                                            const rawGender = insights?.gender || profile?.gender || profile?.gender_mode || 'female';
-                                            const tips = getAccessoryAdvice(rawGender.toLowerCase().includes('female') ? 'female' : 'male', profile?.season || 'Spring');
-                                             return (
-                                                 <div className="grid grid-cols-2 gap-4">
-                                                     <div className="flex gap-2 items-center">
-                                                         <span className="text-xl">💍</span>
-                                                         <div>
-                                                             <p className={`text-[9px] font-black uppercase ${isDark ? 'opacity-60' : 'text-slate-500'}`}>Jewelry</p>
-                                                              <p className={`text-[10px] font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.jewelry}</p>
-                                                         </div>
-                                                     </div>
-                                                     <div className="flex gap-2 items-center">
-                                                         <span className="text-xl">👞</span>
-                                                         <div>
-                                                             <p className={`text-[9px] font-black uppercase ${isDark ? 'opacity-60' : 'text-slate-500'}`}>Shoes</p>
-                                                              <p className={`text-[10px] font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.shoes}</p>
-                                                         </div>
-                                                     </div>
-                                                 </div>
+                                             const rawGender = insights?.gender || profile?.gender || prefs?.gender || 'male';
+                                             const isFemale = rawGender.toLowerCase().includes('female') || rawGender.toLowerCase() === 'women';
+                                             const tips = getAccessoryAdvice(isFemale ? 'female' : 'male', profile?.season || 'Spring');
+                                              return (
+                                                  <div className="flex flex-col sm:flex-row gap-6">
+                                                      <div className="flex-1 flex gap-3 items-center min-w-0">
+                                                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white shadow-sm border border-slate-100'}`}>💍</div>
+                                                          <div className="min-w-0">
+                                                              <p className={`text-[9px] font-black uppercase tracking-wider ${isDark ? 'opacity-40' : 'text-slate-500'}`}>Jewelry Advice</p>
+                                                              <p className={`text-[11px] font-extrabold leading-tight break-words ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.jewelry}</p>
+                                                          </div>
+                                                      </div>
+                                                      <div className="flex-1 flex gap-3 items-center min-w-0">
+                                                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white shadow-sm border border-slate-100'}`}>👞</div>
+                                                          <div className="min-w-0">
+                                                              <p className={`text-[9px] font-black uppercase tracking-wider ${isDark ? 'opacity-40' : 'text-slate-500'}`}>Footwear Style</p>
+                                                              <p className={`text-[11px] font-extrabold leading-tight break-words ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.shoes}</p>
+                                                          </div>
+                                                      </div>
+                                                  </div>
                                              );
                                          })()}
                                     </div>
@@ -672,17 +673,27 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                         {/* Actionable Advice Section (Moved here for better vertical flow) */}
                         <div className={`rounded-3xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-100'}`}>
                             <p className={`text-[9px] font-black uppercase tracking-widest mb-4 ${isDark ? 'opacity-40' : 'text-slate-500'}`}>DNA-Matched Suggestions</p>
-                            <div className="flex flex-wrap gap-2">
-                                {getActionableAdvice(insights?.best_colors || profile?.best_colors, insights?.gender || profile?.gender || 'female').map((adv, i) => {
-                                    const hasInCloset = wardrobe.some(item => item.category === adv.category);
-                                    return (
-                                        <div key={i} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-white border-slate-100 text-slate-800 shadow-sm'}`}>
-                                            <span>{getCategoryIcon(adv.category)}</span>
-                                            <span>{adv.item}</span>
-                                            {hasInCloset && <span className="text-green-500">✓</span>}
-                                        </div>
-                                    );
-                                })}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {(() => {
+                                    const rawGender = insights?.gender || profile?.gender || prefs?.gender || 'male';
+                                    const isFemale = rawGender.toLowerCase().includes('female') || rawGender.toLowerCase() === 'women';
+                                    return getActionableAdvice(insights?.best_colors || profile?.best_colors, isFemale ? 'female' : 'male').map((adv, i) => {
+                                        const hasInCloset = wardrobe.some(item => item.category === adv.category);
+                                        return (
+                                            <div key={i} className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-slate-100 shadow-sm hover:border-purple-200'}`}>
+                                                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-white/5 shrink-0">
+                                                    {getCategoryIcon(adv.category)}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className={`text-[10px] font-black truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>{adv.item}</p>
+                                                    {hasInCloset && (
+                                                        <p className="text-[8px] font-bold text-green-500 uppercase tracking-tighter">In Wardrobe ✓</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    });
+                                })()}
                             </div>
                         </div>
                     </motion.div>
@@ -709,7 +720,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
                                 {(() => {
-                                    const rawGender = insights?.gender || profile?.gender || profile?.gender_mode || 'female';
+                                    const rawGender = insights?.gender || profile?.gender || prefs?.gender || 'male';
                                     const advisoryItems = getActionableAdvice(
                                         insights?.best_colors || 
                                         profile?.best_colors || 
@@ -782,16 +793,16 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                             initial={{ y: 100, scale: 0.9 }}
                             animate={{ y: 0, scale: 1 }}
                             exit={{ y: 100, scale: 0.9 }}
-                            className={`w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative ${isDark ? 'bg-[#0f1123] border border-white/10' : 'bg-white'}`}
+                            className={`w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden ${isDark ? 'bg-[#0f1123] border border-white/10' : 'bg-white'}`}
                             onClick={e => e.stopPropagation()}
                         >
-                            <div className="text-center mb-8">
-                                <div className="w-14 h-1 1 bg-white/10 rounded-full mx-auto mb-6 sm:hidden" />
-                                <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>Select Style Source</h3>
+                            <div className="text-center mb-8 shrink-0">
+                                <div className="w-14 h-1 bg-white/10 rounded-full mx-auto mb-6 sm:hidden" />
+                                <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{t('shopOn') || 'Select Style Source'}</h3>
                                 <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mt-1">Shopping for: {activeShopItem}</p>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-4 overflow-y-auto pr-1 -mx-2 px-2 custom-scrollbar">
                                 {[
                                     { id: 'myntra', name: 'Myntra', logo: '🎀', color: 'from-[#f13ab1] to-[#f87171]' },
                                     { id: 'amazon', name: 'Amazon', logo: '📦', color: 'from-[#ff9900] to-[#232f3e]' },
@@ -801,7 +812,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                     <button 
                                         key={store.id}
                                         onClick={() => handleShopRedirect(activeShopItem, store.id)}
-                                        className={`flex flex-col items-center gap-3 p-6 rounded-[2rem] border transition-all hover:scale-[1.05] active:scale-95 ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-slate-50 border-slate-100 hover:bg-white hover:shadow-xl'}`}
+                                        className={`flex flex-col items-center gap-3 p-6 rounded-[2rem] border transition-all hover:scale-[1.05] active:scale-95 ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-slate-50 border-slate-200 hover:bg-white hover:shadow-xl'}`}
                                     >
                                         <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${store.color} flex items-center justify-center text-2xl shadow-lg`}>
                                             <span className="drop-shadow-sm">{store.logo}</span>
@@ -813,7 +824,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
 
                             <button 
                                 onClick={() => setShowShopSelector(false)}
-                                className="w-full mt-8 py-4 text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity"
+                                className="w-full mt-8 py-4 text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity shrink-0"
                             >
                                 Cancel Discovery
                             </button>

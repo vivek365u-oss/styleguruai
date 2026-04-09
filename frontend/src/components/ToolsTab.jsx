@@ -1,4 +1,5 @@
 import { useState, useContext, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../context/ThemeContext';
 import OutfitChecker from './OutfitChecker';
@@ -110,22 +111,51 @@ function TrendingCard({ item, isDark, AMAZON_TAG }) {
       </button>
 
       {open && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className={`fixed bottom-20 left-3 right-3 z-50 rounded-2xl border p-4 shadow-2xl md:absolute md:bottom-auto md:top-full md:left-auto md:right-auto md:rounded-2xl md:border md:mt-1 md:w-56 md:p-3 ${isDark ? 'bg-slate-900 border-white/20' : 'bg-white border-gray-200'}`}>
-            <div className="flex items-center justify-between mb-3">
-              <p className={`text-xs font-bold ${isDark ? 'text-white/60' : 'text-gray-500'}`}>{t('shopOn')}</p>
-              <button onClick={() => setOpen(false)} className={`text-xs font-bold px-2 py-1 rounded-lg ${isDark ? 'text-white/40 hover:text-white bg-white/5' : 'text-gray-400 hover:text-gray-700 bg-gray-100'}`}>✕</button>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {shopOptions.map(opt => (
-                <a key={opt.name} href={opt.url} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)} className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-bold transition-all hover:scale-[1.02] ${opt.bg}`}>
-                  {opt.name}
-                </a>
-              ))}
-            </div>
-          </div>
-        </>
+        <AnimatePresence>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 backdrop-blur-md bg-black/60" 
+            onClick={() => setOpen(false)}
+          >
+            <motion.div 
+              initial={{ y: 100, scale: 0.9 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 100, scale: 0.9 }}
+              className={`w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden ${isDark ? 'bg-[#0f1123] border border-white/10' : 'bg-white'}`}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="text-center mb-8 shrink-0">
+                <div className="w-14 h-1 bg-white/10 rounded-full mx-auto mb-6 sm:hidden" />
+                <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{t('shopOn')}</h3>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 overflow-y-auto pr-1 -mx-2 px-2 custom-scrollbar">
+                {shopOptions.map(opt => (
+                  <a 
+                    key={opt.name} 
+                    href={opt.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    onClick={() => setOpen(false)} 
+                    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border text-[10px] font-black uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-95 ${opt.bg}`}
+                  >
+                    <span className="text-2xl">{opt.name.split(' ')[0]}</span>
+                    <span>{opt.name.split(' ')[1]}</span>
+                  </a>
+                ))}
+              </div>
+
+              <button 
+                onClick={() => setOpen(false)}
+                className="w-full mt-6 py-3 text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity"
+              >
+                Close Hub
+              </button>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
       )}
     </div>
   );
