@@ -544,7 +544,12 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                             {match ? (
                                                  <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg">CLOSET</span>
                                             ) : (
-                                                 <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg animate-pulse">MISSING</span>
+                                                 <button 
+                                                    onClick={() => openShop(insights.daily_suggestion.top)}
+                                                    className="absolute -top-2 -right-2 bg-orange-600 text-white text-[8px] font-black px-2 py-1 rounded-full shadow-lg animate-pulse hover:scale-110 transition-transform"
+                                                 >
+                                                    🛒 SHOP
+                                                 </button>
                                             )}
                                             {isWorn && <div className="absolute inset-0 bg-green-500/40 rounded-xl flex items-center justify-center text-white text-xl">✓</div>}
                                         </div>
@@ -565,7 +570,12 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                             {match ? (
                                                  <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg">CLOSET</span>
                                             ) : (
-                                                 <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg animate-pulse">MISSING</span>
+                                                 <button 
+                                                    onClick={() => openShop(insights.daily_suggestion.bottom)}
+                                                    className="absolute -top-2 -right-2 bg-orange-600 text-white text-[8px] font-black px-2 py-1 rounded-full shadow-lg animate-pulse hover:scale-110 transition-transform"
+                                                 >
+                                                    🛒 SHOP
+                                                 </button>
                                             )}
                                             {isWorn && <div className="absolute inset-0 bg-green-500/40 rounded-xl flex items-center justify-center text-white text-xl">✓</div>}
                                         </div>
@@ -628,32 +638,37 @@ const StyleNavigator = ({ user, onAnalyze }) => {
             <div className={`rounded-[2.5rem] p-8 border relative overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200 shadow-sm'}`}>
                 <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/5 blur-[80px] pointer-events-none" />
                 <div className="flex items-center gap-4 mb-8 relative z-10">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg ${isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-white text-indigo-600 border border-indigo-100'}`}>🧩</div>
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg ${isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-white text-indigo-600 border border-indigo-100'}`}>🛍️</div>
                     <div>
-                        <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>The Style Gap</p>
-                        <h4 className={`text-xl font-black mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Discover Your Missing DNA</h4>
+                        <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>Universal Shopping Hub</p>
+                        <h4 className={`text-xl font-black mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>DNA Style Discovery</h4>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
                     {(() => {
-                        // Deriving multiple gaps from actionable advice and best colors
                         const advisoryItems = getActionableAdvice(insights?.best_colors || profile?.best_colors, profile?.gender || 'female');
-                        const missingGaps = advisoryItems.filter(adv => !wardrobe.some(item => item.category === adv.category)).slice(0, 4);
+                        
+                        // Check for colors explicitly missing from wardrobe
+                        let missingGaps = advisoryItems.filter(adv => {
+                            const colorName = adv.color?.toLowerCase() || adv.item.split(' ')[0].toLowerCase();
+                            const hasInCloset = wardrobe.some(item => {
+                                const itemColors = item.outfit_data?.colors || [];
+                                return itemColors.some(c => c.name.toLowerCase().includes(colorName)) || 
+                                       (item.color_name && item.color_name.toLowerCase().includes(colorName)) ||
+                                       (item.hex && insights?.best_colors?.some(bc => bc.name.toLowerCase() === colorName && bc.hex === item.hex));
+                            });
+                            return !hasInCloset;
+                        });
 
-                        if (missingGaps.length === 0) {
-                            return (
-                                <div className={`col-span-full py-12 text-center rounded-[2.5rem] border border-dashed ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200'}`}>
-                                    <span className="text-4xl mb-3 block">✨</span>
-                                    <p className={`text-sm font-black tracking-tight uppercase ${isDark ? 'text-white/60' : 'text-slate-400'}`}>Wardrobe Optimization: 100%</p>
-                                </div>
-                            );
-                        }
+                        // FALLBACK: If optimization is 100%, show "Elite Upgrades" using all best colors
+                        const displayGaps = missingGaps.length > 0 ? missingGaps.slice(0, 4) : advisoryItems.slice(0, 4).map(a => ({ ...a, item: `Elite ${a.item}` }));
 
-                        return missingGaps.map((gap, idx) => {
-                            const colorName = gap.item.split(' ')[0];
+                        return displayGaps.map((gap, idx) => {
+                            const colorName = gap.color || gap.item.split(' ')[0];
                             const colorHex = (insights?.best_colors || profile?.best_colors || []).find(c => c.name === colorName)?.hex || '#888';
-                            
+                            const isElite = missingGaps.length === 0;
+
                             return (
                                 <motion.div 
                                     key={idx}
@@ -664,14 +679,14 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                         <div className="w-14 h-14 rounded-2xl border-4 border-white/10 shadow-xl flex-shrink-0" style={{ backgroundColor: colorHex }} />
                                         <div className="flex-1 min-w-0">
                                             <p className={`font-black text-xs truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{gap.item}</p>
-                                            <p className="text-[10px] text-indigo-500 font-bold">+ {15 + (idx * 5)}% Synergy</p>
+                                            <p className="text-[10px] text-indigo-500 font-bold">{isElite ? '💎 Elite Upgrade' : `+ ${15 + (idx * 5)}% Synergy`}</p>
                                         </div>
                                     </div>
                                     <button 
                                         onClick={() => openShop(colorName)}
                                         className={`w-full py-3 rounded-xl text-[9px] font-black tracking-widest transition-all ${isDark ? 'bg-white text-indigo-900' : 'bg-indigo-600 text-white'}`}
                                     >
-                                        🔍 SHOP NOW
+                                        🔍 SHOP HUB
                                     </button>
                                 </motion.div>
                             );

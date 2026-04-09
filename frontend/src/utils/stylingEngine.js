@@ -147,15 +147,22 @@ export const getActionableAdvice = (bestColors, gender) => {
     if (!bestColors || bestColors.length === 0) return [];
     
     const suggestions = [];
-    const color = bestColors[0]?.name || 'Neutral';
     
-    if (gender === 'female') {
-        suggestions.push({ item: `${color} Silk Saree`, category: 'cat_saree_silk' });
-        suggestions.push({ item: `${color} Kurti Set`, category: 'cat_kurti' });
-    } else {
-        suggestions.push({ item: `${color} Formal Shirt`, category: 'cat_formal_shirt' });
-        suggestions.push({ item: `${color} Kurta Set`, category: 'cat_kurta_set' });
-    }
+    // Use top 4 colors for variety
+    bestColors.slice(0, 4).forEach((colorObj, idx) => {
+        const color = colorObj.name;
+        if (gender === 'female') {
+            if (idx === 0) suggestions.push({ item: `${color} Silk Saree`, category: 'cat_saree_silk', color: color });
+            if (idx === 1) suggestions.push({ item: `${color} Kurti Set`, category: 'cat_kurti', color: color });
+            if (idx === 2) suggestions.push({ item: `${color} Maxi Dress`, category: 'cat_dress', color: color });
+            if (idx === 3) suggestions.push({ item: `${color} Peplum Top`, category: 'cat_top', color: color });
+        } else {
+            if (idx === 0) suggestions.push({ item: `${color} Formal Shirt`, category: 'cat_formal_shirt', color: color });
+            if (idx === 1) suggestions.push({ item: `${color} Kurta Set`, category: 'cat_kurta_set', color: color });
+            if (idx === 2) suggestions.push({ item: `${color} Casual Polo`, category: 'cat_polo', color: color });
+            if (idx === 3) suggestions.push({ item: `${color} Linen Blazer`, category: 'cat_blazer', color: color });
+        }
+    });
     
     return suggestions;
 };
