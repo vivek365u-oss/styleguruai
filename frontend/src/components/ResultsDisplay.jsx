@@ -1073,7 +1073,6 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
     { id: 'colors', label: 'Colors', emoji: '🎨' },
     { id: 'outfits', label: 'Outfits', emoji: '👔' },
     { id: 'accessories', label: 'Accessories', emoji: '✨' },
-    { id: 'shopping', label: 'Shop', emoji: '🛍️' },
   ];
 
   const tabBarBg = isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200';
@@ -1264,7 +1263,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           const dy = Math.abs(e.changedTouches[0].clientY - window._tabTouchStartY);
           // Only swipe horizontally if mainly horizontal gesture
           if (Math.abs(diff) < dy * 0.8) return;
-          const tabOrder = ['colors', 'outfits', 'accessories', 'shopping'];
+          const tabOrder = ['colors', 'outfits', 'accessories'];
           const idx = tabOrder.indexOf(activeTab);
           if (diff > 50 && idx < tabOrder.length - 1) setActiveTab(tabOrder[idx + 1]);
           if (diff < -50 && idx > 0) setActiveTab(tabOrder[idx - 1]);
@@ -1304,18 +1303,6 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             makeupSuggestions={makeupSuggestions}
             isDark={isDark}
           />
-        )}
-        {activeTab === 'shopping' && (
-          <div className="space-y-4">
-            <p className={`text-sm font-semibold ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
-              Shop curated products based on your color analysis.
-            </p>
-            <ColorRecommendationsShop
-              recommendations={recommendations}
-              gender={finalData.gender || 'male'}
-              isDark={isDark}
-            />
-          </div>
         )}
       </div>
 

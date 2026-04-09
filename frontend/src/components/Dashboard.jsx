@@ -300,23 +300,17 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
 
 
 // ── Cart Button Component ────────────────────────────────────
-function CartButton({ setCartOpen }) {
-  const { cart } = useCart();
-  const itemCount = cart.length;
-
+function ProfileHeaderButton({ onOpenProfile, isDark }) {
   return (
     <button
-      onClick={() => setCartOpen(true)}
-      id="main-cart-button"
-      className="relative w-11 h-11 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-xl hover:bg-white/10 active:scale-90 transition-all z-[60]"
-      aria-label="Open Shopping Cart"
+      onClick={onOpenProfile}
+      id="header-profile-button"
+      className={`w-11 h-11 rounded-2xl flex items-center justify-center text-xl transition-all z-[60] active:scale-90 border ${
+        isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-purple-100 shadow-sm hover:bg-purple-50'
+      }`}
+      aria-label="Open Profile"
     >
-      <span className="drop-shadow-sm">🛒</span>
-      {itemCount > 0 && (
-        <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[10px] rounded-full flex items-center justify-center font-black shadow-lg border-2 border-[#050816]">
-          {itemCount > 9 ? '9+' : itemCount}
-        </span>
-      )}
+      <span className="drop-shadow-sm">❤️</span>
     </button>
   );
 }
@@ -602,7 +596,7 @@ function Dashboard({ user, onLogout }) {
               {t('navNew')}
             </button>
           )}
-          <CartButton cartOpen={cartOpen} setCartOpen={setCartOpen} />
+          <ProfileHeaderButton onOpenProfile={() => handleTabChange('profile')} isDark={isDark} />
 
           <button onClick={toggleTheme} className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-sm">
             {theme === 'dark' ? '☀️' : '🌙'}
