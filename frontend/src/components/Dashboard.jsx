@@ -13,7 +13,6 @@ import { saveProfile, saveHistory, auth } from '../api/styleApi';
 import WardrobePanel from './WardrobePanel';
 import { saveWardrobeItem } from '../api/styleApi';
 import { usePlan } from '../context/PlanContext';
-import OOTDCard from './OOTDCard';
 import WeatherTip from './WeatherTip';
 import ColorScanner from './ColorScanner';
 import StyleBot from './StyleBot';
@@ -147,6 +146,14 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
     localStorage.setItem('sg_gender_pref', next);
   };
 
+  const [lastScore, setLastScore] = useState(() => localStorage.getItem('sg_last_fit_score'));
+
+  useEffect(() => {
+    const handleScore = () => setLastScore(localStorage.getItem('sg_last_fit_score'));
+    window.addEventListener('sg_score_updated', handleScore);
+    return () => window.removeEventListener('sg_score_updated', handleScore);
+  }, []);
+
   // Global Profile Lock Priority
   const primaryProfile = JSON.parse(localStorage.getItem('sg_primary_profile') || 'null');
   const activeProfile = primaryProfile || lastAnalysis;
@@ -242,42 +249,44 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
         </div>
       )}
 
-      {/* Daily Style Tip */}
-      <div className={`rounded-2xl p-4 border flex items-start gap-3 ${isDark ? 'bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-700/30' : 'bg-purple-50 border-purple-200'}`}>
-        <span className="text-2xl flex-shrink-0">{todayTip.emoji}</span>
-        <div>
-          <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{t('styleTipDay')}</p>
-          <p className={`text-sm leading-relaxed ${isDark ? 'text-white/70' : 'text-gray-700'}`}>{todayTip.tip}</p>
-        </div>
-      </div>
+      {/* Consolidated Daily Intelligence Briefing */}
+      <WeatherTip 
+        isDark={isDark} 
+        profile={activeProfile} 
+        genderPref={genderPref} 
+      />
 
-      {/* OOTD & Hook — Outfit of the Day */}
-      {activeProfile && (
-        <div className="space-y-3">
-          <OOTDCard
-            skinTone={activeProfile.skinTone || activeProfile.skin_tone?.category}
-            gender={activeProfile.fullData?.gender || activeProfile.gender || genderPref}
-            isDark={isDark}
-          />
-
-          {/* Rate My Fit - Hook mechanics */}
-          <div className={`rounded-2xl p-4 border flex items-center gap-3 justify-between ${isDark ? 'bg-gradient-to-r from-orange-900/40 to-red-900/40 border-orange-700/30' : 'bg-gradient-to-r from-orange-50 to-red-50 border-orange-200'}`}>
-            <div>
-              <p className={`text-sm font-black uppercase tracking-wide ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>{t('rateMyFit')}</p>
-              <p className={`text-[10px] mt-0.5 leading-tight ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{t('rateMyFitSub')}</p>
-            </div>
-            <button
-              onClick={onAnalyze}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-lg hover:scale-105 flex-shrink-0 heartbeat ${isDark ? 'bg-orange-500 text-white shadow-orange-900/50' : 'bg-orange-500 text-white hover:bg-orange-600 shadow-orange-500/30'}`}
-            >
-              {t('scanFit')}
-            </button>
+      {/* Rate My Fit - Performance Tracker */}
+      <div className={`rounded-3xl p-5 border flex items-center gap-4 justify-between transition-all ${isDark ? 'bg-[#1a120b]/60 border-orange-500/20 shadow-xl' : 'bg-orange-50 border-orange-200 shadow-lg'}`}>
+        <div className="flex-1">
+          <p className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1.5 ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>{t('rateMyFit')}</p>
+          <div className="flex items-center gap-3">
+             {lastScore ? (
+                <div className="flex flex-col">
+                   <p className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>{lastScore}%</p>
+                   <p className={`text-[9px] font-bold uppercase opacity-40 ${isDark ? 'text-white' : 'text-gray-500'}`}>Last Fit Performance</p>
+                </div>
+             ) : (
+                <p className={`text-xs font-medium leading-tight ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{t('rateMyFitSub')}</p>
+             )}
           </div>
         </div>
-      )}
+        <button
+          onClick={onAnalyze}
+          className={`px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg hover:scale-105 flex-shrink-0 heartbeat ${isDark ? 'bg-orange-500 text-white shadow-orange-900/50' : 'bg-orange-500 text-white hover:bg-orange-600 shadow-orange-500/40'}`}
+        >
+          {t('scanFit')}
+        </button>
+      </div>
 
-      {/* Weather-Based Style Tip */}
-      <WeatherTip isDark={isDark} />
+      {/* Daily Style Tip reasoning box */}
+      <div className={`rounded-2xl p-4 border flex items-start gap-3 ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50/50 border-purple-100'}`}>
+        <span className="text-xl flex-shrink-0 opacity-80">{todayTip.emoji}</span>
+        <div>
+          <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{t('styleTipDay')}</p>
+          <p className={`text-[11px] leading-relaxed italic ${isDark ? 'text-white/50' : 'text-gray-600'}`}>“{todayTip.tip}”</p>
+        </div>
+      </div>
 
       {/* AdSense Ad */}
       <div className="mt-2 text-center py-4 bg-white/5 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-sm">

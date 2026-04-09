@@ -4,8 +4,7 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../context/ThemeContext';
-import { publishToCommunityFeed, auth, saveSavedColor, getSavedColors, saveHistory, saveWardrobeItem } from '../api/styleApi';
-import { useAuthState } from '../hooks/useAuthState';
+import { publishToCommunityFeed, auth, saveSavedColor, getSavedColors, saveHistory } from '../api/styleApi';
 import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';
 import ColorRecommendationsShop from './ColorRecommendationsShop';
@@ -32,54 +31,19 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   // 1. Correct gender-specific category naming
   const getProductCategory = () => {
     const cat = category.toLowerCase();
-    
-    // Comprehensive mapping for Myntra/Amazon search accuracy
-    const mapping = {
-      female: {
-        cat_saree_silk: 'silk-saree',
-        cat_saree_chiffon: 'chiffon-saree',
-        cat_lehenga: 'lehenga-choli',
-        cat_anarkali: 'anarkali-suit',
-        cat_kurti: 'kurti',
-        cat_sharara: 'sharara-set',
-        cat_crop_top: 'crop-top',
-        cat_blouse: 'blouse',
-        cat_corset: 'corset-top',
-        cat_dress_maxi: 'maxi-dress',
-        cat_dress_mini: 'mini-dress',
-        cat_mom_jeans: 'mom-jeans',
-        cat_skirt: 'skirt',
-        cat_palazzo: 'palazzo',
-        shirt: 'top',
-        top: 'top',
-        pant: 'jeans',
-        bottom: 'jeans',
-        shoes: 'heels',
-        jewellery: 'earrings',
-        bag: 'handbag',
-        handbag: 'handbag'
-      },
-      male: {
-        cat_sherwani: 'sherwani',
-        cat_kurta_set: 'kurta-set',
-        cat_nehru_jacket: 'nehru-jacket',
-        cat_dhoti: 'dhoti-kurta',
-        cat_formal_shirt: 'formal-shirt',
-        cat_blazer: 'blazer',
-        cat_tuxedo: 'tuxedo',
-        cat_formal_trouser: 'formal-trousers',
-        cat_oversized_tee: 'oversized-t-shirt',
-        cat_cargo: 'cargo-pants',
-        cat_hoodie: 'hoodie',
-        shirt: 'shirt',
-        top: 'shirt',
-        pant: 'jeans',
-        bottom: 'jeans',
-        shoes: 'shoes'
-      }
-    };
-
-    return mapping[gender]?.[category] || mapping[gender]?.[cat] || cat;
+    if (isFemale) {
+      if (cat === 'shirt' || cat === 'top') return 'top';
+      if (cat === 'pant' || cat === 'bottom') return 'jeans';
+      if (cat === 'shoes' || cat === 'footwear') return 'heels';
+      if (cat === 'jewellery') return 'earrings';
+      if (cat === 'bag' || cat === 'handbag') return 'handbag';
+      return cat;
+    } else {
+      if (cat === 'shirt' || cat === 'top') return 'shirt';
+      if (cat === 'pant' || cat === 'bottom') return 'jeans';
+      if (cat === 'shoes' || cat === 'footwear') return 'shoes';
+      return cat;
+    }
   };
 
   const product = getProductCategory();
@@ -150,29 +114,23 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
   const [savingColor, setSavingColor] = useState(false);
   const [savedColorId, setSavedColorId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuthState();
-  const isLoggedIn = !!user;
+  const isLoggedIn = !!auth.currentUser;
 
-  // Load saved status when component mounts or user changes
+  // Load saved status when component mounts
   useEffect(() => {
     const loadSavedStatus = async () => {
       if (!isLoggedIn) {
-        setSaved(false);
-        setSavedColorId(null);
         setLoading(false);
         return;
       }
 
       try {
-        const savedColors = await getSavedColors(user.uid);
+        const savedColors = await getSavedColors(auth.currentUser.uid);
         // Check if this color hex is already saved
         const foundColor = savedColors.find(sc => sc.hex === color.hex);
         if (foundColor) {
           setSaved(true);
           setSavedColorId(foundColor.id);
-        } else {
-          setSaved(false);
-          setSavedColorId(null);
         }
       } catch (err) {
         console.error('Error loading saved color status:', err);
@@ -182,7 +140,7 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
     };
 
     loadSavedStatus();
-  }, [color.hex, isLoggedIn, user?.uid]);
+  }, [color.hex, isLoggedIn]);
 
   const toggleSave = async (e) => {
     e.stopPropagation();
@@ -191,40 +149,32 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
       return;
     }
 
-    // Optimistic UI update
-    const wasSaved = saved;
-    const oldId = savedColorId;
-    setSaved(!wasSaved);
     setSavingColor(true);
 
     try {
-      if (wasSaved && oldId) {
+      if (saved && savedColorId) {
         // Delete saved color
         const { db } = await import('../firebase');
         const { deleteDoc, doc } = await import('firebase/firestore');
-        await deleteDoc(doc(db, 'users', user.uid, 'saved_colors', oldId));
+        await deleteDoc(doc(db, 'users', auth.currentUser.uid, 'saved_colors', savedColorId));
+        setSaved(false);
         setSavedColorId(null);
         console.log('Color unsaved:', color.name);
       } else {
         // Save new color
-        const colorId = await saveWardrobeItem(user.uid, {
+        const colorId = await saveSavedColor(auth.currentUser.uid, {
           name: color.name,
           hex: color.hex,
           category,
           gender,
-          reason: color.reason || '',
-          source: 'AIPSE_ANALYSIS',
-          vibe: 'locked_dna'
+          reason: color.reason || ''
         });
         setSaved(true);
         setSavedColorId(colorId);
       }
     } catch (err) {
       console.error('Error saving color:', err);
-      // Revert on error
-      setSaved(wasSaved);
-      setSavedColorId(oldId);
-      alert('Failed to update color. Please try again.');
+      alert('Failed to save color. Please try again.');
     } finally {
       setSavingColor(false);
     }
@@ -639,20 +589,8 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
   const avoidColors = recommendations.colors_to_avoid || [];
   const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
 
-  const deduplicateColors = (colors) => {
-    const seen = new Set();
-    return colors.filter(c => {
-      const h = c.hex.toLowerCase();
-      if (seen.has(h)) return false;
-      seen.add(h);
-      return true;
-    });
-  };
-
-  const resultsColors = isSeasonal ? recommendations.seasonal_colors : (isFemale ? [] : recommendations.best_shirt_colors);
-  
   if (isSeasonal) {
-    const seasonalColors = deduplicateColors(recommendations.seasonal_colors || []);
+    const seasonalColors = recommendations.seasonal_colors || [];
     return (
       <div className="space-y-4">
         <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl p-4">
@@ -671,11 +609,11 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 
   if (isFemale) {
     const sections = [
-      { title: 'dressColors', colors: deduplicateColors(recommendations.best_dress_colors || []), cat: 'dress' },
-      { title: 'topColors', colors: deduplicateColors(recommendations.best_top_colors || []), cat: 'top' },
-      { title: 'kurtiColors', colors: deduplicateColors(recommendations.best_kurti_colors || []), cat: 'kurti' },
-      { title: 'lehengaColors', colors: deduplicateColors(recommendations.best_lehenga_colors || []), cat: 'lehenga' },
-      { title: 'bottomColors', colors: deduplicateColors(recommendations.best_bottom_colors || recommendations.best_pant_colors || []), cat: 'bottom' },
+      { title: 'dressColors', colors: recommendations.best_dress_colors || [], cat: 'dress' },
+      { title: 'topColors', colors: recommendations.best_top_colors || [], cat: 'top' },
+      { title: 'kurtiColors', colors: recommendations.best_kurti_colors || [], cat: 'kurti' },
+      { title: 'lehengaColors', colors: recommendations.best_lehenga_colors || [], cat: 'lehenga' },
+      { title: 'bottomColors', colors: recommendations.best_bottom_colors || recommendations.best_pant_colors || [], cat: 'bottom' },
     ].filter(s => s.colors.length > 0);
 
     return (
@@ -692,7 +630,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
           <div>
             <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2">🚫 {t('avoidThese')}</p>
             <div className="grid grid-cols-1 gap-2">
-              {deduplicateColors(avoidColors).map((color, i) => <ColorCard key={i} color={color} category="dress" gender="female" isDark={isDark} />)}
+              {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="dress" gender="female" isDark={isDark} />)}
             </div>
           </div>
         )}
@@ -708,8 +646,8 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
   }
 
   // Male
-  const shirtColors = deduplicateColors(recommendations.best_shirt_colors || []);
-  const pantColors = deduplicateColors(recommendations.best_pant_colors || recommendations.base_pant_colors || []);
+  const shirtColors = recommendations.best_shirt_colors || [];
+  const pantColors = recommendations.best_pant_colors || recommendations.base_pant_colors || [];
   return (
     <div className="space-y-5">
       {shirtColors.length > 0 && (
@@ -732,7 +670,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
         <div>
           <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2">🚫 Avoid These</p>
           <div className="grid grid-cols-1 gap-2">
-            {deduplicateColors(avoidColors).map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} />)}
+            {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} />)}
           </div>
         </div>
       )}
@@ -1139,67 +1077,23 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             ...(recommendations.best_pant_colors || []),
           ].slice(0, 7);
           if (allColors.length === 0) return null;
-          
-          const handleSyncAll = async () => {
-             if (!auth.currentUser) { alert('Please login to sync'); return; }
-             const uid = auth.currentUser.uid;
-             setShareStatus('loading');
-             try {
-                await Promise.all(allColors.map(c => {
-                    let finalCat = c.category || shirtCategory;
-                    
-                    // Smart mapping to Registry IDs
-                    if (isFemale) {
-                        if (finalCat === 'shirt' || finalCat === 'top') finalCat = 'cat_kurti';
-                        if (finalCat === 'dress') finalCat = 'cat_anarkali';
-                        if (finalCat === 'pant' || finalCat === 'bottom') finalCat = 'cat_palazzo';
-                    } else {
-                        if (finalCat === 'shirt' || finalCat === 'top') finalCat = 'cat_casual_shirt';
-                        if (finalCat === 'pant' || finalCat === 'bottom') finalCat = 'cat_jeans';
-                    }
-
-                    return saveWardrobeItem(uid, {
-                        color_name: c.name,
-                        hex: c.hex,
-                        category: finalCat,
-                        gender: isFemale ? 'female' : 'male',
-                        source: 'AIPSE_ANALYSIS',
-                        vibe: 'locked_dna'
-                    });
-                }));
-                setShareStatus('success');
-                window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
-                setTimeout(() => setShareStatus(null), 3000);
-             } catch (e) {
-                console.error('Sync failed:', e);
-                setShareStatus('error');
-             }
-          };
-
           return (
-            <div className="flex-1 flex flex-col gap-2">
-                <button
-                    onClick={() => downloadPalette(allColors, analysis.skin_tone.category)}
-                    className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-bold transition-all hover:scale-[1.02] ${isDark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-purple-500/40' : 'bg-white border-gray-200 text-gray-600 hover:border-purple-400 shadow-sm'}`}
-                >
-                    <span>🎨</span>
-                    <span>Download Palette</span>
-                </button>
-                <button
-                    onClick={handleSyncAll}
-                    disabled={shareStatus === 'loading'}
-                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl border text-[10px] font-black uppercase transition-all hover:scale-[1.02] ${isDark ? 'bg-orange-500/20 border-orange-500/40 text-orange-400' : 'bg-orange-50 border-orange-200 text-orange-700'}`}
-                >
-                    <span>📸</span>
-                    {shareStatus === 'loading' ? 'Syncing...' : 'Sync All to Wardrobe'}
-                </button>
-            </div>
+            <button
+              onClick={() => downloadPalette(allColors, analysis.skin_tone.category)}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-bold transition-all hover:scale-[1.02] ${isDark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-purple-500/40' : 'bg-white border-gray-200 text-gray-600 hover:border-purple-400 shadow-sm'}`}
+            >
+              <span>🎨</span>
+              <span>Download Palette</span>
+            </button>
           );
         })()}
 
         <button
           onClick={async () => {
-            // saveHistory is now automated in Dashboard.jsx
+            // Always allow saving as user is now always authenticated
+            await saveHistory({
+              skinTone: analysis.skin_tone.category,
+            });
             if (shareStatus === 'success') return;
             setShareStatus('loading');
             try {

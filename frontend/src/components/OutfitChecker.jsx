@@ -158,11 +158,16 @@ function OutfitChecker() {
       completeProgress(); // Complete progress animation
       
       // Wait for animation to finish, then show results
-      setTimeout(() => {
-        setResult(res.data);
-        setShowProgress(false);
-        // Usage logging removed
-      }, 800); // 800ms for fade-out animation
+        setTimeout(() => {
+          setResult(res.data);
+          setShowProgress(false);
+          // Persist score for home page intelligence
+          if (res.data?.compatibility?.compatibility_score !== undefined) {
+             localStorage.setItem('sg_last_fit_score', res.data.compatibility.compatibility_score.toString());
+             localStorage.setItem('sg_last_fit_date', new Date().toISOString());
+             window.dispatchEvent(new CustomEvent('sg_score_updated'));
+          }
+        }, 800); 
     } catch (err) {
       console.error("[OutfitChecker] Analysis error:", err);
       setShowProgress(false);

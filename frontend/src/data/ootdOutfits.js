@@ -1,35 +1,35 @@
-export const getLocalizedOOTD = (gender, skinTone, language, indexOffset = 0) => {
+export const getLocalizedOOTD = (gender, skinTone, language, indexOffset = 0, weatherCategory = null) => {
   const OUTFITS = {
     male: {
       fair: [
         { 
           shirt: { en: 'Navy Blue Polo', hinglish: 'Navy Blue Polo', hi: 'नेवी ब्लू पोलो' }, shirtHex: '#1e3a5f',
           pant: { en: 'Beige Chinos', hinglish: 'Beige Chinos', hi: 'बेज चिनोस' }, pantHex: '#d2b48c',
-          shoes: { en: 'White Sneakers', hinglish: 'White Sneakers', hi: 'सफेद स्नीकर्स' }, occasion: { en: 'Casual', hinglish: 'Casual', hi: 'कैज़ुअल' },
+          shoes: { en: 'White Sneakers', hinglish: 'White Sneakers', hi: 'सफेद स्नीकर्स' }, occasion: { en: 'Casual', hinglish: 'Casual', hi: 'कैज़ुअल' }, weather: 'cool',
           tip: { en: 'Navy + beige is a timeless combo for fair skin', hinglish: 'Fair skin ke liye navy + beige timeless combo hai.', hi: 'फेयर स्किन के लिए नेवी + बेज एक बेहतरीन कॉम्बिनेशन है।' }
         },
         { 
           shirt: { en: 'Dusty Rose Tee', hinglish: 'Dusty Rose T-Shirt', hi: 'डस्टी रोज़ टी-शर्ट' }, shirtHex: '#c4767a',
           pant: { en: 'Dark Grey Jeans', hinglish: 'Dark Grey Jeans', hi: 'डार्क ग्रे जींस' }, pantHex: '#3d3d3d',
-          shoes: { en: 'Brown Loafers', hinglish: 'Brown Loafers', hi: 'भूरे रंग के लोफर्स' }, occasion: { en: 'Date', hinglish: 'Date', hi: 'डेट' },
+          shoes: { en: 'Brown Loafers', hinglish: 'Brown Loafers', hi: 'भूरे रंग के लोफर्स' }, occasion: { en: 'Date', hinglish: 'Date', hi: 'डेट' }, weather: 'warm',
           tip: { en: 'Soft pink tones complement your fair complexion beautifully', hinglish: 'Soft pink tones tumhare fair complexion ko nicely complement karte hain.', hi: 'सॉफ्ट पिंक टोन आपकी गोरी त्वचा को खूबसूरती से निखारते हैं।' }
         },
         { 
           shirt: { en: 'Forest Green Shirt', hinglish: 'Forest Green Shirt', hi: 'फॉरेस्ट ग्रीन शर्ट' }, shirtHex: '#2d5a27',
           pant: { en: 'Navy Trousers', hinglish: 'Navy Trousers', hi: 'नेवी ट्राउजर' }, pantHex: '#1b2838',
-          shoes: { en: 'Tan Boots', hinglish: 'Tan Boots', hi: 'टैन बूट्स' }, occasion: { en: 'Office', hinglish: 'Office', hi: 'ऑफिस' },
+          shoes: { en: 'Tan Boots', hinglish: 'Tan Boots', hi: 'टैन बूट्स' }, occasion: { en: 'Office', hinglish: 'Office', hi: 'ऑफिस' }, weather: 'cool',
           tip: { en: 'Deep green adds depth without overwhelming light skin', hinglish: 'Deep green light skin par bahut depth add karta hai bina overwhelm kiye.', hi: 'गहरा हरा रंग हल्की त्वचा पर गहराई जोड़ता है।' }
         },
         { 
           shirt: { en: 'Lavender Oversized', hinglish: 'Lavender Oversized Shirt', hi: 'लैवेंडर ओवरसाइज़्ड शर्ट' }, shirtHex: '#b4a7d6',
           pant: { en: 'White Jeans', hinglish: 'White Jeans', hi: 'सफेद जींस' }, pantHex: '#f5f5f5',
-          shoes: { en: 'Grey Sneakers', hinglish: 'Grey Sneakers', hi: 'ग्रे स्नीकर्स' }, occasion: { en: 'Weekend', hinglish: 'Weekend', hi: 'वीकेंड' },
+          shoes: { en: 'Grey Sneakers', hinglish: 'Grey Sneakers', hi: 'ग्रे स्नीकर्स' }, occasion: { en: 'Weekend', hinglish: 'Weekend', hi: 'वीकेंड' }, weather: 'warm',
           tip: { en: 'Pastels on fair skin look effortlessly stylish', hinglish: 'Fair skin par pastels naturally stylish lagte hain.', hi: 'गोरी त्वचा पर पेस्टल रंग स्टाइलिश लगते हैं।' }
         },
         { 
           shirt: { en: 'Burgundy Henley', hinglish: 'Burgundy Henley', hi: 'बरगंडी हेनले शर्ट' }, shirtHex: '#722f37',
           pant: { en: 'Black Slim Fit', hinglish: 'Black Slim Fit Pants', hi: 'काले स्लिम फिट पैंट' }, pantHex: '#1a1a1a',
-          shoes: { en: 'Oxford Brown', hinglish: 'Oxford Brown Shoes', hi: 'ऑक्सफोर्ड भूरे जूते' }, occasion: { en: 'Party', hinglish: 'Party', hi: 'पार्टी' },
+          shoes: { en: 'Oxford Brown', hinglish: 'Oxford Brown Shoes', hi: 'ऑक्सफोर्ड भूरे जूते' }, occasion: { en: 'Party', hinglish: 'Party', hi: 'पार्टी' }, weather: 'warm',
           tip: { en: 'Burgundy creates a sophisticated, rich contrast', hinglish: 'Burgundy ek rich aur sophisticated contrast banata hai.', hi: 'बरगंडी एक शानदार और समृद्ध कंट्रास्ट बनाता है।' }
         },
       ],
@@ -268,6 +268,13 @@ export const getLocalizedOOTD = (gender, skinTone, language, indexOffset = 0) =>
   if (!OUTFITS[gndr][tone] && !genericOutfitPoolFallback[gndr][tone]) tone = 'medium';
   
   let pool = OUTFITS[gndr][tone] || genericOutfitPoolFallback[gndr][tone];
+  
+  // Weather filtering
+  if (weatherCategory) {
+     const weatherFiltered = pool.filter(o => o.weather === weatherCategory || !o.weather);
+     if (weatherFiltered.length > 0) pool = weatherFiltered;
+  }
+
   if(pool.length === 0) pool = genericOutfitPoolFallback[gndr][tone];
   else if (pool.length < 5 && genericOutfitPoolFallback[gndr][tone]) {
      pool = genericOutfitPoolFallback[gndr][tone]; // use fallback
