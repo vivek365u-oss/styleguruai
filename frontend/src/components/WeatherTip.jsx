@@ -206,7 +206,7 @@ function WeatherTip({ city, isDark, profile, genderPref }) {
            <div>
               <p className={`text-[11px] leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
                  <span className="font-black text-purple-400 uppercase mr-1">{t('expertNote')}:</span>
-                 {localWeatherTip} {t('bestFabricsToday')} <b>{tip.fabrics}</b>
+                 {tip.tip} {t('bestFabricsToday')} <b>{tip.fabrics}</b>
               </p>
            </div>
         </div>
