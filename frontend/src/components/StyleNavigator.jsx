@@ -724,6 +724,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
                                 {(() => {
                                     const rawGender = insights?.gender || profile?.gender || prefs?.gender || 'male';
+                                    const advisoryItems = getActionableAdvice(
                                         insights?.best_colors || 
                                         profile?.best_colors || 
                                         profile?.best_shirt_colors || 
