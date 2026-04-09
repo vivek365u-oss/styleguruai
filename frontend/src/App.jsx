@@ -1,3 +1,4 @@
+// StyleGuru AI - Production Build v1.2.1 [2026-04-09]
 import React, { useState, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { logout } from './api/styleApi';
