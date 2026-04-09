@@ -23,6 +23,25 @@ const infoCls = "w-5 h-5 rounded-full flex items-center justify-center text-[10p
 
 const TONE_COLORS = { fair: "#F5DEB3", light: "#D2A679", medium: "#C68642", olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A" };
 
+const TRENDING_COLLECTIONS = {
+    male: [
+        { id: 't1', key: 'item_oversized_tee', icon: '👕', score: 98 },
+        { id: 't2', key: 'item_baggy_jeans', icon: '👖', score: 95 },
+        { id: 't3', key: 'item_cargo_pants', icon: '📦', score: 92 },
+        { id: 't4', key: 'item_varsity_jacket', icon: '🧥', score: 91 },
+        { id: 't5', key: 'item_minimal_sneakers', icon: '👟', score: 96 },
+        { id: 't6', key: 'item_cuban_collar', icon: '👔', score: 90 }
+    ],
+    female: [
+        { id: 'f1', key: 'item_corset_top', icon: '🎀', score: 98 },
+        { id: 'f2', key: 'item_wide_leg', icon: '👖', score: 96 },
+        { id: 'f3', key: 'item_blazer', icon: '🧥', score: 94 },
+        { id: 'f4', key: 'item_slip_dress', icon: '👗', score: 93 },
+        { id: 'f5', key: 'item_chunky_loafers', icon: '👞', score: 91 },
+        { id: 'f6', key: 'item_saree_chiffon', icon: '🥻', score: 97 }
+    ]
+};
+
 const StyleNavigator = ({ user, onAnalyze }) => {
     const { theme } = useContext(ThemeContext);
     const { t, language } = useLanguage();
@@ -41,6 +60,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
     const [mood, setMood] = useState('mood_minimal');
     const [isEditingDNA, setIsEditingDNA] = useState(false);
     const [editDNA, setEditDNA] = useState({ skinTone: 'medium', undertone: 'neutral', season: 'Spring' });
+    const [activeTrendingGender, setActiveTrendingGender] = useState('male');
     const [activeView, setActiveView] = useState('daily'); // 'daily' | 'shop' | 'dna'
 
     useEffect(() => {
@@ -117,6 +137,13 @@ const StyleNavigator = ({ user, onAnalyze }) => {
         };
 
         loadInitialData();
+        
+        // Auto-set trending gender based on profile
+        if (profile) {
+            const isWomen = profile.gender?.toLowerCase().includes('female') || profile.gender?.toLowerCase() === 'women';
+            setActiveTrendingGender(isWomen ? 'female' : 'male');
+        }
+
         window.addEventListener('sg_wardrobe_updated', loadInitialData);
         return () => window.removeEventListener('sg_wardrobe_updated', loadInitialData);
     }, [language]);
@@ -709,8 +736,85 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
-                        className="space-y-6"
+                        className="space-y-8"
                     >
+                        {/* ── SECTION 2.5: TRENDING HUB ──────────────────────── */}
+                        <div className={`rounded-[3rem] p-8 border relative overflow-hidden transition-all ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/5'}`}>
+                             <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 blur-[100px] pointer-events-none" />
+                             
+                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-10 relative z-10">
+                                <div>
+                                    <h4 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{t('trendingHub') || 'Elite Trending Hub'}</h4>
+                                    <p className={`text-[11px] font-bold mt-1 opacity-50 uppercase tracking-widest`}>{t('trendingDesc') || 'Curated 2025 styles for your Skin DNA'}</p>
+                                </div>
+
+                                {/* PREMIUM GENDER TOGGLE */}
+                                <div className={`flex p-1 rounded-2xl border ${isDark ? 'bg-black/40 border-white/10' : 'bg-slate-100 border-slate-200'}`}>
+                                    {[
+                                        { id: 'male', label: 'Male', icon: '🧔' },
+                                        { id: 'female', label: 'Female', icon: '👩' }
+                                    ].map(g => (
+                                        <button
+                                            key={g.id}
+                                            onClick={() => setActiveTrendingGender(g.id)}
+                                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all relative ${
+                                                activeTrendingGender === g.id 
+                                                    ? 'text-white' 
+                                                    : isDark ? 'text-white/40 hover:text-white/60' : 'text-slate-400 hover:text-slate-600'
+                                            }`}
+                                        >
+                                            {activeTrendingGender === g.id && (
+                                                <motion.div 
+                                                    layoutId="trending-bg"
+                                                    className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-lg shadow-indigo-500/20"
+                                                    transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                                                />
+                                            )}
+                                            <span className="relative z-10">{g.icon}</span>
+                                            <span className="relative z-10">{g.id === 'male' ? (t('male') || 'Male') : (t('female') || 'Female')}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                             </div>
+
+                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 relative z-10">
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={activeTrendingGender}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="contents"
+                                    >
+                                        {TRENDING_COLLECTIONS[activeTrendingGender].map((item, idx) => (
+                                            <motion.div
+                                                key={item.id}
+                                                whileHover={{ scale: 1.02, y: -5 }}
+                                                className={`flex flex-col p-5 rounded-[2.5rem] border transition-all ${isDark ? 'bg-white/5 border-white/10 hover:border-indigo-500/30' : 'bg-slate-50 border-slate-200 hover:border-indigo-200 hover:bg-white hover:shadow-xl'}`}
+                                            >
+                                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mb-4 ${isDark ? 'bg-white/5' : 'bg-white shadow-sm border border-slate-100'}`}>
+                                                    {item.icon}
+                                                </div>
+                                                <div className="flex-1 min-w-0 mb-4">
+                                                    <p className={`text-[11px] font-black leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>{t(item.key)}</p>
+                                                    <div className="flex items-center gap-1.5 mt-1.5">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                                                        <p className="text-[8px] font-black text-indigo-500 uppercase tracking-tighter">{item.score}% Synergy</p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => openShop(t(item.key))}
+                                                    className={`w-full py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${isDark ? 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-900/40' : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200'}`}
+                                                >
+                                                    {t('buyNowCommand') || 'Shop Trend'}
+                                                </button>
+                                            </motion.div>
+                                        ))}
+                                    </motion.div>
+                                </AnimatePresence>
+                             </div>
+                        </div>
+
                         {/* ── SECTION 3: STYLE GAPS (DISCOVERY GRID) ──────────────────────── */}
                         <div className={`rounded-[2.5rem] p-8 border relative overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200 shadow-sm'}`}>
                             <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/5 blur-[80px] pointer-events-none" />
