@@ -5,85 +5,130 @@
 import { useState, useRef, useEffect, useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
+import { 
+  auth, 
+  loadPrimaryProfile, 
+  getWardrobe, 
+  loadStyleInsights 
+} from '../api/styleApi';
 
-const getResponses = (t) => ({
-  greeting: {
-    patterns: ['hi', 'hello', 'hey', 'namaste', 'hlo', 'नमस्ते'],
-    reply: t('botReplyGreeting'),
-  },
-  wedding: {
-    patterns: ['wedding', 'shaadi', 'shadi', 'marriage', 'bridal', 'शादी'],
-    reply: t('botReplyWedding'),
-  },
-  office: {
-    patterns: ['office', 'work', 'formal', 'professional', 'interview', 'ऑफिस'],
-    reply: t('botReplyOffice'),
-  },
-  date: {
-    patterns: ['date', 'romantic', 'dinner', 'impress', 'girlfriend', 'boyfriend', 'डेट'],
-    reply: t('botReplyDate'),
-  },
-  party: {
-    patterns: ['party', 'club', 'night out', 'celebration', 'birthday', 'पार्टी'],
-    reply: t('botReplyParty'),
-  },
-  casual: {
-    patterns: ['casual', 'daily', 'everyday', 'relax', 'weekend', 'college', 'कैजुअल'],
-    reply: t('botReplyCasual'),
-  },
-  summer: {
-    patterns: ['summer', 'hot', 'garmi', 'heat', 'गर्मी'],
-    reply: t('botReplySummer'),
-  },
-  winter: {
-    patterns: ['winter', 'cold', 'sardi', 'sweater', 'सर्दी'],
-    reply: t('botReplyWinter'),
-  },
-  monsoon: {
-    patterns: ['rain', 'monsoon', 'barish', 'rainy', 'बारिश'],
-    reply: t('botReplyMonsoon'),
-  },
-  skinTone: {
-    patterns: ['skin tone', 'skintone', 'my color', 'which color', 'what color', 'colour', 'त्वचा', 'रंग'],
-    reply: t('botReplySkinTone'),
-  },
-  hair: {
-    patterns: ['hair', 'hair color', 'baal', 'highlights', 'बाल'],
-    reply: t('botReplyHair'),
-  },
-  accessories: {
-    patterns: ['accessories', 'jewellery', 'jewelry', 'watch', 'sunglasses', 'गहने'],
-    reply: t('botReplyAccessories'),
-  },
-  budget: {
-    patterns: ['budget', 'cheap', 'affordable', 'sasta', 'price', 'under 500', 'under 1000', 'बजट'],
-    reply: t('botReplyBudget'),
-  },
-  thanks: {
-    patterns: ['thanks', 'thank', 'dhanyawad', 'shukriya', 'nice', 'great', 'awesome', 'धन्यवाद'],
-    reply: t('botReplyThanks'),
-  },
-  help: {
-    patterns: ['help', 'what can you', 'features', 'kya kar sakte', 'options', 'मदद'],
-    reply: t('botHelp'),
-  },
-});
+const getResponses = (t, profile, wardrobe, insights) => {
+  const isMale = (profile?.gender_mode || profile?.gender || 'female').toLowerCase().includes('male');
+  const itemsCount = wardrobe?.length || 0;
+  const skinTone = profile?.skin_tone || profile?.skinTone || 'Discovering...';
+  const celebrity = insights?.celebrity_match || 'a fashion icon';
+
+  return {
+    greeting: {
+      patterns: ['hi', 'hello', 'hey', 'namaste', 'hlo', 'नमस्ते'],
+      reply: t('botReplyGreeting'),
+    },
+    calendar: {
+      patterns: ['calendar', 'schedule', 'planning', 'daily drop', 'weather', 'कैलेंडर'],
+      reply: t('botReplyCalendarExpert'),
+    },
+    dna: {
+      patterns: ['dna', 'skin', 'permanent', 'gender', 'setting', 'lock', 'डीएनए'],
+      reply: t('botReplyDNAExpert') + `\n\n💡 *As your stylist:* I see your DNA is locked as ${isMale ? 'Male' : 'Female'} with a ${skinTone} tone. I've tuned the entire app to match this fingerprint!`,
+    },
+    wardrobe: {
+      patterns: ['wardrobe', 'closet', 'sync', 'harmony', 'synergy', 'owned', 'अलमारी'],
+      reply: t('botReplyWardrobeExpert') + `\n\n💡 *Stylist Note:* You currently have ${itemsCount} items synced. Let's aim for 15+ to reach perfect Harmony!`,
+    },
+    scanner: {
+      patterns: ['scanner', 'camera', 'point', 'shop', 'fabric', 'स्कैनर'],
+      reply: t('botReplyScannerExpert'),
+    },
+    checker: {
+      patterns: ['checker', 'score', 'match', 'compatibility', 'चेकर'],
+      reply: t('botReplyCheckerExpert'),
+    },
+    navigator: {
+      patterns: ['navigator', 'daily', 'shop', 'gaps', 'dashboard', 'नेविगेटर'],
+      reply: t('botReplyNavigatorExpert'),
+    },
+    wedding: {
+      patterns: ['wedding', 'shaadi', 'shadi', 'marriage', 'bridal', 'शादी'],
+      reply: t('botReplyWedding') + `\n\n🌟 Since you match with ${celebrity}, aim for the same high-contrast jewel tones they wear!`,
+    },
+    office: {
+      patterns: ['office', 'work', 'formal', 'professional', 'interview', 'ऑफिस'],
+      reply: t('botReplyOffice'),
+    },
+    date: {
+      patterns: ['date', 'romantic', 'dinner', 'impress', 'gf', 'dating', 'biet', 'डेट'],
+      reply: t('botReplyDate'),
+    },
+    party: {
+      patterns: ['party', 'club', 'night out', 'celebration', 'birthday', 'पार्टी'],
+      reply: t('botReplyParty'),
+    },
+    casual: {
+      patterns: ['casual', 'daily', 'everyday', 'relax', 'weekend', 'college', 'कैजुअल'],
+      reply: t('botReplyCasual'),
+    },
+    skinTone: {
+      patterns: ['skin tone', 'undertone', 'skin color', 'who match', 'त्वचा', 'रंग'],
+      reply: t('botReplySkinTone') + `\n\n💡 *Did you know?* You share a style DNA with ${celebrity}!`,
+    },
+    thanks: {
+      patterns: ['thanks', 'thank', 'dhanyawad', 'shukriya', 'nice', 'great', 'awesome', 'धन्यवाद'],
+      reply: t('botReplyThanks'),
+    },
+    help: {
+      patterns: ['help', 'what can you', 'features', 'kya kar sakte', 'options', 'मदद'],
+      reply: t('botHelp'),
+    },
+  };
+};
 
 function StyleBot({ inline = false }) {
   const { theme } = useContext(ThemeContext);
   const { t } = useLanguage();
   const isDark = theme === 'dark';
-  const [open, setOpen] = useState(inline);
-  const [messages, setMessages] = useState([
-    { role: 'bot', text: t('botInitial') }
-  ]);
+  const [profile, setProfile] = useState(null);
+  const [wardrobe, setWardrobe] = useState([]);
+  const [insights, setInsights] = useState(null);
 
-  const RESPONSES = getResponses(t);
+  useEffect(() => {
+    const fetchContext = async () => {
+      if (!auth.currentUser) return;
+      try {
+        const uid = auth.currentUser.uid;
+        const [p, w, i] = await Promise.all([
+          loadPrimaryProfile(uid),
+          getWardrobe(uid),
+          loadStyleInsights(uid)
+        ]);
+        setProfile(p);
+        setWardrobe(w);
+        setInsights(i);
+      } catch (err) {
+        console.warn('[StyleBot] Context fetch failed', err);
+      }
+    };
+    fetchContext();
+  }, []);
+
+  const RESPONSES = getResponses(t, profile, wardrobe, insights);
 
   const findResponse = (message) => {
     const lower = message.toLowerCase().trim();
-    for (const [, data] of Object.entries(RESPONSES)) {
-      if (data.patterns.some(p => lower.includes(p))) return data.reply;
+    
+    // HUMAN-PERSONA: Initial stylistic touches
+    const stylistPhrases = [
+      "As your personal stylist, here is my take:",
+      "I've analyzed your style DNA. You'll love this:",
+      "Great question! Here's the professional advice:",
+      "Based on ToneFit's expert logic:"
+    ];
+    const prefix = stylistPhrases[Math.floor(Math.random() * stylistPhrases.length)];
+
+    for (const [key, data] of Object.entries(RESPONSES)) {
+      if (data.patterns.some(p => lower.includes(p))) {
+        if (['greeting', 'thanks', 'help'].includes(key)) return data.reply;
+        return `${prefix}\n\n${data.reply}`;
+      }
     }
     return t('botDefault');
   };
@@ -109,7 +154,7 @@ function StyleBot({ inline = false }) {
 
   const handleKey = (e) => { if (e.key === 'Enter') sendMessage(); };
 
-  const quickActions = ['💍 Wedding', '💼 Office', '❤️ Date', '💇 Hair Color', '💰 Budget'];
+  const quickActions = ['🧬 Style DNA', '📅 Calendar', '👕 Wardrobe', '🔎 Checker', '📷 Scanner', '🎀 Wedding'];
 
   return (
     <>
