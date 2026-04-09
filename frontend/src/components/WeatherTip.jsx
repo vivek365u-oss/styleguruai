@@ -5,10 +5,15 @@
 import { useState, useEffect } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
-import { glass } from '../utils/styles';
 import { getLocalizedWeatherTip } from '../data/weatherTips';
 import { getLocalizedOOTD } from '../data/ootdOutfits';
 import { auth, saveWardrobeItem } from '../api/styleApi';
+
+const glass = {
+  container: "backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl",
+  header: "backdrop-blur-md bg-black/40 border-b border-white/10",
+  card: "backdrop-blur-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all",
+};
 
 function getWeatherCategory(tempC, weatherCode) {
   // Check if rainy first (wttr.in weather codes)
