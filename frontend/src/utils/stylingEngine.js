@@ -10,8 +10,18 @@
 
 export const scoreWardrobeItem = (item, context, profile, history = [], preferences = {}, lockedInsights = null) => {
     // 0. Gender Filter (Strict Wall)
+    // Priority: Locked DNA > Profile Mode > Item Gender
     const activeGender = lockedInsights?.gender || profile.gender || profile.gender_mode;
+    
+    // If the item has a target gender and it doesn't match the active user gender, reject immediately
     if (activeGender && item.gender && item.gender !== activeGender) return 0;
+    
+    // CATEGORIAL ENFORCEMENT: Reject female-only categories for males and vice-versa
+    const femaleOnly = ['saree', 'kurti', 'lehenga', 'maxi', 'dress', 'cat_saree_silk', 'cat_kurti', 'cat_makeup'];
+    const maleOnly = ['sherwani', 'cat_formal_shirt', 'tuxedo', 'cat_kurta_set'];
+    
+    if (activeGender === 'male' && femaleOnly.some(cat => item.category?.toLowerCase().includes(cat))) return 0;
+    if (activeGender === 'female' && maleOnly.some(cat => item.category?.toLowerCase().includes(cat))) return 0;
 
     let score = 0;
     const weights = {

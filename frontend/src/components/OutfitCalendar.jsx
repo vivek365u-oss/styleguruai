@@ -88,7 +88,8 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
     const log = getLogForDay(index);
     const occasion = OCCASIONS[index];
     const context = { weather: occasion.weather, event: occasion.event, mood };
-    const userProfile = profile || { gender: 'female' };
+    const activeGender = lockedDNA?.gender || profile?.gender || profile?.gender_mode || 'female';
+    const userProfile = { ...profile, gender: activeGender };
 
     if (log) {
         return {
@@ -97,7 +98,7 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
             occasion,
             isExecuted: true,
             brief: "You wore this look! History saved in the cloud.",
-            accessories: getAccessoryAdvice(userProfile.gender, userProfile.season, occasion.event)
+            accessories: getAccessoryAdvice(activeGender, userProfile.season, occasion.event)
         };
     }
 
@@ -107,15 +108,35 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
             ...item,
             engineScore: scoreWardrobeItem(item, context, userProfile, logs.map(l => ({ itemId: l.id, date: l.date })), lockedDNA)
         }))
+        .filter(i => i.engineScore > 0) // Strict Gender Wall applied here
         .sort((a, b) => b.engineScore - a.engineScore) || [];
 
-    const bestTop = rankedWardrobe.find(i => ['shirts', 'tshirts', 'tops', 'kurti', 'cat_kurti', 'cat_formal_shirt'].includes(i.category)) || 
-                    { name: 'Elite Top', hex: bestColors[index % bestColors.length]?.hex || '#FFFFFF', engineScore: 85 };
-                    
-    const bestBottom = rankedWardrobe.find(i => ['pants', 'bottoms', 'cat_formal_trouser', 'cat_jeans'].includes(i.category) && i.id !== bestTop.id) || 
-                       { name: 'Pro Bottom', hex: pantColors[index % pantColors.length]?.hex || '#1e3a8a', engineScore: 80 };
+    // Gender-Strict Categories
+    const topCats = activeGender === 'male' 
+        ? ['shirts', 'tshirts', 'cat_formal_shirt', 'cat_kurta_set', 'cat_sherwani']
+        : ['tops', 'kurti', 'cat_kurti', 'cat_saree_silk', 'cat_dress_mini', 'cat_dress_maxi'];
 
-    const accessorizing = getAccessoryAdvice(userProfile.gender, userProfile.season, occasion.event);
+    const bottomCats = activeGender === 'male'
+        ? ['pants', 'cat_formal_trouser', 'cat_jeans', 'cat_cargo']
+        : ['pants', 'bottoms', 'cat_palazzo', 'cat_mom_jeans'];
+
+    const bestTop = rankedWardrobe.find(i => topCats.includes(i.category)) || 
+                    { 
+                        name: activeGender === 'male' ? 'Premium Shirt' : 'Elegant Kurti', 
+                        hex: bestColors[index % bestColors.length]?.hex || '#FFFFFF', 
+                        engineScore: 85,
+                        category: activeGender === 'male' ? 'cat_formal_shirt' : 'cat_kurti'
+                    };
+                    
+    const bestBottom = rankedWardrobe.find(i => bottomCats.includes(i.category) && i.id !== bestTop.id) || 
+                       { 
+                           name: activeGender === 'male' ? 'Formal Trousers' : 'Silk Palazzo', 
+                           hex: pantColors[index % pantColors.length]?.hex || '#1e3a8a', 
+                           engineScore: 80,
+                           category: activeGender === 'male' ? 'cat_formal_trouser' : 'cat_palazzo'
+                       };
+
+    const accessorizing = getAccessoryAdvice(activeGender, userProfile.season, occasion.event);
     const stylingBrief = generateStylerBrief(bestTop, bestBottom, context, userProfile);
 
     return { 
