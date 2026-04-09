@@ -478,7 +478,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                             <div className="mt-8 grid grid-cols-2 gap-3">
                                 <div className={`p-4 rounded-3xl border relative ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100/50 border-slate-200'}`}>
                                     <div className="flex items-center justify-between mb-1">
-                                        <p className={`text-[10px] font-bold uppercase ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Harmony Score</p>
+                                        <p className={`text-[10px] font-bold uppercase ${isDark ? 'text-white/30' : 'text-slate-500'}`}>Harmony Score</p>
                                         <button onClick={() => setShowInfo(showInfo === 'harmony' ? null : 'harmony')} className={`${infoCls} ${isDark ? 'bg-white/10 text-white/40' : 'bg-slate-200 text-slate-500'}`}>?</button>
                                     </div>
                                     <div className="flex items-end gap-2">
@@ -503,7 +503,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                 </div>
 
                                 <div className={`p-4 rounded-3xl border relative ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100/50 border-slate-200'}`}>
-                                    <p className={`text-[10px] font-bold uppercase mb-1 ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Sync Status</p>
+                                    <p className={`text-[10px] font-bold uppercase mb-1 ${isDark ? 'text-white/30' : 'text-slate-500'}`}>Sync Status</p>
                                     <div className="flex items-end gap-2">
                                         <span className={`text-[10px] font-black ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>ACTIVE ANALYZER</span>
                                         <button onClick={onAnalyze} className={`ml-auto text-[9px] font-black px-2 py-1 rounded-lg ${isDark ? 'bg-orange-500/20 text-orange-400' : 'bg-orange-100 text-orange-700'}`}>REFRESH 📸</button>
@@ -538,7 +538,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                         className={`py-3 rounded-xl border text-[9px] font-black uppercase transition-all ${
                                             mood === m.id 
                                                 ? 'bg-purple-600 border-transparent text-white shadow-lg' 
-                                                : isDark ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white border-gray-200 text-slate-400 hover:bg-gray-50'
+                                                : isDark ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white border-gray-200 text-slate-500 hover:bg-gray-50'
                                         }`}
                                     >
                                         {m.label}
@@ -624,7 +624,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
 
                                     {/* Finishing Touches Section */}
                                     <div className={`mb-8 p-4 rounded-3xl border border-dashed ${isDark ? 'bg-white/5 border-white/20' : 'bg-slate-50 border-slate-200'}`}>
-                                         <p className="text-[9px] font-black uppercase opacity-40 mb-3 tracking-widest">Finishing Touches</p>
+                                         <p className="text-[9px] font-black uppercase ${isDark ? 'opacity-40' : 'text-slate-500'} mb-3 tracking-widest">Finishing Touches</p>
                                          {(() => {
                                             const rawGender = insights?.gender || profile?.gender || profile?.gender_mode || 'female';
                                             const tips = getAccessoryAdvice(rawGender.toLowerCase().includes('female') ? 'female' : 'male', profile?.season || 'Spring');
@@ -633,15 +633,15 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                                      <div className="flex gap-2 items-center">
                                                          <span className="text-xl">💍</span>
                                                          <div>
-                                                             <p className="text-[9px] font-black uppercase opacity-60">Jewelry</p>
-                                                             <p className="text-[10px] font-bold truncate">{tips.jewelry}</p>
+                                                             <p className="text-[9px] font-black uppercase ${isDark ? 'opacity-60' : 'text-slate-500'}">Jewelry</p>
+                                                             <p className="text-[10px] font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.jewelry}</p>
                                                          </div>
                                                      </div>
                                                      <div className="flex gap-2 items-center">
                                                          <span className="text-xl">👞</span>
                                                          <div>
-                                                             <p className="text-[9px] font-black uppercase opacity-60">Shoes</p>
-                                                             <p className="text-[10px] font-bold truncate">{tips.shoes}</p>
+                                                             <p className="text-[9px] font-black uppercase ${isDark ? 'opacity-60' : 'text-slate-500'}">Shoes</p>
+                                                             <p className="text-[10px] font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.shoes}</p>
                                                          </div>
                                                      </div>
                                                  </div>
@@ -671,12 +671,12 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                         
                         {/* Actionable Advice Section (Moved here for better vertical flow) */}
                         <div className={`rounded-3xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-100'}`}>
-                            <p className={`text-[9px] font-black uppercase tracking-widest opacity-40 mb-4`}>DNA-Matched Suggestions</p>
+                            <p className={`text-[9px] font-black uppercase tracking-widest mb-4 ${isDark ? 'opacity-40' : 'text-slate-500'}`}>DNA-Matched Suggestions</p>
                             <div className="flex flex-wrap gap-2">
                                 {getActionableAdvice(insights?.best_colors || profile?.best_colors, insights?.gender || profile?.gender || 'female').map((adv, i) => {
                                     const hasInCloset = wardrobe.some(item => item.category === adv.category);
                                     return (
-                                        <div key={i} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-100 shadow-sm'}`}>
+                                        <div key={i} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold ${isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-white border-slate-100 text-slate-800 shadow-sm'}`}>
                                             <span>{getCategoryIcon(adv.category)}</span>
                                             <span>{adv.item}</span>
                                             {hasInCloset && <span className="text-green-500">✓</span>}

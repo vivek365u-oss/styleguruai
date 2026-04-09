@@ -229,10 +229,10 @@ function OutfitCard({ combo, index, isDark }) {
   };
   const topItem = combo.shirt || combo.top || combo.dress || "";
   const bottomItem = combo.pant || combo.bottom || "";
-  const headingCls = isDark ? 'text-white' : 'text-gray-800';
-  const subCls = isDark ? 'text-white/60' : 'text-gray-500';
-  const badgeCls = isDark ? 'bg-white/10 text-white/80' : 'bg-white/60 text-gray-700';
-  const vibeCls = isDark ? 'text-white/30' : 'text-gray-400';
+  const headingCls = isDark ? 'text-white' : 'text-slate-800';
+  const subCls = isDark ? 'text-white/60' : 'text-slate-600';
+  const badgeCls = isDark ? 'bg-white/10 text-white/80' : 'bg-white/60 text-slate-700';
+  const vibeCls = isDark ? 'text-white/30' : 'text-slate-500';
 
   return (
     <div className={`bg-gradient-to-br ${colorMap[color]} border rounded-2xl p-4`}>
@@ -691,11 +691,11 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
   else if (isFemale) outfits = recommendations.outfit_combos || [];
   else outfits = recommendations.outfit_combinations || recommendations.outfit_combos || [];
 
-  const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
+  const sectionLabelCls = isDark ? 'text-white/50' : 'text-slate-600';
   const cardBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
-  const bodyTextCls = isDark ? 'text-white/60' : 'text-gray-500';
-  const mutedCls = isDark ? 'text-white/40' : 'text-gray-400';
-  const tipTextCls = isDark ? 'text-white/70' : 'text-gray-600';
+  const bodyTextCls = isDark ? 'text-white/60' : 'text-slate-700';
+  const mutedCls = isDark ? 'text-white/40' : 'text-slate-500';
+  const tipTextCls = isDark ? 'text-white/70' : 'text-slate-800';
 
   // Find occasion-specific advice
   const occasionKey = Object.keys(occasionAdvice).find(k => k.toLowerCase().includes(userOccasion)) || null;
@@ -794,7 +794,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
                 <div className="flex items-start justify-between gap-2 flex-wrap">
                   <div>
                     <p className={`${isDark ? 'text-pink-200' : 'text-pink-700'} font-bold text-sm`}>{item.type}</p>
-                    <p className={`${isDark ? 'text-white/50' : 'text-gray-500'} text-xs mt-0.5`}>🎨 {item.colors}</p>
+                    <p className={`${isDark ? 'text-white/50' : 'text-slate-500'} text-xs mt-0.5`}>🎨 {item.colors}</p>
                     <p className={`${mutedCls} text-xs`}>{item.reason}</p>
                   </div>
                   <span className={`text-xs px-2 py-0.5 rounded-full border ${isDark ? 'bg-pink-500/20 text-pink-300 border-pink-500/20' : 'bg-pink-100 text-pink-700 border-pink-300 font-semibold'}`}>{item.occasion}</span>
