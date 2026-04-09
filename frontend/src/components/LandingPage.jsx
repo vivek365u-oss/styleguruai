@@ -1,3 +1,4 @@
+import React, { useEffect, useRef, useState } from 'react';
 import SEOHead from './SEOHead';
 import Footer from './Footer';
 import { useLanguage } from '../i18n/LanguageContext';
