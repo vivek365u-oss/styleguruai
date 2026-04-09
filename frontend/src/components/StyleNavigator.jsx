@@ -256,10 +256,37 @@ const StyleNavigator = ({ user, onAnalyze }) => {
         }
     };
 
-    const findOnMyntra = (color) => {
+    const [showShopSelector, setShowShopSelector] = useState(false);
+    const [activeShopItem, setActiveShopItem] = useState(null);
+
+    const handleShopRedirect = (itemColor, store) => {
         const gender = profile?.gender || 'men';
-        const query = `${color} outfit for ${gender}`; 
-        window.open(`https://www.myntra.com/${query.replace(/ /g, '-')}`, '_blank');
+        const query = `${itemColor} outfit for ${gender}`; 
+        
+        let url = '';
+        switch(store) {
+            case 'myntra':
+                url = `https://www.myntra.com/${query.replace(/ /g, '-')}`;
+                break;
+            case 'amazon':
+                url = `https://www.amazon.in/s?k=${encodeURIComponent(query)}`;
+                break;
+            case 'flipkart':
+                url = `https://www.flipkart.com/search?q=${encodeURIComponent(query)}`;
+                break;
+            case 'meesho':
+                url = `https://www.meesho.com/search?q=${encodeURIComponent(query)}`;
+                break;
+            default:
+                url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+        }
+        window.open(url, '_blank');
+        setShowShopSelector(false);
+    };
+
+    const openShop = (colorName) => {
+        setActiveShopItem(colorName);
+        setShowShopSelector(true);
     };
 
     if (!auth.currentUser) {
@@ -597,50 +624,63 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                 </div>
             )}
 
-            {/* ── SECTION 3: STYLE GAP ──────────────────────── */}
-            <div className={`rounded-[2.5rem] p-8 border relative overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+            {/* ── SECTION 3: STYLE GAPS (DISCOVERY GRID) ──────────────────────── */}
+            <div className={`rounded-[2.5rem] p-8 border relative overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200 shadow-sm'}`}>
                 <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/5 blur-[80px] pointer-events-none" />
-                <div className="flex items-center gap-4 mb-8">
+                <div className="flex items-center gap-4 mb-8 relative z-10">
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg ${isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-white text-indigo-600 border border-indigo-100'}`}>🧩</div>
                     <div>
                         <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>The Style Gap</p>
-                        <h4 className={`text-xl font-black mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Unlock Elite Harmony</h4>
-                    </div>
-                    <div className="ml-auto text-right">
-                         <p className="text-[10px] font-black text-indigo-500 animate-pulse">POTENTIAL BOOST</p>
-                         <p className="text-xl font-black">+25%</p>
+                        <h4 className={`text-xl font-black mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Discover Your Missing DNA</h4>
                     </div>
                 </div>
 
-                {insights?.missing_piece ? (
-                    <div className={`p-6 rounded-[2.5rem] border border-dashed relative z-10 ${isDark ? 'bg-indigo-500/5 border-indigo-500/20' : 'bg-white border-indigo-200 shadow-sm'}`}>
-                        <div className="flex items-center gap-5 mb-6">
-                            <div className="w-16 h-16 rounded-[1.5rem] border-4 border-white/10 shadow-2xl flex-shrink-0" style={{ backgroundColor: insights.missing_piece.hex }} />
-                            <div className="flex-1">
-                                <p className={`font-black text-base ${isDark ? 'text-white' : 'text-slate-900'}`}>{insights.missing_piece.color_name} {profile?.gender === 'female' ? 'Ethnic Wear' : 'Formal Wear'}</p>
-                                <p className={`text-[11px] font-bold leading-tight mt-1 ${isDark ? 'text-white/40' : 'text-slate-500'}`}>{insights.missing_piece.impact}</p>
-                            </div>
-                        </div>
-                        <div className="flex gap-2 mb-4">
-                             <span className="px-3 py-1 bg-indigo-500/10 text-indigo-500 text-[9px] font-black rounded-full border border-indigo-500/20 uppercase">Must Add</span>
-                             <span className="px-3 py-1 bg-green-500/10 text-green-500 text-[9px] font-black rounded-full border border-green-500/20 uppercase">DNA Match</span>
-                        </div>
-                        <button 
-                            onClick={() => findOnMyntra(insights.missing_piece.color_name)}
-                            className={`w-full py-4 rounded-2xl text-[10px] font-black tracking-widest shadow-xl hover:scale-[1.02] active:scale-95 transition-all ${isDark ? 'bg-white text-indigo-900 font-black' : 'bg-indigo-600 text-white shadow-indigo-900/10'}`}
-                        >
-                            🔍 SHOP STYLE GAP
-                        </button>
-                    </div>
-                ) : (
-                    <div className={`py-12 text-center rounded-[2.5rem] border border-dashed ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200'}`}>
-                         <span className="text-4xl mb-3 block">✨</span>
-                         <p className={`text-sm font-black tracking-tight uppercase ${isDark ? 'text-white/60' : 'text-slate-400'}`}>Wardrobe Optimization: 100%</p>
-                    </div>
-                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
+                    {(() => {
+                        // Deriving multiple gaps from actionable advice and best colors
+                        const advisoryItems = getActionableAdvice(insights?.best_colors || profile?.best_colors, profile?.gender || 'female');
+                        const missingGaps = advisoryItems.filter(adv => !wardrobe.some(item => item.category === adv.category)).slice(0, 4);
+
+                        if (missingGaps.length === 0) {
+                            return (
+                                <div className={`col-span-full py-12 text-center rounded-[2.5rem] border border-dashed ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-200'}`}>
+                                    <span className="text-4xl mb-3 block">✨</span>
+                                    <p className={`text-sm font-black tracking-tight uppercase ${isDark ? 'text-white/60' : 'text-slate-400'}`}>Wardrobe Optimization: 100%</p>
+                                </div>
+                            );
+                        }
+
+                        return missingGaps.map((gap, idx) => {
+                            const colorName = gap.item.split(' ')[0];
+                            const colorHex = (insights?.best_colors || profile?.best_colors || []).find(c => c.name === colorName)?.hex || '#888';
+                            
+                            return (
+                                <motion.div 
+                                    key={idx}
+                                    whileHover={{ y: -5 }}
+                                    className={`p-5 rounded-[2.5rem] border group transition-all ${isDark ? 'bg-indigo-500/5 border-indigo-500/10 hover:border-indigo-500/30' : 'bg-white border-slate-100 hover:border-indigo-200 shadow-sm'}`}
+                                >
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <div className="w-14 h-14 rounded-2xl border-4 border-white/10 shadow-xl flex-shrink-0" style={{ backgroundColor: colorHex }} />
+                                        <div className="flex-1 min-w-0">
+                                            <p className={`font-black text-xs truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{gap.item}</p>
+                                            <p className="text-[10px] text-indigo-500 font-bold">+ {15 + (idx * 5)}% Synergy</p>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={() => openShop(colorName)}
+                                        className={`w-full py-3 rounded-xl text-[9px] font-black tracking-widest transition-all ${isDark ? 'bg-white text-indigo-900' : 'bg-indigo-600 text-white'}`}
+                                    >
+                                        🔍 SHOP NOW
+                                    </button>
+                                </motion.div>
+                            );
+                        });
+                    })()}
+                </div>
             </div>
 
-            {/* TIPS CARD */}
+            {/* ── TIPS CARD ──────────────────────── */}
             <div className={`rounded-3xl p-5 border ${isDark ? 'bg-gradient-to-r from-teal-900/20 to-blue-900/20 border-teal-700/20' : 'bg-teal-50 border-teal-100 shadow-sm'}`}>
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white text-lg">💡</div>
@@ -652,6 +692,60 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                     </div>
                 </div>
             </div>
+
+            {/* ── STORE SELECTOR MODAL ──────────────────────── */}
+            <AnimatePresence>
+                {showShopSelector && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 backdrop-blur-2xl bg-black/60"
+                        onClick={() => setShowShopSelector(false)}
+                    >
+                        <motion.div 
+                            initial={{ y: 100, scale: 0.9 }}
+                            animate={{ y: 0, scale: 1 }}
+                            exit={{ y: 100, scale: 0.9 }}
+                            className={`w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative ${isDark ? 'bg-[#0f1123] border border-white/10' : 'bg-white'}`}
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <div className="text-center mb-8">
+                                <div className="w-14 h-1 1 bg-white/10 rounded-full mx-auto mb-6 sm:hidden" />
+                                <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>Select Style Source</h3>
+                                <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mt-1">Shopping for: {activeShopItem}</p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                {[
+                                    { id: 'myntra', name: 'Myntra', logo: '🎀', color: 'from-[#f13ab1] to-[#f87171]' },
+                                    { id: 'amazon', name: 'Amazon', logo: '📦', color: 'from-[#ff9900] to-[#232f3e]' },
+                                    { id: 'flipkart', name: 'Flipkart', logo: '🛒', color: 'from-[#2874f0] to-[#fb1]' },
+                                    { id: 'meesho', name: 'Meesho', logo: '👗', color: 'from-[#ff44af] to-[#ff8c00]' }
+                                ].map(store => (
+                                    <button 
+                                        key={store.id}
+                                        onClick={() => handleShopRedirect(activeShopItem, store.id)}
+                                        className={`flex flex-col items-center gap-3 p-6 rounded-[2rem] border transition-all hover:scale-[1.05] active:scale-95 ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-slate-50 border-slate-100 hover:bg-white hover:shadow-xl'}`}
+                                    >
+                                        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${store.color} flex items-center justify-center text-2xl shadow-lg`}>
+                                            <span className="drop-shadow-sm">{store.logo}</span>
+                                        </div>
+                                        <span className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-white' : 'text-slate-900'}`}>{store.name}</span>
+                                    </button>
+                                ))}
+                            </div>
+
+                            <button 
+                                onClick={() => setShowShopSelector(false)}
+                                className="w-full mt-8 py-4 text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity"
+                            >
+                                Cancel Discovery
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 };
