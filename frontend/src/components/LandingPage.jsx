@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
 import SEOHead from './SEOHead';
 import Footer from './Footer';
 import { useLanguage } from '../i18n/LanguageContext';
+import AdSense from '../AdSense';
 
 // FAQ items and Features are now handled inside the component to allow for dynamic translations.
 
@@ -159,21 +159,29 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
           </div>
 
           {/* Social Proof */}
-          <div className="flex items-center gap-4 mt-6 justify-center lg:justify-start flex-wrap">
-            <div className="flex items-center gap-2 bg-purple-900/30 border border-purple-700/30 rounded-full px-4 py-2">
-              <div className="flex -space-x-2">
-                {['#F5DEB3','#C68642','#7B4F2E','#4A2C0A'].map((c,i) => (
-                  <div key={i} className="w-6 h-6 rounded-full border-2 border-purple-900" style={{backgroundColor:c}} />
-                ))}
+          <div className="flex flex-col gap-6 mt-10">
+            <div className="flex items-center gap-4 justify-center lg:justify-start flex-wrap">
+              <div className="flex items-center gap-2 bg-purple-900/30 border border-purple-700/30 rounded-full px-4 py-2">
+                <div className="flex -space-x-2">
+                  {['#F5DEB3','#C68642','#7B4F2E','#4A2C0A'].map((c,i) => (
+                    <div key={i} className="w-6 h-6 rounded-full border-2 border-purple-900" style={{backgroundColor:c}} />
+                  ))}
+                </div>
+                <span className="text-purple-300 text-xs font-semibold">10,000+ users</span>
               </div>
-              <span className="text-purple-300 text-xs font-semibold">10,000+ users</span>
+              <div className="flex items-center gap-1.5 bg-green-900/20 border border-green-700/30 rounded-full px-4 py-2">
+                <span className="text-green-400 text-xs">⭐⭐⭐⭐⭐</span>
+                <span className="text-green-300 text-xs font-semibold">4.9/5 rating</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-blue-900/20 border border-blue-700/30 rounded-full px-4 py-2">
+                <span className="text-blue-300 text-xs font-semibold">🇮🇳 {t('madeForIndia')}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 bg-green-900/20 border border-green-700/30 rounded-full px-4 py-2">
-              <span className="text-green-400 text-xs">⭐⭐⭐⭐⭐</span>
-              <span className="text-green-300 text-xs font-semibold">4.9/5 rating</span>
-            </div>
-            <div className="flex items-center gap-1.5 bg-blue-900/20 border border-blue-700/30 rounded-full px-4 py-2">
-              <span className="text-blue-300 text-xs font-semibold">🇮🇳 {t('madeForIndia')}</span>
+            
+            <div className="max-w-xl text-xs text-white/30 leading-relaxed text-center lg:text-left">
+              Our advanced AI engineering analyzes individual skin complexions against thousands of global fashion data points. 
+              By calculating ITA (Individual Typology Angle) and matching it with seasonal color theories, StyleGuru provides 
+              highly accurate recommendations for shirts, sarees, and accessories specifically optimized for the unique range of Indian skin tones.
             </div>
           </div>
         </div>
@@ -449,6 +457,16 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
           <a href="/blog" className="inline-block border border-purple-600/60 hover:border-purple-400 hover:bg-purple-900/20 transition-all px-8 py-3 rounded-full text-sm font-semibold text-white">
             {t('viewAllArticles') || 'View All Articles →'}
           </a>
+        </div>
+      </section>
+
+      {/* AdSense Partner Block - For Google AdSense Readiness */}
+      <section className="relative z-10 px-6 md:px-12 py-12 max-w-7xl mx-auto">
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-md text-center">
+          <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mb-4">Official StyleGuru AI Partner Content</p>
+          <div className="min-h-[200px] flex items-center justify-center border border-white/5 bg-black/20 rounded-2xl">
+             <AdSense />
+          </div>
         </div>
       </section>
 
