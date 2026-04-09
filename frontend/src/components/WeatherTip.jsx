@@ -69,38 +69,6 @@ function WeatherTip({ city, isDark, profile, genderPref }) {
     return getLocalizedWeatherTip(weather.category, tone, language);
   })() : null;
 
-  const localWeatherTip = tip?.tip || '';
-
-  if (editMode || !userCity) {
-    return (
-      <div className={`rounded-2xl p-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-        <p className={`text-xs font-bold mb-2 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>🌤️ {t('weatherStyleTip')}</p>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder={t('enterCity')}
-            value={userCity}
-            onChange={e => setUserCity(e.target.value)}
-            className={`flex-1 px-3 py-2 rounded-xl text-xs border ${isDark ? 'bg-white/5 border-white/10 text-white placeholder-white/30' : 'bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400'}`}
-          />
-          <button
-            onClick={() => { if (userCity.trim()) { setEditMode(false); fetchWeather(userCity.trim()); } }}
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white hover:bg-purple-500 transition-all"
-          >{t('set')}</button>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className={`rounded-2xl p-4 border animate-pulse ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'}`}>
-        <div className={`h-3 rounded-full w-32 mb-2 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}/>
-        <div className={`h-3 rounded-full w-48 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}/>
-      </div>
-    );
-  }
-
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2500); };
 
   const handleSaveOOTD = async (outfit, tone) => {
