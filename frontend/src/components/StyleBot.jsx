@@ -1,6 +1,6 @@
-// ============================================================
 // StyleGuru — Style Bot (Rule-based Fashion Chatbot)
 // Floating chat button with conversational styling advice
+// Updated: 2026-04-09 (Expert Edition v1.1)
 // ============================================================
 import { useState, useRef, useEffect, useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
