@@ -46,7 +46,7 @@ function SkeletonCard({ isDark }) {
 }
 
 // ── Main Component ──────────────────────────────────────────
-function WardrobePanel({ onShowResult, gender = 'male', hideHeader = false }) {
+function WardrobePanel({ onShowResult, gender = 'male' }) {
   const { theme } = useContext(ThemeContext);
   const { t, language } = useLanguage();
   const { isPro } = usePlan();
@@ -157,17 +157,15 @@ function WardrobePanel({ onShowResult, gender = 'male', hideHeader = false }) {
 
   return (
     <div className="mt-4 pb-4">
-      {!hideHeader && (
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-          <div>
-            <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>👗 {t('myWardrobe')}</h2>
-            <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{items.length} {t('outfits')}</p>
-          </div>
-          <div className={`rounded-xl px-3 py-2 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
-            <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{items.length}/{wardrobeLimit}</span>
-          </div>
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <div>
+          <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>👗 {t('myWardrobe')}</h2>
+          <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{items.length} {t('outfits')}</p>
         </div>
-      )}
+        <div className={`rounded-xl px-3 py-2 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
+          <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{items.length}/{wardrobeLimit}</span>
+        </div>
+      </div>
 
       {/* Closet Filters - Gender Aware */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">

@@ -3,7 +3,7 @@ import { scoreWardrobeItem, getAccessoryAdvice, generateStylerBrief } from '../u
 import { useLanguage } from '../i18n/LanguageContext';
 import { auth, getDailyOutfitLogs, loadUserPreferences, loadStyleInsights } from '../api/styleApi';
 
-function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, profile, hideHeader = false }) {
+function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, profile }) {
   const { t } = useLanguage();
   const [selectedDay, setSelectedDay] = useState(0);
   const [logs, setLogs] = useState([]);
@@ -162,17 +162,15 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
   return (
     <div className={`flex flex-col h-full animate-fade-in ${isDark ? 'text-white' : 'text-gray-900'}`}>
       {/* HEADER & NAV */}
-      {!hideHeader && (
-        <div className="flex items-center justify-between mb-6">
-          <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-lg hover:scale-110 transition-all">←</button>
-          <div className="text-right">
-            <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
-               <span className="text-purple-500">AI</span> COMMAND CENTER
-            </h2>
-            <p className="text-[9px] opacity-40 uppercase font-black tracking-widest leading-none">Style Ecosystem v2.0</p>
-          </div>
+      <div className="flex items-center justify-between mb-6">
+        <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-lg hover:scale-110 transition-all">←</button>
+        <div className="text-right">
+          <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
+             <span className="text-purple-500">AI</span> COMMAND CENTER
+          </h2>
+          <p className="text-[9px] opacity-40 uppercase font-black tracking-widest leading-none">Style Ecosystem v2.0</p>
         </div>
-      )}
+      </div>
 
       {/* WEEKLY TIMELINE */}
       <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-4 mb-6 pt-1">

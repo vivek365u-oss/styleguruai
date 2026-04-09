@@ -1,13 +1,22 @@
 /**
  * ToneFit Unified AI Personal Styling Engine (AIPSE)
+ * 
+ * This engine calculates compatibility scores for wardrobe items based on:
+ * 1. Physical Profile (Skin Tone, Body Type)
+ * 2. Environmental Context (Weather, Time of Day)
+ * 3. Occasion Relevance
+ * 4. Behavioral Data (Freshness, Preferences)
  */
 
 export const scoreWardrobeItem = (item, context, profile, history = [], preferences = {}, lockedInsights = null) => {
     // 0. Gender Filter (Strict Wall)
-    const activeGender = lockedInsights?.gender || profile.gender || profile.gender_mode || 'male';
+    // Priority: Locked DNA > Profile Mode > Item Gender
+    const activeGender = lockedInsights?.gender || profile.gender || profile.gender_mode;
     
+    // If the item has a target gender and it doesn't match the active user gender, reject immediately
     if (activeGender && item.gender && item.gender !== activeGender) return 0;
     
+    // CATEGORIAL ENFORCEMENT: Reject female-only categories for males and vice-versa
     const femaleOnly = ['saree', 'kurti', 'lehenga', 'maxi', 'dress', 'cat_saree_silk', 'cat_kurti', 'cat_makeup'];
     const maleOnly = ['sherwani', 'cat_formal_shirt', 'tuxedo', 'cat_kurta_set'];
     
@@ -15,10 +24,17 @@ export const scoreWardrobeItem = (item, context, profile, history = [], preferen
     if (activeGender === 'female' && maleOnly.some(cat => item.category?.toLowerCase().includes(cat))) return 0;
 
     let score = 0;
-    const weights = { color: 35, context: 35, freshness: 15, preference: 15 };
+    const weights = {
+        color: 35,
+        context: 35,
+        freshness: 15,
+        preference: 15
+    };
 
+    // 1. Color Harmony (Skin Tone Match)
     let colorScore = item.compatibility_score || 70; 
 
+    // NEW: "Elite" Boost from Locked DNA
     if (lockedInsights) {
         const bestColors = [
             ...(lockedInsights.best_shirt_colors || []),
@@ -39,20 +55,27 @@ export const scoreWardrobeItem = (item, context, profile, history = [], preferen
 
     score += (colorScore / 100) * weights.color;
 
+    // 2. Context Relevance (Weather & Event)
     let contextScore = 50;
+    
+    // Weather Logic
     const w = context.weather?.toLowerCase() || 'sunny';
     if (w === 'hot' || w === 'sunny') {
         if (item.fabric === 'fabric_linen' || item.fabric === 'fabric_cotton') contextScore += 25;
+        if (item.fabric === 'fabric_wool' || item.fabric === 'fabric_silk') contextScore -= 30;
     } else if (w === 'cold' || w === 'rainy') {
         if (item.fabric === 'fabric_wool' || item.fabric === 'fabric_denim') contextScore += 25;
     }
 
+    // Occasion Logic
     if (context.event) {
-        if (item.tags?.includes(`tag_${context.event.toLowerCase()}`)) contextScore += 30;
+        const isMatch = item.tags?.includes(`tag_${context.event.toLowerCase()}`);
+        if (isMatch) contextScore += 30;
     }
     
     score += (Math.min(contextScore, 100) / 100) * weights.context;
 
+    // 3. Freshness (Repetition Control)
     let freshnessScore = 100;
     const lastWorn = history.find(h => h.itemId === item.id);
     if (lastWorn) {
@@ -62,36 +85,70 @@ export const scoreWardrobeItem = (item, context, profile, history = [], preferen
     }
     score += (freshnessScore / 100) * weights.freshness;
 
+    // 4. Behavioral Preference (Phase 5 Feedback Loop)
     let preferenceScore = 50;
     const safePrefs = preferences || {};
     const likes = safePrefs.feedback_likes || {};
     const rejects = safePrefs.feedback_rejects || {};
 
+    // Check Fit/Fabric/Color likes
     if (likes.fit?.includes(item.fit)) preferenceScore += 20;
+    if (likes.fabric?.includes(item.fabric)) preferenceScore += 20;
     if (likes.color?.some(c => item.color_name?.toLowerCase().includes(c.toLowerCase()))) preferenceScore += 20;
 
+    // Check Fit/Fabric/Color rejects
     if (rejects.fit?.includes(item.fit)) preferenceScore -= 40;
+    if (rejects.fabric?.includes(item.fabric)) preferenceScore -= 40;
 
     score += (Math.max(0, Math.min(preferenceScore, 100)) / 100) * weights.preference;
 
+    // 5. PHYSICAL ENGINE (WORKING STATS)
+    const pHeight = safePrefs.height || 'regular';
     const pBuild = safePrefs.build || 'athletic';
     const pArchetype = safePrefs.styleGoal || 'sophisticated';
+    
     let physicalBoost = 0;
 
+    // Build/Fit Synergy
     if (pBuild === 'slim' && item.fit === 'slim') physicalBoost += 10;
+    if (pBuild === 'broad' && (item.fit === 'relaxed' || item.fit === 'regular')) physicalBoost += 10;
+
+    // Archetype Alignment
     if (pArchetype === 'minimalist') {
         const minCats = ['cat_polo', 'cat_blazer', 'cat_white_shirt', 'cat_minimal_sneakers'];
         if (minCats.some(c => item.category === c)) physicalBoost += 15;
+    } else if (pArchetype === 'vibrant') {
+        const isVibrant = (item.name?.toLowerCase().includes('bright') || item.color_name?.toLowerCase().includes('neon'));
+        if (isVibrant) physicalBoost += 20;
+    } else if (pArchetype === 'edgy') {
+        const edgyCats = ['cat_leather', 'cat_distressed', 'cat_black_denim', 'cat_boots'];
+        if (edgyCats.some(c => item.category?.includes(c))) physicalBoost += 15;
     }
 
+    // Apply Physical Engine Multiplier (Cap at 100)
     return Math.min(100, Math.round(score + physicalBoost));
 };
 
+export const getTopRecommendations = (wardrobe, context, profile, history, preferences, lockedInsights) => {
+    if (!wardrobe || wardrobe.length === 0) return [];
+    
+    return wardrobe
+        .map(item => ({
+            ...item,
+            engineScore: scoreWardrobeItem(item, context, profile, history, preferences, lockedInsights)
+        }))
+        .filter(item => item.engineScore > 0) // Hide gender-mismatched items
+        .sort((a, b) => b.engineScore - a.engineScore)
+        .slice(0, 5);
+};
+
+/**
+ * Returns accessory (shoes/watches/jewelry) advice based on DNA, gender, and event context
+ */
 export const getAccessoryAdvice = (gender, season, event = 'casual') => {
     const isSpecial = event === 'PARTY' || event === 'OFFICE';
-    const activeGender = gender?.toLowerCase().includes('female') ? 'female' : 'male';
     
-    if (activeGender === 'female') {
+    if (gender === 'female') {
         return {
             label: 'Jewelry Advice',
             jewelry: isSpecial 
@@ -109,23 +166,53 @@ export const getAccessoryAdvice = (gender, season, event = 'casual') => {
     };
 };
 
+/**
+ * Maps color recommendations to specific actionable items from the registry
+ */
 export const getActionableAdvice = (bestColors, gender, skinTone = 'medium') => {
-    const activeGender = gender?.toLowerCase().includes('female') ? 'female' : 'male';
+    // Dynamic Fallbacks for Different Skin Types (Fair, Light, Medium, Olive, Brown, Dark)
     const getDynamicFallbacks = (tone = 'medium') => {
         const t = tone.toLowerCase();
-        if (t === 'fair' || t === 'light') return [{ name: 'Navy Blue', hex: '#000080' }, { name: 'Burgundy', hex: '#800020' }, { name: 'Forest Green', hex: '#228B22' }, { name: 'Dusty Rose', hex: '#C4767A' }];
-        if (t === 'dark' || t === 'brown') return [{ name: 'Bright White', hex: '#FFFFFF' }, { name: 'Electric Blue', hex: '#0047AB' }, { name: 'Mustard Yellow', hex: '#FFDB58' }, { name: 'Hot Pink', hex: '#FF69B4' }];
-        if (t === 'olive') return [{ name: 'Emerald', hex: '#50C878' }, { name: 'Rust', hex: '#B7410E' }, { name: 'Ivory', hex: '#FFFFF0' }, { name: 'Wine', hex: '#722F37' }];
-        return [{ name: 'Royal Blue', hex: '#4169E1' }, { name: 'Charcoal Grey', hex: '#36454F' }, { name: 'Wine Red', hex: '#722F37' }, { name: 'Burnt Orange', hex: '#CC5500' }];
+        if (t === 'fair' || t === 'light') return [
+            { name: 'Navy Blue', hex: '#000080' },
+            { name: 'Burgundy', hex: '#800020' },
+            { name: 'Forest Green', hex: '#228B22' },
+            { name: 'Dusty Rose', hex: '#C4767A' }
+        ];
+        if (t === 'dark' || t === 'brown') return [
+            { name: 'Bright White', hex: '#FFFFFF' },
+            { name: 'Electric Blue', hex: '#0047AB' },
+            { name: 'Mustard Yellow', hex: '#FFDB58' },
+            { name: 'Hot Pink', hex: '#FF69B4' }
+        ];
+        if (t === 'olive') return [
+            { name: 'Emerald', hex: '#50C878' },
+            { name: 'Rust', hex: '#B7410E' },
+            { name: 'Ivory', hex: '#FFFFF0' },
+            { name: 'Wine', hex: '#722F37' }
+        ];
+        // Default Medium
+        return [
+            { name: 'Royal Blue', hex: '#4169E1' },
+            { name: 'Charcoal Grey', hex: '#36454F' },
+            { name: 'Wine Red', hex: '#722F37' },
+            { name: 'Burnt Orange', hex: '#CC5500' }
+        ];
     };
 
-    const colorsToUse = (bestColors && bestColors.length > 0) ? bestColors : getDynamicFallbacks(skinTone);
+    const colorsToUse = (bestColors && bestColors.length > 0) 
+        ? bestColors 
+        : getDynamicFallbacks(skinTone);
+    
+    // Normalize to handle both [{name, hex}] and ['colorName'] formats
     const normalizedColors = colorsToUse.map(c => typeof c === 'string' ? { name: c } : c);
     
     const suggestions = [];
+    
+    // Use top 4 colors for variety
     normalizedColors.slice(0, 4).forEach((colorObj, idx) => {
         const color = colorObj.name;
-        if (activeGender === 'female') {
+        if (gender === 'female') {
             if (idx === 0) suggestions.push({ item: `${color} Festive Silk Saree`, category: 'cat_saree_silk', color: color, hex: colorObj.hex });
             if (idx === 1) suggestions.push({ item: `${color} Designer Kurti Set`, category: 'cat_kurti', color: color, hex: colorObj.hex });
             if (idx === 2) suggestions.push({ item: `${color} Elegant Maxi Dress`, category: 'cat_dress', color: color, hex: colorObj.hex });
@@ -137,34 +224,28 @@ export const getActionableAdvice = (bestColors, gender, skinTone = 'medium') => 
             if (idx === 3) suggestions.push({ item: `${color} Modern Linen Blazer`, category: 'cat_blazer', color: color, hex: colorObj.hex });
         }
     });
+    
     return suggestions;
 };
 
 /**
- * DNA COLOR GAP ANALYSIS
- * Compares recommended colors with wardrobe to find missing essentials
+ * Generates a textual "AI Brief" for a specific outfit combo
  */
-export const calculateColorGaps = (wardrobe, bestColors, gender, skinTone) => {
-    const advisory = getActionableAdvice(bestColors, gender, skinTone);
-    return advisory.map(adv => {
-        const colorName = (adv.color || adv.item.split(' ')[0]).toLowerCase();
-        const hex = adv.hex?.toLowerCase();
-        
-        const inCloset = wardrobe.some(item => {
-            const itemColors = item.outfit_data?.colors || [];
-            return itemColors.some(c => c.name.toLowerCase().includes(colorName)) || 
-                   (item.color_name && item.color_name.toLowerCase().includes(colorName)) ||
-                   (item.hex && hex && item.hex.toLowerCase() === hex);
-        });
-
-        return { ...adv, inCloset, synergy: 15 + (Math.random() * 10) };
-    });
-};
-
 export const generateStylerBrief = (top, bottom, context, profile) => {
+    const season = profile?.season || 'Spring';
     const skinTone = profile?.skinTone || 'Medium';
+    
     let brief = `This ${context.event} look uses the ${top.name} to create a sophisticated focal point. `;
-    if (top.engineScore > 85) brief += `The color is a high DNA match for your ${skinTone} skin tone. `;
-    brief += `The light interaction here will enhance your features in the ${context.weather || 'sunny'} light. `;
+    
+    if (top.engineScore > 90) {
+        brief += `The color is a 100% DNA match for your ${skinTone} skin tone. `;
+    }
+    
+    if (context.weather === 'rainy' || context.weather === 'cloudy') {
+        brief += `Since it's ${context.weather}, we chose darker tones to hide moisture and maintain sharpness. `;
+    } else {
+        brief += `The light interaction here will enhance your features in the ${context.weather || 'sunny'} light. `;
+    }
+    
     return brief;
 };

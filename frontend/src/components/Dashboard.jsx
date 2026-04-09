@@ -571,7 +571,8 @@ function Dashboard({ user, onLogout }) {
     { id: 'home', emoji: '🏠', label: t('navHome') },
     { id: 'analyze', emoji: '📸', label: t('navAnalyze') },
     { id: 'history', emoji: '⌛', label: t('navHistory') },
-    { id: 'navigator', emoji: '🧭', label: 'Hub' },
+    { id: 'navigator', emoji: '🧭', label: t('navNavigator') || 'Navigator' },
+    { id: 'tools', emoji: '🛠️', label: t('navTools') },
     { id: 'profile', emoji: '❤️', label: t('navProfile') }
   ];
 
