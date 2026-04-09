@@ -163,15 +163,15 @@ export const getActionableAdvice = (bestColors, gender) => {
     normalizedColors.slice(0, 4).forEach((colorObj, idx) => {
         const color = colorObj.name;
         if (gender === 'female') {
-            if (idx === 0) suggestions.push({ item: `${color} Silk Saree`, category: 'cat_saree_silk', color: color, hex: colorObj.hex });
-            if (idx === 1) suggestions.push({ item: `${color} Kurti Set`, category: 'cat_kurti', color: color, hex: colorObj.hex });
-            if (idx === 2) suggestions.push({ item: `${color} Maxi Dress`, category: 'cat_dress', color: color, hex: colorObj.hex });
-            if (idx === 3) suggestions.push({ item: `${color} Peplum Top`, category: 'cat_top', color: color, hex: colorObj.hex });
+            if (idx === 0) suggestions.push({ item: `${color} Festive Silk Saree`, category: 'cat_saree_silk', color: color, hex: colorObj.hex });
+            if (idx === 1) suggestions.push({ item: `${color} Designer Kurti Set`, category: 'cat_kurti', color: color, hex: colorObj.hex });
+            if (idx === 2) suggestions.push({ item: `${color} Elegant Maxi Dress`, category: 'cat_dress', color: color, hex: colorObj.hex });
+            if (idx === 3) suggestions.push({ item: `${color} Stylish Peplum Top`, category: 'cat_top', color: color, hex: colorObj.hex });
         } else {
-            if (idx === 0) suggestions.push({ item: `${color} Formal Shirt`, category: 'cat_formal_shirt', color: color, hex: colorObj.hex });
-            if (idx === 1) suggestions.push({ item: `${color} Kurta Set`, category: 'cat_kurta_set', color: color, hex: colorObj.hex });
-            if (idx === 2) suggestions.push({ item: `${color} Casual Polo`, category: 'cat_polo', color: color, hex: colorObj.hex });
-            if (idx === 3) suggestions.push({ item: `${color} Linen Blazer`, category: 'cat_blazer', color: color, hex: colorObj.hex });
+            if (idx === 0) suggestions.push({ item: `${color} Slim Fit Formal Shirt`, category: 'cat_formal_shirt', color: color, hex: colorObj.hex });
+            if (idx === 1) suggestions.push({ item: `${color} Traditional Kurta Set`, category: 'cat_kurta_set', color: color, hex: colorObj.hex });
+            if (idx === 2) suggestions.push({ item: `${color} Premium Casual Polo`, category: 'cat_polo', color: color, hex: colorObj.hex });
+            if (idx === 3) suggestions.push({ item: `${color} Modern Linen Blazer`, category: 'cat_blazer', color: color, hex: colorObj.hex });
         }
     });
     

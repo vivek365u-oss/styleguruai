@@ -260,27 +260,31 @@ const StyleNavigator = ({ user, onAnalyze }) => {
     const [showShopSelector, setShowShopSelector] = useState(false);
     const [activeShopItem, setActiveShopItem] = useState(null);
 
-    const handleShopRedirect = (itemColor, store) => {
+    const handleShopRedirect = (fullItemName, store) => {
         // STRICT GENDER ENFORCEMENT
         const rawGender = insights?.gender || profile?.gender || profile?.gender_mode || 'female';
-        const displayGender = rawGender.toLowerCase().includes('female') || rawGender.toLowerCase() === 'women' ? 'women' : 'men';
+        const isWomen = rawGender.toLowerCase().includes('female') || rawGender.toLowerCase() === 'women';
+        const displayGender = isWomen ? 'women' : 'men';
         
-        // Refined query for better search accuracy
-        const query = `${itemColor} ${displayGender} style recommendations`; 
+        // MODERN KEYWORDS: Adding 'Trending 2025', 'Premium', etc.
+        const modernKeywords = "Trending 2025 Premium Latest Collection High Quality";
+        const query = `${fullItemName} for ${displayGender} ${modernKeywords}`; 
+        const slug = fullItemName.toLowerCase().replace(/ /g, '-');
         
         let url = '';
         switch(store) {
             case 'myntra':
-                url = `https://www.myntra.com/${itemColor.replace(/ /g, '-')}-${displayGender === 'women' ? 'women' : 'men'}`;
+                // Myntra slug logic: item-title-women
+                url = `https://www.myntra.com/${slug}-${displayGender}`;
                 break;
             case 'amazon':
-                url = `https://www.amazon.in/s?k=${encodeURIComponent(`${displayGender}'s ${itemColor} outfit`)}`;
+                url = `https://www.amazon.in/s?k=${encodeURIComponent(`${displayGender}'s ${fullItemName} Trending 2025 India`)}`;
                 break;
             case 'flipkart':
-                url = `https://www.flipkart.com/search?q=${encodeURIComponent(`${displayGender} ${itemColor} clothing`)}`;
+                url = `https://www.flipkart.com/search?q=${encodeURIComponent(`${displayGender} ${fullItemName} Premium Quality 2025`)}`;
                 break;
             case 'meesho':
-                url = `https://www.meesho.com/search?q=${encodeURIComponent(`${displayGender} ${itemColor}`)}`;
+                url = `https://www.meesho.com/search?q=${encodeURIComponent(`${displayGender} ${fullItemName}`)}`;
                 break;
             default:
                 url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
@@ -289,8 +293,8 @@ const StyleNavigator = ({ user, onAnalyze }) => {
         setShowShopSelector(false);
     };
 
-    const openShop = (colorName) => {
-        setActiveShopItem(colorName);
+    const openShop = (itemName) => {
+        setActiveShopItem(itemName);
         setShowShopSelector(true);
     };
 
@@ -749,7 +753,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                                     </div>
                                                 </div>
                                                 <button 
-                                                    onClick={() => openShop(colorName)}
+                                                    onClick={() => openShop(gap.item)}
                                                     className={`w-full py-3 rounded-xl text-[9px] font-black tracking-widest transition-all ${isDark ? 'bg-white text-indigo-900' : 'bg-indigo-600 text-white'}`}
                                                 >
                                                     🔍 SHOP HUB
