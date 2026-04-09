@@ -2,7 +2,7 @@ services:
   - type: web
     name: styleguruai-backend
     runtime: python
-    pythonVersion: '3.10'
+    pythonVersion: '3.12'
     buildCommand: './render-build.sh'
     startCommand: './render-start.sh'
     healthCheckPath: /health
