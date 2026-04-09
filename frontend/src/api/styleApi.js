@@ -10,7 +10,7 @@ const API = axios.create({
   timeout: 30000 // 30s global timeout
 });
 
-export { auth, API };
+export { auth, API, db };
 
 // Auto-attach Firebase token to every request
 API.interceptors.request.use(async (config) => {
