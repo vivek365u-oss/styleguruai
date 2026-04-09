@@ -86,6 +86,10 @@ function StyleBot({ inline = false }) {
   const { theme } = useContext(ThemeContext);
   const { t } = useLanguage();
   const isDark = theme === 'dark';
+  const [open, setOpen] = useState(inline);
+  const [messages, setMessages] = useState([
+    { role: 'bot', text: t('botInitial') }
+  ]);
   const [profile, setProfile] = useState(null);
   const [wardrobe, setWardrobe] = useState([]);
   const [insights, setInsights] = useState(null);
