@@ -41,6 +41,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
     const [mood, setMood] = useState('mood_minimal');
     const [isEditingDNA, setIsEditingDNA] = useState(false);
     const [editDNA, setEditDNA] = useState({ skinTone: 'medium', undertone: 'neutral', season: 'Spring' });
+    const [activeView, setActiveView] = useState('daily'); // 'daily' | 'shop' | 'dna'
 
     useEffect(() => {
         const loadInitialData = async () => {
@@ -260,22 +261,26 @@ const StyleNavigator = ({ user, onAnalyze }) => {
     const [activeShopItem, setActiveShopItem] = useState(null);
 
     const handleShopRedirect = (itemColor, store) => {
-        const gender = profile?.gender || 'men';
-        const query = `${itemColor} outfit for ${gender}`; 
+        // STRICT GENDER ENFORCEMENT
+        const rawGender = insights?.gender || profile?.gender || profile?.gender_mode || 'female';
+        const displayGender = rawGender.toLowerCase().includes('female') || rawGender.toLowerCase() === 'women' ? 'women' : 'men';
+        
+        // Refined query for better search accuracy
+        const query = `${itemColor} ${displayGender} style recommendations`; 
         
         let url = '';
         switch(store) {
             case 'myntra':
-                url = `https://www.myntra.com/${query.replace(/ /g, '-')}`;
+                url = `https://www.myntra.com/${itemColor.replace(/ /g, '-')}-${displayGender === 'women' ? 'women' : 'men'}`;
                 break;
             case 'amazon':
-                url = `https://www.amazon.in/s?k=${encodeURIComponent(query)}`;
+                url = `https://www.amazon.in/s?k=${encodeURIComponent(`${displayGender}'s ${itemColor} outfit`)}`;
                 break;
             case 'flipkart':
-                url = `https://www.flipkart.com/search?q=${encodeURIComponent(query)}`;
+                url = `https://www.flipkart.com/search?q=${encodeURIComponent(`${displayGender} ${itemColor} clothing`)}`;
                 break;
             case 'meesho':
-                url = `https://www.meesho.com/search?q=${encodeURIComponent(query)}`;
+                url = `https://www.meesho.com/search?q=${encodeURIComponent(`${displayGender} ${itemColor}`)}`;
                 break;
             default:
                 url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
@@ -341,379 +346,423 @@ const StyleNavigator = ({ user, onAnalyze }) => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6 pt-2 pb-10"
         >
-            {/* ── SECTION 1: STYLE DNA ──────────────────────── */}
-            <div className={`relative overflow-hidden rounded-[2.5rem] p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/5'}`}>
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                    <div className="flex items-center gap-2">
-                         <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>Permanent DNA</p>
-                         <button onClick={() => setIsEditingDNA(true)} className={`text-[9px] font-black px-2 py-0.5 rounded-md ${isDark ? 'bg-white/10 text-white/40 hover:text-white' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}>EDIT ✏️</button>
-                    </div>
-                    
-                    <button 
-                        onClick={handleTogglePrimary}
-                        className={`w-fit flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black transition-all ${
-                            isPrimary 
-                                ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                                : isDark ? 'bg-white/10 text-white/60 hover:bg-white/20' : 'bg-slate-100 text-slate-500 hover:bg-slate-200 border border-slate-200'
+            {/* ── SEGMENTED NAVIGATION ──────────────────────── */}
+            <div className={`sticky top-0 z-30 p-2 -mx-4 mb-6 backdrop-blur-xl border-b flex justify-center gap-1 ${isDark ? 'bg-[#050816]/80 border-white/10' : 'bg-slate-100/80 border-purple-100'}`}>
+                {[
+                    { id: 'daily', label: 'Recommended', icon: '✨' },
+                    { id: 'shop', label: 'Shopping', icon: '🛒' },
+                    { id: 'dna', label: 'Style DNA', icon: '🧬' }
+                ].map(tab => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveView(tab.id)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all relative ${
+                            activeView === tab.id 
+                                ? 'text-white' 
+                                : isDark ? 'text-white/40 hover:text-white/60' : 'text-slate-400 hover:text-slate-600'
                         }`}
                     >
-                        <span>{isPrimary ? '🏠' : '🔓'}</span>
-                        <span>{isPrimary ? (t('primaryProfileLocked') || 'Home Profile') : (t('setAsHomeTone') || 'Set as Home Tone')}</span>
+                        {activeView === tab.id && (
+                            <motion.div 
+                                layoutId="nav-bg"
+                                className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl shadow-lg shadow-purple-900/40"
+                                initial={false}
+                                transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                            />
+                        )}
+                        <span className="relative z-10">{tab.icon}</span>
+                        <span className="relative z-10 hidden sm:inline">{tab.label}</span>
                     </button>
-                </div>
+                ))}
+            </div>
 
-                <div className="relative z-10 flex items-center gap-5">
-                    <div
-                        className="w-20 h-20 rounded-2xl border-4 border-white/20 shadow-2xl overflow-hidden flex-shrink-0 transition-colors duration-500"
-                        style={{ backgroundColor: isEditingDNA ? (TONE_COLORS[editDNA.skinTone] || '#C68642') : (profile?.skinHex || profile?.skin_color?.hex || '#C68642') }}
-                    />
-                    <div className="flex-1 min-w-0">
-                        {isEditingDNA ? (
-                            <div className="space-y-3 animate-fade-in">
-                                <div className="flex gap-2">
-                                    <select 
-                                        value={editDNA.skinTone} 
-                                        onChange={(e) => setEditDNA({...editDNA, skinTone: e.target.value})}
-                                        className={`flex-1 text-[10px] p-2 rounded-xl border font-black focus:outline-none transition-all ${isDark ? 'bg-[#1a1c2e] border-white/10 text-white select-dark-options' : 'bg-white border-purple-200 text-slate-800'}`}
-                                    >
-                                        {['fair', 'light', 'medium', 'olive', 'brown', 'dark'].map(t => <option key={t} value={t} className={isDark ? 'bg-[#1a1c2e] text-white' : ''}>{t.toUpperCase()}</option>)}
-                                    </select>
-                                    <select 
-                                        value={editDNA.undertone} 
-                                        onChange={(e) => setEditDNA({...editDNA, undertone: e.target.value})}
-                                        className={`flex-1 text-[10px] p-2 rounded-xl border font-black focus:outline-none transition-all ${isDark ? 'bg-[#1a1c2e] border-white/10 text-white select-dark-options' : 'bg-white border-purple-200 text-slate-800'}`}
-                                    >
-                                        {['warm', 'cool', 'neutral'].map(u => <option key={u} value={u} className={isDark ? 'bg-[#1a1c2e] text-white' : ''}>{u.toUpperCase()}</option>)}
-                                    </select>
+            <AnimatePresence mode="wait">
+                {activeView === 'dna' && (
+                    <motion.div
+                        key="dna"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className="space-y-6"
+                    >
+                        {/* ── SECTION 1: STYLE DNA ──────────────────────── */}
+                        <div className={`relative overflow-hidden rounded-[2.5rem] p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/5'}`}>
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                <div className="flex items-center gap-2">
+                                     <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>Permanent DNA</p>
+                                     <button onClick={() => setIsEditingDNA(true)} className={`text-[9px] font-black px-2 py-0.5 rounded-md ${isDark ? 'bg-white/10 text-white/40 hover:text-white' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}>EDIT ✏️</button>
                                 </div>
-                                <div className="flex gap-2">
-                                    <select 
-                                        value={editDNA.season} 
-                                        onChange={(e) => setEditDNA({...editDNA, season: e.target.value})}
-                                        className={`flex-1 text-[10px] p-2 rounded-xl border font-black focus:outline-none transition-all ${isDark ? 'bg-[#1a1c2e] border-white/10 text-white select-dark-options' : 'bg-white border-purple-200 text-slate-800'}`}
-                                    >
-                                        {['Spring', 'Summer', 'Autumn', 'Winter'].map(s => <option key={s} value={s} className={isDark ? 'bg-[#1a1c2e] text-white' : ''}>{s}</option>)}
-                                    </select>
-                                    <button onClick={handleUpdateDNA} className="px-4 py-2 bg-purple-600 text-white rounded-xl text-[10px] font-black uppercase shadow-lg shadow-purple-500/20 active:scale-95 transition-all">Save</button>
-                                </div>
+                                
                                 <button 
-                                    onClick={handleReanalyze}
-                                    className={`w-full py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'}`}
+                                    onClick={handleTogglePrimary}
+                                    className={`w-fit flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black transition-all ${
+                                        isPrimary 
+                                            ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                                            : isDark ? 'bg-white/10 text-white/60 hover:bg-white/20' : 'bg-slate-100 text-slate-500 hover:bg-slate-200 border border-slate-200'
+                                    }`}
                                 >
-                                    📸 Re-analyze Photo
+                                    <span>{isPrimary ? '🏠' : '🔓'}</span>
+                                    <span>{isPrimary ? (t('primaryProfileLocked') || 'Home Profile') : (t('setAsHomeTone') || 'Set as Home Tone')}</span>
                                 </button>
                             </div>
-                        ) : (
-                            <>
-                                <h3 className={`text-2xl font-black capitalize truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                    {profile?.skinTone || profile?.skin_tone?.category} {profile?.undertone || profile?.skin_tone?.undertone}
-                                </h3>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50 border-purple-100 text-purple-700'}`}>
-                                        {profile?.season || profile?.skin_tone?.color_season || 'Spring'} Edition
-                                    </span>
+
+                            <div className="relative z-10 flex items-center gap-5">
+                                <div
+                                    className="w-20 h-20 rounded-2xl border-4 border-white/20 shadow-2xl overflow-hidden flex-shrink-0 transition-colors duration-500"
+                                    style={{ backgroundColor: isEditingDNA ? (TONE_COLORS[editDNA.skinTone] || '#C68642') : (profile?.skinHex || profile?.skin_color?.hex || '#C68642') }}
+                                />
+                                <div className="flex-1 min-w-0">
+                                    {isEditingDNA ? (
+                                        <div className="space-y-3 animate-fade-in">
+                                            <div className="flex gap-2">
+                                                <select 
+                                                    value={editDNA.skinTone} 
+                                                    onChange={(e) => setEditDNA({...editDNA, skinTone: e.target.value})}
+                                                    className={`flex-1 text-[10px] p-2 rounded-xl border font-black focus:outline-none transition-all ${isDark ? 'bg-[#1a1c2e] border-white/10 text-white select-dark-options' : 'bg-white border-purple-200 text-slate-800'}`}
+                                                >
+                                                    {['fair', 'light', 'medium', 'olive', 'brown', 'dark'].map(t => <option key={t} value={t} className={isDark ? 'bg-[#1a1c2e] text-white' : ''}>{t.toUpperCase()}</option>)}
+                                                </select>
+                                                <select 
+                                                    value={editDNA.undertone} 
+                                                    onChange={(e) => setEditDNA({...editDNA, undertone: e.target.value})}
+                                                    className={`flex-1 text-[10px] p-2 rounded-xl border font-black focus:outline-none transition-all ${isDark ? 'bg-[#1a1c2e] border-white/10 text-white select-dark-options' : 'bg-white border-purple-200 text-slate-800'}`}
+                                                >
+                                                    {['warm', 'cool', 'neutral'].map(u => <option key={u} value={u} className={isDark ? 'bg-[#1a1c2e] text-white' : ''}>{u.toUpperCase()}</option>)}
+                                                </select>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <select 
+                                                    value={editDNA.season} 
+                                                    onChange={(e) => setEditDNA({...editDNA, season: e.target.value})}
+                                                    className={`flex-1 text-[10px] p-2 rounded-xl border font-black focus:outline-none transition-all ${isDark ? 'bg-[#1a1c2e] border-white/10 text-white select-dark-options' : 'bg-white border-purple-200 text-slate-800'}`}
+                                                >
+                                                    {['Spring', 'Summer', 'Autumn', 'Winter'].map(s => <option key={s} value={s} className={isDark ? 'bg-[#1a1c2e] text-white' : ''}>{s}</option>)}
+                                                </select>
+                                                <button onClick={handleUpdateDNA} className="px-4 py-2 bg-purple-600 text-white rounded-xl text-[10px] font-black uppercase shadow-lg shadow-purple-500/20 active:scale-95 transition-all">Save</button>
+                                            </div>
+                                            <button 
+                                                onClick={handleReanalyze}
+                                                className={`w-full py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'}`}
+                                            >
+                                                📸 Re-analyze Photo
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <h3 className={`text-2xl font-black capitalize truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                                {profile?.skinTone || profile?.skin_tone?.category} {profile?.undertone || profile?.skin_tone?.undertone}
+                                            </h3>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50 border-purple-100 text-purple-700'}`}>
+                                                    {profile?.season || profile?.skin_tone?.color_season || 'Spring'} Edition
+                                                </span>
+                                            </div>
+                                            <div className="mt-4 space-y-2">
+                                                <p className={`text-[9px] font-black uppercase opacity-40`}>Actionable DNA Stats</p>
+                                                <div className="flex flex-wrap gap-2">
+                                                     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-100 shadow-sm'}`}>
+                                                        <span>👕</span>
+                                                        <span>{wardrobe.length} Wardrobe Items</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
-                                <div className="mt-4 space-y-2">
-                                    <p className={`text-[9px] font-black uppercase opacity-40`}>Actionable DNA Recommendations</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {getActionableAdvice(insights?.best_colors || profile?.best_colors, profile?.gender || 'female').map((adv, i) => {
-                                            const hasInCloset = wardrobe.some(item => item.category === adv.category);
+                            </div>
+
+                            <div className="mt-8 grid grid-cols-2 gap-3">
+                                <div className={`p-4 rounded-3xl border relative ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100/50 border-slate-200'}`}>
+                                    <div className="flex items-center justify-between mb-1">
+                                        <p className={`text-[10px] font-bold uppercase ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Harmony Score</p>
+                                        <button onClick={() => setShowInfo(showInfo === 'harmony' ? null : 'harmony')} className={`${infoCls} ${isDark ? 'bg-white/10 text-white/40' : 'bg-slate-200 text-slate-500'}`}>?</button>
+                                    </div>
+                                    <div className="flex items-end gap-2">
+                                         <span className={`text-2xl font-black ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+                                            {(() => {
+                                                if (!wardrobe.length || !profile) return '0%';
+                                                const totalScore = wardrobe.reduce((acc, item) => {
+                                                    return acc + scoreWardrobeItem(item, { weather: 'sunny' }, profile, [], prefs || {}, insights);
+                                                }, 0);
+                                                return Math.round(totalScore / wardrobe.length) + '%';
+                                            })()}
+                                         </span>
+                                    </div>
+                                    
+                                    <AnimatePresence>
+                                        {showInfo === 'harmony' && (
+                                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className={`absolute inset-0 z-20 p-4 rounded-3xl flex items-center text-[10px] font-medium leading-tight backdrop-blur-md ${isDark ? 'bg-black/90 text-white' : 'bg-white/95 text-slate-600 shadow-xl'}`}>
+                                                {t('harmonyExplain')}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+
+                                <div className={`p-4 rounded-3xl border relative ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100/50 border-slate-200'}`}>
+                                    <p className={`text-[10px] font-bold uppercase mb-1 ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Sync Status</p>
+                                    <div className="flex items-end gap-2">
+                                        <span className={`text-[10px] font-black ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>ACTIVE ANALYZER</span>
+                                        <button onClick={onAnalyze} className={`ml-auto text-[9px] font-black px-2 py-1 rounded-lg ${isDark ? 'bg-orange-500/20 text-orange-400' : 'bg-orange-100 text-orange-700'}`}>REFRESH 📸</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+
+                {activeView === 'daily' && (
+                    <motion.div
+                        key="daily"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className="space-y-6"
+                    >
+                        {/* ── SECTION 2: MOOD & ENGINE ──────────────────────── */}
+                        <div className="space-y-4">
+                            <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-white/40' : 'text-slate-500/60'}`}>Recommended Intent</p>
+                            <div className="grid grid-cols-4 gap-2">
+                                {[
+                                    { id: 'mood_comfort', label: 'Comfort' },
+                                    { id: 'mood_confidence', label: 'Confident' },
+                                    { id: 'mood_minimal', label: 'Minimal' },
+                                    { id: 'mood_attention', label: 'Party' }
+                                ].map(m => (
+                                    <button
+                                        key={m.id}
+                                        onClick={() => setMood(m.id)}
+                                        className={`py-3 rounded-xl border text-[9px] font-black uppercase transition-all ${
+                                            mood === m.id 
+                                                ? 'bg-purple-600 border-transparent text-white shadow-lg' 
+                                                : isDark ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white border-gray-200 text-slate-400 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        {m.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* DAILY SUGGESTION CARD */}
+                        {insights?.daily_suggestion && (
+                            <div className={`rounded-[2.5rem] p-7 border relative overflow-hidden transition-all ${isDark ? 'bg-white/5 border-white/10 shadow-2xl' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/5'}`}>
+                                <div className="absolute top-0 right-0 p-6 flex items-center gap-3">
+                                     <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg">✨</div>
+                                </div>
+
+                                <div className="relative z-10">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <span className={`text-[10px] font-black px-3 py-1 rounded-full border tracking-widest ${isDark ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 'bg-purple-50 border-purple-200 text-purple-600'}`}>
+                                           TODAY'S BEST LOOK
+                                        </span>
+                                    </div>
+                                    
+                                    <h2 className={`text-2xl font-black mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                        {insights.daily_suggestion.title}
+                                    </h2>
+                                    <p className={`text-sm mb-8 opacity-60 font-medium ${isDark ? 'text-white' : 'text-slate-500'}`}>
+                                         {t(lifestyleKey)} Rotation · {t('basedOnWeather')}
+                                    </p>
+
+                                    <div className="grid grid-cols-2 gap-6 mb-8">
+                                        {/* TOP */}
+                                        {(() => {
+                                            const match = getMatch(insights.daily_suggestion.top, 'top');
                                             return (
-                                                <div key={i} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-100 shadow-sm'}`}>
-                                                    <span>{getCategoryIcon(adv.category)}</span>
-                                                    <span>{adv.item}</span>
-                                                    {hasInCloset ? (
-                                                        <span className="text-green-500 font-black">✓</span>
-                                                    ) : (
-                                                        <span className="text-orange-500 flex items-center gap-1">🚧 <span className="text-[8px] animate-pulse">+20 pts</span></span>
-                                                    )}
+                                                <div className="space-y-3 relative group">
+                                                    <div className="w-16 h-16 rounded-2xl border-4 border-white/10 shadow-lg relative flex-shrink-0" style={{ backgroundColor: match?.hex || '#888' }}>
+                                                        {match ? (
+                                                             <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg">CLOSET</span>
+                                                        ) : (
+                                                             <button 
+                                                                onClick={() => openShop(insights.daily_suggestion.top)}
+                                                                className="absolute -top-2 -right-2 bg-orange-600 text-white text-[8px] font-black px-2 py-1 rounded-full shadow-lg animate-pulse hover:scale-110 transition-transform"
+                                                             >
+                                                                🛒 SHOP
+                                                             </button>
+                                                        )}
+                                                        {isWorn && <div className="absolute inset-0 bg-green-500/40 rounded-xl flex items-center justify-center text-white text-xl">✓</div>}
+                                                    </div>
+                                                    <div>
+                                                        <p className={`text-[10px] font-black uppercase truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>{insights.daily_suggestion.top}</p>
+                                                        <p className="text-[9px] font-bold opacity-30 mt-0.5">{match ? (match.color_name || 'Matched') : '🚧 Score Boost Available'}</p>
+                                                    </div>
                                                 </div>
                                             );
-                                        })}
+                                        })()}
+
+                                        {/* BOTTOM */}
+                                        {(() => {
+                                            const match = getMatch(insights.daily_suggestion.bottom, 'bottom');
+                                            return (
+                                                <div className="space-y-3 relative group">
+                                                    <div className="w-16 h-16 rounded-2xl border-4 border-white/10 shadow-lg relative flex-shrink-0" style={{ backgroundColor: match?.hex || '#333' }}>
+                                                        {match ? (
+                                                             <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg">CLOSET</span>
+                                                        ) : (
+                                                             <button 
+                                                                onClick={() => openShop(insights.daily_suggestion.bottom)}
+                                                                className="absolute -top-2 -right-2 bg-orange-600 text-white text-[8px] font-black px-2 py-1 rounded-full shadow-lg animate-pulse hover:scale-110 transition-transform"
+                                                             >
+                                                                🛒 SHOP
+                                                             </button>
+                                                        )}
+                                                        {isWorn && <div className="absolute inset-0 bg-green-500/40 rounded-xl flex items-center justify-center text-white text-xl">✓</div>}
+                                                    </div>
+                                                    <div>
+                                                        <p className={`text-[10px] font-black uppercase truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>{insights.daily_suggestion.bottom}</p>
+                                                        <p className="text-[9px] font-bold opacity-30 mt-0.5">{match ? (match.color_name || 'Matched') : '🚧 Score Boost Available'}</p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
 
-                <div className="mt-8 grid grid-cols-2 gap-3">
-                    <div className={`p-4 rounded-3xl border relative ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100/50 border-slate-200'}`}>
-                        <div className="flex items-center justify-between mb-1">
-                            <p className={`text-[10px] font-bold uppercase ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Overall Harmony</p>
-                            <button onClick={() => setShowInfo(showInfo === 'harmony' ? null : 'harmony')} className={`${infoCls} ${isDark ? 'bg-white/10 text-white/40' : 'bg-slate-200 text-slate-500'}`}>?</button>
-                        </div>
-                        <div className="flex items-end gap-2">
-                             <span className={`text-2xl font-black ${isDark ? 'text-green-400' : 'text-green-600'}`}>
-                                {(() => {
-                                    if (!wardrobe.length || !profile) return '0%';
-                                    const totalScore = wardrobe.reduce((acc, item) => {
-                                        return acc + scoreWardrobeItem(item, { weather: 'sunny' }, profile, [], prefs || {}, insights);
-                                    }, 0);
-                                    return Math.round(totalScore / wardrobe.length) + '%';
-                                })()}
-                             </span>
-                        </div>
-                        
-                        <AnimatePresence>
-                            {showInfo === 'harmony' && (
-                                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className={`absolute inset-0 z-20 p-4 rounded-3xl flex items-center text-[10px] font-medium leading-tight backdrop-blur-md ${isDark ? 'bg-black/90 text-white' : 'bg-white/95 text-slate-600 shadow-xl'}`}>
-                                    {t('harmonyExplain')}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-
-                    <div className={`p-4 rounded-3xl border relative ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100/50 border-slate-200'}`}>
-                        <p className={`text-[10px] font-bold uppercase mb-1 ${isDark ? 'text-white/30' : 'text-slate-400'}`}>Items Synced</p>
-                        <div className="flex items-end gap-2">
-                            <span className={`text-2xl font-black ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>+{wardrobe.length || 0}</span>
-                            <button onClick={onAnalyze} className={`ml-auto text-[9px] font-black px-2 py-1 rounded-lg ${isDark ? 'bg-orange-500/20 text-orange-400' : 'bg-orange-100 text-orange-700'}`}>SYNC 📸</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* ── SECTION 2: MOOD & ENGINE ──────────────────────── */}
-            <div className="space-y-4">
-                <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-white/40' : 'text-slate-500/60'}`}>Current Styling Intent</p>
-                <div className="grid grid-cols-4 gap-2">
-                    {[
-                        { id: 'mood_comfort', label: 'Comfort' },
-                        { id: 'mood_confidence', label: 'Confidence' },
-                        { id: 'mood_minimal', label: 'Minimal' },
-                        { id: 'mood_attention', label: 'Attention' }
-                    ].map(m => (
-                        <button
-                            key={m.id}
-                            onClick={() => setMood(m.id)}
-                            className={`py-3.5 rounded-2xl border text-[10px] font-black uppercase transition-all ${
-                                mood === m.id 
-                                    ? 'bg-purple-600 border-transparent text-white shadow-xl shadow-purple-900/40' 
-                                    : isDark ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white border-gray-200 text-slate-400 hover:bg-gray-50'
-                            }`}
-                        >
-                            {m.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* DAILY SUGGESTION CARD */}
-            {insights?.daily_suggestion && (
-                <div className={`rounded-[2.5rem] p-7 border relative overflow-hidden transition-all ${isDark ? 'bg-white/5 border-white/10 shadow-2xl' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/5'}`}>
-                    <div className="absolute top-0 right-0 p-6 flex items-center gap-3">
-                         <div className="flex gap-1.5 mr-4">
-                              <button 
-                                onClick={() => handleFeedback('like')}
-                                className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs transition-all ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-gray-200 hover:bg-gray-50'}`}
-                              >
-                                👍
-                              </button>
-                              <button 
-                                onClick={() => handleFeedback('dislike')}
-                                className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs transition-all ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-gray-200 hover:bg-gray-50'}`}
-                              >
-                                👎
-                              </button>
-                         </div>
-                         <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg">✨</div>
-                    </div>
-
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-2 mb-4">
-                            <span className={`text-[10px] font-black px-3 py-1 rounded-full border tracking-widest ${isDark ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 'bg-purple-50 border-purple-200 text-purple-600'}`}>
-                               AI ENGINE MATCH
-                            </span>
-                        </div>
-                        
-                        <h2 className={`text-2xl font-black mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                            {insights.daily_suggestion.title}
-                        </h2>
-                        <p className={`text-sm mb-8 opacity-60 font-medium ${isDark ? 'text-white' : 'text-slate-500'}`}>
-                             {t(lifestyleKey)} Rotation · {t('basedOnWeather')}
-                        </p>
-
-                        <div className="grid grid-cols-2 gap-6 mb-8">
-                            {/* TOP */}
-                            {(() => {
-                                const match = getMatch(insights.daily_suggestion.top, 'top');
-                                return (
-                                    <div className="space-y-3 relative group">
-                                        <div className="w-16 h-16 rounded-2xl border-4 border-white/10 shadow-lg relative flex-shrink-0" style={{ backgroundColor: match?.hex || '#888' }}>
-                                            {match ? (
-                                                 <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg">CLOSET</span>
-                                            ) : (
-                                                 <button 
-                                                    onClick={() => openShop(insights.daily_suggestion.top)}
-                                                    className="absolute -top-2 -right-2 bg-orange-600 text-white text-[8px] font-black px-2 py-1 rounded-full shadow-lg animate-pulse hover:scale-110 transition-transform"
-                                                 >
-                                                    🛒 SHOP
-                                                 </button>
-                                            )}
-                                            {isWorn && <div className="absolute inset-0 bg-green-500/40 rounded-xl flex items-center justify-center text-white text-xl">✓</div>}
-                                        </div>
-                                        <div>
-                                            <p className={`text-[10px] font-black uppercase truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>{insights.daily_suggestion.top}</p>
-                                            <p className="text-[9px] font-bold opacity-30 mt-0.5">{match ? (match.color_name || 'Matched') : '🚧 Score Boost Available'}</p>
-                                        </div>
+                                    {/* Finishing Touches Section */}
+                                    <div className={`mb-8 p-4 rounded-3xl border border-dashed ${isDark ? 'bg-white/5 border-white/20' : 'bg-slate-50 border-slate-200'}`}>
+                                         <p className="text-[9px] font-black uppercase opacity-40 mb-3 tracking-widest">Finishing Touches</p>
+                                         {(() => {
+                                            const rawGender = insights?.gender || profile?.gender || profile?.gender_mode || 'female';
+                                            const tips = getAccessoryAdvice(rawGender.toLowerCase().includes('female') ? 'female' : 'male', profile?.season || 'Spring');
+                                             return (
+                                                 <div className="grid grid-cols-2 gap-4">
+                                                     <div className="flex gap-2 items-center">
+                                                         <span className="text-xl">💍</span>
+                                                         <div>
+                                                             <p className="text-[9px] font-black uppercase opacity-60">Jewelry</p>
+                                                             <p className="text-[10px] font-bold truncate">{tips.jewelry}</p>
+                                                         </div>
+                                                     </div>
+                                                     <div className="flex gap-2 items-center">
+                                                         <span className="text-xl">👞</span>
+                                                         <div>
+                                                             <p className="text-[9px] font-black uppercase opacity-60">Shoes</p>
+                                                             <p className="text-[10px] font-bold truncate">{tips.shoes}</p>
+                                                         </div>
+                                                     </div>
+                                                 </div>
+                                             );
+                                         })()}
                                     </div>
-                                );
-                            })()}
 
-                            {/* BOTTOM */}
-                            {(() => {
-                                const match = getMatch(insights.daily_suggestion.bottom, 'bottom');
-                                return (
-                                    <div className="space-y-3 relative group">
-                                        <div className="w-16 h-16 rounded-2xl border-4 border-white/10 shadow-lg relative flex-shrink-0" style={{ backgroundColor: match?.hex || '#333' }}>
-                                            {match ? (
-                                                 <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg">CLOSET</span>
-                                            ) : (
-                                                 <button 
-                                                    onClick={() => openShop(insights.daily_suggestion.bottom)}
-                                                    className="absolute -top-2 -right-2 bg-orange-600 text-white text-[8px] font-black px-2 py-1 rounded-full shadow-lg animate-pulse hover:scale-110 transition-transform"
-                                                 >
-                                                    🛒 SHOP
-                                                 </button>
-                                            )}
-                                            {isWorn && <div className="absolute inset-0 bg-green-500/40 rounded-xl flex items-center justify-center text-white text-xl">✓</div>}
-                                        </div>
-                                        <div>
-                                            <p className={`text-[10px] font-black uppercase truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>{insights.daily_suggestion.bottom}</p>
-                                            <p className="text-[9px] font-bold opacity-30 mt-0.5">{match ? (match.color_name || 'Matched') : '🚧 Score Boost Available'}</p>
-                                        </div>
-                                    </div>
-                                );
-                            })()}
-                        </div>
-
-                        {/* Finishing Touches Section */}
-                        <div className={`mb-8 p-4 rounded-3xl border border-dashed ${isDark ? 'bg-white/5 border-white/20' : 'bg-slate-50 border-slate-200'}`}>
-                             <p className="text-[9px] font-black uppercase opacity-40 mb-3 tracking-widest">Finishing Touches</p>
-                             {(() => {
-                                 const tips = getAccessoryAdvice(profile?.gender || 'female', profile?.season || 'Spring');
-                                 return (
-                                     <div className="grid grid-cols-2 gap-4">
-                                         <div className="flex gap-2 items-center">
-                                             <span className="text-xl">💍</span>
-                                             <div>
-                                                 <p className="text-[9px] font-black uppercase opacity-60">Jewelry</p>
-                                                 <p className="text-[10px] font-bold">{tips.jewelry}</p>
-                                             </div>
-                                         </div>
-                                         <div className="flex gap-2 items-center">
-                                             <span className="text-xl">👞</span>
-                                             <div>
-                                                 <p className="text-[9px] font-black uppercase opacity-60">Shoes</p>
-                                                 <p className="text-[10px] font-bold">{tips.shoes}</p>
-                                             </div>
-                                         </div>
-                                     </div>
-                                 );
-                             })()}
-                        </div>
-
-                        <button
-                            onClick={handleWearToday}
-                            disabled={isWorn || logging}
-                            className={`w-full py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all shadow-xl group overflow-hidden relative ${
-                                isWorn 
-                                    ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                                    : 'bg-black text-white hover:scale-[1.02] active:scale-95'
-                            }`}
-                        >
-                            <span className="relative z-10 flex items-center justify-center gap-2">
-                                {isWorn ? '🏆 STYLE LOGGED TODAY' : '✅ MARK AS WORN'}
-                            </span>
-                            {!isWorn && (
-                                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            )}
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* ── SECTION 3: STYLE GAPS (DISCOVERY GRID) ──────────────────────── */}
-            <div className={`rounded-[2.5rem] p-8 border relative overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200 shadow-sm'}`}>
-                <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/5 blur-[80px] pointer-events-none" />
-                <div className="flex items-center gap-4 mb-8 relative z-10">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg ${isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-white text-indigo-600 border border-indigo-100'}`}>🛍️</div>
-                    <div>
-                        <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>Universal Shopping Hub</p>
-                        <h4 className={`text-xl font-black mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>DNA Style Discovery</h4>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
-                    {(() => {
-                        const advisoryItems = getActionableAdvice(
-                            insights?.best_colors || 
-                            profile?.best_colors || 
-                            profile?.best_shirt_colors || 
-                            insights?.best_shirt_colors || 
-                            [], 
-                            profile?.gender || profile?.gender_mode || 'female'
-                        );
-                        
-                        // Check for colors explicitly missing from wardrobe
-                        let missingGaps = advisoryItems.filter(adv => {
-                            const colorName = adv.color?.toLowerCase() || adv.item.split(' ')[0].toLowerCase();
-                            const hasInCloset = wardrobe.some(item => {
-                                const itemColors = item.outfit_data?.colors || [];
-                                return itemColors.some(c => c.name.toLowerCase().includes(colorName)) || 
-                                       (item.color_name && item.color_name.toLowerCase().includes(colorName)) ||
-                                       (item.hex && insights?.best_colors?.some(bc => bc.name.toLowerCase() === colorName && bc.hex === item.hex));
-                            });
-                            return !hasInCloset;
-                        });
-
-                        // FALLBACK: If optimization is 100%, show "Elite Upgrades" using all best colors
-                        const displayGaps = missingGaps.length > 0 ? missingGaps.slice(0, 4) : advisoryItems.slice(0, 4).map(a => ({ ...a, item: `Elite ${a.item}` }));
-
-                        return displayGaps.map((gap, idx) => {
-                            const colorName = gap.color || gap.item.split(' ')[0];
-                            const colorHex = gap.hex || (insights?.best_colors || profile?.best_colors || []).find(c => c.name === colorName)?.hex || '#888';
-                            const isElite = missingGaps.length === 0;
-
-                            return (
-                                <motion.div 
-                                    key={idx}
-                                    whileHover={{ y: -5 }}
-                                    className={`p-5 rounded-[2.5rem] border group transition-all ${isDark ? 'bg-indigo-500/5 border-indigo-500/10 hover:border-indigo-500/30' : 'bg-white border-slate-100 hover:border-indigo-200 shadow-sm'}`}
-                                >
-                                    <div className="flex items-center gap-4 mb-4">
-                                        <div className="w-14 h-14 rounded-2xl border-4 border-white/10 shadow-xl flex-shrink-0" style={{ backgroundColor: colorHex }} />
-                                        <div className="flex-1 min-w-0">
-                                            <p className={`font-black text-xs truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{gap.item}</p>
-                                            <p className="text-[10px] text-indigo-500 font-bold">{isElite ? '💎 Elite Upgrade' : `+ ${15 + (idx * 5)}% Synergy`}</p>
-                                        </div>
-                                    </div>
-                                    <button 
-                                        onClick={() => openShop(colorName)}
-                                        className={`w-full py-3 rounded-xl text-[9px] font-black tracking-widest transition-all ${isDark ? 'bg-white text-indigo-900' : 'bg-indigo-600 text-white'}`}
+                                    <button
+                                        onClick={handleWearToday}
+                                        disabled={isWorn || logging}
+                                        className={`w-full py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all shadow-xl group overflow-hidden relative ${
+                                            isWorn 
+                                                ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                                                : 'bg-black text-white hover:scale-[1.02] active:scale-95'
+                                        }`}
                                     >
-                                        🔍 SHOP HUB
+                                        <span className="relative z-10 flex items-center justify-center gap-2">
+                                            {isWorn ? '🏆 STYLE LOGGED TODAY' : '✅ MARK AS WORN'}
+                                        </span>
+                                        {!isWorn && (
+                                            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                        )}
                                     </button>
-                                </motion.div>
-                            );
-                        });
-                    })()}
-                </div>
-            </div>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Actionable Advice Section (Moved here for better vertical flow) */}
+                        <div className={`rounded-3xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-100'}`}>
+                            <p className={`text-[9px] font-black uppercase tracking-widest opacity-40 mb-4`}>DNA-Matched Suggestions</p>
+                            <div className="flex flex-wrap gap-2">
+                                {getActionableAdvice(insights?.best_colors || profile?.best_colors, insights?.gender || profile?.gender || 'female').map((adv, i) => {
+                                    const hasInCloset = wardrobe.some(item => item.category === adv.category);
+                                    return (
+                                        <div key={i} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-100 shadow-sm'}`}>
+                                            <span>{getCategoryIcon(adv.category)}</span>
+                                            <span>{adv.item}</span>
+                                            {hasInCloset && <span className="text-green-500">✓</span>}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
 
-            {/* ── TIPS CARD ──────────────────────── */}
-            <div className={`rounded-3xl p-5 border ${isDark ? 'bg-gradient-to-r from-teal-900/20 to-blue-900/20 border-teal-700/20' : 'bg-teal-50 border-teal-100 shadow-sm'}`}>
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white text-lg">💡</div>
-                    <div className="flex-1">
-                        <p className={`text-[11px] font-black uppercase tracking-tight mb-0.5 ${isDark ? 'text-teal-400' : 'text-teal-700'}`}>Personalized Hack</p>
-                        <p className={`text-[10px] leading-tight ${isDark ? 'text-white/60' : 'text-teal-900/70'}`}>
-                            {t('smartLogicNote') || 'Smart logic se colors tumhari skin tone se perfectly match honge.'}
-                        </p>
-                    </div>
-                </div>
-            </div>
+                {activeView === 'shop' && (
+                    <motion.div
+                        key="shop"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className="space-y-6"
+                    >
+                        {/* ── SECTION 3: STYLE GAPS (DISCOVERY GRID) ──────────────────────── */}
+                        <div className={`rounded-[2.5rem] p-8 border relative overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200 shadow-sm'}`}>
+                            <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/5 blur-[80px] pointer-events-none" />
+                            <div className="flex items-center gap-4 mb-8 relative z-10">
+                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg ${isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-white text-indigo-600 border border-indigo-100'}`}>🛍️</div>
+                                <div>
+                                    <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>Universal Shopping Hub</p>
+                                    <h4 className={`text-xl font-black mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>DNA Style Discovery</h4>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
+                                {(() => {
+                                    const rawGender = insights?.gender || profile?.gender || profile?.gender_mode || 'female';
+                                    const advisoryItems = getActionableAdvice(
+                                        insights?.best_colors || 
+                                        profile?.best_colors || 
+                                        profile?.best_shirt_colors || 
+                                        insights?.best_shirt_colors || 
+                                        [], 
+                                        rawGender.toLowerCase().includes('female') ? 'female' : 'male'
+                                    );
+                                    
+                                    // Check for colors explicitly missing from wardrobe
+                                    let missingGaps = advisoryItems.filter(adv => {
+                                        const colorName = adv.color?.toLowerCase() || adv.item.split(' ')[0].toLowerCase();
+                                        const hasInCloset = wardrobe.some(item => {
+                                            const itemColors = item.outfit_data?.colors || [];
+                                            return itemColors.some(c => c.name.toLowerCase().includes(colorName)) || 
+                                                   (item.color_name && item.color_name.toLowerCase().includes(colorName)) ||
+                                                   (item.hex && insights?.best_colors?.some(bc => bc.name.toLowerCase() === colorName && bc.hex === item.hex));
+                                        });
+                                        return !hasInCloset;
+                                    });
+
+                                    // FALLBACK: If optimization is 100%, show "Elite Upgrades" using all best colors
+                                    const displayGaps = missingGaps.length > 0 ? missingGaps.slice(0, 4) : advisoryItems.slice(0, 4).map(a => ({ ...a, item: `Elite ${a.item}` }));
+
+                                    return displayGaps.map((gap, idx) => {
+                                        const colorName = gap.color || gap.item.split(' ')[0];
+                                        const colorHex = gap.hex || (insights?.best_colors || profile?.best_colors || []).find(c => c.name === colorName)?.hex || '#888';
+                                        const isElite = missingGaps.length === 0;
+
+                                        return (
+                                            <motion.div 
+                                                key={idx}
+                                                whileHover={{ y: -5 }}
+                                                className={`p-5 rounded-[2.5rem] border group transition-all ${isDark ? 'bg-indigo-500/5 border-indigo-500/10 hover:border-indigo-500/30' : 'bg-white border-slate-100 hover:border-indigo-200 shadow-sm'}`}
+                                            >
+                                                <div className="flex items-center gap-4 mb-4">
+                                                    <div className="w-14 h-14 rounded-2xl border-4 border-white/10 shadow-xl flex-shrink-0" style={{ backgroundColor: colorHex }} />
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className={`font-black text-xs truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{gap.item}</p>
+                                                        <p className="text-[10px] text-indigo-500 font-bold">{isElite ? '💎 Elite Upgrade' : `+ ${15 + (idx * 5)}% Synergy`}</p>
+                                                    </div>
+                                                </div>
+                                                <button 
+                                                    onClick={() => openShop(colorName)}
+                                                    className={`w-full py-3 rounded-xl text-[9px] font-black tracking-widest transition-all ${isDark ? 'bg-white text-indigo-900' : 'bg-indigo-600 text-white'}`}
+                                                >
+                                                    🔍 SHOP HUB
+                                                </button>
+                                            </motion.div>
+                                        );
+                                    });
+                                })()}
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* ── STORE SELECTOR MODAL ──────────────────────── */}
             <AnimatePresence>
