@@ -281,7 +281,9 @@ export const getLocalizedOOTD = (gender, skinTone, language, indexOffset = 0, we
   }
 
   const now = new Date();
-  const index = (now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate() + indexOffset) % pool.length;
+  // Add a unique offset based on the tone name to ensure variety across profiles on the same day
+  const toneHash = tone.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const index = (now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate() + indexOffset + toneHash) % pool.length;
   const safeIndex = index < 0 ? (pool.length - (Math.abs(index) % pool.length)) % pool.length : index;
   
   const selected = pool[safeIndex];

@@ -119,21 +119,23 @@ export const getTopRecommendations = (wardrobe, context, profile, history, prefe
 };
 
 /**
- * Returns accessory (shoes/jewelry) advice based on DNA, gender, and event context
+ * Returns accessory (shoes/watches/jewelry) advice based on DNA, gender, and event context
  */
 export const getAccessoryAdvice = (gender, season, event = 'casual') => {
     const isSpecial = event === 'PARTY' || event === 'OFFICE';
     
     if (gender === 'female') {
         return {
+            label: 'Jewelry Advice',
             jewelry: isSpecial 
-                ? (season === 'Spring' || season === 'Summer' ? 'Emerald or Pearl Chokes' : 'Gold Kundan / Heavy Silks')
+                ? (season === 'Spring' || season === 'Summer' ? 'Emerald or Pearl Choker' : 'Gold Kundan / Heavy Silks')
                 : (season === 'Spring' || season === 'Summer' ? 'Rose Gold Hoops' : 'Minimal Silver Studs'),
             shoes: event === 'PARTY' ? 'Stilettos or Embellished Juttis' : 'Nude Block Heels or Mules',
             tip: isSpecial ? 'Pair with a clutch matching your shoe color.' : 'Keep it light with a cross-body bag.'
         };
     }
     return {
+        label: 'Watch & Leather Advice',
         jewelry: event === 'OFFICE' ? 'Silver Mechanical Watch' : 'Leather Strap Watch or Band',
         shoes: event === 'PARTY' ? 'Black Chelsea Boots' : (event === 'OFFICE' ? 'Dark Brown Oxfords' : 'White Minimal Sneakers'),
         tip: event === 'OFFICE' ? 'Your belt MUST match your shoe leather.' : 'No socks visible with sneakers for an athletic look.'
@@ -143,16 +145,40 @@ export const getAccessoryAdvice = (gender, season, event = 'casual') => {
 /**
  * Maps color recommendations to specific actionable items from the registry
  */
-export const getActionableAdvice = (bestColors, gender) => {
-    // Robust fallback: if bestColors is missing or empty, use high-performing universal classics
+export const getActionableAdvice = (bestColors, gender, skinTone = 'medium') => {
+    // Dynamic Fallbacks for Different Skin Types (Fair, Light, Medium, Olive, Brown, Dark)
+    const getDynamicFallbacks = (tone = 'medium') => {
+        const t = tone.toLowerCase();
+        if (t === 'fair' || t === 'light') return [
+            { name: 'Navy Blue', hex: '#000080' },
+            { name: 'Burgundy', hex: '#800020' },
+            { name: 'Forest Green', hex: '#228B22' },
+            { name: 'Dusty Rose', hex: '#C4767A' }
+        ];
+        if (t === 'dark' || t === 'brown') return [
+            { name: 'Bright White', hex: '#FFFFFF' },
+            { name: 'Electric Blue', hex: '#0047AB' },
+            { name: 'Mustard Yellow', hex: '#FFDB58' },
+            { name: 'Hot Pink', hex: '#FF69B4' }
+        ];
+        if (t === 'olive') return [
+            { name: 'Emerald', hex: '#50C878' },
+            { name: 'Rust', hex: '#B7410E' },
+            { name: 'Ivory', hex: '#FFFFF0' },
+            { name: 'Wine', hex: '#722F37' }
+        ];
+        // Default Medium
+        return [
+            { name: 'Royal Blue', hex: '#4169E1' },
+            { name: 'Charcoal Grey', hex: '#36454F' },
+            { name: 'Wine Red', hex: '#722F37' },
+            { name: 'Burnt Orange', hex: '#CC5500' }
+        ];
+    };
+
     const colorsToUse = (bestColors && bestColors.length > 0) 
         ? bestColors 
-        : [
-            { name: 'Navy Blue', hex: '#000080' },
-            { name: 'Emerald Green', hex: '#50C878' },
-            { name: 'Charcoal Grey', hex: '#36454F' },
-            { name: 'Wine Red', hex: '#722F37' }
-        ];
+        : getDynamicFallbacks(skinTone);
     
     // Normalize to handle both [{name, hex}] and ['colorName'] formats
     const normalizedColors = colorsToUse.map(c => typeof c === 'string' ? { name: c } : c);

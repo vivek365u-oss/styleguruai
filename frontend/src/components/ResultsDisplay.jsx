@@ -4,7 +4,7 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../context/ThemeContext';
-import { publishToCommunityFeed, auth, saveSavedColor, getSavedColors, saveHistory } from '../api/styleApi';
+import { publishToCommunityFeed, auth, saveSavedColor, getSavedColors, saveHistory, savePrimaryProfile, saveStyleInsights, saveUserPreferences } from '../api/styleApi';
 import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';
 import ColorRecommendationsShop from './ColorRecommendationsShop';
@@ -396,6 +396,57 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
   const rawScore = Math.round((qualityScore * 0.7) + confidenceBonus + (analysis.skin_tone.brightness_score ? Math.min(10, analysis.skin_tone.brightness_score / 25) : 5));
   const styleScore = Math.min(98, Math.max(55, rawScore));
 
+  const [isDNAsaved, setIsDNAsaved] = useState(false);
+  const [savingDNA, setSavingDNA] = useState(false);
+
+  // Check if this specific analysis is already the primary DNA
+  useEffect(() => {
+    const checkDNA = async () => {
+      const cached = localStorage.getItem('sg_primary_profile');
+      if (cached) {
+        const primary = JSON.parse(cached);
+        if (primary.skinTone === analysis.skin_tone.category && primary.undertone === analysis.skin_tone.undertone) {
+          setIsDNAsaved(true);
+        }
+      }
+    };
+    checkDNA();
+  }, [analysis]);
+
+  const handleSaveDNA = async () => {
+    if (!auth.currentUser) {
+      alert("Please login to save your Style DNA");
+      return;
+    }
+    setSavingDNA(true);
+    try {
+      const uid = auth.currentUser.uid;
+      const profileData = {
+        skinTone: analysis.skin_tone.category,
+        undertone: analysis.skin_tone.undertone,
+        season: analysis.skin_tone.color_season,
+        gender: isFemale ? 'female' : 'male',
+        last_updated: new Date().toISOString()
+      };
+
+      await Promise.all([
+        savePrimaryProfile(uid, profileData),
+        saveStyleInsights(uid, recommendations),
+        saveUserPreferences(uid, { gender: isFemale ? 'female' : 'male' })
+      ]);
+
+      setIsDNAsaved(true);
+      // Trigger a custom event to notify other components (like StyleNavigator)
+      window.dispatchEvent(new CustomEvent('sg_dna_updated'));
+      console.log("Style DNA Locked Successfully");
+    } catch (err) {
+      console.error("Failed to save Style DNA:", err);
+      alert("Failed to lock DNA. Please try again.");
+    } finally {
+      setSavingDNA(false);
+    }
+  };
+
   // WhatsApp share
   const handleWhatsAppShare = () => {
     const skinTone = analysis.skin_tone.category;
@@ -466,60 +517,84 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
         </div>
       )}
 
-      {/* WhatsApp Share + Download Style Card */}
-      <div className="flex gap-2 mt-3">
+      {/* Save as DNA + WhatsApp Share */}
+      <div className="flex flex-col gap-2 mt-4">
         <button
-          onClick={handleWhatsAppShare}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-xl text-green-400 font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+          onClick={handleSaveDNA}
+          disabled={isDNAsaved || savingDNA}
+          className={`w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-black text-sm transition-all shadow-lg active:scale-95 ${
+            isDNAsaved 
+              ? 'bg-green-500/20 text-green-400 border border-green-500/30 cursor-default'
+              : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-indigo-500/20'
+          } ${savingDNA ? 'opacity-50' : ''}`}
         >
-          <span>📱</span>
-          <span>WhatsApp</span>
+          {savingDNA ? (
+            <span className="animate-pulse">Locking DNA...</span>
+          ) : isDNAsaved ? (
+            <>
+              <span>🔒</span>
+              <span>DNA Locked & Saved</span>
+            </>
+          ) : (
+            <>
+              <span>🧬</span>
+              <span>Set as My Style DNA</span>
+            </>
+          )}
         </button>
-        <button
-          onClick={() => {
-            // Generate shareable style card
-            const canvas = document.createElement('canvas');
-            canvas.width = 800; canvas.height = 500;
-            const ctx = canvas.getContext('2d');
-            // Background gradient
-            const grad = ctx.createLinearGradient(0, 0, 800, 500);
-            grad.addColorStop(0, '#0f0c29'); grad.addColorStop(0.5, '#302b63'); grad.addColorStop(1, '#24243e');
-            ctx.fillStyle = grad; ctx.fillRect(0, 0, 800, 500);
-            // Skin tone circle
-            const skinHex = analysis.skin_color?.hex || '#C68642';
-            ctx.beginPath(); ctx.arc(120, 180, 70, 0, Math.PI * 2);
-            ctx.fillStyle = skinHex; ctx.fill();
-            ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 3; ctx.stroke();
-            // Text
-            ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '14px Arial'; ctx.fillText('MY STYLE PROFILE', 220, 100);
-            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 42px Arial';
-            ctx.fillText(`${analysis.skin_tone.category.charAt(0).toUpperCase() + analysis.skin_tone.category.slice(1)} Skin`, 220, 155);
-            ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '20px Arial';
-            ctx.fillText(`${analysis.skin_tone.undertone} undertone  •  ${analysis.skin_tone.color_season}`, 220, 195);
-            ctx.fillStyle = '#a855f7'; ctx.font = 'bold 28px Arial';
-            ctx.fillText(`Style Score: ${styleScore}/100`, 220, 245);
-            // Color palette
-            const colors = recommendations?.best_shirt_colors?.slice(0, 5) || [];
-            colors.forEach((c, i) => {
-              ctx.beginPath(); ctx.arc(220 + i * 70, 320, 28, 0, Math.PI * 2);
-              ctx.fillStyle = c.hex; ctx.fill();
-              ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 2; ctx.stroke();
-            });
-            ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '13px Arial';
-            ctx.fillText('Your Best Colors', 220, 380);
-            // Branding
-            ctx.fillStyle = '#a855f7'; ctx.font = 'bold 16px Arial';
-            ctx.fillText('styleguruai.in', 620, 470);
-            // Download
-            const link = document.createElement('a');
-            link.download = `styleguruai-${analysis.skin_tone.category}-profile.png`;
-            link.href = canvas.toDataURL(); link.click();
-          }}
-          className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 rounded-xl text-purple-400 font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <span>🎨</span>
-          <span>Save Card</span>
-        </button>
+
+        <div className="flex gap-2">
+          <button
+            onClick={handleWhatsAppShare}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                isDark ? 'bg-green-500/20 border border-green-500/30 text-green-400' : 'bg-green-50 border border-green-200 text-green-700'
+            }`}
+          >
+            <span>📱</span>
+            <span>WhatsApp</span>
+          </button>
+          <button
+            onClick={() => {
+              // Generate shareable style card logic remains same...
+              const canvas = document.createElement('canvas');
+              canvas.width = 800; canvas.height = 500;
+              const ctx = canvas.getContext('2d');
+              const grad = ctx.createLinearGradient(0, 0, 800, 500);
+              grad.addColorStop(0, '#0f0c29'); grad.addColorStop(0.5, '#302b63'); grad.addColorStop(1, '#24243e');
+              ctx.fillStyle = grad; ctx.fillRect(0, 0, 800, 500);
+              const skinHex = (analysis.skin_color?.hex || analysis.skin_tone?.hex || '#C68642');
+              ctx.beginPath(); ctx.arc(120, 180, 70, 0, Math.PI * 2);
+              ctx.fillStyle = skinHex; ctx.fill();
+              ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 3; ctx.stroke();
+              ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '14px Arial'; ctx.fillText('MY STYLE PROFILE', 220, 100);
+              ctx.fillStyle = '#ffffff'; ctx.font = 'bold 42px Arial';
+              ctx.fillText(`${analysis.skin_tone.category.charAt(0).toUpperCase() + analysis.skin_tone.category.slice(1)} Skin`, 220, 155);
+              ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '20px Arial';
+              ctx.fillText(`${analysis.skin_tone.undertone} undertone  •  ${analysis.skin_tone.color_season}`, 220, 195);
+              ctx.fillStyle = '#a855f7'; ctx.font = 'bold 28px Arial';
+              ctx.fillText(`Style Score: ${styleScore}/100`, 220, 245);
+              const colors = (recommendations?.best_shirt_colors || recommendations?.best_dress_colors || []).slice(0, 5);
+              colors.forEach((c, i) => {
+                ctx.beginPath(); ctx.arc(220 + i * 70, 320, 28, 0, Math.PI * 2);
+                ctx.fillStyle = c.hex; ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 2; ctx.stroke();
+              });
+              ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '13px Arial';
+              ctx.fillText('Your Best Colors', 220, 380);
+              ctx.fillStyle = '#a855f7'; ctx.font = 'bold 16px Arial';
+              ctx.fillText('styleguruai.in', 620, 470);
+              const link = document.createElement('a');
+              link.download = `styleguruai-${analysis.skin_tone.category}-profile.png`;
+              link.href = canvas.toDataURL(); link.click();
+            }}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                isDark ? 'bg-purple-500/20 border border-purple-500/30 text-purple-400' : 'bg-purple-50 border border-purple-200 text-purple-700'
+            }`}
+          >
+            <span>🎨</span>
+            <span>Save Card</span>
+          </button>
+        </div>
       </div>
     </div>
   );

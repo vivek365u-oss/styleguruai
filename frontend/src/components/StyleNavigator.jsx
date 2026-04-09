@@ -616,38 +616,40 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                                     <div>
                                                         <p className={`text-[10px] font-black uppercase truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>{insights.daily_suggestion.bottom}</p>
                                                         <p className="text-[9px] font-bold opacity-30 mt-0.5">{match ? (match.color_name || 'Matched') : '🚧 Score Boost Available'}</p>
+                                                        
+                                                        {/* Finishing Touches Section */}
+                                                        <div className={`mt-6 p-4 rounded-3xl border border-dashed ${isDark ? 'bg-white/5 border-white/20' : 'bg-slate-50 border-slate-200'}`}>
+                                                             <p className={`text-[9px] font-black uppercase ${isDark ? 'opacity-40' : 'text-slate-500'} mb-3 tracking-widest`}>Finishing Touches</p>
+                                                             {(() => {
+                                                                 const rawGender = insights?.gender || profile?.gender || prefs?.gender || 'male';
+                                                                 const isFemale = rawGender.toLowerCase().includes('female') || rawGender.toLowerCase() === 'women';
+                                                                 const tips = getAccessoryAdvice(isFemale ? 'female' : 'male', profile?.season || 'Spring');
+                                                                  return (
+                                                                      <div className="flex flex-col sm:flex-row gap-6">
+                                                                          <div className="flex-1 flex gap-3 items-center min-w-0">
+                                                                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white shadow-sm border border-slate-100'}`}>
+                                                                                  {isFemale ? '💍' : '⌚'}
+                                                                              </div>
+                                                                              <div className="min-w-0">
+                                                                                  <p className={`text-[9px] font-black uppercase tracking-wider ${isDark ? 'opacity-40' : 'text-slate-500'}`}>{tips.label || (isFemale ? 'Jewelry Advice' : 'Accessory Advice')}</p>
+                                                                                  <p className={`text-[11px] font-extrabold leading-tight break-words ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.jewelry}</p>
+                                                                              </div>
+                                                                          </div>
+                                                                          <div className="flex-1 flex gap-3 items-center min-w-0">
+                                                                              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white shadow-sm border border-slate-100'}`}>👞</div>
+                                                                              <div className="min-w-0">
+                                                                                  <p className={`text-[9px] font-black uppercase tracking-wider ${isDark ? 'opacity-40' : 'text-slate-500'}`}>Footwear Style</p>
+                                                                                  <p className={`text-[11px] font-extrabold leading-tight break-words ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.shoes}</p>
+                                                                              </div>
+                                                                          </div>
+                                                                      </div>
+                                                                 );
+                                                             })()}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             );
                                         })()}
-                                    </div>
-
-                                    {/* Finishing Touches Section */}
-                                    <div className={`mb-8 p-4 rounded-3xl border border-dashed ${isDark ? 'bg-white/5 border-white/20' : 'bg-slate-50 border-slate-200'}`}>
-                                         <p className={`text-[9px] font-black uppercase ${isDark ? 'opacity-40' : 'text-slate-500'} mb-3 tracking-widest`}>Finishing Touches</p>
-                                         {(() => {
-                                             const rawGender = insights?.gender || profile?.gender || prefs?.gender || 'male';
-                                             const isFemale = rawGender.toLowerCase().includes('female') || rawGender.toLowerCase() === 'women';
-                                             const tips = getAccessoryAdvice(isFemale ? 'female' : 'male', profile?.season || 'Spring');
-                                              return (
-                                                  <div className="flex flex-col sm:flex-row gap-6">
-                                                      <div className="flex-1 flex gap-3 items-center min-w-0">
-                                                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white shadow-sm border border-slate-100'}`}>💍</div>
-                                                          <div className="min-w-0">
-                                                              <p className={`text-[9px] font-black uppercase tracking-wider ${isDark ? 'opacity-40' : 'text-slate-500'}`}>Jewelry Advice</p>
-                                                              <p className={`text-[11px] font-extrabold leading-tight break-words ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.jewelry}</p>
-                                                          </div>
-                                                      </div>
-                                                      <div className="flex-1 flex gap-3 items-center min-w-0">
-                                                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white shadow-sm border border-slate-100'}`}>👞</div>
-                                                          <div className="min-w-0">
-                                                              <p className={`text-[9px] font-black uppercase tracking-wider ${isDark ? 'opacity-40' : 'text-slate-500'}`}>Footwear Style</p>
-                                                              <p className={`text-[11px] font-extrabold leading-tight break-words ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.shoes}</p>
-                                                          </div>
-                                                      </div>
-                                                  </div>
-                                             );
-                                         })()}
                                     </div>
 
                                     <button
@@ -677,7 +679,8 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                 {(() => {
                                     const rawGender = insights?.gender || profile?.gender || prefs?.gender || 'male';
                                     const isFemale = rawGender.toLowerCase().includes('female') || rawGender.toLowerCase() === 'women';
-                                    return getActionableAdvice(insights?.best_colors || profile?.best_colors, isFemale ? 'female' : 'male').map((adv, i) => {
+                                    const skinTone = insights?.skin_tone?.category || profile?.skin_tone?.category || profile?.skinTone || 'medium';
+                                    return getActionableAdvice(insights?.best_colors || profile?.best_colors, isFemale ? 'female' : 'male', skinTone).map((adv, i) => {
                                         const hasInCloset = wardrobe.some(item => item.category === adv.category);
                                         return (
                                             <div key={i} className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-slate-100 shadow-sm hover:border-purple-200'}`}>
@@ -721,13 +724,13 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
                                 {(() => {
                                     const rawGender = insights?.gender || profile?.gender || prefs?.gender || 'male';
-                                    const advisoryItems = getActionableAdvice(
                                         insights?.best_colors || 
                                         profile?.best_colors || 
                                         profile?.best_shirt_colors || 
                                         insights?.best_shirt_colors || 
                                         [], 
-                                        rawGender.toLowerCase().includes('female') ? 'female' : 'male'
+                                        rawGender.toLowerCase().includes('female') ? 'female' : 'male',
+                                        insights?.skin_tone?.category || profile?.skin_tone?.category || profile?.skinTone || 'medium'
                                     );
                                     
                                     // Check for colors explicitly missing from wardrobe
