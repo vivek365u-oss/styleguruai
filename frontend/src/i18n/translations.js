@@ -455,6 +455,12 @@ export const translations = {
     cat_palazzo: "Palazzo",
     cat_sneakers: "Sneakers",
     cat_bomber: "Bomber Jacket",
+    aiCommandCenter: "AI Command Center",
+    commandContext: "Command Context",
+    dnaSynergy: "DNA Synergy",
+    finishingTouches: "Finishing Touches",
+    stylerBrief: "AI Styler's Brief",
+    unlockMyntra: "Unlock via Myntra",
   },
   hinglish: {
     login: "Login",
@@ -876,6 +882,12 @@ export const translations = {
     syncedToWardrobe: "Wardrobe mein Save ho gaya",
     addToWardrobe: "Mera Wardrobe mein Add karo",
     primaryProfileLocked: "Primary Style Locked",
+    aiCommandCenter: "AI Command Center",
+    commandContext: "Command Context",
+    dnaSynergy: "DNA Synergy",
+    finishingTouches: "Finishing Touches",
+    stylerBrief: "AI Styler's Brief",
+    unlockMyntra: "Myntra se Unlock Karo",
   },
   hi: {
     login: "लॉगिन",
@@ -1310,6 +1322,12 @@ export const translations = {
     syncedToWardrobe: "वॉर्डरोब में सेव हो गया",
     addToWardrobe: "वॉर्डरोब में जोड़ें",
     primaryProfileLocked: "मुख्य प्रोफाइल लॉक है",
+    aiCommandCenter: "AI कमांड सेंटर",
+    commandContext: "कमांड कॉन्टेक्स्ट",
+    dnaSynergy: "DNA सिनर्जी",
+    finishingTouches: "फिनिशिंग टच",
+    stylerBrief: "AI स्टायलर ब्रीफ",
+    unlockMyntra: "मिंत्रा से अनलॉक करें",
   },
 };
 

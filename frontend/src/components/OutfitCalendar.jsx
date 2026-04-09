@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { scoreWardrobeItem } from '../utils/stylingEngine';
+import { scoreWardrobeItem, getAccessoryAdvice, generateStylerBrief } from '../utils/stylingEngine';
 import { useLanguage } from '../i18n/LanguageContext';
 import { auth, getDailyOutfitLogs, loadUserPreferences, loadStyleInsights } from '../api/styleApi';
 
@@ -11,6 +11,9 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
   const [loading, setLoading] = useState(true);
   const [mood, setMood] = useState('mood_comfort');
   const [lockedDNA, setLockedDNA] = useState(null);
+  
+  // Custom Event Overrides for the week
+  const [eventOverrides, setEventOverrides] = useState({});
 
   useEffect(() => {
     const loadContext = async () => {
@@ -33,8 +36,6 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
       }
     };
     loadContext();
-    window.addEventListener('sg_calendar_updated', loadContext);
-    return () => window.removeEventListener('sg_calendar_updated', loadContext);
   }, []);
 
   const WEEKDAYS = [
@@ -47,34 +48,30 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
     { key: 'sunday', label: t('sunday') }
   ];
 
-  // Dynamic Occasions based on Lifestyle
+  const EVENT_TYPES = [
+    { id: 'OFFICE', label: 'Office/Business', icon: '💼' },
+    { id: 'PARTY', label: 'Party/Event', icon: '🕺' },
+    { id: 'CAMPUS', label: 'Campus/Study', icon: '🎓' },
+    { id: 'WEEKEND', label: 'Casual/Weekend', icon: '🍿' }
+  ];
+
   const getOccasions = () => {
-     const base = lifestyle === 'student' ? [
-        { day: 'Mon', label: 'Campus Lectures', icon: '🎓', event: 'CAMPUS', weather: 'hot' },
-        { day: 'Tue', label: 'Lab Sessions', icon: '🔬', event: 'CAMPUS', weather: 'cold' },
-        { day: 'Wed', label: 'Late Night Study', icon: '🦉', event: 'CAMPUS', weather: 'warm' },
-        { day: 'Thu', label: 'Campus Canteen', icon: '🍔', event: 'WEEKEND', weather: 'cloudy' },
-        { day: 'Fri', label: 'College Fest', icon: '🎸', event: 'PARTY', weather: 'hot' },
-        { day: 'Sat', label: 'Weekend Chill', icon: '🍿', event: 'WEEKEND', weather: 'sunny' },
-        { day: 'Sun', label: 'Date Prep', icon: '❤️', event: 'PARTY', weather: 'pleasant' }
-     ] : lifestyle === 'pro' ? [
-        { day: 'Mon', label: 'Board Meeting', icon: '💼', event: 'OFFICE', weather: 'sunny' },
-        { day: 'Tue', label: 'Client Visit', icon: '🤝', event: 'OFFICE', weather: 'chilly' },
-        { day: 'Wed', label: 'Deep Focus', icon: '🧠', event: 'OFFICE', weather: 'warm' },
-        { day: 'Thu', label: 'Networking', icon: '🥂', event: 'PARTY', weather: 'cloudy' },
-        { day: 'Fri', label: 'Desk Lunch', icon: '💻', event: 'WEEKEND', weather: 'breezy' },
-        { day: 'Sat', label: 'Family Outing', icon: '🌳', event: 'WEEKEND', weather: 'sunny' },
-        { day: 'Sun', label: 'Self Care', icon: '🫧', event: 'WEEKEND', weather: 'pleasant' }
-     ] : [
-        { day: 'Mon', label: t('officeFormal'), icon: '💼', event: 'OFFICE', weather: 'sunny' },
-        { day: 'Tue', label: t('casualTech'), icon: '💻', event: 'OFFICE', weather: 'chilly' },
-        { day: 'Wed', label: t('midWeekBrunch'), icon: '☕', event: 'WEEKEND', weather: 'warm' },
-        { day: 'Thu', label: t('clientMeeting'), icon: '🤝', event: 'OFFICE', weather: 'cloudy' },
-        { day: 'Fri', label: t('partyNight'), icon: '🕺', event: 'PARTY', weather: 'hot' },
-        { day: 'Sat', label: t('weekendTrip'), icon: '🚗', event: 'WEEKEND', weather: 'sunny' },
-        { day: 'Sun', label: t('dateDine'), icon: '🍝', event: 'PARTY', weather: 'pleasant' }
-     ];
-     return base;
+     // Default occasions based on lifestyle, overridden by user choice
+     const baseMapping = lifestyle === 'student' ? ['CAMPUS','CAMPUS','CAMPUS','WEEKEND','PARTY','WEEKEND','PARTY'] : 
+                         lifestyle === 'pro' ? ['OFFICE','OFFICE','OFFICE','PARTY','OFFICE','WEEKEND','WEEKEND'] : 
+                         ['OFFICE','OFFICE','WEEKEND','OFFICE','PARTY','WEEKEND','PARTY'];
+                         
+     return WEEKDAYS.map((day, i) => {
+        const typeId = eventOverrides[i] || baseMapping[i];
+        const type = EVENT_TYPES.find(e => e.id === typeId);
+        return {
+            ...day,
+            event: typeId,
+            icon: type.icon,
+            label: type.label,
+            weather: ['sunny', 'cloudy', 'rainy', 'warm', 'pleasant', 'chilly', 'sunny'][i]
+        };
+     });
   };
 
   const OCCASIONS = getOccasions();
@@ -89,18 +86,20 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
 
   const getOutfitForDay = (index) => {
     const log = getLogForDay(index);
+    const occasion = OCCASIONS[index];
+    const context = { weather: occasion.weather, event: occasion.event, mood };
+    const userProfile = profile || { gender: 'female' };
+
     if (log) {
         return {
             top: { name: log.top, type: 'executed' },
             bottom: { name: log.bottom, type: 'executed' },
-            occasion: OCCASIONS[index],
-            isExecuted: true
+            occasion,
+            isExecuted: true,
+            brief: "You wore this look! History saved in the cloud.",
+            accessories: getAccessoryAdvice(userProfile.gender, userProfile.season, occasion.event)
         };
     }
-
-    const occasion = OCCASIONS[index];
-    const context = { weather: occasion.weather, event: occasion.event, mood };
-    const userProfile = profile || { gender: lifestyle === 'student' ? 'male' : 'female' };
 
     // Use Engine to find best items
     const rankedWardrobe = wardrobe
@@ -110,11 +109,14 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
         }))
         .sort((a, b) => b.engineScore - a.engineScore) || [];
 
-    const bestTop = rankedWardrobe.find(i => ['shirts', 'tshirts', 'tops', 'kurti'].includes(i.category)) || 
-                    { name: t('premiumTop'), hex: bestColors[index % bestColors.length]?.hex || '#FFFFFF' };
+    const bestTop = rankedWardrobe.find(i => ['shirts', 'tshirts', 'tops', 'kurti', 'cat_kurti', 'cat_formal_shirt'].includes(i.category)) || 
+                    { name: 'Elite Top', hex: bestColors[index % bestColors.length]?.hex || '#FFFFFF', engineScore: 85 };
                     
-    const bestBottom = rankedWardrobe.find(i => ['pants', 'bottoms'].includes(i.category) && i.id !== bestTop.id) || 
-                       { name: t('recommendedPant'), hex: pantColors[index % pantColors.length]?.hex || '#1e3a8a' };
+    const bestBottom = rankedWardrobe.find(i => ['pants', 'bottoms', 'cat_formal_trouser', 'cat_jeans'].includes(i.category) && i.id !== bestTop.id) || 
+                       { name: 'Pro Bottom', hex: pantColors[index % pantColors.length]?.hex || '#1e3a8a', engineScore: 80 };
+
+    const accessorizing = getAccessoryAdvice(userProfile.gender, userProfile.season, occasion.event);
+    const stylingBrief = generateStylerBrief(bestTop, bestBottom, context, userProfile);
 
     return { 
       top: bestTop, 
@@ -122,159 +124,159 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
       occasion,
       engineScore: Math.round(((bestTop.engineScore || 70) + (bestBottom.engineScore || 70)) / 2),
       isFromWardrobe: !!(bestTop.id || bestBottom.id),
-      isExecuted: false
+      isExecuted: false,
+      accessories: accessorizing,
+      brief: stylingBrief
     };
   };
 
-  const currentOutfit = getOutfitForDay(selectedDay);
+  const dayInfo = getOutfitForDay(selectedDay);
 
   if (loading) return (
-    <div className="flex items-center justify-center h-full">
+    <div className="flex items-center justify-center h-[60vh]">
         <div className="w-8 h-8 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
     </div>
   );
 
   return (
     <div className={`flex flex-col h-full animate-fade-in ${isDark ? 'text-white' : 'text-gray-900'}`}>
+      {/* HEADER & NAV */}
       <div className="flex items-center justify-between mb-6">
-        <button onClick={onClose} className="text-sm font-bold opacity-60 hover:opacity-100 flex items-center gap-2">
-          ← {t('back')}
-        </button>
+        <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-lg hover:scale-110 transition-all">←</button>
         <div className="text-right">
-          <h2 className="text-xl font-black uppercase tracking-tight">{t('aiCalendar')}</h2>
-          <p className="text-[10px] opacity-60 uppercase font-black tracking-widest leading-none">{lifestyle.toUpperCase()} LIFESTYLE</p>
+          <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
+             <span className="text-purple-500">AI</span> COMMAND CENTER
+          </h2>
+          <p className="text-[9px] opacity-40 uppercase font-black tracking-widest leading-none">Style Ecosystem v2.0</p>
         </div>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-4 mb-6">
+      {/* WEEKLY TIMELINE */}
+      <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-4 mb-6 pt-1">
         {WEEKDAYS.map((day, i) => {
           const hasLog = !!getLogForDay(i);
           return (
             <button
                 key={day.key}
                 onClick={() => setSelectedDay(i)}
-                className={`flex flex-col items-center justify-center min-w-[75px] py-4 rounded-2xl border transition-all relative ${
+                className={`flex flex-col items-center justify-center min-w-[70px] py-4 rounded-2xl border transition-all relative ${
                 selectedDay === i 
-                    ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white border-transparent shadow-lg scale-105' 
+                    ? 'bg-gradient-to-br from-purple-600/90 to-pink-600/90 text-white border-transparent shadow-xl scale-110 z-10' 
                     : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-gray-100 border-gray-200 text-gray-400'
                 }`}
             >
                 {hasLog && (
                     <span className="absolute -top-1 -right-1 bg-green-500 w-4 h-4 rounded-full flex items-center justify-center text-[8px] text-white border-2 border-white shadow-lg">✓</span>
                 )}
-                <span className="text-[10px] font-bold uppercase tracking-widest">{day.label.slice(0, 3)}</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">{day.label.slice(0, 3)}</span>
                 <span className="text-xl mt-1">{OCCASIONS[i].icon}</span>
             </button>
           );
         })}
       </div>
 
-      <div className="mb-6 space-y-3">
-         <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Styling Intent</p>
-         <div className="grid grid-cols-4 gap-2">
-            {['mood_comfort', 'mood_confidence', 'mood_minimal', 'mood_attention'].map(m => (
-               <button
-                  key={m}
-                  onClick={() => setMood(m)}
-                  className={`py-3 rounded-xl border text-[9px] font-black uppercase transition-all ${
-                     mood === m 
-                        ? 'bg-purple-600 border-transparent text-white shadow-lg' 
-                        : isDark ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white border-gray-200 text-slate-400'
-                  }`}
-               >
-                  {t(m)?.split(' ')[0]}
-               </button>
-            ))}
-         </div>
+      {/* EVENT COMMANDER */}
+      <div className="mb-8 space-y-4">
+          <div className="flex items-center justify-between">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Command Context</p>
+              <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${isDark ? 'bg-white/10 text-white/60' : 'bg-slate-100 text-slate-500'}`}>
+                  {OCCASIONS[selectedDay].weather.toUpperCase()} WEATHER 🛰️
+              </span>
+          </div>
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+              {EVENT_TYPES.map(type => (
+                  <button
+                    key={type.id}
+                    onClick={() => setEventOverrides({...eventOverrides, [selectedDay]: type.id})}
+                    className={`flex-shrink-0 px-4 py-2.5 rounded-xl border text-[10px] font-bold flex items-center gap-2 transition-all ${
+                        OCCASIONS[selectedDay].event === type.id
+                            ? 'bg-purple-600 border-transparent text-white shadow-lg'
+                            : isDark ? 'bg-white/5 border-white/10 text-white/40' : 'bg-white border-gray-200 text-slate-500'
+                    }`}
+                  >
+                      <span>{type.icon}</span>
+                      <span>{type.label}</span>
+                  </button>
+              ))}
+          </div>
       </div>
 
-      <div className={`flex-1 rounded-[32px] p-7 border relative overflow-hidden flex flex-col items-center justify-center text-center transition-all ${
-        currentOutfit.isExecuted 
-            ? 'bg-gradient-to-br from-green-900/40 to-emerald-900/40 border-green-500/30'
-            : isDark ? 'bg-white/5 border-white/10 shadow-2xl' : 'bg-white border-gray-200 shadow-sm'
+      {/* MAIN STYLE BRIEF CARD */}
+      <div className={`flex-1 rounded-[2.5rem] p-8 border relative overflow-hidden transition-all duration-500 ${
+        dayInfo.isExecuted 
+            ? 'bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-green-500/30'
+            : isDark ? 'bg-white/5 border-white/10 shadow-2xl' : 'bg-white border-gray-200 shadow-xl'
       }`}>
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 blur-[80px] pointer-events-none ${
-            currentOutfit.isExecuted ? 'bg-green-500/20' : 'bg-purple-500/20'
+        <div className={`absolute -top-10 -right-10 w-48 h-48 blur-[100px] pointer-events-none opacity-50 ${
+            dayInfo.isExecuted ? 'bg-green-500' : 'bg-purple-500'
         }`} />
-        
-        <div className="relative z-10 mb-6">
-           {currentOutfit.isExecuted ? (
-               <div className="bg-green-500 text-white text-[9px] font-black px-3 py-1 rounded-full w-fit mx-auto mb-4">MISSION LOGGED 🏆</div>
-           ) : (
-               <div className={`text-[10px] font-black px-4 py-1 rounded-full w-fit mx-auto mb-4 border tracking-widest ${
-                  isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-400' : 'bg-purple-50 border-purple-200 text-purple-600'
-               }`}>
-                  {currentOutfit.engineScore}% ENGINE MATCH
-               </div>
-           )}
-           <span className="text-xs font-bold uppercase tracking-[0.1em] opacity-40 mb-2 block italic">
-             {OCCASIONS[selectedDay].label} · {OCCASIONS[selectedDay].weather.toUpperCase()}
-           </span>
-           <h3 className="text-2xl font-black mb-2">{WEEKDAYS[selectedDay].label}<span className="text-purple-500">.</span></h3>
-        </div>
 
-        <div className="flex flex-col items-center gap-10 w-full max-w-[240px]">
-          <div className="w-full flex flex-col items-center group">
-            <div 
-              className={`w-20 h-20 rounded-[2.5rem] border-4 border-white/20 shadow-xl transition-transform group-hover:scale-110 relative flex items-center justify-center text-3xl ${
-                  currentOutfit.isExecuted ? 'bg-white/10' : ''
-              }`} 
-              style={{ backgroundColor: currentOutfit.top.hex }}
-            >
-              {currentOutfit.isExecuted ? '👔' : ''}
-              {(currentOutfit.top.id || currentOutfit.isExecuted) && (
-                <span className={`absolute -top-2 -right-2 text-[8px] font-black px-2 py-0.5 rounded-full text-white shadow-lg ${
-                    currentOutfit.isExecuted ? 'bg-blue-500' : 'bg-green-500'
+        <div className="relative z-10 h-full flex flex-col">
+            <div className="flex items-start justify-between mb-8">
+                <div className="text-left">
+                     <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">{WEEKDAYS[selectedDay].label}</p>
+                     <h3 className="text-2xl font-black">{OCCASIONS[selectedDay].label}</h3>
+                </div>
+                <div className={`flex flex-col items-end px-5 py-3 rounded-2xl border backdrop-blur-md ${
+                    isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'
                 }`}>
-                    {currentOutfit.isExecuted ? 'LOGGED' : 'CLOSET'}
-                </span>
-              )}
+                    <p className="text-[8px] font-black opacity-30 uppercase">DNA Synergy</p>
+                    <p className={`text-xl font-black ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>{dayInfo.engineScore}%</p>
+                </div>
             </div>
-            <div className="mt-4">
-               <p className="font-black text-xs uppercase tracking-wider">{currentOutfit.top.name}</p>
-               {currentOutfit.top.fabric && <p className="text-[9px] font-bold opacity-30 mt-1">{t(currentOutfit.top.fabric)} · {t(currentOutfit.top.fit)}</p>}
-            </div>
-          </div>
 
-          <div className="w-full flex flex-col items-center group">
-            <div 
-              className={`w-20 h-20 rounded-[2.5rem] border-4 border-white/20 shadow-xl transition-transform group-hover:scale-110 relative flex items-center justify-center text-3xl ${
-                  currentOutfit.isExecuted ? 'bg-white/10' : ''
-              }`} 
-              style={{ backgroundColor: currentOutfit.bottom.hex }}
-            >
-              {currentOutfit.isExecuted ? '👖' : ''}
-              {(currentOutfit.bottom.id || currentOutfit.isExecuted) && (
-                <span className={`absolute -top-2 -right-2 text-[8px] font-black px-2 py-0.5 rounded-full text-white shadow-lg ${
-                    currentOutfit.isExecuted ? 'bg-blue-500' : 'bg-green-500'
-                }`}>
-                    {currentOutfit.isExecuted ? 'LOGGED' : 'CLOSET'}
-                </span>
-              )}
+            <div className="flex-1 grid grid-cols-2 gap-10 items-center">
+                 {/* VISUALS */}
+                 <div className="space-y-8">
+                      <div className="flex flex-col items-center group">
+                           <div className="w-16 h-16 rounded-2xl shadow-xl transition-all duration-500 group-hover:scale-110 border-4 border-white/10" style={{ backgroundColor: dayInfo.top.hex }} />
+                           <p className="mt-3 text-[10px] font-black uppercase opacity-60 truncate w-full text-center">{dayInfo.top.name}</p>
+                      </div>
+                      <div className="flex flex-col items-center group">
+                           <div className="w-16 h-16 rounded-2xl shadow-xl transition-all duration-500 group-hover:scale-110 border-4 border-white/10" style={{ backgroundColor: dayInfo.bottom.hex }} />
+                           <p className="mt-3 text-[10px] font-black uppercase opacity-60 truncate w-full text-center">{dayInfo.bottom.name}</p>
+                      </div>
+                 </div>
+
+                 {/* ACCESSORIES & BREIF */}
+                 <div className="text-left space-y-6">
+                      <div className={`p-4 rounded-2xl border border-dashed ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
+                           <p className="text-[8px] font-black opacity-30 uppercase mb-3">Finishing Touches</p>
+                           <div className="space-y-3">
+                                <div className="flex gap-2 items-center">
+                                     <span className="text-lg">💎</span>
+                                     <p className="text-[10px] font-bold leading-tight">{dayInfo.accessories.jewelry}</p>
+                                </div>
+                                <div className="flex gap-2 items-center">
+                                     <span className="text-lg">👟</span>
+                                     <p className="text-[10px] font-bold leading-tight">{dayInfo.accessories.shoes}</p>
+                                </div>
+                           </div>
+                      </div>
+
+                      <div className="space-y-2">
+                           <p className="text-[8px] font-black opacity-30 uppercase">AI Styler's Brief</p>
+                           <p className={`text-[10px] font-medium leading-relaxed italic ${isDark ? 'text-white/60' : 'text-slate-500'}`}>
+                                "{dayInfo.brief}"
+                           </p>
+                      </div>
+                 </div>
             </div>
-            <div className="mt-4">
-               <p className="font-black text-xs uppercase tracking-wider">{currentOutfit.bottom.name}</p>
-               {currentOutfit.bottom.fabric && <p className="text-[9px] font-bold opacity-30 mt-1">{t(currentOutfit.bottom.fabric)} · {t(currentOutfit.bottom.fit)}</p>}
-            </div>
-          </div>
+
+            {!dayInfo.isExecuted ? (
+                <button 
+                  onClick={() => window.open(`https://www.myntra.com/search?q=${dayInfo.top.name}%20${dayInfo.top.category}`, '_blank')}
+                  className="mt-8 w-full py-5 bg-black text-white rounded-3xl text-[10px] font-black uppercase tracking-widest shadow-2xl hover:scale-[1.02] active:scale-95 transition-all"
+                >
+                    🛒 Unlock via Myntra
+                </button>
+            ) : (
+                <div className="mt-8 w-full py-5 bg-green-500/20 text-green-400 border border-green-500/30 rounded-3xl text-[10px] font-black uppercase text-center tracking-widest">
+                    🏆 OUTFIT MISSION COMPLETE
+                </div>
+            )}
         </div>
-
-        {!currentOutfit.isExecuted && (
-            <button 
-                onClick={() => {
-                    const query = `${currentOutfit.top.name} ${currentOutfit.bottom.name} for ${lifestyle}`.replace(/\s+/g, '%20');
-                    window.open(`https://www.myntra.com/search?rawQuery=${query}`, '_blank');
-                }}
-                className="mt-12 px-8 py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black hover:bg-white/10 transition-all uppercase tracking-widest shadow-xl"
-            >
-                🛒 {t('findOnMarket')}
-            </button>
-        )}
       </div>
-
-      <p className="mt-6 text-[10px] text-center opacity-30 font-black italic uppercase tracking-wider max-w-xs mx-auto">
-        THE AI SCORING ENGINE DETERMINES THE BEST OUTFIT BASED ON WEATHER, EVENT CONTEXT, AND YOUR SKIN DNA.
-      </p>
     </div>
   );
 }

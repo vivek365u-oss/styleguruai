@@ -109,20 +109,24 @@ export const getTopRecommendations = (wardrobe, context, profile, history, prefe
 };
 
 /**
- * Returns accessory (shoes/jewelry) advice based on DNA and gender
+ * Returns accessory (shoes/jewelry) advice based on DNA, gender, and event context
  */
-export const getAccessoryAdvice = (gender, season) => {
+export const getAccessoryAdvice = (gender, season, event = 'casual') => {
+    const isSpecial = event === 'PARTY' || event === 'OFFICE';
+    
     if (gender === 'female') {
         return {
-            jewelry: season === 'Spring' || season === 'Summer' ? 'Rose Gold or Pearl' : 'Gold or Kundan',
-            shoes: 'Nude Heels or Juttis',
-            tip: 'Avoid heavy necklaces with high necklines.'
+            jewelry: isSpecial 
+                ? (season === 'Spring' || season === 'Summer' ? 'Emerald or Pearl Chokes' : 'Gold Kundan / Heavy Silks')
+                : (season === 'Spring' || season === 'Summer' ? 'Rose Gold Hoops' : 'Minimal Silver Studs'),
+            shoes: event === 'PARTY' ? 'Stilettos or Embellished Juttis' : 'Nude Block Heels or Mules',
+            tip: isSpecial ? 'Pair with a clutch matching your shoe color.' : 'Keep it light with a cross-body bag.'
         };
     }
     return {
-        jewelry: 'Silver Watch or Leather Strap',
-        shoes: 'Tan Loafers or White Sneakers',
-        tip: 'Match your leather belt with your shoes for a sharp look.'
+        jewelry: event === 'OFFICE' ? 'Silver Mechanical Watch' : 'Leather Strap Watch or Band',
+        shoes: event === 'PARTY' ? 'Black Chelsea Boots' : (event === 'OFFICE' ? 'Dark Brown Oxfords' : 'White Minimal Sneakers'),
+        tip: event === 'OFFICE' ? 'Your belt MUST match your shoe leather.' : 'No socks visible with sneakers for an athletic look.'
     };
 };
 
@@ -132,17 +136,38 @@ export const getAccessoryAdvice = (gender, season) => {
 export const getActionableAdvice = (bestColors, gender) => {
     if (!bestColors || bestColors.length === 0) return [];
     
-    // Pick the best 2 categories for the first color
     const suggestions = [];
     const color = bestColors[0]?.name || 'Neutral';
     
     if (gender === 'female') {
         suggestions.push({ item: `${color} Silk Saree`, category: 'cat_saree_silk' });
-        suggestions.push({ item: `${color} Kurti`, category: 'cat_kurti' });
+        suggestions.push({ item: `${color} Kurti Set`, category: 'cat_kurti' });
     } else {
         suggestions.push({ item: `${color} Formal Shirt`, category: 'cat_formal_shirt' });
         suggestions.push({ item: `${color} Kurta Set`, category: 'cat_kurta_set' });
     }
     
     return suggestions;
+};
+
+/**
+ * Generates a textual "AI Brief" for a specific outfit combo
+ */
+export const generateStylerBrief = (top, bottom, context, profile) => {
+    const season = profile?.season || 'Spring';
+    const skinTone = profile?.skinTone || 'Medium';
+    
+    let brief = `This ${context.event} look uses the ${top.name} to create a sophisticated focal point. `;
+    
+    if (top.engineScore > 90) {
+        brief += `The color is a 100% DNA match for your ${skinTone} skin tone. `;
+    }
+    
+    if (context.weather === 'rainy' || context.weather === 'cloudy') {
+        brief += `Since it's ${context.weather}, we chose darker tones to hide moisture and maintain sharpness. `;
+    } else {
+        brief += `The light interaction here will enhance your features in the ${context.weather || 'sunny'} light. `;
+    }
+    
+    return brief;
 };
