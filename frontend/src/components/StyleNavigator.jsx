@@ -624,7 +624,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
 
                                     {/* Finishing Touches Section */}
                                     <div className={`mb-8 p-4 rounded-3xl border border-dashed ${isDark ? 'bg-white/5 border-white/20' : 'bg-slate-50 border-slate-200'}`}>
-                                         <p className="text-[9px] font-black uppercase ${isDark ? 'opacity-40' : 'text-slate-500'} mb-3 tracking-widest">Finishing Touches</p>
+                                         <p className={`text-[9px] font-black uppercase ${isDark ? 'opacity-40' : 'text-slate-500'} mb-3 tracking-widest`}>Finishing Touches</p>
                                          {(() => {
                                             const rawGender = insights?.gender || profile?.gender || profile?.gender_mode || 'female';
                                             const tips = getAccessoryAdvice(rawGender.toLowerCase().includes('female') ? 'female' : 'male', profile?.season || 'Spring');
@@ -633,15 +633,15 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                                      <div className="flex gap-2 items-center">
                                                          <span className="text-xl">💍</span>
                                                          <div>
-                                                             <p className="text-[9px] font-black uppercase ${isDark ? 'opacity-60' : 'text-slate-500'}">Jewelry</p>
-                                                             <p className="text-[10px] font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.jewelry}</p>
+                                                             <p className={`text-[9px] font-black uppercase ${isDark ? 'opacity-60' : 'text-slate-500'}`}>Jewelry</p>
+                                                              <p className={`text-[10px] font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.jewelry}</p>
                                                          </div>
                                                      </div>
                                                      <div className="flex gap-2 items-center">
                                                          <span className="text-xl">👞</span>
                                                          <div>
-                                                             <p className="text-[9px] font-black uppercase ${isDark ? 'opacity-60' : 'text-slate-500'}">Shoes</p>
-                                                             <p className="text-[10px] font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.shoes}</p>
+                                                             <p className={`text-[9px] font-black uppercase ${isDark ? 'opacity-60' : 'text-slate-500'}`}>Shoes</p>
+                                                              <p className={`text-[10px] font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.shoes}</p>
                                                          </div>
                                                      </div>
                                                  </div>
