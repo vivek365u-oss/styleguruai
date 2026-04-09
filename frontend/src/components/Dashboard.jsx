@@ -566,8 +566,7 @@ function Dashboard({ user, onLogout }) {
     { id: 'analyze', emoji: '📸', label: t('navAnalyze') },
     { id: 'history', emoji: '⌛', label: t('navHistory') },
     { id: 'navigator', emoji: '🧭', label: t('navNavigator') || 'Navigator' },
-    { id: 'tools', emoji: '🛠️', label: t('navTools') },
-    { id: 'profile', emoji: '❤️', label: t('navProfile') }
+    { id: 'tools', emoji: '🛠️', label: t('navTools') }
   ];
 
   const handleTabChange = (tab) => {

@@ -1,33 +1,55 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 const AdSense = () => {
+  const adRef = useRef(null);
+
   useEffect(() => {
-    // Only push if script is loaded and we haven't already pushed for this element
-    const pushAd = () => {
-      try {
-        const adElement = document.querySelector('.adsbygoogle:not([data-adsbygoogle-status="done"])');
-        if (window.adsbygoogle && adElement) {
-          window.adsbygoogle.push({});
-          adElement.setAttribute('data-adsbygoogle-status', 'done');
-        }
-      } catch (err) {
+    // Only proceed if the script is available and the element is ready
+    if (!window.adsbygoogle || !adRef.current) return;
+
+    // Check if ad was already initialized for this specific instance
+    if (adRef.current.getAttribute('data-ad-status') === 'filled') return;
+
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      adRef.current.setAttribute('data-ad-status', 'filled');
+    } catch (err) {
+      // Catch common "All ads on this page are already filled" warnings
+      if (err.message.includes('adsbygoogle.push() error')) {
+        console.debug("AdSense: Ad already filled or slot inactive");
+      } else {
         console.warn("AdSense push ignored:", err.message);
       }
-    };
-
-    // Small delay to ensure DOM is ready
-    const timer = setTimeout(pushAd, 1000);
-    return () => clearTimeout(timer);
+    }
   }, []);
 
   return (
-    <div className="adsense-container" style={{ minHeight: '280px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div 
+      className="adsense-wrap" 
+      style={{ 
+        minHeight: '280px', 
+        width: '100%', 
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(0,0,0,0.05)',
+        borderRadius: '1rem'
+      }}
+    >
       <ins
+        ref={adRef}
         className="adsbygoogle"
-        style={{ display: "block", minWidth: '250px', minHeight: '280px' }}
+        style={{ 
+          display: "block", 
+          textAlign: 'center',
+          width: '100%',
+          minWidth: '250px', 
+          minHeight: '250px' 
+        }}
         data-ad-client="ca-pub-7408587005129335"
         data-ad-slot="3569732070"
-        data-ad-format="auto"
+        data-ad-format="fluid"
         data-full-width-responsive="true"
       ></ins>
     </div>
