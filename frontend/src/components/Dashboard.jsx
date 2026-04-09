@@ -298,11 +298,13 @@ function CartButton({ setCartOpen }) {
   return (
     <button
       onClick={() => setCartOpen(true)}
-      className="relative w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-lg hover:bg-white/10 transition"
+      id="main-cart-button"
+      className="relative w-11 h-11 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-xl hover:bg-white/10 active:scale-90 transition-all z-[60]"
+      aria-label="Open Shopping Cart"
     >
-      🛒
+      <span className="drop-shadow-sm">🛒</span>
       {itemCount > 0 && (
-        <span className="absolute -top-2 -right-2 w-5 h-5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs rounded-full flex items-center justify-center font-bold">
+        <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[10px] rounded-full flex items-center justify-center font-black shadow-lg border-2 border-[#050816]">
           {itemCount > 9 ? '9+' : itemCount}
         </span>
       )}
@@ -514,8 +516,14 @@ function Dashboard({ user, onLogout }) {
       recommendations: recsObj
     };
 
-    setResults(enriched);
-    setLoading(false);
+    try {
+      setResults(enriched);
+    } catch (err) {
+      console.error('[Dashboard] Error setting results:', err);
+      setError('Failed to display results. Please try again.');
+    } finally {
+      setLoading(false);
+    }
 
     // Save to Firestore and Log Event
     const uid = auth.currentUser?.uid;

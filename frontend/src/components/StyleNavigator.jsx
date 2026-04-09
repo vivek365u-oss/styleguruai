@@ -647,7 +647,14 @@ const StyleNavigator = ({ user, onAnalyze }) => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
                     {(() => {
-                        const advisoryItems = getActionableAdvice(insights?.best_colors || profile?.best_colors, profile?.gender || 'female');
+                        const advisoryItems = getActionableAdvice(
+                            insights?.best_colors || 
+                            profile?.best_colors || 
+                            profile?.best_shirt_colors || 
+                            insights?.best_shirt_colors || 
+                            [], 
+                            profile?.gender || profile?.gender_mode || 'female'
+                        );
                         
                         // Check for colors explicitly missing from wardrobe
                         let missingGaps = advisoryItems.filter(adv => {
@@ -666,7 +673,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
 
                         return displayGaps.map((gap, idx) => {
                             const colorName = gap.color || gap.item.split(' ')[0];
-                            const colorHex = (insights?.best_colors || profile?.best_colors || []).find(c => c.name === colorName)?.hex || '#888';
+                            const colorHex = gap.hex || (insights?.best_colors || profile?.best_colors || []).find(c => c.name === colorName)?.hex || '#888';
                             const isElite = missingGaps.length === 0;
 
                             return (

@@ -144,23 +144,34 @@ export const getAccessoryAdvice = (gender, season, event = 'casual') => {
  * Maps color recommendations to specific actionable items from the registry
  */
 export const getActionableAdvice = (bestColors, gender) => {
-    if (!bestColors || bestColors.length === 0) return [];
+    // Robust fallback: if bestColors is missing or empty, use high-performing universal classics
+    const colorsToUse = (bestColors && bestColors.length > 0) 
+        ? bestColors 
+        : [
+            { name: 'Navy Blue', hex: '#000080' },
+            { name: 'Emerald Green', hex: '#50C878' },
+            { name: 'Charcoal Grey', hex: '#36454F' },
+            { name: 'Wine Red', hex: '#722F37' }
+        ];
+    
+    // Normalize to handle both [{name, hex}] and ['colorName'] formats
+    const normalizedColors = colorsToUse.map(c => typeof c === 'string' ? { name: c } : c);
     
     const suggestions = [];
     
     // Use top 4 colors for variety
-    bestColors.slice(0, 4).forEach((colorObj, idx) => {
+    normalizedColors.slice(0, 4).forEach((colorObj, idx) => {
         const color = colorObj.name;
         if (gender === 'female') {
-            if (idx === 0) suggestions.push({ item: `${color} Silk Saree`, category: 'cat_saree_silk', color: color });
-            if (idx === 1) suggestions.push({ item: `${color} Kurti Set`, category: 'cat_kurti', color: color });
-            if (idx === 2) suggestions.push({ item: `${color} Maxi Dress`, category: 'cat_dress', color: color });
-            if (idx === 3) suggestions.push({ item: `${color} Peplum Top`, category: 'cat_top', color: color });
+            if (idx === 0) suggestions.push({ item: `${color} Silk Saree`, category: 'cat_saree_silk', color: color, hex: colorObj.hex });
+            if (idx === 1) suggestions.push({ item: `${color} Kurti Set`, category: 'cat_kurti', color: color, hex: colorObj.hex });
+            if (idx === 2) suggestions.push({ item: `${color} Maxi Dress`, category: 'cat_dress', color: color, hex: colorObj.hex });
+            if (idx === 3) suggestions.push({ item: `${color} Peplum Top`, category: 'cat_top', color: color, hex: colorObj.hex });
         } else {
-            if (idx === 0) suggestions.push({ item: `${color} Formal Shirt`, category: 'cat_formal_shirt', color: color });
-            if (idx === 1) suggestions.push({ item: `${color} Kurta Set`, category: 'cat_kurta_set', color: color });
-            if (idx === 2) suggestions.push({ item: `${color} Casual Polo`, category: 'cat_polo', color: color });
-            if (idx === 3) suggestions.push({ item: `${color} Linen Blazer`, category: 'cat_blazer', color: color });
+            if (idx === 0) suggestions.push({ item: `${color} Formal Shirt`, category: 'cat_formal_shirt', color: color, hex: colorObj.hex });
+            if (idx === 1) suggestions.push({ item: `${color} Kurta Set`, category: 'cat_kurta_set', color: color, hex: colorObj.hex });
+            if (idx === 2) suggestions.push({ item: `${color} Casual Polo`, category: 'cat_polo', color: color, hex: colorObj.hex });
+            if (idx === 3) suggestions.push({ item: `${color} Linen Blazer`, category: 'cat_blazer', color: color, hex: colorObj.hex });
         }
     });
     

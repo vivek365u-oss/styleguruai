@@ -41,7 +41,7 @@ function ShoppingCart({ onClose, onProceedToCheckout, isOpen }) {
   }
 
   return (
-    <div onClick={handleBackdropClick} className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${isDark ? 'bg-black/50' : 'bg-white/50'} backdrop-blur-sm`}>
+    <div onClick={handleBackdropClick} className={`fixed inset-0 z-[100] flex items-center justify-center p-4 ${isDark ? 'bg-black/50' : 'bg-white/50'} backdrop-blur-sm`}>
       <div className={`w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl ${isDark ? 'bg-[#0f1123] border border-white/10' : 'bg-white border border-gray-200'}`}>
         {/* Header */}
         <div className={`p-6 border-b ${isDark ? 'border-white/10 bg-gradient-to-r from-purple-600/20 to-pink-600/20' : 'border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50'}`}>
