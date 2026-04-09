@@ -162,17 +162,14 @@ function StyleBot({ inline = false }) {
 
   return (
     <>
-      {/* Floating button (only if not inline) */}
-      {!inline && (
+      {/* Floating button (only if not inline & not open) */}
+      {!inline && !open && (
         <button
-          onClick={() => setOpen(!open)}
-          className={`fixed bottom-24 right-4 z-40 w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 ${open
-              ? 'bg-gray-700 rotate-0'
-              : 'bg-gradient-to-br from-purple-600 to-pink-600 animate-pulse'
-            }`}
-          style={{ boxShadow: open ? 'none' : '0 0 25px rgba(168,85,247,0.4)' }}
+          onClick={() => setOpen(true)}
+          className={`fixed bottom-24 right-4 z-50 w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 bg-gradient-to-br from-purple-600 to-pink-600 animate-pulse`}
+          style={{ boxShadow: '0 0 25px rgba(168,85,247,0.4)' }}
         >
-          <span className="text-2xl">{open ? '✕' : '🤖'}</span>
+          <span className="text-2xl">🤖</span>
         </button>
       )}
 
@@ -181,15 +178,23 @@ function StyleBot({ inline = false }) {
         <div className={
           inline
             ? `flex-1 flex flex-col w-full h-full ${isDark ? 'bg-transparent' : 'bg-transparent'}`
-            : `fixed bottom-40 right-4 z-40 w-[320px] max-h-[60vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden ${isDark ? 'bg-[#0f0a2e] border-purple-700/40' : 'bg-white border-gray-200'}`
+            : `fixed bottom-4 sm:bottom-40 right-4 z-50 w-[calc(100%-2rem)] sm:w-[320px] max-h-[70vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden ${isDark ? 'bg-[#0f0a2e] border-purple-700/40' : 'bg-white border-gray-200'}`
         }>
           {/* Header */}
-          <div className="px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 flex items-center gap-2">
-            <span className="text-lg">🤖</span>
-            <div>
-              <p className="text-white text-sm font-bold">{t('botTitle')}</p>
-              <p className="text-white/60 text-[10px]">{t('botSub')}</p>
+          <div className="px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🤖</span>
+              <div>
+                <p className="text-white text-sm font-bold">{t('botTitle')}</p>
+                <p className="text-white/60 text-[10px]">{t('botSub')}</p>
+              </div>
             </div>
+            {!inline && (
+              <button 
+                onClick={() => setOpen(false)} 
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all text-sm font-bold"
+              >✕</button>
+            )}
           </div>
 
           {/* Messages */}
