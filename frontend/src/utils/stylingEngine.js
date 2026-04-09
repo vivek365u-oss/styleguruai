@@ -9,8 +9,9 @@
  */
 
 export const scoreWardrobeItem = (item, context, profile, history = [], preferences = {}, lockedInsights = null) => {
-    // 0. Gender Filter (Hard Block)
-    if (profile.gender && item.gender && item.gender !== profile.gender) return 0;
+    // 0. Gender Filter (Strict Wall)
+    const activeGender = lockedInsights?.gender || profile.gender || profile.gender_mode;
+    if (activeGender && item.gender && item.gender !== activeGender) return 0;
 
     let score = 0;
     const weights = {

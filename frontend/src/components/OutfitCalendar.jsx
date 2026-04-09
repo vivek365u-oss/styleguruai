@@ -1,4 +1,7 @@
+import { useState, useEffect } from 'react';
 import { scoreWardrobeItem } from '../utils/stylingEngine';
+import { useLanguage } from '../i18n/LanguageContext';
+import { auth, getDailyOutfitLogs, loadUserPreferences, loadStyleInsights } from '../api/styleApi';
 
 function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, profile }) {
   const { t } = useLanguage();
@@ -7,17 +10,22 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
   const [lifestyle, setLifestyle] = useState('other');
   const [loading, setLoading] = useState(true);
   const [mood, setMood] = useState('mood_comfort');
+  const [lockedDNA, setLockedDNA] = useState(null);
 
   useEffect(() => {
     const loadContext = async () => {
-      if (!auth.currentUser) return;
+      const uid = auth.currentUser?.uid;
+      if (!uid) { setLoading(false); return; }
+      
       try {
-        const [userLogs, prefs] = await Promise.all([
-          getDailyOutfitLogs(auth.currentUser.uid, 14),
-          loadUserPreferences(auth.currentUser.uid)
+        const [userLogs, prefs, dna] = await Promise.all([
+          getDailyOutfitLogs(uid, 14),
+          loadUserPreferences(uid),
+          loadStyleInsights(uid)
         ]);
         setLogs(userLogs);
         if (prefs?.lifestyle) setLifestyle(prefs.lifestyle);
+        if (dna) setLockedDNA(dna);
       } catch (e) {
         console.error('Failed to load calendar context:', e);
       } finally {
@@ -98,7 +106,7 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
     const rankedWardrobe = wardrobe
         ?.map(item => ({
             ...item,
-            engineScore: scoreWardrobeItem(item, context, userProfile, logs.map(l => ({ itemId: l.id, date: l.date })))
+            engineScore: scoreWardrobeItem(item, context, userProfile, logs.map(l => ({ itemId: l.id, date: l.date })), lockedDNA)
         }))
         .sort((a, b) => b.engineScore - a.engineScore) || [];
 
