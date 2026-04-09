@@ -122,6 +122,60 @@ export const isLoggedIn = () => !!auth.currentUser;
 export const getMe = () => API.get('/auth/me');
 
 // ============================================
+// ACCOUNT DESTRUCTION — FIRESTORE & AUTH
+// ============================================
+
+/**
+ * Performs a deep wipe of all user data in Firestore and deletes the Auth account.
+ */
+export const destroyUserAccount = async (uid) => {
+  if (!uid || auth.currentUser?.uid !== uid) throw new Error('Unauthorized');
+
+  const collectionsToWipe = [
+    'wardrobe',
+    'history',
+    'saved_colors',
+    'outfit_logs',
+    'push_subscriptions',
+    'events'
+  ];
+
+  try {
+    console.log(`[Security] Initiating deep wipe for user: ${uid}`);
+
+    // 1. Wipe Sub-collections
+    for (const collName of collectionsToWipe) {
+      const collRef = collection(db, 'users', uid, collName);
+      const snap = await getDocs(collRef);
+      const deletePromises = snap.docs.map(d => deleteDoc(d.ref));
+      await Promise.all(deletePromises);
+      console.log(`[Security] Wiped collection: ${collName}`);
+    }
+
+    // 2. Wipe Profile Docs
+    const profileDocs = ['data', 'preferences', 'insights', 'primary'];
+    for (const docName of profileDocs) {
+      await deleteDoc(doc(db, 'users', uid, 'profile', docName));
+    }
+    console.log('[Security] Wiped profile documentation');
+
+    // 3. Wipe Main User Doc
+    await deleteDoc(doc(db, 'users', uid));
+    console.log('[Security] Wiped root user metadata');
+
+    // 4. Delete Auth User (Must be recently logged in)
+    const { deleteUser } = await import('firebase/auth');
+    await deleteUser(auth.currentUser);
+    console.log('[Security] Auth account destroyed successfully');
+
+    return true;
+  } catch (err) {
+    console.error('[Security] Deep wipe failed partially:', err);
+    throw err;
+  }
+};
+
+// ============================================
 // HISTORY — FIRESTORE
 // ============================================
 

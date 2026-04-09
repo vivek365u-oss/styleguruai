@@ -102,7 +102,31 @@ export const scoreWardrobeItem = (item, context, profile, history = [], preferen
 
     score += (Math.max(0, Math.min(preferenceScore, 100)) / 100) * weights.preference;
 
-    return Math.round(score);
+    // 5. PHYSICAL ENGINE (WORKING STATS)
+    const pHeight = safePrefs.height || 'regular';
+    const pBuild = safePrefs.build || 'athletic';
+    const pArchetype = safePrefs.styleGoal || 'sophisticated';
+    
+    let physicalBoost = 0;
+
+    // Build/Fit Synergy
+    if (pBuild === 'slim' && item.fit === 'slim') physicalBoost += 10;
+    if (pBuild === 'broad' && (item.fit === 'relaxed' || item.fit === 'regular')) physicalBoost += 10;
+
+    // Archetype Alignment
+    if (pArchetype === 'minimalist') {
+        const minCats = ['cat_polo', 'cat_blazer', 'cat_white_shirt', 'cat_minimal_sneakers'];
+        if (minCats.some(c => item.category === c)) physicalBoost += 15;
+    } else if (pArchetype === 'vibrant') {
+        const isVibrant = (item.name?.toLowerCase().includes('bright') || item.color_name?.toLowerCase().includes('neon'));
+        if (isVibrant) physicalBoost += 20;
+    } else if (pArchetype === 'edgy') {
+        const edgyCats = ['cat_leather', 'cat_distressed', 'cat_black_denim', 'cat_boots'];
+        if (edgyCats.some(c => item.category?.includes(c))) physicalBoost += 15;
+    }
+
+    // Apply Physical Engine Multiplier (Cap at 100)
+    return Math.min(100, Math.round(score + physicalBoost));
 };
 
 export const getTopRecommendations = (wardrobe, context, profile, history, preferences, lockedInsights) => {
