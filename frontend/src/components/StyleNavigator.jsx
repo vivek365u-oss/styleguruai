@@ -16,7 +16,8 @@ import {
     updateUserFeedback 
 } from '../api/styleApi';
 
-import { scoreWardrobeItem } from '../utils/stylingEngine';
+import { scoreWardrobeItem, getActionableAdvice, getAccessoryAdvice } from '../utils/stylingEngine';
+import { getCategoryIcon } from '../constants/fashionCategories';
 
 const infoCls = "w-5 h-5 rounded-full flex items-center justify-center text-[10px] cursor-help transition-all";
 
@@ -317,7 +318,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
             <div className={`relative overflow-hidden rounded-[2.5rem] p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/5'}`}>
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                     <div className="flex items-center gap-2">
-                         <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>Style DNA</p>
+                         <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>Permanent DNA</p>
                          <button onClick={() => setIsEditingDNA(true)} className={`text-[9px] font-black px-2 py-0.5 rounded-md ${isDark ? 'bg-white/10 text-white/40 hover:text-white' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}>EDIT ✏️</button>
                     </div>
                     
@@ -384,6 +385,25 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                     <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50 border-purple-100 text-purple-700'}`}>
                                         {profile?.season || profile?.skin_tone?.color_season || 'Spring'} Edition
                                     </span>
+                                </div>
+                                <div className="mt-4 space-y-2">
+                                    <p className={`text-[9px] font-black uppercase opacity-40`}>Actionable DNA Recommendations</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {getActionableAdvice(insights?.best_colors || profile?.best_colors, profile?.gender || 'female').map((adv, i) => {
+                                            const hasInCloset = wardrobe.some(item => item.category === adv.category);
+                                            return (
+                                                <div key={i} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-100 shadow-sm'}`}>
+                                                    <span>{getCategoryIcon(adv.category)}</span>
+                                                    <span>{adv.item}</span>
+                                                    {hasInCloset ? (
+                                                        <span className="text-green-500 font-black">✓</span>
+                                                    ) : (
+                                                        <span className="text-orange-500 flex items-center gap-1">🚧 <span className="text-[8px] animate-pulse">+20 pts</span></span>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
                             </>
                         )}
@@ -492,13 +512,18 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                             {(() => {
                                 const match = getMatch(insights.daily_suggestion.top, 'top');
                                 return (
-                                    <div className="space-y-3">
+                                    <div className="space-y-3 relative group">
                                         <div className="w-16 h-16 rounded-2xl border-4 border-white/10 shadow-lg relative flex-shrink-0" style={{ backgroundColor: match?.hex || '#888' }}>
-                                            {match && <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg">CLOSET</span>}
+                                            {match ? (
+                                                 <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg">CLOSET</span>
+                                            ) : (
+                                                 <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg animate-pulse">MISSING</span>
+                                            )}
+                                            {isWorn && <div className="absolute inset-0 bg-green-500/40 rounded-xl flex items-center justify-center text-white text-xl">✓</div>}
                                         </div>
                                         <div>
                                             <p className={`text-[10px] font-black uppercase truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>{insights.daily_suggestion.top}</p>
-                                            <p className="text-[9px] font-bold opacity-30 mt-0.5">{match ? (match.color_name || 'Matched') : 'Not Synced'}</p>
+                                            <p className="text-[9px] font-bold opacity-30 mt-0.5">{match ? (match.color_name || 'Matched') : '🚧 Score Boost Available'}</p>
                                         </div>
                                     </div>
                                 );
@@ -508,29 +533,65 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                             {(() => {
                                 const match = getMatch(insights.daily_suggestion.bottom, 'bottom');
                                 return (
-                                    <div className="space-y-3">
+                                    <div className="space-y-3 relative group">
                                         <div className="w-16 h-16 rounded-2xl border-4 border-white/10 shadow-lg relative flex-shrink-0" style={{ backgroundColor: match?.hex || '#333' }}>
-                                            {match && <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg">CLOSET</span>}
+                                            {match ? (
+                                                 <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg">CLOSET</span>
+                                            ) : (
+                                                 <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg animate-pulse">MISSING</span>
+                                            )}
+                                            {isWorn && <div className="absolute inset-0 bg-green-500/40 rounded-xl flex items-center justify-center text-white text-xl">✓</div>}
                                         </div>
                                         <div>
                                             <p className={`text-[10px] font-black uppercase truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>{insights.daily_suggestion.bottom}</p>
-                                            <p className="text-[9px] font-bold opacity-30 mt-0.5">{match ? (match.color_name || 'Matched') : 'Not Synced'}</p>
+                                            <p className="text-[9px] font-bold opacity-30 mt-0.5">{match ? (match.color_name || 'Matched') : '🚧 Score Boost Available'}</p>
                                         </div>
                                     </div>
                                 );
                             })()}
                         </div>
 
+                        {/* Finishing Touches Section */}
+                        <div className={`mb-8 p-4 rounded-3xl border border-dashed ${isDark ? 'bg-white/5 border-white/20' : 'bg-slate-50 border-slate-200'}`}>
+                             <p className="text-[9px] font-black uppercase opacity-40 mb-3 tracking-widest">Finishing Touches</p>
+                             {(() => {
+                                 const tips = getAccessoryAdvice(profile?.gender || 'female', profile?.season || 'Spring');
+                                 return (
+                                     <div className="grid grid-cols-2 gap-4">
+                                         <div className="flex gap-2 items-center">
+                                             <span className="text-xl">💍</span>
+                                             <div>
+                                                 <p className="text-[9px] font-black uppercase opacity-60">Jewelry</p>
+                                                 <p className="text-[10px] font-bold">{tips.jewelry}</p>
+                                             </div>
+                                         </div>
+                                         <div className="flex gap-2 items-center">
+                                             <span className="text-xl">👞</span>
+                                             <div>
+                                                 <p className="text-[9px] font-black uppercase opacity-60">Shoes</p>
+                                                 <p className="text-[10px] font-bold">{tips.shoes}</p>
+                                             </div>
+                                         </div>
+                                     </div>
+                                 );
+                             })()}
+                        </div>
+
                         <button
                             onClick={handleWearToday}
                             disabled={isWorn || logging}
-                            className={`w-full py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all shadow-xl ${
+                            className={`w-full py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all shadow-xl group overflow-hidden relative ${
                                 isWorn 
                                     ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                                    : 'bg-slate-900 text-white hover:scale-[1.02] active:scale-95'
+                                    : 'bg-black text-white hover:scale-[1.02] active:scale-95'
                             }`}
                         >
-                            {logging ? '⌛ LOGGING...' : isWorn ? t('alreadyWorn') : t('wearToday')}
+                            <span className="relative z-10 flex items-center justify-center gap-2">
+                                {isWorn ? '🏆 STYLE LOGGED TODAY' : '✅ MARK AS WORN'}
+                            </span>
+                            {!isWorn && (
+                                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            )}
                         </button>
                     </div>
                 </div>
@@ -543,7 +604,11 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg ${isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-white text-indigo-600 border border-indigo-100'}`}>🧩</div>
                     <div>
                         <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>The Style Gap</p>
-                        <h4 className={`text-xl font-black mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Complete Your DNA</h4>
+                        <h4 className={`text-xl font-black mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>Unlock Elite Harmony</h4>
+                    </div>
+                    <div className="ml-auto text-right">
+                         <p className="text-[10px] font-black text-indigo-500 animate-pulse">POTENTIAL BOOST</p>
+                         <p className="text-xl font-black">+25%</p>
                     </div>
                 </div>
 
@@ -552,13 +617,17 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                         <div className="flex items-center gap-5 mb-6">
                             <div className="w-16 h-16 rounded-[1.5rem] border-4 border-white/10 shadow-2xl flex-shrink-0" style={{ backgroundColor: insights.missing_piece.hex }} />
                             <div className="flex-1">
-                                <p className={`font-black text-base ${isDark ? 'text-white' : 'text-slate-900'}`}>{insights.missing_piece.color_name} Essential</p>
+                                <p className={`font-black text-base ${isDark ? 'text-white' : 'text-slate-900'}`}>{insights.missing_piece.color_name} {profile?.gender === 'female' ? 'Ethnic Wear' : 'Formal Wear'}</p>
                                 <p className={`text-[11px] font-bold leading-tight mt-1 ${isDark ? 'text-white/40' : 'text-slate-500'}`}>{insights.missing_piece.impact}</p>
                             </div>
                         </div>
+                        <div className="flex gap-2 mb-4">
+                             <span className="px-3 py-1 bg-indigo-500/10 text-indigo-500 text-[9px] font-black rounded-full border border-indigo-500/20 uppercase">Must Add</span>
+                             <span className="px-3 py-1 bg-green-500/10 text-green-500 text-[9px] font-black rounded-full border border-green-500/20 uppercase">DNA Match</span>
+                        </div>
                         <button 
                             onClick={() => findOnMyntra(insights.missing_piece.color_name)}
-                            className={`w-full py-4 rounded-2xl text-[10px] font-black tracking-widest shadow-xl hover:scale-[1.02] active:scale-95 transition-all ${isDark ? 'bg-white text-indigo-900' : 'bg-indigo-600 text-white shadow-indigo-900/10'}`}
+                            className={`w-full py-4 rounded-2xl text-[10px] font-black tracking-widest shadow-xl hover:scale-[1.02] active:scale-95 transition-all ${isDark ? 'bg-white text-indigo-900 font-black' : 'bg-indigo-600 text-white shadow-indigo-900/10'}`}
                         >
                             🔍 SHOP STYLE GAP
                         </button>

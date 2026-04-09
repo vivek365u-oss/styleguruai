@@ -107,3 +107,42 @@ export const getTopRecommendations = (wardrobe, context, profile, history, prefe
         .sort((a, b) => b.engineScore - a.engineScore)
         .slice(0, 5);
 };
+
+/**
+ * Returns accessory (shoes/jewelry) advice based on DNA and gender
+ */
+export const getAccessoryAdvice = (gender, season) => {
+    if (gender === 'female') {
+        return {
+            jewelry: season === 'Spring' || season === 'Summer' ? 'Rose Gold or Pearl' : 'Gold or Kundan',
+            shoes: 'Nude Heels or Juttis',
+            tip: 'Avoid heavy necklaces with high necklines.'
+        };
+    }
+    return {
+        jewelry: 'Silver Watch or Leather Strap',
+        shoes: 'Tan Loafers or White Sneakers',
+        tip: 'Match your leather belt with your shoes for a sharp look.'
+    };
+};
+
+/**
+ * Maps color recommendations to specific actionable items from the registry
+ */
+export const getActionableAdvice = (bestColors, gender) => {
+    if (!bestColors || bestColors.length === 0) return [];
+    
+    // Pick the best 2 categories for the first color
+    const suggestions = [];
+    const color = bestColors[0]?.name || 'Neutral';
+    
+    if (gender === 'female') {
+        suggestions.push({ item: `${color} Silk Saree`, category: 'cat_saree_silk' });
+        suggestions.push({ item: `${color} Kurti`, category: 'cat_kurti' });
+    } else {
+        suggestions.push({ item: `${color} Formal Shirt`, category: 'cat_formal_shirt' });
+        suggestions.push({ item: `${color} Kurta Set`, category: 'cat_kurta_set' });
+    }
+    
+    return suggestions;
+};
