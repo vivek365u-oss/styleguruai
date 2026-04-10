@@ -1,7 +1,8 @@
 import { useParams, Navigate, Link } from 'react-router-dom';
 import SEOHead from '../components/SEOHead';
-import Footer from '../components/Footer';
 import { blogPosts } from '../data/blogPosts';
+
+const C = { text: '#F0EDE6', muted: '#6B6B6B', border: '#242424', surface: '#141414', gold: '#C9A96E' };
 
 export default function BlogPostPage() {
   const { slug } = useParams();
@@ -10,83 +11,71 @@ export default function BlogPostPage() {
   if (!post) return <Navigate to="/404" replace />;
 
   return (
-    <div className="min-h-screen bg-[#050816] text-white" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '56px 24px 80px' }}>
       <SEOHead
-        title={`${post.title} – StyleGuru AI`}
+        title={`${post.title} — StyleGuru AI`}
         description={post.description}
       />
 
-      <div className="fixed top-[-200px] left-[-200px] w-[600px] h-[600px] rounded-full bg-purple-700/20 blur-[120px] pointer-events-none z-0" />
-      <div className="fixed bottom-[-200px] right-[-200px] w-[600px] h-[600px] rounded-full bg-pink-700/20 blur-[120px] pointer-events-none z-0" />
+      {/* Back link */}
+      <Link
+        to="/blog"
+        style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 32, fontFamily: "'Inter',sans-serif", transition: 'color 0.2s' }}
+        onMouseEnter={e => e.currentTarget.style.color = C.gold}
+        onMouseLeave={e => e.currentTarget.style.color = C.muted}
+      >
+        ← Back to Blog
+      </Link>
 
-      <nav className="relative z-10 flex items-center justify-between px-6 md:px-12 py-5 max-w-7xl mx-auto border-b border-gray-800/50">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm font-bold">S</div>
-          <span className="text-lg font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">StyleGuru AI</span>
-        </Link>
-        <Link to="/blog" className="text-gray-400 hover:text-white transition text-sm">← Blog</Link>
-      </nav>
+      {/* Post header */}
+      <p style={{ fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: C.gold, marginBottom: 12, fontFamily: "'Inter',sans-serif" }}>
+        Fashion Blog
+      </p>
+      <h1 style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: 'clamp(24px,4vw,40px)', fontWeight: 300, color: C.text, lineHeight: 1.25, marginBottom: 16 }}>
+        {post.title}
+      </h1>
+      <p style={{ fontSize: '11px', color: C.muted, letterSpacing: '0.1em', marginBottom: 48, fontFamily: "'Inter',sans-serif" }}>
+        {new Date(post.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+      </p>
 
-      <main className="relative z-10 max-w-3xl mx-auto px-6 py-16">
-        <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-6">Fashion Blog</div>
+      {/* Divider */}
+      <div style={{ height: 1, background: C.border, marginBottom: 48 }} />
 
-        <h1 className="text-3xl md:text-5xl font-extrabold mb-4 text-white leading-tight">
-          {post.title}
-        </h1>
-
-        <p className="text-purple-400 text-sm mb-10">
-          {new Date(post.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
-        </p>
-
-        <article className="space-y-8">
-          {post.sections.map((section, i) => (
-            <section key={i} className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6 backdrop-blur-sm">
-              <h2 className="text-white font-bold text-xl mb-4 flex items-center gap-2">
-                <span className="w-1 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full inline-block flex-shrink-0" />
+      {/* Sections */}
+      <article>
+        {post.sections.map((section, i) => (
+          <div key={i} style={{ marginBottom: 40, paddingBottom: 40, borderBottom: `1px solid ${C.border}` }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 12 }}>
+              <div style={{ width: 2, height: '100%', background: C.gold, flexShrink: 0, alignSelf: 'stretch', minHeight: 24, marginTop: 3 }} />
+              <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: '20px', fontWeight: 400, color: C.text, lineHeight: 1.3 }}>
                 {section.heading}
               </h2>
-              <p className="text-gray-300 leading-relaxed text-base">{section.body}</p>
-            </section>
-          ))}
-        </article>
-
-        {/* CTA Banner */}
-        <div className="mt-12 relative bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-700/40 rounded-3xl p-8 text-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-pink-600/10 blur-2xl pointer-events-none" />
-          <div className="relative z-10">
-            <div className="text-4xl mb-3">✨</div>
-            <h3 className="text-2xl font-extrabold text-white mb-2">Try StyleGuru AI — It's Free!</h3>
-            <p className="text-gray-400 text-sm mb-6 max-w-md mx-auto">
-              Upload your selfie and get instant AI-powered outfit recommendations based on your skin tone.
+            </div>
+            <p style={{ fontSize: '15px', color: C.muted, lineHeight: '1.85', fontFamily: "'Inter',sans-serif", paddingLeft: 16 }}>
+              {section.body}
             </p>
-            <a
-              href="https://www.styleguruai.in/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 transition-all px-8 py-3 rounded-full text-white font-bold text-sm shadow-lg shadow-purple-900/50 hover:scale-105"
-            >
-              🚀 Visit styleguruai.in
-            </a>
-            <p className="text-gray-600 text-xs mt-4">No credit card required • Instant results</p>
           </div>
-        </div>
+        ))}
+      </article>
 
-        <div className="mt-8 pt-8 border-t border-gray-800/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <Link to="/blog" className="text-purple-400 hover:text-purple-300 transition text-sm font-semibold">
-            ← Back to Blog
-          </Link>
-          <a
-            href="https://www.styleguruai.in/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 transition px-6 py-3 rounded-full text-sm font-semibold text-white"
-          >
-            Try StyleGuru AI Free ✨
-          </a>
-        </div>
-      </main>
-
-      <Footer />
+      {/* CTA Banner */}
+      <div style={{ marginTop: 16, padding: '36px', background: C.surface, border: `1px solid ${C.border}`, textAlign: 'center' }}>
+        <p style={{ fontSize: '24px', marginBottom: 12 }}>✨</p>
+        <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: '22px', fontWeight: 300, color: C.text, marginBottom: 8 }}>
+          Try StyleGuru AI — It's Free
+        </h3>
+        <p style={{ fontSize: '13px', color: C.muted, lineHeight: '1.7', marginBottom: 24, fontFamily: "'Inter',sans-serif" }}>
+          Upload your selfie and get instant AI-powered outfit recommendations based on your skin tone.
+        </p>
+        <Link
+          to="/"
+          style={{ display: 'inline-block', padding: '14px 32px', background: C.gold, color: '#0A0A0A', fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', fontWeight: 600, fontFamily: "'Inter',sans-serif", transition: 'opacity 0.2s' }}
+          onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
+          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+        >
+          Analyze My Style →
+        </Link>
+      </div>
     </div>
   );
 }

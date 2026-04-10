@@ -1,4 +1,4 @@
-// StyleGuru AI — Unified SPA Architecture v2.0
+// StyleGuru AI — Unified SPA Architecture v3.0
 // Login = state change only, no page redirect
 import React, { useState, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
@@ -11,11 +11,12 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeContext } from './context/ThemeContext';
 
 // ── Core shells (eagerly loaded for fast paint) ──
-import LandingPage from './components/LandingPage';
-import AuthPage    from './components/AuthPage';
-import AppShell    from './components/AppShell';
+import LandingPage   from './components/LandingPage';
+import AuthPage      from './components/AuthPage';
+import AppShell      from './components/AppShell';
+import PublicLayout  from './layouts/PublicLayout';
 
-// ── Other pages (lazy for code splitting) ──
+// ── Static pages (lazy for code splitting) ──
 const AboutPage      = lazy(() => import('./pages/AboutPage'));
 const PrivacyPage    = lazy(() => import('./pages/PrivacyPage'));
 const ContactPage    = lazy(() => import('./pages/ContactPage'));
@@ -99,28 +100,32 @@ function AppRoutes({ user, setUser }) {
         {/* ROOT — unified shell, no redirect after login */}
         <Route path="/" element={<RootShell />} />
 
-        {/* AUTH — same page style modal preferred, fallback route */}
+        {/* AUTH */}
         <Route path="/auth" element={
           user ? <Navigate to="/" replace /> : <AuthPage onLoginSuccess={setUser} />
         } />
 
-        {/* OLD dashboard route → redirect to / (AppShell handles it) */}
+        {/* Legacy redirects */}
         <Route path="/dashboard" element={<Navigate to="/" replace />} />
         <Route path="/loading"   element={<LoadingFallback />} />
+        <Route path="/profile"   element={user ? <Navigate to="/" replace /> : <Navigate to="/auth" replace />} />
+        <Route path="/settings"  element={<Navigate to="/" replace />} />
 
-        {/* Static pages — kept separate with same premium theme */}
-        <Route path="/about"       element={<AboutPage />} />
-        <Route path="/privacy"     element={<PrivacyPage />} />
-        <Route path="/contact"     element={<ContactPage />} />
-        <Route path="/terms"       element={<TermsPage />} />
-        <Route path="/blog"        element={<BlogListPage />} />
-        <Route path="/blog/:slug"  element={<BlogPostPage />} />
-
-        {/* Profile — inline in AppShell for logged in, redirect otherwise */}
-        <Route path="/profile" element={
-          user ? <Navigate to="/" replace /> : <Navigate to="/auth" replace />
-        } />
-        <Route path="/settings" element={<Navigate to="/" replace />} />
+        {/* ════════════════════════════════════
+            PUBLIC STATIC PAGES
+            All wrapped in PublicLayout:
+            → Premium Navbar + Footer on every page
+            → <Outlet /> renders page content only
+            → Zero UI leakage between pages
+            ════════════════════════════════════ */}
+        <Route element={<PublicLayout />}>
+          <Route path="/about"      element={<AboutPage />} />
+          <Route path="/privacy"    element={<PrivacyPage />} />
+          <Route path="/contact"    element={<ContactPage />} />
+          <Route path="/terms"      element={<TermsPage />} />
+          <Route path="/blog"       element={<BlogListPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
+        </Route>
 
         {/* Admin */}
         <Route path="/admin" element={
