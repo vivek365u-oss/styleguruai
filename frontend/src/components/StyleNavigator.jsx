@@ -288,30 +288,31 @@ const StyleNavigator = ({ user, onAnalyze }) => {
     const [activeShopItem, setActiveShopItem] = useState(null);
 
     const handleShopRedirect = (fullItemName, store) => {
-        // STRICT GENDER ENFORCEMENT
+        // STRICT GENDER ENFORCEMENT & DEEP LINKING
         const rawGender = insights?.gender || profile?.gender || prefs?.gender || 'male';
         const isWomen = rawGender.toLowerCase().includes('female') || rawGender.toLowerCase() === 'women';
         const displayGender = isWomen ? 'women' : 'men';
         
-        // MODERN KEYWORDS: Adding 'Trending 2025', 'Premium', etc.
-        const modernKeywords = "Trending 2025 Premium Latest Collection High Quality";
-        const query = `${fullItemName} for ${displayGender} ${modernKeywords}`; 
+        // PREMIUM SEARCH PARAMETERS
+        const premiumSuffix = "Trending 2025 Premium Latest Collection";
+        const query = `${displayGender} ${fullItemName} ${premiumSuffix}`;
         const slug = fullItemName.toLowerCase().replace(/ /g, '-');
         
         let url = '';
         switch(store) {
             case 'myntra':
-                // Myntra slug logic: item-title-women
-                url = `https://www.myntra.com/${slug}-${displayGender}`;
+                // Deep link to specific Myntra category search
+                url = `https://www.myntra.com/${slug}?f=Gender:${displayGender === 'women' ? 'women' : 'men'}`;
                 break;
             case 'amazon':
-                url = `https://www.amazon.in/s?k=${encodeURIComponent(`${displayGender}'s ${fullItemName} Trending 2025 India`)}`;
+                // Optimized search with regional interest and intent
+                url = `https://www.amazon.in/s?k=${encodeURIComponent(`${displayGender} ${fullItemName} ${premiumSuffix} India`)}&ref=nb_sb_noss`;
                 break;
             case 'flipkart':
-                url = `https://www.flipkart.com/search?q=${encodeURIComponent(`${displayGender} ${fullItemName} Premium Quality 2025`)}`;
+                url = `https://www.flipkart.com/search?q=${encodeURIComponent(`${displayGender} ${fullItemName} ${premiumSuffix}`)}`;
                 break;
             case 'meesho':
-                url = `https://www.meesho.com/search?q=${encodeURIComponent(`${displayGender} ${fullItemName}`)}`;
+                url = `https://www.meesho.com/search?q=${encodeURIComponent(`${displayGender} ${fullItemName} budget fashion`)}`;
                 break;
             default:
                 url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;

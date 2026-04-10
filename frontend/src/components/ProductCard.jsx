@@ -25,7 +25,10 @@ function ProductCard({ product }) {
     }`}>
       {/* Product Image */}
       <div className="relative w-full aspect-[4/5] bg-gradient-to-br from-gray-900/40 to-gray-800/40 flex items-center justify-center overflow-hidden group-hover:after:absolute group-hover:after:inset-0 group-hover:after:bg-purple-500/10 transition-all">
-        {!imgError && product.image_url && !product.image_url.includes('placeholder.com') && !product.image_url.includes('water-droplets') ? (
+        {!imgError && product.image_url && 
+         !product.image_url.includes('placeholder.com') && 
+         !product.image_url.includes('water-droplets') &&
+         !product.image_url.includes('droplet') ? (
           <img
             src={product.image_url}
             alt={product.name}
@@ -37,13 +40,16 @@ function ProductCard({ product }) {
             }}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-[#1a1c2e] to-[#0a0b14] relative">
+          <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-[#121421] to-[#05060d] relative px-6 text-center">
             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-500/20 via-transparent to-transparent" />
-            <svg className="w-16 h-16 text-white/10 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.62 1.96V10a12 12 0 0010 11.83 12 12 0 0010-11.83V5.42a2 2 0 00-1.62-1.96z" />
-              <path d="M12 22V12" />
+            <svg className="w-16 h-16 text-white/5 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+               <path d="M6 3h12l1 5h1l1 13H3L4 9h1l1-6z" />
+               <path d="M9 3v2m6-2v2" />
             </svg>
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">StyleGuru Original</span>
+            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20 select-none">StyleGuru Signature Collection</span>
+            <div className="absolute bottom-4 left-0 right-0">
+               <span className="text-[7px] font-bold text-purple-500/40 uppercase tracking-[0.5em]">Verified Trend 2025</span>
+            </div>
           </div>
         )}
         

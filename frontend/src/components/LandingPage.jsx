@@ -6,7 +6,79 @@ import AdSense from '../AdSense';
 
 // FAQ items and Features are now handled inside the component to allow for dynamic translations.
 
-const floatingItems = ['👗', '👔', '👠', '🧣', '💍', '👒', '🧥', '👜'];
+const FashionIcons = {
+  Dress: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
+      <path d="M6 3h12l1 5h1l1 13H3L4 9h1l1-6z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 3v2m6-2v2" strokeLinecap="round" />
+    </svg>
+  ),
+  Shirt: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
+      <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.62 1.96V10a12 12 0 0010 11.83 12 12 0 0010-11.83V5.42a2 2 0 00-1.62-1.96z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 22V12" strokeLinecap="round" />
+    </svg>
+  ),
+  Watch: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
+      <circle cx="12" cy="12" r="7" />
+      <path d="M12 9v3l2 2" strokeLinecap="round" />
+      <path d="M16 5V2H8v3m8 14v3H8v-3" strokeLinecap="round" />
+    </svg>
+  ),
+  Analysis: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
+      <path d="M4.5 16.5c0 1.933 1.567 3.5 3.5 3.5s3.5-1.567 3.5-3.5" strokeLinecap="round" />
+      <path d="M12.5 7.5c0-1.933 1.567-3.5 3.5-3.5s3.5 1.567 3.5 3.5" strokeLinecap="round" />
+      <path d="M8 7.5v9m8-9v9" strokeLinecap="round" />
+      <circle cx="8" cy="7.5" r="3.5" />
+      <circle cx="16" cy="16.5" r="3.5" />
+    </svg>
+  ),
+  Global: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" strokeLinecap="round" />
+    </svg>
+  ),
+  Star: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  Wardrobe: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M3 10h18M9 4v16" strokeLinecap="round" />
+    </svg>
+  ),
+  Camera: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+  ),
+  Bulb: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
+      <path d="M9 18h6m-3-15a7 7 0 0 1 0 14m0 4v-4" strokeLinecap="round" />
+    </svg>
+  ),
+  Shop: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
+      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4H6z" strokeLinecap="round" />
+      <path d="M3 6h18M16 10a4 4 0 0 1-8 0" strokeLinecap="round" />
+    </svg>
+  )
+};
+
+const floatingItems = [
+  <FashionIcons.Dress />, 
+  <FashionIcons.Shirt />, 
+  <FashionIcons.Watch />, 
+  <FashionIcons.Dress />, 
+  <FashionIcons.Shirt />, 
+  <FashionIcons.Watch />
+];
 
 export default function LandingPage({ onGetStarted, onLoginClick }) {
   const { t } = useLanguage();
@@ -197,12 +269,22 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
           <div className="flex flex-col gap-6 mt-10">
             <div className="flex items-center gap-4 justify-center lg:justify-start flex-wrap">
               <div className="flex items-center gap-2 bg-purple-900/30 border border-purple-700/30 rounded-full px-4 py-2">
-                <div className="flex -space-x-2">
-                  {['#F5DEB3','#C68642','#7B4F2E','#4A2C0A'].map((c,i) => (
-                    <div key={i} className="w-6 h-6 rounded-full border-2 border-purple-900" style={{backgroundColor:c}} />
+                <div className="flex -space-x-3">
+                  {[1,2,3,4].map((i) => (
+                    <div key={i} className="w-8 h-8 rounded-full border-2 border-[#02040a] bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center overflow-hidden">
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-purple-400 opacity-40 translate-y-1">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                      </svg>
+                    </div>
                   ))}
                 </div>
-                <span className="text-purple-300 text-xs font-semibold">10,000+ users</span>
+                <div className="flex flex-col">
+                  <span className="text-white text-xs font-black tracking-tight leading-none mb-0.5">10,000+ users</span>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm shadow-green-500/40" />
+                    <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Verified Expert Analysis</span>
+                  </div>
+                </div>
               </div>
               <div className="flex items-center gap-1.5 bg-green-900/20 border border-green-700/30 rounded-full px-4 py-2">
                 <span className="text-green-400 text-xs">⭐⭐⭐⭐⭐</span>
@@ -309,10 +391,10 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { icon: '🎨', title: t('featureSkinTitle'), desc: t('featureSkinDesc') },
-            { icon: '👔', title: t('featureOutfitTitle'), desc: t('featureOutfitDesc') },
-            { icon: '✨', title: t('featureAdviceTitle'), desc: t('featureAdviceDesc') },
-            { icon: '📱', title: t('featureEaseTitle'), desc: t('featureEaseDesc') },
+            { icon: <FashionIcons.Analysis />, title: t('featureSkinTitle'), desc: t('featureSkinDesc') },
+            { icon: <FashionIcons.Wardrobe />, title: t('featureOutfitTitle'), desc: t('featureOutfitDesc') },
+            { icon: <FashionIcons.Star />, title: t('featureAdviceTitle'), desc: t('featureAdviceDesc') },
+            { icon: <FashionIcons.Global />, title: t('featureEaseTitle'), desc: t('featureEaseDesc') },
           ].map((f) => (
             <div
               key={f.title}
@@ -341,9 +423,9 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { step: '01', icon: '📸', title: t('step1Title'), desc: t('step1Desc'), color: 'from-purple-500/20 to-purple-600/10 border-purple-500/30', badge: 'bg-purple-500' },
-            { step: '02', icon: '🔬', title: t('step2Title'), desc: t('step2Desc'), color: 'from-pink-500/20 to-pink-600/10 border-pink-500/30', badge: 'bg-pink-500' },
-            { step: '03', icon: '🎨', title: t('step3Title'), desc: t('step3Desc'), color: 'from-blue-500/20 to-blue-600/10 border-blue-500/30', badge: 'bg-blue-500' },
+            { step: '01', icon: <FashionIcons.Camera />, title: t('step1Title'), desc: t('step1Desc'), color: 'from-purple-500/20 to-purple-600/10 border-purple-500/30', badge: 'bg-purple-500' },
+            { step: '02', icon: <FashionIcons.Analysis />, title: t('step2Title'), desc: t('step2Desc'), color: 'from-pink-500/20 to-pink-600/10 border-pink-500/30', badge: 'bg-pink-500' },
+            { step: '03', icon: <FashionIcons.Star />, title: t('step3Title'), desc: t('step3Desc'), color: 'from-blue-500/20 to-blue-600/10 border-blue-500/30', badge: 'bg-blue-500' },
           ].map((s, i) => (
             <div key={s.step} className={`relative bg-gradient-to-br ${s.color} border rounded-3xl p-6 hover:-translate-y-1 transition-all duration-300`}>
               <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${s.badge} text-white text-xs font-black mb-4`}>{s.step}</div>
@@ -360,10 +442,10 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
           <p className="text-white/50 text-xs font-semibold uppercase tracking-wide text-center mb-4">{t('whatYouGet')}</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: '🎨', label: t('colorPalette'), desc: t('colorPaletteDesc') },
-              { icon: '👔', label: t('outfitCombos'), desc: t('outfitCombosDesc') },
-              { icon: '🛍️', label: t('shopLinks'), desc: t('shopLinksDesc') },
-              { icon: '💡', label: t('styleTips'), desc: t('styleTipsDesc') },
+              { icon: <FashionIcons.Analysis />, label: t('colorPalette'), desc: t('colorPaletteDesc') },
+              { icon: <FashionIcons.Wardrobe />, label: t('outfitCombos'), desc: t('outfitCombosDesc') },
+              { icon: <FashionIcons.Shop />, label: t('shopLinks'), desc: t('shopLinksDesc') },
+              { icon: <FashionIcons.Bulb />, label: t('styleTips'), desc: t('styleTipsDesc') },
             ].map((item) => (
               <div key={item.label} className="text-center p-3 bg-white/5 rounded-2xl border border-white/10">
                 <div className="text-3xl mb-2">{item.icon}</div>
