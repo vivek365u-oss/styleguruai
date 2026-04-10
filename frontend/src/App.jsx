@@ -95,7 +95,7 @@ function AppRoutes({ user, setUser }) {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
-        <Route path="/" element={<LandingPage onGetStarted={() => navigate('/auth')} onLoginClick={() => navigate('/auth')} />} />
+        <Route path="/" element={<LandingPage user={user} onGetStarted={() => navigate('/auth')} onLoginClick={() => navigate('/auth')} />} />
         <Route path="/auth" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} />} />
         <Route path="/loading" element={<LoadingFallback />} />
         <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />

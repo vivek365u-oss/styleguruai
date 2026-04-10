@@ -1,549 +1,716 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import SEOHead from './SEOHead';
-import Footer from './Footer';
 import { useLanguage } from '../i18n/LanguageContext';
-import AdSense from '../AdSense';
 
-// FAQ items and Features are now handled inside the component to allow for dynamic translations.
-
-import { FashionIcons, IconRenderer } from './Icons';
-
-const floatingItems = [
-  FashionIcons.Dress,
-  FashionIcons.Shirt,
-  FashionIcons.Watch,
-  FashionIcons.Heels,
-  FashionIcons.Accessories,
-  FashionIcons.Hoodie
-];
-
-export default function LandingPage({ onGetStarted, onLoginClick }) {
-  const { t } = useLanguage();
-  const canvasRef = useRef(null);
-
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+/* ══════════════════════════════════════════════
+   LOGIN GATE MODAL
+   Appears when unauthenticated user clicks a feature
+   ══════════════════════════════════════════════ */
+function LoginGateModal({ feature, onClose, onLogin }) {
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const particles = Array.from({ length: 40 }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 2 + 0.5,
-      dx: (Math.random() - 0.5) * 0.3,
-      dy: (Math.random() - 0.5) * 0.3,
-      alpha: Math.random() * 0.3 + 0.1,
-    }));
-
-    let animId;
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(168, 85, 247, ${p.alpha})`;
-        ctx.fill();
-        p.x += p.dx;
-        p.y += p.dy;
-        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-      });
-      animId = requestAnimationFrame(draw);
-    };
-    draw();
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    window.addEventListener('resize', resize);
-    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
   }, []);
-
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300 overflow-x-hidden selection:bg-purple-500/30" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
-      <SEOHead
-        title={t('landingHeroTitle') + " " + t('landingHeroSub')}
-        description={t('landingTagline').replace('{perfectColors}', t('perfectColors'))}
-      />
+    <div
+      className="fixed inset-0 z-[300] flex items-end sm:items-center justify-center sm:p-6"
+      style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(12px)' }}
+      onClick={onClose}
+    >
+      <div
+        className="w-full sm:max-w-sm text-center fade-up"
+        style={{ background: '#111111', border: '1px solid #242424', padding: '48px 40px 40px' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Mobile drag handle */}
+        <div className="w-10 h-0.5 mx-auto mb-8 sm:hidden" style={{ background: '#3A3A3A' }} />
 
-      {/* Particle canvas */}
-      <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" />
+        <p className="luxe-label mb-5" style={{ color: '#C9A96E' }}>Members Only</p>
 
-      {/* Glow blobs - Controlled placement to avoid text overlay */}
-      <div className="fixed top-[-10%] left-[-10%] w-[40vw] h-[40vw] rounded-full bg-purple-600/10 blur-[120px] pointer-events-none z-0" />
-      <div className="fixed bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-pink-600/10 blur-[120px] pointer-events-none z-0" />
+        <h3 className="luxe-display mb-3" style={{ fontSize: '26px', color: '#F0EDE6' }}>
+          Access {feature}
+        </h3>
 
-      {/* Floating fashion items */}
-      {floatingItems.map((item, i) => (
-        <div
-          key={i}
-          className="fixed w-12 h-12 pointer-events-none z-0 opacity-[0.05]"
-          style={{
-            left: `${(i * 13 + 7) % 95}%`,
-            top: `${(i * 17 + 12) % 90}%`,
-            animation: `float${i % 3} ${5 + i % 2}s ease-in-out infinite`,
-          }}
+        <p className="mb-8 leading-relaxed" style={{ fontSize: '13px', color: '#6B6B6B' }}>
+          Sign in to unlock personalized AI style analysis, wardrobe building tools, and expert recommendations.
+        </p>
+
+        <button
+          onClick={onLogin}
+          className="btn-luxe w-full mb-3"
         >
-          <IconRenderer icon={item} />
-        </div>
-      ))}
+          Sign In to Continue
+        </button>
 
-      <style>{`
-        @keyframes float0 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-15px) rotate(5deg)} }
-        @keyframes float1 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-25px) rotate(-5deg)} }
-        @keyframes float2 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-10px) rotate(3deg)} }
-        @keyframes glow { 0%,100%{box-shadow:0 0 20px rgba(168,85,247,0.3)} 50%{box-shadow:0 0 40px rgba(236,72,153,0.6)} }
-      `}</style>
-
-      {/* Navbar */}
-      <nav className="relative z-[100] border-b border-[var(--border-primary)] bg-[var(--bg-primary)]/80 backdrop-blur-xl">
-        <div className="flex items-center justify-between px-6 md:px-12 py-5 max-w-7xl mx-auto">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm font-black text-white shadow-lg shadow-purple-500/20">S</div>
-            <span className="text-xl font-black bg-gradient-to-r from-[var(--text-primary)] to-[var(--text-secondary)] bg-clip-text text-transparent tracking-tight">StyleGuru AI</span>
-          </div>
-
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-6">
-            <button onClick={onLoginClick} className="opacity-60 hover:opacity-100 transition text-sm font-medium">{t('login')}</button>
-            <button
-              onClick={onGetStarted}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-105 transition-all px-6 py-2.5 rounded-full text-sm font-bold text-white shadow-lg shadow-purple-500/20 active:scale-95"
-            >
-              {t('tryNow')}
-            </button>
-          </div>
-
-          {/* Mobile Toggle */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--bg-accent)] border border-[var(--border-primary)]"
-          >
-            {isMenuOpen ? (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-            ) : (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16m-7 6h7" /></svg>
-            )}
-          </button>
-        </div>
-
-        {/* Mobile Menu Overlay */}
-        {isMenuOpen && (
-          <div className="absolute top-full left-0 right-0 bg-[var(--bg-primary)]/95 backdrop-blur-2xl border-b border-[var(--border-primary)] p-6 md:hidden animate-fade-in flex flex-col gap-4 shadow-2xl z-[101]">
-            <button
-              onClick={() => { setIsMenuOpen(false); onLoginClick(); }}
-              className="w-full py-4 text-center opacity-70 hover:opacity-100 font-bold border-b border-[var(--border-primary)]"
-            >
-              {t('login')}
-            </button>
-            <button
-              onClick={() => { setIsMenuOpen(false); onGetStarted(); }}
-              className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl text-center text-white font-bold"
-            >
-              {t('tryNow')}
-            </button>
-          </div>
-        )}
-      </nav>
-
-      {/* Hero */}
-      <section className="relative z-10 flex flex-col lg:flex-row items-center justify-between px-6 md:px-12 py-16 md:py-24 max-w-7xl mx-auto gap-16 lg:gap-12">
-        {/* Left */}
-        <div className="flex-[1.2] text-center lg:text-left">
-          <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-300 text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full mb-8 backdrop-blur-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
-            AI-Powered Fashion Advisor
-          </div>
-
-          <h1 className="text-4xl md:text-6xl lg:text-8xl font-black leading-[1.1] mb-8">
-            <span className="text-[var(--text-primary)]">StyleGuru AI</span>
-            <br />
-            <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 bg-clip-text text-transparent">
-              {t('landingHeroTitle')}
-            </span>
-            <br />
-            <span className="text-[var(--text-primary)] opacity-90">{t('landingHeroSub')}</span>
-          </h1>
-
-          <p className="text-[var(--text-secondary)] text-lg md:text-xl mb-12 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
-            {t('landingTagline').split('{perfectColors}').map((part, index, array) => (
-              <React.Fragment key={index}>
-                {part}
-                {index < array.length - 1 && <span className="text-purple-600 font-black decoration-purple-600/30 decoration-4 underline-offset-4">{t('perfectColors')}</span>}
-              </React.Fragment>
-            ))}
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start">
-            <button
-              onClick={onGetStarted}
-              className="relative group bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-[1.02] transition-all px-10 py-5 rounded-3xl text-lg font-black text-white overflow-hidden shadow-2xl shadow-purple-500/20 active:scale-95"
-            >
-              <span className="relative z-10">✨ {t('tryNowFree')}</span>
-            </button>
-            <button
-              onClick={onLoginClick}
-              className="border border-[var(--border-primary)] hover:border-purple-500/50 hover:bg-purple-500/5 transition-all text-[var(--text-primary)] px-10 py-5 rounded-3xl text-lg font-black backdrop-blur-sm active:scale-95"
-            >
-              {t('loginArrow')}
-            </button>
-          </div>
-
-          <div className="flex items-center gap-6 mt-10 justify-center lg:justify-start text-sm opacity-50">
-            <span>✓ {t('noCreditCard')}</span>
-            <span>✓ {t('instantResults')}</span>
-            <span>✓ {t('fullyFree')}</span>
-          </div>
-
-          {/* Social Proof */}
-          <div className="flex flex-col gap-6 mt-10">
-            <div className="flex items-center gap-4 justify-center lg:justify-start flex-wrap">
-              <div className="flex items-center gap-2 bg-purple-900/30 border border-purple-700/30 rounded-full px-4 py-2">
-                <div className="flex -space-x-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-8 h-8 rounded-full border-2 border-[#02040a] bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center overflow-hidden">
-                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-purple-400 opacity-40 translate-y-1">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                      </svg>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-white text-xs font-black tracking-tight leading-none mb-0.5">10,000+ users</span>
-                  <div className="flex items-center gap-1">
-                    <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm shadow-green-500/40" />
-                    <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Verified Expert Analysis</span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 bg-green-900/20 border border-green-700/30 rounded-full px-4 py-2">
-                <span className="text-green-400 text-xs">⭐⭐⭐⭐⭐</span>
-                <span className="text-green-300 text-xs font-semibold">4.9/5 rating</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-blue-900/20 border border-blue-700/30 rounded-full px-4 py-2">
-                <span className="text-blue-300 text-xs font-semibold">🇮🇳 {t('madeForIndia')}</span>
-              </div>
-            </div>
-
-            <div className="max-w-xl text-xs text-white/30 leading-relaxed text-center lg:text-left">
-              Our advanced AI engineering analyzes individual skin complexions against thousands of global fashion data points.
-              By calculating ITA (Individual Typology Angle) and matching it with seasonal color theories, StyleGuru provides
-              highly accurate recommendations for shirts, sarees, and accessories specifically optimized for the unique range of Indian skin tones.
-            </div>
-          </div>
-        </div>
-
-        {/* Right — Phone mockup */}
-        <div className="flex-1 flex justify-center lg:justify-end">
-          <div className="relative">
-            {/* Glow behind phone */}
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/30 to-pink-600/30 blur-3xl rounded-full scale-110" />
-
-            {/* Phone */}
-            <div className="relative w-64 md:w-72 bg-gray-900 rounded-[3rem] border-2 border-purple-700/50 shadow-2xl shadow-purple-900/50 overflow-hidden">
-              {/* Notch */}
-              <div className="flex justify-center pt-4 pb-2">
-                <div className="w-20 h-5 bg-gray-800 rounded-full" />
-              </div>
-
-              {/* Screen content */}
-              <div className="px-4 pb-6 space-y-3">
-                <div className="bg-gradient-to-br from-purple-900/60 to-pink-900/60 rounded-2xl p-4 border border-purple-700/30">
-                  <div className="text-xs text-purple-300 mb-2 font-medium">Skin Analysis</div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-orange-500/30" />
-                    <div>
-                      <div className="text-sm font-semibold">Medium Warm</div>
-                      <div className="text-xs text-gray-400">ITA: 28.4° · High confidence</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-xs text-gray-400 font-medium px-1">Best Colors For You</div>
-                <div className="grid grid-cols-4 gap-2">
-                  {['#000080', '#008080', '#800000', '#FFFDD0', '#556B2F', '#FF7F50', '#FFDB58', '#B7410E'].map(c => (
-                    <div key={c} className="w-full aspect-square rounded-xl shadow-lg" style={{ backgroundColor: c }} />
-                  ))}
-                </div>
-
-                <div className="bg-gray-800/60 rounded-2xl p-3 border border-gray-700/30">
-                  <div className="text-xs text-gray-400 mb-1">Top Outfit Combo</div>
-                  <div className="text-sm font-medium">Navy shirt + Beige chinos</div>
-                  <div className="text-xs text-purple-400">Office / Interview ✓</div>
-                </div>
-              </div>
-
-              {/* Home bar */}
-              <div className="flex justify-center pb-3">
-                <div className="w-24 h-1 bg-gray-600 rounded-full" />
-              </div>
-            </div>
-
-            {/* Floating badge */}
-            <div className="absolute -top-4 -right-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl px-3 py-2 text-xs font-bold shadow-lg shadow-purple-900/50">
-              AI Powered ✨
-            </div>
-            <div className="absolute -bottom-4 -left-4 bg-gray-900 border border-purple-700/50 rounded-2xl px-3 py-2 text-xs shadow-lg">
-              <span className="text-green-400">●</span> 98% {t('accuracy')}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="relative z-10 px-6 md:px-12 py-20 max-w-7xl mx-auto">
-        <div className="text-center mb-14">
-          <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-4">Features</div>
-          <h2 className="text-3xl md:text-5xl font-bold">
-            {t('whyToneFit').split('StyleGuru AI').map((part, i, arr) => (
-              <React.Fragment key={i}>
-                {part}
-                {i < arr.length - 1 && <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">StyleGuru AI</span>}
-              </React.Fragment>
-            ))}
-          </h2>
-        </div>
-
-        {/* Stats bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          {[
-            { value: '10K+', label: t('happyUsers'), icon: <IconRenderer icon={FashionIcons.User} /> },
-            { value: '95%+', label: t('accuracy'), icon: <IconRenderer icon={FashionIcons.Accuracy} /> },
-            { value: '6', label: t('skinToneCategories'), icon: <IconRenderer icon={FashionIcons.Analysis} /> },
-            { value: '100%', label: t('fullyFree'), icon: <IconRenderer icon={FashionIcons.Star} /> },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 text-center backdrop-blur-sm">
-              <div className="w-8 h-8 mx-auto mb-2 text-purple-400 opacity-60">{stat.icon}</div>
-              <p className="text-white font-black text-xl">{stat.value}</p>
-              <p className="text-gray-400 text-xs">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            { icon: <IconRenderer icon={FashionIcons.Analysis} />, title: t('featureSkinTitle'), desc: t('featureSkinDesc') },
-            { icon: <IconRenderer icon={FashionIcons.Wardrobe} />, title: t('featureOutfitTitle'), desc: t('featureOutfitDesc') },
-            { icon: <IconRenderer icon={FashionIcons.Star} />, title: t('featureAdviceTitle'), desc: t('featureAdviceDesc') },
-            { icon: <IconRenderer icon={FashionIcons.Global} />, title: t('featureEaseTitle'), desc: t('featureEaseDesc') },
-          ].map((f) => (
-            <div
-              key={f.title}
-              className="group bg-gray-900/60 border border-gray-800 rounded-2xl p-6 hover:border-purple-600/60 hover:bg-gray-900/80 transition-all duration-300 backdrop-blur-sm hover:shadow-lg hover:shadow-purple-900/20 hover:-translate-y-1 card-hover"
-            >
-              <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">{f.icon}</div>
-              <h3 className="text-base font-semibold mb-2 text-white">{f.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* How it works — Visual Demo */}
-      <section className="relative z-10 px-6 md:px-12 py-20 max-w-5xl mx-auto">
-        <div className="text-center mb-12">
-          <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-4">{t('howItWorks')}</div>
-          <h2 className="text-3xl md:text-5xl font-bold text-white">
-            {t('howItWorksSubTitle').split('{perfectStyle}').map((part, i, arr) => (
-              <React.Fragment key={i}>
-                {part}
-                {i < arr.length - 1 && <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{t('perfectStyle')}</span>}
-              </React.Fragment>
-            ))}
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { step: '01', icon: <FashionIcons.Camera />, title: t('step1Title'), desc: t('step1Desc'), color: 'from-purple-500/20 to-purple-600/10 border-purple-500/30', badge: 'bg-purple-500' },
-            { step: '02', icon: <FashionIcons.Analysis />, title: t('step2Title'), desc: t('step2Desc'), color: 'from-pink-500/20 to-pink-600/10 border-pink-500/30', badge: 'bg-pink-500' },
-            { step: '03', icon: <FashionIcons.Star />, title: t('step3Title'), desc: t('step3Desc'), color: 'from-blue-500/20 to-blue-600/10 border-blue-500/30', badge: 'bg-blue-500' },
-          ].map((s, i) => (
-            <div key={s.step} className={`relative bg-gradient-to-br ${s.color} border rounded-3xl p-6 hover:-translate-y-1 transition-all duration-300`}>
-              <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${s.badge} text-white text-xs font-black mb-4`}>{s.step}</div>
-              <div className="text-5xl mb-4">{s.icon}</div>
-              <h3 className="text-white font-black text-lg mb-2">{s.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{s.desc}</p>
-              {i < 2 && <div className="hidden md:block absolute -right-4 top-1/2 -translate-y-1/2 text-purple-600 text-2xl z-10">→</div>}
-            </div>
-          ))}
-        </div>
-
-        {/* Visual result preview */}
-        <div className="mt-10 bg-gray-900/60 border border-gray-800 rounded-3xl p-6 backdrop-blur-sm">
-          <p className="text-white/50 text-xs font-semibold uppercase tracking-wide text-center mb-4">{t('whatYouGet')}</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { icon: <IconRenderer icon={FashionIcons.Analysis} className="w-8 h-8" />, label: t('colorPalette'), desc: t('colorPaletteDesc') },
-              { icon: <IconRenderer icon={FashionIcons.Wardrobe} className="w-8 h-8" />, label: t('outfitCombos'), desc: t('outfitCombosDesc') },
-              { icon: <IconRenderer icon={FashionIcons.Shopping} className="w-8 h-8" />, label: t('shopLinks'), desc: t('shopLinksDesc') },
-              { icon: <IconRenderer icon={FashionIcons.Bulb} className="w-8 h-8" />, label: t('styleTips'), desc: t('styleTipsDesc') },
-            ].map((item) => (
-              <div key={item.label} className="text-center p-3 bg-white/5 rounded-2xl border border-white/10">
-                <div className="text-3xl mb-2">{item.icon}</div>
-                <p className="text-white font-bold text-xs">{item.label}</p>
-                <p className="text-gray-500 text-xs mt-0.5">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="relative z-10 px-6 md:px-12 py-20 max-w-4xl mx-auto text-center">
-        <div className="relative bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-700/40 rounded-3xl p-12 md:p-16 backdrop-blur-sm overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-pink-600/10 blur-2xl" />
-          <div className="relative z-10">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">{t('startJourneyToday')}</h2>
-            <p className="text-gray-400 text-lg mb-10">{t('joinThousands')}</p>
-            <button
-              onClick={onGetStarted}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 transition-all px-12 py-4 rounded-full text-lg font-semibold shadow-2xl shadow-purple-900/50 hover:scale-105"
-              style={{ animation: 'glow 3s ease-in-out infinite' }}
-            >
-              {t('getStartedFree')}
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="relative z-10 px-6 md:px-12 py-16 max-w-7xl mx-auto">
-        <div className="text-center mb-10">
-          <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-4">Reviews</div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white">
-            {t('whatUsersSay').split('{areSaying}').map((part, i, arr) => (
-              <React.Fragment key={i}>
-                {part}
-                {i < arr.length - 1 && <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{t('areSaying')}</span>}
-              </React.Fragment>
-            ))}
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { name: 'Priya S.', location: 'Mumbai', skin: 'Medium Warm', review: t('test1Review'), rating: 5, icon: FashionIcons.Dress },
-            { name: 'Rahul K.', location: 'Delhi', skin: 'Wheatish', review: t('test2Review'), rating: 5, icon: FashionIcons.Shirt },
-            { name: 'Ananya M.', location: 'Bangalore', skin: 'Fair Cool', review: t('test3Review'), rating: 5, icon: FashionIcons.Star },
-            { name: 'Vikram T.', location: 'Chennai', skin: 'Dark Warm', review: t('test4Review'), rating: 5, icon: FashionIcons.Analysis },
-            { name: 'Sneha R.', location: 'Pune', skin: 'Olive Neutral', review: t('test5Review'), rating: 5, icon: FashionIcons.Dress },
-            { name: 'Arjun P.', location: 'Hyderabad', skin: 'Light Warm', review: t('test6Review'), rating: 5, icon: FashionIcons.Shirt },
-          ].map((t, i) => (
-            <div key={i} className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6 hover:border-purple-600/40 transition-all backdrop-blur-sm">
-              <div className="flex items-center gap-1 mb-3">
-                {[...Array(t.rating)].map((_, j) => <span key={j} className="text-yellow-400 text-sm">★</span>)}
-              </div>
-              <p className="text-gray-300 text-sm leading-relaxed mb-4">"{t.review}"</p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center p-2.5">
-                  <IconRenderer icon={t.icon} className="text-white" />
-                </div>
-                <div>
-                  <p className="text-white font-bold text-sm">{t.name}</p>
-                  <p className="text-gray-500 text-xs">{t.location} · {t.skin} skin</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="relative z-10 px-6 md:px-12 py-16 max-w-4xl mx-auto">
-        <div className="text-center mb-10">
-          <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-4">FAQ</div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white">
-            {t('faqTitle').split('{questions}').map((part, i, arr) => (
-              <React.Fragment key={i}>
-                {part}
-                {i < arr.length - 1 && <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{t('questions')}</span>}
-              </React.Fragment>
-            ))}
-          </h2>
-        </div>
-        <div className="space-y-3">
-          {[
-            { q: t('faq1Q'), a: t('faq1A') },
-            { q: t('faq2Q'), a: t('faq2A') },
-            { q: t('faq3Q'), a: t('faq3A') },
-            { q: t('faq4Q'), a: t('faq4A') },
-            { q: t('faq5Q'), a: t('faq5A') },
-            { q: t('faq6Q'), a: t('faq6A') },
-            { q: t('faq7Q'), a: t('faq7A') },
-            { q: t('faq8Q'), a: t('faq8A') },
-          ].map((item, i) => (
-            <FAQItem key={i} q={item.q} a={item.a} />
-          ))}
-        </div>
-      </section>
-
-      {/* Blog Section */}
-      <section className="relative z-10 px-6 md:px-12 py-16 max-w-7xl mx-auto">
-        <div className="text-center mb-10">
-          <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-4">Fashion Blog</div>
-          <h2 className="text-3xl md:text-4xl font-bold">
-            Style Tips & <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Fashion Guides</span>
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { slug: 'skin-tone-colors', title: t('blog1Title'), excerpt: t('blog1Excerpt'), icon: FashionIcons.Analysis, emoji: '🎨', date: 'Jan 15, 2025' },
-            { slug: 'outfit-guide', title: t('blog2Title'), excerpt: t('blog2Excerpt'), icon: FashionIcons.Wardrobe, emoji: '👗', date: 'Jan 20, 2025' },
-            { slug: 'ai-fashion', title: t('blog3Title'), excerpt: t('blog3Excerpt'), icon: FashionIcons.AI, emoji: '🤖', date: 'Jan 25, 2025' },
-          ].map((post) => (
-            <a
-              key={post.slug}
-              href={`/blog/${post.slug}`}
-              className="group bg-gray-900/60 border border-gray-800 rounded-2xl p-6 hover:border-purple-600/60 hover:bg-gray-900/80 transition-all duration-300 backdrop-blur-sm hover:shadow-lg hover:shadow-purple-900/20 hover:-translate-y-1 flex flex-col"
-            >
-              <div className="text-3xl mb-3">{post.emoji}</div>
-              <p className="text-purple-400 text-xs mb-2">{post.date}</p>
-              <h3 className="text-white font-bold text-base mb-2 group-hover:text-purple-300 transition-colors">{post.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed flex-1">{post.excerpt}</p>
-              <p className="text-purple-400 text-xs mt-4 font-semibold group-hover:text-purple-300">{t('readMore') || 'Read More →'}</p>
-            </a>
-          ))}
-        </div>
-        <div className="text-center mt-8">
-          <a href="/blog" className="inline-block border border-purple-500/50 hover:border-purple-400 bg-purple-900/20 hover:bg-purple-900/40 transition-all px-8 py-3 rounded-full text-sm font-semibold text-purple-300 hover:text-white">
-            {t('viewAllArticles') || 'View All Articles →'}
-          </a>
-        </div>
-      </section>
-
-      {/* AdSense Partner Block - Only renders when AdSense script is loaded */}
-      {typeof window !== 'undefined' && window.adsbygoogle && (
-        <section className="relative z-10 px-6 md:px-12 py-12 max-w-7xl mx-auto">
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-md text-center">
-            <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mb-4">Official StyleGuru AI Partner Content</p>
-            <div className="min-h-[200px] flex items-center justify-center border border-white/5 bg-black/20 rounded-2xl">
-              <AdSense />
-            </div>
-          </div>
-        </section>
-      )}
-
-      <Footer />
+        <button
+          onClick={onClose}
+          style={{ background: 'none', border: 'none', color: '#6B6B6B', fontSize: '12px', cursor: 'pointer', padding: '8px', letterSpacing: '0.05em' }}
+        >
+          Continue Exploring
+        </button>
+      </div>
     </div>
   );
 }
 
-function FAQItem({ q, a }) {
-  const [open, setOpen] = useState(false);
+/* ══════════════════════════════════════════════
+   MOBILE MENU OVERLAY
+   Full-screen black menu for mobile
+   ══════════════════════════════════════════════ */
+function MobileMenu({ open, onClose, navItems, onItemClick, onLoginClick }) {
+  useEffect(() => {
+    if (open) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
+  if (!open) return null;
+
   return (
-    <div className="bg-gray-900/60 border border-gray-800 rounded-2xl overflow-hidden hover:border-purple-600/40 transition-all">
-      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between px-5 py-4 text-left">
-        <span className="text-white font-semibold text-sm pr-4">{q}</span>
-        <span className={`text-purple-400 text-lg flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>▼</span>
-      </button>
-      {open && (
-        <div className="px-5 pb-4 border-t border-gray-800/50">
-          <p className="text-gray-400 text-sm leading-relaxed pt-3">{a}</p>
+    <div
+      className="fixed inset-0 z-[200] flex flex-col"
+      style={{ background: '#0A0A0A' }}
+    >
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-6 py-5" style={{ borderBottom: '1px solid #1C1C1C' }}>
+        <div className="flex items-center gap-2.5">
+          <div style={{ width: 32, height: 32, background: '#C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#0A0A0A', letterSpacing: '0.05em' }}>SG</span>
+          </div>
+          <span style={{ fontSize: '14px', fontWeight: 600, color: '#F0EDE6', letterSpacing: '0.02em' }}>StyleGuru AI</span>
         </div>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#6B6B6B', cursor: 'pointer', fontSize: '22px', padding: '4px' }}>
+          ✕
+        </button>
+      </div>
+
+      {/* Nav items */}
+      <div className="flex-1 flex flex-col justify-center px-8 gap-1">
+        {navItems.map((item, i) => (
+          <button
+            key={item.id}
+            onClick={() => { onItemClick(item); onClose(); }}
+            className="w-full text-left py-5 fade-up"
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              borderBottom: '1px solid #1C1C1C',
+              fontFamily: "'Playfair Display', serif",
+              fontSize: '32px', fontWeight: 300,
+              color: '#F0EDE6',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              animationDelay: `${i * 0.06}s`, opacity: 0
+            }}
+          >
+            {item.label}
+            {item.requiresAuth && (
+              <span className="luxe-label" style={{ color: '#C9A96E', fontSize: '9px' }}>Members</span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Bottom */}
+      <div className="p-8">
+        <button onClick={() => { onLoginClick(); onClose(); }} className="btn-luxe w-full">
+          Login / Sign Up
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   FEATURE PREVIEW CARD (locked behind login)
+   ══════════════════════════════════════════════ */
+function FeatureCard({ icon, title, desc, tag, items, onUnlock, delay }) {
+  return (
+    <div
+      className="luxe-card card-hover stagger-1 flex flex-col"
+      style={{ padding: '40px 32px', animationDelay: `${delay}s`, opacity: 0 }}
+    >
+      <p className="luxe-label mb-6" style={{ color: '#C9A96E' }}>{tag}</p>
+      <div style={{ fontSize: '32px', marginBottom: '16px' }}>{icon}</div>
+      <h3 className="luxe-display mb-3" style={{ fontSize: '22px', color: '#F0EDE6' }}>{title}</h3>
+      <p style={{ fontSize: '13px', color: '#6B6B6B', lineHeight: '1.7', marginBottom: '28px', flex: 1 }}>{desc}</p>
+
+      {/* Preview locked items */}
+      <div style={{ padding: '16px', background: '#0A0A0A', border: '1px solid #1C1C1C', marginBottom: '28px' }}>
+        <p className="luxe-label mb-3" style={{ color: '#3A3A3A', fontSize: '9px' }}>Preview</p>
+        <div className="flex flex-col gap-2">
+          {items.map((item, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#C9A96E', flexShrink: 0 }} />
+              <span style={{ fontSize: '12px', color: '#3A3A3A' }}>{item}</span>
+            </div>
+          ))}
+        </div>
+        {/* Blur overlay */}
+        <div style={{ position: 'absolute', inset: 0, backdropFilter: 'blur(4px)', background: 'rgba(10,10,10,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '0' }} />
+      </div>
+
+      <button onClick={onUnlock} className="btn-luxe-outline w-full">
+        Sign In to Access
+      </button>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   SKIN TONE SWATCH
+   ══════════════════════════════════════════════ */
+function SkinToneSwatch({ name, hex, colors }) {
+  return (
+    <div className="text-center">
+      <div
+        style={{ width: 56, height: 56, borderRadius: '50%', background: hex, margin: '0 auto 10px', border: '2px solid #242424' }}
+      />
+      <p style={{ fontSize: '11px', color: '#6B6B6B', letterSpacing: '0.08em', marginBottom: '10px' }}>{name}</p>
+      <div className="flex gap-1.5 justify-center">
+        {colors.map((c, i) => (
+          <div key={i} style={{ width: 16, height: 16, borderRadius: '2px', background: c }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   MAIN LANDING PAGE
+   ══════════════════════════════════════════════ */
+export default function LandingPage({ user, onGetStarted, onLoginClick }) {
+  const { t } = useLanguage();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [gateFeature, setGateFeature] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
+
+  // Scroll listener for navbar
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 60);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Testimonial auto-rotate
+  useEffect(() => {
+    const timer = setInterval(() => setActiveTestimonial(i => (i + 1) % testimonials.length), 4500);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleFeatureClick = (feature, id) => {
+    if (user) {
+      onGetStarted();
+    } else {
+      setGateFeature(feature);
+    }
+  };
+
+  const navItems = [
+    { id: 'home', label: 'Home', requiresAuth: false },
+    { id: 'analyze', label: 'Analyze', requiresAuth: true },
+    { id: 'history', label: 'History', requiresAuth: true },
+    { id: 'wardrobe', label: 'Wardrobe', requiresAuth: true },
+    { id: 'tools', label: 'Tools', requiresAuth: true },
+    { id: 'profile', label: 'Profile', requiresAuth: true },
+  ];
+
+  const testimonials = [
+    { quote: "Finally an AI that understood my warm Indian skin tone perfectly. The color recommendations were spot-on.", author: "Priya S.", location: "Mumbai" },
+    { quote: "I never knew which colors suited me until StyleGuru AI analyzed my photo. Now I shop with confidence.", author: "Rahul K.", location: "Delhi" },
+    { quote: "The outfit combinations it suggested for my olive skin were exactly what I needed for my interview.", author: "Ananya M.", location: "Bangalore" },
+  ];
+
+  const skinTones = [
+    { name: 'Fair Cool', hex: '#F5E6D8', colors: ['#000080','#008080','#4B0082','#2F4F4F'] },
+    { name: 'Light Warm', hex: '#E8C9A0', colors: ['#8B4513','#556B2F','#B8860B','#8B0000'] },
+    { name: 'Wheatish', hex: '#D4A574', colors: ['#000080','#228B22','#8B0000','#2F4F4F'] },
+    { name: 'Medium Warm', hex: '#C68642', colors: ['#000080','#008000','#800000','#FFFDD0'] },
+    { name: 'Olive', hex: '#A0785A', colors: ['#FF7F50','#20B2AA','#9370DB','#F0E68C'] },
+    { name: 'Dark Warm', hex: '#6B3D2E', colors: ['#FFD700','#FF6347','#00CED1','#FF69B4'] },
+  ];
+
+  const features = [
+    {
+      icon: '📷',
+      tag: 'Core Feature',
+      title: 'AI Skin Analysis',
+      desc: 'Upload a selfie and our AI maps your exact skin tone using ITA color theory, then curates your complete personal color palette.',
+      items: ['Skin tone detected & categorized', 'Best colors for shirts & tops', 'Colors to avoid', 'Seasonal palette assigned'],
+      id: 'analyze',
+      label: 'Analyze'
+    },
+    {
+      icon: '👗',
+      tag: 'Style Vault',
+      title: 'Your Wardrobe',
+      desc: 'Build and organize your personal wardrobe. Get AI outfit combinations and never wonder "what to wear" again.',
+      items: ['Save your clothing pieces', 'AI outfit combinations', 'Occasion-based suggestions', 'Fit performance score'],
+      id: 'wardrobe',
+      label: 'Wardrobe'
+    },
+    {
+      icon: '⚙️',
+      tag: 'Power Tools',
+      title: 'Style Tools',
+      desc: 'AI style chat, outfit checker, outfit calendar, color contrast checker, and trending fashion picks — all in one place.',
+      items: ['AI StyleBot chat', 'Outfit checker tool', 'Outfit calendar', 'Trending styles in India'],
+      id: 'tools',
+      label: 'Tools'
+    },
+  ];
+
+  return (
+    <div style={{ background: '#0A0A0A', color: '#F0EDE6', minHeight: '100vh', overflowX: 'hidden', fontFamily: "'Inter', 'DM Sans', sans-serif" }}>
+      <SEOHead
+        title="StyleGuru AI — AI Fashion Advisor for Your Skin Tone"
+        description="Discover your perfect colors and outfits with AI-powered skin tone analysis. Personalized fashion advice for every Indian skin tone."
+      />
+
+      {/* ─── Login Gate Modal ─── */}
+      {gateFeature && (
+        <LoginGateModal
+          feature={gateFeature}
+          onClose={() => setGateFeature(null)}
+          onLogin={() => { setGateFeature(null); onLoginClick(); }}
+        />
       )}
+
+      {/* ─── Mobile Menu ─── */}
+      <MobileMenu
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        navItems={navItems}
+        onItemClick={(item) => item.requiresAuth ? handleFeatureClick(item.label, item.id) : null}
+        onLoginClick={onLoginClick}
+      />
+
+      {/* ════════════════════════════════════════
+          NAVBAR
+          ════════════════════════════════════════ */}
+      <nav
+        className="fixed top-0 left-0 right-0 z-[100]"
+        style={{
+          borderBottom: isScrolled ? '1px solid #1C1C1C' : '1px solid transparent',
+          background: isScrolled ? 'rgba(10,10,10,0.95)' : 'transparent',
+          backdropFilter: isScrolled ? 'blur(20px)' : 'none',
+          transition: 'all 0.3s ease',
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between" style={{ height: 64 }}>
+          {/* Logo */}
+          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <div style={{ width: 30, height: 30, background: '#C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ fontSize: '10px', fontWeight: 700, color: '#0A0A0A', letterSpacing: '0.05em' }}>SG</span>
+            </div>
+            <span style={{ fontSize: '13px', fontWeight: 500, color: '#F0EDE6', letterSpacing: '0.06em', textTransform: 'uppercase' }}>StyleGuru AI</span>
+          </div>
+
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-8">
+            {navItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => item.requiresAuth ? handleFeatureClick(item.label, item.id) : null}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  fontSize: '11px', fontWeight: 500, letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: '#6B6B6B',
+                  padding: '4px 0',
+                  transition: 'color 0.2s'
+                }}
+                onMouseEnter={e => e.target.style.color = '#F0EDE6'}
+                onMouseLeave={e => e.target.style.color = '#6B6B6B'}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Desktop CTA */}
+          <div className="hidden md:flex items-center gap-4">
+            <button
+              onClick={onLoginClick}
+              style={{ background: 'none', border: '1px solid #242424', color: '#F0EDE6', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', padding: '9px 20px', cursor: 'pointer', transition: 'border-color 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = '#C9A96E'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = '#242424'}
+            >
+              Login
+            </button>
+            <button onClick={onGetStarted} className="btn-gold" style={{ padding: '9px 20px' }}>
+              Get Started
+            </button>
+          </div>
+
+          {/* Mobile Hamburger */}
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="md:hidden"
+            style={{ background: 'none', border: 'none', color: '#F0EDE6', cursor: 'pointer', padding: '8px', fontSize: '20px' }}
+          >
+            ☰
+          </button>
+        </div>
+      </nav>
+
+      {/* ════════════════════════════════════════
+          HERO SECTION
+          ════════════════════════════════════════ */}
+      <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', paddingTop: 64 }}>
+        <div className="max-w-7xl mx-auto px-6 md:px-10 w-full">
+          <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-8 py-20">
+
+            {/* Left: Text */}
+            <div className="flex-[1.2] text-center lg:text-left">
+              <p className="luxe-label mb-8 fade-up" style={{ color: '#C9A96E', animationDelay: '0.1s', opacity: 0 }}>
+                AI-Powered Fashion Intelligence
+              </p>
+
+              <h1
+                className="luxe-display fade-up"
+                style={{ fontSize: 'clamp(48px, 8vw, 88px)', color: '#F0EDE6', marginBottom: '24px', animationDelay: '0.2s', opacity: 0 }}
+              >
+                Discover Your<br />
+                <em style={{ fontStyle: 'italic', color: '#C9A96E' }}>Perfect</em> Style
+              </h1>
+
+              <p className="fade-up" style={{ fontSize: '15px', color: '#6B6B6B', lineHeight: '1.8', marginBottom: '40px', maxWidth: 460, animationDelay: '0.3s', opacity: 0 }}>
+                Upload a selfie. Our AI analyzes your skin tone, curates your color palette, and builds a personalized style guide — all in seconds.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start fade-up" style={{ animationDelay: '0.4s', opacity: 0 }}>
+                <button onClick={onGetStarted} className="btn-gold" style={{ padding: '16px 44px', fontSize: '11px' }}>
+                  Analyze My Style →
+                </button>
+                <button
+                  onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="btn-luxe-outline"
+                  style={{ padding: '16px 44px', fontSize: '11px', color: 'var(--luxe-text)' }}
+                >
+                  Explore Features
+                </button>
+              </div>
+
+              {/* Trust signals */}
+              <div className="flex items-center gap-6 mt-10 justify-center lg:justify-start fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
+                <span style={{ fontSize: '11px', color: '#3A3A3A', letterSpacing: '0.05em' }}>✓ Free Forever</span>
+                <span style={{ color: '#242424' }}>|</span>
+                <span style={{ fontSize: '11px', color: '#3A3A3A', letterSpacing: '0.05em' }}>✓ No Credit Card</span>
+                <span style={{ color: '#242424' }}>|</span>
+                <span style={{ fontSize: '11px', color: '#3A3A3A', letterSpacing: '0.05em' }}>✓ Instant Results</span>
+              </div>
+            </div>
+
+            {/* Right: Editorial Image */}
+            <div className="flex-1 flex justify-center lg:justify-end w-full max-w-sm lg:max-w-none float">
+              <div style={{ position: 'relative' }}>
+                {/* Outer frame */}
+                <div style={{ border: '1px solid #242424', padding: '8px', background: '#111111' }}>
+                  <div style={{ width: '100%', maxWidth: 340, height: 440, overflow: 'hidden', position: 'relative' }}>
+                    <img
+                      src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=680&q=85&auto=format&fit=crop"
+                      alt="Fashion editorial"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(20%) contrast(1.05)' }}
+                    />
+                    {/* Analysis overlay */}
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px', background: 'linear-gradient(transparent, rgba(0,0,0,0.92))' }}>
+                      <p style={{ fontSize: '9px', letterSpacing: '0.2em', color: '#C9A96E', textTransform: 'uppercase', marginBottom: '8px' }}>AI Analysis</p>
+                      <p style={{ fontSize: '15px', fontFamily: "'Playfair Display', serif", color: '#F0EDE6', marginBottom: '8px' }}>Medium Warm Tone</p>
+                      <div className="flex gap-1.5">
+                        {['#000080','#008080','#800000','#556B2F','#FF7F50','#FFDB58'].map(c => (
+                          <div key={c} style={{ width: 18, height: 18, borderRadius: '2px', background: c }} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating badge */}
+                <div style={{ position: 'absolute', top: -12, right: -12, background: '#C9A96E', padding: '8px 14px' }}>
+                  <p style={{ fontSize: '9px', letterSpacing: '0.15em', color: '#0A0A0A', fontWeight: 600 }}>98% ACCURACY</p>
+                </div>
+
+                {/* Bottom badge */}
+                <div style={{ position: 'absolute', bottom: -12, left: -12, background: '#111111', border: '1px solid #242424', padding: '8px 14px' }}>
+                  <p style={{ fontSize: '9px', letterSpacing: '0.1em', color: '#6B6B6B' }}>
+                    <span style={{ color: '#C9A96E' }}>10,000+</span> analyses done
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          STATS BAR
+          ════════════════════════════════════════ */}
+      <div style={{ borderTop: '1px solid #1C1C1C', borderBottom: '1px solid #1C1C1C' }}>
+        <div className="max-w-7xl mx-auto px-6 md:px-10">
+          <div className="grid grid-cols-2 md:grid-cols-4">
+            {[
+              { value: '10,000+', label: 'Style Analyses' },
+              { value: '98%', label: 'Accuracy Rate' },
+              { value: '6', label: 'Skin Tone Types' },
+              { value: '100%', label: 'Free Forever' },
+            ].map((stat, i) => (
+              <div
+                key={i}
+                className="text-center py-8 px-4"
+                style={{ borderRight: i < 3 ? '1px solid #1C1C1C' : 'none', borderBottom: i < 2 ? '1px solid #1C1C1C' : 'none' }}
+              >
+                <p className="luxe-display mb-1" style={{ fontSize: '32px', color: '#F0EDE6' }}>{stat.value}</p>
+                <p className="luxe-label" style={{ color: '#6B6B6B', fontSize: '9px' }}>{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ════════════════════════════════════════
+          FEATURE PREVIEW (explore without login)
+          ════════════════════════════════════════ */}
+      <section id="features" className="max-w-7xl mx-auto px-6 md:px-10 py-24">
+        <div className="text-center mb-16">
+          <p className="luxe-label mb-4" style={{ color: '#C9A96E' }}>What's Inside</p>
+          <h2 className="luxe-display" style={{ fontSize: 'clamp(32px, 5vw, 52px)', color: '#F0EDE6' }}>
+            Your Complete Style Suite
+          </h2>
+          <div className="luxe-divider mt-8 mb-4 max-w-xs mx-auto" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-px" style={{ border: '1px solid #1C1C1C' }}>
+          {features.map((f, i) => (
+            <div
+              key={f.id}
+              className="stagger-1"
+              style={{
+                background: '#111111',
+                padding: '40px 32px',
+                borderRight: i < 2 ? '1px solid #1C1C1C' : 'none',
+                animationDelay: `${i * 0.1}s`, opacity: 0,
+                position: 'relative',
+                transition: 'background 0.25s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#141414'}
+              onMouseLeave={e => e.currentTarget.style.background = '#111111'}
+            >
+              <p className="luxe-label mb-6" style={{ color: '#C9A96E' }}>{f.tag}</p>
+              <div style={{ fontSize: '28px', marginBottom: '16px' }}>{f.icon}</div>
+              <h3 className="luxe-display mb-3" style={{ fontSize: '22px', color: '#F0EDE6' }}>{f.title}</h3>
+              <p style={{ fontSize: '13px', color: '#6B6B6B', lineHeight: '1.7', marginBottom: '28px' }}>{f.desc}</p>
+
+              {/* Locked preview */}
+              <div style={{ padding: '16px', background: '#0A0A0A', marginBottom: '28px', position: 'relative', overflow: 'hidden' }}>
+                <p className="luxe-label mb-3" style={{ color: '#3A3A3A', fontSize: '9px' }}>Preview</p>
+                <div style={{ filter: 'blur(3px)', pointerEvents: 'none' }}>
+                  {f.items.map((item, j) => (
+                    <div key={j} className="flex items-center gap-3 mb-2">
+                      <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#C9A96E', flexShrink: 0 }} />
+                      <span style={{ fontSize: '12px', color: '#6B6B6B' }}>{item}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.5)' }}>
+                  <span style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#C9A96E', textTransform: 'uppercase' }}>🔒 Members Only</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => handleFeatureClick(f.label, f.id)}
+                className="btn-luxe-outline w-full"
+              >
+                Sign In to Access →
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          HOW IT WORKS
+          ════════════════════════════════════════ */}
+      <section style={{ borderTop: '1px solid #1C1C1C', borderBottom: '1px solid #1C1C1C', padding: '80px 0' }}>
+        <div className="max-w-7xl mx-auto px-6 md:px-10">
+          <div className="text-center mb-14">
+            <p className="luxe-label mb-4" style={{ color: '#C9A96E' }}>The Process</p>
+            <h2 className="luxe-display" style={{ fontSize: 'clamp(28px, 4vw, 44px)', color: '#F0EDE6' }}>
+              Three Steps to Your Style
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
+            {[
+              { n: '01', title: 'Upload a Photo', desc: 'Take a selfie or upload any clear photo of your face. Natural lighting gives the best results.' },
+              { n: '02', title: 'AI Analyzes', desc: 'Our algorithm measures your skin tone using ITA angle calculation and seasonal color theory.' },
+              { n: '03', title: 'Get Your Guide', desc: 'Receive your full color palette, outfit combinations, shopping links, and personalized style tips.' },
+            ].map((step, i) => (
+              <div
+                key={i}
+                className="text-center md:text-left"
+                style={{ padding: '40px', borderRight: i < 2 ? '1px solid #1C1C1C' : 'none' }}
+              >
+                <p className="luxe-display mb-6" style={{ fontSize: '72px', color: '#1C1C1C', lineHeight: 1 }}>{step.n}</p>
+                <h3 style={{ fontSize: '17px', fontWeight: 500, color: '#F0EDE6', marginBottom: '12px' }}>{step.title}</h3>
+                <p style={{ fontSize: '13px', color: '#6B6B6B', lineHeight: '1.75' }}>{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          SKIN TONE SHOWCASE
+          ════════════════════════════════════════ */}
+      <section className="max-w-7xl mx-auto px-6 md:px-10 py-24">
+        <div className="text-center mb-14">
+          <p className="luxe-label mb-4" style={{ color: '#C9A96E' }}>Personalized for You</p>
+          <h2 className="luxe-display" style={{ fontSize: 'clamp(28px, 4vw, 44px)', color: '#F0EDE6' }}>
+            Every Skin Tone. Every Style.
+          </h2>
+          <p style={{ fontSize: '14px', color: '#6B6B6B', marginTop: '12px', maxWidth: 480, margin: '12px auto 0' }}>
+            StyleGuru AI is built specifically for the rich spectrum of Indian skin tones.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-8">
+          {skinTones.map((tone, i) => (
+            <SkinToneSwatch key={i} {...tone} />
+          ))}
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          EDITORIAL TESTIMONIAL
+          ════════════════════════════════════════ */}
+      <section style={{ borderTop: '1px solid #1C1C1C', padding: '80px 0', background: '#111111' }}>
+        <div className="max-w-2xl mx-auto text-center px-6">
+          <p className="luxe-label mb-8" style={{ color: '#C9A96E' }}>What They Say</p>
+          <div style={{ position: 'relative', minHeight: 120 }}>
+            {testimonials.map((t, i) => (
+              <div
+                key={i}
+                style={{
+                  position: i === 0 ? 'relative' : 'absolute',
+                  top: 0, left: 0, right: 0,
+                  opacity: activeTestimonial === i ? 1 : 0,
+                  transition: 'opacity 0.6s ease',
+                  pointerEvents: activeTestimonial === i ? 'auto' : 'none'
+                }}
+              >
+                <blockquote className="luxe-display" style={{ fontSize: 'clamp(18px, 3vw, 26px)', color: '#F0EDE6', fontStyle: 'italic', lineHeight: 1.5, marginBottom: '24px' }}>
+                  "{t.quote}"
+                </blockquote>
+                <p className="luxe-label" style={{ color: '#6B6B6B', fontSize: '10px' }}>
+                  — {t.author}, {t.location}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Dots */}
+          <div className="flex items-center justify-center gap-2 mt-10">
+            {testimonials.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveTestimonial(i)}
+                style={{
+                  width: activeTestimonial === i ? 20 : 6,
+                  height: 2,
+                  background: activeTestimonial === i ? '#C9A96E' : '#2A2A2A',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          CTA BANNER
+          ════════════════════════════════════════ */}
+      <section style={{ borderTop: '1px solid #1C1C1C' }}>
+        <div className="max-w-7xl mx-auto px-6 md:px-10 py-24 text-center">
+          <p className="luxe-label mb-6" style={{ color: '#C9A96E' }}>Begin Today</p>
+          <h2 className="luxe-display mb-6" style={{ fontSize: 'clamp(36px, 6vw, 72px)', color: '#F0EDE6' }}>
+            Your Style Journey<br />Starts Here
+          </h2>
+          <p style={{ fontSize: '14px', color: '#6B6B6B', marginBottom: '40px', maxWidth: 420, margin: '0 auto 40px' }}>
+            Join thousands of users across India who have discovered their perfect style with StyleGuru AI.
+          </p>
+          <button onClick={onGetStarted} className="btn-gold" style={{ padding: '18px 56px', fontSize: '11px' }}>
+            Get Started Free →
+          </button>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          FOOTER
+          ════════════════════════════════════════ */}
+      <footer style={{ borderTop: '1px solid #1C1C1C', padding: '56px 0 32px', background: '#0A0A0A' }}>
+        <div className="max-w-7xl mx-auto px-6 md:px-10">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+            {/* Brand */}
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-2.5 mb-4">
+                <div style={{ width: 28, height: 28, background: '#C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: '9px', fontWeight: 700, color: '#0A0A0A' }}>SG</span>
+                </div>
+                <span style={{ fontSize: '13px', fontWeight: 500, color: '#F0EDE6', letterSpacing: '0.06em', textTransform: 'uppercase' }}>StyleGuru AI</span>
+              </div>
+              <p style={{ fontSize: '13px', color: '#6B6B6B', lineHeight: '1.7', maxWidth: 280 }}>
+                AI-powered fashion intelligence for every skin tone. Made in India 🇮🇳
+              </p>
+            </div>
+
+            {/* Product */}
+            <div>
+              <p className="luxe-label mb-4" style={{ color: '#3A3A3A', fontSize: '9px' }}>Product</p>
+              {['Analyze', 'History', 'Wardrobe', 'Tools', 'Blog'].map(link => (
+                <div key={link} style={{ marginBottom: '10px' }}>
+                  <button
+                    onClick={() => link === 'Blog' ? window.location.href = '/blog' : handleFeatureClick(link, link.toLowerCase())}
+                    style={{ background: 'none', border: 'none', color: '#6B6B6B', fontSize: '13px', cursor: 'pointer', padding: 0, transition: 'color 0.2s' }}
+                    onMouseEnter={e => e.target.style.color = '#F0EDE6'}
+                    onMouseLeave={e => e.target.style.color = '#6B6B6B'}
+                  >{link}</button>
+                </div>
+              ))}
+            </div>
+
+            {/* Company */}
+            <div>
+              <p className="luxe-label mb-4" style={{ color: '#3A3A3A', fontSize: '9px' }}>Company</p>
+              {[
+                { label: 'About', href: '/about' },
+                { label: 'Contact', href: '/contact' },
+                { label: 'Privacy', href: '/privacy' },
+                { label: 'Terms', href: '/terms' },
+              ].map(link => (
+                <div key={link.label} style={{ marginBottom: '10px' }}>
+                  <a href={link.href} style={{ color: '#6B6B6B', fontSize: '13px', textDecoration: 'none', transition: 'color 0.2s' }}
+                    onMouseEnter={e => e.target.style.color = '#F0EDE6'}
+                    onMouseLeave={e => e.target.style.color = '#6B6B6B'}
+                  >{link.label}</a>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="luxe-divider mb-6" />
+
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p style={{ fontSize: '11px', color: '#3A3A3A', letterSpacing: '0.05em' }}>
+              © 2026 StyleGuru AI. All rights reserved.
+            </p>
+            <p className="luxe-label" style={{ color: '#3A3A3A', fontSize: '9px' }}>
+              Designed for Indian skin tones · Built in India 🇮🇳
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
