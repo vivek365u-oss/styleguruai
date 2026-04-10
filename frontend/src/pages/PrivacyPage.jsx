@@ -23,24 +23,48 @@ export default function PrivacyPage() {
 
       <main className="relative z-10 max-w-3xl mx-auto px-6 py-16">
         <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-6">Legal</div>
-        <h1 className="text-4xl md:text-5xl font-extrabold mb-8 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-          Privacy Policy
-        </h1>
-
-        <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-8 space-y-6 backdrop-blur-sm">
-          <p className="text-gray-400 text-sm">Last updated: January 2025</p>
-
-          {[
-            { heading: 'Your Privacy Matters', text: 'We respect your privacy. Style Guru AI does not store or share your uploaded images.' },
-            { heading: 'Image Processing', text: 'Images are processed securely for analysis purposes only.' },
-            { heading: 'Cookies', text: 'We may use cookies to improve user experience. Third-party services like Google AdSense may use cookies.' },
-            { heading: 'Agreement', text: 'By using our website, you agree to this policy.' },
-          ].map((section) => (
-            <div key={section.heading} className="border-l-2 border-purple-500/50 pl-4">
-              <h2 className="text-white font-semibold text-lg mb-2">{section.heading}</h2>
-              <p className="text-gray-300 leading-relaxed">{section.text}</p>
+        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 space-y-10 backdrop-blur-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-6">
+            <div>
+              <h1 className="text-4xl font-black mb-2 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Privacy Policy</h1>
+              <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Effective Date: January 01, 2025</p>
             </div>
-          ))}
+            <div className="px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-xl text-purple-300 text-[10px] font-black uppercase tracking-widest">
+              GDPR & ITA Compliant
+            </div>
+          </div>
+
+          <section className="space-y-4">
+            <h2 className="text-xl font-black text-white">1. Data Collection & Usage</h2>
+            <p className="text-gray-400 leading-relaxed text-sm">
+              StyleGuru AI operates on a "Privacy First" architecture. When you upload an image for Skin Tone or Outfit analysis, our AI processes the visual data in a transient state. We do not store original raw images on our permanent servers after the analysis is complete, ensuring your visual identity remains yours.
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-xl font-black text-white">2. Intelligence Processing</h2>
+            <p className="text-gray-400 leading-relaxed text-sm">
+              Our models analyze technical attributes such as ITA (Individual Typology Angle) and hex-code values to provide accurate fashion recommendations. This data is converted into anonymized style profiles to personalize your experience without identifying you personally.
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-xl font-black text-white">3. Third-Party Integration</h2>
+            <p className="text-gray-400 leading-relaxed text-sm">
+              We partner with Google AdSense and various affiliate networks (Amazon, Myntra, etc.) to monetize our free services. These partners may use cookies to serve relevant advertisements. We recommend reviewing their respective privacy policies for more details on their data handling practices.
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-xl font-black text-white">4. Your Rights</h2>
+            <p className="text-gray-400 leading-relaxed text-sm">
+              You have the right to access, delete, or modify any saved style preferences within your Dashboard. For any data-related queries or formal requests, please contact our Data Protection Officer at <span className="text-purple-400 font-bold">privacy@styleguruai.online</span>.
+            </p>
+          </section>
+
+          <div className="pt-6 border-t border-white/5">
+             <p className="text-gray-500 text-[10px] italic">By continuing to use StyleGuru AI, you acknowledge and agree to the terms outlined in this Privacy Policy.</p>
+          </div>
         </div>
       </main>
 

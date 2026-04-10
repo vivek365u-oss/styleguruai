@@ -24,21 +24,26 @@ function ProductCard({ product }) {
       isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-gray-200 hover:bg-gray-50'
     }`}>
       {/* Product Image */}
-      <div className="relative w-full aspect-[4/5] bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center overflow-hidden">
-        {!imgError && product.image_url ? (
+      <div className="relative w-full aspect-[4/5] bg-gradient-to-br from-gray-900/40 to-gray-800/40 flex items-center justify-center overflow-hidden group-hover:after:absolute group-hover:after:inset-0 group-hover:after:bg-purple-500/10 transition-all">
+        {!imgError && product.image_url && !product.image_url.includes('placeholder.com') && !product.image_url.includes('water-droplets') ? (
           <img
             src={product.image_url}
             alt={product.name}
-            className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
             loading="lazy"
             onError={() => {
-              console.warn(`[ProductCard] Failed to load image, using fallback: ${product.image_url}`);
+              console.warn(`[ProductCard] Image failed: ${product.image_url}`);
               setImgError(true);
             }}
           />
         ) : (
-          <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30">
-            <span className="text-5xl drop-shadow-md mb-2">🛍️</span>
+          <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-br from-[#1a1c2e] to-[#0a0b14] relative">
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-500/20 via-transparent to-transparent" />
+            <svg className="w-16 h-16 text-white/10 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.62 1.96V10a12 12 0 0010 11.83 12 12 0 0010-11.83V5.42a2 2 0 00-1.62-1.96z" />
+              <path d="M12 22V12" />
+            </svg>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">StyleGuru Original</span>
           </div>
         )}
         

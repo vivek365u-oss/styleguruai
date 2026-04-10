@@ -23,23 +23,48 @@ export default function TermsPage() {
 
       <main className="relative z-10 max-w-3xl mx-auto px-6 py-16">
         <div className="inline-block bg-purple-900/30 border border-purple-700/40 text-purple-300 text-xs px-4 py-2 rounded-full mb-6">Legal</div>
-        <h1 className="text-4xl md:text-5xl font-extrabold mb-8 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-          Terms &amp; Conditions
-        </h1>
-
-        <div className="bg-gray-900/60 border border-gray-800 rounded-2xl p-8 space-y-6 backdrop-blur-sm">
-          <p className="text-gray-400 text-sm">Last updated: January 2025</p>
-
-          {[
-            { heading: 'Responsible Use', text: 'By using this website, you agree to use the service responsibly.' },
-            { heading: 'Informational Purposes', text: 'All recommendations are for informational purposes only.' },
-            { heading: 'Liability', text: 'We are not responsible for decisions made based on suggestions.' },
-          ].map((section) => (
-            <div key={section.heading} className="border-l-2 border-purple-500/50 pl-4">
-              <h2 className="text-white font-semibold text-lg mb-2">{section.heading}</h2>
-              <p className="text-gray-300 leading-relaxed">{section.text}</p>
+        <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-10 space-y-10 backdrop-blur-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-6">
+            <div>
+              <h1 className="text-4xl font-black mb-2 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Terms & Conditions</h1>
+              <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Last Modified: January 2025</p>
             </div>
-          ))}
+            <div className="px-4 py-2 bg-pink-500/10 border border-pink-500/20 rounded-xl text-pink-300 text-[10px] font-black uppercase tracking-widest">
+              Standard Service Agreement
+            </div>
+          </div>
+
+          <section className="space-y-4">
+            <h2 className="text-xl font-black text-white">1. Acceptance of Terms</h2>
+            <p className="text-gray-400 leading-relaxed text-sm">
+              By accessing or using StyleGuru AI, you agree to be bound by these Terms and Conditions. Our platform provides AI-driven fashion advice, skin tone analysis, and shopping recommendations tailored for Indian complexions. If you do not agree to these terms, please discontinue use of the service.
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-xl font-black text-white">2. Service Accuracy & Limitation</h2>
+            <p className="text-gray-400 leading-relaxed text-sm">
+              While our AI models use advanced engineering to provide high-accuracy style advice, recommendations are for informational and aesthetic purposes only. Final fashion choices, including purchases through affiliate links, are at the user's discretion. StyleGuru AI is not liable for dissatisfaction with external products or analysis variance due to lighting/photo quality.
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-xl font-black text-white">3. Intellectual Property</h2>
+            <p className="text-gray-400 leading-relaxed text-sm">
+              The algorithms, UI design, branding, and generated content within StyleGuru AI are the exclusive property of our founders. You may use our style analysis for personal use but are prohibited from reverse-engineering or commercializing our AI recommendations without written consent.
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-xl font-black text-white">4. User Responsibility</h2>
+            <p className="text-gray-400 leading-relaxed text-sm">
+              Users are responsible for the quality of images uploaded. Clear, well-lit photos provide the most accurate ITA calculations. Any misuse of the platform or attempts to disrupt our AI services will result in immediate termination of access.
+            </p>
+          </section>
+
+          <div className="pt-6 border-t border-white/5">
+             <p className="text-gray-500 text-[10px] italic">StyleGuru AI reserves the right to update these terms at any time. Your continued use constitutes acceptance of the latest version.</p>
+          </div>
         </div>
       </main>
 

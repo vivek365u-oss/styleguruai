@@ -12,6 +12,8 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
   const { t } = useLanguage();
   const canvasRef = useRef(null);
 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -19,13 +21,13 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const particles = Array.from({ length: 60 }, () => ({
+    const particles = Array.from({ length: 40 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       r: Math.random() * 2 + 0.5,
-      dx: (Math.random() - 0.5) * 0.4,
-      dy: (Math.random() - 0.5) * 0.4,
-      alpha: Math.random() * 0.5 + 0.1,
+      dx: (Math.random() - 0.5) * 0.3,
+      dy: (Math.random() - 0.5) * 0.3,
+      alpha: Math.random() * 0.3 + 0.1,
     }));
 
     let animId;
@@ -54,7 +56,7 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#050816] text-white overflow-x-hidden" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
+    <div className="min-h-screen bg-[#02040a] text-white overflow-x-hidden selection:bg-purple-500/30" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
       <SEOHead
         title={t('landingHeroTitle') + " " + t('landingHeroSub')}
         description={t('landingTagline').replace('{perfectColors}', t('perfectColors'))}
@@ -63,21 +65,20 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
       {/* Particle canvas */}
       <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" />
 
-      {/* Glow blobs */}
-      <div className="fixed top-[-200px] left-[-200px] w-[600px] h-[600px] rounded-full bg-purple-700/20 blur-[120px] pointer-events-none z-0" />
-      <div className="fixed bottom-[-200px] right-[-200px] w-[600px] h-[600px] rounded-full bg-pink-700/20 blur-[120px] pointer-events-none z-0" />
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full bg-indigo-900/20 blur-[100px] pointer-events-none z-0" />
+      {/* Glow blobs - Controlled placement to avoid text overlay */}
+      <div className="fixed top-[-10%] left-[-10%] w-[40vw] h-[40vw] rounded-full bg-purple-600/10 blur-[120px] pointer-events-none z-0" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-pink-600/10 blur-[120px] pointer-events-none z-0" />
 
       {/* Floating fashion items */}
       {floatingItems.map((item, i) => (
         <div
           key={i}
-          className="fixed text-2xl pointer-events-none z-0 opacity-10"
+          className="fixed text-2xl pointer-events-none z-0 opacity-[0.03]"
           style={{
-            left: `${(i * 13 + 5) % 95}%`,
-            top: `${(i * 17 + 10) % 90}%`,
-            animation: `float${i % 3} ${4 + i % 3}s ease-in-out infinite`,
-            filter: 'blur(0.5px)',
+            left: `${(i * 13 + 7) % 95}%`,
+            top: `${(i * 17 + 12) % 90}%`,
+            animation: `float${i % 3} ${5 + i % 2}s ease-in-out infinite`,
+            filter: 'blur(1px)',
           }}
         >
           {item}
@@ -85,69 +86,102 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
       ))}
 
       <style>{`
-        @keyframes float0 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
-        @keyframes float1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-25px)} }
-        @keyframes float2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-        @keyframes glow { 0%,100%{box-shadow:0 0 20px rgba(168,85,247,0.5)} 50%{box-shadow:0 0 40px rgba(236,72,153,0.8)} }
+        @keyframes float0 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-15px) rotate(5deg)} }
+        @keyframes float1 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-25px) rotate(-5deg)} }
+        @keyframes float2 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-10px) rotate(3deg)} }
+        @keyframes glow { 0%,100%{box-shadow:0 0 20px rgba(168,85,247,0.3)} 50%{box-shadow:0 0 40px rgba(236,72,153,0.6)} }
+        .hero-title-shadow { text-shadow: 0 0 40px rgba(168,85,247,0.15); }
       `}</style>
 
       {/* Navbar */}
-      <nav className="relative z-10 flex items-center justify-between px-6 md:px-12 py-5 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm font-bold">S</div>
-          <span className="text-lg font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">StyleGuru AI</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <button onClick={onLoginClick} className="text-gray-400 hover:text-white transition text-sm">{t('login')}</button>
-          <button
-            onClick={onGetStarted}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 transition px-5 py-2 rounded-full text-sm font-medium"
-            style={{ animation: 'glow 3s ease-in-out infinite' }}
+      <nav className="relative z-[100] border-b border-white/5 bg-black/20 backdrop-blur-lg">
+        <div className="flex items-center justify-between px-6 md:px-12 py-5 max-w-7xl mx-auto">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm font-black shadow-lg shadow-purple-500/20">S</div>
+            <span className="text-xl font-black bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent tracking-tight">StyleGuru AI</span>
+          </div>
+
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-6">
+            <button onClick={onLoginClick} className="text-gray-400 hover:text-white transition text-sm font-medium">{t('login')}</button>
+            <button
+              onClick={onGetStarted}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-105 transition-all px-6 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-purple-500/20 active:scale-95"
+            >
+              {t('tryNow')}
+            </button>
+          </div>
+
+          {/* Mobile Toggle */}
+          <button 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10"
           >
-            {t('tryNow')}
+            {isMenuOpen ? (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+            )}
           </button>
         </div>
+
+        {/* Mobile Menu Overlay */}
+        {isMenuOpen && (
+          <div className="absolute top-full left-0 right-0 bg-black/95 backdrop-blur-2xl border-b border-white/10 p-6 md:hidden animate-fade-in flex flex-col gap-4 shadow-2xl z-[101]">
+            <button 
+              onClick={() => { setIsMenuOpen(false); onLoginClick(); }}
+              className="w-full py-4 text-center text-gray-300 hover:text-white font-bold border-b border-white/5"
+            >
+              {t('login')}
+            </button>
+            <button 
+              onClick={() => { setIsMenuOpen(false); onGetStarted(); }}
+              className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl text-center text-white font-bold"
+            >
+              {t('tryNow')}
+            </button>
+          </div>
+        )}
       </nav>
 
       {/* Hero */}
-      <section className="relative z-10 flex flex-col lg:flex-row items-center justify-between px-6 md:px-12 py-16 max-w-7xl mx-auto gap-12">
+      <section className="relative z-10 flex flex-col lg:flex-row items-center justify-between px-6 md:px-12 py-16 md:py-24 max-w-7xl mx-auto gap-16 lg:gap-12">
         {/* Left */}
-        <div className="flex-1 text-center lg:text-left">
-          <div className="inline-flex items-center gap-2 bg-purple-900/40 border border-purple-700/50 text-purple-300 text-xs px-4 py-2 rounded-full mb-8 backdrop-blur-sm">
-            <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+        <div className="flex-[1.2] text-center lg:text-left">
+          <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full mb-8 backdrop-blur-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
             AI-Powered Fashion Advisor
           </div>
 
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-6">
-            <span className="text-white">StyleGuru AI</span>
+          <h1 className="text-4xl md:text-6xl lg:text-8xl font-black leading-[1.1] mb-8 hero-title-shadow">
+            <span className="text-white drop-shadow-sm">StyleGuru AI</span>
             <br />
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
               {t('landingHeroTitle')}
             </span>
             <br />
-            <span className="text-white">{t('landingHeroSub')}</span>
+            <span className="text-white opacity-90">{t('landingHeroSub')}</span>
           </h1>
 
-          <p className="text-gray-400 text-lg md:text-xl mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+          <p className="text-gray-400 text-lg md:text-xl mb-12 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
             {t('landingTagline').split('{perfectColors}').map((part, index, array) => (
               <React.Fragment key={index}>
                 {part}
-                {index < array.length - 1 && <span className="text-purple-400 font-medium">{t('perfectColors')}</span>}
+                {index < array.length - 1 && <span className="text-purple-400 font-black decoration-purple-500/30 decoration-4 underline-offset-4">{t('perfectColors')}</span>}
               </React.Fragment>
             ))}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+          <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start">
             <button
               onClick={onGetStarted}
-              className="relative group bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 transition-all px-8 py-4 rounded-full text-lg font-semibold overflow-hidden"
-              style={{ animation: 'glow 3s ease-in-out infinite' }}
+              className="relative group bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-[1.02] transition-all px-10 py-5 rounded-3xl text-lg font-black overflow-hidden shadow-2xl shadow-purple-500/20 active:scale-95"
             >
               <span className="relative z-10">✨ {t('tryNowFree')}</span>
             </button>
             <button
               onClick={onLoginClick}
-              className="border border-purple-600/60 hover:border-purple-400 hover:bg-purple-900/20 transition-all px-8 py-4 rounded-full text-lg font-semibold backdrop-blur-sm"
+              className="border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all px-10 py-5 rounded-3xl text-lg font-black backdrop-blur-sm active:scale-95"
             >
               {t('loginArrow')}
             </button>
