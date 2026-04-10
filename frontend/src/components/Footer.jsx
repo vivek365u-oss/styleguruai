@@ -1,66 +1,74 @@
 /**
- * Footer.jsx — StyleGuru AI Premium Footer
- * Used by LandingPage, PublicLayout (About, Blog, Contact, Privacy, Terms)
+ * Footer.jsx — StyleGuru AI Premium Footer v2
+ * Glassmorphism design system
  */
 import { Link } from 'react-router-dom';
 
-const C = {
-  bg:     '#0A0A0A',
-  border: '#1C1C1C',
-  text:   '#F0EDE6',
-  muted:  '#6B6B6B',
-  subtle: '#2A2A2A',
-  gold:   '#C9A96E',
-};
+const BG = '#080C17';
+const BORDER = 'rgba(255,255,255,0.06)';
+const TEXT = '#F9FAFB';
+const MUTED = '#6B7280';
+const SUBTLE = '#374151';
+const GRAD = 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%)';
 
 export default function Footer() {
   const product = [
-    { label: 'Analyze',  href: '/' },
-    { label: 'History',  href: '/' },
-    { label: 'Wardrobe', href: '/' },
-    { label: 'Tools',    href: '/' },
-    { label: 'Blog',     href: '/blog' },
+    { label: 'Analyze',   href: '/' },
+    { label: 'History',   href: '/' },
+    { label: 'Wardrobe',  href: '/' },
+    { label: 'Tools',     href: '/' },
+    { label: 'Blog',      href: '/blog' },
   ];
 
   const company = [
-    { label: 'About',   href: '/about' },
-    { label: 'Contact', href: '/contact' },
-    { label: 'Privacy', href: '/privacy' },
-    { label: 'Terms',   href: '/terms' },
+    { label: 'About',    href: '/about' },
+    { label: 'Contact',  href: '/contact' },
+    { label: 'Privacy',  href: '/privacy' },
+    { label: 'Terms',    href: '/terms' },
   ];
 
   return (
-    <footer style={{ background: C.bg, borderTop: `1px solid ${C.border}`, padding: '56px 0 32px', fontFamily: "'Inter','DM Sans',sans-serif" }}>
+    <footer style={{
+      background: BG,
+      borderTop: `1px solid ${BORDER}`,
+      padding: '56px 0 32px',
+      fontFamily: "'Plus Jakarta Sans','Inter','DM Sans',sans-serif",
+    }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
 
         {/* Top grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 40, marginBottom: 48 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 40, marginBottom: 48 }}>
 
           {/* Brand */}
           <div style={{ gridColumn: 'span 2' }}>
             <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 16 }}>
-              <div style={{ width: 28, height: 28, background: C.gold, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: '9px', fontWeight: 700, color: '#0A0A0A', letterSpacing: '0.05em' }}>SG</span>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: GRAD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(139,92,246,0.4)', flexShrink: 0 }}>
+                <span style={{ fontSize: '12px', fontWeight: 800, color: 'white' }}>SG</span>
               </div>
-              <span style={{ fontSize: '13px', fontWeight: 500, color: C.text, letterSpacing: '0.06em', textTransform: 'uppercase' }}>StyleGuru AI</span>
+              <span style={{ fontSize: '14px', fontWeight: 700 }}>
+                <span style={{ color: TEXT }}>StyleGuru </span>
+                <span style={{ background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>AI</span>
+              </span>
             </Link>
-            <p style={{ fontSize: '13px', color: C.muted, lineHeight: '1.7', maxWidth: 280 }}>
+            <p style={{ fontSize: '13px', color: MUTED, lineHeight: '1.7', maxWidth: 260, fontWeight: 400 }}>
               AI-powered fashion intelligence for every skin tone. Made in India 🇮🇳
             </p>
+            {/* Gradient divider */}
+            <div style={{ marginTop: 20, height: 2, width: 48, background: GRAD, borderRadius: 1 }} />
           </div>
 
           {/* Product */}
           <div>
-            <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: C.subtle, marginBottom: 16, fontWeight: 600 }}>
+            <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: SUBTLE, marginBottom: 16, fontWeight: 700 }}>
               Product
             </p>
             {product.map(link => (
               <div key={link.label} style={{ marginBottom: 10 }}>
                 <Link
                   to={link.href}
-                  style={{ color: C.muted, fontSize: '13px', textDecoration: 'none', transition: 'color 0.15s', display: 'inline-block' }}
-                  onMouseEnter={e => e.target.style.color = C.text}
-                  onMouseLeave={e => e.target.style.color = C.muted}
+                  style={{ color: MUTED, fontSize: '13px', textDecoration: 'none', transition: 'color 0.15s', display: 'inline-block' }}
+                  onMouseEnter={e => e.target.style.color = TEXT}
+                  onMouseLeave={e => e.target.style.color = MUTED}
                 >
                   {link.label}
                 </Link>
@@ -70,16 +78,16 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: C.subtle, marginBottom: 16, fontWeight: 600 }}>
+            <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: SUBTLE, marginBottom: 16, fontWeight: 700 }}>
               Company
             </p>
             {company.map(link => (
               <div key={link.label} style={{ marginBottom: 10 }}>
                 <Link
                   to={link.href}
-                  style={{ color: C.muted, fontSize: '13px', textDecoration: 'none', transition: 'color 0.15s', display: 'inline-block' }}
-                  onMouseEnter={e => e.target.style.color = C.text}
-                  onMouseLeave={e => e.target.style.color = C.muted}
+                  style={{ color: MUTED, fontSize: '13px', textDecoration: 'none', transition: 'color 0.15s', display: 'inline-block' }}
+                  onMouseEnter={e => e.target.style.color = TEXT}
+                  onMouseLeave={e => e.target.style.color = MUTED}
                 >
                   {link.label}
                 </Link>
@@ -89,14 +97,14 @@ export default function Footer() {
         </div>
 
         {/* Divider */}
-        <div style={{ height: 1, background: C.border, marginBottom: 24 }} />
+        <div style={{ height: 1, background: BORDER, marginBottom: 24 }} />
 
         {/* Bottom bar */}
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <p style={{ fontSize: '11px', color: '#2A2A2A', letterSpacing: '0.05em' }}>
+          <p style={{ fontSize: '12px', color: SUBTLE }}>
             © 2026 StyleGuru AI. All rights reserved.
           </p>
-          <p style={{ fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#2A2A2A' }}>
+          <p style={{ fontSize: '11px', color: SUBTLE, letterSpacing: '0.03em' }}>
             Designed for Indian skin tones · Built in India 🇮🇳
           </p>
         </div>
