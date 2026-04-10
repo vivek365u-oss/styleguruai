@@ -33,8 +33,19 @@ function ColorRecommendationsShop({ recommendations, gender = 'male', isDark = f
 
   if (recommendedColors.length === 0) {
     return (
-      <div className={`p-4 rounded-xl text-center ${isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200'}`}>
-        <p className={isDark ? 'text-white/50' : 'text-gray-600'}>🔍 No color recommendations available</p>
+      <div className="glass-card-premium p-10 rounded-[2.5rem] text-center space-y-4">
+        <div className="w-16 h-16 bg-purple-500/10 rounded-3xl flex items-center justify-center mx-auto text-purple-500">
+           <IconRenderer icon={FashionIcons.Analysis} />
+        </div>
+        <div>
+          <h3 className="text-xl font-bold mb-2">Style Discovery in Progress</h3>
+          <p className="text-gray-500 text-sm leading-relaxed max-w-xs mx-auto">
+            We haven't matched exact products for this specific shade yet, but check out these trending fusion styles that work for all tones!
+          </p>
+        </div>
+        <button className="text-sm font-black text-purple-400 hover:text-purple-300 transition-colors uppercase tracking-widest">
+           Explore Collection →
+        </button>
       </div>
     );
   }

@@ -1,6 +1,7 @@
-import OutfitChecker from './OutfitChecker';
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import OutfitChecker from './OutfitChecker';
 import UploadSection from './UploadSection';
 import ResultsDisplay from './ResultsDisplay';
 import CoupleResults from './CoupleResults';
@@ -39,8 +40,6 @@ function Toast({ message, onClose }) {
   );
 }
 
-
-
 function DailyDropModal({ lastAnalysis, isDark, onClose }) {
   const { t } = useLanguage();
   const [revealed, setRevealed] = useState(false);
@@ -49,15 +48,15 @@ function DailyDropModal({ lastAnalysis, isDark, onClose }) {
     setTimeout(() => {
       localStorage.setItem('sg_daily_drop_date', new Date().toLocaleDateString('en-CA'));
       onClose();
-    }, 2500); 
+    }, 2500);
   };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className={`w-full max-w-sm rounded-[2.5rem] p-8 text-center border-2 border-purple-500/50 shadow-2xl relative overflow-hidden glass-card`}>
+      <div className={`w-full max-w-sm rounded-[2.5rem] p-8 text-center border-2 border-purple-500/50 shadow-2xl relative overflow-hidden glass-card-premium`}>
         {!revealed ? (
           <div className="space-y-6 scale-in">
             <div className="w-20 h-20 mx-auto bg-purple-500/10 rounded-3xl flex items-center justify-center p-4 text-purple-500">
-               <IconRenderer icon={FashionIcons.Wardrobe} />
+              <IconRenderer icon={FashionIcons.Wardrobe} />
             </div>
             <div>
               <h2 className="text-2xl font-black">{t('dailyDropReady')}</h2>
@@ -74,7 +73,7 @@ function DailyDropModal({ lastAnalysis, isDark, onClose }) {
         ) : (
           <div className="scale-in space-y-4">
             <div className="w-12 h-12 mx-auto text-purple-500 animate-pulse">
-               <IconRenderer icon={FashionIcons.AI} />
+              <IconRenderer icon={FashionIcons.AI} />
             </div>
             <h2 className="text-xl font-black">{t('unlockingWardrobe')}</h2>
             <div className="flex gap-2 justify-center">
@@ -92,14 +91,11 @@ function DailyDropModal({ lastAnalysis, isDark, onClose }) {
   );
 }
 
-// ------------------------------------------
-
 function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
   const { theme } = useContext(ThemeContext);
   const { t, language } = useLanguage();
   const isDark = theme === 'dark';
 
-  // First visit onboarding
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return !localStorage.getItem('sg_onboarded');
   });
@@ -108,7 +104,6 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
     setShowOnboarding(false);
   };
 
-  // Animated social proof counter
   const [displayCount, setDisplayCount] = useState(0);
   const TARGET_COUNT = 52847;
   useEffect(() => {
@@ -122,7 +117,6 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
     return () => clearInterval(timer);
   }, []);
 
-  // Daily Streak Logic 🔥
   const [streak] = useState(() => {
     const today = new Date().toLocaleDateString('en-CA');
     const lastCheckin = localStorage.getItem('sg_last_checkin');
@@ -143,7 +137,6 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
     return currentStreak;
   });
 
-  // Gender Preference Logic
   const [genderPref, setGenderPref] = useState(() => localStorage.getItem('sg_gender_pref') || 'male');
   const toggleGenderPref = () => {
     const next = genderPref === 'male' ? 'female' : 'male';
@@ -159,12 +152,10 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
     return () => window.removeEventListener('sg_score_updated', handleScore);
   }, []);
 
-  // Global Profile Lock Priority
   const primaryProfile = JSON.parse(localStorage.getItem('sg_primary_profile') || 'null');
   const activeProfile = primaryProfile || lastAnalysis;
   const hasProfile = !!activeProfile;
 
-  // Daily Drop Logic 🎁
   const [showDailyDrop, setShowDailyDrop] = useState(() => {
     const today = new Date().toLocaleDateString('en-CA');
     const lastDrop = localStorage.getItem('sg_daily_drop_date');
@@ -172,15 +163,15 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
   });
 
   const gndr = activeProfile?.fullData?.gender || activeProfile?.gender || genderPref;
-  const tone = (typeof (activeProfile?.skinTone || activeProfile?.skin_tone?.category) === 'string' 
-    ? (activeProfile?.skinTone || activeProfile?.skin_tone?.category) 
+  const tone = (typeof (activeProfile?.skinTone || activeProfile?.skin_tone?.category) === 'string'
+    ? (activeProfile?.skinTone || activeProfile?.skin_tone?.category)
     : 'medium')?.toLowerCase();
-    
+
   const todayTip = getLocalizedTip(gndr, tone, language);
   const firstName = user?.name?.split(' ')[0] || '';
   return (
     <div className="pb-4 space-y-6">
-      {showDailyDrop && <DailyDropModal lastAnalysis={lastAnalysis} isDark={isDark} isPro={isPro} onClose={() => setShowDailyDrop(false)} />}
+      {showDailyDrop && <DailyDropModal lastAnalysis={lastAnalysis} isDark={isDark} onClose={() => setShowDailyDrop(false)} />}
       <div className="pt-2 flex justify-between items-start">
         <div>
           <p className="text-sm opacity-60">{t('goodDay')}</p>
@@ -190,11 +181,10 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
           <p className="text-xs mt-1 opacity-50">{t('discoverPerfect')}</p>
         </div>
         <div className="flex flex-col items-end gap-2">
-          {/* Gender Toggle */}
           {!lastAnalysis && (
             <button
               onClick={toggleGenderPref}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight border border-[var(--border-primary)] bg-[var(--bg-accent)] transition-all hover:scale-105"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight glass-card-premium transition-all hover:scale-105"
             >
               <span className="w-3 h-3 text-purple-500"><IconRenderer icon={FashionIcons.User} /></span>
               <span>{t(genderPref)}</span>
@@ -216,7 +206,6 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
         {t('analyzeBtn')}
       </button>
 
-      {/* Social proof */}
       <div className="flex items-center justify-center gap-2 py-2 rounded-xl bg-[var(--bg-accent)]">
         <div className="flex -space-x-1.5">
           {['#F5DEB3', '#C68642', '#7B4F2E', '#4A2C0A'].map((c, i) => (
@@ -230,7 +219,6 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
         </p>
       </div>
 
-      {/* First-visit onboarding */}
       {showOnboarding && (
         <div className="tooltip-in rounded-2xl p-4 border-2 border-purple-500/50 relative bg-purple-500/5">
           <button onClick={dismissOnboarding} className="absolute top-3 right-3 text-xs px-2 py-1 rounded-lg opacity-40 hover:opacity-100 bg-[var(--bg-accent)]">✕</button>
@@ -254,26 +242,24 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
         </div>
       )}
 
-      {/* Consolidated Daily Intelligence Briefing */}
-      <WeatherTip 
-        isDark={isDark} 
-        profile={activeProfile} 
-        genderPref={genderPref} 
+      <WeatherTip
+        isDark={isDark}
+        profile={activeProfile}
+        genderPref={genderPref}
       />
 
-      {/* Rate My Fit - Performance Tracker */}
-      <div className="rounded-3xl p-5 border flex items-center gap-4 justify-between transition-all bg-orange-500/5 border-orange-500/20 shadow-xl">
+      <div className="rounded-3xl p-5 glass-card-premium border flex items-center gap-4 justify-between transition-all bg-orange-500/5 border-orange-500/20 shadow-xl">
         <div className="flex-1">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-1.5 text-orange-500">{t('rateMyFit')}</p>
           <div className="flex items-center gap-3">
-             {lastScore ? (
-                <div className="flex flex-col">
-                   <p className="text-2xl font-black">{lastScore}%</p>
-                   <p className="text-[9px] font-bold uppercase opacity-40">Last Fit Performance</p>
-                </div>
-             ) : (
-                <p className="text-xs font-medium leading-tight opacity-70">{t('rateMyFitSub')}</p>
-             )}
+            {lastScore ? (
+              <div className="flex flex-col">
+                <p className="text-2xl font-black">{lastScore}%</p>
+                <p className="text-[9px] font-bold uppercase opacity-40">Last Fit Performance</p>
+              </div>
+            ) : (
+              <p className="text-xs font-medium leading-tight opacity-70">{t('rateMyFitSub')}</p>
+            )}
           </div>
         </div>
         <button
@@ -284,8 +270,7 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
         </button>
       </div>
 
-      {/* Daily Style Tip reasoning box */}
-      <div className="rounded-2xl p-4 border border-[var(--border-primary)] bg-[var(--bg-accent)] flex items-start gap-3">
+      <div className="rounded-2xl p-4 glass-card-premium flex items-start gap-3">
         <span className="w-6 h-6 flex-shrink-0 opacity-80 text-purple-500"><IconRenderer icon={FashionIcons.Bulb} /></span>
         <div>
           <p className="text-[10px] font-black uppercase tracking-widest mb-1 text-purple-600 dark:text-purple-400">{t('styleTipDay')}</p>
@@ -293,8 +278,7 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
         </div>
       </div>
 
-      {/* AdSense Ad */}
-      <div className="mt-2 text-center py-4 bg-[var(--bg-accent)] border border-[var(--border-primary)] rounded-3xl overflow-hidden backdrop-blur-sm">
+      <div className="mt-2 text-center py-4 glass-card-premium border border-[var(--border-primary)] rounded-3xl overflow-hidden backdrop-blur-sm">
         <p className="text-[10px] font-bold opacity-30 uppercase tracking-widest mb-2">StyleGuru AI Partner Content</p>
         <AdSense />
       </div>
@@ -302,15 +286,12 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
   );
 }
 
-
-
-// ── Cart Button Component ────────────────────────────────────
 function ProfileHeaderButton({ onOpenProfile, isDark }) {
   return (
     <button
       onClick={onOpenProfile}
       id="header-profile-button"
-      className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl transition-all z-[60] active:scale-90 border border-[var(--border-primary)] bg-[var(--bg-accent)] shadow-sm hover:bg-purple-500/10"
+      className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl transition-all z-[60] active:scale-90 glass-card-premium hover:bg-purple-500/10"
       aria-label="Open Profile"
     >
       <span className="w-5 h-5 text-purple-500"><IconRenderer icon={FashionIcons.Star} /></span>
@@ -337,49 +318,34 @@ function Dashboard({ user, onLogout }) {
   const lastAnalysis = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
   const showToast = (msg) => setToast(msg);
 
-  // Keep-alive system: ping health endpoint every 10 minutes to prevent sleep
   useEffect(() => {
     const keepAlive = async () => {
       try {
         const response = await fetch('/health', { method: 'GET' });
         if (response.ok) {
-          // Success ping - only log in dev or as debug
           if (import.meta.env.DEV) console.debug('[Keep-Alive] ✅ Backend is active');
         }
       } catch (err) {
-        // Only log failures
         console.warn('[Keep-Alive] ⚠️ Background ping failed:', err.message);
       }
     };
-
     keepAlive();
     const intervalId = setInterval(keepAlive, 600000);
     return () => clearInterval(intervalId);
   }, []);
 
-  const handleUpgradeSuccess = async () => {
-    // No longer needed
-  };
-
-  // Product order checkout handler
   const handleCheckoutClick = async (totals) => {
     if (!auth.currentUser) {
       showToast('❌ Please login first');
       return;
     }
-
     if (!cart || cart.length === 0) {
       showToast('❌ Cart is empty');
       return;
     }
-
     try {
-      // Get token for API request
       const token = await auth.currentUser.getIdToken();
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
-      // Create order on backend
-      console.log('[Checkout] Creating order at:', apiUrl);
       const response = await fetch(`${apiUrl}/api/orders/create-checkout`, {
         method: 'POST',
         headers: {
@@ -391,18 +357,13 @@ function Dashboard({ user, onLogout }) {
           total_amount: totals.total
         })
       });
-
       if (!response.ok) {
         const error = await response.json();
         showToast(`❌ ${error.detail || 'Checkout failed'}`);
         return;
       }
-
       const data = await response.json();
       const { order_id, amount, currency } = data;
-      console.log('[Checkout] Order created:', { order_id, amount, currency });
-
-      // Initialize Razorpay
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_BKnG5mzHD4nH0p',
         order_id,
@@ -415,12 +376,7 @@ function Dashboard({ user, onLogout }) {
         },
         handler: async (response) => {
           try {
-            // Generate idempotency key to prevent duplicate charges
             const idempotencyKey = `${auth.currentUser.uid}_${response.razorpay_payment_id}_${Date.now()}`;
-            console.log('[Checkout] Idempotency Key:', idempotencyKey);
-
-            // Verify payment on backend
-            console.log('[Checkout] Verifying payment...');
             const verifyResponse = await fetch(`${apiUrl}/api/orders/verify-payment`, {
               method: 'POST',
               headers: {
@@ -434,12 +390,8 @@ function Dashboard({ user, onLogout }) {
                 razorpay_signature: response.razorpay_signature
               })
             });
-
             if (verifyResponse.ok) {
               const result = await verifyResponse.json();
-              console.log('[Checkout] ✅ Payment verified:', result);
-
-              // Save order data to localStorage for success page
               const orderData = {
                 order_id: response.razorpay_order_id,
                 payment_id: response.razorpay_payment_id,
@@ -449,33 +401,19 @@ function Dashboard({ user, onLogout }) {
                 timestamp: new Date().toISOString()
               };
               localStorage.setItem('sg_last_order', JSON.stringify(orderData));
-
               showToast(`✅ Order placed! Commission: ₹${result.commission_earned.toFixed(0)}`);
-
-              // Clear cart after successful purchase
               clearCart();
               setCartOpen(false);
-
-              // Redirect to order success page after 1 second
-              setTimeout(() => {
-                navigate('/order-success');
-              }, 1000);
+              setTimeout(() => { navigate('/order-success'); }, 1000);
             } else {
               showToast('❌ Payment verification failed');
             }
           } catch (e) {
-            console.error('Payment verification error:', e);
             showToast('❌ Verification error');
           }
         },
-        modal: {
-          ondismiss: () => {
-            showToast('❌ Payment cancelled');
-          }
-        }
+        modal: { ondismiss: () => { showToast('❌ Payment cancelled'); } }
       };
-
-      // Load and open Razorpay
       const script = document.createElement('script');
       script.src = 'https://checkout.razorpay.com/v1/checkout.js';
       script.onload = () => {
@@ -484,54 +422,33 @@ function Dashboard({ user, onLogout }) {
       };
       document.body.appendChild(script);
     } catch (e) {
-      console.error('Checkout error:', e);
       showToast('❌ Checkout error');
     }
   };
 
-  // Offline wardrobe queue retry
-  useEffect(() => {
-    if (!auth.currentUser || !navigator.onLine) return;
-    try {
-      const queue = JSON.parse(localStorage.getItem('sg_wardrobe_queue') || '[]');
-      if (queue.length === 0) return;
-      const uid = auth.currentUser.uid;
-      Promise.all(queue.map(item => saveWardrobeItem(uid, item)))
-        .then(() => localStorage.removeItem('sg_wardrobe_queue'))
-        .catch(() => { }); // silently fail, will retry next time
-    } catch { /* ignore */ }
-  }, []);
-
   const handleReset = () => { setResults(null); setError(null); setUploadedImage(null); };
+
   const handleAnalysisComplete = (data) => {
     if (!data) return;
-
-    // Normalize: Ensure skin_tone is accessible either at root or inside analysis
     const skinToneObj = data.analysis?.skin_tone || data.skin_tone;
     const skinColorObj = data.analysis?.skin_color || data.skin_color;
     const recsObj = data.recommendations || data.analysis?.recommendations;
-
     const enriched = {
       ...data,
       gender: data.gender || currentGender,
-      // Ensure the structure matches what the UI expects
       analysis: data.analysis || {
         skin_tone: skinToneObj,
         skin_color: skinColorObj
       },
       recommendations: recsObj
     };
-
     try {
       setResults(enriched);
     } catch (err) {
-      console.error('[Dashboard] Error setting results:', err);
       setError('Failed to display results. Please try again.');
     } finally {
       setLoading(false);
     }
-
-    // Save to Firestore and Log Event
     const uid = auth.currentUser?.uid;
     if (uid) {
       logEvent(EVENTS.STYLE_ANALYSIS_SUCCESS, {
@@ -540,7 +457,6 @@ function Dashboard({ user, onLogout }) {
         gender: enriched.gender || currentGender,
         is_pro: isPro,
       });
-      
       const profileData = {
         skin_tone: enriched.analysis?.skin_tone?.category,
         undertone: enriched.analysis?.skin_tone?.undertone,
@@ -552,15 +468,8 @@ function Dashboard({ user, onLogout }) {
         language: localStorage.getItem('styleguru_lang') || 'en',
         analyzed_at: new Date().toISOString(),
       };
-      
-      saveProfile(uid, profileData).catch(() => {
-        showToast('Profile not synced — will retry on next login');
-      });
-      
-      // AUTO-SAVE TO HISTORY (FIRESTORE ONLY)
-      saveHistory(enriched).catch(err => {
-        console.error('[API] Auto-save history failed:', err);
-      });
+      saveProfile(uid, profileData).catch(() => { });
+      saveHistory(enriched).catch(() => { });
     }
   };
 
@@ -578,8 +487,7 @@ function Dashboard({ user, onLogout }) {
   };
 
   return (
-    <div className="min-h-screen transition-colors duration-300 overflow-x-hidden selection:bg-purple-500/30" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
-      {/* Background glow effects that stay subtle in both modes */}
+    <div className="min-h-screen transition-colors duration-300 overflow-x-hidden selection:bg-purple-500/30">
       <div className="fixed top-[-200px] left-[-200px] w-[500px] h-[500px] rounded-full bg-purple-500/5 blur-[120px] pointer-events-none z-0" />
       <div className="fixed bottom-[-100px] right-[-100px] w-[500px] h-[500px] rounded-full bg-pink-500/5 blur-[120px] pointer-events-none z-0" />
 
@@ -588,22 +496,21 @@ function Dashboard({ user, onLogout }) {
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      <header className="relative z-[60] flex items-center justify-between px-4 py-4 border-b border-[var(--border-primary)] bg-[var(--bg-primary)]/80 backdrop-blur-xl sticky top-0 shadow-sm">
+      <header className="relative z-[60] flex items-center justify-between px-4 py-4 border-b border-[var(--border-primary)] glass-card-premium sticky top-0">
         <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-black text-white shadow-lg shadow-purple-500/20">SG</div>
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-black text-white shadow-lg">SG</div>
           <span className="font-black text-base bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">StyleGuru AI</span>
         </div>
         <div className="flex items-center gap-2">
           {results && activeTab === 'analyze' && (
-            <button onClick={handleReset} className="text-[10px] font-black uppercase tracking-widest text-purple-600 border border-purple-500/30 px-3 py-1.5 rounded-xl hover:bg-purple-500/10 transition">
+            <button onClick={handleReset} className="text-[10px] font-black uppercase tracking-widest text-purple-400 border border-purple-500/30 px-3 py-1.5 rounded-xl hover:bg-purple-500/10 transition">
               {t('navNew')}
             </button>
           )}
           <ProfileHeaderButton onOpenProfile={() => handleTabChange('profile')} isDark={isDark} />
-
-          <button 
-            onClick={toggleTheme} 
-            className="w-11 h-11 rounded-2xl bg-[var(--bg-accent)] border border-[var(--border-primary)] flex items-center justify-center shadow-sm hover:scale-105 transition-all"
+          <button
+            onClick={toggleTheme}
+            className="w-11 h-11 rounded-2xl glass-card-premium flex items-center justify-center shadow-sm hover:scale-105 transition-all"
           >
             {theme === 'dark' ? (
               <IconRenderer icon={FashionIcons.Bulb} className="w-5 h-5 text-yellow-400" />
@@ -614,82 +521,84 @@ function Dashboard({ user, onLogout }) {
         </div>
       </header>
 
-      <main className="relative z-10 max-w-lg mx-auto px-4 pt-4 pb-24">
-        <div className="tab-content" key={activeTab}>
-          {activeTab === 'home' && (
-            <HomeScreen
-              user={user}
-              lastAnalysis={lastAnalysis}
-              onAnalyze={() => setActiveTab('analyze')}
-              onTabChange={handleTabChange}
-              onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }}
-              isPro={isPro}
-            />
-          )}
-
-          {activeTab === 'analyze' && (
-            <>
-              {!results && !loading && !error && (
-                <UploadSection
-                  onLoadingStart={() => setLoading(true)}
-                  onAnalysisComplete={handleAnalysisComplete}
-                  onError={setError}
-                  onImageSelected={setUploadedImage}
-                  setUploadProgress={setUploadProgress}
-                  currentGender={currentGender}
-                  setCurrentGender={setCurrentGender}
-                  isPro={isPro}
-                  usage={usage}
-                  coins={coins}
-                  onCoinEmpty={() => {}}
-                />
-              )}
-              {loading && <LoadingScreenWithProgress progress={uploadProgress} />}
-              {error && (
-                <div className="mt-8 rounded-2xl p-6 text-center border bg-red-500/10 border-red-500/30">
-                  <div className="text-4xl mb-3">😕</div>
-                  <p className="text-red-300 font-medium mb-1">Oops!</p>
-                  <p className="text-red-400/80 text-sm whitespace-pre-line">{error}</p>
-                  <button onClick={handleReset} className="mt-4 px-5 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/20 text-sm font-medium transition">
-                    {t('tryAgain')}
-                  </button>
-                </div>
-              )}
-              {results && results.type === 'couple' ? (
-                <CoupleResults data={results} uploadedImages={uploadedImage} onReset={handleReset} />
-              ) : results ? (
-                <ResultsDisplay data={results} uploadedImage={uploadedImage} onReset={handleReset} />
-              ) : null}
-            </>
-          )}
-
-          {activeTab === 'history' && <HistoryPanel onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
-
-          {activeTab === 'navigator' && <StyleNavigator user={user} onAnalyze={() => setActiveTab('analyze')} />}
-
-          {activeTab === 'tools' && <ToolsTab uploadedImage={uploadedImage} analysisData={results} onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} onOpenScanner={() => setActiveTab('scanner')} />}
-
-          {activeTab === 'scanner' && (
-            <ColorScanner
-              savedPalette={(() => {
-                try {
-                  return lastAnalysis?.fullData?.recommendations?.best_shirt_colors ||
-                    lastAnalysis?.fullData?.recommendations?.best_dress_colors || [];
-                } catch { return []; }
-              })()}
-              skinTone={lastAnalysis?.skinTone || ''}
-              onClose={() => setActiveTab('home')}
-            />
-          )}
-
-          {activeTab === 'profile' && (
-            <ProfilePanel hideHeader onOpenUpgrade={() => {}} />
-          )}
-        </div>
+      <main className="relative z-10 max-w-lg mx-auto px-4 pt-4 pb-24 min-h-[80vh]">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.98 }}
+            transition={{ duration: 0.28, ease: [0.23, 1, 0.32, 1] }}
+            className="w-full"
+          >
+            {activeTab === 'home' && (
+              <HomeScreen
+                user={user}
+                lastAnalysis={lastAnalysis}
+                onAnalyze={() => setActiveTab('analyze')}
+                onTabChange={handleTabChange}
+                onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }}
+                isPro={isPro}
+              />
+            )}
+            {activeTab === 'analyze' && (
+              <>
+                {!results && !loading && !error && (
+                  <UploadSection
+                    onLoadingStart={() => setLoading(true)}
+                    onAnalysisComplete={handleAnalysisComplete}
+                    onError={setError}
+                    onImageSelected={setUploadedImage}
+                    setUploadProgress={setUploadProgress}
+                    currentGender={currentGender}
+                    setCurrentGender={setCurrentGender}
+                    isPro={isPro}
+                    usage={usage}
+                    coins={coins}
+                    onCoinEmpty={() => { }}
+                  />
+                )}
+                {loading && <LoadingScreenWithProgress progress={uploadProgress} />}
+                {error && (
+                  <div className="mt-8 rounded-2xl p-6 text-center border bg-red-500/10 border-red-500/30">
+                    <div className="text-4xl mb-3">😕</div>
+                    <p className="text-red-300 font-medium mb-1">Oops!</p>
+                    <p className="text-red-400/80 text-sm whitespace-pre-line">{error}</p>
+                    <button onClick={handleReset} className="mt-4 px-5 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/20 text-sm font-medium transition">
+                      {t('tryAgain')}
+                    </button>
+                  </div>
+                )}
+                {results && results.type === 'couple' ? (
+                  <CoupleResults data={results} uploadedImages={uploadedImage} onReset={handleReset} />
+                ) : results ? (
+                  <ResultsDisplay data={results} uploadedImage={uploadedImage} onReset={handleReset} />
+                ) : null}
+              </>
+            )}
+            {activeTab === 'history' && <HistoryPanel onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
+            {activeTab === 'navigator' && <StyleNavigator user={user} onAnalyze={() => setActiveTab('analyze')} />}
+            {activeTab === 'tools' && <ToolsTab uploadedImage={uploadedImage} analysisData={results} onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} onOpenScanner={() => setActiveTab('scanner')} />}
+            {activeTab === 'scanner' && (
+              <ColorScanner
+                savedPalette={(() => {
+                  try {
+                    return lastAnalysis?.fullData?.recommendations?.best_shirt_colors ||
+                      lastAnalysis?.fullData?.recommendations?.best_dress_colors || [];
+                  } catch { return []; }
+                })()}
+                skinTone={lastAnalysis?.skinTone || ''}
+                onClose={() => setActiveTab('home')}
+              />
+            )}
+            {activeTab === 'profile' && (
+              <ProfilePanel hideHeader onOpenUpgrade={() => { }} />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <nav className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t border-[var(--border-primary)] bg-[var(--bg-primary)]/90 safe-area-bottom shadow-lg">
-        {/* Nav Container */}
         <div className="max-w-md mx-auto px-1 py-1.5">
           <div className="flex w-full items-end">
             {navItems.map((item) => (
@@ -698,12 +607,12 @@ function Dashboard({ user, onLogout }) {
                 onClick={() => handleTabChange(item.id)}
                 style={{ flex: '1 1 0', minWidth: 0 }}
                 className={`flex flex-col items-center justify-center gap-0 px-0.5 py-1 rounded-xl transition-all min-h-[50px] ${activeTab === item.id
-                    ? 'text-purple-600 bg-purple-500/10'
-                    : 'opacity-40 hover:opacity-100'
+                  ? 'text-purple-600 bg-purple-500/10'
+                  : 'opacity-40 hover:opacity-100'
                   }`}
               >
                 <span className={`w-6 h-6 mb-1 transition-transform duration-200 ${activeTab === item.id ? 'scale-110 text-purple-500' : 'text-[var(--text-primary)]'}`}>
-                   <IconRenderer icon={item.icon} />
+                  <IconRenderer icon={item.icon} />
                 </span>
                 <span className={`text-[7.5px] font-black uppercase tracking-tighter leading-none text-center truncate w-full px-0.5 ${activeTab === item.id ? 'text-purple-600' : 'text-[var(--text-secondary)]'}`}>{item.label}</span>
                 {activeTab === item.id && <div className="w-3 h-0.5 rounded-full bg-purple-600 mt-1" />}
