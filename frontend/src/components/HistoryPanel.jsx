@@ -4,6 +4,7 @@ import { useAuthState } from '../hooks/useAuthState';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
+import { FashionIcons, IconRenderer } from './Icons';
 
 function HistoryPanel({ onShowResult }) {
   const { theme } = useContext(ThemeContext);
@@ -103,8 +104,8 @@ function HistoryPanel({ onShowResult }) {
       {/* Tab Switcher */}
       <div className={`flex rounded-2xl p-1 mb-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
         {[
-          { id: 'analyses', label: t('analyses') || 'Analyses', icon: '📊' },
-          { id: 'colors', label: t('savedColors') || 'Saved Colors', icon: '🎨' }
+          { id: 'analyses', label: t('analyses') || 'Analyses', icon: FashionIcons.Accuracy },
+          { id: 'colors', label: t('savedColors') || 'Saved Colors', icon: FashionIcons.Analysis }
         ].map(tab => (
           <button
             key={tab.id}
@@ -115,7 +116,7 @@ function HistoryPanel({ onShowResult }) {
                 : isDark ? 'text-white/60 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
             }`}
           >
-            <span>{tab.icon}</span>
+            <span className="w-4 h-4"><IconRenderer icon={tab.icon} /></span>
             {tab.label}
           </button>
         ))}
@@ -137,8 +138,8 @@ function HistoryPanel({ onShowResult }) {
 
           {history.length === 0 ? (
             <div className="mt-8 text-center py-10">
-              <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
-                <span className="text-4xl">📋</span>
+              <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border p-5 ${isDark ? 'bg-white/5 border-white/10 text-white/30' : 'bg-gray-100 border-gray-200 text-gray-400'}`}>
+                <IconRenderer icon={FashionIcons.Analysis} />
               </div>
               <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('noHistory')}</h3>
               <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('noHistoryDesc')}</p>
@@ -161,7 +162,11 @@ function HistoryPanel({ onShowResult }) {
                         <div className="flex flex-wrap items-center gap-2 mb-1">
                           <span className={`font-bold capitalize text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{t(skinTone)} {language === 'hi' ? 'त्वचा' : 'skin'}</span>
                           <span className={`text-xs px-2 py-0.5 rounded-full border capitalize ${isDark ? 'bg-purple-500/20 text-purple-300 border-purple-500/20' : 'bg-purple-100 text-purple-700 border-purple-300'}`}>{t(undertone)}</span>
-                          {season && <span className={`text-xs px-2 py-0.5 rounded-full border ${isDark ? 'bg-pink-500/20 text-pink-300 border-pink-500/20' : 'bg-pink-100 text-pink-700 border-pink-300'}`}>🍂 {t(season)}</span>}
+                          {season && (
+                            <span className={`text-xs px-2 py-0.5 rounded-full border flex items-center gap-1 ${isDark ? 'bg-pink-500/20 text-pink-300 border-pink-500/20' : 'bg-pink-100 text-pink-700 border-pink-300'}`}>
+                              <IconRenderer icon={FashionIcons.Star} className="w-3 h-3" /> {t(season)}
+                            </span>
+                          )}
                         </div>
                         <p className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{dateStr}</p>
                       </div>
@@ -196,8 +201,8 @@ function HistoryPanel({ onShowResult }) {
             </div>
           ) : savedColors.length === 0 ? (
             <div className="text-center py-10 mt-4">
-              <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
-                <span className="text-4xl">🎨</span>
+              <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border p-5 ${isDark ? 'bg-white/5 border-white/10 text-white/30' : 'bg-gray-100 border-gray-200 text-gray-400'}`}>
+                <IconRenderer icon={FashionIcons.Analysis} />
               </div>
               <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('noSavedColors')}</h3>
               <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('tapToSaveColor')}</p>
@@ -217,7 +222,7 @@ function HistoryPanel({ onShowResult }) {
                     disabled={deletingColorId === color.id}
                     className={`p-2.5 rounded-xl transition-all ${isDark ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20' : 'bg-red-50 text-red-500 hover:bg-red-100'}`}
                   >
-                    {deletingColorId === color.id ? '...' : '🗑️'}
+                    {deletingColorId === color.id ? '...' : <IconRenderer icon={FashionIcons.Wardrobe} className="w-4 h-4 text-red-500" />}
                   </button>
                 </div>
               ))}

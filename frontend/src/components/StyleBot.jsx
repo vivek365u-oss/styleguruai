@@ -11,6 +11,7 @@ import {
   getWardrobe, 
   loadStyleInsights 
 } from '../api/styleApi';
+import { FashionIcons, IconRenderer } from './Icons';
 
 const getResponses = (t, profile, wardrobe, insights) => {
   const isMale = (profile?.gender_mode || profile?.gender || 'female').toLowerCase().includes('male');
@@ -158,7 +159,14 @@ function StyleBot({ inline = false }) {
 
   const handleKey = (e) => { if (e.key === 'Enter') sendMessage(); };
 
-  const quickActions = ['🧬 Style DNA', '📅 Calendar', '👕 Wardrobe', '🔎 Checker', '📷 Scanner', '🎀 Wedding'];
+  const quickActions = [
+    { label: 'Style DNA', icon: FashionIcons.Analysis },
+    { label: 'Calendar', icon: FashionIcons.Accuracy },
+    { label: 'Wardrobe', icon: FashionIcons.Wardrobe },
+    { label: 'Checker', icon: FashionIcons.Analysis },
+    { label: 'Scanner', icon: FashionIcons.Camera },
+    { label: 'Wedding', icon: FashionIcons.Dress }
+  ];
 
   return (
     <>
@@ -166,10 +174,10 @@ function StyleBot({ inline = false }) {
       {!inline && !open && (
         <button
           onClick={() => setOpen(true)}
-          className={`fixed bottom-24 right-4 z-50 w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 bg-gradient-to-br from-purple-600 to-pink-600 animate-pulse`}
+          className={`fixed bottom-24 right-4 z-50 w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 bg-gradient-to-br from-purple-600 to-pink-600 animate-pulse p-4 text-white`}
           style={{ boxShadow: '0 0 25px rgba(168,85,247,0.4)' }}
         >
-          <span className="text-2xl">🤖</span>
+          <IconRenderer icon={FashionIcons.AI} />
         </button>
       )}
 
@@ -183,7 +191,7 @@ function StyleBot({ inline = false }) {
           {/* Header */}
           <div className="px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-lg">🤖</span>
+              <span className="w-5 h-5 text-white/80"><IconRenderer icon={FashionIcons.AI} /></span>
               <div>
                 <p className="text-white text-sm font-bold">{t('botTitle')}</p>
                 <p className="text-white/60 text-[10px]">{t('botSub')}</p>
@@ -214,14 +222,15 @@ function StyleBot({ inline = false }) {
 
           {/* Quick actions */}
           <div className="px-3 pb-1 flex gap-1 overflow-x-auto scrollbar-hide">
-            {quickActions.map(qa => (
               <button
-                key={qa}
-                onClick={() => { setInput(qa.split(' ').slice(1).join(' ')); setTimeout(sendMessage, 100); }}
-                className={`flex-shrink-0 px-2 py-1 rounded-full text-[10px] font-bold border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/50 hover:text-white' : 'bg-gray-50 border-gray-200 text-gray-500 hover:text-gray-800'
+                key={qa.label}
+                onClick={() => { setInput(qa.label); setTimeout(sendMessage, 100); }}
+                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold border transition-all flex items-center gap-1.5 ${isDark ? 'bg-white/5 border-white/10 text-white/50 hover:text-white' : 'bg-gray-50 border-gray-200 text-gray-500 hover:text-gray-800'
                   }`}
-              >{qa}</button>
-            ))}
+              >
+                <span className="w-3 h-3"><IconRenderer icon={qa.icon} /></span>
+                {qa.label}
+              </button>
           </div>
 
           {/* Input */}

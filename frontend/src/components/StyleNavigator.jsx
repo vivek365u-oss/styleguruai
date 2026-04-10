@@ -18,6 +18,7 @@ import {
 
 import { scoreWardrobeItem, getActionableAdvice, getAccessoryAdvice } from '../utils/stylingEngine';
 import { getCategoryIcon } from '../constants/fashionCategories';
+import { FashionIcons, IconRenderer } from './Icons';
 
 const infoCls = "w-5 h-5 rounded-full flex items-center justify-center text-[10px] cursor-help transition-all";
 
@@ -25,20 +26,20 @@ const TONE_COLORS = { fair: "#F5DEB3", light: "#D2A679", medium: "#C68642", oliv
 
 const TRENDING_COLLECTIONS = {
     male: [
-        { id: 't1', key: 'item_oversized_tee', icon: '👕', score: 98 },
-        { id: 't2', key: 'item_baggy_jeans', icon: '👖', score: 95 },
-        { id: 't3', key: 'item_cargo_pants', icon: '📦', score: 92 },
-        { id: 't4', key: 'item_varsity_jacket', icon: '🧥', score: 91 },
-        { id: 't5', key: 'item_minimal_sneakers', icon: '👟', score: 96 },
-        { id: 't6', key: 'item_cuban_collar', icon: '👔', score: 90 }
+        { id: 't1', key: 'item_oversized_tee', icon: 'Shirt', score: 98 },
+        { id: 't2', key: 'item_baggy_jeans', icon: 'Trousers', score: 95 },
+        { id: 't3', key: 'item_cargo_pants', icon: 'Trousers', score: 92 },
+        { id: 't4', key: 'item_varsity_jacket', icon: 'Hoodie', score: 91 },
+        { id: 't5', key: 'item_minimal_sneakers', icon: 'Shoes', score: 96 },
+        { id: 't6', key: 'item_cuban_collar', icon: 'Shirt', score: 90 }
     ],
     female: [
-        { id: 'f1', key: 'item_corset_top', icon: '🎀', score: 98 },
-        { id: 'f2', key: 'item_wide_leg', icon: '👖', score: 96 },
-        { id: 'f3', key: 'item_blazer', icon: '🧥', score: 94 },
-        { id: 'f4', key: 'item_slip_dress', icon: '👗', score: 93 },
-        { id: 'f5', key: 'item_chunky_loafers', icon: '👞', score: 91 },
-        { id: 'f6', key: 'item_saree_chiffon', icon: '🥻', score: 97 }
+        { id: 'f1', key: 'item_corset_top', icon: 'Shirt', score: 98 },
+        { id: 'f2', key: 'item_wide_leg', icon: 'Trousers', score: 96 },
+        { id: 'f3', key: 'item_blazer', icon: 'Shirt', score: 94 },
+        { id: 'f4', key: 'item_slip_dress', icon: 'Dress', score: 93 },
+        { id: 'f5', key: 'item_chunky_loafers', icon: 'Shoes', score: 91 },
+        { id: 'f6', key: 'item_saree_chiffon', icon: 'Dress', score: 97 }
     ]
 };
 
@@ -379,11 +380,11 @@ const StyleNavigator = ({ user, onAnalyze }) => {
             className="space-y-6 pt-2 pb-10"
         >
             {/* ── SEGMENTED NAVIGATION ──────────────────────── */}
-            <div className={`sticky top-0 z-30 p-2 -mx-4 mb-6 backdrop-blur-xl border-b flex justify-center gap-1 ${isDark ? 'bg-[#050816]/80 border-white/10' : 'bg-slate-100/80 border-purple-100'}`}>
+            <div className={`sticky top-0 z-30 p-2 -mx-4 mb-6 backdrop-blur-xl border-b flex justify-center gap-1 ${isDark ? 'bg-[#02040a]/80 border-white/10' : 'bg-slate-100/80 border-purple-100'}`}>
                 {[
-                    { id: 'daily', label: 'Recommended', icon: '✨' },
-                    { id: 'shop', label: 'Shopping', icon: '🛒' },
-                    { id: 'dna', label: 'Style DNA', icon: '🧬' }
+                    { id: 'daily', label: 'Recommended', icon: FashionIcons.Star },
+                    { id: 'shop', label: 'Shopping', icon: FashionIcons.Shopping },
+                    { id: 'dna', label: 'Style DNA', icon: FashionIcons.Analysis }
                 ].map(tab => (
                     <button
                         key={tab.id}
@@ -402,7 +403,9 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                 transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
                             />
                         )}
-                        <span className="relative z-10">{tab.icon}</span>
+                        <span className="relative z-10 w-4 h-4 mr-2">
+                           <IconRenderer icon={tab.icon} />
+                        </span>
                         <span className="relative z-10 hidden sm:inline">{tab.label}</span>
                     </button>
                 ))}
@@ -433,7 +436,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                             : isDark ? 'bg-white/10 text-white/60 hover:bg-white/20' : 'bg-slate-100 text-slate-500 hover:bg-slate-200 border border-slate-200'
                                     }`}
                                 >
-                                    <span>{isPrimary ? '🏠' : '🔓'}</span>
+                                    <span><IconRenderer icon={isPrimary ? FashionIcons.Formal : FashionIcons.Analysis} className="w-3 h-3" /></span>
                                     <span>{isPrimary ? (t('primaryProfileLocked') || 'Home Profile') : (t('setAsHomeTone') || 'Set as Home Tone')}</span>
                                 </button>
                             </div>
@@ -493,7 +496,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                                 <p className={`text-[9px] font-black uppercase opacity-40`}>Actionable DNA Stats</p>
                                                 <div className="flex flex-wrap gap-2">
                                                      <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-100 shadow-sm'}`}>
-                                                        <span>👕</span>
+                                                        <span className="w-3 h-3"><IconRenderer icon={FashionIcons.Wardrobe} /></span>
                                                         <span>{wardrobe.length} Wardrobe Items</span>
                                                     </div>
                                                 </div>
@@ -579,7 +582,9 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                         {insights?.daily_suggestion && (
                             <div className={`rounded-[2.5rem] p-7 border relative overflow-hidden transition-all ${isDark ? 'bg-white/5 border-white/10 shadow-2xl' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/5'}`}>
                                 <div className="absolute top-0 right-0 p-6 flex items-center gap-3">
-                                     <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg">✨</div>
+                                     <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg p-2">
+                                         <IconRenderer icon={FashionIcons.AI} />
+                                     </div>
                                 </div>
 
                                 <div className="relative z-10">
@@ -662,7 +667,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                                     <div className="flex gap-4 items-center min-w-0">
                                                         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white shadow-sm border border-slate-100'}`}>
-                                                            {isFemale ? '💍' : '⌚'}
+                                                            <IconRenderer icon={isFemale ? FashionIcons.Jewelry : FashionIcons.Watch} className="w-8 h-8" />
                                                         </div>
                                                         <div className="min-w-0">
                                                             <p className={`text-[9px] font-black uppercase tracking-wider ${isDark ? 'opacity-40' : 'text-slate-500'} mb-0.5`}>{tips.label || (isFemale ? 'Jewelry Advice' : 'Accessory Advice')}</p>
@@ -670,7 +675,9 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                                         </div>
                                                     </div>
                                                     <div className="flex gap-4 items-center min-w-0">
-                                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white shadow-sm border border-slate-100'}`}>👞</div>
+                                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white shadow-sm border border-slate-100'}`}>
+                                                            <IconRenderer icon={FashionIcons.Shoes} className="w-8 h-8" />
+                                                        </div>
                                                         <div className="min-w-0">
                                                             <p className={`text-[9px] font-black uppercase tracking-wider ${isDark ? 'opacity-40' : 'text-slate-500'} mb-0.5`}>Footwear Style</p>
                                                             <p className={`text-[13px] font-black leading-snug ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.shoes}</p>
@@ -713,8 +720,8 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                         const hasInCloset = wardrobe.some(item => item.category === adv.category);
                                         return (
                                             <div key={i} className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-slate-100 shadow-sm hover:border-purple-200'}`}>
-                                                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-white/5 shrink-0">
-                                                    {getCategoryIcon(adv.category)}
+                                                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-white/5 shrink-0 p-2">
+                                                    <IconRenderer icon={FashionIcons[getCategoryIcon(adv.category)] || FashionIcons.Shopping} />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className={`text-[10px] font-black truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>{adv.item}</p>
@@ -752,8 +759,8 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                 {/* PREMIUM GENDER TOGGLE */}
                                 <div className={`flex p-1 rounded-2xl border ${isDark ? 'bg-black/40 border-white/10' : 'bg-slate-100 border-slate-200'}`}>
                                     {[
-                                        { id: 'male', label: 'Male', icon: '🧔' },
-                                        { id: 'female', label: 'Female', icon: '👩' }
+                                        { id: 'male', label: 'Male', icon: FashionIcons.User },
+                                        { id: 'female', label: 'Female', icon: FashionIcons.User }
                                     ].map(g => (
                                         <button
                                             key={g.id}
@@ -771,7 +778,7 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                                     transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
                                                 />
                                             )}
-                                            <span className="relative z-10">{g.icon}</span>
+                                            <span className="relative z-10 w-4 h-4 mr-2"><IconRenderer icon={g.icon} /></span>
                                             <span className="relative z-10">{g.id === 'male' ? (t('male') || 'Male') : (t('female') || 'Female')}</span>
                                         </button>
                                     ))}
@@ -793,8 +800,8 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                                                 whileHover={{ scale: 1.02, y: -5 }}
                                                 className={`flex flex-col p-5 rounded-[2.5rem] border transition-all ${isDark ? 'bg-white/5 border-white/10 hover:border-indigo-500/30' : 'bg-slate-50 border-slate-200 hover:border-indigo-200 hover:bg-white hover:shadow-xl'}`}
                                             >
-                                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mb-4 ${isDark ? 'bg-white/5' : 'bg-white shadow-sm border border-slate-100'}`}>
-                                                    {item.icon}
+                                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mb-4 p-3 ${isDark ? 'bg-white/5 text-indigo-400' : 'bg-white shadow-sm border border-slate-100'}`}>
+                                                    <IconRenderer icon={FashionIcons[item.icon] || FashionIcons.Shirt} />
                                                 </div>
                                                 <div className="flex-1 min-w-0 mb-4">
                                                     <p className={`text-[11px] font-black leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>{t(item.key)}</p>
@@ -820,7 +827,9 @@ const StyleNavigator = ({ user, onAnalyze }) => {
                         <div className={`rounded-[2.5rem] p-8 border relative overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200 shadow-sm'}`}>
                             <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/5 blur-[80px] pointer-events-none" />
                             <div className="flex items-center gap-4 mb-8 relative z-10">
-                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg ${isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-white text-indigo-600 border border-indigo-100'}`}>🛍️</div>
+                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg p-3 ${isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-white text-indigo-600 border border-indigo-100'}`}>
+                                    <IconRenderer icon={FashionIcons.Shopping} />
+                                </div>
                                 <div>
                                     <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>Universal Shopping Hub</p>
                                     <h4 className={`text-xl font-black mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>DNA Style Discovery</h4>

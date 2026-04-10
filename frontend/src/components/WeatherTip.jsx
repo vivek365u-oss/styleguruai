@@ -8,6 +8,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { getLocalizedWeatherTip } from '../data/weatherTips';
 import { getLocalizedOOTD } from '../data/ootdOutfits';
 import { auth, saveWardrobeItem } from '../api/styleApi';
+import { FashionIcons, IconRenderer } from './Icons';
 
 const glass = {
   container: "backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl",
@@ -104,7 +105,7 @@ function WeatherTip({ city, isDark, profile, genderPref }) {
     return (
       <div className={`rounded-3xl p-6 border transition-all ${isDark ? glass.card : 'bg-white border-purple-100 shadow-xl'}`}>
         <p className={`text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2 ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
-           <span className="text-xl">🌤️</span> {t('weatherStyleBriefing')}
+           <span className="w-5 h-5"><IconRenderer icon={FashionIcons.Analysis} /></span> {t('weatherStyleBriefing')}
         </p>
         <div className="flex gap-2">
           <input
@@ -145,8 +146,8 @@ function WeatherTip({ city, isDark, profile, genderPref }) {
         {/* Weather Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center text-3xl shadow-inner">
-                {tip.emoji}
+             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center text-3xl shadow-inner p-2.5">
+                <IconRenderer icon={FashionIcons.Analysis} />
              </div>
              <div>
                 <p className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>{weather.temp}°C</p>
@@ -157,12 +158,16 @@ function WeatherTip({ city, isDark, profile, genderPref }) {
                 </div>
              </div>
           </div>
-          <button onClick={() => setEditMode(true)} className={`w-10 h-10 rounded-full flex items-center justify-center border transition-all ${isDark ? 'border-white/10 text-white/40 hover:bg-white/5' : 'border-gray-100 text-gray-400 hover:bg-gray-50'}`}>✏️</button>
+          <button onClick={() => setEditMode(true)} className={`w-10 h-10 rounded-full flex items-center justify-center border transition-all p-2.5 ${isDark ? 'border-white/10 text-white/40 hover:bg-white/5' : 'border-gray-100 text-gray-400 hover:bg-gray-50'}`}>
+             <IconRenderer icon={FashionIcons.Formal} />
+          </button>
         </div>
 
         {/* The Briefing Suggestion */}
         <div className={`rounded-[2rem] p-5 border mb-6 ${isDark ? 'bg-white/5 border-white/10 shadow-inner' : 'bg-purple-50/50 border-purple-100'}`}>
-            <p className={`text-[10px] font-black uppercase tracking-[0.2em] mb-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>🚀 Today's Smart Pick</p>
+            <p className={`text-[10px] font-black uppercase tracking-[0.2em] mb-4 flex items-center gap-2 ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
+               <span className="w-4 h-4"><IconRenderer icon={FashionIcons.AI} /></span> Today's Smart Pick
+            </p>
             
             <div className="flex items-center gap-4">
                {/* Outfit Visual */}
@@ -202,7 +207,9 @@ function WeatherTip({ city, isDark, profile, genderPref }) {
 
         {/* Expert Persona Info */}
         <div className="flex items-start gap-3">
-           <div className={`flex-shrink-0 w-8 h-8 rounded-full border flex items-center justify-center text-sm ${isDark ? 'bg-purple-900/40 border-purple-500/30' : 'bg-purple-100 border-purple-200'}`}>👗</div>
+           <div className={`flex-shrink-0 w-8 h-8 rounded-full border flex items-center justify-center text-sm p-1.5 ${isDark ? 'bg-purple-900/40 border-purple-500/30' : 'bg-purple-100 border-purple-200'}`}>
+              <IconRenderer icon={FashionIcons.Bulb} />
+           </div>
            <div>
               <p className={`text-[11px] leading-relaxed ${isDark ? 'text-white/60' : 'text-gray-700'}`}>
                  <span className="font-black text-purple-400 uppercase mr-1">{t('expertNote')}:</span>

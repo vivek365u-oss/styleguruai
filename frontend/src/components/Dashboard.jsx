@@ -23,6 +23,7 @@ import { logEvent, EVENTS } from '../utils/analytics';
 import { useCart } from '../context/CartContext';
 import ShoppingCart from './ShoppingCart';
 import ProfilePanel from './ProfilePanel';
+import { FashionIcons, IconRenderer } from './Icons';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
 
@@ -55,7 +56,9 @@ function DailyDropModal({ lastAnalysis, isDark, onClose }) {
       <div className={`w-full max-w-sm rounded-3xl p-6 text-center border-2 border-purple-500/50 shadow-2xl relative overflow-hidden ${isDark ? 'bg-gradient-to-br from-purple-900 to-slate-900' : 'bg-white'}`}>
         {!revealed ? (
           <div className="space-y-6 scale-in">
-            <div className="text-6xl animate-bounce-slow">🎁</div>
+            <div className="w-20 h-20 mx-auto bg-white/10 rounded-3xl flex items-center justify-center p-4 text-purple-400">
+               <IconRenderer icon={FashionIcons.Wardrobe} />
+            </div>
             <div>
               <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-purple-700'}`}>{t('dailyDropReady')}</h2>
               <p className={`text-sm mt-2 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>{t('dailyDropSub').replace('{skinTone}', lastAnalysis?.skinTone)}</p>
@@ -70,7 +73,9 @@ function DailyDropModal({ lastAnalysis, isDark, onClose }) {
           </div>
         ) : (
           <div className="scale-in space-y-4">
-            <span className="text-5xl">✨</span>
+            <div className="w-12 h-12 mx-auto text-purple-400 animate-pulse">
+               <IconRenderer icon={FashionIcons.AI} />
+            </div>
             <h2 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('unlockingWardrobe')}</h2>
             <div className="flex gap-2 justify-center">
               {[1, 2, 3].map(i => <div key={i} className="w-3 h-3 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />)}
@@ -191,13 +196,13 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
               onClick={toggleGenderPref}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white' : 'bg-white border-purple-100 text-purple-600 shadow-sm'}`}
             >
-              <span>{genderPref === 'male' ? '🧔' : '👩'}</span>
+              <span className="w-3 h-3"><IconRenderer icon={FashionIcons.User} /></span>
               <span>{t(genderPref)}</span>
             </button>
           )}
           {streak > 0 && (
             <div className={`px-2.5 py-1 rounded-full flex items-center gap-1.5 border ${isDark ? 'bg-orange-500/10 border-orange-500/20' : 'bg-orange-50 border-orange-200'}`}>
-              <span className="text-sm">🔥</span>
+              <span className="w-3 h-3 text-orange-500"><IconRenderer icon={FashionIcons.Accuracy} /></span>
               <span className={`text-[10px] font-black ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>{streak}</span>
             </div>
           )}
@@ -281,7 +286,7 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
 
       {/* Daily Style Tip reasoning box */}
       <div className={`rounded-2xl p-4 border flex items-start gap-3 ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50/50 border-purple-100'}`}>
-        <span className="text-xl flex-shrink-0 opacity-80">{todayTip.emoji}</span>
+        <span className="w-6 h-6 flex-shrink-0 opacity-80 text-purple-400"><IconRenderer icon={FashionIcons.Bulb} /></span>
         <div>
           <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{t('styleTipDay')}</p>
           <p className={`text-[11px] leading-relaxed italic ${isDark ? 'text-white/50' : 'text-gray-600'}`}>“{todayTip.tip}”</p>
@@ -310,7 +315,7 @@ function ProfileHeaderButton({ onOpenProfile, isDark }) {
       }`}
       aria-label="Open Profile"
     >
-      <span className="drop-shadow-sm">❤️</span>
+      <span className="w-5 h-5 text-red-500"><IconRenderer icon={FashionIcons.Star} /></span>
     </button>
   );
 }
@@ -562,11 +567,11 @@ function Dashboard({ user, onLogout }) {
   };
 
   const navItems = [
-    { id: 'home', emoji: '🏠', label: t('navHome') },
-    { id: 'analyze', emoji: '📸', label: t('navAnalyze') },
-    { id: 'history', emoji: '⌛', label: t('navHistory') },
-    { id: 'navigator', emoji: '🧭', label: t('navNavigator') || 'Navigator' },
-    { id: 'tools', emoji: '🛠️', label: t('navTools') }
+    { id: 'home', icon: FashionIcons.Formal, label: t('navHome') },
+    { id: 'analyze', icon: FashionIcons.Camera, label: t('navAnalyze') },
+    { id: 'history', icon: FashionIcons.Analysis, label: t('navHistory') },
+    { id: 'navigator', icon: FashionIcons.Global, label: t('navNavigator') || 'Navigator' },
+    { id: 'tools', icon: FashionIcons.Wardrobe, label: t('navTools') }
   ];
 
   const handleTabChange = (tab) => {
@@ -575,7 +580,7 @@ function Dashboard({ user, onLogout }) {
   };
 
   return (
-    <div className={`min-h-screen text-white ${theme === 'dark' ? 'bg-[#050816]' : 'bg-gradient-to-br from-slate-200 via-purple-100/50 to-slate-200'}`} style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
+    <div className={`min-h-screen text-white ${theme === 'dark' ? 'bg-[#02040a]' : 'bg-gradient-to-br from-slate-200 via-purple-100/50 to-slate-200'}`} style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
       <div className="fixed top-[-200px] left-[-200px] w-[500px] h-[500px] rounded-full bg-purple-700/20 blur-[120px] pointer-events-none z-0" />
       <div className="fixed bottom-[-200px] right-[-200px] w-[500px] h-[500px] rounded-full bg-pink-700/20 blur-[120px] pointer-events-none z-0" />
 
@@ -584,7 +589,7 @@ function Dashboard({ user, onLogout }) {
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      <header className={`relative z-10 flex items-center justify-between px-4 py-4 border-b backdrop-blur-xl sticky top-0 ${theme === 'dark' ? 'border-white/10 bg-[#050816]/80' : 'border-purple-200 bg-slate-100/90 shadow-sm'}`}>
+      <header className={`relative z-10 flex items-center justify-between px-4 py-4 border-b backdrop-blur-xl sticky top-0 ${theme === 'dark' ? 'border-white/10 bg-[#02040a]/80' : 'border-purple-200 bg-slate-100/90 shadow-sm'}`}>
         <div className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-black text-white">SG</div>
           <span className={`font-black text-base bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent`}>StyleGuru AI</span>
@@ -598,7 +603,7 @@ function Dashboard({ user, onLogout }) {
           <ProfileHeaderButton onOpenProfile={() => handleTabChange('profile')} isDark={isDark} />
 
           <button onClick={toggleTheme} className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-sm">
-            {theme === 'dark' ? '☀️' : '🌙'}
+            {theme === 'dark' ? <IconRenderer icon={FashionIcons.Bulb} className="w-4 h-4 text-yellow-400" /> : <IconRenderer icon={FashionIcons.Bulb} className="w-4 h-4 text-slate-400" />}
           </button>
         </div>
       </header>
@@ -677,7 +682,7 @@ function Dashboard({ user, onLogout }) {
         </div>
       </main>
 
-      <nav className={`fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t safe-area-bottom ${theme === 'dark' ? 'bg-[#050816]/95 border-white/10' : 'bg-slate-100/95 border-purple-200 shadow-lg'}`}>
+      <nav className={`fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t safe-area-bottom ${theme === 'dark' ? 'bg-[#02040a]/95 border-white/10' : 'bg-slate-100/95 border-purple-200 shadow-lg'}`}>
         {/* Nav Container: Perfect equal distribution — each item gets exact 1/6th */}
         <div className="max-w-md mx-auto px-1 py-1.5">
           <div className="flex w-full items-end">
@@ -693,7 +698,9 @@ function Dashboard({ user, onLogout }) {
                       : 'text-gray-500'
                   }`}
               >
-                <span className={`text-[20px] leading-none transition-transform duration-200 ${activeTab === item.id ? 'scale-110 mb-0.5' : 'mb-0'}`}>{item.emoji}</span>
+                <span className={`w-6 h-6 mb-1 transition-transform duration-200 ${activeTab === item.id ? 'scale-110 text-purple-400' : 'text-white/40'}`}>
+                   <IconRenderer icon={item.icon} />
+                </span>
                 <span className={`text-[7.5px] font-black uppercase tracking-tighter leading-none text-center truncate w-full px-0.5 ${activeTab === item.id ? 'text-purple-400' : theme === 'dark' ? 'text-white/30' : 'text-gray-500'
                   }`}>{item.label}</span>
                 {activeTab === item.id && <div className="w-3 h-0.5 rounded-full bg-purple-500 mt-1" />}

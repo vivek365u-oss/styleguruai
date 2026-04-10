@@ -6,78 +6,15 @@ import AdSense from '../AdSense';
 
 // FAQ items and Features are now handled inside the component to allow for dynamic translations.
 
-const FashionIcons = {
-  Dress: () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
-      <path d="M6 3h12l1 5h1l1 13H3L4 9h1l1-6z" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M9 3v2m6-2v2" strokeLinecap="round" />
-    </svg>
-  ),
-  Shirt: () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
-      <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.62 1.96V10a12 12 0 0010 11.83 12 12 0 0010-11.83V5.42a2 2 0 00-1.62-1.96z" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M12 22V12" strokeLinecap="round" />
-    </svg>
-  ),
-  Watch: () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
-      <circle cx="12" cy="12" r="7" />
-      <path d="M12 9v3l2 2" strokeLinecap="round" />
-      <path d="M16 5V2H8v3m8 14v3H8v-3" strokeLinecap="round" />
-    </svg>
-  ),
-  Analysis: () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
-      <path d="M4.5 16.5c0 1.933 1.567 3.5 3.5 3.5s3.5-1.567 3.5-3.5" strokeLinecap="round" />
-      <path d="M12.5 7.5c0-1.933 1.567-3.5 3.5-3.5s3.5 1.567 3.5 3.5" strokeLinecap="round" />
-      <path d="M8 7.5v9m8-9v9" strokeLinecap="round" />
-      <circle cx="8" cy="7.5" r="3.5" />
-      <circle cx="16" cy="16.5" r="3.5" />
-    </svg>
-  ),
-  Global: () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
-      <circle cx="12" cy="12" r="10" />
-      <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" strokeLinecap="round" />
-    </svg>
-  ),
-  Star: () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
-      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  ),
-  Wardrobe: () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
-      <rect x="3" y="4" width="18" height="16" rx="2" />
-      <path d="M3 10h18M9 4v16" strokeLinecap="round" />
-    </svg>
-  ),
-  Camera: () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
-      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-      <circle cx="12" cy="13" r="4" />
-    </svg>
-  ),
-  Bulb: () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
-      <path d="M9 18h6m-3-15a7 7 0 0 1 0 14m0 4v-4" strokeLinecap="round" />
-    </svg>
-  ),
-  Shop: () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
-      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4H6z" strokeLinecap="round" />
-      <path d="M3 6h18M16 10a4 4 0 0 1-8 0" strokeLinecap="round" />
-    </svg>
-  )
-};
+import { FashionIcons, IconRenderer } from './Icons';
 
 const floatingItems = [
-  <FashionIcons.Dress />, 
-  <FashionIcons.Shirt />, 
-  <FashionIcons.Watch />, 
-  <FashionIcons.Dress />, 
-  <FashionIcons.Shirt />, 
-  <FashionIcons.Watch />
+  FashionIcons.Dress, 
+  FashionIcons.Shirt, 
+  FashionIcons.Watch, 
+  FashionIcons.Heels, 
+  FashionIcons.Accessories, 
+  FashionIcons.Hoodie 
 ];
 
 export default function LandingPage({ onGetStarted, onLoginClick }) {
@@ -145,7 +82,7 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
       {floatingItems.map((item, i) => (
         <div
           key={i}
-          className="fixed text-2xl pointer-events-none z-0 opacity-[0.03]"
+          className="fixed w-12 h-12 pointer-events-none z-0 opacity-[0.03]"
           style={{
             left: `${(i * 13 + 7) % 95}%`,
             top: `${(i * 17 + 12) % 90}%`,
@@ -153,7 +90,7 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
             filter: 'blur(1px)',
           }}
         >
-          {item}
+          <IconRenderer icon={item} />
         </div>
       ))}
 
@@ -377,13 +314,13 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
         {/* Stats bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           {[
-            { value: '10K+', label: t('happyUsers'), emoji: '👥' },
-            { value: '95%+', label: t('accuracy'), emoji: '🎯' },
-            { value: '6', label: t('skinToneCategories'), emoji: '🎨' },
-            { value: '100%', label: t('fullyFree'), emoji: '✨' },
+            { value: '10K+', label: t('happyUsers'), icon: <IconRenderer icon={FashionIcons.User} /> },
+            { value: '95%+', label: t('accuracy'), icon: <IconRenderer icon={FashionIcons.Accuracy} /> },
+            { value: '6', label: t('skinToneCategories'), icon: <IconRenderer icon={FashionIcons.Analysis} /> },
+            { value: '100%', label: t('fullyFree'), icon: <IconRenderer icon={FashionIcons.Star} /> },
           ].map((stat) => (
             <div key={stat.label} className="bg-gray-900/60 border border-gray-800 rounded-2xl p-4 text-center backdrop-blur-sm">
-              <p className="text-2xl mb-1">{stat.emoji}</p>
+              <div className="w-8 h-8 mx-auto mb-2 text-purple-400 opacity-60">{stat.icon}</div>
               <p className="text-white font-black text-xl">{stat.value}</p>
               <p className="text-gray-400 text-xs">{stat.label}</p>
             </div>
@@ -391,10 +328,10 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { icon: <FashionIcons.Analysis />, title: t('featureSkinTitle'), desc: t('featureSkinDesc') },
-            { icon: <FashionIcons.Wardrobe />, title: t('featureOutfitTitle'), desc: t('featureOutfitDesc') },
-            { icon: <FashionIcons.Star />, title: t('featureAdviceTitle'), desc: t('featureAdviceDesc') },
-            { icon: <FashionIcons.Global />, title: t('featureEaseTitle'), desc: t('featureEaseDesc') },
+            { icon: <IconRenderer icon={FashionIcons.Analysis} />, title: t('featureSkinTitle'), desc: t('featureSkinDesc') },
+            { icon: <IconRenderer icon={FashionIcons.Wardrobe} />, title: t('featureOutfitTitle'), desc: t('featureOutfitDesc') },
+            { icon: <IconRenderer icon={FashionIcons.Star} />, title: t('featureAdviceTitle'), desc: t('featureAdviceDesc') },
+            { icon: <IconRenderer icon={FashionIcons.Global} />, title: t('featureEaseTitle'), desc: t('featureEaseDesc') },
           ].map((f) => (
             <div
               key={f.title}
@@ -442,10 +379,10 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
           <p className="text-white/50 text-xs font-semibold uppercase tracking-wide text-center mb-4">{t('whatYouGet')}</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: <FashionIcons.Analysis />, label: t('colorPalette'), desc: t('colorPaletteDesc') },
-              { icon: <FashionIcons.Wardrobe />, label: t('outfitCombos'), desc: t('outfitCombosDesc') },
-              { icon: <FashionIcons.Shop />, label: t('shopLinks'), desc: t('shopLinksDesc') },
-              { icon: <FashionIcons.Bulb />, label: t('styleTips'), desc: t('styleTipsDesc') },
+              { icon: <IconRenderer icon={FashionIcons.Analysis} className="w-8 h-8" />, label: t('colorPalette'), desc: t('colorPaletteDesc') },
+              { icon: <IconRenderer icon={FashionIcons.Wardrobe} className="w-8 h-8" />, label: t('outfitCombos'), desc: t('outfitCombosDesc') },
+              { icon: <IconRenderer icon={FashionIcons.Shopping} className="w-8 h-8" />, label: t('shopLinks'), desc: t('shopLinksDesc') },
+              { icon: <IconRenderer icon={FashionIcons.Bulb} className="w-8 h-8" />, label: t('styleTips'), desc: t('styleTipsDesc') },
             ].map((item) => (
               <div key={item.label} className="text-center p-3 bg-white/5 rounded-2xl border border-white/10">
                 <div className="text-3xl mb-2">{item.icon}</div>
@@ -490,20 +427,22 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { name: 'Priya S.', location: 'Mumbai', skin: 'Medium Warm', review: 'Finally an app that understands Indian skin tones! The color recommendations are spot on. I wore the suggested teal kurta to a wedding and got so many compliments.', rating: 5, emoji: '🥻' },
-            { name: 'Rahul K.', location: 'Delhi', skin: 'Wheatish', review: 'The outfit checker feature is amazing. I uploaded my shirt and it told me exactly which pants would look good. Saved me from a fashion disaster!', rating: 5, emoji: '👔' },
-            { name: 'Ananya M.', location: 'Bangalore', skin: 'Fair Cool', review: 'I never knew my undertone was cool until StyleGuru AI told me. Now I understand why navy and purple always looked better on me than orange. Game changer!', rating: 5, emoji: '✨' },
-            { name: 'Vikram T.', location: 'Chennai', skin: 'Dark Warm', review: 'As someone with dark skin, I always struggled to find colors that suited me. This app recommended cobalt blue and white — and wow, the difference is incredible!', rating: 5, emoji: '🎨' },
-            { name: 'Sneha R.', location: 'Pune', skin: 'Olive Neutral', review: 'The lehenga color recommendations for my sister\'s wedding were perfect. I went with the suggested deep burgundy and everyone loved it. Highly recommend!', rating: 5, emoji: '💃' },
-            { name: 'Arjun P.', location: 'Hyderabad', skin: 'Light Warm', review: 'The body type tips combined with skin tone recommendations are super helpful. I\'m slim and the app suggested horizontal stripes — looks great on me!', rating: 5, emoji: '👕' },
+            { name: 'Priya S.', location: 'Mumbai', skin: 'Medium Warm', review: t('test1Review'), rating: 5, icon: FashionIcons.Dress },
+            { name: 'Rahul K.', location: 'Delhi', skin: 'Wheatish', review: t('test2Review'), rating: 5, icon: FashionIcons.Shirt },
+            { name: 'Ananya M.', location: 'Bangalore', skin: 'Fair Cool', review: t('test3Review'), rating: 5, icon: FashionIcons.Star },
+            { name: 'Vikram T.', location: 'Chennai', skin: 'Dark Warm', review: t('test4Review'), rating: 5, icon: FashionIcons.Analysis },
+            { name: 'Sneha R.', location: 'Pune', skin: 'Olive Neutral', review: t('test5Review'), rating: 5, icon: FashionIcons.Dress },
+            { name: 'Arjun P.', location: 'Hyderabad', skin: 'Light Warm', review: t('test6Review'), rating: 5, icon: FashionIcons.Shirt },
           ].map((t, i) => (
             <div key={i} className="bg-gray-900/60 border border-gray-800 rounded-2xl p-6 hover:border-purple-600/40 transition-all backdrop-blur-sm">
               <div className="flex items-center gap-1 mb-3">
-                {[...Array(t.rating)].map((_, j) => <span key={j} className="text-yellow-400 text-sm">⭐</span>)}
+                {[...Array(t.rating)].map((_, j) => <span key={j} className="text-yellow-400 text-sm">★</span>)}
               </div>
               <p className="text-gray-300 text-sm leading-relaxed mb-4">"{t.review}"</p>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-lg">{t.emoji}</div>
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center p-2.5">
+                   <IconRenderer icon={t.icon} className="text-white" />
+                </div>
                 <div>
                   <p className="text-white font-bold text-sm">{t.name}</p>
                   <p className="text-gray-500 text-xs">{t.location} · {t.skin} skin</p>
@@ -553,9 +492,9 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { slug: 'skin-tone-colors', title: t('blog1Title'), excerpt: t('blog1Excerpt'), emoji: '🎨', date: 'Jan 15, 2025' },
-            { slug: 'outfit-guide', title: t('blog2Title'), excerpt: t('blog2Excerpt'), emoji: '👔', date: 'Jan 20, 2025' },
-            { slug: 'ai-fashion', title: t('blog3Title'), excerpt: t('blog3Excerpt'), emoji: '🤖', date: 'Jan 25, 2025' },
+            { slug: 'skin-tone-colors', title: t('blog1Title'), excerpt: t('blog1Excerpt'), icon: FashionIcons.Analysis, date: 'Jan 15, 2025' },
+            { slug: 'outfit-guide', title: t('blog2Title'), excerpt: t('blog2Excerpt'), icon: FashionIcons.Wardrobe, date: 'Jan 20, 2025' },
+            { slug: 'ai-fashion', title: t('blog3Title'), excerpt: t('blog3Excerpt'), icon: FashionIcons.AI, date: 'Jan 25, 2025' },
           ].map((post) => (
             <a
               key={post.slug}

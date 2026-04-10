@@ -4,6 +4,7 @@
 // ============================================================
 import { useState, useRef, useEffect, useContext, useCallback } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
+import { FashionIcons, IconRenderer } from './Icons';
 
 function hexToRgb(hex) {
   if (!hex || hex.length < 7) return { r: 128, g: 128, b: 128 };
@@ -140,7 +141,7 @@ function ColorScanner({ savedPalette = [], onClose }) {
         match: score >= 60,
         closest: bestMatch,
         score,
-        verdict: score >= 80 ? '🔥 Perfect match!' : score >= 60 ? '✅ Good match' : score >= 40 ? '🤔 Decent' : '🚫 Not your color',
+        verdict: score >= 80 ? 'Perfect match!' : score >= 60 ? 'Good match' : score >= 40 ? 'Decent' : 'Not your color',
       });
     }
 
@@ -161,7 +162,7 @@ function ColorScanner({ savedPalette = [], onClose }) {
     return (
       <div className="space-y-4">
         <div className={`rounded-2xl p-6 text-center border ${isDark ? 'bg-red-500/10 border-red-500/20' : 'bg-red-50 border-red-200'}`}>
-          <p className="text-4xl mb-3">📷</p>
+          <div className="w-12 h-12 mx-auto mb-3 opacity-30"><IconRenderer icon={FashionIcons.Analysis} /></div>
           <p className={`text-sm font-bold mb-1 ${isDark ? 'text-red-300' : 'text-red-700'}`}>Camera Error</p>
           <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{error}</p>
         </div>
@@ -183,7 +184,7 @@ function ColorScanner({ savedPalette = [], onClose }) {
       <div className="flex items-center justify-between">
         <div>
           <p className={`text-xs font-bold uppercase tracking-wider ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>
-            📷 Color Scanner
+            <span className="w-4 h-4"><IconRenderer icon={FashionIcons.Analysis} /></span> Color Scanner
           </p>
           <p className={`text-[10px] mt-0.5 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
             Point at clothing to check color match
@@ -221,10 +222,10 @@ function ColorScanner({ savedPalette = [], onClose }) {
         <div className="absolute bottom-3 right-3 flex gap-2">
           <button onClick={toggleTorch}
             className={`w-10 h-10 rounded-xl flex items-center justify-center backdrop-blur-md border transition-all ${torchOn ? 'bg-yellow-500/40 border-yellow-400 text-yellow-200' : 'bg-black/40 border-white/10 text-white/70'
-              }`}>🔦</button>
+              }><IconRenderer icon={FashionIcons.Sun} className="w-5 h-5" /></button>
           <button onClick={toggleFreeze}
             className={`w-10 h-10 rounded-xl flex items-center justify-center backdrop-blur-md border transition-all ${frozen ? 'bg-blue-500/40 border-blue-400 text-blue-200' : 'bg-black/40 border-white/10 text-white/70'
-              }`}>{frozen ? '▶️' : '⏸'}</button>
+              }><IconRenderer icon={frozen ? FashionIcons.Shirt : FashionIcons.Wardrobe} className="w-5 h-5" /></button>
         </div>
 
         {!cameraReady && (
@@ -244,8 +245,8 @@ function ColorScanner({ savedPalette = [], onClose }) {
             : isDark ? 'bg-red-500/10 border-red-500/20' : 'bg-red-50 border-red-200'
           }`}>
           <div className="flex items-center justify-between mb-2">
-            <span className={`text-lg font-bold ${matchResult.match ? 'text-green-400' : isDark ? 'text-red-300' : 'text-red-600'}`}>
-              {matchResult.verdict}
+            <span className={`text-lg font-bold flex items-center gap-2 ${matchResult.match ? 'text-green-400' : isDark ? 'text-red-300' : 'text-red-600'}`}>
+               <span className="w-5 h-5"><IconRenderer icon={matchResult.match ? FashionIcons.Accuracy : FashionIcons.Analysis} /></span> {matchResult.verdict}
             </span>
             <span className={`text-xs font-black px-2 py-1 rounded-full ${matchResult.score >= 60 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
               }`}>{matchResult.score}%</span>
@@ -274,7 +275,9 @@ function ColorScanner({ savedPalette = [], onClose }) {
       {/* Your Palette Reference */}
       {savedPalette.length > 0 && (
         <div className={`rounded-2xl p-3 border ${cardBg}`}>
-          <p className={`text-xs font-bold mb-2 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>🎨 Your Color Palette</p>
+          <p className={`text-xs font-bold mb-2 flex items-center gap-2 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
+             <span className="w-4 h-4"><IconRenderer icon={FashionIcons.Analysis} /></span> {t('savedColors') || 'Your Color Palette'}
+          </p>
           <div className="flex gap-1.5 flex-wrap">
             {savedPalette.map((c, i) => (
               <div key={i} className="flex flex-col items-center gap-0.5">
@@ -288,7 +291,7 @@ function ColorScanner({ savedPalette = [], onClose }) {
 
       {/* Pro tip */}
       <div className={`rounded-2xl p-3 border flex items-start gap-3 ${isDark ? 'bg-purple-900/20 border-purple-700/20' : 'bg-purple-50 border-purple-200'}`}>
-        <span className="text-lg flex-shrink-0">💡</span>
+        <span className="w-5 h-5 flex-shrink-0"><IconRenderer icon={FashionIcons.Bulb} className="text-purple-400" /></span>
         <p className={`text-xs leading-relaxed ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
           Point the camera at any clothing item. The center square detects the color and checks if it matches your personal palette. Use 🔦 for dark stores and ⏸ to freeze the frame.
         </p>

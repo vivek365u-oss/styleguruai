@@ -4,6 +4,7 @@ import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import { useAnalysisProgress } from '../hooks/useAnalysisProgress';
+import { FashionIcons, IconRenderer } from './Icons';
 
 // ── Skin Tone Quiz ────────────────────────────────────────────
 function SkinToneQuiz({ isDark, onResult, gender }) {
@@ -28,29 +29,29 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
       q: 'What is your undertone?',
       key: 'undertone',
       options: [
-        { label: '🌞 Warm (yellowish/golden veins)', value: 'warm' },
-        { label: '❄️ Cool (bluish/purple veins)', value: 'cool' },
-        { label: '⚖️ Neutral (mix of both)', value: 'neutral' },
+        { label: 'Warm (yellowish/golden veins)', value: 'warm', icon: FashionIcons.Sun },
+        { label: 'Cool (bluish/purple veins)', value: 'cool', icon: FashionIcons.Snow },
+        { label: 'Neutral (mix of both)', value: 'neutral', icon: FashionIcons.AI },
       ]
     },
     {
       q: 'What is your body type?',
       key: 'bodyType',
       options: [
-        { label: '🏃 Slim / Lean', value: 'slim' },
-        { label: '💪 Athletic / Muscular', value: 'athletic' },
-        { label: '⚖️ Average / Regular', value: 'average' },
-        { label: '🌸 Plus Size / Curvy', value: 'plus' },
+        { label: 'Slim / Lean', value: 'slim', icon: FashionIcons.User },
+        { label: 'Athletic / Muscular', value: 'athletic', icon: FashionIcons.User },
+        { label: 'Average / Regular', value: 'average', icon: FashionIcons.User },
+        { label: 'Plus Size / Curvy', value: 'plus', icon: FashionIcons.User },
       ]
     },
     {
       q: 'What is your eye color?',
       key: 'eyeColor',
       options: [
-        { label: '🟤 Brown / Dark Brown', value: 'brown' },
-        { label: '⚫ Black / Very Dark', value: 'black' },
-        { label: '🟢 Hazel / Green', value: 'hazel' },
-        { label: '🔵 Blue / Grey', value: 'blue' },
+        { label: 'Brown / Dark Brown', value: 'brown', icon: FashionIcons.Accuracy },
+        { label: 'Black / Very Dark', value: 'black', icon: FashionIcons.Accuracy },
+        { label: 'Hazel / Green', value: 'hazel', icon: FashionIcons.Accuracy },
+        { label: 'Blue / Grey', value: 'blue', icon: FashionIcons.Accuracy },
       ]
     },
   ];
@@ -168,7 +169,7 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
         onClick={() => setOpen(true)}
         className={`w-full flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-semibold transition-all hover:border-purple-500/50 ${isDark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white' : 'bg-white border-gray-200 text-gray-500 hover:text-gray-800 shadow-sm'}`}
       >
-        <span>🎯</span>
+        <span className="w-4 h-4"><IconRenderer icon={FashionIcons.Accuracy} /></span>
         <span>No photo? Take Skin Tone Quiz</span>
       </button>
     );
@@ -178,7 +179,9 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
   return (
     <div className={`${cardCls} rounded-2xl p-4`}>
       <div className="flex items-center justify-between mb-4">
-        <p className={`font-black text-sm ${headingCls}`}>🎯 Skin Tone Quiz</p>
+        <p className={`font-black text-sm flex items-center gap-2 ${headingCls}`}>
+           <span className="w-4 h-4"><IconRenderer icon={FashionIcons.Accuracy} /></span> Skin Tone Quiz
+        </p>
         <div className="flex gap-1">
           {questions.map((_, i) => (
             <div key={i} className={`w-6 h-1.5 rounded-full transition-all ${i <= step ? 'bg-purple-500' : isDark ? 'bg-white/20' : 'bg-gray-200'}`} />
@@ -204,8 +207,13 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
               }`}
             >
               {opt.color && <div className="w-8 h-8 rounded-lg flex-shrink-0 border border-white/20 shadow-md" style={{ backgroundColor: opt.color }} />}
-              <span className={`text-sm font-semibold flex-1 text-left ${headingCls}`}>{opt.label}</span>
-              {isSelected && <span className="text-lg">✓</span>}
+              <span className={`text-sm font-semibold flex-1 text-left ${headingCls}`}>
+                <div className="flex items-center gap-3">
+                  {opt.icon && <span className="w-4 h-4 opacity-70"><IconRenderer icon={opt.icon} /></span>}
+                  {opt.label}
+                </div>
+              </span>
+              {isSelected && <span className="text-lg text-purple-500 font-black"><IconRenderer icon={FashionIcons.AI} className="w-4 h-4" /></span>}
             </button>
           );
         })}
@@ -367,11 +375,11 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   };
 
   const seasons = [
-    { id: 'summer', label: 'Summer', emoji: '☀️', desc: 'March-June' },
-    { id: 'monsoon', label: 'Monsoon', emoji: '🌧️', desc: 'July-Sept' },
-    { id: 'winter', label: 'Winter', emoji: '❄️', desc: 'Oct-Feb' },
-    { id: 'festive', label: 'Festive', emoji: '🎉', desc: 'Diwali/Eid' },
-    { id: 'college', label: 'College', emoji: '🎓', desc: 'Campus Wear' },
+    { id: 'summer', label: 'Summer', icon: FashionIcons.Sun, desc: 'March-June' },
+    { id: 'monsoon', label: 'Monsoon', icon: FashionIcons.Rain, desc: 'July-Sept' },
+    { id: 'winter', label: 'Winter', icon: FashionIcons.Snow, desc: 'Oct-Feb' },
+    { id: 'festive', label: 'Festive', icon: FashionIcons.Star, desc: 'Diwali/Eid' },
+    { id: 'college', label: 'College', icon: FashionIcons.Formal, desc: 'Campus Wear' },
   ];
 
   return (
@@ -409,7 +417,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                 : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'
             }`}
           >
-            <span>👔</span> Normal
+            <span className="w-4 h-4"><IconRenderer icon={FashionIcons.Shirt} /></span> Normal
           </button>
           <button
             onClick={() => { setMode('seasonal'); handleGenderChange('male'); }}
@@ -419,7 +427,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                 : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'
             }`}
           >
-            <span>🌍</span> Seasonal
+            <span className="w-4 h-4"><IconRenderer icon={FashionIcons.Analysis} /></span> Seasonal
           </button>
           <button
             onClick={() => { setMode('couple'); }}
@@ -429,7 +437,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                 : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'
             }`}
           >
-            <span>👩‍❤️‍👨</span> Couple
+            <span className="w-4 h-4"><IconRenderer icon={FashionIcons.User} /></span> Couple
           </button>
         </div>
       </div>
@@ -446,7 +454,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                   : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'
               }`}
             >
-              <span>👨</span> Male
+              <span className="w-4 h-4"><IconRenderer icon={FashionIcons.User} /></span> Male
             </button>
             <button
               onClick={() => handleGenderChange('female')}
@@ -456,7 +464,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                   : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'
               }`}
             >
-              <span>👩</span> Female
+              <span className="w-4 h-4"><IconRenderer icon={FashionIcons.User} /></span> Female
             </button>
           </div>
         </div>
@@ -476,7 +484,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                     : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'
                 }`}
               >
-                <span>👨</span> Male
+                <span className="w-4 h-4"><IconRenderer icon={FashionIcons.User} /></span> Male
               </button>
               <button
                 onClick={() => handleGenderChange('female')}
@@ -486,7 +494,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                     : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'
                 }`}
               >
-                <span>👩</span> Female
+                <span className="w-4 h-4"><IconRenderer icon={FashionIcons.User} /></span> Female
               </button>
             </div>
           </div>
@@ -504,7 +512,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                       : 'bg-white border-purple-100 text-purple-400 hover:text-purple-700 hover:border-purple-300 shadow-sm'
                 }`}
               >
-                <span className="text-2xl">{s.emoji}</span>
+                <span className="w-6 h-6 mb-1"><IconRenderer icon={s.icon} /></span>
                 <span className="font-bold">{s.label}</span>
                 <span className="text-xs opacity-70">{s.desc}</span>
               </button>
@@ -537,10 +545,10 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           </div>
           <div className="grid grid-cols-2 gap-3 mb-6">
             {[
-              { value: 'slim', label: '🏃 Slim', desc: 'Lean' },
-              { value: 'athletic', label: '💪 Athletic', desc: 'Muscular' },
-              { value: 'average', label: '⚖️ Average', desc: 'Regular' },
-              { value: 'plus', label: '🌸 Plus', desc: 'Curvy' },
+              { value: 'slim', label: 'Slim', icon: FashionIcons.User, desc: 'Lean' },
+              { value: 'athletic', label: 'Athletic', icon: FashionIcons.User, desc: 'Muscular' },
+              { value: 'average', label: 'Average', icon: FashionIcons.User, desc: 'Regular' },
+              { value: 'plus', label: 'Plus', icon: FashionIcons.User, desc: 'Curvy' },
             ].map((bt) => (
               <button
                 key={bt.value}
@@ -555,6 +563,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                       : 'bg-white border-gray-200 hover:border-purple-300 shadow-sm'
                 }`}
               >
+                <span className="w-8 h-8 opacity-20 mb-2"><IconRenderer icon={bt.icon} /></span>
                 <span className={`text-sm font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{bt.label}</span>
                 <span className={`text-[10px] font-bold uppercase opacity-50 ${isDark ? 'text-white' : 'text-gray-900'}`}>{bt.desc}</span>
               </button>
@@ -578,10 +587,10 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           </div>
           <div className="grid grid-cols-2 gap-3 mb-6">
             {[
-              { value: 'brown', label: '🟤 Brown', desc: 'Dark' },
-              { value: 'black', label: '⚫ Black', desc: 'Very Dark' },
-              { value: 'hazel', label: '🟢 Hazel', desc: 'Green' },
-              { value: 'blue', label: '🔵 Blue', desc: 'Grey' },
+              { value: 'brown', label: 'Brown', icon: FashionIcons.Accuracy, desc: 'Dark' },
+              { value: 'black', label: 'Black', icon: FashionIcons.Accuracy, desc: 'Very Dark' },
+              { value: 'hazel', label: 'Hazel', icon: FashionIcons.Accuracy, desc: 'Green' },
+              { value: 'blue',  label: 'Blue',  icon: FashionIcons.Accuracy, desc: 'Grey' },
             ].map((ec) => (
               <button
                 key={ec.value}
@@ -596,6 +605,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                       : 'bg-white border-gray-200 hover:border-purple-300 shadow-sm'
                 }`}
               >
+                <span className="w-8 h-8 opacity-20 mb-2"><IconRenderer icon={ec.icon} /></span>
                 <span className={`text-sm font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{ec.label}</span>
                 <span className={`text-[10px] font-bold uppercase opacity-50 ${isDark ? 'text-white' : 'text-gray-900'}`}>{ec.desc}</span>
               </button>
@@ -627,11 +637,11 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           </div>
           <div className="grid grid-cols-2 gap-3 mb-6">
             {[
-              { value: 'casual',  label: '😎 Casual',  desc: 'Daily' },
-              { value: 'office',  label: '💼 Office',  desc: 'Work' },
-              { value: 'wedding', label: '💍 Wedding', desc: 'Festive' },
-              { value: 'party',   label: '🎉 Party',   desc: 'Night out' },
-              { value: 'date',    label: '❤️ Date',    desc: 'Romantic' },
+              { value: 'casual',  label: 'Casual',  icon: FashionIcons.Formal, desc: 'Daily' },
+              { value: 'office',  label: 'Office',  icon: FashionIcons.Formal, desc: 'Work' },
+              { value: 'wedding', label: 'Wedding', icon: FashionIcons.Dress, desc: 'Festive' },
+              { value: 'party',   label: 'Party',   icon: FashionIcons.Star, desc: 'Night out' },
+              { value: 'date',    label: 'Date',    icon: FashionIcons.Sun, desc: 'Romantic' },
             ].map((oc) => (
               <button
                 key={oc.value}
@@ -646,6 +656,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                       : 'bg-white border-gray-200 hover:border-purple-300 shadow-sm'
                 }`}
               >
+                <span className="w-8 h-8 opacity-20 mb-2"><IconRenderer icon={oc.icon} /></span>
                 <span className={`text-sm font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{oc.label}</span>
                 <span className={`text-[10px] font-bold uppercase opacity-50 ${isDark ? 'text-white' : 'text-gray-900'}`}>{oc.desc}</span>
               </button>
@@ -739,8 +750,8 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                 <div key={p.id} className={`flex flex-col items-center rounded-3xl p-4 border-2 border-dashed transition-all ${isDark ? 'border-rose-500/30 bg-rose-500/5' : 'border-rose-300 bg-rose-50'}`}>
                   <span className="font-bold text-sm mb-2 opacity-70">{p.label}</span>
                   <div className="flex gap-1 mb-3 bg-white/10 p-1 rounded-lg">
-                    <button onClick={() => p.setGender('female')} className={`px-2 py-1 text-xs rounded-md ${p.gender === 'female' ? 'bg-pink-500 text-white' : 'text-gray-400'}`}>👩</button>
-                    <button onClick={() => p.setGender('male')} className={`px-2 py-1 text-xs rounded-md ${p.gender === 'male' ? 'bg-blue-500 text-white' : 'text-gray-400'}`}>👨</button>
+                    <button onClick={() => p.setGender('female')} className={`px-2 py-1 text-xs rounded-md ${p.gender === 'female' ? 'bg-pink-500 text-white' : 'text-gray-400'}`}><IconRenderer icon={FashionIcons.User} className="w-4 h-4" /></button>
+                    <button onClick={() => p.setGender('male')} className={`px-2 py-1 text-xs rounded-md ${p.gender === 'male' ? 'bg-blue-500 text-white' : 'text-gray-400'}`}><IconRenderer icon={FashionIcons.User} className="w-4 h-4" /></button>
                   </div>
                   <input
                     ref={p.ref} type="file" accept="image/*" className="hidden"
@@ -756,9 +767,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                   {p.file ? (
                     <img src={p.file} className="w-24 h-24 object-cover rounded-xl border border-white/20 mb-2 cursor-pointer shadow-lg" onClick={() => p.ref.current?.click()} />
                   ) : (
-                    <button onClick={() => p.ref.current?.click()} className="w-24 h-24 rounded-xl bg-black/5 dark:bg-white/5 flex items-center justify-center text-3xl mb-2 hover:bg-black/10 dark:hover:bg-white/10 transition pb-1">
-                      📸
-                    </button>
+                      <IconRenderer icon={FashionIcons.Analysis} className="w-8 h-8 opacity-30" />
                   )}
                 </div>
               ))}
@@ -768,7 +777,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                   disabled={!partner1 || !partner2}
                   className={`w-full py-4 rounded-2xl font-black text-lg text-white shadow-xl transition-all hover:scale-[1.02] ${(!partner1 || !partner2) ? 'bg-gray-400 opacity-50 cursor-not-allowed' : 'bg-gradient-to-r from-rose-500 to-pink-600 shadow-rose-500/30'}`}
                 >
-                  👩‍❤️‍👨 Match Outfits
+                  <IconRenderer icon={FashionIcons.User} className="w-5 h-5" /> Match Outfits
                 </button>
                 {uploadProgress > 0 && uploadProgress < 100 && (
                   <p className="text-center text-xs mt-2 text-rose-500 animate-pulse">Analyzing both photos... {uploadProgress}%</p>
@@ -827,7 +836,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                         : isDark ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-white/10' : 'bg-purple-100 border-purple-200'
                   }`}>
                     <span className="text-4xl">
-                      {mode === 'seasonal' ? seasons.find(s => s.id === season)?.emoji : gender === 'female' ? '👩' : '🤳'}
+                      <IconRenderer icon={mode === 'seasonal' ? (seasons.find(s => s.id === season)?.icon || FashionIcons.Sun) : (gender === 'female' ? FashionIcons.User : FashionIcons.Analysis)} />
                     </span>
                   </div>
                   <p className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('dropSelfie')}</p>
@@ -839,7 +848,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                         ? 'bg-gradient-to-r from-pink-500 to-rose-500 shadow-pink-500/30'
                         : 'bg-gradient-to-r from-purple-500 to-pink-500 shadow-purple-500/30'
                   }`}>
-                    📁 {t('choosePhoto')}
+                    <IconRenderer icon={FashionIcons.Analysis} className="w-4 h-4" /> {t('choosePhoto')}
                   </span>
                   <div className="flex gap-3 justify-center mt-3">
                     <button
@@ -849,7 +858,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                           ? 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/30'
                           : 'bg-purple-600 border-purple-600 text-white shadow-sm hover:bg-purple-700'}`}
                     >
-                      📷 Camera
+                      <IconRenderer icon={FashionIcons.Analysis} className="w-3 h-3" /> Camera
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
@@ -858,7 +867,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                           ? 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'
                           : 'bg-gray-100 border-gray-300 text-gray-700 shadow-sm hover:bg-gray-200'}`}
                     >
-                      🖼️ Gallery
+                      <IconRenderer icon={FashionIcons.Wardrobe} className="w-3 h-3" /> Gallery
                     </button>
                   </div>
                   <p className={`text-xs mt-4 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>{t('photoNote')}</p>
@@ -877,7 +886,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           { emoji: '😊', title: t('clearFace'), desc: t('clearFaceDesc') },
         ].map((tip, i) => (
           <div key={i} className={`rounded-2xl p-4 flex items-center gap-3 transition border ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-slate-100 border-purple-200 hover:border-purple-400 shadow-sm'}`}>
-            <span className="text-2xl">{tip.emoji}</span>
+            <span className="w-6 h-6"><IconRenderer icon={i === 0 ? FashionIcons.Sun : (i === 1 ? FashionIcons.Analysis : FashionIcons.AI)} /></span>
             <div>
               <p className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{tip.title}</p>
               <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{tip.desc}</p>

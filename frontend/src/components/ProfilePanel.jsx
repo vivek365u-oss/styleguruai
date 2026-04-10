@@ -7,6 +7,7 @@ import { auth, db, loadProfile, logout, getHistory, getSavedColors, saveUserPref
 import { updateProfile } from 'firebase/auth';
 import { motion, AnimatePresence } from 'framer-motion';
 import { doc, getDoc } from 'firebase/firestore';
+import { FashionIcons, IconRenderer } from './Icons';
 
 export default function ProfilePanel() {
   const { theme, setTheme } = useContext(ThemeContext);
@@ -169,7 +170,7 @@ export default function ProfilePanel() {
             {/* ── PROFILE HEADER ──────────────────────── */}
             <header className="flex items-center justify-between px-4">
                <h1 className="text-xl font-black uppercase tracking-widest text-white">{t('profileSetting')}</h1>
-               <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-xs">👤</div>
+               <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-xs p-1.5"><IconRenderer icon={FashionIcons.User} /></div>
             </header>
 
             <div className={`p-6 rounded-[2.5rem] border border-white/10 bg-white/5 backdrop-blur-3xl flex items-center gap-4`}>
@@ -199,7 +200,7 @@ export default function ProfilePanel() {
                   <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-2 space-y-1">
                      <button onClick={() => setViewMode('edit')} className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all group">
                         <div className="flex items-center gap-4">
-                           <span className="text-lg">👤</span>
+                           <span className="w-5 h-5 opacity-60"><IconRenderer icon={FashionIcons.User} /></span>
                            <span className="text-sm font-bold text-white/80">{t('editProfile')}</span>
                         </div>
                         <span className="text-white/20 group-hover:text-purple-500 transition-colors">→</span>
@@ -207,7 +208,7 @@ export default function ProfilePanel() {
 
                      <button onClick={() => window.open(`mailto:${SUPPORT_EMAIL}`)} className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all group">
                         <div className="flex items-center gap-4">
-                           <span className="text-lg">✉️</span>
+                           <span className="w-5 h-5 opacity-60"><IconRenderer icon={FashionIcons.Formal} /></span>
                            <span className="text-sm font-bold text-white/80">{t('contactUs')}</span>
                         </div>
                         <span className="text-white/20 group-hover:text-purple-500 transition-colors">→</span>
@@ -215,7 +216,7 @@ export default function ProfilePanel() {
 
                      <button onClick={() => window.open(`mailto:${SUPPORT_EMAIL}?subject=Error Report`)} className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all group">
                         <div className="flex items-center gap-4">
-                           <span className="text-lg">🐞</span>
+                           <span className="w-5 h-5 opacity-60"><IconRenderer icon={FashionIcons.Analysis} /></span>
                            <span className="text-sm font-bold text-white/80">{t('reportError')}</span>
                         </div>
                         <span className="text-white/20 group-hover:text-purple-500 transition-colors">→</span>
@@ -223,7 +224,7 @@ export default function ProfilePanel() {
 
                      <button className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all group">
                         <div className="flex items-center gap-4">
-                           <span className="text-lg">🛡️</span>
+                           <span className="w-5 h-5 opacity-60"><IconRenderer icon={FashionIcons.Accuracy} /></span>
                            <span className="text-sm font-bold text-white/80">{t('terms')}</span>
                         </div>
                         <span className="text-white/20 group-hover:text-indigo-500 transition-colors">→</span>
@@ -237,20 +238,20 @@ export default function ProfilePanel() {
                   <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-2 space-y-1">
                      <button onClick={handleShare} className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all group">
                         <div className="flex items-center gap-4">
-                           <span className="text-lg">📢</span>
+                           <span className="w-5 h-5 opacity-60"><IconRenderer icon={FashionIcons.Formal} /></span>
                            <span className="text-sm font-bold text-white/80">{t('shareApp')}</span>
                         </div>
                         <span className="text-white/20 group-hover:text-purple-500 transition-colors">→</span>
                      </button>
                      <button className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all group opacity-50 cursor-not-allowed">
                         <div className="flex items-center gap-4">
-                           <span className="text-lg">⭐</span>
+                           <span className="w-5 h-5 opacity-60"><IconRenderer icon={FashionIcons.Star} /></span>
                            <span className="text-sm font-bold text-white/80">{t('rateUs')}</span>
                         </div>
                      </button>
                      <button onClick={() => window.open(`mailto:${SUPPORT_EMAIL}?subject=Feature Request`)} className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all group">
                         <div className="flex items-center gap-4">
-                           <span className="text-lg">🚀</span>
+                           <span className="w-5 h-5 opacity-60"><IconRenderer icon={FashionIcons.AI} /></span>
                            <span className="text-sm font-bold text-white/80">{t('featureRequest')}</span>
                         </div>
                         <span className="text-white/20 group-hover:text-indigo-500 transition-colors">→</span>
@@ -276,8 +277,8 @@ export default function ProfilePanel() {
                                 <h3 className="text-2xl font-black text-white">{wardrobeStats.season} Master</h3>
                                 <p className="text-[10px] font-bold text-white/40 mt-1 uppercase tracking-tight">{wardrobeStats.undertone} Undertone • {wardrobeStats.skinTone} Tone</p>
                              </div>
-                             <div className="w-14 h-14 rounded-2xl bg-white shadow-2xl flex items-center justify-center text-3xl" style={{ backgroundColor: wardrobeStats.skinHex }}>
-                                ✨
+                             <div className="w-14 h-14 rounded-2xl bg-white shadow-2xl flex items-center justify-center p-3" style={{ backgroundColor: wardrobeStats.skinHex }}>
+                                <IconRenderer icon={FashionIcons.AI} className="w-full h-full text-white/50" />
                              </div>
                           </div>
                        </button>
@@ -287,7 +288,7 @@ export default function ProfilePanel() {
                   <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-2 space-y-1">
                      <div className="p-5 flex items-center justify-between">
                          <div className="flex items-center gap-4 text-white/80">
-                            <span className="text-lg">🌐</span>
+                            <span className="w-5 h-5 opacity-60"><IconRenderer icon={FashionIcons.Formal} /></span>
                             <span className="text-sm font-bold">Language</span>
                          </div>
                          <div className="flex p-0.5 bg-black/40 rounded-xl border border-white/5 overflow-hidden">
@@ -327,7 +328,7 @@ export default function ProfilePanel() {
                                     : 'bg-white/5 border-white/5 text-white/40 hover:border-white/20'
                                 }`}
                               >
-                                <span>{item.icon}</span>
+                                <span className="w-4 h-4"><IconRenderer icon={item.icon} /></span>
                                 <span className="text-[10px] font-black uppercase">{item.label}</span>
                               </button>
                            ))}
@@ -353,7 +354,7 @@ export default function ProfilePanel() {
                                          userPrefs[section.key] === opt.id ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-white/5 border-white/5 text-white/20'
                                        }`}
                                      >
-                                        <span className="text-sm">{opt.i}</span>
+                                        <span className="w-5 h-5 opacity-40 group-hover:opacity-100 transition-opacity"><IconRenderer icon={opt.i} /></span>
                                         <span className="text-[7px] font-black uppercase">{opt.id}</span>
                                      </button>
                                    ))}
@@ -371,7 +372,7 @@ export default function ProfilePanel() {
                   <div className="bg-red-500/5 border border-red-500/10 rounded-[2.5rem] p-2">
                      <button onClick={() => logout().then(() => navigate('/'))} className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all text-red-500 group">
                         <div className="flex items-center gap-4">
-                           <span className="text-lg">🚪</span>
+                           <span className="w-5 h-5"><IconRenderer icon={FashionIcons.Wardrobe} /></span>
                            <span className="text-sm font-bold">Sign Out</span>
                         </div>
                         <span className="opacity-40 group-hover:opacity-100 transition-opacity">→</span>
@@ -396,7 +397,9 @@ export default function ProfilePanel() {
             className="space-y-8"
           >
             <header className="flex items-center gap-6 px-4">
-               <button onClick={() => setViewMode('main')} className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white">←</button>
+               <button onClick={() => setViewMode('main')} className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white p-4">
+                  <IconRenderer icon={FashionIcons.Formal} />
+               </button>
                <h1 className="text-xl font-black uppercase tracking-widest text-white">{t('editProfile')}</h1>
             </header>
 
@@ -405,7 +408,9 @@ export default function ProfilePanel() {
                   <div className="w-full h-full rounded-[2.2rem] bg-slate-900 flex items-center justify-center text-4xl font-black text-white">
                      {user.name.charAt(0)}
                   </div>
-                  <button className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-white border-4 border-slate-900 flex items-center justify-center text-lg">📷</button>
+                  <button className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-white border-4 border-slate-900 flex items-center justify-center p-2.5">
+                     <IconRenderer icon={FashionIcons.Analysis} className="text-slate-900" />
+                  </button>
                </div>
             </div>
 

@@ -6,6 +6,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
 import { getLocalWardrobeImage, deleteLocalWardrobeImage } from '../utils/indexedDB';
 import { getFiltersByGender, ALL_CATEGORIES, getCategoryLabel } from '../constants/fashionCategories';
+import { FashionIcons, IconRenderer } from './Icons';
 
 // ── Helpers ──────────────────────────────────────────────────
 function WardrobeImage({ imageId, fallbackColor }) {
@@ -26,7 +27,7 @@ function WardrobeImage({ imageId, fallbackColor }) {
       className="w-12 h-12 rounded-xl flex items-center justify-center border border-white/20 shadow"
       style={{ backgroundColor: fallbackColor || '#C68642' }}
     >
-      <span className="text-xl">👗</span>
+      <span className="w-6 h-6"><IconRenderer icon={FashionIcons.Dress} /></span>
     </div>
   );
 }
@@ -137,8 +138,8 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
   if (!auth.currentUser) {
     return (
       <div className="mt-8 text-center pt-10">
-        <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
-          <span className="text-4xl">👗</span>
+        <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border p-5 ${isDark ? 'bg-white/5 border-white/10 text-white/30' : 'bg-gray-100 border-gray-200 text-gray-400'}`}>
+          <IconRenderer icon={FashionIcons.Wardrobe} />
         </div>
         <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('myWardrobe')}</h3>
         <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('wardrobeLimitNote')}</p>
@@ -149,7 +150,9 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
   if (loading) {
     return (
       <div className="mt-4 space-y-3">
-        <h2 className={`font-black text-2xl mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>👗 {t('myWardrobe')}</h2>
+        <h2 className={`font-black text-2xl mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+           <span className="w-6 h-6"><IconRenderer icon={FashionIcons.Wardrobe} /></span> {t('myWardrobe')}
+        </h2>
         {[1, 2, 3].map(i => <SkeletonCard key={i} isDark={isDark} />)}
       </div>
     );
@@ -159,7 +162,9 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
     <div className="mt-4 pb-4">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div>
-          <h2 className={`font-black text-2xl ${isDark ? 'text-white' : 'text-gray-900'}`}>👗 {t('myWardrobe')}</h2>
+          <h2 className={`font-black text-2xl flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+             <span className="w-6 h-6"><IconRenderer icon={FashionIcons.Wardrobe} /></span> {t('myWardrobe')}
+          </h2>
           <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{items.length} {t('outfits')}</p>
         </div>
         <div className={`rounded-xl px-3 py-2 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
@@ -179,7 +184,7 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
                 : isDark ? 'bg-white/5 border-white/10 text-white/50 hover:text-white' : 'bg-white border-gray-200 text-gray-500 hover:border-purple-300'
             }`}
           >
-            <span>{f.icon}</span>
+            <span className="w-3 h-3"><IconRenderer icon={f.icon || FashionIcons.Shirt} /></span>
             {t(`cat_${f.id}`) || f.label}
           </button>
         ))}
@@ -187,15 +192,15 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
 
       {capWarning && (
         <div className={`rounded-2xl p-3 mb-4 border flex items-center gap-3 ${isDark ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-yellow-50 border-yellow-200'}`}>
-          <span className="text-xl">⚠️</span>
+          <span className="w-5 h-5 flex-shrink-0"><IconRenderer icon={FashionIcons.Bulb} className="text-yellow-500" /></span>
           <p className={`text-xs ${isDark ? 'text-yellow-300' : 'text-yellow-700'}`}>{t('wardrobeFull', { current: items.length, limit: wardrobeLimit })}</p>
         </div>
       )}
 
       {items.length === 0 ? (
         <div className="mt-8 text-center py-10">
-          <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'}`}>
-            <span className="text-4xl">👗</span>
+          <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border p-5 ${isDark ? 'bg-white/5 border-white/10 text-white/30' : 'bg-gray-100 border-gray-200 text-gray-400'}`}>
+            <IconRenderer icon={FashionIcons.Wardrobe} />
           </div>
           <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('noOutfitsSaved')}</h3>
           <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('analyzeToSave')}</p>
@@ -263,7 +268,9 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
                               <p className={`text-[10px] font-black uppercase tracking-tighter ${isDark ? 'text-white/60' : 'text-slate-500'}`}>{item.color_name || 'Item Color'}</p>
                            </div>
                            {item.compatibility_score !== undefined && (
-                              <p className={`text-[10px] font-black ${isDark ? 'text-green-400' : 'text-green-600'}`}>🎯 {item.compatibility_score}%</p>
+                              <p className={`text-[10px] font-black flex items-center gap-1 ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+                                 <IconRenderer icon={FashionIcons.Accuracy} className="w-3 h-3" /> {item.compatibility_score}%
+                              </p>
                            )}
                         </div>
 
@@ -276,7 +283,11 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
                               : 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'
                           } disabled:opacity-50 active:scale-95`}
                         >
-                          {deletingId === item.id ? t('deleting') : `🗑️ ${t('removeFromWardrobe')}`}
+                          {deletingId === item.id ? t('deleting') : (
+                            <span className="flex items-center justify-center gap-2 text-red-500">
+                               <IconRenderer icon={FashionIcons.Wardrobe} className="w-3 h-3" /> {t('removeFromWardrobe')}
+                            </span>
+                          )}
                         </button>
                     </div>
                 </div>

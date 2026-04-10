@@ -10,6 +10,7 @@ import ProductShowcase from './ProductShowcase';
 import ColorRecommendationsShop from './ColorRecommendationsShop';
 import AffiliateLink from './AffiliateLink';
 import AdSense from '../AdSense';
+import { FashionIcons, IconRenderer } from './Icons';
 
 // ── Shopping Links ───────────────────────────────────────────
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
@@ -63,10 +64,10 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   const myntraPriceParam = budget?.myntraMax ? `&p=price%5B0%5D%3D0%20TO%20${budget.myntraMax}` : '';
 
   const links = [
-    { name: 'Amazon', url: `https://www.amazon.in/s?k=${encodeURIComponent(amzKw)}&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, icon: '🛒', bg: isDark ? 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' : 'bg-orange-50 hover:bg-orange-100 border-orange-300 text-orange-700 font-bold' },
-    { name: 'Flipkart', url: `https://www.flipkart.com/search?q=${encodeURIComponent(fkKw)}&sort=popularity_desc${fkPriceParam}`, icon: '🏪', bg: isDark ? 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700 font-bold' },
-    { name: 'Myntra', url: `${myntraUrl}${myntraUrl.includes('?') ? '&' : '?'}${myntraPriceParam.slice(1)}`, icon: '👗', bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold' },
-    { name: 'Meesho', url: `https://meesho.com/search?q=${encodeURIComponent(meeKw)}`, icon: '🛍️', bg: isDark ? 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' : 'bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700 font-bold' },
+    { name: 'Amazon', url: `https://www.amazon.in/s?k=${encodeURIComponent(amzKw)}&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, icon: FashionIcons.Shopping, bg: isDark ? 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' : 'bg-orange-50 hover:bg-orange-100 border-orange-300 text-orange-700 font-bold' },
+    { name: 'Flipkart', url: `https://www.flipkart.com/search?q=${encodeURIComponent(fkKw)}&sort=popularity_desc${fkPriceParam}`, icon: FashionIcons.Shopping, bg: isDark ? 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700 font-bold' },
+    { name: 'Myntra', url: `${myntraUrl}${myntraUrl.includes('?') ? '&' : '?'}${myntraPriceParam.slice(1)}`, icon: FashionIcons.Dress, bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold' },
+    { name: 'Meesho', url: `https://meesho.com/search?q=${encodeURIComponent(meeKw)}`, icon: FashionIcons.Shopping, bg: isDark ? 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' : 'bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700 font-bold' },
   ];
 
   return (
@@ -99,7 +100,7 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
             isDark={isDark}
             className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}
           >
-            <span>{link.icon}</span><span>{link.name}</span>
+            <span className="w-3 h-3"><IconRenderer icon={link.icon} /></span><span>{link.name}</span>
           </AffiliateLink>
         ))}
       </div>
@@ -202,7 +203,7 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
           className={`text-lg transition-transform hover:scale-125 ${!isLoggedIn ? 'opacity-30 cursor-not-allowed' : (saved ? 'text-pink-400' : isDark ? 'text-white/20 hover:text-pink-400' : 'text-gray-300 hover:text-pink-400')} ${savingColor ? 'opacity-50' : ''}`}
           title={!isLoggedIn ? 'Login to save colors' : (saved ? 'Remove from saved' : 'Save color')}
         >
-          {saved ? '❤️' : '🤍'}
+          <IconRenderer icon={saved ? FashionIcons.Star : FashionIcons.Star} className={saved ? 'text-pink-400' : 'text-slate-400 opacity-20'} />
         </button>
         <span className={`${chevronCls} text-xs transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}>▼</span>
       </div>
@@ -240,9 +241,9 @@ function OutfitCard({ combo, index, isDark }) {
         <div className="flex-1">
           <p className={`${headingCls} font-bold text-sm mb-1`}>{topItem}</p>
           <div className="flex flex-wrap gap-2 text-xs">
-            {bottomItem && <span className={subCls}>👖 {bottomItem}</span>}
-            {combo.shoes && <span className={subCls}>👟 {combo.shoes}</span>}
-            {combo.dupatta && combo.dupatta !== "-" && <span className={subCls}>🧣 {combo.dupatta}</span>}
+            {bottomItem && <span className={`flex items-center gap-1 ${subCls}`}><IconRenderer icon={FashionIcons.Trousers} className="w-3 h-3" /> {bottomItem}</span>}
+            {combo.shoes && <span className={`flex items-center gap-1 ${subCls}`}><IconRenderer icon={FashionIcons.Shoes} className="w-3 h-3" /> {combo.shoes}</span>}
+            {combo.dupatta && combo.dupatta !== "-" && <span className={`flex items-center gap-1 ${subCls}`}><IconRenderer icon={FashionIcons.Jewelry} className="w-3 h-3" /> {combo.dupatta}</span>}
           </div>
         </div>
         <div className="text-right flex-shrink-0">
@@ -469,14 +470,19 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
         )}
         <div className="flex-1 min-w-0">
           <p className={`${labelCls} text-xs uppercase tracking-widest mb-0.5`}>
-            {isSeasonal ? 'Seasonal' : isFemale ? '👩 Female' : '👨 Male'} Profile
+            <span className="flex items-center gap-1">
+              <IconRenderer icon={isFemale ? FashionIcons.User : FashionIcons.User} className="w-3 h-3" />
+              {isSeasonal ? 'Seasonal' : isFemale ? 'Female' : 'Male'} Profile
+            </span>
           </p>
           <h2 className={`${headingCls} text-2xl font-black capitalize`}>
             {analysis.skin_tone.category} <span className={`${skinLabelCls} font-light text-lg`}>Skin</span>
           </h2>
           <div className="flex flex-wrap gap-1.5 mt-2">
             <span className={`text-xs px-2 py-0.5 rounded-full border capitalize ${isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-200' : 'bg-purple-100 border-purple-400 text-purple-800 font-semibold'}`}>{analysis.skin_tone.undertone}</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full border ${isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-200' : 'bg-pink-100 border-pink-400 text-pink-800 font-semibold'}`}>🍂 {analysis.skin_tone.color_season}</span>
+            <span className={`text-xs px-2 py-0.5 rounded-full border flex items-center gap-1 ${isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-200' : 'bg-pink-100 border-pink-400 text-pink-800 font-semibold'}`}>
+               <IconRenderer icon={FashionIcons.Star} className="w-3 h-3" /> {analysis.skin_tone.color_season}
+            </span>
             <span className={`text-xs px-2 py-0.5 rounded-full border ${analysis.skin_tone.confidence === "high"
                 ? isDark ? "bg-green-500/20 border-green-500/30 text-green-300" : "bg-green-100 border-green-500 text-green-800 font-semibold"
                 : isDark ? "bg-yellow-500/20 border-yellow-500/30 text-yellow-300" : "bg-yellow-100 border-yellow-500 text-yellow-800 font-semibold"
@@ -490,7 +496,9 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
       {/* Style Score */}
       <div className={`mt-3 rounded-xl p-3 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200'}`}>
         <div className="flex items-center justify-between mb-1.5">
-          <p className={`text-xs font-bold ${isDark ? 'text-white/70' : 'text-gray-700'}`}>💯 {t('styleScore')}</p>
+          <p className={`text-xs font-bold flex items-center gap-1 ${isDark ? 'text-white/70' : 'text-gray-700'}`}>
+             <IconRenderer icon={FashionIcons.Accuracy} className="w-3 h-3" /> {t('styleScore')}
+          </p>
           <span className="text-purple-400 font-black text-sm">{styleScore}/100</span>
         </div>
         <div className={`h-2 rounded-full ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
@@ -501,9 +509,9 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
       {/* Celebrity Match */}
       {celeb && (
         <div className={`mt-2 rounded-xl p-3 border flex items-center gap-3 ${isDark ? 'bg-amber-500/10 border-amber-500/20' : 'bg-amber-50 border-amber-200'}`}>
-          <span className="text-2xl">🌟</span>
-          <div className="flex-1">
-            <p className={`text-xs font-bold ${isDark ? 'text-amber-200' : 'text-amber-800'}`}>⭐ {t('celebMatch')}</p>
+            <p className={`text-xs font-bold flex items-center gap-1 ${isDark ? 'text-amber-200' : 'text-amber-800'}`}>
+               <IconRenderer icon={FashionIcons.Star} className="w-3 h-3" /> {t('celebMatch')}
+            </p>
             <p className={`text-sm font-black ${isDark ? 'text-white' : 'text-gray-800'}`}>{t(celeb?.name)}</p>
             <p className={`text-xs ${isDark ? 'text-amber-100/60' : 'text-amber-700'}`}>{celeb?.tip}</p>
           </div>
@@ -531,15 +539,15 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
           {savingDNA ? (
             <span className="animate-pulse">Locking DNA...</span>
           ) : isDNAsaved ? (
-            <>
-              <span>🔒</span>
+            <div className="flex items-center gap-2">
+              <IconRenderer icon={FashionIcons.AI} className="w-4 h-4" />
               <span>DNA Locked & Saved</span>
-            </>
+            </div>
           ) : (
-            <>
-              <span>🧬</span>
+            <div className="flex items-center gap-2">
+              <IconRenderer icon={FashionIcons.AI} className="w-4 h-4" />
               <span>Set as My Style DNA</span>
-            </>
+            </div>
           )}
         </button>
 
@@ -622,7 +630,9 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
 
   return (
     <div className={`${cardCls} rounded-2xl p-4`}>
-      <p className={`text-xs font-bold uppercase tracking-wide mb-3 ${labelCls}`}>✨ {t('completeLook')}</p>
+      <p className={`text-xs font-bold uppercase tracking-wide mb-3 flex items-center gap-1 ${labelCls}`}>
+         <span className="w-3 h-3"><IconRenderer icon={FashionIcons.AI} /></span> {t('completeLook')}
+      </p>
       <div className="flex gap-2 mb-3">
         {items.map((item, i) => (
           <div key={i} className="flex-1 text-center">
@@ -635,10 +645,10 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
       {/* Shop the full look */}
       <div className="flex gap-1.5 flex-wrap">
         {[
-          { name: '🛒 Amazon', url: `https://www.amazon.in/s?k=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit set'))}&rh=n%3A1968024031&sort=review-rank&tag=${AMAZON_TAG}`, bg: isDark ? 'bg-orange-500/20 border-orange-500/30 text-orange-300' : 'bg-orange-50 border-orange-300 text-orange-700 font-bold' },
-          { name: '🏪 Flipkart', url: `https://www.flipkart.com/search?q=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit'))}&sort=popularity_desc`, bg: isDark ? 'bg-blue-500/20 border-blue-500/30 text-blue-300' : 'bg-blue-50 border-blue-300 text-blue-700 font-bold' },
-          { name: '👗 Myntra', url: `https://www.myntra.com/${isFemale ? 'co-ords' : 'tshirts'}?rawQuery=${shirtColor.name.toLowerCase().replace(/\s+/g, '%20')}%20${isFemale ? 'women%20coord%20set' : 'men%20oversized'}`, bg: isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300' : 'bg-pink-50 border-pink-300 text-pink-700 font-bold' },
-          { name: '🛍️ Meesho', url: `https://meesho.com/search?q=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit'))}`, bg: isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-300' : 'bg-purple-50 border-purple-300 text-purple-700 font-bold' },
+          { name: 'Amazon', icon: FashionIcons.Shopping, url: `https://www.amazon.in/s?k=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit set'))}&rh=n%3A1968024031&sort=review-rank&tag=${AMAZON_TAG}`, bg: isDark ? 'bg-orange-500/20 border-orange-500/30 text-orange-300' : 'bg-orange-50 border-orange-300 text-orange-700 font-bold' },
+          { name: 'Flipkart', icon: FashionIcons.Shopping, url: `https://www.flipkart.com/search?q=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit'))}&sort=popularity_desc`, bg: isDark ? 'bg-blue-500/20 border-blue-500/30 text-blue-300' : 'bg-blue-50 border-blue-300 text-blue-700 font-bold' },
+          { name: 'Myntra', icon: FashionIcons.Dress, url: `https://www.myntra.com/${isFemale ? 'co-ords' : 'tshirts'}?rawQuery=${shirtColor.name.toLowerCase().replace(/\s+/g, '%20')}%20${isFemale ? 'women%20coord%20set' : 'men%20oversized'}`, bg: isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300' : 'bg-pink-50 border-pink-300 text-pink-700 font-bold' },
+          { name: 'Meesho', icon: FashionIcons.Shopping, url: `https://meesho.com/search?q=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit'))}`, bg: isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-300' : 'bg-purple-50 border-purple-300 text-purple-700 font-bold' },
         ].map(link => (
           <AffiliateLink
             key={link.name}
@@ -648,8 +658,9 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
             brand={link.name.replace(/[^A-Za-z]/g, '')}
             platform={link.name.toLowerCase().replace(/[^a-z]/g, '')}
             isDark={isDark}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}
           >
+            <span className="w-3 h-3"><IconRenderer icon={link.icon} /></span>
             {link.name}
           </AffiliateLink>
         ))}
@@ -703,7 +714,9 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
         ))}
         {avoidColors.length > 0 && (
           <div>
-            <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2">🚫 {t('avoidThese')}</p>
+            <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2 flex items-center gap-1">
+               <IconRenderer icon={FashionIcons.Bulb} className="w-3 h-3" /> {t('avoidThese')}
+            </p>
             <div className="grid grid-cols-1 gap-2">
               {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="dress" gender="female" isDark={isDark} />)}
             </div>
@@ -727,7 +740,9 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
     <div className="space-y-5">
       {shirtColors.length > 0 && (
         <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>👕 T-Shirt / Top Colors</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2 flex items-center gap-1`}>
+             <IconRenderer icon={FashionIcons.Shirt} className="w-3 h-3" /> T-Shirt / Top Colors
+          </p>
           <div className="grid grid-cols-1 gap-2">
             {shirtColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} className={`stagger-${Math.min(i + 1, 6)}`} />)}
           </div>
@@ -735,7 +750,9 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
       )}
       {pantColors.length > 0 && (
         <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>👖 Pants / Cargo Colors</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2 flex items-center gap-1`}>
+             <IconRenderer icon={FashionIcons.Trousers} className="w-3 h-3" /> Pants / Cargo Colors
+          </p>
           <div className="grid grid-cols-1 gap-2">
             {pantColors.map((color, i) => <ColorCard key={i} color={color} category="pant" gender="male" isDark={isDark} />)}
           </div>
@@ -743,7 +760,9 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
       )}
       {avoidColors.length > 0 && (
         <div>
-          <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2">🚫 Avoid These</p>
+          <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2 flex items-center gap-1">
+             <IconRenderer icon={FashionIcons.Bulb} className="w-3 h-3" /> Avoid These
+          </p>
           <div className="grid grid-cols-1 gap-2">
             {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} />)}
           </div>
@@ -781,8 +800,8 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
       {/* Featured occasion advice (highlighted) */}
       {featuredAdvice && (
         <div className={`rounded-2xl p-4 border-2 border-purple-500/40 ${isDark ? 'bg-purple-900/20' : 'bg-purple-50'}`}>
-          <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>
-            ✨ For Your {occasionKey} Look
+          <p className={`text-xs font-bold uppercase tracking-wide mb-1 flex items-center gap-1 ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>
+            <IconRenderer icon={FashionIcons.AI} className="w-3 h-3" /> For Your {occasionKey} Look
           </p>
           <p className={`text-sm font-medium ${isDark ? 'text-white/80' : 'text-gray-800'}`}>{featuredAdvice}</p>
         </div>
@@ -790,7 +809,9 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
       {/* Outfit combos */}
       {outfits.length > 0 && (
         <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🧥 {t('outfitCombos')}</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2 flex items-center gap-1`}>
+             <IconRenderer icon={FashionIcons.Wardrobe} className="w-3 h-3" /> {t('outfitCombos')}
+          </p>
           <div className="space-y-2">
             {outfits.map((combo, i) => <OutfitCard key={i} combo={combo} index={i} isDark={isDark} />)}
           </div>
@@ -800,7 +821,9 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
       {/* Occasion advice */}
       {Object.keys(occasionAdvice).length > 0 && (
         <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>📅 {t('whatToWear')}</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2 flex items-center gap-1`}>
+             <IconRenderer icon={FashionIcons.Accuracy} className="w-3 h-3" /> {t('whatToWear')}
+          </p>
           <div className="space-y-2">
             {Object.entries(occasionAdvice).map(([occasion, advice], i) => (
               <div key={i} className={`${cardBgCls} rounded-xl p-3`}>
@@ -815,7 +838,9 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
       {/* Style tips */}
       {styleTips.length > 0 && (
         <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>💡 {t('styleTips')}</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2 flex items-center gap-1`}>
+             <IconRenderer icon={FashionIcons.Bulb} className="w-3 h-3" /> {t('styleTips')}
+          </p>
           <div className="space-y-2">
             {styleTips.map((tip, i) => (
               <div key={i} className={`flex items-start gap-2 ${cardBgCls} rounded-xl p-3`}>
@@ -831,8 +856,8 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
       {/* Body Type Tips */}
       {bodyTypeTips.length > 0 && (
         <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>
-            👤 {bodyType === 'slim' ? 'Slim Body' : bodyType === 'athletic' ? 'Athletic Body' : bodyType === 'plus' ? 'Plus Size' : 'Body Type'} Tips
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2 flex items-center gap-1`}>
+            <IconRenderer icon={FashionIcons.User} className="w-3 h-3" /> {bodyType === 'slim' ? 'Slim Body' : bodyType === 'athletic' ? 'Athletic Body' : bodyType === 'plus' ? 'Plus Size' : 'Body Type'} Tips
           </p>
           <div className={`rounded-2xl p-4 space-y-2 border ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-200'}`}>
             {bodyTypeTips.map((tip, i) => (
@@ -912,7 +937,9 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }
       {/* Female accessories */}
       {isFemale && accessories.length > 0 && (
         <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>👜 Accessories & Jewellery</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2 flex items-center gap-1`}>
+             <IconRenderer icon={FashionIcons.Jewelry} className="w-3 h-3" /> Accessories & Jewellery
+          </p>
           <div className="space-y-2">
             {accessories.map((item, i) => {
               const typeLC = (item.type || '').toLowerCase();
@@ -956,7 +983,9 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }
       {/* Makeup (female) */}
       {isFemale && makeupSuggestions.length > 0 && (
         <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>💄 Makeup Suggestions</p>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2 flex items-center gap-1`}>
+             <IconRenderer icon={FashionIcons.Star} className="w-3 h-3" /> Makeup Suggestions
+          </p>
           <div className="space-y-2">
             {makeupSuggestions.map((item, i) => (
               <div key={i} className={`${isDark ? 'bg-white/5' : 'bg-white shadow-sm'} rounded-xl p-3 border border-rose-500/20`}>
@@ -1030,7 +1059,9 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   if (!finalData || !finalData.analysis?.skin_tone) {
     return (
       <div className="mt-8 text-center px-6">
-        <p className="text-4xl mb-4">🔍</p>
+        <div className="w-16 h-16 mx-auto bg-white/5 rounded-full flex items-center justify-center p-3 text-white/30 mb-4">
+           <IconRenderer icon={FashionIcons.Analysis} />
+        </div>
         <p className="text-white/60 text-sm font-medium mb-2">{t('resultsLoadError') || 'Analysis results could not be processed.'}</p>
         <p className="text-white/30 text-xs mb-6">This usually happens if the photo was too dark or blurry.</p>
         <button onClick={onReset} className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-sm font-bold transition-all shadow-lg active:scale-95">
@@ -1050,7 +1081,20 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const userOccasion = data.occasion || 'casual';
   const userBudget = data.budget || 'any';
 
-  const OCCASION_LABELS = { casual: '😎 Casual', office: '💼 Office', wedding: '💍 Wedding', party: '🎉 Party', date: '❤️ Date' };
+  const OCCASION_LABELS = { 
+    casual: 'Casual', 
+    office: 'Office', 
+    wedding: 'Wedding', 
+    party: 'Party', 
+    date: 'Date' 
+  };
+  const OCCASION_ICONS = {
+    casual: FashionIcons.Formal,
+    office: FashionIcons.Formal,
+    wedding: FashionIcons.Dress,
+    party: FashionIcons.Star,
+    date: FashionIcons.Star
+  };
   const BUDGET_LABELS = { any: 'Any Budget', '500': 'Under ₹500', '1000': 'Under ₹1000', '2000': 'Under ₹2000' };
 
   const BODY_TYPE_TIPS = {
@@ -1070,9 +1114,9 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const ethnicWear = recommendations.ethnic_wear || sareeSuggestions;
 
   const tabs = [
-    { id: 'colors', label: 'Colors', emoji: '🎨' },
-    { id: 'outfits', label: 'Outfits', emoji: '👔' },
-    { id: 'accessories', label: 'Accessories', emoji: '✨' },
+    { id: 'colors', label: 'Colors', icon: FashionIcons.Analysis },
+    { id: 'outfits', label: 'Outfits', icon: FashionIcons.Wardrobe },
+    { id: 'accessories', label: 'Accessories', icon: FashionIcons.Jewelry },
   ];
 
   const tabBarBg = isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200';
@@ -1122,13 +1166,15 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
       {/* Occasion + Budget context banner */}
       <div className={`flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
         <span className={`text-xs font-semibold ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Styled for:</span>
-        <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300' : 'bg-pink-100 border-pink-300 text-pink-700'}`}>
-          {OCCASION_LABELS[userOccasion] || '😎 Casual'}
-        </span>
+        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300' : 'bg-pink-100 border-pink-300 text-pink-700'}`}>
+          <span className="w-3 h-3"><IconRenderer icon={OCCASION_ICONS[userOccasion] || FashionIcons.Formal} /></span>
+          <span className="text-xs font-bold">{OCCASION_LABELS[userOccasion] || 'Casual'}</span>
+        </div>
         {userBudget !== 'any' && (
-          <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${isDark ? 'bg-green-500/20 border-green-500/30 text-green-300' : 'bg-green-100 border-green-300 text-green-700'}`}>
-            💰 {BUDGET_LABELS[userBudget]}
-          </span>
+          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${isDark ? 'bg-green-500/20 border-green-500/30 text-green-300' : 'bg-green-100 border-green-300 text-green-700'}`}>
+            <span className="w-3 h-3"><IconRenderer icon={FashionIcons.Shopping} /></span>
+            <span className="text-xs font-bold">{BUDGET_LABELS[userBudget]}</span>
+          </div>
         )}
       </div>
 
@@ -1156,7 +1202,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
               onClick={() => downloadPalette(allColors, analysis.skin_tone.category)}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-bold transition-all hover:scale-[1.02] ${isDark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-purple-500/40' : 'bg-white border-gray-200 text-gray-600 hover:border-purple-400 shadow-sm'}`}
             >
-              <span>🎨</span>
+              <span className="w-4 h-4"><IconRenderer icon={FashionIcons.Analysis} /></span>
               <span>Download Palette</span>
             </button>
           );
@@ -1224,7 +1270,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
                 : inactiveTabCls
               }`}
           >
-            <span className="text-sm">{tab.emoji}</span>
+            <span className="w-5 h-5 mb-0.5"><IconRenderer icon={tab.icon} /></span>
             <span className="truncate w-full text-center px-0.5">{tab.label}</span>
           </button>
         ))}
@@ -1328,7 +1374,9 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
                   href={`/blog/${blog.slug}`}
                   className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all hover:border-purple-500/40 ${isDark ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-gray-50 border-gray-100 hover:bg-purple-50'}`}
                 >
-                  <span className="text-xl">{blog.emoji}</span>
+                  <span className="w-6 h-6 p-1 text-purple-400 bg-purple-500/10 rounded-lg flex items-center justify-center">
+                    <IconRenderer icon={FashionIcons.Analysis} />
+                  </span>
                   <p className={`text-sm font-semibold flex-1 ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{blog.title}</p>
                   <span className={`text-xs ${isDark ? 'text-purple-400' : 'text-purple-500'}`}>→</span>
                 </a>

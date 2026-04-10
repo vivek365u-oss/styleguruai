@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply bg-[#02040a] text-white selection:bg-purple-500/30;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+}
+
 /* ═══════════════════════════════════════════
    StyleGuru AI — Premium UI/UX Animations
    ═══════════════════════════════════════════ */
