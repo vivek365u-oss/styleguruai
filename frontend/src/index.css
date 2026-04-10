@@ -278,6 +278,18 @@
 }
 .nav-dot { animation: dotPop 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
+/* Section Slide-in (AppShell tab transitions) */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Toast fade-up */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
 /* ═══════════════════════════════════════════
    Global Interactive Styles
    ═══════════════════════════════════════════ */
