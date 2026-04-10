@@ -23,9 +23,9 @@ import {
   GiTrousers, 
   GiHighHeel, 
   GiNecklace,
-  GiLargeHat,
+  GiSombrero,
   GiRunningShoe,
-  GiManualHoodie,
+  GiHoodie,
   GiSunglasses
 } from 'react-icons/gi';
 
@@ -36,9 +36,9 @@ export const FashionIcons = {
   Trousers: GiTrousers,
   Heels: GiHighHeel,
   Jewelry: GiNecklace,
-  Hat: GiLargeHat,
+  Hat: GiSombrero,
   Shoes: GiRunningShoe,
-  Hoodie: GiManualHoodie,
+  Hoodie: GiHoodie,
   Accessories: GiSunglasses,
   Watch: FiWatch,
   
