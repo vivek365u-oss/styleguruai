@@ -515,7 +515,6 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
             <p className={`text-sm font-black ${isDark ? 'text-white' : 'text-gray-800'}`}>{t(celeb?.name)}</p>
             <p className={`text-xs ${isDark ? 'text-amber-100/60' : 'text-amber-700'}`}>{celeb?.tip}</p>
           </div>
-        </div>
       )}
 
       {/* Summary */}

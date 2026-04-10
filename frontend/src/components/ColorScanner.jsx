@@ -222,10 +222,10 @@ function ColorScanner({ savedPalette = [], onClose }) {
         <div className="absolute bottom-3 right-3 flex gap-2">
           <button onClick={toggleTorch}
             className={`w-10 h-10 rounded-xl flex items-center justify-center backdrop-blur-md border transition-all ${torchOn ? 'bg-yellow-500/40 border-yellow-400 text-yellow-200' : 'bg-black/40 border-white/10 text-white/70'
-              }><IconRenderer icon={FashionIcons.Sun} className="w-5 h-5" /></button>
+              }`}><IconRenderer icon={FashionIcons.Sun} className="w-5 h-5" /></button>
           <button onClick={toggleFreeze}
             className={`w-10 h-10 rounded-xl flex items-center justify-center backdrop-blur-md border transition-all ${frozen ? 'bg-blue-500/40 border-blue-400 text-blue-200' : 'bg-black/40 border-white/10 text-white/70'
-              }><IconRenderer icon={frozen ? FashionIcons.Shirt : FashionIcons.Wardrobe} className="w-5 h-5" /></button>
+              }`}><IconRenderer icon={frozen ? FashionIcons.Shirt : FashionIcons.Wardrobe} className="w-5 h-5" /></button>
         </div>
 
         {!cameraReady && (
