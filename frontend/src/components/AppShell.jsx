@@ -79,7 +79,8 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange }) {
   const primaryProfile = JSON.parse(localStorage.getItem('sg_primary_profile') || 'null');
   const activeProfile = primaryProfile || lastAnalysis;
   const tone = (activeProfile?.skinTone || activeProfile?.skin_tone?.category || 'medium').toLowerCase();
-  const todayTip = getLocalizedTip(genderPref, tone, language);
+  const tipObj  = getLocalizedTip(genderPref, tone, language);
+  const todayTip = tipObj ? `${tipObj.emoji}  ${tipObj.tip}` : null;
 
   const quickStats = [
     { label: 'Analyses', value: localStorage.getItem('sg_analysis_count') || '0', icon: '📷' },
