@@ -157,8 +157,7 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
   const level           = useMemo(() => deriveLevel(personalityData.analysisCount), [personalityData.analysisCount]);
   const archetype       = personality.primary;
 
-  const firstName    = user?.name?.split(' ')[0] || 'there';
-  const avatarLetter = (user?.name?.[0] || user?.email?.[0] || 'U').toUpperCase();
+  const firstName = user?.name?.split(' ')[0] || 'there';
 
   const streak = useMemo(() => {
     const today = new Date().toLocaleDateString('en-CA');
@@ -195,33 +194,22 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
     <div style={{ animation:'fadeSlideIn 0.4s ease' }}>
 
       {/* Welcome */}
-      <div style={{ marginBottom:24, display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12 }}>
-        <div>
-          <p style={{ fontSize:'12px', color:C.muted, marginBottom:4, fontFamily:PJS }}>
-            {greeting} 👋
-          </p>
-          <h2 style={{ fontFamily:PDI, fontSize:'clamp(24px,5vw,38px)', fontWeight:300, lineHeight:1.15, margin:0 }}>
-            <span style={{ color:C.text }}>Hi, </span>
-            <span style={{ background:GRAD, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>
-              {firstName}
-            </span>
-          </h2>
-          <div style={{ display:'inline-flex', alignItems:'center', gap:6, marginTop:8, background:`${level.color}18`, border:`1px solid ${level.color}30`, borderRadius:20, padding:'4px 12px' }}>
-            <div style={{ width:6, height:6, borderRadius:'50%', background:level.color }} />
-            <span style={{ fontSize:'8px', color:level.color, fontFamily:PJS, fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase' }}>
-              {level.label}
-            </span>
-          </div>
+      <div style={{ marginBottom:28 }}>
+        <p style={{ fontSize:'12px', color:C.muted, marginBottom:4, fontFamily:PJS }}>
+          {greeting} 👋
+        </p>
+        <h2 style={{ fontFamily:PDI, fontSize:'clamp(24px,5vw,38px)', fontWeight:300, lineHeight:1.15, margin:0 }}>
+          <span style={{ color:C.text }}>Hi, </span>
+          <span style={{ background:GRAD, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>
+            {firstName}
+          </span>
+        </h2>
+        <div style={{ display:'inline-flex', alignItems:'center', gap:6, marginTop:8, background:`${level.color}18`, border:`1px solid ${level.color}30`, borderRadius:20, padding:'4px 12px' }}>
+          <div style={{ width:6, height:6, borderRadius:'50%', background:level.color }} />
+          <span style={{ fontSize:'8px', color:level.color, fontFamily:PJS, fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase' }}>
+            {level.label}
+          </span>
         </div>
-        <button
-          onClick={() => onTabChange('profile')}
-          style={{ flexShrink:0, width:50, height:50, borderRadius:'50%', background:GRAD, border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:C.btnShadow, transition:'all 0.2s' }}
-          onMouseEnter={e => { e.currentTarget.style.transform='scale(1.07)'; }}
-          onMouseLeave={e => { e.currentTarget.style.transform='scale(1)'; }}
-          title="My Profile"
-        >
-          <span style={{ fontSize:'18px', fontWeight:700, color:'white', fontFamily:PJS }}>{avatarLetter}</span>
-        </button>
       </div>
 
       {/* Style Personality Card */}
