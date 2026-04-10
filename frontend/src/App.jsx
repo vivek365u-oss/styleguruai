@@ -78,27 +78,21 @@ function AppRoutes({ user, setUser }) {
     // No navigate — stay on / which will show LandingPage (user=null)
   };
 
-  // ── Root: decides which shell to render ──
-  const RootShell = () => {
-    if (user) {
-      // Logged in → AppShell (new premium UI, no redirect)
-      return <AppShell user={user} onLogout={handleLogout} />;
-    }
-    // Guest → LandingPage with inline auth capability
-    return (
-      <LandingPage
-        user={null}
-        onGetStarted={() => navigate('/auth')}
-        onLoginClick={() => navigate('/auth')}
-      />
-    );
-  };
 
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
-        {/* ROOT — unified shell, no redirect after login */}
-        <Route path="/" element={<RootShell />} />
+        {/* ROOT — Inline conditional: no intermediate component = no remount on re-render */}
+        <Route path="/" element={
+          user
+            ? <AppShell user={user} onLogout={handleLogout} />
+            : <LandingPage
+                user={null}
+                onGetStarted={() => navigate('/auth')}
+                onLoginClick={() => navigate('/auth')}
+              />
+        } />
+
 
         {/* AUTH */}
         <Route path="/auth" element={

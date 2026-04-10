@@ -734,17 +734,17 @@ export default function AppShell({ user, onLogout }) {
     { id:'home',      label:'Home' },
     { id:'analyze',   label:'Analyze' },
     { id:'history',   label:'History' },
-    { id:'navigator', label:'Navigator' },
+    { id:'navigator', label:'Style Compass' },
     { id:'tools',     label:'Tools' },
   ];
 
+  // Mobile: 5 clean tabs — Profile accessible via top-nav avatar
   const mobileTabs = [
     { id:'home',      icon:'🏠', label:'Home' },
     { id:'analyze',   icon:'📷', label:'Analyze' },
     { id:'history',   icon:'📋', label:'History' },
     { id:'tools',     icon:'🛠️', label:'Tools' },
-    { id:'navigator', icon:'🗺️', label:'Navigate' },
-    { id:'profile',   icon:'👤', label:'Profile' },
+    { id:'navigator', icon:'🧭', label:'Compass' },
   ];
 
   return (
@@ -857,7 +857,7 @@ export default function AppShell({ user, onLogout }) {
 
           {activeTab === 'navigator' && (
             <div key="navigator" style={{ animation:'fadeSlideIn 0.3s ease' }}>
-              <SectionHeader C={C} label="Style Intelligence" title="Style Navigator" subtitle="AI-powered style guide tailored to your skin tone" />
+              <SectionHeader C={C} label="AI Style Intelligence" title="Style Compass" subtitle="Personalized outfit guidance based on your skin tone & style DNA" />
               <StyleNavigator user={user} onAnalyze={() => handleTabChange('analyze')} />
             </div>
           )}
