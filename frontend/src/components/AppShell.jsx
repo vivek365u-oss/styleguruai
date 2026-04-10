@@ -12,7 +12,7 @@
  */
 
 import { useState, useEffect, useContext, lazy, Suspense, useCallback, useMemo } from 'react';
-import { logout, saveHistory, getHistory, auth } from '../api/styleApi';
+import { logout, saveHistory, getHistory, auth, destroyUserAccount } from '../api/styleApi';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
@@ -371,33 +371,29 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
   const [editingName, setEditingName] = useState(false);
   const [displayName, setDisplayName] = useState(() => localStorage.getItem('sg_display_name') || user?.name || '');
   const [copied, setCopied]           = useState(false);
-  const [langOpen, setLangOpen]       = useState(false);
   const [notifOn, setNotifOn]         = useState(() => localStorage.getItem('sg_notif_on') === 'true');
+  const [destroying, setDestroying]   = useState(false);
 
-  // Language options
+  // Language pill options
   const LANGUAGES = [
-    { code:'en',       flag:'🇺🇸', name:'English',   sub:'English (India)' },
-    { code:'hinglish', flag:'🇮🇳', name:'Hinglish', sub:'हिन्ग्लिश' },
-    { code:'hi',       flag:'🇮🇳', name:'हिन्दी',    sub:'Hindi — Devanagari' },
+    { code:'en',       label:'EN',   full:'English' },
+    { code:'hinglish', label:'HI',   full:'Hinglish' },
+    { code:'hi',       label:'हि',   full:'Hindi' },
   ];
-  const currentLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0];
 
   const handleLangChange = (code) => {
     changeLanguage(code);
-    setLangOpen(false);
-    const name = LANGUAGES.find(l => l.code === code)?.name || code;
-    onToast({ message:`Language set to ${name} ✅`, type:'success' });
+    const full = LANGUAGES.find(l => l.code === code)?.full || code;
+    onToast({ message:`Language: ${full}`, type:'success' });
   };
 
   const handleNotifToggle = async () => {
     if (notifOn) {
-      // Disable
       localStorage.setItem('sg_notif_on', 'false');
       setNotifOn(false);
       onToast({ message:'Notifications disabled', type:'default' });
       return;
     }
-    // Enable — request browser permission
     if (!('Notification' in window)) {
       onToast({ message:'Notifications not supported in this browser', type:'error' }); return;
     }
@@ -406,13 +402,41 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
       localStorage.setItem('sg_notif_on', 'true');
       setNotifOn(true);
       onToast({ message:'Notifications enabled 🔔', type:'success' });
-      // Send welcome notification
-      new Notification('StyleGuru AI', {
-        body: 'You\'ll get daily style tips & updates! 🎨',
-        icon: '/favicon.ico',
-      });
+      new Notification('StyleGuru AI', { body: 'Daily style tips & updates enabled! 🎨', icon:'/favicon.ico' });
     } else if (perm === 'denied') {
-      onToast({ message:'Notifications blocked. Please allow in browser settings.', type:'error' });
+      onToast({ message:'Allow notifications in browser settings', type:'error' });
+    }
+  };
+
+  const handleDestroyAccount = async () => {
+    // Step 1: First confirm
+    const step1 = window.confirm(
+      '⚠️ Delete Account?\n\nThis will PERMANENTLY delete:\n• Your profile & Style DNA\n• All analysis history\n• Saved outfits & wardrobe\n• Your Firebase account\n\nThis action CANNOT be undone.'
+    );
+    if (!step1) return;
+    // Step 2: Type confirmation
+    const typed = window.prompt('Type DELETE to confirm account deletion:');
+    if (typed?.trim().toUpperCase() !== 'DELETE') {
+      onToast({ message:'Account deletion cancelled', type:'default' }); return;
+    }
+    setDestroying(true);
+    try {
+      const uid = auth.currentUser?.uid;
+      if (!uid) throw new Error('Not logged in');
+      await destroyUserAccount(uid);
+      onToast({ message:'🔒 Account deleted. Goodbye!', type:'success' });
+      // Clear all local data
+      localStorage.clear();
+      // Logout
+      setTimeout(() => onLogout(), 1200);
+    } catch (err) {
+      console.error('[Delete Account]', err);
+      if (err.code === 'auth/requires-recent-login') {
+        onToast({ message:'Please logout and login again before deleting.', type:'error' });
+      } else {
+        onToast({ message:'Deletion failed. Please try again.', type:'error' });
+      }
+      setDestroying(false);
     }
   };
 
@@ -598,9 +622,9 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
         {[
           {
             icon:'🌐', label:'Language',
-            value: currentLang.flag + ' ' + currentLang.name + ' — tap to change',
-            expand: true,
-            action: () => setLangOpen(v => !v),
+            value: null, // rendered separately as pill toggle
+            isLang: true,
+            action: () => {},
           },
           {
             icon:'🔔', label:'Notifications',
@@ -626,53 +650,57 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
           },
         ].map((item, i, arr) => (
           <div key={item.label}>
-            <button
-              onClick={item.action}
-              style={{ ...rowBtn(), borderRadius:i===arr.length-1?'0 0 16px 16px':0 }}
-              onMouseEnter={e => e.currentTarget.style.background=C.glass2}
-              onMouseLeave={e => e.currentTarget.style.background='none'}
+            <div
+              style={{ display:'flex', alignItems:'center', gap:14, padding: item.isLang ? '12px 18px' : '14px 18px',
+                cursor: item.isLang ? 'default' : 'pointer',
+                borderRadius: i===arr.length-1 ? '0 0 16px 16px' : 0,
+                transition:'background 0.2s',
+              }}
+              onClick={!item.isLang ? item.action : undefined}
+              onMouseEnter={e => { if(!item.isLang) e.currentTarget.style.background=C.glass2; }}
+              onMouseLeave={e => { if(!item.isLang) e.currentTarget.style.background='none'; }}
             >
               <span style={{ fontSize:'18px', flexShrink:0 }}>{item.icon}</span>
               <div style={{ flex:1 }}>
-                <p style={{ fontSize:'13px', color:item.danger ? C.warnText : C.text, margin:'0 0 2px', fontFamily:PJS, fontWeight:500 }}>{item.label}</p>
-                <p style={{ fontSize:'11px', color:C.muted, margin:0, fontFamily:PJS }}>{item.value}</p>
+                <p style={{ fontSize:'13px', color:item.danger ? C.warnText : C.text, margin:'0 0 4px', fontFamily:PJS, fontWeight:500 }}>{item.label}</p>
+                {item.isLang ? (
+                  /* Language 3-pill toggle — instant, no dropdown */
+                  <div style={{ display:'flex', gap:6 }}>
+                    {LANGUAGES.map(lang => (
+                      <button key={lang.code}
+                        onClick={() => handleLangChange(lang.code)}
+                        style={{
+                          padding:'5px 14px', borderRadius:20,
+                          background: language===lang.code ? GRAD : C.glass2,
+                          border:`1px solid ${language===lang.code ? 'transparent' : C.border}`,
+                          color: language===lang.code ? 'white' : C.muted,
+                          fontSize:'12px', fontWeight: language===lang.code ? 700 : 400,
+                          cursor:'pointer', transition:'all 0.2s', fontFamily:PJS,
+                          boxShadow: language===lang.code ? '0 2px 8px rgba(139,92,246,0.35)' : 'none',
+                        }}>
+                        {lang.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ fontSize:'11px', color:C.muted, margin:0, fontFamily:PJS }}>{item.value}</p>
+                )}
               </div>
               {item.isToggle ? (
-                /* Notification toggle indicator */
                 <div style={{ width:36, height:20, borderRadius:10, flexShrink:0,
                   background: item.toggleOn ? GRAD : C.isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)',
                   position:'relative', transition:'background 0.3s' }}>
                   <div style={{ position:'absolute', top:2, left: item.toggleOn ? 18 : 2, width:16, height:16,
                     borderRadius:'50%', background:'white', boxShadow:'0 1px 4px rgba(0,0,0,0.3)', transition:'left 0.3s' }} />
                 </div>
-              ) : (
-                <span style={{ color:C.muted, fontSize:'14px' }}>{item.expand ? (langOpen?'▾':'›') : '›'}</span>
-              )}
-            </button>
-            {/* Language Picker Inline Panel */}
-            {item.expand && langOpen && (
-              <div style={{ padding:'4px 16px 12px', background:C.glass2, borderTop:`1px solid ${C.divider}` }}>
-                {LANGUAGES.map(lang => (
-                  <button key={lang.code} onClick={() => handleLangChange(lang.code)}
-                    style={{ display:'flex', alignItems:'center', gap:12, width:'100%', padding:'10px 12px',
-                      background: language===lang.code ? `rgba(139,92,246,${C.isDark?'0.15':'0.08'})` : 'none',
-                      border: language===lang.code ? `1px solid rgba(139,92,246,0.3)` : '1px solid transparent',
-                      borderRadius:10, cursor:'pointer', marginBottom:4, transition:'all 0.15s', textAlign:'left' }}>
-                    <span style={{ fontSize:'20px' }}>{lang.flag}</span>
-                    <div style={{ flex:1 }}>
-                      <p style={{ fontSize:'13px', color:C.text, margin:0, fontFamily:PJS, fontWeight: language===lang.code?600:400 }}>{lang.name}</p>
-                      <p style={{ fontSize:'10px', color:C.muted, margin:0, fontFamily:PJS }}>{lang.sub}</p>
-                    </div>
-                    {language===lang.code && <span style={{ fontSize:'16px', color:VIOLET }}>✓</span>}
-                  </button>
-                ))}
-              </div>
-            )}
+              ) : !item.isLang ? (
+                <span style={{ color:C.muted, fontSize:'14px' }}>›</span>
+              ) : null}
+            </div>
             {i<arr.length-1 && <div style={{ height:1, background:C.divider, margin:'0 18px' }} />}
           </div>
         ))}
       </GlassCard>
-
 
       {/* Support & Feedback */}
       <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'4px 0 10px' }}>Support & Feedback</p>
@@ -722,16 +750,48 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
         </button>
       </div>
 
-      {/* Sign Out */}
+      {/* ── Sign Out ── */}
       <button
         onClick={onLogout}
-        style={{ ...actionBtn(true), width:'100%', flex:'unset', marginBottom:32 }}
+        style={{ ...actionBtn(true), width:'100%', flex:'unset', marginBottom:12 }}
         onMouseEnter={e => e.currentTarget.style.background='rgba(239,68,68,0.14)'}
         onMouseLeave={e => e.currentTarget.style.background=C.dangerBg}
       >
         🚪 Sign Out
       </button>
+
+      {/* ── Delete Account — Danger Zone ── */}
+      <div style={{ border:`1px solid ${C.dangerBorder}`, borderRadius:14, padding:'16px 18px', marginBottom:32, background:C.dangerBg }}>
+        <p style={{ fontSize:'10px', fontWeight:700, color:C.dangerText, fontFamily:PJS, letterSpacing:'0.14em', textTransform:'uppercase', margin:'0 0 6px', display:'flex', alignItems:'center', gap:6 }}>
+          ⚠️ Danger Zone
+        </p>
+        <p style={{ fontSize:'12px', color:C.muted, fontFamily:PJS, margin:'0 0 14px', lineHeight:'1.65' }}>
+          Permanently deletes your account, Style DNA, analysis history, wardrobe, and all Firebase data. Cannot be undone.
+        </p>
+        <button
+          onClick={handleDestroyAccount}
+          disabled={destroying}
+          style={{
+            width:'100%', padding:'12px', borderRadius:10,
+            background: 'transparent',
+            border:`1.5px solid ${C.dangerBorder}`,
+            color: C.dangerText,
+            fontSize:'13px', fontWeight:600, cursor: destroying ? 'not-allowed' : 'pointer',
+            fontFamily:PJS, transition:'all 0.2s',
+            display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+            opacity: destroying ? 0.6 : 1,
+          }}
+          onMouseEnter={e => { if(!destroying) e.currentTarget.style.background='rgba(239,68,68,0.12)'; }}
+          onMouseLeave={e => e.currentTarget.style.background='transparent'}
+        >
+          {destroying
+            ? <><span style={{ display:'inline-block', width:14, height:14, borderRadius:'50%', border:'2px solid rgba(239,68,68,0.3)', borderTopColor:C.dangerText, animation:'spinSmooth 0.8s linear infinite' }} /> Deleting account…</>
+            : '🗑️ Delete My Account Permanently'
+          }
+        </button>
+      </div>
     </div>
+
   );
 }
 
