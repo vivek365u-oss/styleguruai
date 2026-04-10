@@ -35,7 +35,6 @@ function ColorContrastChecker({ isDark }) {
   const verdict = ratio >= 4.5 ? t('greatCombo') : ratio >= 3 ? t('okayForLarge') : t('poorContrast');
 
   return (
-  return (
     <div className={`rounded-2xl border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
       <button onClick={() => setOpen(o => !o)} className={`w-full flex items-center gap-3 p-4 transition ${isDark ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}>
         <span className="w-8 h-8 flex items-center justify-center text-purple-500">
@@ -329,10 +328,6 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
           ))}
         </div>
       </div>
-
-    </div>
-  );
-}
 
     </div>
   );

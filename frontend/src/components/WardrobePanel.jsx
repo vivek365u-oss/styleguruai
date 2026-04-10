@@ -40,7 +40,13 @@ function SkeletonCard({ isDark }) {
         <div className="flex-1 space-y-2">
           <div className={`h-3 rounded-full w-3/4 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
           <div className={`h-3 rounded-full w-1/2 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
-        </div>function WardrobePanel({ onShowResult, gender = 'male' }) {
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WardrobePanel({ onShowResult, gender = 'male' }) {
   const { theme } = useContext(ThemeContext);
   const { t, language } = useLanguage();
   const { isPro } = usePlan();
