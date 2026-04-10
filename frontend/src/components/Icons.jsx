@@ -17,7 +17,7 @@ import {
   FiSun,
   FiCloudRain,
   FiCloud,
-  FiSnowflake,
+  FiCloudSnow,
   FiSmile
 } from 'react-icons/fi';
 import { 
@@ -63,7 +63,7 @@ export const FashionIcons = {
   Sun: FiSun,
   Rain: FiCloudRain,
   Cloud: FiCloud,
-  Snow: FiSnowflake,
+  Snow: FiCloudSnow,
   Happy: FiSmile,
   
   // UI
