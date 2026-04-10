@@ -313,11 +313,11 @@ export default function ProfilePanel() {
                         <p className="text-[9px] font-black uppercase tracking-widest text-white/30">{t('lifestyle')}</p>
                         <div className="flex flex-wrap gap-2">
                            {[
-                              { id: 'student', icon: '🎓', label: t('student') },
-                              { id: 'pro', icon: '💼', label: t('corpPro') },
-                              { id: 'creative', icon: '🎨', label: t('creativeFreelancer') },
-                              { id: 'social', icon: '📱', label: t('socialCreator') },
-                              { id: 'other', icon: '✨', label: t('lifestyle_other') }
+                              { id: 'student', icon: FashionIcons.Star, label: t('student') },
+                              { id: 'pro', icon: FashionIcons.Formal, label: t('corpPro') },
+                              { id: 'creative', icon: FashionIcons.Camera, label: t('creativeFreelancer') },
+                              { id: 'social', icon: FashionIcons.Star, label: t('socialCreator') },
+                              { id: 'other', icon: FashionIcons.Bulb, label: t('lifestyle_other') }
                            ].map(item => (
                               <button
                                 key={item.id}

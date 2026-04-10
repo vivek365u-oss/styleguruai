@@ -222,6 +222,7 @@ function StyleBot({ inline = false }) {
 
           {/* Quick actions */}
           <div className="px-3 pb-1 flex gap-1 overflow-x-auto scrollbar-hide">
+            {quickActions.map(qa => (
               <button
                 key={qa.label}
                 onClick={() => { setInput(qa.label); setTimeout(sendMessage, 100); }}
@@ -231,6 +232,7 @@ function StyleBot({ inline = false }) {
                 <span className="w-3 h-3"><IconRenderer icon={qa.icon} /></span>
                 {qa.label}
               </button>
+            ))}
           </div>
 
           {/* Input */}

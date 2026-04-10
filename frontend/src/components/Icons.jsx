@@ -15,7 +15,10 @@ import {
   FiWatch,
   FiBriefcase,
   FiSun,
-  FiCloudRain
+  FiCloudRain,
+  FiCloud,
+  FiSnowflake,
+  FiSmile
 } from 'react-icons/fi';
 import { 
   GiDress, 
@@ -26,7 +29,8 @@ import {
   GiSombrero,
   GiRunningShoe,
   GiHoodie,
-  GiSunglasses
+  GiSunglasses,
+  GiBilledCap
 } from 'react-icons/gi';
 
 export const FashionIcons = {
@@ -41,6 +45,7 @@ export const FashionIcons = {
   Hoodie: GiHoodie,
   Accessories: GiSunglasses,
   Watch: FiWatch,
+  Cap: GiBilledCap,
   
   // Feature Icons
   Analysis: FiZap,
@@ -54,14 +59,18 @@ export const FashionIcons = {
   AI: FiZap,
   Formal: FiBriefcase,
   
-  // Weather
+  // Weather & States
   Sun: FiSun,
   Rain: FiCloudRain,
+  Cloud: FiCloud,
+  Snow: FiSnowflake,
+  Happy: FiSmile,
   
   // UI
   User: FiUser,
   Settings: FiSettings,
-  Heart: FiHeart
+  Heart: FiHeart,
+  Bulb: FiSun
 };
 
 export const IconRenderer = ({ icon: Icon, className = "w-full h-full", ...props }) => {

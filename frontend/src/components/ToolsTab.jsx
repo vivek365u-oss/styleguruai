@@ -9,6 +9,7 @@ import StyleBot from './StyleBot';
 import OutfitCalendar from './OutfitCalendar';
 import WardrobePanel from './WardrobePanel';
 import { getWardrobe, auth } from '../api/styleApi';
+import { FashionIcons, IconRenderer } from './Icons';
 
 // --- Extracted from Dashboard.jsx ---
 function ColorContrastChecker({ isDark }) {
