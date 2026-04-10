@@ -11,7 +11,7 @@
  */
 
 import { useState, useEffect, useContext, lazy, Suspense, useCallback, useMemo } from 'react';
-import { logout, saveProfile, saveHistory, auth } from '../api/styleApi';
+import { logout, saveProfile, saveHistory, getHistory, auth } from '../api/styleApi';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
@@ -353,21 +353,30 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange }) {
         </p>
       </GlassCard>
 
-      {/* ── Feature Shortcuts ── */}
-      <p style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: MUTED, fontFamily: PJS, margin: '0 0 12px' }}>Explore Features</p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        {shortcuts.map(f => (
-          <GlassCard key={f.id} onClick={() => onTabChange(f.id)} style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ width: 42, height: 42, borderRadius: 12, background: f.grad, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-              <span style={{ fontSize: '20px' }}>{f.icon}</span>
-            </div>
-            <div>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: TEXT, margin: '0 0 2px', fontFamily: PJS }}>{f.label}</p>
-              <p style={{ fontSize: '11px', color: MUTED, margin: 0, fontFamily: PJS }}>{f.desc}</p>
-            </div>
-          </GlassCard>
-        ))}
-      </div>
+      {/* ── Wardrobe Peek (only when wardrobe has items) ── */}
+      {personalityData.wardrobeCount > 0 && (
+        <GlassCard onClick={() => onTabChange('wardrobe')} style={{ padding: '16px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ width: 42, height: 42, borderRadius: 12, background: 'linear-gradient(135deg,#8B5CF6,#EC4899)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: '20px' }}>👗</span>
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '0 0 2px', fontFamily: PJS, fontWeight: 700 }}>Your Wardrobe</p>
+            <p style={{ fontSize: '14px', fontFamily: PDI, color: TEXT, margin: '0 0 1px' }}>{personalityData.wardrobeCount} saved {personalityData.wardrobeCount === 1 ? 'item' : 'items'}</p>
+            <p style={{ fontSize: '11px', color: MUTED, margin: 0, fontFamily: PJS }}>Tap to browse your collection</p>
+          </div>
+          <div style={{ width: 30, height: 30, borderRadius: '50%', background: GLASS2, border: `1px solid ${BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: TEXT, fontSize: '14px' }}>→</div>
+        </GlassCard>
+      )}
+
+      {/* ── First use prompt (no analysis yet) ── */}
+      {analysisCount === 0 && (
+        <GlassCard style={{ padding: '20px', marginBottom: 8, textAlign: 'center' }} hoverable={false}>
+          <p style={{ fontSize: '28px', marginBottom: 8 }}>🎨</p>
+          <p style={{ fontSize: '14px', fontFamily: PDI, color: TEXT, margin: '0 0 6px' }}>Discover Your Style DNA</p>
+          <p style={{ fontSize: '12px', color: MUTED, margin: '0 0 16px', fontFamily: PJS, lineHeight: '1.6' }}>Upload a photo to unlock your personalized color palette, skin tone analysis, and AI style archetype.</p>
+          <button onClick={onAnalyze} style={{ background: GRAD, border: 'none', color: 'white', borderRadius: 10, padding: '10px 24px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: PJS, boxShadow: GLOW_BTN }}>Start My First Scan →</button>
+        </GlassCard>
+      )}
     </div>
   );
 }
@@ -555,46 +564,29 @@ function ProfileSection({ user, onLogout, onTabChange, onToast }) {
         </GlassCard>
       )}
 
-      {/* ── Quick Actions ── */}
-      <p style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: MUTED, fontFamily: PJS, margin: '16px 0 10px' }}>Quick Actions</p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
-        {[
-          { label: 'My History', icon: '📋', tab: 'history', desc: `${historyCount} analyses` },
-          { label: 'Wardrobe',   icon: '👗', tab: 'wardrobe', desc: `${wardrobeCount} items` },
-          { label: 'Navigator',  icon: '🗺️', tab: 'navigator', desc: 'Style guide' },
-          { label: 'Tools',      icon: '🛠️', tab: 'tools', desc: 'Fashion tools' },
-        ].map(item => (
-          <GlassCard key={item.tab} onClick={() => onTabChange(item.tab)} style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: '20px' }}>{item.icon}</span>
-            <div>
-              <p style={{ fontSize: '13px', fontWeight: 600, color: TEXT, margin: '0 0 2px', fontFamily: PJS }}>{item.label}</p>
-              <p style={{ fontSize: '10px', color: MUTED, margin: 0, fontFamily: PJS }}>{item.desc}</p>
-            </div>
-          </GlassCard>
-        ))}
-      </div>
-
-      {/* ── Settings ── */}
-      <p style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: MUTED, fontFamily: PJS, margin: '16px 0 10px' }}>Settings</p>
+      {/* ── Support & Help ── */}
+      <p style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: MUTED, fontFamily: PJS, margin: '16px 0 10px' }}>Support & Feedback</p>
       <GlassCard style={{ padding: '4px 0', marginBottom: 16 }} hoverable={false}>
         {[
           {
-            icon: theme === 'dark' ? '🌙' : '☀️',
-            label: 'Theme',
-            value: theme === 'dark' ? 'Dark Mode' : 'Light Mode',
-            action: () => toggleTheme(),
+            icon: '💬', label: 'Contact Support',
+            value: 'styleguruai.in.gmail@gmail.com',
+            action: () => window.open('mailto:styleguruai.in.gmail@gmail.com', '_blank'),
           },
           {
-            icon: '🔔',
-            label: 'Notifications',
-            value: 'Style tips & updates',
-            action: () => onToast({ message: 'Notifications setting coming soon', type: 'default' }),
+            icon: '⭐', label: 'Rate the App',
+            value: 'Leave a review & help us grow',
+            action: () => { try { window.open('https://play.google.com/store/apps/details?id=com.styleguruai', '_blank'); } catch { onToast({ message: 'Thanks for your support!', type: 'success' }); } },
           },
           {
-            icon: '🔒',
-            label: 'Privacy',
-            value: 'Data stays on your device',
-            action: () => onTabChange ? window.open('/privacy', '_blank') : null,
+            icon: '🐛', label: 'Report an Issue',
+            value: 'Found a bug? Tell us about it',
+            action: () => window.open('mailto:styleguruai.in.gmail@gmail.com?subject=Bug Report&body=Describe the issue:', '_blank'),
+          },
+          {
+            icon: '📋', label: 'View Privacy Policy',
+            value: 'How we handle your data',
+            action: () => window.open('/privacy', '_blank'),
           },
         ].map((item, i, arr) => (
           <div key={item.label}>
@@ -607,6 +599,62 @@ function ProfileSection({ user, onLogout, onTabChange, onToast }) {
               <span style={{ fontSize: '18px', flexShrink: 0 }}>{item.icon}</span>
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: '13px', color: TEXT, margin: '0 0 2px', fontFamily: PJS, fontWeight: 500 }}>{item.label}</p>
+                <p style={{ fontSize: '11px', color: MUTED, margin: 0, fontFamily: PJS }}>{item.value}</p>
+              </div>
+              <span style={{ color: MUTED, fontSize: '14px' }}>›</span>
+            </button>
+            {i < arr.length - 1 && <div style={{ height: 1, background: BORDER, margin: '0 18px' }} />}
+          </div>
+        ))}
+      </GlassCard>
+
+      {/* ── Settings ── */}
+      <p style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: MUTED, fontFamily: PJS, margin: '4px 0 10px' }}>Preferences</p>
+      <GlassCard style={{ padding: '4px 0', marginBottom: 16 }} hoverable={false}>
+        {[
+          {
+            icon: theme === 'dark' ? '🌙' : '☀️',
+            label: 'App Theme',
+            value: theme === 'dark' ? 'Dark Mode (current)' : 'Light Mode (current)',
+            action: () => { toggleTheme(); onToast({ message: `Switched to ${theme === 'dark' ? 'light' : 'dark'} mode`, type: 'success' }); },
+          },
+          {
+            icon: '🌐',
+            label: 'Language',
+            value: 'English (India)',
+            action: () => onToast({ message: 'More languages coming soon!', type: 'default' }),
+          },
+          {
+            icon: '🔔',
+            label: 'Notifications',
+            value: 'Daily style tips & feature updates',
+            action: () => onToast({ message: 'Notification settings coming soon', type: 'default' }),
+          },
+          {
+            icon: '🗑️',
+            label: 'Clear My Data',
+            value: 'Reset all local analysis data',
+            action: () => {
+              if (window.confirm('Clear all your local data? This cannot be undone.')) {
+                ['sg_last_analysis','sg_analysis_count','sg_streak_count','sg_last_checkin',
+                 'sg_analysis_history','sg_saved_colors','sg_wardrobe_queue','sg_primary_profile',
+                 'sg_gender_pref', 'sg_display_name'
+                ].forEach(k => localStorage.removeItem(k));
+                onToast({ message: 'Local data cleared', type: 'success' });
+              }
+            },
+          },
+        ].map((item, i, arr) => (
+          <div key={item.label}>
+            <button
+              onClick={item.action}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'background 0.2s', borderRadius: i === 0 ? '16px 16px 0 0' : i === arr.length - 1 ? '0 0 16px 16px' : 0 }}
+              onMouseEnter={e => e.currentTarget.style.background = GLASS2}
+              onMouseLeave={e => e.currentTarget.style.background = 'none'}
+            >
+              <span style={{ fontSize: '18px', flexShrink: 0 }}>{item.icon}</span>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: '13px', color: item.label === 'Clear My Data' ? '#EF9090' : TEXT, margin: '0 0 2px', fontFamily: PJS, fontWeight: 500 }}>{item.label}</p>
                 <p style={{ fontSize: '11px', color: MUTED, margin: 0, fontFamily: PJS }}>{item.value}</p>
               </div>
               <span style={{ color: MUTED, fontSize: '14px' }}>›</span>
@@ -676,6 +724,28 @@ export default function AppShell({ user, onLogout }) {
     return () => window.removeEventListener('scroll', handler);
   }, []);
 
+  // ── Firestore Data Sync (fixes laptop vs mobile discrepancy) ──
+  // On mount, read Firestore history count and sync to localStorage
+  // This ensures same account always shows same data across devices
+  useEffect(() => {
+    if (!auth.currentUser) return;
+    getHistory().then(res => {
+      const firestoreCount = res?.data?.history?.length || 0;
+      const localCount = parseInt(localStorage.getItem('sg_analysis_count') || '0');
+      // Use the higher of the two (Firestore is source of truth)
+      if (firestoreCount > localCount) {
+        localStorage.setItem('sg_analysis_count', firestoreCount.toString());
+      }
+      // Sync last analysis from Firestore if local is empty
+      const localLast = localStorage.getItem('sg_last_analysis');
+      if (!localLast && res?.data?.history?.length > 0) {
+        const lastEntry = res.data.history[0];
+        localStorage.setItem('sg_last_analysis', JSON.stringify(lastEntry));
+        setLastAnalysis(lastEntry);
+      }
+    }).catch(() => {}); // Silent fail — offline/no-network OK
+  }, [user?.uid]); // Re-run when user changes (login/logout)
+
   const handleTabChange = useCallback((tab) => {
     setActiveTab(tab);
     if (tab !== 'analyze') setError(null);
@@ -691,11 +761,9 @@ export default function AppShell({ user, onLogout }) {
     localStorage.setItem('sg_analysis_count', count.toString());
     setToast({ message: '✨ Analysis complete!', type: 'success' });
     try {
-      if (auth.currentUser) {
-        await saveHistory(auth.currentUser.uid, data);
-        await saveProfile(auth.currentUser.uid, data);
-      }
-    } catch (e) { console.warn('Save failed:', e); }
+      // saveHistory takes just the data (uid is derived from auth.currentUser inside)
+      await saveHistory(data);
+    } catch (e) { console.warn('Firestore save failed (offline?):', e); }
     logEvent(EVENTS.ANALYSIS_COMPLETE);
   }, []);
 
@@ -713,21 +781,24 @@ export default function AppShell({ user, onLogout }) {
 
   const avatarLetter  = (user?.name?.[0] || user?.email?.[0] || 'U').toUpperCase();
 
+  // Desktop: 5 primary tabs (Wardrobe accessible via Tools)
   const desktopTabs = [
     { id: 'home',      label: 'Home' },
     { id: 'analyze',   label: 'Analyze' },
     { id: 'history',   label: 'History' },
-    { id: 'wardrobe',  label: 'Wardrobe' },
     { id: 'navigator', label: 'Navigator' },
     { id: 'tools',     label: 'Tools' },
   ];
 
+  // Mobile: 6 items — Home, Analyze, History, Tools, Navigator, Profile
+  // NO Wardrobe (use Tools > Wardrobe instead)
   const mobileTabs = [
-    { id: 'home',     icon: '🏠', label: 'Home' },
-    { id: 'analyze',  icon: '📷', label: 'Analyze' },
-    { id: 'history',  icon: '📋', label: 'History' },
-    { id: 'wardrobe', icon: '👗', label: 'Wardrobe' },
-    { id: 'tools',    icon: '🛠️', label: 'Tools' },
+    { id: 'home',      icon: '🏠', label: 'Home' },
+    { id: 'analyze',   icon: '📷', label: 'Analyze' },
+    { id: 'history',   icon: '📋', label: 'History' },
+    { id: 'tools',     icon: '🛠️', label: 'Tools' },
+    { id: 'navigator', icon: '🗺️', label: 'Navigate' },
+    { id: 'profile',   icon: '👤', label: 'Profile' },
   ];
 
   return (
