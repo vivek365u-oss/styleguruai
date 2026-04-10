@@ -23,6 +23,7 @@ import { logEvent, EVENTS } from '../utils/analytics';
 import { useCart } from '../context/CartContext';
 import ShoppingCart from './ShoppingCart';
 import ProfilePanel from './ProfilePanel';
+import CommunityFeed from './CommunityFeed';
 import { FashionIcons, IconRenderer } from './Icons';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || '';
@@ -566,10 +567,10 @@ function Dashboard({ user, onLogout }) {
 
   const navItems = [
     { id: 'home', icon: FashionIcons.Formal, label: t('navHome') },
+    { id: 'community', icon: FashionIcons.User, label: t('community') },
     { id: 'analyze', icon: FashionIcons.Camera, label: t('navAnalyze') },
-    { id: 'history', icon: FashionIcons.Analysis, label: t('navHistory') },
-    { id: 'navigator', icon: FashionIcons.Global, label: t('navNavigator') || 'Navigator' },
-    { id: 'tools', icon: FashionIcons.Wardrobe, label: t('navTools') }
+    { id: 'tools', icon: FashionIcons.Wardrobe, label: t('explore') || 'Explore' },
+    { id: 'history', icon: FashionIcons.Analysis, label: t('navHistory') }
   ];
 
   const handleTabChange = (tab) => {
@@ -665,9 +666,16 @@ function Dashboard({ user, onLogout }) {
 
           {activeTab === 'history' && <HistoryPanel onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} />}
 
-          {activeTab === 'navigator' && <StyleNavigator user={user} onAnalyze={() => setActiveTab('analyze')} />}
+          {activeTab === 'community' && <CommunityFeed />}
 
-          {activeTab === 'tools' && <ToolsTab uploadedImage={uploadedImage} analysisData={results} onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} onOpenScanner={() => setActiveTab('scanner')} />}
+          {activeTab === 'tools' && (
+            <div className="space-y-8 animate-fade-in">
+               <StyleNavigator user={user} onAnalyze={() => setActiveTab('analyze')} />
+               <div className="border-t border-[var(--border-primary)] pt-8">
+                 <ToolsTab uploadedImage={uploadedImage} analysisData={results} onShowResult={(data) => { setResults(data); setActiveTab('analyze'); }} onOpenScanner={() => setActiveTab('scanner')} />
+               </div>
+            </div>
+          )}
 
           {activeTab === 'scanner' && (
             <ColorScanner
