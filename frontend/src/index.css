@@ -5,6 +5,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ══════════════════════════════════════════════════════
+   CRITICAL FIX: Mobile bottom nav — flex ONLY on mobile
+   md:hidden sets display:none on desktop (768px+)
+   This class sets display:flex on mobile but md:hidden wins on desktop
+   ══════════════════════════════════════════════════════ */
+.mobile-bottom-nav {
+  display: flex;
+}
+@media (min-width: 768px) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+}
+
+/* ── Public pages: content below the fixed 60px nav ── */
+.public-page-content {
+  padding-top: 24px;
+}
+
 /* ═══════════════════════════════════════════════════════
    StyleGuru AI — Premium Design System v3.0
    Glassmorphism + Gradient + Soft 3D Aesthetic

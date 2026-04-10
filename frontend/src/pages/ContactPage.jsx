@@ -22,7 +22,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: '56px 24px 80px' }}>
+    <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 24px 80px' }}>
       <SEOHead title="Contact — StyleGuru AI" description="Get in touch with the StyleGuru AI team." />
 
       <p style={LABEL}>Support</p>

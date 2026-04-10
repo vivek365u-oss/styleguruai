@@ -86,6 +86,8 @@ function Toast({ message, type='default', onClose }) {
       animation:'fadeUp 0.3s ease', boxShadow:SHADOW,
       display:'flex', alignItems:'center', gap:8,
       fontFamily:"'Plus Jakarta Sans','Inter',sans-serif",
+      // On desktop, move toast higher so it doesn't conflict with no-bottom-nav
+      // On mobile (with bottom nav), keep at 88px
     }}>
       {type==='success' && <span style={{ color:'#10B981' }}>✓</span>}
       {type==='error'   && <span style={{ color:'#EF4444' }}>✗</span>}
@@ -684,17 +686,14 @@ export default function AppShell({ user, onLogout }) {
         </Suspense>
       </main>
 
-      {/* ══════════════════════════════════════════
-          MOBILE BOTTOM NAV — glass style
-          ══════════════════════════════════════════ */}
+      {/* MOBILE BOTTOM NAV — shows only below md breakpoint */}
       <nav
-        className="md:hidden"
+        className="mobile-bottom-nav md:hidden"
         style={{
           position:'fixed', bottom:0, left:0, right:0, zIndex:200,
           background:'rgba(11,15,26,0.95)',
           backdropFilter:'blur(28px)', WebkitBackdropFilter:'blur(28px)',
           borderTop:`1px solid ${BORDER}`,
-          display:'flex',
           paddingBottom:'env(safe-area-inset-bottom, 6px)',
         }}
       >

@@ -4,7 +4,7 @@ const C = { text: '#F0EDE6', muted: '#6B6B6B', border: '#242424', surface: '#141
 
 export default function AboutPage() {
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: '56px 24px 80px' }}>
+    <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 24px 80px' }}>
       <SEOHead
         title="About — StyleGuru AI"
         description="StyleGuru AI is an AI-powered fashion advisor that helps users choose the best outfits based on their skin tone."

@@ -15,7 +15,7 @@ function Section({ num, title, children }) {
 
 export default function PrivacyPage() {
   return (
-    <div style={{ maxWidth: 760, margin: '0 auto', padding: '56px 24px 80px' }}>
+    <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 24px 80px' }}>
       <SEOHead title="Privacy Policy — StyleGuru AI" description="Read the StyleGuru AI privacy policy. We do not store or share your uploaded images." />
 
       <p style={{ fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: C.gold, marginBottom: 12, fontFamily: "'Inter',sans-serif" }}>Legal</p>

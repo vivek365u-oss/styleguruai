@@ -6,20 +6,20 @@ const C = { text: '#F0EDE6', muted: '#6B6B6B', border: '#242424', surface: '#141
 
 export default function BlogListPage() {
   return (
-    <div style={{ maxWidth: 1000, margin: '0 auto', padding: '56px 24px 80px' }}>
+    <div style={{ maxWidth: 1000, margin: '0 auto', padding: '24px 24px 80px' }}>
       <SEOHead
         title="Fashion Blog — StyleGuru AI"
         description="Read fashion tips, skin tone guides, and AI styling articles on the StyleGuru AI blog."
       />
 
       {/* Header */}
-      <p style={{ fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: C.gold, marginBottom: 12, fontFamily: "'Inter',sans-serif" }}>
+      <p style={{ fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: C.gold, marginBottom: 12, fontFamily: "'Plus Jakarta Sans','Inter',sans-serif" }}>
         Fashion Blog
       </p>
       <h1 style={{ fontFamily: "'Playfair Display',Georgia,serif", fontSize: 'clamp(30px,5vw,52px)', fontWeight: 300, color: C.text, lineHeight: 1.15, marginBottom: 16 }}>
         Style & Fashion Tips
       </h1>
-      <p style={{ fontSize: '15px', color: C.muted, lineHeight: '1.7', marginBottom: 56, maxWidth: 480, fontFamily: "'Inter',sans-serif" }}>
+      <p style={{ fontSize: '15px', color: C.muted, lineHeight: '1.7', marginBottom: 40, maxWidth: 480, fontFamily: "'Plus Jakarta Sans','Inter',sans-serif" }}>
         Expert advice on skin tones, outfit selection, and how AI is transforming the fashion industry.
       </p>
 

@@ -12,7 +12,7 @@ const terms = [
 
 export default function TermsPage() {
   return (
-    <div style={{ maxWidth: 760, margin: '0 auto', padding: '56px 24px 80px' }}>
+    <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 24px 80px' }}>
       <SEOHead title="Terms & Conditions — StyleGuru AI" description="Read the StyleGuru AI terms of use before using the service." />
 
       <p style={{ fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: C.gold, marginBottom: 12, fontFamily: "'Inter',sans-serif" }}>Legal</p>
