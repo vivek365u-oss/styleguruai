@@ -367,9 +367,54 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
 // PROFILE SECTION
 // ══════════════════════════════════════════════════════
 function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggleTheme }) {
+  const { language, changeLanguage } = useLanguage();
   const [editingName, setEditingName] = useState(false);
   const [displayName, setDisplayName] = useState(() => localStorage.getItem('sg_display_name') || user?.name || '');
   const [copied, setCopied]           = useState(false);
+  const [langOpen, setLangOpen]       = useState(false);
+  const [notifOn, setNotifOn]         = useState(() => localStorage.getItem('sg_notif_on') === 'true');
+
+  // Language options
+  const LANGUAGES = [
+    { code:'en',       flag:'🇺🇸', name:'English',   sub:'English (India)' },
+    { code:'hinglish', flag:'🇮🇳', name:'Hinglish', sub:'हिन्ग्लिश' },
+    { code:'hi',       flag:'🇮🇳', name:'हिन्दी',    sub:'Hindi — Devanagari' },
+  ];
+  const currentLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0];
+
+  const handleLangChange = (code) => {
+    changeLanguage(code);
+    setLangOpen(false);
+    const name = LANGUAGES.find(l => l.code === code)?.name || code;
+    onToast({ message:`Language set to ${name} ✅`, type:'success' });
+  };
+
+  const handleNotifToggle = async () => {
+    if (notifOn) {
+      // Disable
+      localStorage.setItem('sg_notif_on', 'false');
+      setNotifOn(false);
+      onToast({ message:'Notifications disabled', type:'default' });
+      return;
+    }
+    // Enable — request browser permission
+    if (!('Notification' in window)) {
+      onToast({ message:'Notifications not supported in this browser', type:'error' }); return;
+    }
+    const perm = await Notification.requestPermission();
+    if (perm === 'granted') {
+      localStorage.setItem('sg_notif_on', 'true');
+      setNotifOn(true);
+      onToast({ message:'Notifications enabled 🔔', type:'success' });
+      // Send welcome notification
+      new Notification('StyleGuru AI', {
+        body: 'You\'ll get daily style tips & updates! 🎨',
+        icon: '/favicon.ico',
+      });
+    } else if (perm === 'denied') {
+      onToast({ message:'Notifications blocked. Please allow in browser settings.', type:'error' });
+    }
+  };
 
   const personalityData = useMemo(() => readUserPersonalityData(), []);
   const personality     = useMemo(() => derivePersonality(personalityData), [personalityData]);
@@ -552,12 +597,20 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
 
         {[
           {
-            icon:'🌐', label:'Language', value:'English (India)',
-            action:() => onToast({ message:'More languages coming soon!', type:'default' }),
+            icon:'🌐', label:'Language',
+            value: currentLang.flag + ' ' + currentLang.name + ' — tap to change',
+            expand: true,
+            action: () => setLangOpen(v => !v),
           },
           {
-            icon:'🔔', label:'Notifications', value:'Daily style tips & updates',
-            action:() => onToast({ message:'Notification settings coming soon', type:'default' }),
+            icon:'🔔', label:'Notifications',
+            value: notifOn ? 'Enabled ✓ — daily style tips active'
+              : (typeof Notification!=='undefined' && Notification.permission==='denied'
+                  ? '🚫 Blocked — allow in browser settings'
+                  : 'Tap to enable daily style tips'),
+            isToggle: true,
+            toggleOn: notifOn,
+            action: handleNotifToggle,
           },
           {
             icon:'🗑️', label:'Clear My Data', value:'Reset all local analysis data', danger:true,
@@ -584,12 +637,42 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
                 <p style={{ fontSize:'13px', color:item.danger ? C.warnText : C.text, margin:'0 0 2px', fontFamily:PJS, fontWeight:500 }}>{item.label}</p>
                 <p style={{ fontSize:'11px', color:C.muted, margin:0, fontFamily:PJS }}>{item.value}</p>
               </div>
-              <span style={{ color:C.muted, fontSize:'14px' }}>›</span>
+              {item.isToggle ? (
+                /* Notification toggle indicator */
+                <div style={{ width:36, height:20, borderRadius:10, flexShrink:0,
+                  background: item.toggleOn ? GRAD : C.isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)',
+                  position:'relative', transition:'background 0.3s' }}>
+                  <div style={{ position:'absolute', top:2, left: item.toggleOn ? 18 : 2, width:16, height:16,
+                    borderRadius:'50%', background:'white', boxShadow:'0 1px 4px rgba(0,0,0,0.3)', transition:'left 0.3s' }} />
+                </div>
+              ) : (
+                <span style={{ color:C.muted, fontSize:'14px' }}>{item.expand ? (langOpen?'▾':'›') : '›'}</span>
+              )}
             </button>
+            {/* Language Picker Inline Panel */}
+            {item.expand && langOpen && (
+              <div style={{ padding:'4px 16px 12px', background:C.glass2, borderTop:`1px solid ${C.divider}` }}>
+                {LANGUAGES.map(lang => (
+                  <button key={lang.code} onClick={() => handleLangChange(lang.code)}
+                    style={{ display:'flex', alignItems:'center', gap:12, width:'100%', padding:'10px 12px',
+                      background: language===lang.code ? `rgba(139,92,246,${C.isDark?'0.15':'0.08'})` : 'none',
+                      border: language===lang.code ? `1px solid rgba(139,92,246,0.3)` : '1px solid transparent',
+                      borderRadius:10, cursor:'pointer', marginBottom:4, transition:'all 0.15s', textAlign:'left' }}>
+                    <span style={{ fontSize:'20px' }}>{lang.flag}</span>
+                    <div style={{ flex:1 }}>
+                      <p style={{ fontSize:'13px', color:C.text, margin:0, fontFamily:PJS, fontWeight: language===lang.code?600:400 }}>{lang.name}</p>
+                      <p style={{ fontSize:'10px', color:C.muted, margin:0, fontFamily:PJS }}>{lang.sub}</p>
+                    </div>
+                    {language===lang.code && <span style={{ fontSize:'16px', color:VIOLET }}>✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
             {i<arr.length-1 && <div style={{ height:1, background:C.divider, margin:'0 18px' }} />}
           </div>
         ))}
       </GlassCard>
+
 
       {/* Support & Feedback */}
       <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'4px 0 10px' }}>Support & Feedback</p>
