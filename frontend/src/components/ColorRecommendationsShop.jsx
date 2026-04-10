@@ -13,7 +13,7 @@ function ColorRecommendationsShop({ recommendations, gender = 'male', isDark = f
   const getRecommendedColors = () => {
     if (gender === 'female') {
       const colors = [
-        ...( recommendations.best_dress_colors || []),
+        ...(recommendations.best_dress_colors || []),
         ...(recommendations.best_top_colors || []),
         ...(recommendations.best_kurti_colors || []),
         ...(recommendations.best_lehenga_colors || []),
@@ -33,19 +33,8 @@ function ColorRecommendationsShop({ recommendations, gender = 'male', isDark = f
 
   if (recommendedColors.length === 0) {
     return (
-      <div className="glass-card-premium p-10 rounded-[2.5rem] text-center space-y-4">
-        <div className="w-16 h-16 bg-purple-500/10 rounded-3xl flex items-center justify-center mx-auto text-purple-500">
-           <IconRenderer icon={FashionIcons.Analysis} />
-        </div>
-        <div>
-          <h3 className="text-xl font-bold mb-2">Style Discovery in Progress</h3>
-          <p className="text-gray-500 text-sm leading-relaxed max-w-xs mx-auto">
-            We haven't matched exact products for this specific shade yet, but check out these trending fusion styles that work for all tones!
-          </p>
-        </div>
-        <button className="text-sm font-black text-purple-400 hover:text-purple-300 transition-colors uppercase tracking-widest">
-           Explore Collection →
-        </button>
+      <div className={`p-4 rounded-xl text-center ${isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200'}`}>
+        <p className={isDark ? 'text-white/50' : 'text-gray-600'}>🔍 No color recommendations available</p>
       </div>
     );
   }
@@ -62,11 +51,10 @@ function ColorRecommendationsShop({ recommendations, gender = 'male', isDark = f
           </h3>
           <button
             onClick={() => setShowOutfits(!showOutfits)}
-            className={`text-xs px-2.5 py-1 rounded-full font-semibold transition-all ${
-              showOutfits
+            className={`text-xs px-2.5 py-1 rounded-full font-semibold transition-all ${showOutfits
                 ? isDark ? 'bg-purple-500/40 border border-purple-400 text-purple-200' : 'bg-purple-600 text-white'
                 : isDark ? 'bg-white/10 border border-white/20 text-white/60 hover:text-white/80' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+              }`}
           >
             👔 Outfits
           </button>
@@ -74,7 +62,7 @@ function ColorRecommendationsShop({ recommendations, gender = 'male', isDark = f
 
         {/* Color Tabs - Responsive Horizontal Scroll with Nested Scrolling Support */}
         <div className="relative -mx-4 px-4">
-          <div 
+          <div
             className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide scroll-smooth snap-x snap-mandatory"
             id="colorTabsScroll"
             role="tablist"
@@ -89,22 +77,21 @@ function ColorRecommendationsShop({ recommendations, gender = 'male', isDark = f
           >
             {/* Left spacing for edge items visibility */}
             <div className="flex-shrink-0 w-0" />
-            
+
             {recommendedColors.map((color, idx) => (
               <button
                 key={idx}
                 role="tab"
                 aria-selected={activeColorTab === idx}
                 onClick={() => setActiveColorTab(idx)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm whitespace-nowrap transition-all flex-shrink-0 snap-center ${
-                  activeColorTab === idx
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm whitespace-nowrap transition-all flex-shrink-0 snap-center ${activeColorTab === idx
                     ? isDark
                       ? 'bg-purple-500/40 border border-purple-400 text-purple-100 shadow-lg'
                       : 'bg-purple-600 border border-purple-600 text-white shadow-md'
                     : isDark
-                    ? 'border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10'
-                    : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                }`}
+                      ? 'border border-white/20 bg-white/5 text-white/70 hover:text-white hover:bg-white/10'
+                      : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
               >
                 {color.hex && (
                   <div
@@ -115,7 +102,7 @@ function ColorRecommendationsShop({ recommendations, gender = 'male', isDark = f
                 <span>{color.name}</span>
               </button>
             ))}
-            
+
             {/* Right spacing for edge items visibility */}
             <div className="flex-shrink-0 w-0" />
           </div>
@@ -124,11 +111,10 @@ function ColorRecommendationsShop({ recommendations, gender = 'male', isDark = f
         {/* Why this color? */}
         {selectedColor?.reason && (
           <div
-            className={`text-xs p-2.5 rounded-lg border-l-4 ${
-              isDark
+            className={`text-xs p-2.5 rounded-lg border-l-4 ${isDark
                 ? 'bg-white/5 border-purple-400/50 text-white/70'
                 : 'bg-purple-50 border-purple-300 text-purple-700'
-            }`}
+              }`}
           >
             💡 <span className="font-semibold">Why {selectedColor.name}?</span> {selectedColor.reason}
           </div>
@@ -188,15 +174,14 @@ function OutfitCombinations({ outfits, isDark = false }) {
           <button
             key={idx}
             onClick={() => setExpandedIdx(idx)}
-            className={`px-2.5 py-1 rounded text-xs font-semibold whitespace-nowrap transition-all ${
-              expandedIdx === idx
+            className={`px-2.5 py-1 rounded text-xs font-semibold whitespace-nowrap transition-all ${expandedIdx === idx
                 ? isDark
                   ? 'bg-purple-500/40 text-purple-100'
                   : 'bg-purple-600 text-white'
                 : isDark
-                ? 'bg-white/10 text-white/60 hover:text-white/80'
-                : 'bg-white text-gray-700 border border-purple-200 hover:bg-purple-50'
-            }`}
+                  ? 'bg-white/10 text-white/60 hover:text-white/80'
+                  : 'bg-white text-gray-700 border border-purple-200 hover:bg-purple-50'
+              }`}
           >
             Combo {idx + 1}
           </button>
@@ -206,14 +191,13 @@ function OutfitCombinations({ outfits, isDark = false }) {
       {/* Outfit Details */}
       {outfit && (
         <div
-          className={`p-3 rounded-lg border space-y-2 ${
-            isDark
+          className={`p-3 rounded-lg border space-y-2 ${isDark
               ? 'bg-white/5 border-white/10 text-white/80'
               : 'bg-white border-purple-200 text-gray-700'
-          }`}
+            }`}
         >
           <p className="text-sm leading-relaxed">{formatOutfitDisplay(outfit)}</p>
-          
+
           {/* Vibe/Occasion tip */}
           {outfit.vibe && (
             <div className={`text-xs italic pt-2 border-t ${isDark ? 'border-white/10 text-white/60' : 'border-purple-200 text-gray-600'}`}>

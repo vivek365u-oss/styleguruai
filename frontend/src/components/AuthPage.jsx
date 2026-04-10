@@ -155,7 +155,7 @@ function AuthPage({ onLoginSuccess }) {
             <div className="space-y-5 mb-8">
                {mode === 'register' && (
                 <div className="space-y-2">
-                   <label className="text-white/30 text-[10px] uppercase font-black tracking-widest pl-1">Identification</label>
+                   <label className="text-white/30 text-[10px] uppercase font-black tracking-widest pl-1">Full Name</label>
                    <input
                     name="full_name"
                     placeholder="ENTER FULL NAME"
@@ -167,7 +167,7 @@ function AuthPage({ onLoginSuccess }) {
               )}
 
               <div className="space-y-2">
-                 <label className="text-white/30 text-[10px] uppercase font-black tracking-widest pl-1">Email Coordinates</label>
+                 <label className="text-white/30 text-[10px] uppercase font-black tracking-widest pl-1">Email Address</label>
                  <input
                   name="email"
                   type="email"
@@ -179,7 +179,7 @@ function AuthPage({ onLoginSuccess }) {
               </div>
 
               <div className="space-y-2">
-                 <label className="text-white/30 text-[10px] uppercase font-black tracking-widest pl-1">Security Key</label>
+                 <label className="text-white/30 text-[10px] uppercase font-black tracking-widest pl-1">Password</label>
                  <input
                   name="password"
                   type="password"
@@ -210,13 +210,13 @@ function AuthPage({ onLoginSuccess }) {
             {/* Switch Mode */}
             <div className="mt-8 text-center text-[11px] font-bold tracking-widest uppercase">
                <span className="text-white/30">
-                {mode === 'login' ? "New Perspective?" : "Known Entity?"}
+                {mode === 'login' ? "Don't have an account?" : "Already have an account?"}
                </span>
                <button 
                 onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); }}
                 className="ml-2 text-purple-400 hover:text-purple-300 transition"
                >
-                {mode === 'login' ? 'Join the Elite' : 'Access Profile'}
+                {mode === 'login' ? 'Sign Up' : 'Sign In'}
                </button>
             </div>
           </div>

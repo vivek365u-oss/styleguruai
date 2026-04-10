@@ -1,27 +1,36 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const AdSense = () => {
   const adRef = useRef(null);
+  const [adLoaded, setAdLoaded] = useState(false);
 
   useEffect(() => {
-    // Only proceed if the script is available and the element is ready
-    if (!window.adsbygoogle || !adRef.current) return;
+    // Only show if AdSense script is present
+    if (typeof window !== 'undefined' && window.adsbygoogle) {
+      setAdLoaded(true);
+    }
+    // Check again after a short delay (script might load async)
+    const timer = setTimeout(() => {
+      if (window.adsbygoogle) setAdLoaded(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
-    // Check if ad was already initialized for this specific instance
+  useEffect(() => {
+    if (!adLoaded || !adRef.current) return;
     if (adRef.current.getAttribute('data-ad-status') === 'filled') return;
-
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
       adRef.current.setAttribute('data-ad-status', 'filled');
     } catch (err) {
-      // Catch common "All ads on this page are already filled" warnings
-      if (err.message.includes('adsbygoogle.push() error')) {
-        console.debug("AdSense: Ad already filled or slot inactive");
-      } else {
+      if (!err.message?.includes('adsbygoogle.push() error')) {
         console.warn("AdSense push ignored:", err.message);
       }
     }
-  }, []);
+  }, [adLoaded]);
+
+  // Don't render anything if AdSense isn't available (dev / ad-blocker)
+  if (!adLoaded) return null;
 
   return (
     <div 
