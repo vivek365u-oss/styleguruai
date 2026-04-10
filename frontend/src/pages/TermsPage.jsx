@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-[#050816] text-white" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
+    <div className="min-h-screen bg-[#02040a] text-white" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
       <SEOHead
         title="Terms of Use – StyleGuru AI"
         description="Read the StyleGuru AI terms of use before using the service."
@@ -13,12 +13,14 @@ export default function TermsPage() {
       <div className="fixed top-[-200px] left-[-200px] w-[600px] h-[600px] rounded-full bg-purple-700/20 blur-[120px] pointer-events-none z-0" />
       <div className="fixed bottom-[-200px] right-[-200px] w-[600px] h-[600px] rounded-full bg-pink-700/20 blur-[120px] pointer-events-none z-0" />
 
-      <nav className="relative z-10 flex items-center justify-between px-6 md:px-12 py-5 max-w-7xl mx-auto border-b border-gray-800/50">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm font-bold">S</div>
-          <span className="text-lg font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">StyleGuru AI</span>
-        </Link>
-        <Link to="/" className="text-gray-400 hover:text-white transition text-sm">← Home</Link>
+      <nav className="relative z-10 border-b border-white/5 bg-black/20 backdrop-blur-lg">
+        <div className="flex items-center justify-between px-6 md:px-12 py-5 max-w-7xl mx-auto">
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm font-black shadow-lg shadow-purple-500/20">S</div>
+            <span className="text-xl font-black bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent tracking-tight">StyleGuru AI</span>
+          </Link>
+          <Link to="/" className="text-gray-400 hover:text-white transition text-sm font-medium">← Home</Link>
+        </div>
       </nav>
 
       <main className="relative z-10 max-w-3xl mx-auto px-6 py-16">

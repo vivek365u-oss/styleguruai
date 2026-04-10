@@ -1,10 +1,12 @@
 import SEOHead from '../components/SEOHead';
 import Footer from '../components/Footer';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export default function ContactPage() {
+  const { t } = useLanguage();
   return (
-    <div className="min-h-screen bg-[#050816] text-white" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
+    <div className="min-h-screen bg-[#02040a] text-white" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
       <SEOHead
         title="Contact – StyleGuru AI"
         description="Get in touch with the StyleGuru AI team."

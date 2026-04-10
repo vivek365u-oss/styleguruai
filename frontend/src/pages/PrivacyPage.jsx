@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-[#050816] text-white" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
+    <div className="min-h-screen bg-[#02040a] text-white" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
       <SEOHead
         title="Privacy Policy – StyleGuru AI"
         description="Read the StyleGuru AI privacy policy. We do not store or share your uploaded images."
