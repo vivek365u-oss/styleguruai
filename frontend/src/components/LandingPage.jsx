@@ -65,7 +65,7 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#02040a] text-white overflow-x-hidden selection:bg-purple-500/30" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300 overflow-x-hidden selection:bg-purple-500/30" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
       <SEOHead
         title={t('landingHeroTitle') + " " + t('landingHeroSub')}
         description={t('landingTagline').replace('{perfectColors}', t('perfectColors'))}
@@ -82,12 +82,11 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
       {floatingItems.map((item, i) => (
         <div
           key={i}
-          className="fixed w-12 h-12 pointer-events-none z-0 opacity-[0.03]"
+          className="fixed w-12 h-12 pointer-events-none z-0 opacity-[0.05]"
           style={{
             left: `${(i * 13 + 7) % 95}%`,
             top: `${(i * 17 + 12) % 90}%`,
             animation: `float${i % 3} ${5 + i % 2}s ease-in-out infinite`,
-            filter: 'blur(1px)',
           }}
         >
           <IconRenderer icon={item} />
@@ -99,23 +98,22 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
         @keyframes float1 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-25px) rotate(-5deg)} }
         @keyframes float2 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-10px) rotate(3deg)} }
         @keyframes glow { 0%,100%{box-shadow:0 0 20px rgba(168,85,247,0.3)} 50%{box-shadow:0 0 40px rgba(236,72,153,0.6)} }
-        .hero-title-shadow { text-shadow: 0 0 40px rgba(168,85,247,0.15); }
       `}</style>
 
       {/* Navbar */}
-      <nav className="relative z-[100] border-b border-white/5 bg-black/20 backdrop-blur-lg">
+      <nav className="relative z-[100] border-b border-[var(--border-primary)] bg-[var(--bg-primary)]/80 backdrop-blur-xl">
         <div className="flex items-center justify-between px-6 md:px-12 py-5 max-w-7xl mx-auto">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm font-black shadow-lg shadow-purple-500/20">S</div>
-            <span className="text-xl font-black bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent tracking-tight">StyleGuru AI</span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm font-black text-white shadow-lg shadow-purple-500/20">S</div>
+            <span className="text-xl font-black bg-gradient-to-r from-[var(--text-primary)] to-[var(--text-secondary)] bg-clip-text text-transparent tracking-tight">StyleGuru AI</span>
           </div>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-6">
-            <button onClick={onLoginClick} className="text-gray-400 hover:text-white transition text-sm font-medium">{t('login')}</button>
+            <button onClick={onLoginClick} className="opacity-60 hover:opacity-100 transition text-sm font-medium">{t('login')}</button>
             <button
               onClick={onGetStarted}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-105 transition-all px-6 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-purple-500/20 active:scale-95"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-105 transition-all px-6 py-2.5 rounded-full text-sm font-bold text-white shadow-lg shadow-purple-500/20 active:scale-95"
             >
               {t('tryNow')}
             </button>
@@ -124,7 +122,7 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
           {/* Mobile Toggle */}
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10"
+            className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--bg-accent)] border border-[var(--border-primary)]"
           >
             {isMenuOpen ? (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -136,10 +134,10 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
 
         {/* Mobile Menu Overlay */}
         {isMenuOpen && (
-          <div className="absolute top-full left-0 right-0 bg-black/95 backdrop-blur-2xl border-b border-white/10 p-6 md:hidden animate-fade-in flex flex-col gap-4 shadow-2xl z-[101]">
+          <div className="absolute top-full left-0 right-0 bg-[var(--bg-primary)]/95 backdrop-blur-2xl border-b border-[var(--border-primary)] p-6 md:hidden animate-fade-in flex flex-col gap-4 shadow-2xl z-[101]">
             <button 
               onClick={() => { setIsMenuOpen(false); onLoginClick(); }}
-              className="w-full py-4 text-center text-gray-300 hover:text-white font-bold border-b border-white/5"
+              className="w-full py-4 text-center opacity-70 hover:opacity-100 font-bold border-b border-[var(--border-primary)]"
             >
               {t('login')}
             </button>
@@ -157,26 +155,26 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
       <section className="relative z-10 flex flex-col lg:flex-row items-center justify-between px-6 md:px-12 py-16 md:py-24 max-w-7xl mx-auto gap-16 lg:gap-12">
         {/* Left */}
         <div className="flex-[1.2] text-center lg:text-left">
-          <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full mb-8 backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-300 text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-full mb-8 backdrop-blur-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
             AI-Powered Fashion Advisor
           </div>
 
-          <h1 className="text-4xl md:text-6xl lg:text-8xl font-black leading-[1.1] mb-8 hero-title-shadow">
-            <span className="text-white drop-shadow-sm">StyleGuru AI</span>
+          <h1 className="text-4xl md:text-6xl lg:text-8xl font-black leading-[1.1] mb-8">
+            <span className="text-[var(--text-primary)]">StyleGuru AI</span>
             <br />
-            <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 bg-clip-text text-transparent">
               {t('landingHeroTitle')}
             </span>
             <br />
-            <span className="text-white opacity-90">{t('landingHeroSub')}</span>
+            <span className="text-[var(--text-primary)] opacity-90">{t('landingHeroSub')}</span>
           </h1>
 
-          <p className="text-gray-400 text-lg md:text-xl mb-12 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
+          <p className="text-[var(--text-secondary)] text-lg md:text-xl mb-12 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
             {t('landingTagline').split('{perfectColors}').map((part, index, array) => (
               <React.Fragment key={index}>
                 {part}
-                {index < array.length - 1 && <span className="text-purple-400 font-black decoration-purple-500/30 decoration-4 underline-offset-4">{t('perfectColors')}</span>}
+                {index < array.length - 1 && <span className="text-purple-600 font-black decoration-purple-600/30 decoration-4 underline-offset-4">{t('perfectColors')}</span>}
               </React.Fragment>
             ))}
           </p>
@@ -184,19 +182,19 @@ export default function LandingPage({ onGetStarted, onLoginClick }) {
           <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start">
             <button
               onClick={onGetStarted}
-              className="relative group bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-[1.02] transition-all px-10 py-5 rounded-3xl text-lg font-black overflow-hidden shadow-2xl shadow-purple-500/20 active:scale-95"
+              className="relative group bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-[1.02] transition-all px-10 py-5 rounded-3xl text-lg font-black text-white overflow-hidden shadow-2xl shadow-purple-500/20 active:scale-95"
             >
               <span className="relative z-10">✨ {t('tryNowFree')}</span>
             </button>
             <button
               onClick={onLoginClick}
-              className="border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all px-10 py-5 rounded-3xl text-lg font-black backdrop-blur-sm active:scale-95"
+              className="border border-[var(--border-primary)] hover:border-purple-500/50 hover:bg-purple-500/5 transition-all text-[var(--text-primary)] px-10 py-5 rounded-3xl text-lg font-black backdrop-blur-sm active:scale-95"
             >
               {t('loginArrow')}
             </button>
           </div>
 
-          <div className="flex items-center gap-6 mt-10 justify-center lg:justify-start text-sm text-gray-500">
+          <div className="flex items-center gap-6 mt-10 justify-center lg:justify-start text-sm opacity-50">
             <span>✓ {t('noCreditCard')}</span>
             <span>✓ {t('instantResults')}</span>
             <span>✓ {t('fullyFree')}</span>

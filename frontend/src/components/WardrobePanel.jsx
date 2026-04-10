@@ -40,14 +40,7 @@ function SkeletonCard({ isDark }) {
         <div className="flex-1 space-y-2">
           <div className={`h-3 rounded-full w-3/4 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
           <div className={`h-3 rounded-full w-1/2 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Main Component ──────────────────────────────────────────
-function WardrobePanel({ onShowResult, gender = 'male' }) {
+        </div>function WardrobePanel({ onShowResult, gender = 'male' }) {
   const { theme } = useContext(ThemeContext);
   const { t, language } = useLanguage();
   const { isPro } = usePlan();
@@ -102,9 +95,6 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
     if (cat.startsWith('cat_')) {
        const catObj = ALL_CATEGORIES.find(c => c.id === cat);
        if (catObj) {
-           // This is a bit complex, but if the item was saved as 'cat_sherwani', 
-           // and the filter is 'ethnic', we should show it.
-           // For now, simple includes check
            return cat.includes(filter);
        }
     }
@@ -138,11 +128,11 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
   if (!auth.currentUser) {
     return (
       <div className="mt-8 text-center pt-10">
-        <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border p-5 ${isDark ? 'bg-white/5 border-white/10 text-white/30' : 'bg-gray-100 border-gray-200 text-gray-400'}`}>
+        <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-[var(--border-primary)] bg-[var(--bg-accent)] p-5 opacity-30">
           <IconRenderer icon={FashionIcons.Wardrobe} />
         </div>
-        <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('myWardrobe')}</h3>
-        <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('wardrobeLimitNote')}</p>
+        <h3 className="font-bold text-xl mb-2">{t('myWardrobe')}</h3>
+        <p className="text-sm opacity-50">{t('wardrobeLimitNote')}</p>
       </div>
     );
   }
@@ -150,7 +140,7 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
   if (loading) {
     return (
       <div className="mt-4 space-y-3">
-        <h2 className={`font-black text-2xl mb-4 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+        <h2 className="font-black text-2xl mb-4 flex items-center gap-2">
            <span className="w-6 h-6"><IconRenderer icon={FashionIcons.Wardrobe} /></span> {t('myWardrobe')}
         </h2>
         {[1, 2, 3].map(i => <SkeletonCard key={i} isDark={isDark} />)}
@@ -162,13 +152,13 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
     <div className="mt-4 pb-4">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div>
-          <h2 className={`font-black text-2xl flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          <h2 className="font-black text-2xl flex items-center gap-2">
              <span className="w-6 h-6"><IconRenderer icon={FashionIcons.Wardrobe} /></span> {t('myWardrobe')}
           </h2>
-          <p className={`text-sm mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{items.length} {t('outfits')}</p>
+          <p className="text-sm mt-1 opacity-50">{items.length} {t('outfits')}</p>
         </div>
-        <div className={`rounded-xl px-3 py-2 border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-50 border-purple-200'}`}>
-          <span className={`text-sm font-medium ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{items.length}/{wardrobeLimit}</span>
+        <div className="rounded-xl px-3 py-2 border border-purple-500/30 bg-purple-500/10 shadow-sm shadow-purple-500/5">
+          <span className="text-sm font-black text-purple-600 dark:text-purple-400">{items.length}/{wardrobeLimit}</span>
         </div>
       </div>
 
@@ -178,10 +168,10 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
           <button
             key={f.id}
             onClick={() => setFilter(f.id)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-tight transition-all border whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-tight transition-all border whitespace-nowrap shadow-sm ${
               filter === f.id
-                ? 'bg-purple-500 border-purple-500 text-white shadow-lg'
-                : isDark ? 'bg-white/5 border-white/10 text-white/50 hover:text-white' : 'bg-white border-gray-200 text-gray-500 hover:border-purple-300'
+                ? 'bg-purple-600 border-purple-600 text-white shadow-purple-500/30'
+                : 'bg-[var(--bg-accent)] border-[var(--border-primary)] opacity-60 hover:opacity-100 hover:scale-105 active:scale-95'
             }`}
           >
             <span className="w-3 h-3"><IconRenderer icon={f.icon || FashionIcons.Shirt} /></span>
@@ -191,24 +181,24 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
       </div>
 
       {capWarning && (
-        <div className={`rounded-2xl p-3 mb-4 border flex items-center gap-3 ${isDark ? 'bg-yellow-500/10 border-yellow-500/20' : 'bg-yellow-50 border-yellow-200'}`}>
-          <span className="w-5 h-5 flex-shrink-0"><IconRenderer icon={FashionIcons.Bulb} className="text-yellow-500" /></span>
-          <p className={`text-xs ${isDark ? 'text-yellow-300' : 'text-yellow-700'}`}>{t('wardrobeFull', { current: items.length, limit: wardrobeLimit })}</p>
+        <div className="rounded-2xl p-4 mb-4 border border-yellow-500/20 bg-yellow-500/5 flex items-center gap-3">
+          <span className="w-5 h-5 flex-shrink-0 text-yellow-500"><IconRenderer icon={FashionIcons.Bulb} /></span>
+          <p className="text-[11px] font-medium text-yellow-700 dark:text-yellow-400">{t('wardrobeFull', { current: items.length, limit: wardrobeLimit })}</p>
         </div>
       )}
 
       {items.length === 0 ? (
         <div className="mt-8 text-center py-10">
-          <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border p-5 ${isDark ? 'bg-white/5 border-white/10 text-white/30' : 'bg-gray-100 border-gray-200 text-gray-400'}`}>
+          <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-[var(--border-primary)] bg-[var(--bg-accent)] p-5 opacity-30">
             <IconRenderer icon={FashionIcons.Wardrobe} />
           </div>
-          <h3 className={`font-bold text-xl mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('noOutfitsSaved')}</h3>
-          <p className={`text-sm ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{t('analyzeToSave')}</p>
+          <h3 className="font-bold text-xl mb-2">{t('noOutfitsSaved')}</h3>
+          <p className="text-sm opacity-50">{t('analyzeToSave')}</p>
         </div>
       ) : (
         <div className="space-y-3">
           {filteredItems.map(item => (
-            <div key={item.id} className={`rounded-[2rem] border overflow-hidden transition-all duration-300 ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-gray-100 shadow-sm hover:shadow-md'}`}>
+            <div key={item.id} className="rounded-[2rem] border border-[var(--border-primary)] bg-[var(--card-bg)] overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-purple-500/30">
               <div
                 className="flex items-center gap-4 p-5 cursor-pointer"
                 onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
@@ -216,19 +206,19 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
                 <div className="relative">
                     <WardrobeImage imageId={item.imageId} fallbackColor={item.hex || item.skin_hex} />
                     {item.hex && (
-                        <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: item.hex }} />
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-[var(--bg-primary)] shadow-sm" style={{ backgroundColor: item.hex }} />
                     )}
                 </div>
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className={`font-black text-sm capitalize tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    <span className="font-black text-sm capitalize tracking-tight">
                       {item.category?.startsWith('cat_') ? getCategoryLabel(item.category) : (item.category ? t(`cat_${item.category}`) : (item.outfit_data?.shirt || item.outfit_data?.top || 'Style Item'))}
                     </span>
                     <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border border-dashed ${
                       item.source === 'outfit_checker'
-                        ? isDark ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-blue-50 text-blue-600 border-blue-200'
-                        : isDark ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : 'bg-purple-50 text-purple-600 border-purple-200'
+                        ? 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                        : 'bg-purple-500/10 text-purple-500 border-purple-500/20'
                     }`}>
                       {item.source === 'outfit_checker' ? 'CHECK' : 'SCAN'}
                     </span>
@@ -246,29 +236,29 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
                 </div>
                 
                 <div className="text-right">
-                    <p className={`text-[10px] font-bold ${isDark ? 'text-white/20' : 'text-slate-300'}`}>{formatDate(item.saved_at)}</p>
-                    <span className={`text-[10px] mt-1 block ${isDark ? 'text-white/30' : 'text-slate-400'}`}>{expandedId === item.id ? '▲' : '▼'}</span>
+                    <p className="text-[10px] font-bold opacity-20">{formatDate(item.saved_at)}</p>
+                    <span className="text-[10px] mt-1 block opacity-30">{expandedId === item.id ? '▲' : '▼'}</span>
                 </div>
               </div>
 
               {expandedId === item.id && (
-                <div className={`px-5 pb-5 border-t animate-fade-in ${isDark ? 'border-white/5' : 'border-slate-50'}`}>
+                <div className="px-5 pb-5 border-t border-[var(--border-primary)] animate-fade-in">
                     <div className="space-y-4 pt-4">
-                        <p className={`text-[9px] font-black uppercase tracking-widest opacity-40 ${isDark ? 'text-white' : 'text-slate-900'}`}>Smart Attributes</p>
+                        <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Smart Attributes</p>
                         <div className="flex flex-wrap gap-2">
-                           {item.fit && <span className={`px-2 py-1 rounded-lg text-[9px] font-bold border ${isDark ? 'bg-purple-500/10 border-purple-500/20 text-purple-300' : 'bg-purple-50 border-purple-100 text-purple-600'}`}>{t(item.fit)}</span>}
-                           {item.fabric && <span className={`px-2 py-1 rounded-lg text-[9px] font-bold border ${isDark ? 'bg-blue-500/10 border-blue-500/20 text-blue-300' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>{t(item.fabric)}</span>}
-                           {item.pattern && <span className={`px-2 py-1 rounded-lg text-[9px] font-bold border ${isDark ? 'bg-pink-500/10 border-pink-500/20 text-pink-300' : 'bg-pink-50 border-pink-100 text-pink-600'}`}>{t(item.pattern)}</span>}
-                           {item.mood && <span className={`px-2 py-1 rounded-lg text-[9px] font-bold border ${isDark ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-300' : 'bg-indigo-50 border-indigo-100 text-indigo-600'}`}>{t(item.mood)}</span>}
+                           {item.fit && <span className="px-2 py-1 rounded-lg text-[9px] font-black border border-purple-500/20 bg-purple-500/5 text-purple-600 dark:text-purple-400">{t(item.fit)}</span>}
+                           {item.fabric && <span className="px-2 py-1 rounded-lg text-[9px] font-black border border-blue-500/20 bg-blue-500/5 text-blue-600 dark:text-blue-400">{t(item.fabric)}</span>}
+                           {item.pattern && <span className="px-2 py-1 rounded-lg text-[9px] font-black border border-pink-500/20 bg-pink-500/5 text-pink-600 dark:text-pink-400">{t(item.pattern)}</span>}
+                           {item.mood && <span className="px-2 py-1 rounded-lg text-[9px] font-black border border-indigo-500/20 bg-indigo-500/5 text-indigo-600 dark:text-indigo-400">{t(item.mood)}</span>}
                         </div>
                         
-                        <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                        <div className="flex items-center justify-between pt-2 border-t border-[var(--border-primary)]">
                            <div className="flex items-center gap-2">
-                              {item.hex && <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.hex }} />}
-                              <p className={`text-[10px] font-black uppercase tracking-tighter ${isDark ? 'text-white/60' : 'text-slate-500'}`}>{item.color_name || 'Item Color'}</p>
+                              {item.hex && <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: item.hex }} />}
+                              <p className="text-[10px] font-black uppercase tracking-tighter opacity-60">{item.color_name || 'Item Color'}</p>
                            </div>
                            {item.compatibility_score !== undefined && (
-                              <p className={`text-[10px] font-black flex items-center gap-1 ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+                              <p className="text-[10px] font-black flex items-center gap-1 text-green-600 dark:text-green-400">
                                  <IconRenderer icon={FashionIcons.Accuracy} className="w-3 h-3" /> {item.compatibility_score}%
                               </p>
                            )}
@@ -277,14 +267,10 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
                         <button
                           onClick={() => handleDelete(item)}
                           disabled={deletingId === item.id}
-                          className={`mt-4 w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${
-                            isDark
-                              ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
-                              : 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'
-                          } disabled:opacity-50 active:scale-95`}
+                          className="mt-4 w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-red-500/20 bg-red-500/5 text-red-500 hover:bg-red-500/10 disabled:opacity-50 active:scale-95 transition-all shadow-sm shadow-red-500/5"
                         >
                           {deletingId === item.id ? t('deleting') : (
-                            <span className="flex items-center justify-center gap-2 text-red-500">
+                            <span className="flex items-center justify-center gap-2">
                                <IconRenderer icon={FashionIcons.Wardrobe} className="w-3 h-3" /> {t('removeFromWardrobe')}
                             </span>
                           )}
@@ -298,7 +284,7 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
       )}
       
       {toast && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg border border-white/10">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] bg-slate-900/90 backdrop-blur-md text-white text-xs font-black px-5 py-3 rounded-full shadow-2xl border border-white/10 animate-fade-in">
           {toast}
         </div>
       )}

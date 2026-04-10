@@ -35,45 +35,48 @@ function ColorContrastChecker({ isDark }) {
   const verdict = ratio >= 4.5 ? t('greatCombo') : ratio >= 3 ? t('okayForLarge') : t('poorContrast');
 
   return (
+  return (
     <div className={`rounded-2xl border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center gap-3 p-4 transition hover:bg-white/5">
-        <span className="text-2xl">🎨</span>
+      <button onClick={() => setOpen(o => !o)} className={`w-full flex items-center gap-3 p-4 transition ${isDark ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}>
+        <span className="w-8 h-8 flex items-center justify-center text-purple-500">
+          <IconRenderer icon={FashionIcons.Analysis} />
+        </span>
         <div className="flex-1 text-left">
-          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('contrastChecker')}</p>
-          <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('contrastDesc')}</p>
+          <p className="font-bold text-sm">{t('contrastChecker')}</p>
+          <p className="text-xs opacity-60">{t('contrastDesc')}</p>
         </div>
-        <span className={`text-xs ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{open ? '▲' : '▼'}</span>
+        <span className="text-xs opacity-40">{open ? '▲' : '▼'}</span>
       </button>
       {open && (
-        <div className={`px-4 pb-4 border-t ${isDark ? 'border-white/5' : 'border-gray-100'}`}>
+        <div className="px-4 pb-4 border-t border-[var(--border-primary)]">
           <div className="flex gap-3 mt-3 mb-3">
             <div className="flex-1">
-              <p className={`text-xs mb-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('color1')}</p>
+              <p className="text-xs mb-1 opacity-60">{t('color1')}</p>
               <div className="flex items-center gap-2">
                 <input type="color" value={color1} onChange={e => setColor1(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent" />
-                <span className={`text-xs font-mono ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{color1}</span>
+                <span className="text-xs font-mono opacity-80">{color1}</span>
               </div>
             </div>
             <div className="flex-1">
-              <p className={`text-xs mb-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('color2')}</p>
+              <p className="text-xs mb-1 opacity-60">{t('color2')}</p>
               <div className="flex items-center gap-2">
                 <input type="color" value={color2} onChange={e => setColor2(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent" />
-                <span className={`text-xs font-mono ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{color2}</span>
+                <span className="text-xs font-mono opacity-80">{color2}</span>
               </div>
             </div>
           </div>
           {/* Preview */}
-          <div className="rounded-xl p-4 mb-3 flex items-center justify-center text-sm font-bold" style={{ backgroundColor: color1, color: color2 }}>
+          <div className="rounded-xl p-4 mb-3 flex items-center justify-center text-sm font-bold shadow-inner" style={{ backgroundColor: color1, color: color2 }}>
             {t('sampleText')}
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('contrastRatio')}</p>
-              <p className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-800'}`}>{ratio}:1</p>
+              <p className="text-xs opacity-60">{t('contrastRatio')}</p>
+              <p className="font-black text-lg">{ratio}:1</p>
             </div>
             <div className="text-right">
               <p className={`font-bold text-sm ${grade.color}`}>{grade.label}</p>
-              <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{verdict}</p>
+              <p className="text-xs opacity-70">{verdict}</p>
             </div>
           </div>
         </div>
@@ -89,10 +92,10 @@ function TrendingCard({ item, isDark, AMAZON_TAG }) {
   const amzUrl = `https://www.amazon.in/s?k=${kw}&rh=n%3A1968024031&sort=review-rank&tag=${AMAZON_TAG}`;
 
   const shopOptions = [
-    { name: '🛒 Amazon',   url: amzUrl, bg: isDark ? 'bg-orange-500/20 border-orange-500/30 text-orange-300 hover:bg-orange-500/40' : 'bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100' },
-    { name: '🏪 Flipkart', url: item.flipkartUrl, bg: isDark ? 'bg-blue-500/20 border-blue-500/30 text-blue-300 hover:bg-blue-500/40' : 'bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100' },
-    { name: '👗 Myntra',   url: item.myntraUrl, bg: isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300 hover:bg-pink-500/40' : 'bg-pink-50 border-pink-300 text-pink-700 hover:bg-pink-100' },
-    { name: '🛍️ Meesho',  url: `https://meesho.com/search?q=${encodeURIComponent(item.meeshoQ)}`, bg: isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/40' : 'bg-purple-50 border-purple-300 text-purple-700 hover:bg-purple-100' },
+    { name: 'Amazon',   url: amzUrl, icon: FashionIcons.Shopping, bg: isDark ? 'bg-orange-500/20 border-orange-500/30 text-orange-300' : 'bg-orange-50 border-orange-200 text-orange-700' },
+    { name: 'Flipkart', url: item.flipkartUrl, icon: FashionIcons.Shopping, bg: isDark ? 'bg-blue-500/20 border-blue-500/30 text-blue-300' : 'bg-blue-50 border-blue-200 text-blue-700' },
+    { name: 'Myntra',   url: item.myntraUrl, icon: FashionIcons.Dress, bg: isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300' : 'bg-pink-50 border-pink-200 text-pink-700' },
+    { name: 'Meesho',  url: `https://meesho.com/search?q=${encodeURIComponent(item.meeshoQ)}`, icon: FashionIcons.Shopping, bg: isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-300' : 'bg-purple-50 border-purple-200 text-purple-700' },
   ];
 
   return (
@@ -102,12 +105,14 @@ function TrendingCard({ item, isDark, AMAZON_TAG }) {
         className={`w-full flex flex-col items-center gap-2 border rounded-2xl p-3 transition-all active:scale-95 ${
           open
             ? 'border-purple-500/60 bg-purple-500/10'
-            : isDark ? 'bg-white/5 border-white/10 hover:border-purple-500/40 hover:bg-white/10' : 'bg-white border-purple-100 hover:border-purple-400 shadow-sm'
+            : 'bg-[var(--bg-accent)] border-[var(--border-primary)] hover:border-purple-500/40'
         }`}
       >
-        <span className="text-3xl">{item.emoji}</span>
-        <span className={`text-xs font-semibold text-center leading-tight ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{item.label}</span>
-        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.gender === 'male' ? isDark ? 'text-blue-400 bg-blue-500/10' : 'text-blue-700 bg-blue-100' : isDark ? 'text-pink-400 bg-pink-500/10' : 'text-pink-700 bg-pink-100'}`}>{item.tag}</span>
+        <span className="w-8 h-8 flex items-center justify-center text-purple-500">
+          <IconRenderer icon={item.icon || FashionIcons.Shirt} />
+        </span>
+        <span className="text-xs font-semibold text-center leading-tight opacity-90">{item.label}</span>
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.gender === 'male' ? 'text-blue-500 bg-blue-500/10' : 'text-pink-500 bg-pink-500/10'}`}>{item.tag}</span>
       </button>
 
       {open && (
@@ -141,8 +146,8 @@ function TrendingCard({ item, isDark, AMAZON_TAG }) {
                     onClick={() => setOpen(false)} 
                     className={`flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border text-[10px] font-black uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-95 ${opt.bg}`}
                   >
-                    <span className="text-2xl">{opt.name.split(' ')[0]}</span>
-                    <span>{opt.name.split(' ')[1]}</span>
+                    <span className="w-6 h-6"><IconRenderer icon={opt.icon} /></span>
+                    <span>{opt.name}</span>
                   </a>
                 ))}
               </div>
@@ -166,7 +171,7 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
   const { t } = useLanguage();
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const [activeTool, setActiveTool] = useState(null); // 'outfit', 'community', 'stylebot', 'calendar', 'wardrobe'
+  const [activeTool, setActiveTool] = useState(null); 
   const [wardrobe, setWardrobe] = useState([]);
 
   useEffect(() => {
@@ -176,18 +181,18 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
   }, []);
 
   const trendingStyles = [
-    { emoji: '👕', label: 'Oversized Tee', tag: '🔥 Male', gender: 'male', category: 'oversized tshirt', myntraUrl: 'https://www.myntra.com/men-oversized-tshirt', flipkartUrl: 'https://www.flipkart.com/search?q=men+oversized+tshirt', meeshoQ: 'men oversized tshirt' },
-    { emoji: '🎽', label: 'Cargo Pants', tag: '🔥 Male', gender: 'male', category: 'cargo pants', myntraUrl: 'https://www.myntra.com/men-cargo-pants', flipkartUrl: 'https://www.flipkart.com/search?q=men+cargo+pants', meeshoQ: 'men cargo pants' },
-    { emoji: '🧥', label: 'Co-ord Set', tag: '🔥 Male', gender: 'male', category: 'men coord set', myntraUrl: 'https://www.myntra.com/men-coord-set', flipkartUrl: 'https://www.flipkart.com/search?q=men+coord+set', meeshoQ: 'men coord set' },
-    { emoji: '✨', label: 'Coord Set', tag: '🔥 Female', gender: 'female', category: 'women coord set', myntraUrl: 'https://www.myntra.com/women-coord-set', flipkartUrl: 'https://www.flipkart.com/search?q=women+coord+set', meeshoQ: 'women coord set' },
-    { emoji: '👗', label: 'Maxi Dress', tag: '🔥 Female', gender: 'female', category: 'women maxi dress', myntraUrl: 'https://www.myntra.com/women-maxi-dress', flipkartUrl: 'https://www.flipkart.com/search?q=women+maxi+dress', meeshoQ: 'women maxi dress' },
-    { emoji: '🥻', label: 'Kurti Set', tag: '🔥 Female', gender: 'female', category: 'women kurti set', myntraUrl: 'https://www.myntra.com/women-kurti-set', flipkartUrl: 'https://www.flipkart.com/search?q=women+kurti+set', meeshoQ: 'women kurti set' },
+    { icon: FashionIcons.Shirt, label: 'Oversized Tee', tag: '🔥 Male', gender: 'male', category: 'oversized tshirt', myntraUrl: 'https://www.myntra.com/men-oversized-tshirt', flipkartUrl: 'https://www.flipkart.com/search?q=men+oversized+tshirt', meeshoQ: 'men oversized tshirt' },
+    { icon: FashionIcons.Trousers, label: 'Cargo Pants', tag: '🔥 Male', gender: 'male', category: 'cargo pants', myntraUrl: 'https://www.myntra.com/men-cargo-pants', flipkartUrl: 'https://www.flipkart.com/search?q=men+cargo+pants', meeshoQ: 'men cargo pants' },
+    { icon: FashionIcons.Formal, label: 'Co-ord Set', tag: '🔥 Male', gender: 'male', category: 'men coord set', myntraUrl: 'https://www.myntra.com/men-coord-set', flipkartUrl: 'https://www.flipkart.com/search?q=men+coord+set', meeshoQ: 'men coord set' },
+    { icon: FashionIcons.Analysis, label: 'Coord Set', tag: '🔥 Female', gender: 'female', category: 'women coord set', myntraUrl: 'https://www.myntra.com/women-coord-set', flipkartUrl: 'https://www.flipkart.com/search?q=women+coord+set', meeshoQ: 'women coord set' },
+    { icon: FashionIcons.Dress, label: 'Maxi Dress', tag: '🔥 Female', gender: 'female', category: 'women maxi dress', myntraUrl: 'https://www.myntra.com/women-maxi-dress', flipkartUrl: 'https://www.flipkart.com/search?q=women+maxi+dress', meeshoQ: 'women maxi dress' },
+    { icon: FashionIcons.Shirt, label: 'Kurti Set', tag: '🔥 Female', gender: 'female', category: 'women kurti set', myntraUrl: 'https://www.myntra.com/women-kurti-set', flipkartUrl: 'https://www.flipkart.com/search?q=women+kurti+set', meeshoQ: 'women kurti set' },
   ];
 
   if (activeTool === 'outfit') {
     return (
       <div className="space-y-4 pt-2">
-        <button onClick={() => setActiveTool(null)} className={`text-sm font-bold flex items-center gap-2 ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
+        <button onClick={() => setActiveTool(null)} className="text-sm font-bold flex items-center gap-2 opacity-60 hover:opacity-100">
           ← {t('backTools')}
         </button>
         <OutfitChecker />
@@ -198,7 +203,7 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
   if (activeTool === 'community') {
     return (
       <div className="space-y-4 pt-2">
-        <button onClick={() => setActiveTool(null)} className={`text-sm font-bold flex items-center gap-2 ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
+        <button onClick={() => setActiveTool(null)} className="text-sm font-bold flex items-center gap-2 opacity-60 hover:opacity-100">
           ← {t('backTools')}
         </button>
         <CommunityFeed />
@@ -209,7 +214,7 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
   if (activeTool === 'stylebot') {
     return (
       <div className="space-y-4 pt-2">
-        <button onClick={() => setActiveTool(null)} className={`text-sm font-bold flex items-center gap-2 ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
+        <button onClick={() => setActiveTool(null)} className="text-sm font-bold flex items-center gap-2 opacity-60 hover:opacity-100">
           ← {t('backTools')}
         </button>
         <div className={`rounded-2xl border h-[70vh] flex flex-col overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
@@ -244,7 +249,7 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
   }  if (activeTool === 'wardrobe') {
     return (
       <div className="space-y-4 pt-2 pb-10">
-        <button onClick={() => setActiveTool(null)} className={`text-sm font-bold flex items-center gap-2 ${isDark ? 'text-white/60 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}>
+        <button onClick={() => setActiveTool(null)} className="text-sm font-bold flex items-center gap-2 opacity-60 hover:opacity-100">
           ← {t('backTools')}
         </button>
         <WardrobePanel 
@@ -259,50 +264,53 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
   }
   return (
     <div className="space-y-6 pt-2">
-      <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>🛠️ {t('toolsHeader')}</h2>
+      <div className="flex items-center gap-3">
+        <span className="w-8 h-8 text-purple-500"><IconRenderer icon={FashionIcons.Settings} /></span>
+        <h2 className="text-2xl font-black">{t('toolsHeader')}</h2>
+      </div>
       
       {/* Primary Tool Buttons */}
       <div className="grid grid-cols-2 gap-3 mb-6">
         <button 
           onClick={() => setActiveTool('stylebot')}
           className={`flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border-purple-500/30' : 'bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200 shadow-sm'}`}>
-          <span className="text-4xl mb-2">💬</span>
+          <span className="w-10 h-10 mb-2 text-purple-500"><IconRenderer icon={FashionIcons.AI} /></span>
           <span className={`font-bold text-sm ${isDark ? 'text-purple-100' : 'text-purple-900'}`}>{t('aiStyleBot')}</span>
-          <span className={`text-[10px] ${isDark ? 'text-purple-300/60' : 'text-purple-600/60'}`}>{t('styleBotDesc')}</span>
+          <span className={`text-[10px] opacity-60 ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{t('styleBotDesc')}</span>
         </button>
 
         <button 
           onClick={() => setActiveTool('outfit')}
           className={`flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-blue-900/40 to-cyan-900/40 border-blue-500/30' : 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 shadow-sm'}`}>
-          <span className="text-3xl mb-1 mt-1">👔</span>
-          <span className={`font-bold text-sm mt-1 ${isDark ? 'text-blue-100' : 'text-blue-900'}`}>{t('outfitChecker')}</span>
-          <span className={`text-[10px] ${isDark ? 'text-blue-300/60' : 'text-blue-600/60'}`}>{t('outfitCheckerDesc')}</span>
+          <span className="w-10 h-10 mb-2 text-blue-500"><IconRenderer icon={FashionIcons.Shirt} /></span>
+          <span className={`font-bold text-sm ${isDark ? 'text-blue-100' : 'text-blue-900'}`}>{t('outfitChecker')}</span>
+          <span className={`text-[10px] opacity-60 ${isDark ? 'text-blue-300' : 'text-blue-600'}`}>{t('outfitCheckerDesc')}</span>
         </button>
 
         <button 
           onClick={() => setActiveTool('calendar')}
           className={`flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-amber-900/40 to-orange-900/40 border-amber-500/30' : 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 shadow-sm'}`}>
-          <span className="text-3xl mb-1 mt-1">📅</span>
-          <span className={`font-bold text-sm mt-1 ${isDark ? 'text-amber-100' : 'text-amber-900'}`}>{t('aiCalendar')}</span>
-          <span className={`text-[10px] ${isDark ? 'text-amber-300/60' : 'text-amber-600/60'}`}>{t('calendarDesc')}</span>
+          <span className="w-10 h-10 mb-2 text-amber-500"><IconRenderer icon={FashionIcons.Watch} /></span>
+          <span className={`font-bold text-sm ${isDark ? 'text-amber-100' : 'text-amber-900'}`}>{t('aiCalendar')}</span>
+          <span className={`text-[10px] opacity-60 ${isDark ? 'text-amber-300' : 'text-amber-600'}`}>{t('calendarDesc')}</span>
         </button>
 
         <button 
           onClick={() => setActiveTool('wardrobe')}
           className={`flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-pink-900/40 to-rose-900/40 border-pink-500/30' : 'bg-gradient-to-br from-pink-50 to-rose-50 border-pink-200 shadow-sm'}`}>
-          <span className="text-3xl mb-1 mt-1">👗</span>
-          <span className={`font-bold text-sm mt-1 ${isDark ? 'text-pink-100' : 'text-pink-900'}`}>{t('navWardrobe')}</span>
-          <span className={`text-[10px] ${isDark ? 'text-pink-300/60' : 'text-pink-600/60'}`}>{t('wardrobeDesc') || 'Manage Closet'}</span>
+          <span className="w-10 h-10 mb-2 text-pink-500"><IconRenderer icon={FashionIcons.Wardrobe} /></span>
+          <span className={`font-bold text-sm ${isDark ? 'text-pink-100' : 'text-pink-900'}`}>{t('navWardrobe')}</span>
+          <span className={`text-[10px] opacity-60 ${isDark ? 'text-pink-300' : 'text-pink-600'}`}>{t('wardrobeDesc')}</span>
         </button>
 
         <button 
           onClick={() => onOpenScanner ? onOpenScanner() : null}
           className={`col-span-2 flex flex-col items-center justify-center p-5 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${isDark ? 'bg-gradient-to-br from-emerald-900/40 to-teal-900/40 border-emerald-500/30' : 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 shadow-sm'}`}>
           <span className="flex items-center gap-3">
-            <span className="text-4xl">📸</span>
+            <span className="w-12 h-12 text-emerald-500"><IconRenderer icon={FashionIcons.Camera} /></span>
             <div className="flex flex-col items-start text-left">
               <span className={`font-bold text-lg leading-none ${isDark ? 'text-emerald-100' : 'text-emerald-900'}`}>{t('colorScanner')}</span>
-              <span className={`text-xs mt-1 ${isDark ? 'text-emerald-300/60' : 'text-emerald-600/60'}`}>{t('scannerDesc')}</span>
+              <span className={`text-xs mt-1 opacity-60 ${isDark ? 'text-emerald-300' : 'text-emerald-600'}`}>{t('scannerDesc')}</span>
             </div>
           </span>
         </button>
@@ -311,19 +319,20 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
       <ColorContrastChecker isDark={isDark} />
 
       <div>
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xl">🔥</span>
-          <h3 className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('trendingNow')}</h3>
+        <div className="flex items-center gap-2 mb-3 px-1">
+          <span className="w-5 h-5 text-red-500"><IconRenderer icon={FashionIcons.AI} /></span>
+          <h3 className="font-black text-lg">{t('trendingNow')}</h3>
         </div>
         <div className="grid grid-cols-3 gap-3">
-          {(() => {
-            // Display both Male and Female trending items (3 each)
-            return trendingStyles.map((s) => (
+          { trendingStyles.map((s) => (
               <TrendingCard key={s.label} item={s} isDark={isDark} AMAZON_TAG="styleguruai-21" />
-            ));
-          })()}
+          ))}
         </div>
       </div>
+
+    </div>
+  );
+}
 
     </div>
   );

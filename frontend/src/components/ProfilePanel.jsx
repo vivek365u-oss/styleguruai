@@ -40,7 +40,7 @@ export default function ProfilePanel() {
   const [destroyConfirmText, setDestroyConfirmText] = useState('');
   const [destroying, setDestroying] = useState(false);
 
-  const SUPPORT_EMAIL = 'styleguruai.in@gmail.com';
+  const SUPPORT_EMAIL = 'styleguruai.in.gmail@gmail.com';
 
   const loadData = async () => {
     try {
@@ -286,7 +286,7 @@ export default function ProfilePanel() {
                   )}
 
                   <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-2 space-y-1">
-                     <div className="p-5 flex items-center justify-between">
+                      <div className="p-5 flex items-center justify-between">
                          <div className="flex items-center gap-4 text-white/80">
                             <span className="w-5 h-5 opacity-60"><IconRenderer icon={FashionIcons.Formal} /></span>
                             <span className="text-sm font-bold">Language</span>

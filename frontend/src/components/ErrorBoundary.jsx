@@ -126,7 +126,7 @@ class ErrorBoundary extends React.Component {
 
             {/* Support Message */}
             <p className="text-white/40 text-xs text-center mt-6">
-              If this persists, please contact support at support@styleguruai.com
+              If this persists, please contact support at styleguruai.in.gmail@gmail.com
             </p>
           </div>
         </div>

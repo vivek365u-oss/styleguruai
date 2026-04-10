@@ -168,7 +168,7 @@ function App() {
         }) }}>
           <PlanProvider>
             <CartProvider>
-              <div className="min-h-screen">
+              <div className={`min-h-screen transition-colors duration-300 ${theme}`}>
                 <AppRoutes user={user} setUser={setUser} theme={theme} toggleTheme={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')} />
               </div>
             </CartProvider>

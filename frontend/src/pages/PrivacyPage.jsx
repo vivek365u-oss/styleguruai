@@ -58,7 +58,7 @@ export default function PrivacyPage() {
           <section className="space-y-4">
             <h2 className="text-xl font-black text-white">4. Your Rights</h2>
             <p className="text-gray-400 leading-relaxed text-sm">
-              You have the right to access, delete, or modify any saved style preferences within your Dashboard. For any data-related queries or formal requests, please contact our Data Protection Officer at <span className="text-purple-400 font-bold">privacy@styleguruai.online</span>.
+              You have the right to access, delete, or modify any saved style preferences within your Dashboard. For any data-related queries or formal requests, please contact our Data Protection Officer at <span className="text-purple-400 font-bold">styleguruai.in.gmail@gmail.com</span>.
             </p>
           </section>
 

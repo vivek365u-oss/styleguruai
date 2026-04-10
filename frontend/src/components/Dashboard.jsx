@@ -49,19 +49,19 @@ function DailyDropModal({ lastAnalysis, isDark, onClose }) {
     setTimeout(() => {
       localStorage.setItem('sg_daily_drop_date', new Date().toLocaleDateString('en-CA'));
       onClose();
-    }, 2500); // closes after reading 
+    }, 2500); 
   };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className={`w-full max-w-sm rounded-3xl p-6 text-center border-2 border-purple-500/50 shadow-2xl relative overflow-hidden ${isDark ? 'bg-gradient-to-br from-purple-900 to-slate-900' : 'bg-white'}`}>
+      <div className={`w-full max-w-sm rounded-[2.5rem] p-8 text-center border-2 border-purple-500/50 shadow-2xl relative overflow-hidden glass-card`}>
         {!revealed ? (
           <div className="space-y-6 scale-in">
-            <div className="w-20 h-20 mx-auto bg-white/10 rounded-3xl flex items-center justify-center p-4 text-purple-400">
+            <div className="w-20 h-20 mx-auto bg-purple-500/10 rounded-3xl flex items-center justify-center p-4 text-purple-500">
                <IconRenderer icon={FashionIcons.Wardrobe} />
             </div>
             <div>
-              <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-purple-700'}`}>{t('dailyDropReady')}</h2>
-              <p className={`text-sm mt-2 font-medium ${isDark ? 'text-white/70' : 'text-gray-600'}`}>{t('dailyDropSub').replace('{skinTone}', lastAnalysis?.skinTone)}</p>
+              <h2 className="text-2xl font-black">{t('dailyDropReady')}</h2>
+              <p className="text-sm mt-2 font-medium opacity-70">{t('dailyDropSub').replace('{skinTone}', lastAnalysis?.skinTone)}</p>
             </div>
             <button
               onClick={handleReveal}
@@ -69,22 +69,22 @@ function DailyDropModal({ lastAnalysis, isDark, onClose }) {
             >
               {t('unlockOutfit')}
             </button>
-            <button onClick={() => { localStorage.setItem('sg_daily_drop_date', new Date().toLocaleDateString('en-CA')); onClose(); }} className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('skipToday')}</button>
+            <button onClick={() => { localStorage.setItem('sg_daily_drop_date', new Date().toLocaleDateString('en-CA')); onClose(); }} className="text-xs opacity-40 hover:opacity-100">{t('skipToday')}</button>
           </div>
         ) : (
           <div className="scale-in space-y-4">
-            <div className="w-12 h-12 mx-auto text-purple-400 animate-pulse">
+            <div className="w-12 h-12 mx-auto text-purple-500 animate-pulse">
                <IconRenderer icon={FashionIcons.AI} />
             </div>
-            <h2 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('unlockingWardrobe')}</h2>
+            <h2 className="text-xl font-black">{t('unlockingWardrobe')}</h2>
             <div className="flex gap-2 justify-center">
               {[1, 2, 3].map(i => <div key={i} className="w-3 h-3 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />)}
             </div>
           </div>
         )}
-        {/* Bottom Ad Card — Consolidated to prevent console 400 errors */}
-        <div className={`mt-8 rounded-3xl p-6 border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-200'}`}>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 text-center">Sponsored Style Content</p>
+        {/* Bottom Ad Card */}
+        <div className="mt-8 rounded-3xl p-6 border border-[var(--border-primary)] bg-[var(--bg-accent)] overflow-hidden">
+          <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mb-3 text-center">Sponsored Style Content</p>
           <AdSense />
         </div>
       </div>
@@ -183,27 +183,27 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
       {showDailyDrop && <DailyDropModal lastAnalysis={lastAnalysis} isDark={isDark} isPro={isPro} onClose={() => setShowDailyDrop(false)} />}
       <div className="pt-2 flex justify-between items-start">
         <div>
-          <p className={`text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{t('goodDay')}</p>
-          <h2 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          <p className="text-sm opacity-60">{t('goodDay')}</p>
+          <h2 className="text-2xl font-black">
             {t('welcomeHey').replace('{name}', firstName)}
           </h2>
-          <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('discoverPerfect')}</p>
+          <p className="text-xs mt-1 opacity-50">{t('discoverPerfect')}</p>
         </div>
         <div className="flex flex-col items-end gap-2">
           {/* Gender Toggle */}
           {!lastAnalysis && (
             <button
               onClick={toggleGenderPref}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white' : 'bg-white border-purple-100 text-purple-600 shadow-sm'}`}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight border border-[var(--border-primary)] bg-[var(--bg-accent)] transition-all hover:scale-105"
             >
-              <span className="w-3 h-3"><IconRenderer icon={FashionIcons.User} /></span>
+              <span className="w-3 h-3 text-purple-500"><IconRenderer icon={FashionIcons.User} /></span>
               <span>{t(genderPref)}</span>
             </button>
           )}
           {streak > 0 && (
-            <div className={`px-2.5 py-1 rounded-full flex items-center gap-1.5 border ${isDark ? 'bg-orange-500/10 border-orange-500/20' : 'bg-orange-50 border-orange-200'}`}>
+            <div className="px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-orange-500/20 bg-orange-500/10">
               <span className="w-3 h-3 text-orange-500"><IconRenderer icon={FashionIcons.Accuracy} /></span>
-              <span className={`text-[10px] font-black ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>{streak}</span>
+              <span className="text-[10px] font-black text-orange-500">{streak}</span>
             </div>
           )}
         </div>
@@ -217,14 +217,14 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
       </button>
 
       {/* Social proof */}
-      <div className={`flex items-center justify-center gap-2 py-2 rounded-xl ${isDark ? 'bg-white/5' : 'bg-purple-50'}`}>
+      <div className="flex items-center justify-center gap-2 py-2 rounded-xl bg-[var(--bg-accent)]">
         <div className="flex -space-x-1.5">
           {['#F5DEB3', '#C68642', '#7B4F2E', '#4A2C0A'].map((c, i) => (
-            <div key={i} className="w-6 h-6 rounded-full border-2 border-white/30" style={{ backgroundColor: c }} />
+            <div key={i} className="w-6 h-6 rounded-full border-2 border-[var(--border-primary)]" style={{ backgroundColor: c }} />
           ))}
         </div>
-        <p className={`text-xs font-semibold ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
-          <span className={`font-black ${isDark ? 'text-purple-300' : 'text-purple-600'} count-up`}>
+        <p className="text-xs font-semibold opacity-70">
+          <span className="font-black text-purple-500 count-up">
             {displayCount.toLocaleString('en-IN')}
           </span> {t('profilesCreated')}
         </p>
@@ -232,9 +232,9 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
 
       {/* First-visit onboarding */}
       {showOnboarding && (
-        <div className={`tooltip-in rounded-2xl p-4 border-2 border-purple-500/50 relative ${isDark ? 'bg-purple-900/30' : 'bg-purple-50'}`}>
-          <button onClick={dismissOnboarding} className={`absolute top-3 right-3 text-xs px-2 py-1 rounded-lg ${isDark ? 'text-white/40 hover:text-white bg-white/5' : 'text-gray-400 hover:text-gray-700 bg-gray-100'}`}>✕</button>
-          <p className={`font-black text-sm mb-2 ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>{t('welcomeGuru')}</p>
+        <div className="tooltip-in rounded-2xl p-4 border-2 border-purple-500/50 relative bg-purple-500/5">
+          <button onClick={dismissOnboarding} className="absolute top-3 right-3 text-xs px-2 py-1 rounded-lg opacity-40 hover:opacity-100 bg-[var(--bg-accent)]">✕</button>
+          <p className="font-black text-sm mb-2 text-purple-600 dark:text-purple-400">{t('welcomeGuru')}</p>
           <div className="space-y-1.5">
             {[
               { step: '1', text: t('step1') },
@@ -243,12 +243,12 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
             ].map(s => (
               <div key={s.step} className="flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-purple-500 text-white text-xs font-black flex items-center justify-center flex-shrink-0">{s.step}</span>
-                <p className={`text-xs ${isDark ? 'text-white/70' : 'text-gray-600'}`}>{s.text}</p>
+                <p className="text-xs opacity-70">{s.text}</p>
               </div>
             ))}
           </div>
           <button onClick={() => { dismissOnboarding(); onAnalyze(); }}
-            className="mt-3 w-full py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-black rounded-xl transition-all">
+            className="mt-3 w-full py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-purple-500/20">
             {t('getStarted')}
           </button>
         </div>
@@ -262,40 +262,40 @@ function HomeScreen({ user, onAnalyze, isPro, lastAnalysis }) {
       />
 
       {/* Rate My Fit - Performance Tracker */}
-      <div className={`rounded-3xl p-5 border flex items-center gap-4 justify-between transition-all ${isDark ? 'bg-[#1a120b]/60 border-orange-500/20 shadow-xl' : 'bg-orange-50 border-orange-200 shadow-lg'}`}>
+      <div className="rounded-3xl p-5 border flex items-center gap-4 justify-between transition-all bg-orange-500/5 border-orange-500/20 shadow-xl">
         <div className="flex-1">
-          <p className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1.5 ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>{t('rateMyFit')}</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-1.5 text-orange-500">{t('rateMyFit')}</p>
           <div className="flex items-center gap-3">
              {lastScore ? (
                 <div className="flex flex-col">
-                   <p className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>{lastScore}%</p>
-                   <p className={`text-[9px] font-bold uppercase opacity-40 ${isDark ? 'text-white' : 'text-gray-500'}`}>Last Fit Performance</p>
+                   <p className="text-2xl font-black">{lastScore}%</p>
+                   <p className="text-[9px] font-bold uppercase opacity-40">Last Fit Performance</p>
                 </div>
              ) : (
-                <p className={`text-xs font-medium leading-tight ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{t('rateMyFitSub')}</p>
+                <p className="text-xs font-medium leading-tight opacity-70">{t('rateMyFitSub')}</p>
              )}
           </div>
         </div>
         <button
           onClick={onAnalyze}
-          className={`px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg hover:scale-105 flex-shrink-0 heartbeat ${isDark ? 'bg-orange-500 text-white shadow-orange-900/50' : 'bg-orange-500 text-white hover:bg-orange-600 shadow-orange-500/40'}`}
+          className="px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg hover:scale-105 flex-shrink-0 heartbeat bg-orange-500 text-white shadow-orange-500/30"
         >
           {t('scanFit')}
         </button>
       </div>
 
       {/* Daily Style Tip reasoning box */}
-      <div className={`rounded-2xl p-4 border flex items-start gap-3 ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50/50 border-purple-100'}`}>
-        <span className="w-6 h-6 flex-shrink-0 opacity-80 text-purple-400"><IconRenderer icon={FashionIcons.Bulb} /></span>
+      <div className="rounded-2xl p-4 border border-[var(--border-primary)] bg-[var(--bg-accent)] flex items-start gap-3">
+        <span className="w-6 h-6 flex-shrink-0 opacity-80 text-purple-500"><IconRenderer icon={FashionIcons.Bulb} /></span>
         <div>
-          <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{t('styleTipDay')}</p>
-          <p className={`text-[11px] leading-relaxed italic ${isDark ? 'text-white/50' : 'text-gray-600'}`}>“{todayTip.tip}”</p>
+          <p className="text-[10px] font-black uppercase tracking-widest mb-1 text-purple-600 dark:text-purple-400">{t('styleTipDay')}</p>
+          <p className="text-[11px] leading-relaxed italic opacity-60">“{todayTip.tip}”</p>
         </div>
       </div>
 
       {/* AdSense Ad */}
-      <div className="mt-2 text-center py-4 bg-white/5 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-sm">
-        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">StyleGuru AI Partner Content</p>
+      <div className="mt-2 text-center py-4 bg-[var(--bg-accent)] border border-[var(--border-primary)] rounded-3xl overflow-hidden backdrop-blur-sm">
+        <p className="text-[10px] font-bold opacity-30 uppercase tracking-widest mb-2">StyleGuru AI Partner Content</p>
         <AdSense />
       </div>
     </div>
@@ -310,12 +310,10 @@ function ProfileHeaderButton({ onOpenProfile, isDark }) {
     <button
       onClick={onOpenProfile}
       id="header-profile-button"
-      className={`w-11 h-11 rounded-2xl flex items-center justify-center text-xl transition-all z-[60] active:scale-90 border ${
-        isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-purple-100 shadow-sm hover:bg-purple-50'
-      }`}
+      className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl transition-all z-[60] active:scale-90 border border-[var(--border-primary)] bg-[var(--bg-accent)] shadow-sm hover:bg-purple-500/10"
       aria-label="Open Profile"
     >
-      <span className="w-5 h-5 text-red-500"><IconRenderer icon={FashionIcons.Star} /></span>
+      <span className="w-5 h-5 text-purple-500"><IconRenderer icon={FashionIcons.Star} /></span>
     </button>
   );
 }
@@ -580,30 +578,38 @@ function Dashboard({ user, onLogout }) {
   };
 
   return (
-    <div className={`min-h-screen text-white ${theme === 'dark' ? 'bg-[#02040a]' : 'bg-gradient-to-br from-slate-200 via-purple-100/50 to-slate-200'}`} style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
-      <div className="fixed top-[-200px] left-[-200px] w-[500px] h-[500px] rounded-full bg-purple-700/20 blur-[120px] pointer-events-none z-0" />
-      <div className="fixed bottom-[-200px] right-[-200px] w-[500px] h-[500px] rounded-full bg-pink-700/20 blur-[120px] pointer-events-none z-0" />
+    <div className="min-h-screen transition-colors duration-300 overflow-x-hidden selection:bg-purple-500/30" style={{ fontFamily: "'Inter', 'Poppins', sans-serif" }}>
+      {/* Background glow effects that stay subtle in both modes */}
+      <div className="fixed top-[-200px] left-[-200px] w-[500px] h-[500px] rounded-full bg-purple-500/5 blur-[120px] pointer-events-none z-0" />
+      <div className="fixed bottom-[-100px] right-[-100px] w-[500px] h-[500px] rounded-full bg-pink-500/5 blur-[120px] pointer-events-none z-0" />
 
       <style>{`
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      <header className={`relative z-10 flex items-center justify-between px-4 py-4 border-b backdrop-blur-xl sticky top-0 ${theme === 'dark' ? 'border-white/10 bg-[#02040a]/80' : 'border-purple-200 bg-slate-100/90 shadow-sm'}`}>
+      <header className="relative z-[60] flex items-center justify-between px-4 py-4 border-b border-[var(--border-primary)] bg-[var(--bg-primary)]/80 backdrop-blur-xl sticky top-0 shadow-sm">
         <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-black text-white">SG</div>
-          <span className={`font-black text-base bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent`}>StyleGuru AI</span>
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-black text-white shadow-lg shadow-purple-500/20">SG</div>
+          <span className="font-black text-base bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">StyleGuru AI</span>
         </div>
         <div className="flex items-center gap-2">
           {results && activeTab === 'analyze' && (
-            <button onClick={handleReset} className="text-xs text-purple-400 border border-purple-500/30 px-3 py-1.5 rounded-full hover:bg-purple-500/10 transition">
+            <button onClick={handleReset} className="text-[10px] font-black uppercase tracking-widest text-purple-600 border border-purple-500/30 px-3 py-1.5 rounded-xl hover:bg-purple-500/10 transition">
               {t('navNew')}
             </button>
           )}
           <ProfileHeaderButton onOpenProfile={() => handleTabChange('profile')} isDark={isDark} />
 
-          <button onClick={toggleTheme} className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-sm">
-            {theme === 'dark' ? <IconRenderer icon={FashionIcons.Bulb} className="w-4 h-4 text-yellow-400" /> : <IconRenderer icon={FashionIcons.Bulb} className="w-4 h-4 text-slate-400" />}
+          <button 
+            onClick={toggleTheme} 
+            className="w-11 h-11 rounded-2xl bg-[var(--bg-accent)] border border-[var(--border-primary)] flex items-center justify-center shadow-sm hover:scale-105 transition-all"
+          >
+            {theme === 'dark' ? (
+              <IconRenderer icon={FashionIcons.Bulb} className="w-5 h-5 text-yellow-400" />
+            ) : (
+              <IconRenderer icon={FashionIcons.Bulb} className="w-5 h-5 text-slate-400" />
+            )}
           </button>
         </div>
       </header>
@@ -682,8 +688,8 @@ function Dashboard({ user, onLogout }) {
         </div>
       </main>
 
-      <nav className={`fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t safe-area-bottom ${theme === 'dark' ? 'bg-[#02040a]/95 border-white/10' : 'bg-slate-100/95 border-purple-200 shadow-lg'}`}>
-        {/* Nav Container: Perfect equal distribution — each item gets exact 1/6th */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-xl border-t border-[var(--border-primary)] bg-[var(--bg-primary)]/90 safe-area-bottom shadow-lg">
+        {/* Nav Container */}
         <div className="max-w-md mx-auto px-1 py-1.5">
           <div className="flex w-full items-end">
             {navItems.map((item) => (
@@ -692,18 +698,15 @@ function Dashboard({ user, onLogout }) {
                 onClick={() => handleTabChange(item.id)}
                 style={{ flex: '1 1 0', minWidth: 0 }}
                 className={`flex flex-col items-center justify-center gap-0 px-0.5 py-1 rounded-xl transition-all min-h-[50px] ${activeTab === item.id
-                    ? 'text-purple-500 bg-purple-500/10'
-                    : theme === 'dark'
-                      ? 'text-white/30 hover:text-white/60'
-                      : 'text-gray-500'
+                    ? 'text-purple-600 bg-purple-500/10'
+                    : 'opacity-40 hover:opacity-100'
                   }`}
               >
-                <span className={`w-6 h-6 mb-1 transition-transform duration-200 ${activeTab === item.id ? 'scale-110 text-purple-400' : 'text-white/40'}`}>
+                <span className={`w-6 h-6 mb-1 transition-transform duration-200 ${activeTab === item.id ? 'scale-110 text-purple-500' : 'text-[var(--text-primary)]'}`}>
                    <IconRenderer icon={item.icon} />
                 </span>
-                <span className={`text-[7.5px] font-black uppercase tracking-tighter leading-none text-center truncate w-full px-0.5 ${activeTab === item.id ? 'text-purple-400' : theme === 'dark' ? 'text-white/30' : 'text-gray-500'
-                  }`}>{item.label}</span>
-                {activeTab === item.id && <div className="w-3 h-0.5 rounded-full bg-purple-500 mt-1" />}
+                <span className={`text-[7.5px] font-black uppercase tracking-tighter leading-none text-center truncate w-full px-0.5 ${activeTab === item.id ? 'text-purple-600' : 'text-[var(--text-secondary)]'}`}>{item.label}</span>
+                {activeTab === item.id && <div className="w-3 h-0.5 rounded-full bg-purple-600 mt-1" />}
               </button>
             ))}
           </div>

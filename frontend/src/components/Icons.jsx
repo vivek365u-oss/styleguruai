@@ -43,7 +43,7 @@ export const FashionIcons = {
   Watch: FiWatch,
   
   // Feature Icons
-  Analysis: FiDroplet,
+  Analysis: FiZap,
   Camera: FiCamera,
   Global: FiGlobe,
   Star: FiStar,

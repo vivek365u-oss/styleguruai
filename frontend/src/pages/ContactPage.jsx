@@ -48,14 +48,14 @@ export default function ContactPage() {
                   <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-xl">✉️</div>
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-purple-400 mb-1">Email Us</p>
-                    <a href="mailto:support@styleguruai.online" className="text-lg font-bold hover:text-purple-400 transition-colors">support@styleguruai.online</a>
+                    <a href="mailto:styleguruai.in.gmail@gmail.com" className="text-lg font-bold hover:text-purple-400 transition-colors">styleguruai.in.gmail@gmail.com</a>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
                    <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-xl">🤝</div>
                    <div>
                      <p className="text-[10px] font-black uppercase tracking-widest text-blue-400 mb-1">Partnerships</p>
-                     <p className="text-gray-300 font-medium">brands@styleguruai.online</p>
+                     <p className="text-gray-300 font-medium">styleguruai.in.gmail@gmail.com</p>
                    </div>
                 </div>
               </div>
