@@ -1,5 +1,5 @@
 import { useState, useRef, useContext } from 'react';
-import { analyzeImage, analyzeImageFemale, analyzeImageSeasonal, auth } from '../api/styleApi';
+import { analyzeImage, analyzeImageFemale, analyzeImageSeasonal } from '../api/styleApi';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
@@ -256,16 +256,6 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   const cameraInputRef = useRef(null);
   const [currentStep, setCurrentStep] = useState(0); // 0: Body, 1: Eye, 2: Occasion, 3: Budget, 4: Upload
 
-  // Guest Scan Limit Logic
-  const [guestScansRemaining, setGuestScansRemaining] = useState(() => {
-    if (auth.currentUser) return 999;
-    const today = new Date().toLocaleDateString('en-CA');
-    const lastScanDate = localStorage.getItem('sg_guest_scan_date');
-    const count = parseInt(localStorage.getItem('sg_guest_scan_count') || '0');
-    if (lastScanDate !== today) return 1;
-    return Math.max(0, 1 - count);
-  });
-
   // Couple Mode States
   const [partner1, setPartner1] = useState(null);
   const [partner2, setPartner2] = useState(null);
@@ -286,14 +276,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   };
 
   const handleFile = async (file) => {
-    // Guest limit check
-    if (!auth.currentUser) {
-      if (guestScansRemaining <= 0) {
-        onError('Daily limit reached! 🛑 Login for UNLIMITED AI scans and to save your results.');
-        return;
-      }
-    }
-
+    // Coin checks removed
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) { onError('Only JPG, PNG, or WebP images are allowed.'); return; }
     if (file.size > 10 * 1024 * 1024) { onError('Image is too large. Maximum size is 10MB.'); return; }
@@ -304,15 +287,6 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     onLoadingStart();
     setShowProgress(true);
     startProgress();
-
-    // Consume guest scan
-    if (!auth.currentUser) {
-      const today = new Date().toLocaleDateString('en-CA');
-      const count = parseInt(localStorage.getItem('sg_guest_scan_count') || '0') + 1;
-      localStorage.setItem('sg_guest_scan_date', today);
-      localStorage.setItem('sg_guest_scan_count', count.toString());
-      setGuestScansRemaining(0);
-    }
     // Map language code for backend (hinglish -> en, hi -> hi)
     const backendLang = language === 'hi' ? 'hi' : 'en';
     
@@ -399,8 +373,6 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     setDragActive(false);
     if (e.dataTransfer.files?.[0]) handleFile(e.dataTransfer.files[0]);
   };
-
-  const isGuestLimitReached = !auth.currentUser && guestScansRemaining <= 0;
 
   const seasons = [
     { id: 'summer', label: 'Summer', icon: FashionIcons.Sun, desc: 'March-June' },
@@ -817,21 +789,13 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
               className={`relative border-2 border-dashed rounded-3xl p-6 md:p-12 text-center cursor-pointer transition-all duration-300 ${
                 dragActive
                   ? 'border-purple-400 bg-purple-500/10 scale-[1.01]'
-                  : isGuestLimitReached 
-                    ? 'border-red-500/50 bg-red-500/5 cursor-not-allowed grayscale'
-                    : mode === 'seasonal'
-                      ? isDark ? 'border-amber-500/30 bg-amber-500/5 hover:border-amber-400/50 hover:bg-amber-500/10' : 'border-amber-300 bg-amber-50 hover:border-amber-400 hover:bg-amber-100'
-                      : gender === 'female'
-                        ? isDark ? 'border-pink-500/30 bg-pink-500/5 hover:border-pink-400/50 hover:bg-pink-500/10' : 'border-pink-300 bg-pink-50 hover:border-pink-400 hover:bg-pink-100'
-                        : isDark ? 'border-white/20 bg-white/5 hover:border-purple-400/50 hover:bg-white/10' : 'border-purple-300 bg-slate-100 hover:border-purple-500 hover:bg-purple-50 shadow-sm'
+                  : mode === 'seasonal'
+                    ? isDark ? 'border-amber-500/30 bg-amber-500/5 hover:border-amber-400/50 hover:bg-amber-500/10' : 'border-amber-300 bg-amber-50 hover:border-amber-400 hover:bg-amber-100'
+                    : gender === 'female'
+                      ? isDark ? 'border-pink-500/30 bg-pink-500/5 hover:border-pink-400/50 hover:bg-pink-500/10' : 'border-pink-300 bg-pink-50 hover:border-pink-400 hover:bg-pink-100'
+                      : isDark ? 'border-white/20 bg-white/5 hover:border-purple-400/50 hover:bg-white/10' : 'border-purple-300 bg-slate-100 hover:border-purple-500 hover:bg-purple-50 shadow-sm'
               }`}
-              onClick={() => {
-                if (isGuestLimitReached) {
-                  onError('Login to unlock unlimited scans! ❤️');
-                  return;
-                }
-                fileInputRef.current?.click();
-              }}
+              onClick={() => fileInputRef.current?.click()}
               onDrop={handleDrop}
               onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
               onDragLeave={() => setDragActive(false)}
