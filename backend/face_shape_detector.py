@@ -894,7 +894,7 @@ HAIRSTYLE_DATABASE = {
             },
             {
                 "rank": 5,
-                "name": "Beard at Chin Level (Medium)")  ,
+                "name": "Beard at Chin Level (Medium)",
                 "description": "Medium-length beard concentrated at the chin and jaw sides to add width.",
                 "reason": "A beard at chin level adds visual mass to the narrow jaw of a diamond face.",
                 "benefit": "Strategically widens the chin area, balancing the wide-cheekbone feature.",
