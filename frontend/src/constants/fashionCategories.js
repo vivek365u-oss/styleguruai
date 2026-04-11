@@ -75,22 +75,30 @@ export const getCategoryIcon = (id) => ALL_CATEGORIES.find(c => c.id === id)?.ic
 export const getFiltersByGender = (gender) => {
     if (gender === 'female') {
         return [
-            { id: 'all', label: 'All', icon: 'Global' },
-            { id: 'ethnic', label: 'Ethnic', icon: 'Dress' },
-            { id: 'western', label: 'Western', icon: 'Shirt' },
-            { id: 'tops', label: 'Tops', icon: 'Shirt' },
-            { id: 'bottoms', label: 'Bottoms', icon: 'Trousers' },
-            { id: 'jewelry', label: 'Jewelry', icon: 'Jewelry' }
+            { id: 'all',        label: 'All',         icon: 'Global'   },
+            { id: 'ethnic',     label: 'Ethnic',      icon: 'Dress'    },
+            { id: 'tops',       label: 'Tops',        icon: 'Shirt'    },
+            { id: 'bottoms',    label: 'Bottoms',     icon: 'Trousers' },
+            { id: 'casual',     label: 'Casual',      icon: 'Shirt'    },
+            { id: 'formal',     label: 'Formal',      icon: 'Formal'   },
+            { id: 'streetwear', label: 'Streetwear',  icon: 'Hoodie'   },
+            { id: 'shoes',      label: 'Shoes',       icon: 'Shoes'    },
+            { id: 'accessories',label: 'Accessories', icon: 'Jewelry'  },
         ];
     }
     return [
-        { id: 'all', label: 'All', icon: 'Global' },
-        { id: 'formal', label: 'Formal', icon: 'Formal' },
-        { id: 'ethnic', label: 'Ethnic', icon: 'Shirt' },
-        { id: 'casual', label: 'Casual', icon: 'Shirt' },
-        { id: 'shoes', label: 'Shoes', icon: 'Shoes' }
+        { id: 'all',        label: 'All',         icon: 'Global'   },
+        { id: 'casual',     label: 'Casual',      icon: 'Shirt'    },
+        { id: 'formal',     label: 'Formal',      icon: 'Formal'   },
+        { id: 'ethnic',     label: 'Ethnic',      icon: 'Shirt'    },
+        { id: 'streetwear', label: 'Streetwear',  icon: 'Hoodie'   },
+        { id: 'tops',       label: 'Tops',        icon: 'Shirt'    },
+        { id: 'bottoms',    label: 'Bottoms',     icon: 'Trousers' },
+        { id: 'shoes',      label: 'Shoes',       icon: 'Shoes'    },
+        { id: 'accessories',label: 'Accessories', icon: 'Jewelry'  },
     ];
 };
+
 
 /**
  * Returns all sub-categories for a specific gender for the Sync Picker

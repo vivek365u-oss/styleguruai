@@ -358,27 +358,48 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
           ════════════════════════════════════════ */}
       <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', paddingTop: 64 }}>
         <div className="max-w-7xl mx-auto px-6 md:px-10 w-full">
-          <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-8 py-20">
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.2fr) minmax(0,1fr)', gap: '48px', alignItems: 'center', padding: '80px 0' }}
+               className="hero-grid">
+            <style>{`
+              @media (max-width: 768px) {
+                .hero-grid { grid-template-columns: 1fr !important; gap: 40px !important; padding: 48px 0 !important; }
+                .hero-image-col { order: -1; }
+              }
+            `}</style>
 
-            {/* Left: Text */}
-            <div className="flex-[1.2] text-center lg:text-left">
-              <p className="luxe-label mb-8 fade-up" style={{ color: '#C9A96E', animationDelay: '0.1s', opacity: 0 }}>
+            {/* Left: Text Content */}
+            <div>
+              <p className="luxe-label mb-6 fade-up" style={{ color: '#C9A96E', animationDelay: '0.1s', opacity: 0 }}>
                 AI-Powered Fashion Intelligence
               </p>
 
               <h1
                 className="luxe-display fade-up"
-                style={{ fontSize: 'clamp(48px, 8vw, 88px)', color: '#F0EDE6', marginBottom: '24px', animationDelay: '0.2s', opacity: 0 }}
+                style={{ fontSize: 'clamp(40px, 7vw, 82px)', color: '#F0EDE6', marginBottom: '20px', lineHeight: 1.1, animationDelay: '0.2s', opacity: 0 }}
               >
                 Discover Your<br />
                 <em style={{ fontStyle: 'italic', color: '#C9A96E' }}>Perfect</em> Style
               </h1>
 
-              <p className="fade-up" style={{ fontSize: '15px', color: '#6B6B6B', lineHeight: '1.8', marginBottom: '40px', maxWidth: 460, animationDelay: '0.3s', opacity: 0 }}>
-                Upload a selfie. Our AI analyzes your skin tone, curates your color palette, and builds a personalized style guide — all in seconds.
+              <p className="fade-up" style={{ fontSize: '15px', color: '#6B6B6B', lineHeight: '1.8', marginBottom: '36px', maxWidth: 460, animationDelay: '0.3s', opacity: 0 }}>
+                Upload a selfie. Our AI analyzes your skin tone, curates your personal color palette, and builds a style guide tailored to <em style={{ color: '#9B9B8B' }}>your</em> skin — in seconds.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start fade-up" style={{ animationDelay: '0.4s', opacity: 0 }}>
+              {/* Feature pills */}
+              <div className="fade-up" style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 32, animationDelay: '0.32s', opacity: 0 }}>
+                {[
+                  { emoji: '🎨', text: 'Skin Tone Analysis' },
+                  { emoji: '👗', text: 'Outfit Combos' },
+                  { emoji: '🛍', text: 'Shop Suggestions' },
+                  { emoji: '🧭', text: 'Style Compass' },
+                ].map((f, i) => (
+                  <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#111', border: '1px solid #1C1C1C', padding: '6px 12px', fontSize: '11px', color: '#9B9B8B', letterSpacing: '0.05em' }}>
+                    {f.emoji} {f.text}
+                  </span>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 fade-up" style={{ animationDelay: '0.4s', opacity: 0 }}>
                 <button onClick={onGetStarted} className="btn-gold" style={{ padding: '16px 44px', fontSize: '11px' }}>
                   Analyze My Style →
                 </button>
@@ -392,7 +413,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
               </div>
 
               {/* Trust signals */}
-              <div className="flex items-center gap-6 mt-10 justify-center lg:justify-start fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
+              <div className="flex items-center gap-6 mt-10 fade-up" style={{ animationDelay: '0.5s', opacity: 0 }}>
                 <span style={{ fontSize: '11px', color: '#3A3A3A', letterSpacing: '0.05em' }}>✓ Free Forever</span>
                 <span style={{ color: '#242424' }}>|</span>
                 <span style={{ fontSize: '11px', color: '#3A3A3A', letterSpacing: '0.05em' }}>✓ No Credit Card</span>
@@ -402,45 +423,53 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
             </div>
 
             {/* Right: Editorial Image */}
-            <div className="flex-1 flex justify-center lg:justify-end w-full max-w-sm lg:max-w-none float">
-              <div style={{ position: 'relative' }}>
+            <div className="hero-image-col flex justify-center lg:justify-end float">
+              <div style={{ position: 'relative', maxWidth: 360, width: '100%' }}>
                 {/* Outer frame */}
                 <div style={{ border: '1px solid #242424', padding: '8px', background: '#111111' }}>
-                  <div style={{ width: '100%', maxWidth: 340, height: 440, overflow: 'hidden', position: 'relative' }}>
+                  <div style={{ width: '100%', height: 440, overflow: 'hidden', position: 'relative' }}>
                     <img
                       src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=680&q=85&auto=format&fit=crop"
-                      alt="Fashion editorial"
+                      alt="AI Fashion Analysis — StyleGuru AI"
                       style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(20%) contrast(1.05)' }}
                     />
                     {/* Analysis overlay */}
-                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px', background: 'linear-gradient(transparent, rgba(0,0,0,0.92))' }}>
-                      <p style={{ fontSize: '9px', letterSpacing: '0.2em', color: '#C9A96E', textTransform: 'uppercase', marginBottom: '8px' }}>AI Analysis</p>
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px', background: 'linear-gradient(transparent, rgba(0,0,0,0.95))' }}>
+                      <p style={{ fontSize: '9px', letterSpacing: '0.2em', color: '#C9A96E', textTransform: 'uppercase', marginBottom: '8px' }}>Live AI Analysis</p>
                       <p style={{ fontSize: '15px', fontFamily: "'Playfair Display', serif", color: '#F0EDE6', marginBottom: '8px' }}>Medium Warm Tone</p>
-                      <div className="flex gap-1.5">
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                         {['#000080','#008080','#800000','#556B2F','#FF7F50','#FFDB58'].map(c => (
-                          <div key={c} style={{ width: 18, height: 18, borderRadius: '2px', background: c }} />
+                          <div key={c} style={{ width: 22, height: 22, borderRadius: 3, background: c, title: c }} />
                         ))}
                       </div>
+                      <p style={{ fontSize: '9px', color: '#6B6B6B', marginTop: 8, letterSpacing: '0.05em' }}>6 best colors detected for your skin tone</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Floating badge */}
+                {/* Floating badge top-right */}
                 <div style={{ position: 'absolute', top: -12, right: -12, background: '#C9A96E', padding: '8px 14px' }}>
                   <p style={{ fontSize: '9px', letterSpacing: '0.15em', color: '#0A0A0A', fontWeight: 600 }}>98% ACCURACY</p>
                 </div>
 
-                {/* Bottom badge */}
+                {/* Bottom-left badge */}
                 <div style={{ position: 'absolute', bottom: -12, left: -12, background: '#111111', border: '1px solid #242424', padding: '8px 14px' }}>
                   <p style={{ fontSize: '9px', letterSpacing: '0.1em', color: '#6B6B6B' }}>
                     <span style={{ color: '#C9A96E' }}>10,000+</span> analyses done
                   </p>
                 </div>
+
+                {/* Side label — desktop only */}
+                <div style={{ position: 'absolute', top: '50%', right: -48, transform: 'translateY(-50%) rotate(90deg)', transformOrigin: 'center' }} className="hidden lg:block">
+                  <p style={{ fontSize: '8px', letterSpacing: '0.3em', color: '#242424', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>StyleGuru AI — Personalized Color Science</p>
+                </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>
+
 
       {/* ════════════════════════════════════════
           STATS BAR

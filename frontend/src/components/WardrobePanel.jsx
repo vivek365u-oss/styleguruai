@@ -89,24 +89,44 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
   const filteredItems = items.filter(item => {
     if (filter === 'all') return true;
     const cat = (item.category || '').toLowerCase();
-    
-    // Check if category matches the group
-    if (filter === 'tops') return cat === 'tops' || cat.includes('top') || cat.includes('shirt') || cat.includes('kurti');
-    if (filter === 'bottoms') return cat === 'bottoms' || cat.includes('jeans') || cat.includes('pant') || cat.includes('palazzo') || cat.includes('skirt');
-    if (filter === 'shoes') return cat === 'shoes' || cat.includes('sneakers') || cat.includes('heels');
-    if (filter === 'jewelry') return cat === 'jewelry' || cat.includes('earrings') || cat.includes('neck');
-    
-    // Exact cat matching or sub-category matching
-    if (cat === filter) return true;
-    if (cat.startsWith('cat_')) {
-       const catObj = ALL_CATEGORIES.find(c => c.id === cat);
-       if (catObj) {
-           return cat.includes(filter);
-       }
-    }
+    const tags = (item.tags || []).join(' ').toLowerCase();
+
+    if (filter === 'tops')
+      return cat.includes('top') || cat.includes('shirt') || cat.includes('tshirt') ||
+             cat.includes('blouse') || cat.includes('kurti') || cat.includes('polo') ||
+             cat.includes('corset') || cat.includes('crop');
+    if (filter === 'bottoms')
+      return cat.includes('trouser') || cat.includes('pant') || cat.includes('jeans') ||
+             cat.includes('skirt') || cat.includes('palazzo') || cat.includes('cargo') ||
+             cat.includes('shorts') || cat.includes('churidar');
+    if (filter === 'ethnic')
+      return cat.includes('ethnic') || cat.includes('kurta') || cat.includes('kurti') ||
+             cat.includes('saree') || cat.includes('lehenga') || cat.includes('sherwani') ||
+             cat.includes('anarkali') || cat.includes('sharara') || cat.includes('dhoti') ||
+             cat.includes('nehru');
+    if (filter === 'formal')
+      return cat.includes('formal') || cat.includes('blazer') || cat.includes('tuxedo') ||
+             cat.includes('suit') || tags.includes('office');
+    if (filter === 'casual')
+      return cat.includes('casual') || cat.includes('tshirt') || cat.includes('hoodie') ||
+             cat.includes('polo') || cat.includes('oversized') || tags.includes('casual');
+    if (filter === 'streetwear')
+      return cat.includes('hoodie') || cat.includes('bomber') || cat.includes('oversized') ||
+             cat.includes('graphic') || cat.includes('sneaker') || tags.includes('street') ||
+             cat.includes('unisex');
+    if (filter === 'shoes')
+      return cat.includes('shoe') || cat.includes('sneaker') || cat.includes('heel') ||
+             cat.includes('boot') || cat.includes('sandal') || cat.includes('loafer') ||
+             cat.includes('mojari') || cat.includes('oxford') || cat.includes('mule');
+    if (filter === 'accessories')
+      return cat.includes('jewelry') || cat.includes('watch') || cat.includes('bag') ||
+             cat.includes('belt') || cat.includes('glass') || cat.includes('sunglass') ||
+             cat.includes('earring') || cat.includes('necklace') || cat.includes('bracelet') ||
+             cat.includes('wallet') || cat.includes('clutch') || cat.includes('accessory');
 
     return cat === filter;
   });
+
 
   const handleDelete = async (item) => {
     const uid = auth.currentUser?.uid;

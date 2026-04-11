@@ -100,6 +100,43 @@ const PDI = "'Playfair Display', 'Georgia', serif";
 const GRAD = 'linear-gradient(135deg, #8B5CF6, #EC4899)';
 const VIOLET = '#8B5CF6';
 
+// ── Trending Products ──────────────────────────────
+const TRENDING_PRODUCTS = {
+  male: [
+    { id:'m1', emoji:'👕', name:'Oversized Graphic Tee', category:'Streetwear', why:'Most-saved item in India 2025', search:'men oversized graphic tee streetwear India 2025' },
+    { id:'m2', emoji:'👖', name:'Baggy Cargo Pants',      category:'Casual',     why:'Trending 3 months straight',    search:'men baggy cargo pants trending India 2025' },
+    { id:'m3', emoji:'🧥', name:'Varsity Jacket',         category:'Streetwear', why:'Campus must-have 2025',          search:'men varsity jacket India 2025' },
+    { id:'m4', emoji:'👔', name:'Linen Formal Shirt',     category:'Formal',     why:'Office-casual crossover pick',  search:'men linen formal shirt office India' },
+    { id:'m5', emoji:'👟', name:'Chunky Sole Sneakers',   category:'Shoes',      why:'Top footwear choice 2025',      search:'men chunky sole sneakers India 2025' },
+    { id:'m6', emoji:'🧣', name:'Minimal Cuban Collar',   category:'Casual',     why:'Summer staple, rising fast',    search:'men cuban collar shirt India summer' },
+    { id:'m7', emoji:'🩲', name:'Slim Fit Joggers',        category:'Casual',     why:'Comfort + style balance',       search:'men slim fit joggers India 2025' },
+    { id:'m8', emoji:'🎩', name:'Bucket Hat',              category:'Accessories',why:'Streetwear accessory of 2025',  search:'men bucket hat streetwear India' },
+    { id:'m9', emoji:'👔', name:'Nehru Collar Kurta',      category:'Ethnic',     why:'Festive & casual modernized',   search:'men Nehru collar kurta India 2025' },
+    { id:'m10',emoji:'⌚', name:'Minimalist Watch',        category:'Accessories',why:'Bestseller across all ages',    search:'men minimalist watch India under 2000' },
+    { id:'m11',emoji:'🧤', name:'Leather Belt',            category:'Accessories',why:'Essential wardrobe basic',      search:'men genuine leather belt India' },
+    { id:'m12',emoji:'👟', name:'White Canvas Sneakers',   category:'Shoes',      why:'Works with every outfit',       search:'men white canvas sneakers India 2025' },
+  ],
+  female: [
+    { id:'f1', emoji:'👗', name:'Co-ord Set',              category:'Casual',     why:'Most-trending outfit 2025 India', search:'women co ord set trending India 2025' },
+    { id:'f2', emoji:'👚', name:'Corset Style Top',         category:'Party',      why:'Fashion week viral pick',         search:'women corset top India 2025' },
+    { id:'f3', emoji:'👖', name:'Wide Leg Trousers',        category:'Formal',     why:'Office-to-party versatile',       search:'women wide leg trousers India 2025' },
+    { id:'f4', emoji:'👘', name:'Chiffon Printed Saree',    category:'Ethnic',     why:'Top saree pick this season',      search:'women chiffon printed saree India 2025' },
+    { id:'f5', emoji:'👡', name:'Block Heel Sandals',        category:'Shoes',      why:'Most comfortable heels 2025',     search:'women block heel sandals India 2025' },
+    { id:'f6', emoji:'👜', name:'Quilted Mini Bag',          category:'Accessories',why:'It-bag of 2025',                  search:'women quilted mini bag India 2025' },
+    { id:'f7', emoji:'🧣', name:'Maxi Floral Dress',         category:'Casual',     why:'Summer bestseller',               search:'women maxi floral dress India summer 2025' },
+    { id:'f8', emoji:'🥿', name:'Chunky Silver Jhumkas',     category:'Accessories',why:'Traditional + modern fusion',     search:'women chunky silver jhumka earrings India' },
+    { id:'f9', emoji:'🧥', name:'Oversized Blazer',          category:'Formal',     why:'Power dressing essential',        search:'women oversized blazer India 2025' },
+    { id:'f10',emoji:'👗', name:'Sharara Set',               category:'Ethnic',     why:'Wedding season favourite',        search:'women sharara set India 2025 wedding' },
+    { id:'f11',emoji:'💍', name:'Layered Necklace Set',      category:'Accessories',why:'Loved by 2M+ users on Meesho',   search:'women layered necklace set India 2025' },
+    { id:'f12',emoji:'👖', name:'High Waist Mom Jeans',      category:'Casual',     why:'Classic comfort, always trending', search:'women high waist mom jeans India 2025' },
+  ],
+};
+
+const TREND_CATS = {
+  male:   ['All','Casual','Formal','Ethnic','Streetwear','Shoes','Accessories'],
+  female: ['All','Casual','Formal','Ethnic','Party','Shoes','Accessories'],
+};
+
 // ── Shop URL builder ────────────────────────────────
 const buildShopUrl = (item, store, gender) => {
   const g = gender.toLowerCase().includes('female') ? 'women' : 'men';
@@ -126,9 +163,11 @@ export default function StyleNavigator({ user, onAnalyze }) {
   const [isWorn,    setIsWorn]    = useState(false);
   const [logging,   setLogging]   = useState(false);
   const [mood,      setMood]      = useState('casual');
-  const [tab,       setTab]       = useState('look');   // 'look' | 'colors' | 'closet'
-  const [shopItem,  setShopItem]  = useState(null);
-  const [insights,  setInsights]  = useState(null);
+  const [tab,        setTab]       = useState('look');   // 'look' | 'colors' | 'closet' | 'trending'
+  const [shopItem,   setShopItem]  = useState(null);
+  const [insights,   setInsights]  = useState(null);
+  const [trendGender,setTrendGender] = useState(null);  // auto-set from profile
+  const [trendCat,   setTrendCat]  = useState('All');
 
   useEffect(() => {
     if (!auth.currentUser) { setLoading(false); return; }
@@ -173,6 +212,14 @@ export default function StyleNavigator({ user, onAnalyze }) {
       }
     })();
   }, []);
+
+  // Auto-set trendGender from profile
+  useEffect(() => {
+    if (profile || prefs) {
+      const g = profile?.gender || prefs?.gender || 'male';
+      setTrendGender((g.toLowerCase().includes('female') || g === 'women') ? 'female' : 'male');
+    }
+  }, [profile, prefs]);
 
   // ── Derived data ───────────────────────────────────
   const gender    = useMemo(() => {
@@ -344,18 +391,19 @@ export default function StyleNavigator({ user, onAnalyze }) {
       </div>
 
       {/* ── TAB BAR ── */}
-      <div style={{ display:'flex', gap:6, marginBottom:20, padding:'4px', background:C.glass, borderRadius:14, border:`1px solid ${C.border}` }}>
+      <div style={{ display:'flex', gap:4, marginBottom:20, padding:'4px', background:C.glass, borderRadius:14, border:`1px solid ${C.border}`, overflowX:'auto' }}>
         {[
-          { id:'look',   label:'🎯 Today\'s Look' },
-          { id:'colors', label:'🎨 Color Guide' },
-          { id:'closet', label:'👝 Smart Closet' },
+          { id:'look',     label:'🎯 Today' },
+          { id:'colors',   label:'🎨 Colors' },
+          { id:'closet',   label:'👝 Closet' },
+          { id:'trending', label:'🔥 Trending' },
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
-            flex:1, padding:'9px 4px', borderRadius:10, border:'none', cursor:'pointer',
+            flex:1, minWidth:64, padding:'9px 6px', borderRadius:10, border:'none', cursor:'pointer',
             background: tab === t.id ? GRAD : 'transparent',
             color: tab === t.id ? 'white' : C.muted,
-            fontSize:'11px', fontWeight: tab === t.id ? 700 : 400,
-            fontFamily:PJS, transition:'all 0.2s',
+            fontSize:'10px', fontWeight: tab === t.id ? 700 : 400,
+            fontFamily:PJS, transition:'all 0.2s', whiteSpace:'nowrap',
             boxShadow: tab === t.id ? '0 2px 10px rgba(139,92,246,0.35)' : 'none',
           }}>
             {t.label}
@@ -700,6 +748,126 @@ export default function StyleNavigator({ user, onAnalyze }) {
           )}
         </div>
       )}
+
+      {/* ══════════════════════════════════════════
+           TAB 4: TRENDING / SHOP
+         ══════════════════════════════════════════ */}
+      {tab === 'trending' && (() => {
+        const activeTG = trendGender || gender;
+        const cats = TREND_CATS[activeTG];
+        const filtered = TRENDING_PRODUCTS[activeTG].filter(p => trendCat === 'All' || p.category === trendCat);
+        return (
+          <div style={{ animation:'fadeSlideIn 0.3s ease' }}>
+
+            {/* Header + Gender Toggle */}
+            <div style={{ ...card({ padding:'18px 20px', marginBottom:14 }), display:'flex', alignItems:'center', gap:12, flexWrap:'wrap' }}>
+              <div style={{ flex:1, minWidth:0 }}>
+                <p style={{ fontSize:'9px', letterSpacing:'0.2em', textTransform:'uppercase', background:GRAD, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', fontWeight:700, fontFamily:PJS, margin:'0 0 3px' }}>Fashion Trending — India 2025</p>
+                <p style={{ fontFamily:PDI, fontSize:'17px', color:C.text, margin:0 }}>What Everyone's Buying</p>
+              </div>
+              {/* Gender Pills */}
+              <div style={{ display:'flex', gap:6, flexShrink:0 }}>
+                {['male','female'].map(g => (
+                  <button key={g} onClick={() => { setTrendGender(g); setTrendCat('All'); }} style={{
+                    padding:'7px 14px', borderRadius:20, border:`1px solid ${activeTG===g?'transparent':C.border}`,
+                    background: activeTG===g ? GRAD : C.glass2,
+                    color: activeTG===g ? 'white' : C.muted,
+                    fontSize:'11px', fontWeight: activeTG===g ? 700 : 400,
+                    cursor:'pointer', fontFamily:PJS, transition:'all 0.2s',
+                    boxShadow: activeTG===g ? '0 3px 10px rgba(139,92,246,0.35)' : 'none',
+                  }}>
+                    {g === 'male' ? '👨 Male' : '👩 Female'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Category filter pills */}
+            <div style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:4, marginBottom:14 }}>
+              {cats.map(c => (
+                <button key={c} onClick={() => setTrendCat(c)} style={{
+                  ...pill(trendCat===c), flexShrink:0, padding:'6px 14px', fontSize:'10px',
+                }}>
+                  {c}
+                </button>
+              ))}
+            </div>
+
+            {/* Products grid */}
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:16 }}>
+              {filtered.map((product, i) => (
+                <div key={product.id} style={{ ...card({ padding:0, overflow:'hidden' }) }}>
+                  {/* Product "image" — emoji hero */}
+                  <div style={{
+                    height:90, display:'flex', alignItems:'center', justifyContent:'center',
+                    background: C.isDark
+                      ? `linear-gradient(135deg, rgba(139,92,246,${0.06+i*0.01}), rgba(236,72,153,${0.04+i*0.005}))`
+                      : `linear-gradient(135deg, rgba(139,92,246,0.05), rgba(236,72,153,0.03))`,
+                    fontSize:'40px', position:'relative',
+                  }}>
+                    {product.emoji}
+                    <span style={{ position:'absolute', top:8, right:8, fontSize:'8px', background:`rgba(139,92,246,${C.isDark?'0.2':'0.1'})`, color:VIOLET, border:`1px solid rgba(139,92,246,0.2)`, borderRadius:6, padding:'2px 6px', fontFamily:PJS, fontWeight:600 }}>
+                      #{i+1} Trending
+                    </span>
+                  </div>
+
+                  {/* Product info */}
+                  <div style={{ padding:'12px 12px 8px' }}>
+                    <p style={{ fontSize:'12px', color:C.text, fontFamily:PJS, fontWeight:700, margin:'0 0 3px', lineHeight:'1.4' }}>{product.name}</p>
+                    <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
+                      <span style={{ fontSize:'9px', background:C.glass2, border:`1px solid ${C.border}`, borderRadius:6, padding:'2px 6px', color:C.muted, fontFamily:PJS }}>{product.category}</span>
+                    </div>
+                    <p style={{ fontSize:'9px', color:C.muted, fontFamily:PJS, margin:'0 0 10px', lineHeight:'1.5' }}>
+                      🔥 {product.why}
+                    </p>
+
+                    {/* Shop buttons */}
+                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:4 }}>
+                      {[STORES[0], STORES[1]].map(store => (
+                        <button key={store.id}
+                          onClick={() => window.open(
+                            store.id === 'myntra'
+                              ? `https://www.myntra.com/${activeTG === 'female' ? 'women' : 'men'}-${product.name.toLowerCase().replace(/ /g,'-')}?rawQuery=${encodeURIComponent(product.name)}`
+                              : `https://www.amazon.in/s?k=${encodeURIComponent(product.search)}`,
+                            '_blank'
+                          )}
+                          style={{ padding:'6px 4px', borderRadius:8, border:`1px solid ${C.border}`, background:C.glass2, cursor:'pointer', fontSize:'9px', color:C.muted, fontFamily:PJS, fontWeight:600, display:'flex', alignItems:'center', justifyContent:'center', gap:4, transition:'all 0.15s' }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor=store.color; e.currentTarget.style.color=store.color; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor=C.border; e.currentTarget.style.color=C.muted; }}
+                        >
+                          {store.emoji} {store.name}
+                        </button>
+                      ))}
+                      {[STORES[2], STORES[3]].map(store => (
+                        <button key={store.id}
+                          onClick={() => window.open(
+                            store.id === 'flipkart'
+                              ? `https://www.flipkart.com/search?q=${encodeURIComponent(`${activeTG === 'female' ? 'women' : 'men'} ${product.name}`)}`
+                              : `https://www.meesho.com/search?q=${encodeURIComponent(product.search)}`,
+                            '_blank'
+                          )}
+                          style={{ padding:'6px 4px', borderRadius:8, border:`1px solid ${C.border}`, background:C.glass2, cursor:'pointer', fontSize:'9px', color:C.muted, fontFamily:PJS, fontWeight:600, display:'flex', alignItems:'center', justifyContent:'center', gap:4, transition:'all 0.15s' }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor=store.color; e.currentTarget.style.color=store.color; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor=C.border; e.currentTarget.style.color=C.muted; }}
+                        >
+                          {store.emoji} {store.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {filtered.length === 0 && (
+              <div style={{ textAlign:'center', padding:'40px 20px' }}>
+                <p style={{ fontSize:'32px', marginBottom:8 }}>🔍</p>
+                <p style={{ fontSize:'13px', color:C.muted, fontFamily:PJS }}>No items in this category yet.</p>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* ── SHOP SELECTOR MODAL ── */}
       {shopItem && (
