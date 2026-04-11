@@ -192,22 +192,22 @@ export default function ProfilePanel() {
             </div>
 
             {/* ── USAGE LIMITS & PLAN ────────────────────────── */}
-            <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-6 space-y-4 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-[50px] -z-10" />
+            <div className={`border rounded-[2.5rem] p-6 space-y-4 relative overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-200 shadow-sm'}`}>
+                <div className={`absolute top-0 right-0 w-32 h-32 blur-[50px] -z-10 ${isDark ? 'bg-purple-500/10' : 'bg-purple-200/40'}`} />
                 <div className="flex justify-between items-center mb-2">
-                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">Your Current Plan</p>
+                   <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Your Current Plan</p>
                    {isPro ? (
-                       <span className="text-[9px] font-bold text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full uppercase flex items-center gap-1">🌟 PRO {plan === 'yearly' ? 'YEARLY' : 'MONTHLY'}</span>
+                       <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase flex items-center gap-1 ${isDark ? 'text-yellow-400 bg-yellow-400/10' : 'text-yellow-700 bg-yellow-100'}`}>🌟 PRO {plan === 'yearly' ? 'YEARLY' : 'MONTHLY'}</span>
                    ) : (
-                       <span className="text-[9px] font-bold text-slate-400 bg-slate-400/20 px-2 py-0.5 rounded-full uppercase">⚪ Free Plan</span>
+                       <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${isDark ? 'text-slate-400 bg-slate-400/20' : 'text-slate-600 bg-slate-200'}`}>⚪ Free Plan</span>
                    )}
                 </div>
 
                 {isPro ? (
-                    <div className="py-8 text-center border border-white/5 rounded-[1.5rem] bg-white/5 shadow-inner">
-                        <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-full mx-auto mb-3 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-yellow-500/20">∞</div>
-                        <p className="text-xl font-black text-white uppercase tracking-tight">Unlimited Access</p>
-                        <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-1">AI Scans • Outfit Checks • No Ads</p>
+                    <div className={`py-8 text-center border rounded-[1.5rem] shadow-inner ${isDark ? 'bg-white/5 border-white/5' : 'bg-white border-purple-100'}`}>
+                        <div className={`w-12 h-12 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-full mx-auto mb-3 flex items-center justify-center text-white font-black text-xl shadow-lg ${isDark ? 'shadow-yellow-500/20' : 'shadow-amber-500/30'}`}>∞</div>
+                        <p className={`text-xl font-black uppercase tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>Unlimited Access</p>
+                        <p className={`text-[9px] font-bold uppercase tracking-widest mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>AI Scans • Outfit Checks • No Ads</p>
                     </div>
                 ) : (
                     <>
@@ -215,43 +215,43 @@ export default function ProfilePanel() {
                           {/* DNA Analysis Limit */}
                           <div className="space-y-1">
                              <div className="flex justify-between text-xs font-bold">
-                                <span className="text-white/80">DNA Analyses (Ad-Free)</span>
-                                <span className="text-white">{Math.max(0, 3 - (usage?.adFreeAnalysesLeft || 0))} / 3 Used</span>
+                                <span className={isDark ? 'text-white/80' : 'text-gray-700'}>DNA Analyses (Ad-Free)</span>
+                                <span className={isDark ? 'text-white' : 'text-purple-600'}>{Math.max(0, 3 - (usage?.adFreeAnalysesLeft || 0))} / 3 Used</span>
                              </div>
-                             <div className="w-full bg-white/10 rounded-full h-1.5"><div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${(Math.max(0, 3 - (usage?.adFreeAnalysesLeft || 0)) / 3) * 100}%` }}></div></div>
+                             <div className={`w-full rounded-full h-1.5 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}><div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${(Math.max(0, 3 - (usage?.adFreeAnalysesLeft || 0)) / 3) * 100}%` }}></div></div>
                           </div>
                           
                           {/* Outfit Checks Limit */}
                           <div className="space-y-1">
                              <div className="flex justify-between text-xs font-bold">
-                                <span className="text-white/80">Outfit Checks (Ad-Free)</span>
-                                <span className="text-white">{Math.max(0, 3 - (usage?.adFreeOutfitChecks || 0))} / 3 Used</span>
+                                <span className={isDark ? 'text-white/80' : 'text-gray-700'}>Outfit Checks (Ad-Free)</span>
+                                <span className={isDark ? 'text-white' : 'text-indigo-600'}>{Math.max(0, 3 - (usage?.adFreeOutfitChecks || 0))} / 3 Used</span>
                              </div>
-                             <div className="w-full bg-white/10 rounded-full h-1.5"><div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: `${(Math.max(0, 3 - (usage?.adFreeOutfitChecks || 0)) / 3) * 100}%` }}></div></div>
+                             <div className={`w-full rounded-full h-1.5 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}><div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: `${(Math.max(0, 3 - (usage?.adFreeOutfitChecks || 0)) / 3) * 100}%` }}></div></div>
                           </div>
 
                           {/* History Saves */}
                           <div className="space-y-1">
                              <div className="flex justify-between text-xs font-bold">
-                                <span className="text-white/80">History Saved</span>
-                                <span className="text-white">{usage?.analysisHistoryCount || 0} / 5 Slots</span>
+                                <span className={isDark ? 'text-white/80' : 'text-gray-700'}>History Saved</span>
+                                <span className={isDark ? 'text-white' : 'text-pink-600'}>{usage?.analysisHistoryCount || 0} / 5 Slots</span>
                              </div>
-                             <div className="w-full bg-white/10 rounded-full h-1.5"><div className="bg-pink-500 h-1.5 rounded-full" style={{ width: `${((usage?.analysisHistoryCount || 0) / 5) * 100}%` }}></div></div>
+                             <div className={`w-full rounded-full h-1.5 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}><div className="bg-pink-500 h-1.5 rounded-full" style={{ width: `${((usage?.analysisHistoryCount || 0) / 5) * 100}%` }}></div></div>
                           </div>
                           
                           {/* Coin Balance */}
-                          <div className="pt-2 border-t border-white/5">
-                              <div className="flex justify-between items-center bg-yellow-500/5 p-3 rounded-xl border border-yellow-500/10">
-                                  <span className="text-[10px] font-black uppercase tracking-[0.1em] text-yellow-500/70">🪙 ToneFit Coins Balance:</span>
-                                  <span className="text-sm font-black text-yellow-400">{coins} Coins</span>
+                          <div className={`pt-2 border-t ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
+                              <div className={`flex justify-between items-center p-3 rounded-xl border ${isDark ? 'bg-yellow-500/5 border-yellow-500/10' : 'bg-yellow-50 border-yellow-200 shadow-sm'}`}>
+                                  <span className={`text-[10px] font-black uppercase tracking-[0.1em] ${isDark ? 'text-yellow-500/70' : 'text-yellow-600'}`}>🪙 ToneFit Coins Balance:</span>
+                                  <span className={`text-sm font-black ${isDark ? 'text-yellow-400' : 'text-yellow-600'}`}>{coins} Coins</span>
                               </div>
-                              <p className="text-[8px] text-white/30 text-center mt-2 uppercase tracking-widest leading-relaxed">
+                              <p className={`text-[8px] text-center mt-2 uppercase tracking-widest leading-relaxed ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
                                  1 Coin = 1 AI Scan when free limits are exhausted. 
                               </p>
                           </div>
                        </div>
 
-                       <button onClick={() => window.dispatchEvent(new CustomEvent('open_subscription_modal'))} className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black uppercase text-[10px] tracking-widest shadow-xl active:scale-[0.98] transition-all">
+                       <button onClick={() => window.dispatchEvent(new CustomEvent('open_subscription_modal'))} className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black uppercase text-[10px] tracking-widest shadow-lg shadow-purple-500/20 active:scale-[0.98] transition-all">
                           Unlock Unlimited Access
                        </button>
                     </>
