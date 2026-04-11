@@ -36,7 +36,7 @@ const StyleNavigator = lazy(() => import('./StyleNavigator'));
 const ProfilePanel   = lazy(() => import('./ProfilePanel'));
 const ColorScanner   = lazy(() => import('./ColorScanner'));
 const SubscriptionModal = lazy(() => import('./SubscriptionModal'));
-const SelfieStyleAdvisor = lazy(() => import('./SelfieStyleAdvisor'));
+
 
 // ── Section Loader ──────────────────────────────────
 function SectionLoader({ C }) {
@@ -880,7 +880,6 @@ export default function AppShell({ user, onLogout }) {
     { id:'analyze',   label:'Analyze' },
     { id:'history',   label:'History' },
     { id:'navigator', label:'Style Compass' },
-    { id:'stylist',   label:'AI Stylist ✨' },
     { id:'tools',     label:'Tools' },
   ];
 
@@ -888,7 +887,7 @@ export default function AppShell({ user, onLogout }) {
   const mobileTabs = [
     { id:'home',      icon:'🏠', label:'Home' },
     { id:'analyze',   icon:'📷', label:'Analyze' },
-    { id:'stylist',   icon:'💇', label:'Stylist' },
+    { id:'history',   icon:'📋', label:'History' },
     { id:'tools',     icon:'🛠️', label:'Tools' },
     { id:'navigator', icon:'🧭', label:'Compass' },
   ];
@@ -1012,13 +1011,6 @@ export default function AppShell({ user, onLogout }) {
             <div key="tools" style={{ animation:'fadeSlideIn 0.3s ease' }}>
               <SectionHeader C={C} label="Power Tools" title="Style Tools" subtitle="Advanced tools to elevate your fashion game" />
               <ToolsTab analysisData={results} onShowResult={data => { setResults(data); handleTabChange('analyze'); }} onOpenScanner={() => handleTabChange('scanner')} />
-            </div>
-          )}
-
-          {activeTab === 'stylist' && (
-            <div key="stylist" style={{ animation:'fadeSlideIn 0.3s ease' }}>
-              <SectionHeader C={C} label="AI Hair & Style" title="Selfie Stylist" subtitle="Upload a selfie to get personalized hairstyle & style recommendations" />
-              <SelfieStyleAdvisor />
             </div>
           )}
 

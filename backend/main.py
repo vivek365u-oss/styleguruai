@@ -218,34 +218,41 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
 
     pixels = center_region.reshape(-1, 3).astype(np.float32)
 
-    r_ch = pixels[:, 0]
-    g_ch = pixels[:, 1]
-    b_ch = pixels[:, 2]
-
     brightness = np.mean(pixels, axis=1)
     max_rgb = np.max(pixels, axis=1)
     min_rgb = np.min(pixels, axis=1)
     saturation = (max_rgb - min_rgb) / (max_rgb + 1e-6)
-    channel_diff = max_rgb - min_rgb
 
-    # Background conditions: white walls, grey walls, beige backgrounds
-    is_background = (
-        (brightness > 215) |
-        (brightness < 10) |
-        ((saturation < 0.12) & (brightness > 170)) |
-        ((channel_diff < 25) & (brightness > 160))
-    )
+    # ── Step 1: Detect if the dominant region is already a light/white outfit ──
+    # Count how many pixels are high-brightness low-saturation (white/off-white range)
+    is_white_region = (brightness > 200) & (saturation < 0.15)
+    white_fraction = np.sum(is_white_region) / len(pixels)
+
+    if white_fraction > 0.35:
+        # The outfit IS white/off-white — do NOT filter these out.
+        # Only remove very dark (shadow/black) pixels
+        is_background = (brightness < 8)
+    else:
+        # Standard background filter: remove plain walls, floors, neutral BG
+        # Keep white shirts by NOT filtering brightness > 215 blindly
+        is_background = (
+            (brightness < 8) |
+            # Only filter very-bright if saturation is also extremely low AND
+            # white fraction is low (meaning it's likely the background, not clothing)
+            ((brightness > 240) & (saturation < 0.04) & (white_fraction < 0.20))
+        )
 
     fabric_pixels = pixels[~is_background]
 
     if len(fabric_pixels) < 100:
-        is_background_relaxed = (brightness > 230) | (brightness < 5)
-        fabric_pixels = pixels[~is_background_relaxed]
+        # Softer fallback — only strip pure black and pure white background
+        is_bg_relaxed = (brightness < 5) | ((brightness > 250) & (saturation < 0.02))
+        fabric_pixels = pixels[~is_bg_relaxed]
 
     if len(fabric_pixels) < 50:
         fabric_pixels = pixels
 
-    # K-means with more clusters
+    # K-means with multiple clusters
     k = min(8, len(fabric_pixels) // 10, len(fabric_pixels))
     k = max(3, k)
 
@@ -257,13 +264,14 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
         )
     except:
         avg = np.mean(fabric_pixels, axis=0)
-        r, g, b = int(avg[0]), int(avg[1]), int(avg[2])
-        centers = np.array([[r, g, b]])
+        r_v, g_v, b_v = int(avg[0]), int(avg[1]), int(avg[2])
+        centers = np.array([[r_v, g_v, b_v]])
         labels = np.zeros(len(fabric_pixels), dtype=np.int32)
 
     counts = np.bincount(labels.flatten(), minlength=len(centers))
 
-    # Best cluster — count + saturation bonus
+    # ── Best cluster: count weight + small saturation bonus ──
+    # IMPORTANT: Do NOT skip white/bright clusters — they may be the outfit.
     best_idx = 0
     best_score = -1
 
@@ -274,14 +282,13 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
         min_c = min(cr, cg, cb)
         sat = (max_c - min_c) / (max_c + 1e-6)
 
-        # Skip backgrounds
-        if brightness_c > 210 and sat < 0.15:
-            continue
+        # Skip near-black (shadow artifacts) only
         if brightness_c < 12:
             continue
 
         count_weight = counts[i] / len(fabric_pixels)
-        sat_bonus = sat * 0.4
+        # Saturation bonus is smaller now so white clusters can still win by count
+        sat_bonus = sat * 0.25
         score = count_weight + sat_bonus
 
         if score > best_score:
