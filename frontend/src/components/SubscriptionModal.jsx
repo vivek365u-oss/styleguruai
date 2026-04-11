@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePlan } from '../context/PlanContext';
-import { createRazorpayOrder, verifyRazorpayPayment } from '../api/styleApi';
+import { createRazorpayOrder, verifyRazorpayPayment, auth } from '../api/styleApi';
 import { FashionIcons, IconRenderer } from './Icons';
 
 export default function SubscriptionModal() {
@@ -75,8 +75,8 @@ export default function SubscriptionModal() {
           }
         },
         prefill: {
-          name: "Tonefit User",
-          email: "user@tonefit.com"
+          name: auth?.currentUser?.displayName || "ToneFit User",
+          email: auth?.currentUser?.email || "user@tonefit.com"
         },
         theme: {
           color: "#8B5CF6"
@@ -175,9 +175,9 @@ export default function SubscriptionModal() {
               <button 
                 onClick={() => handleCheckout('coins')}
                 disabled={loadingTier === 'coins'}
-                className="py-2 px-6 rounded-xl border border-white/10 text-white/70 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-colors"
+                className="py-2 px-6 rounded-xl border border-white/10 text-white/70 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-colors disabled:opacity-50"
               >
-                Buy 50 Coins for ₹199
+                {loadingTier === 'coins' ? 'Processing...' : 'Buy 50 Coins for ₹199'}
               </button>
             </div>
 
