@@ -21,11 +21,9 @@ const cardStyle = (C) => ({
   transition: 'all 0.2s ease',
 });
 
-// ── Color Contrast Checker ──────────────────────────
 function ColorContrastChecker({ C }) {
   const [color1, setColor1] = useState('#8B5CF6');
   const [color2, setColor2] = useState('#F0EDE6');
-  const [open,   setOpen]   = useState(false);
   const { t } = useLanguage();
 
   const hexToRgb = (hex) => {
@@ -58,53 +56,43 @@ function ColorContrastChecker({ C }) {
                 :                t('poorContrast');
 
   return (
-    <div style={{ ...cardStyle(C), marginBottom: 24 }}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '16px', background: open ? C.glass2 : 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s' }}
-        onMouseEnter={e => { e.currentTarget.style.background = C.glass2; }}
-        onMouseLeave={e => { e.currentTarget.style.background = open ? C.glass2 : 'transparent'; }}
-      >
-        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, color: VIOLET, background: `${VIOLET}15`, borderRadius: 10 }}>
+    <div style={{ ...cardStyle(C), padding: '24px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, color: '#64748b', background: '#64748b15', borderRadius: 12 }}>
           <IconRenderer icon={FashionIcons.Analysis} />
         </span>
-        <div style={{ flex: 1 }}>
-          <p style={{ fontFamily: PJS, fontSize: '14px', fontWeight: 700, color: C.text, margin: '0 0 2px' }}>{t('contrastChecker')}</p>
-          <p style={{ fontFamily: PJS, fontSize: '11px', color: C.muted, margin: 0 }}>{t('contrastDesc')}</p>
+        <div>
+          <h3 style={{ margin: 0, fontFamily: PDI, fontSize: '20px', color: C.text }}>{t('contrastChecker')}</h3>
+          <p style={{ margin: '4px 0 0', fontFamily: PJS, fontSize: '12px', color: C.muted }}>{t('contrastDesc')}</p>
         </div>
-        <span style={{ fontSize: '10px', color: C.muted }}>{open ? '▲' : '▼'}</span>
-      </button>
+      </div>
 
-      {open && (
-        <div style={{ padding: '0 16px 16px', borderTop: `1px solid ${C.border}` }}>
-          <div style={{ display: 'flex', gap: 12, margin: '16px 0' }}>
-            {[[color1, setColor1, t('color1')], [color2, setColor2, t('color2')]].map(([val, setter, lbl]) => (
-              <div key={lbl} style={{ flex: 1 }}>
-                <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: C.muted, margin: '0 0 6px', fontFamily: PJS }}>{lbl}</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: C.glass2, padding: 8, borderRadius: 12, border: `1px solid ${C.border}` }}>
-                  <input type="color" value={val} onChange={e => setter(e.target.value)} style={{ width: 30, height: 30, padding: 0, border: 'none', borderRadius: 6, cursor: 'pointer', background: 'transparent' }} />
-                  <span style={{ fontSize: '12px', fontFamily: 'monospace', color: C.text }}>{val}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ padding: '16px', borderRadius: 12, backgroundColor: color1, color: color2, textAlign: 'center', fontSize: '14px', fontWeight: 700, fontFamily: PJS, marginBottom: 16, boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
-            {t('sampleText')}
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: C.glass2, padding: '12px 16px', borderRadius: 12, border: `1px solid ${C.border}` }}>
-            <div>
-              <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: C.muted, margin: '0 0 4px', fontFamily: PJS }}>{t('contrastRatio')}</p>
-              <p style={{ fontSize: '18px', fontWeight: 800, color: C.text, margin: 0, fontFamily: PJS }}>{ratio}:1</p>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <p style={{ fontSize: '14px', fontWeight: 700, color: grade.color, margin: '0 0 2px', fontFamily: PJS }}>{grade.label}</p>
-              <p style={{ fontSize: '11px', color: C.muted, margin: 0, fontFamily: PJS }}>{verdict}</p>
+      <div style={{ display: 'flex', gap: 12, margin: '16px 0' }}>
+        {[[color1, setColor1, t('color1')], [color2, setColor2, t('color2')]].map(([val, setter, lbl]) => (
+          <div key={lbl} style={{ flex: 1 }}>
+            <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: C.muted, margin: '0 0 6px', fontFamily: PJS }}>{lbl}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: C.glass2, padding: 8, borderRadius: 12, border: `1px solid ${C.border}` }}>
+              <input type="color" value={val} onChange={e => setter(e.target.value)} style={{ width: 30, height: 30, padding: 0, border: 'none', borderRadius: 6, cursor: 'pointer', background: 'transparent' }} />
+              <span style={{ fontSize: '12px', fontFamily: 'monospace', color: C.text }}>{val}</span>
             </div>
           </div>
+        ))}
+      </div>
+
+      <div style={{ padding: '20px', borderRadius: 12, backgroundColor: color1, color: color2, textAlign: 'center', fontSize: '16px', fontWeight: 700, fontFamily: PJS, marginBottom: 24, boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
+        {t('sampleText')}
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: C.glass2, padding: '16px 20px', borderRadius: 12, border: `1px solid ${C.border}` }}>
+        <div>
+          <p style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: C.muted, margin: '0 0 4px', fontFamily: PJS }}>{t('contrastRatio')}</p>
+          <p style={{ fontSize: '22px', fontWeight: 800, color: C.text, margin: 0, fontFamily: PJS }}>{ratio}:1</p>
         </div>
-      )}
+        <div style={{ textAlign: 'right' }}>
+          <p style={{ fontSize: '16px', fontWeight: 700, color: grade.color, margin: '0 0 2px', fontFamily: PJS }}>{grade.label}</p>
+          <p style={{ fontSize: '12px', color: C.muted, margin: 0, fontFamily: PJS }}>{verdict}</p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -123,11 +111,13 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
   }, []);
 
   const primaryTools = [
-    { id: 'stylist',  icon: FashionIcons.AI,       title: 'AI Stylist',          desc: 'Face shape & hairstyle recs',    grad: ['#7c3aed40','#5b21b640'], border: '#8b5cf630', color: '#8b5cf6' },
+    { id: 'stylist',  icon: FashionIcons.Star,      title: 'AI Stylist',          desc: 'Face shape & hairstyle recs',    grad: ['#7c3aed40','#5b21b640'], border: '#8b5cf630', color: '#8b5cf6' },
     { id: 'stylebot', icon: FashionIcons.AI,        title: t('aiStyleBot'),       desc: t('styleBotDesc'),                grad: ['#581c8740','#312e8140'], border: '#a855f730', color: '#a855f7' },
     { id: 'outfit',   icon: FashionIcons.Shirt,     title: t('outfitChecker'),    desc: t('outfitCheckerDesc'),           grad: ['#1e3a8a40','#164e6340'], border: '#3b82f630', color: '#3b82f6' },
     { id: 'calendar', icon: FashionIcons.Watch,     title: t('aiCalendar'),       desc: t('calendarDesc'),                grad: ['#78350f40','#7c2d1240'], border: '#f59e0b30', color: '#f59e0b' },
     { id: 'wardrobe', icon: FashionIcons.Wardrobe,  title: t('navWardrobe'),      desc: t('wardrobeDesc'),                grad: ['#88133740','#88133740'], border: '#ec489930', color: '#ec4899' },
+    { id: 'scanner',  icon: FashionIcons.Camera,    title: t('colorScanner'),     desc: t('scannerDesc'),                 grad: ['#064e3b40','#134e4a40'], border: '#10b98130', color: '#10b981' },
+    { id: 'contrast', icon: FashionIcons.Analysis,  title: t('contrastChecker'),  desc: t('contrastDesc'),                grad: ['#0f172a40','#1e293b40'], border: '#64748b30', color: '#64748b' },
   ];
 
   const BackBtn = () => (
@@ -190,6 +180,12 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
       />
     </div>
   );
+  if (activeTool === 'contrast') return (
+    <div style={{ animation: 'fadeSlideIn 0.3s ease', paddingBottom: 40 }}>
+      <BackBtn />
+      <ColorContrastChecker C={C} />
+    </div>
+  );
 
   // ── Main Tools Grid ─────────────────
   return (
@@ -206,7 +202,13 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
         {primaryTools.map(tool => (
           <button
             key={tool.id}
-            onClick={() => setActiveTool(tool.id)}
+            onClick={() => {
+              if (tool.id === 'scanner') {
+                onOpenScanner?.();
+              } else {
+                setActiveTool(tool.id);
+              }
+            }}
             style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 16px',
               background: C.isDark ? `linear-gradient(135deg, ${tool.grad[0]}, ${tool.grad[1]})` : C.glass,
@@ -224,31 +226,7 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
             <span style={{ fontFamily: PJS, fontSize: '10px', color: C.muted, opacity: 0.8, textAlign: 'center' }}>{tool.desc}</span>
           </button>
         ))}
-
-        {/* Color Scanner — full-width */}
-        <button
-          onClick={() => onOpenScanner?.()}
-          style={{
-            gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, padding: '24px',
-            background: C.isDark ? 'linear-gradient(135deg, #064e3b40, #134e4a40)' : C.glass,
-            border: `1px solid ${C.isDark ? '#10b98130' : C.border}`,
-            borderRadius: 20, cursor: 'pointer', transition: 'all 0.2s',
-            boxShadow: C.cardShadow,
-          }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.border = `1px solid #10b98150`; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)';    e.currentTarget.style.border = `1px solid ${C.isDark ? '#10b98130' : C.border}`; }}
-        >
-          <span style={{ width: 48, height: 48, color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <IconRenderer icon={FashionIcons.Camera} />
-          </span>
-          <div style={{ textAlign: 'left' }}>
-            <span style={{ display: 'block', fontFamily: PJS, fontSize: '18px', fontWeight: 700, color: C.text, marginBottom: 4 }}>{t('colorScanner')}</span>
-            <span style={{ display: 'block', fontFamily: PJS, fontSize: '12px', color: C.muted, opacity: 0.8 }}>{t('scannerDesc')}</span>
-          </div>
-        </button>
       </div>
-
-      <ColorContrastChecker C={C} />
     </div>
   );
 }
