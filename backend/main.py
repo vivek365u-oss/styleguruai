@@ -815,16 +815,26 @@ async def consume_limit(request: ConsumeActionRequest, current_user: dict = Depe
     # Implement limit tracking logic
     if request.action == 'analysis':
         current = data.get("adFreeAnalysesLeft", 0)
+        coins = data.get("coins", 0)
         if current > 0:
             doc_ref.update({"adFreeAnalysesLeft": current - 1})
             return {"success": True, "adFreeAnalysesLeft": current - 1}
+        elif coins > 0:
+            # Consume 1 coin for Analysis
+            doc_ref.update({"coins": coins - 1})
+            return {"success": True, "coins": coins - 1, "message": "1 Coin consumed"}
         return {"success": False, "requires_ad": True}
         
     elif request.action == 'outfit_check':
         current = data.get("adFreeOutfitChecks", 0)
+        coins = data.get("coins", 0)
         if current > 0:
             doc_ref.update({"adFreeOutfitChecks": current - 1})
             return {"success": True, "adFreeOutfitChecks": current - 1}
+        elif coins > 0:
+            # Consume 1 coin for Outfit Check
+            doc_ref.update({"coins": coins - 1})
+            return {"success": True, "coins": coins - 1, "message": "1 Coin consumed"}
         return {"success": False, "requires_ad": True}
         
     elif request.action == 'history_save':

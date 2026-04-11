@@ -297,7 +297,13 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     // LIMIT CHECK
     const limitCheck = await consumeUserLimit('analysis');
     if (!limitCheck.success && limitCheck.requires_ad) {
-        window.dispatchEvent(new CustomEvent('open_subscription_modal'));
+        window.dispatchEvent(new CustomEvent('open_subscription_modal', {
+            detail: {
+                onSuccess: () => {
+                    handleFile(file);
+                }
+            }
+        }));
         onError("You've reached your free Ad-Free limits! Please Upgrade to Pro.");
         // We simulate loading stop below in finally
         setShowProgress(false);
@@ -356,7 +362,13 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     // LIMIT CHECK (Couple requires 2 analysis credits or we just consume 1 for now)
     const limitCheck = await consumeUserLimit('analysis');
     if (!limitCheck.success && limitCheck.requires_ad) {
-        window.dispatchEvent(new CustomEvent('open_subscription_modal'));
+        window.dispatchEvent(new CustomEvent('open_subscription_modal', {
+            detail: {
+                onSuccess: () => {
+                    handleCoupleAnalysis();
+                }
+            }
+        }));
         onError("You've reached your free Ad-Free limits! Please Upgrade to Pro.");
         setShowProgress(false);
         return;

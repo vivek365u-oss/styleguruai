@@ -7,10 +7,18 @@ import { FashionIcons, IconRenderer } from './Icons';
 export default function SubscriptionModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [loadingTier, setLoadingTier] = useState(null);
+  const [onSuccessCallback, setOnSuccessCallback] = useState(null);
   const { isPro, refreshPlan } = usePlan();
 
   useEffect(() => {
-    const handleOpen = () => setIsOpen(true);
+    const handleOpen = (e) => {
+      setIsOpen(true);
+      if (e.detail && e.detail.onSuccess) {
+        setOnSuccessCallback(() => e.detail.onSuccess);
+      } else {
+        setOnSuccessCallback(null);
+      }
+    };
     window.addEventListener('open_subscription_modal', handleOpen);
     
     // Load Razorpay Script dynamically if not already loaded
@@ -56,7 +64,12 @@ export default function SubscriptionModal() {
             });
             alert("Payment Successful! Welcome to ToneFit PRO.");
             setIsOpen(false);
-            refreshPlan(); // Refresh limits state globally
+            await refreshPlan(); // Refresh limits state globally
+            if (onSuccessCallback) {
+              setTimeout(() => {
+                onSuccessCallback();
+              }, 500);
+            }
           } catch (verifyError) {
             alert("Payment Verification Failed. Please contact support.");
           }

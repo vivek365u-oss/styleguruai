@@ -12,7 +12,7 @@ import { FashionIcons, IconRenderer } from './Icons';
 export default function ProfilePanel() {
   const { theme, setTheme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const { isPro, usage } = usePlan();
+  const { isPro, usage, coins, plan } = usePlan();
   const { language, changeLanguage, t } = useLanguage();
   const navigate = useNavigate();
 
@@ -191,49 +191,72 @@ export default function ProfilePanel() {
                </div>
             </div>
 
-            {/* ── USAGE LIMITS (FREE TIER ONLY) ────────────────────────── */}
-            {(!isPro) && (
-              <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-6 space-y-4 relative overflow-hidden">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-[50px] -z-10" />
-                 <div className="flex justify-between items-center mb-2">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">Your Usage Limits</p>
-                    <span className="text-[9px] font-bold text-red-400 bg-red-400/10 px-2 py-0.5 rounded-full uppercase">Free Plan</span>
-                 </div>
-                 
-                 <div className="space-y-4">
-                    {/* DNA Analysis Limit */}
-                    <div className="space-y-1">
-                       <div className="flex justify-between text-xs font-bold">
-                          <span className="text-white/80">DNA Analyses (Ad-Free)</span>
-                          <span className="text-white">{Math.max(0, 3 - (usage?.adFreeAnalysesLeft || 0))} / 3 Used</span>
-                       </div>
-                       <div className="w-full bg-white/10 rounded-full h-1.5"><div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${(Math.max(0, 3 - (usage?.adFreeAnalysesLeft || 0)) / 3) * 100}%` }}></div></div>
-                    </div>
-                    
-                    {/* Outfit Checks Limit */}
-                    <div className="space-y-1">
-                       <div className="flex justify-between text-xs font-bold">
-                          <span className="text-white/80">Outfit Checks (Ad-Free)</span>
-                          <span className="text-white">{Math.max(0, 3 - (usage?.adFreeOutfitChecks || 0))} / 3 Used</span>
-                       </div>
-                       <div className="w-full bg-white/10 rounded-full h-1.5"><div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: `${(Math.max(0, 3 - (usage?.adFreeOutfitChecks || 0)) / 3) * 100}%` }}></div></div>
-                    </div>
+            {/* ── USAGE LIMITS & PLAN ────────────────────────── */}
+            <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-6 space-y-4 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-[50px] -z-10" />
+                <div className="flex justify-between items-center mb-2">
+                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">Your Current Plan</p>
+                   {isPro ? (
+                       <span className="text-[9px] font-bold text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full uppercase flex items-center gap-1">🌟 PRO {plan === 'yearly' ? 'YEARLY' : 'MONTHLY'}</span>
+                   ) : (
+                       <span className="text-[9px] font-bold text-slate-400 bg-slate-400/20 px-2 py-0.5 rounded-full uppercase">⚪ Free Plan</span>
+                   )}
+                </div>
 
-                    {/* History Saves */}
-                    <div className="space-y-1">
-                       <div className="flex justify-between text-xs font-bold">
-                          <span className="text-white/80">History Saved</span>
-                          <span className="text-white">{usage?.analysisHistoryCount || 0} / 5 Slots</span>
-                       </div>
-                       <div className="w-full bg-white/10 rounded-full h-1.5"><div className="bg-pink-500 h-1.5 rounded-full" style={{ width: `${((usage?.analysisHistoryCount || 0) / 5) * 100}%` }}></div></div>
+                {isPro ? (
+                    <div className="py-8 text-center border border-white/5 rounded-[1.5rem] bg-white/5 shadow-inner">
+                        <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-full mx-auto mb-3 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-yellow-500/20">∞</div>
+                        <p className="text-xl font-black text-white uppercase tracking-tight">Unlimited Access</p>
+                        <p className="text-[9px] font-bold text-white/40 uppercase tracking-widest mt-1">AI Scans • Outfit Checks • No Ads</p>
                     </div>
-                 </div>
+                ) : (
+                    <>
+                       <div className="space-y-4">
+                          {/* DNA Analysis Limit */}
+                          <div className="space-y-1">
+                             <div className="flex justify-between text-xs font-bold">
+                                <span className="text-white/80">DNA Analyses (Ad-Free)</span>
+                                <span className="text-white">{Math.max(0, 3 - (usage?.adFreeAnalysesLeft || 0))} / 3 Used</span>
+                             </div>
+                             <div className="w-full bg-white/10 rounded-full h-1.5"><div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${(Math.max(0, 3 - (usage?.adFreeAnalysesLeft || 0)) / 3) * 100}%` }}></div></div>
+                          </div>
+                          
+                          {/* Outfit Checks Limit */}
+                          <div className="space-y-1">
+                             <div className="flex justify-between text-xs font-bold">
+                                <span className="text-white/80">Outfit Checks (Ad-Free)</span>
+                                <span className="text-white">{Math.max(0, 3 - (usage?.adFreeOutfitChecks || 0))} / 3 Used</span>
+                             </div>
+                             <div className="w-full bg-white/10 rounded-full h-1.5"><div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: `${(Math.max(0, 3 - (usage?.adFreeOutfitChecks || 0)) / 3) * 100}%` }}></div></div>
+                          </div>
 
-                 <button onClick={() => window.dispatchEvent(new CustomEvent('open_subscription_modal'))} className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black uppercase text-[10px] tracking-widest shadow-xl active:scale-[0.98] transition-all">
-                    Unlock Unlimited Access
-                 </button>
-              </div>
-            )}
+                          {/* History Saves */}
+                          <div className="space-y-1">
+                             <div className="flex justify-between text-xs font-bold">
+                                <span className="text-white/80">History Saved</span>
+                                <span className="text-white">{usage?.analysisHistoryCount || 0} / 5 Slots</span>
+                             </div>
+                             <div className="w-full bg-white/10 rounded-full h-1.5"><div className="bg-pink-500 h-1.5 rounded-full" style={{ width: `${((usage?.analysisHistoryCount || 0) / 5) * 100}%` }}></div></div>
+                          </div>
+                          
+                          {/* Coin Balance */}
+                          <div className="pt-2 border-t border-white/5">
+                              <div className="flex justify-between items-center bg-yellow-500/5 p-3 rounded-xl border border-yellow-500/10">
+                                  <span className="text-[10px] font-black uppercase tracking-[0.1em] text-yellow-500/70">🪙 ToneFit Coins Balance:</span>
+                                  <span className="text-sm font-black text-yellow-400">{coins} Coins</span>
+                              </div>
+                              <p className="text-[8px] text-white/30 text-center mt-2 uppercase tracking-widest leading-relaxed">
+                                 1 Coin = 1 AI Scan when free limits are exhausted. 
+                              </p>
+                          </div>
+                       </div>
+
+                       <button onClick={() => window.dispatchEvent(new CustomEvent('open_subscription_modal'))} className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black uppercase text-[10px] tracking-widest shadow-xl active:scale-[0.98] transition-all">
+                          Unlock Unlimited Access
+                       </button>
+                    </>
+                )}
+            </div>
 
 
             {/* ── SECTIONS ────────────────────────── */}

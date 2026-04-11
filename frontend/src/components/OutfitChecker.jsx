@@ -150,7 +150,13 @@ function OutfitChecker() {
     // LIMIT CHECK
     const limitCheck = await consumeUserLimit('outfit_check');
     if (!limitCheck.success && limitCheck.requires_ad) {
-        window.dispatchEvent(new CustomEvent('open_subscription_modal'));
+        window.dispatchEvent(new CustomEvent('open_subscription_modal', {
+            detail: {
+                onSuccess: () => {
+                    handleCheck();
+                }
+            }
+        }));
         setError("You've reached your free Ad-Free limits! Please Upgrade to Pro.");
         return;
     }
