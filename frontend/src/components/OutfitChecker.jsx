@@ -144,21 +144,23 @@ function OutfitChecker() {
     reader.readAsDataURL(file);
   };
 
-  const handleCheck = async () => {
+  const handleCheck = async (skipLimit = false) => {
     if (!selfieFile || !outfitFile) { setError(t('uploadBoth')); return; }
 
     // LIMIT CHECK
-    const limitCheck = await consumeUserLimit('outfit_check');
-    if (!limitCheck.success && limitCheck.requires_ad) {
-        window.dispatchEvent(new CustomEvent('open_subscription_modal', {
-            detail: {
-                onSuccess: () => {
-                    handleCheck();
+    if (!skipLimit) {
+        const limitCheck = await consumeUserLimit('outfit_check');
+        if (!limitCheck.success && limitCheck.requires_ad) {
+            window.dispatchEvent(new CustomEvent('open_subscription_modal', {
+                detail: {
+                    onSuccess: (byAd = false) => {
+                        handleCheck(byAd);
+                    }
                 }
-            }
-        }));
-        setError("You've reached your free Ad-Free limits! Please Upgrade to Pro.");
-        return;
+            }));
+            setError("You've reached your free Ad-Free limits! Please Upgrade to Pro.");
+            return;
+        }
     }
 
     console.log("[OutfitChecker] Starting outfit check with progress...");

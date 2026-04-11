@@ -97,6 +97,21 @@ export default function SubscriptionModal() {
     }
   };
 
+  const handleWatchAd = () => {
+    setLoadingTier('ad');
+    // Open Monetag Direct Link in new tab
+    window.open('https://omg10.com/4/10863757', '_blank');
+    
+    // Fake progress timer for the ad view
+    setTimeout(() => {
+        setIsOpen(false);
+        setLoadingTier(null);
+        if (onSuccessCallback) {
+            onSuccessCallback(true); // pass true for `skipLimit / isAd` parameter
+        }
+    }, 4000);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -172,13 +187,23 @@ export default function SubscriptionModal() {
             {/* TIER 3: COINS (PAYG) */}
             <div className="border border-white/5 bg-transparent rounded-3xl p-4 text-center">
               <h4 className="text-xs font-black text-white/50 uppercase tracking-widest mb-2">Need a Quick Scan?</h4>
-              <button 
-                onClick={() => handleCheckout('coins')}
-                disabled={loadingTier === 'coins'}
-                className="py-2 px-6 rounded-xl border border-white/10 text-white/70 hover:text-white text-[10px] font-bold uppercase tracking-widest transition-colors disabled:opacity-50"
-              >
-                {loadingTier === 'coins' ? 'Processing...' : 'Buy 50 Coins for ₹199'}
-              </button>
+              <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    onClick={() => handleCheckout('coins')}
+                    disabled={loadingTier !== null}
+                    className="py-3 px-2 rounded-xl border border-yellow-500/20 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 text-[10px] font-bold uppercase tracking-widest transition-colors disabled:opacity-50"
+                  >
+                    {loadingTier === 'coins' ? 'Processing...' : 'Buy 50 Coins (₹199)'}
+                  </button>
+
+                  <button 
+                    onClick={handleWatchAd}
+                    disabled={loadingTier !== null}
+                    className="py-3 px-2 rounded-xl border border-blue-500/20 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 text-[10px] font-bold uppercase tracking-widest transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
+                  >
+                    {loadingTier === 'ad' ? 'Watching...' : '📺 Watch Ad (Free)'}
+                  </button>
+              </div>
             </div>
 
           </div>

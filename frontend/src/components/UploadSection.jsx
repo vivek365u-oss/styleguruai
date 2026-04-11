@@ -286,8 +286,8 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     if (onGenderChange) onGenderChange(newGender);
   };
 
-  const handleFile = async (file) => {
-    // Coin checks removed
+  const handleFile = async (file, skipLimit = false) => {
+    if (!file) return;
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) { onError('Only JPG, PNG, or WebP images are allowed.'); return; }
     if (file.size > 10 * 1024 * 1024) { onError('Image is too large. Maximum size is 10MB.'); return; }
@@ -295,19 +295,20 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     onLoadingStart();
     
     // LIMIT CHECK
-    const limitCheck = await consumeUserLimit('analysis');
-    if (!limitCheck.success && limitCheck.requires_ad) {
-        window.dispatchEvent(new CustomEvent('open_subscription_modal', {
-            detail: {
-                onSuccess: () => {
-                    handleFile(file);
+    if (!skipLimit) {
+        const limitCheck = await consumeUserLimit('analysis');
+        if (!limitCheck.success && limitCheck.requires_ad) {
+            window.dispatchEvent(new CustomEvent('open_subscription_modal', {
+                detail: {
+                    onSuccess: (byAd = false) => {
+                        handleFile(file, byAd);
+                    }
                 }
-            }
-        }));
-        onError("You've reached your free Ad-Free limits! Please Upgrade to Pro.");
-        // We simulate loading stop below in finally
-        setShowProgress(false);
-        return;
+            }));
+            onError("You've reached your free Ad-Free limits! Please Upgrade to Pro.");
+            setShowProgress(false);
+            return;
+        }
     }
 
     const reader = new FileReader();
@@ -351,8 +352,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     }
   };
 
-  const handleCoupleAnalysis = async () => {
-    // Coin checks removed
+  const handleCoupleAnalysis = async (skipLimit = false) => {
     if (!partner1 || !partner2) {
       onError('Please select photos for both partners.');
       return;
@@ -360,18 +360,20 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
 
     onLoadingStart();
     // LIMIT CHECK (Couple requires 2 analysis credits or we just consume 1 for now)
-    const limitCheck = await consumeUserLimit('analysis');
-    if (!limitCheck.success && limitCheck.requires_ad) {
-        window.dispatchEvent(new CustomEvent('open_subscription_modal', {
-            detail: {
-                onSuccess: () => {
-                    handleCoupleAnalysis();
+    if (!skipLimit) {
+        const limitCheck = await consumeUserLimit('analysis');
+        if (!limitCheck.success && limitCheck.requires_ad) {
+            window.dispatchEvent(new CustomEvent('open_subscription_modal', {
+                detail: {
+                    onSuccess: (byAd = false) => {
+                        handleCoupleAnalysis(byAd);
+                    }
                 }
-            }
-        }));
-        onError("You've reached your free Ad-Free limits! Please Upgrade to Pro.");
-        setShowProgress(false);
-        return;
+            }));
+            onError("You've reached your free Ad-Free limits! Please Upgrade to Pro.");
+            setShowProgress(false);
+            return;
+        }
     }
 
     const dataURLtoFile = (dataurl, filename) => {
