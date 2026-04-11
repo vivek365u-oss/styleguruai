@@ -9,7 +9,8 @@ from datetime import datetime
 from typing import Optional, List, Dict
 
 import firebase_admin
-from firebase_admin import credentials, auth as firebase_auth
+from firebase_admin import credentials, auth as firebase_auth, firestore as firebase_firestore
+import razorpay
 
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks, Request, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
@@ -761,33 +762,143 @@ async def push_send_weekly(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================
-# PHASE 1.3: FREEMIUM USER ENDPOINTS
+# PHASE 1.3: MONETIZATION & LIMITS (RAZORPAY)
 # ============================================
+RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "rzp_test_placeholder999x")
+RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "secret_placeholder999x")
+razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+
+def init_user_limits_if_needed(uid: str, db):
+    doc_ref = db.collection("users").document(uid)
+    doc = doc_ref.get()
+    if not doc.exists:
+        doc_ref.set({
+            "is_pro": False,
+            "coins": 0,
+            "adFreeAnalysesLeft": 3,
+            "analysisHistoryCount": 0,
+            "adFreeOutfitChecks": 3,
+            "planName": "free",
+            "created_at": datetime.utcnow().isoformat()
+        })
+        return doc_ref.get().to_dict()
+    return doc.to_dict()
 
 @app.get("/api/users/profile")
 async def get_user_profile(current_user: dict = Depends(get_current_user)):
-    """Fetch user's profile status. All users are now PRO."""
+    """Fetch user's actual profile status and limits from Firebase."""
     uid = current_user["uid"]
-    return {
-        "success": True, 
-        "data": {
-            "coins_balance": 9999,
-            "tier": "pro",
-            "is_pro": True
+    db = get_firestore_db()
+    data = init_user_limits_if_needed(uid, db)
+    return {"success": True, "data": data}
+
+class ConsumeActionRequest(BaseModel):
+    action: str  # e.g., 'analysis', 'outfit_check', 'history_save'
+
+@app.post("/api/users/consume-action")
+async def consume_limit(request: ConsumeActionRequest, current_user: dict = Depends(get_current_user)):
+    """Safely decrement user limits based on the action performed."""
+    uid = current_user["uid"]
+    db = get_firestore_db()
+    doc_ref = db.collection("users").document(uid)
+    doc = doc_ref.get()
+    
+    if not doc.exists:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    data = doc.to_dict()
+    is_pro = data.get("is_pro", False)
+    
+    if is_pro:
+        return {"success": True, "message": "Pro user, unlimited access granted"}
+
+    # Implement limit tracking logic
+    if request.action == 'analysis':
+        current = data.get("adFreeAnalysesLeft", 0)
+        if current > 0:
+            doc_ref.update({"adFreeAnalysesLeft": current - 1})
+            return {"success": True, "adFreeAnalysesLeft": current - 1}
+        return {"success": False, "requires_ad": True}
+        
+    elif request.action == 'outfit_check':
+        current = data.get("adFreeOutfitChecks", 0)
+        if current > 0:
+            doc_ref.update({"adFreeOutfitChecks": current - 1})
+            return {"success": True, "adFreeOutfitChecks": current - 1}
+        return {"success": False, "requires_ad": True}
+        
+    elif request.action == 'history_save':
+        current = data.get("analysisHistoryCount", 0)
+        if current < 5:
+            doc_ref.update({"analysisHistoryCount": current + 1})
+            return {"success": True, "analysisHistoryCount": current + 1}
+        return {"success": False, "limit_reached": True}
+
+    raise HTTPException(status_code=400, detail="Invalid action")
+
+class CreateOrderRequest(BaseModel):
+    tier: str # 'monthly', 'yearly', 'coins'
+
+@app.post("/api/payment/create-order")
+async def create_order(request: CreateOrderRequest, current_user: dict = Depends(get_current_user)):
+    amount_in_inr = 0
+    if request.tier == 'monthly':
+        amount_in_inr = 499
+    elif request.tier == 'yearly':
+        amount_in_inr = 2499
+    elif request.tier == 'coins':
+        amount_in_inr = 199
+    else:
+        raise HTTPException(status_code=400, detail="Invalid tier")
+
+    data = {
+        "amount": amount_in_inr * 100,  # Razorpay expects paise
+        "currency": "INR",
+        "receipt": f"receipt_{current_user['uid'][:10]}",
+        "notes": {
+            "tier": request.tier,
+            "uid": current_user["uid"]
         }
     }
+    try:
+        order = razorpay_client.order.create(data=data)
+        return {"success": True, "order": order, "key": RAZORPAY_KEY_ID}
+    except Exception as e:
+        print(f"Razorpay Order Creation Failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-class ConsumeCoinRequest(BaseModel):
-    cost: int = 1
+class VerifyPaymentRequest(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+    tier: str
 
-@app.post("/api/users/consume-coin")
-async def consume_coin(request: ConsumeCoinRequest, current_user: dict = Depends(get_current_user)):
-    """Always return success (unlimited access)."""
-    return {"success": True, "is_pro": True, "remaining_coins": 9999}
-
-# Payment routes removed.
-
-# User endpoints logic moved to top and simplified.
+@app.post("/api/payment/verify")
+async def verify_payment(request: VerifyPaymentRequest, current_user: dict = Depends(get_current_user)):
+    try:
+        result = razorpay_client.utility.verify_payment_signature({
+            'razorpay_order_id': request.razorpay_order_id,
+            'razorpay_payment_id': request.razorpay_payment_id,
+            'razorpay_signature': request.razorpay_signature
+        })
+        # If signature is valid, result is None or True
+        uid = current_user["uid"]
+        db = get_firestore_db()
+        doc_ref = db.collection("users").document(uid)
+        doc = doc_ref.get().to_dict() or {}
+        
+        updates = {}
+        if request.tier in ['monthly', 'yearly']:
+            updates['is_pro'] = True
+            updates['planName'] = request.tier
+        elif request.tier == 'coins':
+            updates['coins'] = doc.get('coins', 0) + 50
+            
+        doc_ref.set(updates, merge=True)
+        return {"success": True, "message": "Payment verified and tier upgraded successfully"}
+    except Exception as e:
+        print(f"Razorpay Verification Failed: {str(e)}")
+        raise HTTPException(status_code=400, detail="Invalid Payment Signature")
 
 # ============================================
 # PRODUCTS — PHASE 1 REVENUE

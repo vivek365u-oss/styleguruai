@@ -1,26 +1,61 @@
 import { useState, useEffect, useCallback } from 'react';
 import { PlanContext } from './PlanContext';
+import { getUserLimits } from '../api/styleApi';
+import { auth } from '../firebase';
 
 export function PlanProvider({ children }) {
-  // Simplified for a fully free experience
-  const [plan] = useState('pro');
-  const [usage] = useState({ analyses_count: 0, outfit_checks_count: 0 });
-  const [isPro] = useState(true);
-  const [validUntil] = useState(null);
-  const [coins] = useState(9999);
-  const [loading] = useState(false);
+  const [plan, setPlan] = useState('free');
+  const [usage, setUsage] = useState({ 
+    adFreeAnalysesLeft: 3, 
+    analysisHistoryCount: 0, 
+    adFreeOutfitChecks: 3 
+  });
+  const [isPro, setIsPro] = useState(false);
+  const [coins, setCoins] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const refreshPlan = useCallback(async () => {
-    // No-op in free mode
+    if (!auth.currentUser) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await getUserLimits();
+      if (res.success && res.data) {
+        setIsPro(res.data.is_pro || false);
+        setPlan(res.data.planName || 'free');
+        setCoins(res.data.coins || 0);
+        setUsage({
+          adFreeAnalysesLeft: res.data.adFreeAnalysesLeft ?? 3,
+          analysisHistoryCount: res.data.analysisHistoryCount ?? 0,
+          adFreeOutfitChecks: res.data.adFreeOutfitChecks ?? 3,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to load plan:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const setUsage = () => {};
-  const setCoins = () => {};
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        refreshPlan();
+      } else {
+        setIsPro(false);
+        setPlan('free');
+        setCoins(0);
+        setLoading(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [refreshPlan]);
 
   return (
-    <PlanContext.Provider value={{ plan, usage, isPro, validUntil, loading, refreshPlan, setUsage, coins, setCoins }}>
+    <PlanContext.Provider value={{ plan, usage, isPro, loading, refreshPlan, coins, setUsage, setCoins }}>
       {children}
     </PlanContext.Provider>
   );
 }
-

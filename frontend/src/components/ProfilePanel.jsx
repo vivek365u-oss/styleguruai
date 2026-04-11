@@ -191,6 +191,51 @@ export default function ProfilePanel() {
                </div>
             </div>
 
+            {/* ── USAGE LIMITS (FREE TIER ONLY) ────────────────────────── */}
+            {(!isPro) && (
+              <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-6 space-y-4 relative overflow-hidden">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-[50px] -z-10" />
+                 <div className="flex justify-between items-center mb-2">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">Your Usage Limits</p>
+                    <span className="text-[9px] font-bold text-red-400 bg-red-400/10 px-2 py-0.5 rounded-full uppercase">Free Plan</span>
+                 </div>
+                 
+                 <div className="space-y-4">
+                    {/* DNA Analysis Limit */}
+                    <div className="space-y-1">
+                       <div className="flex justify-between text-xs font-bold">
+                          <span className="text-white/80">DNA Analyses (Ad-Free)</span>
+                          <span className="text-white">{Math.max(0, 3 - (usage?.adFreeAnalysesLeft || 0))} / 3 Used</span>
+                       </div>
+                       <div className="w-full bg-white/10 rounded-full h-1.5"><div className="bg-purple-500 h-1.5 rounded-full" style={{ width: `${(Math.max(0, 3 - (usage?.adFreeAnalysesLeft || 0)) / 3) * 100}%` }}></div></div>
+                    </div>
+                    
+                    {/* Outfit Checks Limit */}
+                    <div className="space-y-1">
+                       <div className="flex justify-between text-xs font-bold">
+                          <span className="text-white/80">Outfit Checks (Ad-Free)</span>
+                          <span className="text-white">{Math.max(0, 3 - (usage?.adFreeOutfitChecks || 0))} / 3 Used</span>
+                       </div>
+                       <div className="w-full bg-white/10 rounded-full h-1.5"><div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: `${(Math.max(0, 3 - (usage?.adFreeOutfitChecks || 0)) / 3) * 100}%` }}></div></div>
+                    </div>
+
+                    {/* History Saves */}
+                    <div className="space-y-1">
+                       <div className="flex justify-between text-xs font-bold">
+                          <span className="text-white/80">History Saved</span>
+                          <span className="text-white">{usage?.analysisHistoryCount || 0} / 5 Slots</span>
+                       </div>
+                       <div className="w-full bg-white/10 rounded-full h-1.5"><div className="bg-pink-500 h-1.5 rounded-full" style={{ width: `${((usage?.analysisHistoryCount || 0) / 5) * 100}%` }}></div></div>
+                    </div>
+                 </div>
+
+                 <button onClick={() => window.dispatchEvent(new CustomEvent('open_subscription_modal'))} className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black uppercase text-[10px] tracking-widest shadow-xl active:scale-[0.98] transition-all">
+                    Unlock Unlimited Access
+                 </button>
+              </div>
+            )}
+
+
             {/* ── SECTIONS ────────────────────────── */}
             <div className="space-y-8">
                

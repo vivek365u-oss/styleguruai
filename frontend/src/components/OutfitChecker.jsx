@@ -1,5 +1,5 @@
 import { useState, useRef, useContext } from 'react';
-import { checkOutfitCompatibility, saveWardrobeItem, auth } from '../api/styleApi';
+import { checkOutfitCompatibility, saveWardrobeItem, auth, consumeUserLimit } from '../api/styleApi';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
@@ -146,8 +146,15 @@ function OutfitChecker() {
 
   const handleCheck = async () => {
     if (!selfieFile || !outfitFile) { setError(t('uploadBoth')); return; }
-    // Plan gate
-    // Usage limit removed
+
+    // LIMIT CHECK
+    const limitCheck = await consumeUserLimit('outfit_check');
+    if (!limitCheck.success && limitCheck.requires_ad) {
+        window.dispatchEvent(new CustomEvent('open_subscription_modal'));
+        setError("You've reached your free Ad-Free limits! Please Upgrade to Pro.");
+        return;
+    }
+
     console.log("[OutfitChecker] Starting outfit check with progress...");
     setLoading(true); setError(null); setResult(null);
     setShowProgress(true);

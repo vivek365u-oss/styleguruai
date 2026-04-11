@@ -1,5 +1,5 @@
 import { useState, useRef, useContext } from 'react';
-import { analyzeImage, analyzeImageFemale, analyzeImageSeasonal } from '../api/styleApi';
+import { analyzeImage, analyzeImageFemale, analyzeImageSeasonal, consumeUserLimit } from '../api/styleApi';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
@@ -291,6 +291,19 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) { onError('Only JPG, PNG, or WebP images are allowed.'); return; }
     if (file.size > 10 * 1024 * 1024) { onError('Image is too large. Maximum size is 10MB.'); return; }
+
+    onLoadingStart();
+    
+    // LIMIT CHECK
+    const limitCheck = await consumeUserLimit('analysis');
+    if (!limitCheck.success && limitCheck.requires_ad) {
+        window.dispatchEvent(new CustomEvent('open_subscription_modal'));
+        onError("You've reached your free Ad-Free limits! Please Upgrade to Pro.");
+        // We simulate loading stop below in finally
+        setShowProgress(false);
+        return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => { setPreview(e.target.result); onImageSelected(e.target.result); };
     reader.readAsDataURL(file);
@@ -338,6 +351,17 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       onError('Please select photos for both partners.');
       return;
     }
+
+    onLoadingStart();
+    // LIMIT CHECK (Couple requires 2 analysis credits or we just consume 1 for now)
+    const limitCheck = await consumeUserLimit('analysis');
+    if (!limitCheck.success && limitCheck.requires_ad) {
+        window.dispatchEvent(new CustomEvent('open_subscription_modal'));
+        onError("You've reached your free Ad-Free limits! Please Upgrade to Pro.");
+        setShowProgress(false);
+        return;
+    }
+
     const dataURLtoFile = (dataurl, filename) => {
       let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
         bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
@@ -345,7 +369,6 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       return new File([u8arr], filename, { type: mime });
     };
 
-    onLoadingStart();
     setShowProgress(true);
     startProgress();
     // Map language code for backend
