@@ -544,11 +544,41 @@ export const updateUserFeedback = async (uid, category, value, signal) => {
 export const saveWardrobeItem = async (uid, item) => {
   if (!auth.currentUser) return null;
   try {
-    const ref = await addDoc(collection(db, 'users', uid, 'wardrobe'), {
+    // 1. Strict Gender Safety Net
+    const isFemaleCat = ['cat_saree_silk', 'cat_kurti', 'cat_makeup', 'cat_dress', 'cat_top', 'cat_skirt', 'lehenga'].some(x => item.category?.toLowerCase().includes(x));
+    const isMaleCat = ['sherwani', 'cat_formal_shirt', 'tuxedo', 'cat_kurta_set', 'cat_polo', 'cat_blazer'].some(x => item.category?.toLowerCase().includes(x));
+    
+    let safetyGender = item.gender || 'male';
+    if (isFemaleCat) safetyGender = 'female';
+    if (isMaleCat && !isFemaleCat) safetyGender = 'male';
+
+    // 2. Formality & Occasion Logic Mapping
+    let formality = 5;
+    const tags = item.tags || [];
+    if (['tag_office', 'tag_traditional', 'tag_party'].some(t => tags.includes(t)) || isFemaleCat || isMaleCat) formality = 8;
+    if (tags.includes('tag_gym') || item.category === 'cat_sneakers') formality = 2;
+
+    const seasons = [];
+    if (item.fabric === 'fabric_wool' || item.fabric === 'fabric_leather') seasons.push('Winter', 'Autumn');
+    else if (item.fabric === 'fabric_linen' || item.fabric === 'fabric_cotton') seasons.push('Summer', 'Spring');
+    else seasons.push('All-Season');
+
+    const enhancedItem = {
       ...item,
-      tags: item.tags || [], // New: Supports vibe/fit tags
+      // Backward Compatability Rules
+      tags: tags,
+      gender: safetyGender, // Explicit override if category demands it
+      // Smart Schema Fields (Phase 2 DNA compatibility)
+      main_category: item.category?.includes('top') || item.category?.includes('shirt') ? 'Topwear' : item.category?.includes('bottom') || item.category?.includes('pant') || item.category?.includes('jeans') ? 'Bottomwear' : 'Apparel',
+      primary_color_name: item.color_name || 'Unknown',
+      primary_color_hex: item.hex || '#000000',
+      occasions: tags.map(t => t.replace('tag_', '')),
+      seasons: seasons,
+      formality_score: formality,
       saved_at: new Date().toISOString(),
-    });
+    };
+
+    const ref = await addDoc(collection(db, 'users', uid, 'wardrobe'), enhancedItem);
     return ref.id;
   } catch (e) {
     handleFirestoreError('saveWardrobeItem', e);
