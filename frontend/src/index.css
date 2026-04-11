@@ -437,3 +437,17 @@ button, a, input, select { transition: all 0.15s cubic-bezier(0.25, 0.46, 0.45, 
 
 /* Scrollable containers */
 html { scroll-behavior: smooth; }
+
+/* ── Keyframe Animations ── */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes spinSmooth {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}

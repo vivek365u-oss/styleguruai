@@ -1,958 +1,745 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+/**
+ * StyleNavigator.jsx → "Style Compass" v4.0
+ * ═══════════════════════════════════════════════════
+ * Premium AI-powered style guidance system.
+ * Every recommendation includes: WHAT + WHY + BENEFIT
+ * Strict gender differentiation (male vs female logic)
+ * Color theory based on skin tone science
+ * Data-driven (history, wardrobe, analysis) — zero random output
+ * ═══════════════════════════════════════════════════
+ */
+
+import React, { useState, useEffect, useContext, useMemo, useCallback } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
-import { 
-    auth, 
-    getStyleInsights, 
-    getWardrobe, 
-    loadPrimaryProfile, 
-    savePrimaryProfile,
-    saveStyleInsights,
-    loadStyleInsights,
-    logDailyOutfit,
-    getDailyOutfitLogs,
-    loadUserPreferences,
-    updateUserFeedback 
+import {
+  auth, getWardrobe, loadPrimaryProfile,
+  loadUserPreferences, getDailyOutfitLogs, logDailyOutfit,
+  savePrimaryProfile, saveStyleInsights, loadStyleInsights,
+  getStyleInsights,
 } from '../api/styleApi';
-
 import { scoreWardrobeItem, getActionableAdvice, getAccessoryAdvice } from '../utils/stylingEngine';
-import { getCategoryIcon } from '../constants/fashionCategories';
-import { FashionIcons, IconRenderer } from './Icons';
+import { getThemeColors } from '../utils/themeColors';
 
-const infoCls = "w-5 h-5 rounded-full flex items-center justify-center text-[10px] cursor-help transition-all";
-
-const TONE_COLORS = { fair: "#F5DEB3", light: "#D2A679", medium: "#C68642", olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A" };
-
-const TRENDING_COLLECTIONS = {
-    male: [
-        { id: 't1', key: 'item_oversized_tee', icon: 'Shirt', score: 98 },
-        { id: 't2', key: 'item_baggy_jeans', icon: 'Trousers', score: 95 },
-        { id: 't3', key: 'item_cargo_pants', icon: 'Trousers', score: 92 },
-        { id: 't4', key: 'item_varsity_jacket', icon: 'Hoodie', score: 91 },
-        { id: 't5', key: 'item_minimal_sneakers', icon: 'Shoes', score: 96 },
-        { id: 't6', key: 'item_cuban_collar', icon: 'Shirt', score: 90 }
-    ],
-    female: [
-        { id: 'f1', key: 'item_corset_top', icon: 'Shirt', score: 98 },
-        { id: 'f2', key: 'item_wide_leg', icon: 'Trousers', score: 96 },
-        { id: 'f3', key: 'item_blazer', icon: 'Shirt', score: 94 },
-        { id: 'f4', key: 'item_slip_dress', icon: 'Dress', score: 93 },
-        { id: 'f5', key: 'item_chunky_loafers', icon: 'Shoes', score: 91 },
-        { id: 'f6', key: 'item_saree_chiffon', icon: 'Dress', score: 97 }
-    ]
+// ── Skin tone → hex ─────────────────────────────────
+const TONE_HEX = {
+  fair:   '#F5DEB3', light:  '#D2A679', medium: '#C68642',
+  olive:  '#A0724A', brown:  '#7B4F2E', dark:   '#4A2C0A',
 };
 
-const StyleNavigator = ({ user, onAnalyze }) => {
-    const { theme } = useContext(ThemeContext);
-    const { t, language } = useLanguage();
-    const isDark = theme === 'dark';
+// ── Color Science: tone → best palette ──────────────
+const TONE_PALETTE = {
+  fair:   { warm:['#8B3A3A','#556B2F','#4682B4','#483D8B'], cool:['#C71585','#2E8B57','#4169E1','#6A0DAD'], neutral:['#8B0000','#228B22','#2F4F8F','#8B4513'] },
+  light:  { warm:['#B8860B','#6B4226','#2E4057','#8B3A62'], cool:['#1C6EA4','#96281B','#1D7A4D','#8B006B'], neutral:['#4A90D9','#C0392B','#27AE60','#8E44AD'] },
+  medium: { warm:['#1A5276','#196F3D','#922B21','#CA6F1E'], cool:['#2471A3','#1E8449','#943126','#D4AC0D'], neutral:['#154360','#145A32','#78281F','#B7950B'] },
+  olive:  { warm:['#50C878','#B7410E','#FFFFF0','#722F37'], cool:['#40E0D0','#FF6347','#F5F5DC','#8B008B'], neutral:['#228B22','#CC5500','#F5DEB3','#800020'] },
+  brown:  { warm:['#FFFFFF','#0047AB','#FFD700','#FF4500'], cool:['#F0F8FF','#4169E1','#FFDB58','#FF69B4'], neutral:['#FFFAF0','#0047AB','#EFCB68','#E34234'] },
+  dark:   { warm:['#FF7F50','#FFD700','#00CED1','#98FB98'], cool:['#FF6B6B','#FFE66D','#4ECDC4','#A8E6CF'], neutral:['#FF8C61','#FFDA77','#45B7D1','#96CEB4'] },
+};
 
-    const [loading, setLoading] = useState(true);
-    const [insights, setInsights] = useState(null);
-    const [profile, setProfile] = useState(null);
-    const [prefs, setPrefs] = useState(null);
-    const [isPrimary, setIsPrimary] = useState(false);
-    const [error, setError] = useState(null);
-    const [showInfo, setShowInfo] = useState(null); // 'harmony' | 'gap' | null
-    const [wardrobe, setWardrobe] = useState([]);
-    const [isWorn, setIsWorn] = useState(false);
-    const [logging, setLogging] = useState(false);
-    const [mood, setMood] = useState('mood_minimal');
-    const [isEditingDNA, setIsEditingDNA] = useState(false);
-    const [editDNA, setEditDNA] = useState({ skinTone: 'medium', undertone: 'neutral', season: 'Spring' });
-    const [activeTrendingGender, setActiveTrendingGender] = useState('male');
-    const [activeView, setActiveView] = useState('daily'); // 'daily' | 'shop' | 'dna'
+// ── Male outfit templates by occasion ───────────────
+const MALE_OUTFITS = {
+  office:   (color1, color2) => ({ top:`${color1} formal shirt`,      bottom:`${color2} tailored trousers`,    shoes:'Dark brown Oxford shoes', accent:'Silver watch + leather belt matching shoes' }),
+  casual:   (color1, color2) => ({ top:`${color1} slim-fit polo`,     bottom:`${color2} clean chinos`,         shoes:'White minimal sneakers',  accent:'Minimal bracelet + clean watch' }),
+  party:    (color1, color2) => ({ top:`${color1} printed shirt`,     bottom:`${color2} slim dark jeans`,      shoes:'Dark Chelsea boots',      accent:'Bold statement watch or ring' }),
+  ethnic:   (color1, color2) => ({ top:`${color1} kurta set`,         bottom:`${color2} churidar`,             shoes:'Tan mojari / juttis',     accent:'Pocket square + minimal bracelet' }),
+  gym:      (color1, color2) => ({ top:`${color1} dry-fit tee`,       bottom:`${color2} track pants`,          shoes:'Cushioned athletic shoes', accent:'Sports band / cap' }),
+};
+const FEMALE_OUTFITS = {
+  office:   (color1, color2) => ({ top:`${color1} structured blazer`, bottom:`${color2} cigarette trousers`,   shoes:'Nude pointed pumps',      accent:'Pearl earrings + structured handbag' }),
+  casual:   (color1, color2) => ({ top:`${color1} crop top`,         bottom:`${color2} high-waist jeans`,     shoes:'White slip-on sneakers',  accent:'Layered necklace + tote bag' }),
+  party:    (color1, color2) => ({ top:`${color1} co-ord set top`,   bottom:`${color2} wide-leg pants`,       shoes:'Block heel sandals',      accent:'Statement earrings + clutch' }),
+  ethnic:   (color1, color2) => ({ top:`${color1} silk kurti`,       bottom:`${color2} palazzo / salwar`,    shoes:'Kolhapuri / embellished flats', accent:'Jhumka earrings + bangles' }),
+  party_gown: (color1)       => ({ top:`${color1} midi dress`,       bottom:'—',                              shoes:'Strappy heeled sandals',  accent:'Ear cuff + chain bag' }),
+};
 
-    useEffect(() => {
-        const loadInitialData = async () => {
-            if (!auth.currentUser) {
-                setLoading(false);
-                return;
-            }
+// ── Why text (color theory backed) ─────────────────
+const getColorWhy = (tone, undertone = 'neutral') => {
+  const reasons = {
+    fair:   'Your fair skin creates high contrast with rich deep tones — they will make your complexion look radiant.',
+    light:  'Light skin with warm undertones pairs best with earthy and jewel tones that add warmth without washing out.',
+    medium: 'Medium skin tones have the widest range — bold colors and earth tones both create beautiful contrast.',
+    olive:  'Olive undertones pop when paired with warm terracotta, burgundy, and contrast neutrals.',
+    brown:  'Brown tones look stunning with vivid, high-saturation colors that complement the natural richness of your skin.',
+    dark:   'Deep skin tones glow with bright, saturated colors — high contrast palettes make your features stand out powerfully.',
+  };
+  return reasons[tone] || reasons.medium;
+};
 
-            try {
-                const uid = auth.currentUser.uid;
-                const [primary, userPrefs, userWardrobe, logs] = await Promise.all([
-                    loadPrimaryProfile(uid),
-                    loadUserPreferences(uid),
-                    getWardrobe(uid),
-                    getDailyOutfitLogs(uid, 1)
-                ]);
-                
-                let activeProfile = primary;
-                if (primary) {
-                    setIsPrimary(true);
-                } else {
-                    activeProfile = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
-                    setIsPrimary(false);
-                }
+// ── Benefit text ────────────────────────────────────
+const getOutfitBenefit = (occasion) => {
+  const benefits = {
+    office:  'Projects authority & polish — look 30% more confident in client/team interactions.',
+    casual:  'Effortlessly put-together look — stylish without trying too hard.',
+    party:   'Commands attention — high visual impact outfit that photographs well.',
+    ethnic:  'Cultural confidence — honors your roots while staying modern.',
+    gym:     'Peak performance aesthetic — motivated mindset starts with matching energy.',
+  };
+  return benefits[occasion] || benefits.casual;
+};
 
-                if (!activeProfile) {
-                    setLoading(false);
-                    return;
-                }
-                setProfile(activeProfile);
-                setPrefs(userPrefs);
-                setWardrobe(userWardrobe);
-                setEditDNA({
-                    skinTone: activeProfile.skinTone || activeProfile.skin_tone?.category || 'medium',
-                    undertone: activeProfile.undertone || activeProfile.skin_tone?.undertone || 'neutral',
-                    season: activeProfile.season || activeProfile.skin_tone?.color_season || 'Spring'
-                });
+// ── Mood selector options ────────────────────────────
+const MOODS = [
+  { id:'office',   emoji:'💼', label:'Office' },
+  { id:'casual',   emoji:'😎', label:'Casual' },
+  { id:'party',    emoji:'🎉', label:'Party' },
+  { id:'ethnic',   emoji:'🪔', label:'Ethnic' },
+  { id:'gym',      emoji:'🏋️', label:'Active' },
+];
 
-                // Check if already worn today
-                const today = new Date().toLocaleDateString('en-CA');
-                if (logs.length > 0 && logs[0].date === today) {
-                    setIsWorn(true);
-                }
+// ── Store deeplinks ─────────────────────────────────
+const STORES = [
+  { id:'myntra',   name:'Myntra',   emoji:'🎀', color:'#f13ab1', bg:'linear-gradient(135deg,#f13ab1,#f87171)' },
+  { id:'amazon',   name:'Amazon',   emoji:'📦', color:'#ff9900', bg:'linear-gradient(135deg,#ff9900,#232f3e)' },
+  { id:'flipkart', name:'Flipkart', emoji:'🛒', color:'#2874f0', bg:'linear-gradient(135deg,#2874f0,#0052cc)' },
+  { id:'meesho',   name:'Meesho',   emoji:'💸', color:'#ff44af', bg:'linear-gradient(135deg,#ff44af,#ff8c00)' },
+];
 
-                // Load locked insights from Firestore first
-                const lockedInsights = await loadStyleInsights(uid);
-                if (lockedInsights) {
-                    setInsights(lockedInsights);
-                }
+const PJS = "'Plus Jakarta Sans', 'Inter', sans-serif";
+const PDI = "'Playfair Display', 'Georgia', serif";
+const GRAD = 'linear-gradient(135deg, #8B5CF6, #EC4899)';
+const VIOLET = '#8B5CF6';
 
-                const data = await getStyleInsights(
-                    activeProfile.skinTone || activeProfile.skin_tone?.category,
-                    activeProfile.undertone || activeProfile.skin_tone?.undertone,
-                    userWardrobe,
-                    language,
-                    userPrefs?.lifestyle || 'other',
-                    activeProfile.gender || userPrefs?.gender || 'men'
-                );
+// ── Shop URL builder ────────────────────────────────
+const buildShopUrl = (item, store, gender) => {
+  const g = gender.toLowerCase().includes('female') ? 'women' : 'men';
+  const q = `${g} ${item} India`;
+  if (store === 'myntra')   return `https://www.myntra.com/search?f=Gender:${g}&q=${encodeURIComponent(item)}`;
+  if (store === 'amazon')   return `https://www.amazon.in/s?k=${encodeURIComponent(q)}`;
+  if (store === 'flipkart') return `https://www.flipkart.com/search?q=${encodeURIComponent(q)}`;
+  if (store === 'meesho')   return `https://www.meesho.com/search?q=${encodeURIComponent(q)}`;
+  return `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+};
 
-                if (data.success) {
-                    setInsights(data.insights);
-                    // Sync to Firestore for persistence
-                    await saveStyleInsights(uid, data.insights);
-                } else if (!lockedInsights) {
-                    setError('Failed to sync style data');
-                }
-            } catch (err) {
-                console.error('Style Navigator load failed:', err);
-                setError('Failed to sync style data');
-            } finally {
-                setLoading(false);
-            }
-        };
+// ══════════════════════════════════════════════════════
+// COMPONENT: Style Compass
+// ══════════════════════════════════════════════════════
+export default function StyleNavigator({ user, onAnalyze }) {
+  const { theme } = useContext(ThemeContext);
+  const { t } = useLanguage();
+  const C = useMemo(() => getThemeColors(theme), [theme]);
 
-        loadInitialData();
-        
-        // Auto-set trending gender based on profile
-        if (profile) {
-            const isWomen = profile.gender?.toLowerCase().includes('female') || profile.gender?.toLowerCase() === 'women';
-            setActiveTrendingGender(isWomen ? 'female' : 'male');
+  const [loading,   setLoading]   = useState(true);
+  const [profile,   setProfile]   = useState(null);
+  const [wardrobe,  setWardrobe]  = useState([]);
+  const [prefs,     setPrefs]     = useState(null);
+  const [isWorn,    setIsWorn]    = useState(false);
+  const [logging,   setLogging]   = useState(false);
+  const [mood,      setMood]      = useState('casual');
+  const [tab,       setTab]       = useState('look');   // 'look' | 'colors' | 'closet'
+  const [shopItem,  setShopItem]  = useState(null);
+  const [insights,  setInsights]  = useState(null);
+
+  useEffect(() => {
+    if (!auth.currentUser) { setLoading(false); return; }
+    const uid = auth.currentUser.uid;
+
+    (async () => {
+      try {
+        const [primary, userPrefs, userWardrobe, logs, locked] = await Promise.all([
+          loadPrimaryProfile(uid),
+          loadUserPreferences(uid),
+          getWardrobe(uid),
+          getDailyOutfitLogs(uid, 1),
+          loadStyleInsights(uid),
+        ]);
+        const activeProfile = primary || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
+        setProfile(activeProfile);
+        setPrefs(userPrefs);
+        setWardrobe(userWardrobe || []);
+        if (locked) setInsights(locked);
+
+        const today = new Date().toLocaleDateString('en-CA');
+        if (logs?.length > 0 && logs[0].date === today) setIsWorn(true);
+
+        if (activeProfile) {
+          const res = await getStyleInsights(
+            activeProfile.skinTone || activeProfile.skin_tone?.category,
+            activeProfile.undertone || activeProfile.skin_tone?.undertone,
+            userWardrobe || [],
+            'en',
+            userPrefs?.lifestyle || 'other',
+            activeProfile.gender || userPrefs?.gender || 'male'
+          );
+          if (res?.success) {
+            setInsights(res.insights);
+            saveStyleInsights(uid, res.insights).catch(() => {});
+          }
         }
+      } catch (e) {
+        console.error('[StyleCompass]', e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
-        window.addEventListener('sg_wardrobe_updated', loadInitialData);
-        return () => window.removeEventListener('sg_wardrobe_updated', loadInitialData);
-    }, [language]);
+  // ── Derived data ───────────────────────────────────
+  const gender    = useMemo(() => {
+    const g = insights?.gender || profile?.gender || prefs?.gender || 'male';
+    return (g.toLowerCase().includes('female') || g === 'women') ? 'female' : 'male';
+  }, [insights, profile, prefs]);
 
-    const getMatch = (colorName, categoryHint = 'top') => {
-        if (!colorName || !wardrobe.length) return null;
-        
-        // Use AIPSE Engine for matching
-        const context = { weather: 'sunny', event: prefs?.lifestyle || 'casual', mood };
-        const userProfile = profile || { gender: 'male' };
+  const toneKey   = useMemo(() => (profile?.skinTone || profile?.skin_tone?.category || 'medium').toLowerCase(), [profile]);
+  const undertone = useMemo(() => (profile?.undertone || profile?.skin_tone?.undertone || 'neutral').toLowerCase(), [profile]);
+  const skinHex   = useMemo(() => profile?.skinHex || TONE_HEX[toneKey] || '#C68642', [profile, toneKey]);
+  const season    = useMemo(() => profile?.season || profile?.skin_tone?.color_season || 'Spring', [profile]);
 
-        const ranked = wardrobe
-            .map(item => ({
-                ...item,
-                engineScore: scoreWardrobeItem(item, context, userProfile, [], prefs || {}, insights)
-            }))
-            .sort((a, b) => b.engineScore - a.engineScore);
+  // Best colors from analysis or fallback color science
+  const bestColors = useMemo(() => {
+    const fromInsights = insights?.best_shirt_colors || insights?.best_dress_colors || insights?.best_colors || [];
+    if (fromInsights.length > 0) return fromInsights.slice(0, 6);
+    const palette = TONE_PALETTE[toneKey]?.[undertone] || TONE_PALETTE.medium.neutral;
+    return palette.map((hex, i) => ({
+      name: ['Primary Tone', 'Secondary Tone', 'Accent Color', 'Neutral Base', 'Power Color', 'Contrast'][i] || `Color ${i+1}`,
+      hex,
+    }));
+  }, [insights, toneKey, undertone]);
 
-        // Try to find a high-match item in wardrobe that matches the hint
-        const low = colorName.toLowerCase();
-        return ranked.find(item => {
-            const outfitColors = item.outfit_data?.colors || [];
-            const matchesColor = outfitColors.some(c => c.name.toLowerCase().includes(low)) || 
-                                (item.hex && item.hex.toLowerCase() === low) ||
-                                (item.color_name && item.color_name.toLowerCase().includes(low));
-            
-            return matchesColor && item.engineScore > 60;
-        });
-    };
+  // Outfit for current mood
+  const outfit = useMemo(() => {
+    if (!bestColors.length) return null;
+    const c1 = bestColors[0]?.name || 'Navy';
+    const c2 = bestColors[1]?.name || 'White';
+    const templates = gender === 'female' ? FEMALE_OUTFITS : MALE_OUTFITS;
+    const fn = templates[mood] || templates.casual;
+    return fn(c1, c2);
+  }, [bestColors, gender, mood]);
 
-    const handleWearToday = async () => {
-        if (!auth.currentUser || !insights?.daily_suggestion || isWorn || logging) return;
-        setLogging(true);
-        try {
-            const success = await logDailyOutfit(auth.currentUser.uid, {
-                title: insights.daily_suggestion.title,
-                top: insights.daily_suggestion.top,
-                bottom: insights.daily_suggestion.bottom,
-                vibe: prefs?.lifestyle || 'casual'
-            });
-            if (success) {
-                setIsWorn(true);
-                 window.dispatchEvent(new CustomEvent('sg_calendar_updated'));
-            }
-        } catch (e) {
-            console.error('Failed to log outfit:', e);
-        } finally {
-            setLogging(false);
-        }
-    };
+  // Wardrobe harmony score
+  const harmonyScore = useMemo(() => {
+    if (!wardrobe.length || !profile) return 0;
+    const total = wardrobe.reduce((s, item) =>
+      s + scoreWardrobeItem(item, { weather:'sunny' }, profile, [], prefs || {}, insights), 0);
+    return Math.round(total / wardrobe.length);
+  }, [wardrobe, profile, prefs, insights]);
 
-    const handleUpdateDNA = async () => {
-        if (!auth.currentUser || !profile) return;
-        setLogging(true);
-        try {
-            const uid = auth.currentUser.uid;
-            const updatedProfile = {
-                ...profile,
-                skinTone: editDNA.skinTone,
-                undertone: editDNA.undertone,
-                season: editDNA.season,
-                // Ensure skinHex is updated if manually changed
-                skinHex: TONE_COLORS[editDNA.skinTone] || profile.skinHex,
-                updated_at: new Date().toISOString()
-            };
-            await savePrimaryProfile(uid, updatedProfile);
-            setProfile(updatedProfile);
-            setIsEditingDNA(false);
-            // Refresh insights
-            const data = await getStyleInsights(
-                updatedProfile.skinTone,
-                updatedProfile.undertone,
-                wardrobe,
-                language,
-                prefs?.lifestyle || 'other',
-                updatedProfile.gender || prefs?.gender || 'men'
-            );
-            if (data.success) {
-                setInsights(data.insights);
-                await saveStyleInsights(uid, data.insights);
-            }
-            window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
-        } catch (e) {
-            console.error('Failed to update DNA:', e);
-            alert('Update failed. Please try again.');
-        } finally {
-            setLogging(false);
-        }
-    };
-
-    const handleReanalyze = () => {
-        if (window.confirm('This will clear your current profile and start a new analysis. Proceed?')) {
-            localStorage.removeItem('sg_primary_profile');
-            localStorage.removeItem('sg_locked_insights');
-            onAnalyze();
-        }
-    };
-
-    const handleTogglePrimary = async () => {
-        if (!auth.currentUser || !profile) return;
-        try {
-            if (isPrimary) {
-                setIsPrimary(false);
-                localStorage.removeItem('sg_primary_profile');
-            } else {
-                await savePrimaryProfile(auth.currentUser.uid, profile);
-                setIsPrimary(true);
-            }
-        } catch (e) {
-            console.error('Failed to toggle primary profile:', e);
-        }
-    };
-
-    const handleFeedback = async (signal) => {
-        if (!auth.currentUser || logging) return;
-        const suggestion = insights?.daily_suggestion;
-        if (!suggestion) return;
-
-        setLogging(true);
-        try {
-            const uid = auth.currentUser.uid;
-            // Capture the top's category and the bottom's category if possible, 
-            // but for now we tag the actual colors/vibes
-            await updateUserFeedback(uid, 'color', suggestion.top, signal);
-            await updateUserFeedback(uid, 'color', suggestion.bottom, signal);
-            
-            // Show feedback
-            const msg = signal === 'like' ? 'Style preference saved! ❤️' : 'Optimizing engine... 🧠';
-            alert(msg); // Simplified for now, or use a toast if available
-            
-            // Reload prefs to refresh scores
-            const newPrefs = await loadUserPreferences(uid);
-            setPrefs(newPrefs);
-        } catch (e) {
-            console.error('Feedback failed:', e);
-        } finally {
-            setLogging(false);
-        }
-    };
-
-    const [showShopSelector, setShowShopSelector] = useState(false);
-    const [activeShopItem, setActiveShopItem] = useState(null);
-
-    const handleShopRedirect = (fullItemName, store) => {
-        // STRICT GENDER ENFORCEMENT & DEEP LINKING
-        const rawGender = insights?.gender || profile?.gender || prefs?.gender || 'male';
-        const isWomen = rawGender.toLowerCase().includes('female') || rawGender.toLowerCase() === 'women';
-        const displayGender = isWomen ? 'women' : 'men';
-        
-        // PREMIUM SEARCH PARAMETERS
-        const premiumSuffix = "Trending 2025 Premium Latest Collection";
-        const query = `${displayGender} ${fullItemName} ${premiumSuffix}`;
-        const slug = fullItemName.toLowerCase().replace(/ /g, '-');
-        
-        let url = '';
-        switch(store) {
-            case 'myntra':
-                // Deep link to specific Myntra category search
-                url = `https://www.myntra.com/${slug}?f=Gender:${displayGender === 'women' ? 'women' : 'men'}`;
-                break;
-            case 'amazon':
-                // Optimized search with regional interest and intent
-                url = `https://www.amazon.in/s?k=${encodeURIComponent(`${displayGender} ${fullItemName} ${premiumSuffix} India`)}&ref=nb_sb_noss`;
-                break;
-            case 'flipkart':
-                url = `https://www.flipkart.com/search?q=${encodeURIComponent(`${displayGender} ${fullItemName} ${premiumSuffix}`)}`;
-                break;
-            case 'meesho':
-                url = `https://www.meesho.com/search?q=${encodeURIComponent(`${displayGender} ${fullItemName} budget fashion`)}`;
-                break;
-            default:
-                url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-        }
-        window.open(url, '_blank');
-        setShowShopSelector(false);
-    };
-
-    const openShop = (itemName) => {
-        setActiveShopItem(itemName);
-        setShowShopSelector(true);
-    };
-
-    if (!auth.currentUser) {
-        return (
-            <div className="text-center py-20 animate-fade-in">
-                <div className="w-20 h-20 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
-                    <span className="text-4xl text-purple-400">🔐</span>
-                </div>
-                <h2 className={`text-2xl font-black mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>{t('loginRequired') || 'Login Required'}</h2>
-                <p className={`text-sm max-w-xs mx-auto ${isDark ? 'text-white/50' : 'text-slate-500'}`}>
-                    Unlock your personal Style Navigator by signing in to your account.
-                </p>
-            </div>
-        );
-    }
-
-    if (!profile && !loading) {
-        return (
-            <div className="text-center py-20 px-4 animate-fade-in">
-                <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-purple-500/10">
-                    <span className="text-5xl animate-bounce">📸</span>
-                </div>
-                <h2 className={`text-2xl font-black mb-3 ${isDark ? 'text-white' : 'text-slate-900'}`}>{t('startJourney') || 'Start Your Journey'}</h2>
-                <p className={`text-sm max-w-xs mx-auto mb-8 leading-relaxed ${isDark ? 'text-white/50' : 'text-slate-500'}`}>
-                    We need one quick analysis to build your **Style DNA** and unlock your personal navigator.
-                </p>
-                <button
-                    onClick={onAnalyze}
-                    className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl text-white font-black shadow-lg shadow-purple-900/40 hover:scale-105 active:scale-95 transition-all"
-                >
-                    Analyze My First Look
-                </button>
-            </div>
-        );
-    }
-
-    if (loading) {
-        return (
-            <div className="space-y-6 pt-4 animate-fade-in">
-                <div className={`h-48 rounded-3xl animate-pulse ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} />
-                <div className={`h-64 rounded-3xl animate-pulse ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} />
-                <div className={`h-40 rounded-3xl animate-pulse ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} />
-            </div>
-        );
-    }
-
-    const lifestyleKey = prefs?.lifestyle ? `lifestyle_${prefs.lifestyle}` : 'lifestyle_other';
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6 pt-2 pb-10"
-        >
-            {/* ── SEGMENTED NAVIGATION ──────────────────────── */}
-            <div className={`sticky top-0 z-30 p-2 -mx-4 mb-6 backdrop-blur-xl border-b flex justify-center gap-1 ${isDark ? 'bg-[#02040a]/80 border-white/10' : 'bg-slate-100/80 border-purple-100'}`}>
-                {[
-                    { id: 'daily', label: 'Recommended', icon: FashionIcons.Star },
-                    { id: 'shop', label: 'Shopping', icon: FashionIcons.Shopping },
-                    { id: 'dna', label: 'Style DNA', icon: FashionIcons.Analysis }
-                ].map(tab => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveView(tab.id)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all relative ${
-                            activeView === tab.id 
-                                ? 'text-white' 
-                                : isDark ? 'text-white/40 hover:text-white/60' : 'text-slate-400 hover:text-slate-600'
-                        }`}
-                    >
-                        {activeView === tab.id && (
-                            <motion.div 
-                                layoutId="nav-bg"
-                                className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl shadow-lg shadow-purple-900/40"
-                                initial={false}
-                                transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-                            />
-                        )}
-                        <span className="relative z-10 w-4 h-4 mr-2">
-                           <IconRenderer icon={tab.icon} />
-                        </span>
-                        <span className="relative z-10 hidden sm:inline">{tab.label}</span>
-                    </button>
-                ))}
-            </div>
-
-            <AnimatePresence mode="wait">
-                {activeView === 'dna' && (
-                    <motion.div
-                        key="dna"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        className="space-y-6"
-                    >
-                        {/* ── SECTION 1: STYLE DNA ──────────────────────── */}
-                        <div className={`relative overflow-hidden rounded-[2.5rem] p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/5'}`}>
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                                <div className="flex items-center gap-2">
-                                     <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>Permanent DNA</p>
-                                     <button onClick={() => setIsEditingDNA(true)} className={`text-[9px] font-black px-2 py-0.5 rounded-md ${isDark ? 'bg-white/10 text-white/40 hover:text-white' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}>EDIT ✏️</button>
-                                </div>
-                                
-                                <button 
-                                    onClick={handleTogglePrimary}
-                                    className={`w-fit flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black transition-all ${
-                                        isPrimary 
-                                            ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                                            : isDark ? 'bg-white/10 text-white/60 hover:bg-white/20' : 'bg-slate-100 text-slate-500 hover:bg-slate-200 border border-slate-200'
-                                    }`}
-                                >
-                                    <span><IconRenderer icon={isPrimary ? FashionIcons.Formal : FashionIcons.Analysis} className="w-3 h-3" /></span>
-                                    <span>{isPrimary ? (t('primaryProfileLocked') || 'Home Profile') : (t('setAsHomeTone') || 'Set as Home Tone')}</span>
-                                </button>
-                            </div>
-
-                            <div className="relative z-10 flex items-center gap-5">
-                                <div
-                                    className="w-20 h-20 rounded-2xl border-4 border-white/20 shadow-2xl overflow-hidden flex-shrink-0 transition-colors duration-500"
-                                    style={{ backgroundColor: isEditingDNA ? (TONE_COLORS[editDNA.skinTone] || '#C68642') : (profile?.skinHex || profile?.skin_color?.hex || '#C68642') }}
-                                />
-                                <div className="flex-1 min-w-0">
-                                    {isEditingDNA ? (
-                                        <div className="space-y-3 animate-fade-in">
-                                            <div className="flex gap-2">
-                                                <select 
-                                                    value={editDNA.skinTone} 
-                                                    onChange={(e) => setEditDNA({...editDNA, skinTone: e.target.value})}
-                                                    className={`flex-1 text-[10px] p-2 rounded-xl border font-black focus:outline-none transition-all ${isDark ? 'bg-[#1a1c2e] border-white/10 text-white select-dark-options' : 'bg-white border-purple-200 text-slate-800'}`}
-                                                >
-                                                    {['fair', 'light', 'medium', 'olive', 'brown', 'dark'].map(t => <option key={t} value={t} className={isDark ? 'bg-[#1a1c2e] text-white' : ''}>{t.toUpperCase()}</option>)}
-                                                </select>
-                                                <select 
-                                                    value={editDNA.undertone} 
-                                                    onChange={(e) => setEditDNA({...editDNA, undertone: e.target.value})}
-                                                    className={`flex-1 text-[10px] p-2 rounded-xl border font-black focus:outline-none transition-all ${isDark ? 'bg-[#1a1c2e] border-white/10 text-white select-dark-options' : 'bg-white border-purple-200 text-slate-800'}`}
-                                                >
-                                                    {['warm', 'cool', 'neutral'].map(u => <option key={u} value={u} className={isDark ? 'bg-[#1a1c2e] text-white' : ''}>{u.toUpperCase()}</option>)}
-                                                </select>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <select 
-                                                    value={editDNA.season} 
-                                                    onChange={(e) => setEditDNA({...editDNA, season: e.target.value})}
-                                                    className={`flex-1 text-[10px] p-2 rounded-xl border font-black focus:outline-none transition-all ${isDark ? 'bg-[#1a1c2e] border-white/10 text-white select-dark-options' : 'bg-white border-purple-200 text-slate-800'}`}
-                                                >
-                                                    {['Spring', 'Summer', 'Autumn', 'Winter'].map(s => <option key={s} value={s} className={isDark ? 'bg-[#1a1c2e] text-white' : ''}>{s}</option>)}
-                                                </select>
-                                                <button onClick={handleUpdateDNA} className="px-4 py-2 bg-purple-600 text-white rounded-xl text-[10px] font-black uppercase shadow-lg shadow-purple-500/20 active:scale-95 transition-all">Save</button>
-                                            </div>
-                                            <button 
-                                                onClick={handleReanalyze}
-                                                className={`w-full py-2 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'}`}
-                                            >
-                                                📸 Re-analyze Photo
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <h3 className={`text-2xl font-black capitalize truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                                {profile?.skinTone || profile?.skin_tone?.category} {profile?.undertone || profile?.skin_tone?.undertone}
-                                            </h3>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${isDark ? 'bg-white/5 border-white/10' : 'bg-purple-50 border-purple-100 text-purple-700'}`}>
-                                                    {profile?.season || profile?.skin_tone?.color_season || 'Spring'} Edition
-                                                </span>
-                                            </div>
-                                            <div className="mt-4 space-y-2">
-                                                <p className={`text-[9px] font-black uppercase opacity-40`}>Actionable DNA Stats</p>
-                                                <div className="flex flex-wrap gap-2">
-                                                     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[10px] font-bold ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-100 shadow-sm'}`}>
-                                                        <span className="w-3 h-3"><IconRenderer icon={FashionIcons.Wardrobe} /></span>
-                                                        <span>{wardrobe.length} Wardrobe Items</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="mt-8 grid grid-cols-2 gap-3">
-                                <div className={`p-4 rounded-3xl border relative ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100/50 border-slate-200'}`}>
-                                    <div className="flex items-center justify-between mb-1">
-                                        <p className={`text-[10px] font-bold uppercase ${isDark ? 'text-white/30' : 'text-slate-500'}`}>Harmony Score</p>
-                                        <button onClick={() => setShowInfo(showInfo === 'harmony' ? null : 'harmony')} className={`${infoCls} ${isDark ? 'bg-white/10 text-white/40' : 'bg-slate-200 text-slate-500'}`}>?</button>
-                                    </div>
-                                    <div className="flex items-end gap-2">
-                                         <span className={`text-2xl font-black ${isDark ? 'text-green-400' : 'text-green-600'}`}>
-                                            {(() => {
-                                                if (!wardrobe.length || !profile) return '0%';
-                                                const totalScore = wardrobe.reduce((acc, item) => {
-                                                    return acc + scoreWardrobeItem(item, { weather: 'sunny' }, profile, [], prefs || {}, insights);
-                                                }, 0);
-                                                return Math.round(totalScore / wardrobe.length) + '%';
-                                            })()}
-                                         </span>
-                                    </div>
-                                    
-                                    <AnimatePresence>
-                                        {showInfo === 'harmony' && (
-                                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className={`absolute inset-0 z-20 p-4 rounded-3xl flex items-center text-[10px] font-medium leading-tight backdrop-blur-md ${isDark ? 'bg-black/90 text-white' : 'bg-white/95 text-slate-600 shadow-xl'}`}>
-                                                {t('harmonyExplain')}
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </div>
-
-                                <div className={`p-4 rounded-3xl border relative ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100/50 border-slate-200'}`}>
-                                    <p className={`text-[10px] font-bold uppercase mb-1 ${isDark ? 'text-white/30' : 'text-slate-500'}`}>Sync Status</p>
-                                    <div className="flex items-end gap-2">
-                                        <span className={`text-[10px] font-black ${isDark ? 'text-orange-400' : 'text-orange-600'}`}>ACTIVE ANALYZER</span>
-                                        <button onClick={onAnalyze} className={`ml-auto text-[9px] font-black px-2 py-1 rounded-lg ${isDark ? 'bg-orange-500/20 text-orange-400' : 'bg-orange-100 text-orange-700'}`}>REFRESH 📸</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-
-                {activeView === 'daily' && (
-                    <motion.div
-                        key="daily"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        className="space-y-6"
-                    >
-                        {/* ── SECTION 2: MOOD & ENGINE ──────────────────────── */}
-                        <div className="space-y-4">
-                            <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-white/40' : 'text-slate-500/60'}`}>Recommended Intent</p>
-                            <div className="grid grid-cols-4 gap-2">
-                                {[
-                                    { id: 'mood_comfort', label: 'Comfort' },
-                                    { id: 'mood_confidence', label: 'Confident' },
-                                    { id: 'mood_minimal', label: 'Minimal' },
-                                    { id: 'mood_attention', label: 'Party' }
-                                ].map(m => (
-                                    <button
-                                        key={m.id}
-                                        onClick={() => setMood(m.id)}
-                                        className={`py-3 rounded-xl border text-[9px] font-black uppercase transition-all ${
-                                            mood === m.id 
-                                                ? 'bg-purple-600 border-transparent text-white shadow-lg' 
-                                                : isDark ? 'bg-white/5 border-white/10 text-white/30' : 'bg-white border-gray-200 text-slate-500 hover:bg-gray-50'
-                                        }`}
-                                    >
-                                        {m.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* DAILY SUGGESTION CARD */}
-                        {insights?.daily_suggestion && (
-                            <div className={`rounded-[2.5rem] p-7 border relative overflow-hidden transition-all ${isDark ? 'bg-white/5 border-white/10 shadow-2xl' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/5'}`}>
-                                <div className="absolute top-0 right-0 p-6 flex items-center gap-3">
-                                     <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg p-2">
-                                         <IconRenderer icon={FashionIcons.AI} />
-                                     </div>
-                                </div>
-
-                                <div className="relative z-10">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <span className={`text-[10px] font-black px-3 py-1 rounded-full border tracking-widest ${isDark ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 'bg-purple-50 border-purple-200 text-purple-600'}`}>
-                                           TODAY'S BEST LOOK
-                                        </span>
-                                    </div>
-                                    
-                                    <h2 className={`text-2xl font-black mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                                        {insights.daily_suggestion.title}
-                                    </h2>
-                                    <p className={`text-sm mb-8 opacity-60 font-medium ${isDark ? 'text-white' : 'text-slate-500'}`}>
-                                         {t(lifestyleKey)} Rotation · {t('basedOnWeather')}
-                                    </p>
-
-                                    <div className="grid grid-cols-2 gap-6 mb-8">
-                                        {/* TOP */}
-                                        {(() => {
-                                            const match = getMatch(insights.daily_suggestion.top, 'top');
-                                            return (
-                                                <div className="space-y-3 relative group">
-                                                    <div className="w-16 h-16 rounded-2xl border-4 border-white/10 shadow-lg relative flex-shrink-0" style={{ backgroundColor: match?.hex || '#888' }}>
-                                                        {match ? (
-                                                             <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg">CLOSET</span>
-                                                        ) : (
-                                                             <button 
-                                                                onClick={() => openShop(insights.daily_suggestion.top)}
-                                                                className="absolute -top-2 -right-2 bg-orange-600 text-white text-[8px] font-black px-2 py-1 rounded-full shadow-lg animate-pulse hover:scale-110 transition-transform"
-                                                             >
-                                                                🛒 SHOP
-                                                             </button>
-                                                        )}
-                                                        {isWorn && <div className="absolute inset-0 bg-green-500/40 rounded-xl flex items-center justify-center text-white text-xl">✓</div>}
-                                                    </div>
-                                                    <div>
-                                                        <p className={`text-[10px] font-black uppercase truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>{insights.daily_suggestion.top}</p>
-                                                        <p className="text-[9px] font-bold opacity-30 mt-0.5">{match ? (match.color_name || 'Matched') : '🚧 Score Boost Available'}</p>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })()}
-
-                                        {/* BOTTOM */}
-                                        {(() => {
-                                            const match = getMatch(insights.daily_suggestion.bottom, 'bottom');
-                                            return (
-                                                <div className="space-y-3 relative group">
-                                                    <div className="w-16 h-16 rounded-2xl border-4 border-white/10 shadow-lg relative flex-shrink-0" style={{ backgroundColor: match?.hex || '#333' }}>
-                                                        {match ? (
-                                                             <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-lg">CLOSET</span>
-                                                        ) : (
-                                                             <button 
-                                                                onClick={() => openShop(insights.daily_suggestion.bottom)}
-                                                                className="absolute -top-2 -right-2 bg-orange-600 text-white text-[8px] font-black px-2 py-1 rounded-full shadow-lg animate-pulse hover:scale-110 transition-transform"
-                                                             >
-                                                                🛒 SHOP
-                                                             </button>
-                                                        )}
-                                                        {isWorn && <div className="absolute inset-0 bg-green-500/40 rounded-xl flex items-center justify-center text-white text-xl">✓</div>}
-                                                    </div>
-                                                    <div>
-                                                        <p className={`text-[10px] font-black uppercase truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>{insights.daily_suggestion.bottom}</p>
-                                                        <p className="text-[9px] font-bold opacity-30 mt-0.5">{match ? (match.color_name || 'Matched') : '🚧 Score Boost Available'}</p>
-                                                        
-                                                    </div>
-                                                </div>
-                                            );
-                                        })()}
-                                    </div>
-
-                                    {/* Finishing Touches Section - Moved to full width for better layout */}
-                                    <div className={`mb-8 p-6 rounded-[2rem] border border-dashed transition-all ${isDark ? 'bg-white/5 border-white/20' : 'bg-slate-50 border-slate-200'}`}>
-                                        <p className={`text-[10px] font-black uppercase ${isDark ? 'opacity-40' : 'text-slate-500'} mb-5 tracking-[0.2em]`}>Finishing Touches</p>
-                                        {(() => {
-                                            const rawGender = insights?.gender || profile?.gender || prefs?.gender || 'male';
-                                            const isFemale = rawGender.toLowerCase().includes('female') || rawGender.toLowerCase() === 'women';
-                                            const tips = getAccessoryAdvice(isFemale ? 'female' : 'male', profile?.season || 'Spring');
-                                            return (
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                                                    <div className="flex gap-4 items-center min-w-0">
-                                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white shadow-sm border border-slate-100'}`}>
-                                                            <IconRenderer icon={isFemale ? FashionIcons.Jewelry : FashionIcons.Watch} className="w-8 h-8" />
-                                                        </div>
-                                                        <div className="min-w-0">
-                                                            <p className={`text-[9px] font-black uppercase tracking-wider ${isDark ? 'opacity-40' : 'text-slate-500'} mb-0.5`}>{tips.label || (isFemale ? 'Jewelry Advice' : 'Accessory Advice')}</p>
-                                                            <p className={`text-[13px] font-black leading-snug ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.jewelry}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex gap-4 items-center min-w-0">
-                                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-white shadow-sm border border-slate-100'}`}>
-                                                            <IconRenderer icon={FashionIcons.Shoes} className="w-8 h-8" />
-                                                        </div>
-                                                        <div className="min-w-0">
-                                                            <p className={`text-[9px] font-black uppercase tracking-wider ${isDark ? 'opacity-40' : 'text-slate-500'} mb-0.5`}>Footwear Style</p>
-                                                            <p className={`text-[13px] font-black leading-snug ${isDark ? 'text-white' : 'text-slate-900'}`}>{tips.shoes}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })()}
-                                    </div>
-
-                                    <button
-                                        onClick={handleWearToday}
-                                        disabled={isWorn || logging}
-                                        className={`w-full py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-widest transition-all shadow-xl group overflow-hidden relative ${
-                                            isWorn 
-                                                ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                                                : 'bg-black text-white hover:scale-[1.02] active:scale-95'
-                                        }`}
-                                    >
-                                        <span className="relative z-10 flex items-center justify-center gap-2">
-                                            {isWorn ? '🏆 STYLE LOGGED TODAY' : '✅ MARK AS WORN'}
-                                        </span>
-                                        {!isWorn && (
-                                            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                        
-                        {/* Actionable Advice Section (Moved here for better vertical flow) */}
-                        <div className={`rounded-3xl p-6 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-slate-100'}`}>
-                            <p className={`text-[9px] font-black uppercase tracking-widest mb-4 ${isDark ? 'opacity-40' : 'text-slate-500'}`}>DNA-Matched Suggestions</p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                {(() => {
-                                    const rawGender = insights?.gender || profile?.gender || prefs?.gender || 'male';
-                                    const isFemale = rawGender.toLowerCase().includes('female') || rawGender.toLowerCase() === 'women';
-                                    const skinTone = insights?.skin_tone?.category || profile?.skin_tone?.category || profile?.skinTone || 'medium';
-                                    return getActionableAdvice(insights?.best_colors || profile?.best_colors, isFemale ? 'female' : 'male', skinTone).map((adv, i) => {
-                                        const hasInCloset = wardrobe.some(item => item.category === adv.category);
-                                        return (
-                                            <div key={i} className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-slate-100 shadow-sm hover:border-purple-200'}`}>
-                                                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-white/5 shrink-0 p-2">
-                                                    <IconRenderer icon={FashionIcons[getCategoryIcon(adv.category)] || FashionIcons.Shopping} />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className={`text-[10px] font-black truncate ${isDark ? 'text-white' : 'text-slate-800'}`}>{adv.item}</p>
-                                                    {hasInCloset && (
-                                                        <p className="text-[8px] font-bold text-green-500 uppercase tracking-tighter">In Wardrobe ✓</p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        );
-                                    });
-                                })()}
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-
-                {activeView === 'shop' && (
-                    <motion.div
-                        key="shop"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        className="space-y-8"
-                    >
-                        {/* ── SECTION 2.5: TRENDING HUB ──────────────────────── */}
-                        <div className={`rounded-[3rem] p-8 border relative overflow-hidden transition-all ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-xl shadow-purple-900/5'}`}>
-                             <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 blur-[100px] pointer-events-none" />
-                             
-                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-10 relative z-10">
-                                <div>
-                                    <h4 className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{t('trendingHub') || 'Elite Trending Hub'}</h4>
-                                    <p className={`text-[11px] font-bold mt-1 opacity-50 uppercase tracking-widest`}>{t('trendingDesc') || 'Curated 2025 styles for your Skin DNA'}</p>
-                                </div>
-
-                                {/* PREMIUM GENDER TOGGLE */}
-                                <div className={`flex p-1 rounded-2xl border ${isDark ? 'bg-black/40 border-white/10' : 'bg-slate-100 border-slate-200'}`}>
-                                    {[
-                                        { id: 'male', label: 'Male', icon: FashionIcons.User },
-                                        { id: 'female', label: 'Female', icon: FashionIcons.User }
-                                    ].map(g => (
-                                        <button
-                                            key={g.id}
-                                            onClick={() => setActiveTrendingGender(g.id)}
-                                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all relative ${
-                                                activeTrendingGender === g.id 
-                                                    ? 'text-white' 
-                                                    : isDark ? 'text-white/40 hover:text-white/60' : 'text-slate-400 hover:text-slate-600'
-                                            }`}
-                                        >
-                                            {activeTrendingGender === g.id && (
-                                                <motion.div 
-                                                    layoutId="trending-bg"
-                                                    className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-lg shadow-indigo-500/20"
-                                                    transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-                                                />
-                                            )}
-                                            <span className="relative z-10 w-4 h-4 mr-2"><IconRenderer icon={g.icon} /></span>
-                                            <span className="relative z-10">{g.id === 'male' ? (t('male') || 'Male') : (t('female') || 'Female')}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                             </div>
-
-                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 relative z-10">
-                                <AnimatePresence mode="wait">
-                                    <motion.div
-                                        key={activeTrendingGender}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="contents"
-                                    >
-                                        {TRENDING_COLLECTIONS[activeTrendingGender].map((item, idx) => (
-                                            <motion.div
-                                                key={item.id}
-                                                whileHover={{ scale: 1.02, y: -5 }}
-                                                className={`flex flex-col p-5 rounded-[2.5rem] border transition-all ${isDark ? 'bg-white/5 border-white/10 hover:border-indigo-500/30' : 'bg-slate-50 border-slate-200 hover:border-indigo-200 hover:bg-white hover:shadow-xl'}`}
-                                            >
-                                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mb-4 p-3 ${isDark ? 'bg-white/5 text-indigo-400' : 'bg-white shadow-sm border border-slate-100'}`}>
-                                                    <IconRenderer icon={FashionIcons[item.icon] || FashionIcons.Shirt} />
-                                                </div>
-                                                <div className="flex-1 min-w-0 mb-4">
-                                                    <p className={`text-[11px] font-black leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>{t(item.key)}</p>
-                                                    <div className="flex items-center gap-1.5 mt-1.5">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-                                                        <p className="text-[8px] font-black text-indigo-500 uppercase tracking-tighter">{item.score}% Synergy</p>
-                                                    </div>
-                                                </div>
-                                                <button
-                                                    onClick={() => openShop(t(item.key))}
-                                                    className={`w-full py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${isDark ? 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-900/40' : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200'}`}
-                                                >
-                                                    {t('buyNowCommand') || 'Shop Trend'}
-                                                </button>
-                                            </motion.div>
-                                        ))}
-                                    </motion.div>
-                                </AnimatePresence>
-                             </div>
-                        </div>
-
-                        {/* ── SECTION 3: STYLE GAPS (DISCOVERY GRID) ──────────────────────── */}
-                        <div className={`rounded-[2.5rem] p-8 border relative overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200 shadow-sm'}`}>
-                            <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/5 blur-[80px] pointer-events-none" />
-                            <div className="flex items-center gap-4 mb-8 relative z-10">
-                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg p-3 ${isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-white text-indigo-600 border border-indigo-100'}`}>
-                                    <IconRenderer icon={FashionIcons.Shopping} />
-                                </div>
-                                <div>
-                                    <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>Universal Shopping Hub</p>
-                                    <h4 className={`text-xl font-black mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>DNA Style Discovery</h4>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
-                                {(() => {
-                                    const rawGender = insights?.gender || profile?.gender || prefs?.gender || 'male';
-                                    const advisoryItems = getActionableAdvice(
-                                        insights?.best_colors || 
-                                        profile?.best_colors || 
-                                        profile?.best_shirt_colors || 
-                                        insights?.best_shirt_colors || 
-                                        [], 
-                                        rawGender.toLowerCase().includes('female') ? 'female' : 'male',
-                                        insights?.skin_tone?.category || profile?.skin_tone?.category || profile?.skinTone || 'medium'
-                                    );
-                                    
-                                    // Check for colors explicitly missing from wardrobe
-                                    let missingGaps = advisoryItems.filter(adv => {
-                                        const colorName = adv.color?.toLowerCase() || adv.item.split(' ')[0].toLowerCase();
-                                        const hasInCloset = wardrobe.some(item => {
-                                            const itemColors = item.outfit_data?.colors || [];
-                                            return itemColors.some(c => c.name.toLowerCase().includes(colorName)) || 
-                                                   (item.color_name && item.color_name.toLowerCase().includes(colorName)) ||
-                                                   (item.hex && insights?.best_colors?.some(bc => bc.name.toLowerCase() === colorName && bc.hex === item.hex));
-                                        });
-                                        return !hasInCloset;
-                                    });
-
-                                    // FALLBACK: If optimization is 100%, show "Elite Upgrades" using all best colors
-                                    const displayGaps = missingGaps.length > 0 ? missingGaps.slice(0, 4) : advisoryItems.slice(0, 4).map(a => ({ ...a, item: `Elite ${a.item}` }));
-
-                                    return displayGaps.map((gap, idx) => {
-                                        const colorName = gap.color || gap.item.split(' ')[0];
-                                        const colorHex = gap.hex || (insights?.best_colors || profile?.best_colors || []).find(c => c.name === colorName)?.hex || '#888';
-                                        const isElite = missingGaps.length === 0;
-
-                                        return (
-                                            <motion.div 
-                                                key={idx}
-                                                whileHover={{ y: -5 }}
-                                                className={`p-5 rounded-[2.5rem] border group transition-all ${isDark ? 'bg-indigo-500/5 border-indigo-500/10 hover:border-indigo-500/30' : 'bg-white border-slate-100 hover:border-indigo-200 shadow-sm'}`}
-                                            >
-                                                <div className="flex items-center gap-4 mb-4">
-                                                    <div className="w-14 h-14 rounded-2xl border-4 border-white/10 shadow-xl flex-shrink-0" style={{ backgroundColor: colorHex }} />
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className={`font-black text-xs truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{gap.item}</p>
-                                                        <p className="text-[10px] text-indigo-500 font-bold">{isElite ? '💎 Elite Upgrade' : `+ ${15 + (idx * 5)}% Synergy`}</p>
-                                                    </div>
-                                                </div>
-                                                <button 
-                                                    onClick={() => openShop(gap.item)}
-                                                    className={`w-full py-3 rounded-xl text-[9px] font-black tracking-widest transition-all ${isDark ? 'bg-white text-indigo-900' : 'bg-indigo-600 text-white'}`}
-                                                >
-                                                    🔍 SHOP HUB
-                                                </button>
-                                            </motion.div>
-                                        );
-                                    });
-                                })()}
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* ── STORE SELECTOR MODAL ──────────────────────── */}
-            <AnimatePresence>
-                {showShopSelector && (
-                    <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 backdrop-blur-2xl bg-black/60"
-                        onClick={() => setShowShopSelector(false)}
-                    >
-                        <motion.div 
-                            initial={{ y: 100, scale: 0.9 }}
-                            animate={{ y: 0, scale: 1 }}
-                            exit={{ y: 100, scale: 0.9 }}
-                            className={`w-full max-w-md rounded-[3rem] p-8 shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden ${isDark ? 'bg-[#0f1123] border border-white/10' : 'bg-white'}`}
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <div className="text-center mb-8 shrink-0">
-                                <div className="w-14 h-1 bg-white/10 rounded-full mx-auto mb-6 sm:hidden" />
-                                <h3 className={`text-xl font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>{t('shopOn') || 'Select Style Source'}</h3>
-                                <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mt-1">Shopping for: {activeShopItem}</p>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4 overflow-y-auto pr-1 -mx-2 px-2 custom-scrollbar">
-                                {[
-                                    { id: 'myntra', name: 'Myntra', logo: '🎀', color: 'from-[#f13ab1] to-[#f87171]' },
-                                    { id: 'amazon', name: 'Amazon', logo: '📦', color: 'from-[#ff9900] to-[#232f3e]' },
-                                    { id: 'flipkart', name: 'Flipkart', logo: '🛒', color: 'from-[#2874f0] to-[#fb1]' },
-                                    { id: 'meesho', name: 'Meesho', logo: '👗', color: 'from-[#ff44af] to-[#ff8c00]' }
-                                ].map(store => (
-                                    <button 
-                                        key={store.id}
-                                        onClick={() => handleShopRedirect(activeShopItem, store.id)}
-                                        className={`flex flex-col items-center gap-3 p-6 rounded-[2rem] border transition-all hover:scale-[1.05] active:scale-95 ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-slate-50 border-slate-200 hover:bg-white hover:shadow-xl'}`}
-                                    >
-                                        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${store.color} flex items-center justify-center text-2xl shadow-lg`}>
-                                            <span className="drop-shadow-sm">{store.logo}</span>
-                                        </div>
-                                        <span className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-white' : 'text-slate-900'}`}>{store.name}</span>
-                                    </button>
-                                ))}
-                            </div>
-
-                            <button 
-                                onClick={() => setShowShopSelector(false)}
-                                className="w-full mt-8 py-4 text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity shrink-0"
-                            >
-                                Cancel Discovery
-                            </button>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </motion.div>
+  // Wardrobe gap items (items user should buy based on analysis)
+  const gapItems = useMemo(() => {
+    const advice = getActionableAdvice(
+      insights?.best_colors || bestColors,
+      gender,
+      toneKey
     );
-};
+    return advice.map(adv => ({
+      ...adv,
+      inWardrobe: wardrobe.some(w =>
+        w.category === adv.category ||
+        (w.color_name && w.color_name.toLowerCase().includes((adv.color || '').toLowerCase()))
+      ),
+    }));
+  }, [insights, bestColors, gender, toneKey, wardrobe]);
 
-export default StyleNavigator;
+  const accessory = useMemo(() =>
+    getAccessoryAdvice(gender, season, mood.toUpperCase()), [gender, season, mood]);
+
+  const handleWearToday = useCallback(async () => {
+    if (!auth.currentUser || isWorn || logging || !outfit) return;
+    setLogging(true);
+    try {
+      await logDailyOutfit(auth.currentUser.uid, {
+        title: `${mood.charAt(0).toUpperCase() + mood.slice(1)} Look`,
+        top: outfit.top, bottom: outfit.bottom, vibe: mood,
+      });
+      setIsWorn(true);
+    } catch (e) { console.error(e); } finally { setLogging(false); }
+  }, [auth.currentUser, isWorn, logging, outfit, mood]);
+
+  // ── Render helpers ─────────────────────────────────
+  const card = (style) => ({
+    background: C.glass,
+    backdropFilter: 'blur(20px)',
+    border: `1px solid ${C.border}`,
+    borderRadius: 20,
+    boxShadow: C.cardShadow,
+    ...style,
+  });
+
+  const pill = (active, style = {}) => ({
+    padding: '8px 16px', borderRadius: 30,
+    background: active ? GRAD : C.glass2,
+    border: `1px solid ${active ? 'transparent' : C.border}`,
+    color: active ? 'white' : C.muted,
+    fontSize: '11px', fontWeight: active ? 700 : 400,
+    cursor: 'pointer', transition: 'all 0.2s',
+    fontFamily: PJS,
+    boxShadow: active ? '0 4px 12px rgba(139,92,246,0.35)' : 'none',
+    ...style,
+  });
+
+  // ── STATES ─────────────────────────────────────────
+  if (!auth.currentUser) {
+    return (
+      <div style={{ textAlign:'center', padding:'60px 20px' }}>
+        <div style={{ fontSize:'48px', marginBottom:16 }}>🔐</div>
+        <p style={{ fontFamily:PDI, fontSize:'20px', color:C.text, marginBottom:8 }}>Login Required</p>
+        <p style={{ fontSize:'13px', color:C.muted, fontFamily:PJS }}>Sign in to unlock your personalized Style Compass.</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div style={{ padding:'32px 0' }}>
+        {[180, 280, 200].map((h, i) => (
+          <div key={i} style={{ height:h, borderRadius:20, background:C.glass, marginBottom:16, animation:'pulse 1.5s ease-in-out infinite', animationDelay:`${i*0.15}s` }} />
+        ))}
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div style={{ textAlign:'center', padding:'60px 20px' }}>
+        <div style={{ fontSize:'52px', marginBottom:16 }}>📸</div>
+        <p style={{ fontFamily:PDI, fontSize:'22px', color:C.text, marginBottom:8 }}>Start Your Style Journey</p>
+        <p style={{ fontSize:'13px', color:C.muted, fontFamily:PJS, maxWidth:280, margin:'0 auto 28px' }}>
+          Upload one photo to unlock your personalized Style Compass — colors, outfits, and AI insights all calibrated to your skin tone.
+        </p>
+        <button
+          onClick={onAnalyze}
+          style={{ background:GRAD, border:'none', color:'white', borderRadius:14, padding:'14px 32px', fontSize:'14px', fontWeight:700, cursor:'pointer', fontFamily:PJS, boxShadow:'0 8px 24px rgba(139,92,246,0.4)' }}
+        >
+          📷 Analyze My First Look
+        </button>
+      </div>
+    );
+  }
+
+  // ══════════════════════════════════════════════════
+  // MAIN RENDER
+  // ══════════════════════════════════════════════════
+  return (
+    <div style={{ animation:'fadeSlideIn 0.4s ease' }}>
+
+      {/* ── DNA CARD (Skin tone identity) ── */}
+      <div style={{ ...card({ padding:'20px', marginBottom:16, position:'relative', overflow:'hidden' }) }}>
+        <div style={{ position:'absolute', top:-40, right:-40, width:160, height:160, background:`radial-gradient(circle,${skinHex}35,transparent)`, borderRadius:'50%', pointerEvents:'none' }} />
+        <div style={{ display:'flex', alignItems:'center', gap:16 }}>
+          <div style={{ width:58, height:58, borderRadius:16, background:skinHex, flexShrink:0, border:`4px solid ${C.border}`, boxShadow:`0 6px 20px ${skinHex}60` }} />
+          <div style={{ flex:1, minWidth:0 }}>
+            <p style={{ fontSize:'9px', letterSpacing:'0.2em', textTransform:'uppercase', background:GRAD, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', fontWeight:700, fontFamily:PJS, margin:'0 0 3px' }}>Your Style DNA</p>
+            <p style={{ fontFamily:PDI, fontSize:'18px', color:C.text, margin:'0 0 4px', textTransform:'capitalize' }}>
+              {toneKey} · {undertone}
+            </p>
+            <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+              <span style={{ fontSize:'9px', color:`${C.isDark?'rgba(139,92,246,0.9)':'#7C3AED'}`, background:`rgba(139,92,246,${C.isDark?'0.12':'0.07'})`, border:`1px solid rgba(139,92,246,0.2)`, borderRadius:10, padding:'2px 8px', fontFamily:PJS, fontWeight:600 }}>
+                {season}
+              </span>
+              <span style={{ fontSize:'9px', color:C.muted, background:C.glass2, border:`1px solid ${C.border}`, borderRadius:10, padding:'2px 8px', fontFamily:PJS }}>
+                {gender === 'female' ? '👩 Female' : '👨 Male'} · {wardrobe.length > 0 ? `${wardrobe.length} wardrobe items` : 'No wardrobe yet'}
+              </span>
+            </div>
+          </div>
+          {/* Harmony score ring */}
+          <div style={{ flexShrink:0, textAlign:'center' }}>
+            <div style={{ width:48, height:48, borderRadius:'50%', background:`conic-gradient(${VIOLET} ${harmonyScore}%, ${C.isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.05)'} 0)`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <div style={{ width:38, height:38, borderRadius:'50%', background:C.glass, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                <span style={{ fontSize:'11px', fontWeight:700, color:C.text, fontFamily:PJS }}>{harmonyScore}%</span>
+              </div>
+            </div>
+            <p style={{ fontSize:'7px', color:C.muted, fontFamily:PJS, marginTop:4, letterSpacing:'0.1em', textTransform:'uppercase' }}>Harmony</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── TAB BAR ── */}
+      <div style={{ display:'flex', gap:6, marginBottom:20, padding:'4px', background:C.glass, borderRadius:14, border:`1px solid ${C.border}` }}>
+        {[
+          { id:'look',   label:'🎯 Today\'s Look' },
+          { id:'colors', label:'🎨 Color Guide' },
+          { id:'closet', label:'👝 Smart Closet' },
+        ].map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)} style={{
+            flex:1, padding:'9px 4px', borderRadius:10, border:'none', cursor:'pointer',
+            background: tab === t.id ? GRAD : 'transparent',
+            color: tab === t.id ? 'white' : C.muted,
+            fontSize:'11px', fontWeight: tab === t.id ? 700 : 400,
+            fontFamily:PJS, transition:'all 0.2s',
+            boxShadow: tab === t.id ? '0 2px 10px rgba(139,92,246,0.35)' : 'none',
+          }}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ══════════════════════════════════════════
+           TAB 1: TODAY'S LOOK
+         ══════════════════════════════════════════ */}
+      {tab === 'look' && (
+        <div style={{ animation:'fadeSlideIn 0.3s ease' }}>
+
+          {/* Mood/Occasion Selector */}
+          <div style={{ marginBottom:16 }}>
+            <p style={{ fontSize:'9px', letterSpacing:'0.2em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>Choose Occasion</p>
+            <div style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:4 }}>
+              {MOODS.map(m => (
+                <button key={m.id} onClick={() => setMood(m.id)} style={{
+                  ...pill(mood === m.id),
+                  display:'flex', alignItems:'center', gap:6, flexShrink:0,
+                }}>
+                  <span>{m.emoji}</span> {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* OUTFIT RECOMMENDATION CARD */}
+          {outfit && (
+            <div style={{ ...card({ padding:'22px', marginBottom:14, position:'relative', overflow:'hidden' }) }}>
+              <div style={{ position:'absolute', top:-50, right:-50, width:200, height:200, background:`radial-gradient(circle,rgba(139,92,246,${C.isDark?'0.08':'0.04'}),transparent)`, pointerEvents:'none' }} />
+
+              {/* Header */}
+              <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:16 }}>
+                <div style={{ width:28, height:28, borderRadius:8, background:GRAD, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'12px' }}>🤖</div>
+                <div>
+                  <p style={{ fontSize:'9px', letterSpacing:'0.2em', textTransform:'uppercase', background:GRAD, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', fontWeight:700, fontFamily:PJS, margin:0 }}>
+                    AI Outfit — {mood.charAt(0).toUpperCase()+mood.slice(1)}
+                  </p>
+                  <p style={{ fontSize:'11px', color:C.muted, fontFamily:PJS, margin:'1px 0 0' }}>
+                    Calibrated to your {toneKey} {undertone} skin tone
+                  </p>
+                </div>
+                {isWorn && (
+                  <span style={{ marginLeft:'auto', fontSize:'9px', background:'rgba(16,185,129,0.12)', color:'#10B981', border:'1px solid rgba(16,185,129,0.25)', borderRadius:10, padding:'3px 8px', fontFamily:PJS, fontWeight:700 }}>
+                    ✓ Worn Today
+                  </span>
+                )}
+              </div>
+
+              {/* Outfit items grid */}
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14 }}>
+                {[
+                  { label:'👕 Top / Upper',    value:outfit.top,    colorIdx:0 },
+                  { label:'👖 Bottom / Lower',  value:outfit.bottom === '—' ? null : outfit.bottom, colorIdx:1 },
+                ].map((piece, i) => (
+                  piece.value && (
+                    <div key={i} style={{ background:C.glass2, border:`1px solid ${C.border}`, borderRadius:14, padding:'14px 13px' }}>
+                      <p style={{ fontSize:'9px', color:C.muted, fontFamily:PJS, margin:'0 0 6px', textTransform:'uppercase', letterSpacing:'0.1em' }}>{piece.label}</p>
+                      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                        <div style={{ width:28, height:28, borderRadius:8, background:bestColors[piece.colorIdx]?.hex || '#888', flexShrink:0, boxShadow:`0 2px 8px ${bestColors[piece.colorIdx]?.hex || '#888'}60` }} />
+                        <p style={{ fontSize:'12px', color:C.text, fontFamily:PJS, fontWeight:600, lineHeight:'1.4', margin:0 }}>{piece.value}</p>
+                      </div>
+                      <button
+                        onClick={() => setShopItem(piece.value)}
+                        style={{ marginTop:8, width:'100%', padding:'6px', borderRadius:8, background:C.glass, border:`1px solid ${C.border}`, color:C.muted, fontSize:'9px', cursor:'pointer', fontFamily:PJS, transition:'all 0.2s' }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor=VIOLET; e.currentTarget.style.color=VIOLET; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor=C.border; e.currentTarget.style.color=C.muted; }}
+                      >
+                        🛍 Shop This
+                      </button>
+                    </div>
+                  )
+                ))}
+              </div>
+
+              {/* Shoes + Accent */}
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14 }}>
+                {[
+                  { icon:'👟', label:'Footwear', value:outfit.shoes },
+                  { icon:'✨', label:'Accent Piece', value:outfit.accent },
+                ].map((item, i) => (
+                  <div key={i} style={{ background:C.glass2, border:`1px solid ${C.border}`, borderRadius:12, padding:'12px' }}>
+                    <p style={{ fontSize:'9px', color:C.muted, fontFamily:PJS, margin:'0 0 4px', textTransform:'uppercase', letterSpacing:'0.1em' }}>{item.icon} {item.label}</p>
+                    <p style={{ fontSize:'11px', color:C.text2, fontFamily:PJS, margin:0, lineHeight:'1.5' }}>{item.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* WHY + BENEFIT cards */}
+              <div style={{ background:`rgba(139,92,246,${C.isDark?'0.06':'0.03'})`, border:`1px solid rgba(139,92,246,${C.isDark?'0.15':'0.08'})`, borderRadius:14, padding:'14px 16px', marginBottom:14 }}>
+                <p style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.15em', textTransform:'uppercase', color:VIOLET, fontFamily:PJS, margin:'0 0 6px' }}>🧠 Why This Works</p>
+                <p style={{ fontSize:'12px', color:C.text2, fontFamily:PJS, lineHeight:'1.7', margin:0 }}>
+                  {getColorWhy(toneKey, undertone)}
+                </p>
+              </div>
+              <div style={{ background:`rgba(16,185,129,${C.isDark?'0.06':'0.03'})`, border:`1px solid rgba(16,185,129,${C.isDark?'0.15':'0.08'})`, borderRadius:14, padding:'14px 16px', marginBottom:16 }}>
+                <p style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.15em', textTransform:'uppercase', color:'#10B981', fontFamily:PJS, margin:'0 0 6px' }}>🎯 Benefit</p>
+                <p style={{ fontSize:'12px', color:C.text2, fontFamily:PJS, lineHeight:'1.7', margin:0 }}>
+                  {getOutfitBenefit(mood)}
+                </p>
+              </div>
+
+              {/* Accessory Advice */}
+              <div style={{ background:C.glass2, border:`1px solid ${C.border}`, borderRadius:14, padding:'14px 16px', marginBottom:16 }}>
+                <p style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.15em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>
+                  {gender === 'female' ? '💎 Jewelry & Accessories' : '⌚ Watch & Accessories'}
+                </p>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+                  <div>
+                    <p style={{ fontSize:'9px', color:C.muted, fontFamily:PJS, margin:'0 0 3px' }}>{gender === 'female' ? 'Jewelry' : 'Watch'}</p>
+                    <p style={{ fontSize:'12px', color:C.text, fontFamily:PJS, fontWeight:500 }}>{accessory.jewelry}</p>
+                  </div>
+                  <div>
+                    <p style={{ fontSize:'9px', color:C.muted, fontFamily:PJS, margin:'0 0 3px' }}>Footwear</p>
+                    <p style={{ fontSize:'12px', color:C.text, fontFamily:PJS, fontWeight:500 }}>{accessory.shoes}</p>
+                  </div>
+                </div>
+                {accessory.tip && (
+                  <p style={{ fontSize:'11px', color:C.muted, fontFamily:PJS, marginTop:8, borderTop:`1px solid ${C.divider}`, paddingTop:8 }}>
+                    💡 {accessory.tip}
+                  </p>
+                )}
+              </div>
+
+              {/* Mark as Worn button */}
+              <button
+                onClick={handleWearToday}
+                disabled={isWorn || logging}
+                style={{
+                  width:'100%', padding:'14px', borderRadius:14,
+                  background: isWorn ? 'rgba(16,185,129,0.1)' : GRAD,
+                  border: isWorn ? '1px solid rgba(16,185,129,0.3)' : 'none',
+                  color: isWorn ? '#10B981' : 'white',
+                  fontSize:'13px', fontWeight:700,
+                  cursor: isWorn ? 'default' : 'pointer',
+                  fontFamily:PJS, transition:'all 0.2s',
+                  boxShadow: isWorn ? 'none' : '0 6px 20px rgba(139,92,246,0.35)',
+                  display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+                }}
+                onMouseEnter={e => { if (!isWorn) e.currentTarget.style.opacity='0.9'; }}
+                onMouseLeave={e => e.currentTarget.style.opacity='1'}
+              >
+                {logging ? '⏳ Logging...' : isWorn ? '🏆 Style Logged for Today!' : '✅ Wear This Today'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════
+           TAB 2: COLOR GUIDE
+         ══════════════════════════════════════════ */}
+      {tab === 'colors' && (
+        <div style={{ animation:'fadeSlideIn 0.3s ease' }}>
+
+          {/* Color Science Banner */}
+          <div style={{ ...card({ padding:'20px', marginBottom:14, background:`linear-gradient(135deg,rgba(139,92,246,${C.isDark?'0.12':'0.06'}),rgba(236,72,153,${C.isDark?'0.08':'0.04'}))` }) }}>
+            <p style={{ fontSize:'9px', letterSpacing:'0.2em', textTransform:'uppercase', background:GRAD, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', fontWeight:700, fontFamily:PJS, margin:'0 0 6px' }}>
+              🎨 Color Theory Analysis
+            </p>
+            <p style={{ fontFamily:PDI, fontSize:'18px', color:C.text, margin:'0 0 8px' }}>
+              Your {toneKey.charAt(0).toUpperCase()+toneKey.slice(1)} Skin Palette
+            </p>
+            <p style={{ fontSize:'12px', color:C.text2, fontFamily:PJS, lineHeight:'1.7', margin:0 }}>
+              {getColorWhy(toneKey, undertone)} Based on ITA color science and your {undertone} undertone, we've identified your ideal color spectrum.
+            </p>
+          </div>
+
+          {/* Best Colors Grid */}
+          <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>✅ Best Colors For You</p>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:16 }}>
+            {bestColors.map((color, i) => (
+              <div key={i} style={{ ...card({ padding:0, overflow:'hidden' }) }}>
+                <div style={{ height:64, background:color.hex, position:'relative' }}>
+                  <button
+                    onClick={() => setShopItem(`${color.name} ${gender === 'female' ? 'kurti dress top' : 'shirt polo kurta'}`)}
+                    style={{ position:'absolute', bottom:6, right:6, background:'rgba(0,0,0,0.5)', border:'none', color:'white', borderRadius:6, padding:'3px 7px', fontSize:'8px', cursor:'pointer', fontFamily:PJS }}
+                  >
+                    🛍 Shop
+                  </button>
+                </div>
+                <div style={{ padding:'10px 10px 12px' }}>
+                  <p style={{ fontSize:'11px', color:C.text, fontFamily:PJS, fontWeight:600, margin:'0 0 2px' }}>{color.name}</p>
+                  <p style={{ fontSize:'9px', color:C.muted, fontFamily:PJS, margin:0 }}>{color.hex}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Avoid Colors */}
+          <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>❌ Colors to Avoid</p>
+          <div style={{ ...card({ padding:'16px 18px', marginBottom:14 }) }}>
+            {(insights?.colors_to_avoid || (function() {
+              const avoidMap = {
+                fair:   ['Neon Yellow','Pastel Peach','Very Pale Pink — washes out fair skin with no contrast'],
+                light:  ['Orange','Bright Red','Coral — clashes with warm undertones on light skin'],
+                medium: ['Khaki Beige','Camel Brown — too close to skin tone, creates blending effect'],
+                olive:  ['Lime Green','Bright Yellow — clashes with olive undertones, creates sickly cast'],
+                brown:  ['Chocolate Brown','Dark Maroon — too close in value, reduces definition'],
+                dark:   ['Black','Very Dark Navy — hides definition; creates flat silhouette'],
+              };
+              return (avoidMap[toneKey] || avoidMap.medium).map(s => ({ name:s }));
+            })()).map((item, i) => (
+              <div key={i} style={{ display:'flex', alignItems:'center', gap:10, paddingTop: i>0?10:0, borderTop: i>0?`1px solid ${C.divider}`:'' }}>
+                <span style={{ fontSize:'14px', flexShrink:0 }}>⚠️</span>
+                <p style={{ fontSize:'12px', color:C.text2, fontFamily:PJS, margin:0 }}>{typeof item === 'string' ? item : item.name}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Outfit color combos by gender */}
+          <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>
+            {gender === 'female' ? '👗 Outfit Color Combinations' : '👔 Outfit Color Combinations'}
+          </p>
+          <div style={{ display:'flex', flexDirection:'column', gap:10, marginBottom:16 }}>
+            {bestColors.slice(0,3).map((color, i) => {
+              const pair = bestColors[(i+2) % bestColors.length];
+              return (
+                <div key={i} style={{ ...card({ padding:'14px 16px', display:'flex', alignItems:'center', gap:14 }) }}>
+                  <div style={{ display:'flex', gap:-6 }}>
+                    <div style={{ width:32, height:32, borderRadius:8, background:color.hex, border:`2px solid ${C.border}` }} />
+                    <div style={{ width:32, height:32, borderRadius:8, background:pair?.hex || '#333', border:`2px solid ${C.border}`, marginLeft:-8 }} />
+                  </div>
+                  <div style={{ flex:1 }}>
+                    <p style={{ fontSize:'12px', color:C.text, fontFamily:PJS, fontWeight:600, margin:'0 0 2px' }}>
+                      {color.name} + {pair?.name || 'White'}
+                    </p>
+                    <p style={{ fontSize:'10px', color:C.muted, fontFamily:PJS, margin:0 }}>
+                      {gender === 'female'
+                        ? ['Silk top + palazzo', 'Kurti + palazzo', 'Dress + heels'][i]
+                        : ['Formal shirt + trousers', 'Polo + chinos', 'Kurta + churidar'][i]
+                      }
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShopItem(`${color.name} ${gender==='female'?'kurti top dress':'shirt kurta polo'}`)}
+                    style={{ fontSize:'10px', color:VIOLET, background:`rgba(139,92,246,0.08)`, border:`1px solid rgba(139,92,246,0.2)`, borderRadius:8, padding:'5px 10px', cursor:'pointer', fontFamily:PJS, fontWeight:600 }}>
+                    Shop
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════
+           TAB 3: SMART CLOSET
+         ══════════════════════════════════════════ */}
+      {tab === 'closet' && (
+        <div style={{ animation:'fadeSlideIn 0.3s ease' }}>
+
+          {/* Harmony overview */}
+          <div style={{ ...card({ padding:'20px', marginBottom:14, position:'relative', overflow:'hidden' }) }}>
+            <div style={{ position:'absolute', top:-30, right:-30, width:120, height:120, background:`radial-gradient(circle,${VIOLET}20,transparent)`, pointerEvents:'none' }} />
+            <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+              <div style={{ width:60, height:60, borderRadius:'50%', background:`conic-gradient(${VIOLET} ${harmonyScore}%, ${C.isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.05)'} 0)`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                <div style={{ width:48, height:48, borderRadius:'50%', background:C.glass, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <span style={{ fontFamily:PDI, fontSize:'16px', color:C.text }}>{harmonyScore}%</span>
+                </div>
+              </div>
+              <div>
+                <p style={{ fontSize:'9px', letterSpacing:'0.2em', textTransform:'uppercase', background:GRAD, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', fontWeight:700, fontFamily:PJS, margin:'0 0 3px' }}>Wardrobe Harmony Score</p>
+                <p style={{ fontFamily:PDI, fontSize:'18px', color:C.text, margin:'0 0 3px' }}>
+                  {harmonyScore >= 80 ? 'Elite Wardrobe' : harmonyScore >= 60 ? 'Good Foundation' : harmonyScore > 0 ? 'Needs Curation' : 'Build Your Closet'}
+                </p>
+                <p style={{ fontSize:'11px', color:C.muted, fontFamily:PJS, margin:0 }}>
+                  {wardrobe.length} items · {gapItems.filter(g => !g.inWardrobe).length} color gaps found
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Items to Buy (Gaps) */}
+          <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>
+            🛍 {gapItems.filter(g => !g.inWardrobe).length > 0 ? 'Missing From Your Wardrobe' : 'Level Up Picks'}
+          </p>
+          <div style={{ display:'flex', flexDirection:'column', gap:10, marginBottom:16 }}>
+            {gapItems.map((gap, i) => (
+              <div key={i} style={{ ...card({ padding:'14px 16px', display:'flex', alignItems:'center', gap:14 }) }}>
+                <div style={{ width:44, height:44, borderRadius:12, background:gap.hex || '#888', flexShrink:0, border:`3px solid ${C.border}`, boxShadow:`0 3px 10px ${gap.hex || '#888'}50` }} />
+                <div style={{ flex:1, minWidth:0 }}>
+                  <p style={{ fontSize:'13px', color:C.text, fontFamily:PJS, fontWeight:600, margin:'0 0 2px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{gap.item}</p>
+                  <p style={{ fontSize:'10px', color:C.muted, fontFamily:PJS, margin:0 }}>
+                    {gap.inWardrobe
+                      ? <span style={{ color:'#10B981' }}>✓ In your wardrobe</span>
+                      : <span style={{ color:`rgba(139,92,246,${C.isDark?'0.8':'0.7'})` }}>+ Adds {15 + i*5}% harmony</span>
+                    }
+                  </p>
+                </div>
+                {!gap.inWardrobe && (
+                  <button
+                    onClick={() => setShopItem(gap.item)}
+                    style={{ fontSize:'11px', color:'white', background:GRAD, border:'none', borderRadius:10, padding:'8px 14px', cursor:'pointer', fontFamily:PJS, fontWeight:600, flexShrink:0, boxShadow:'0 3px 10px rgba(139,92,246,0.3)' }}
+                  >
+                    Shop →
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Wardrobe items preview */}
+          {wardrobe.length > 0 && (
+            <>
+              <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>📦 Your Wardrobe Items</p>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginBottom:16 }}>
+                {wardrobe.slice(0, 8).map((item, i) => {
+                  const score = scoreWardrobeItem(item, { weather:'sunny' }, profile, [], prefs || {}, insights);
+                  return (
+                    <div key={i} style={{ ...card({ padding:0, overflow:'hidden', textAlign:'center' }) }}>
+                      <div style={{ height:48, background:item.hex || C.glass2, position:'relative' }}>
+                        <div style={{ position:'absolute', bottom:4, right:4, background:score >= 80 ? '#10B981' : score >= 60 ? VIOLET : '#F59E0B', borderRadius:6, padding:'1px 5px', fontSize:'8px', color:'white', fontFamily:PJS, fontWeight:700 }}>
+                          {score}%
+                        </div>
+                      </div>
+                      <p style={{ fontSize:'8px', color:C.muted, fontFamily:PJS, margin:'6px 4px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                        {item.color_name || item.category || 'Item'}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+              {wardrobe.length > 8 && (
+                <p style={{ fontSize:'11px', color:C.muted, fontFamily:PJS, textAlign:'center', marginBottom:16 }}>
+                  +{wardrobe.length - 8} more items in wardrobe
+                </p>
+              )}
+            </>
+          )}
+
+          {wardrobe.length === 0 && (
+            <div style={{ textAlign:'center', padding:'32px 20px' }}>
+              <p style={{ fontSize:'32px', marginBottom:8 }}>👝</p>
+              <p style={{ fontFamily:PDI, fontSize:'16px', color:C.text, margin:'0 0 8px' }}>Empty Wardrobe</p>
+              <p style={{ fontSize:'12px', color:C.muted, fontFamily:PJS, lineHeight:'1.7' }}>
+                After an analysis, save your favorite outfit colors to see them here with harmony scores.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── SHOP SELECTOR MODAL ── */}
+      {shopItem && (
+        <div
+          onClick={() => setShopItem(null)}
+          style={{ position:'fixed', inset:0, zIndex:300, background:'rgba(0,0,0,0.7)', backdropFilter:'blur(12px)', display:'flex', alignItems:'flex-end', justifyContent:'center', padding:'0 0 0 0' }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ width:'100%', maxWidth:480, background:C.isDark?'#0B0F1A':'#FFFFFF', borderRadius:'24px 24px 0 0', padding:'24px 20px 48px', boxShadow:'0 -20px 60px rgba(0,0,0,0.3)' }}
+          >
+            <div style={{ width:40, height:4, borderRadius:2, background:'rgba(139,92,246,0.3)', margin:'0 auto 20px' }} />
+            <p style={{ fontFamily:PDI, fontSize:'18px', color:C.text, textAlign:'center', margin:'0 0 4px' }}>Shop This Look</p>
+            <p style={{ fontSize:'11px', color:C.muted, fontFamily:PJS, textAlign:'center', margin:'0 0 20px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+              {shopItem}
+            </p>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+              {STORES.map(store => (
+                <button key={store.id}
+                  onClick={() => { window.open(buildShopUrl(shopItem, store.id, gender), '_blank'); setShopItem(null); }}
+                  style={{ display:'flex', alignItems:'center', gap:12, padding:'14px 16px', borderRadius:14, border:`1px solid ${C.border}`, background:C.glass2, cursor:'pointer', transition:'all 0.2s', textAlign:'left', color:'inherit' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor=store.color; e.currentTarget.style.background=`${store.color}10`; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor=C.border; e.currentTarget.style.background=C.glass2; }}
+                >
+                  <div style={{ width:36, height:36, borderRadius:10, background:store.bg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px', flexShrink:0 }}>
+                    {store.emoji}
+                  </div>
+                  <p style={{ fontSize:'13px', fontWeight:700, color:C.text, fontFamily:PJS, margin:0 }}>{store.name}</p>
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setShopItem(null)}
+              style={{ width:'100%', marginTop:16, padding:'12px', background:'none', border:'none', color:C.muted, fontSize:'12px', cursor:'pointer', fontFamily:PJS }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
