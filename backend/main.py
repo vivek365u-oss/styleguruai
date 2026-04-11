@@ -1538,6 +1538,123 @@ async def get_navigator_insights(
 # ============================================
 # RUN
 # ============================================
+# SELFIE → STYLE RECOMMENDATION
+# ============================================
+from face_shape_detector import face_shape_detector
+
+class SelfieStyleRequest(BaseModel):
+    gender: str = "male"  # male | female
+
+@app.post("/api/analyze/selfie-style")
+@limiter.limit("5/minute")
+async def analyze_selfie_style(
+    request: Request,
+    file: UploadFile = File(...),
+    gender: str = "male",
+    lang: str = "en",
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Full selfie analysis:
+      1. Image quality gate (existing pipeline)
+      2. Face detection (existing MediaPipe)
+      3. Skin tone extraction (existing classifier)
+      4. Face shape detection (new geometric landmark analysis)
+      5. Hairstyle recommendations (new rule-based engine)
+    Returns all data needed by the frontend SelfieStyleAdvisor component.
+    """
+    start_time = time.time()
+    try:
+        # ── Step 1-3: Existing Pipeline ──────────────────
+        image, face, full_quality, skin_color, skin_tone, color_season = await process_image_core(file)
+
+        # ── Step 4: Face Shape Detection ─────────────────
+        face_shape_result = {"shape": "oval", "confidence": 0.5, "ratios": {}, "data": {}, "fallback": True}
+
+        try:
+            # Re-run MediaPipe to get landmarks (image_processor returns dict face, not landmarks)
+            import mediapipe as mp
+            import cv2
+
+            mp_face_mesh = mp.solutions.face_mesh
+            with mp_face_mesh.FaceMesh(
+                static_image_mode=True,
+                max_num_faces=1,
+                refine_landmarks=True,
+                min_detection_confidence=0.5
+            ) as face_mesh:
+                rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                results = face_mesh.process(rgb_image)
+
+                if results.multi_face_landmarks:
+                    h, w = image.shape[:2]
+                    landmarks_raw = results.multi_face_landmarks[0].landmark
+                    landmarks = {
+                        i: (int(lm.x * w), int(lm.y * h))
+                        for i, lm in enumerate(landmarks_raw)
+                    }
+                    face_shape_result = face_shape_detector.detect_shape(landmarks)
+                    print(f"[SELFIE] Face shape: {face_shape_result['shape']} ({face_shape_result['confidence']:.0%} confidence)")
+        except Exception as e:
+            print(f"[SELFIE] Face shape detection skipped: {e}")
+
+        # ── Step 5: Hairstyle Recommendations ────────────
+        shape_key = face_shape_result.get("shape", "oval")
+        hairstyle_recs = face_shape_detector.get_hairstyle_recommendations(
+            shape=shape_key,
+            gender=gender,
+            skin_tone=skin_tone.category,
+            limit=5
+        )
+
+        # ── Compose final response ────────────────────────
+        processing_time = round(time.time() - start_time, 2)
+        return JSONResponse(content={
+            "success": True,
+            "gender": gender,
+            "processing_time_seconds": processing_time,
+            "photo_quality": {
+                "score": full_quality.quality_score,
+                "message": full_quality.specific_message,
+                "warnings": full_quality.warnings,
+            },
+            "skin_analysis": {
+                "skin_color": {"hex": skin_color["hex"], "rgb": {"r": skin_color["r"], "g": skin_color["g"], "b": skin_color["b"]}},
+                "skin_tone": skin_tone.category,
+                "undertone": skin_tone.subcategory,
+                "brightness_score": skin_tone.brightness_score,
+                "color_season": color_season,
+                "confidence": skin_tone.confidence,
+                "description": skin_tone.description,
+            },
+            "face_shape": {
+                "shape": face_shape_result.get("shape", "oval"),
+                "confidence": face_shape_result.get("confidence", 0.5),
+                "display": face_shape_result.get("data", {}).get("display", "Oval"),
+                "description": face_shape_result.get("data", {}).get("description", ""),
+                "icon": face_shape_result.get("data", {}).get("icon", "🥚"),
+                "characteristics": face_shape_result.get("data", {}).get("characteristics", []),
+                "celebrity_examples": face_shape_result.get("data", {}).get("celebrity_examples", []),
+                "ratios": face_shape_result.get("ratios", {}),
+                "is_fallback": face_shape_result.get("fallback", False),
+            },
+            "hairstyle_recommendations": hairstyle_recs,
+            "style_tips": {
+                "primary": f"Your {face_shape_result.get('data', {}).get('display','oval')} face shape pairs beautifully with tailored hairstyles that enhance your natural bone structure.",
+                "skin_tone_tip": f"With your {skin_tone.category} skin tone and {skin_tone.subcategory} undertone, warm-toned hair colors will complement you best.",
+                "color_season": color_season,
+            }
+        })
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"ERROR selfie-style: {str(e)}")
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail={"error": "server_error", "message": "Something went wrong. Please try again."})
+
+
+# ============================================
 if __name__ == "__main__":
     import uvicorn
     print("\nStyleGuru API starting...")

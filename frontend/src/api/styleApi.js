@@ -880,3 +880,46 @@ export const getDailyOutfitLogs = async (uid, limitCount = 31) => {
     return [];
   }
 };
+
+// ============================================
+// SELFIE → STYLE RECOMMENDATION
+// ============================================
+
+export const analyzeSelfieStyle = async (file, gender = 'male', lang = 'en', onProgress) => {
+  try {
+    validateImageFile(file);
+    const compressedFile = await compressImage(file);
+    console.log(`✓ Selfie compressed: ${(file.size / 1024).toFixed(2)}KB → ${(compressedFile.size / 1024).toFixed(2)}KB`);
+
+    return await retryRequest(async () => {
+      const formData = new FormData();
+      formData.append('file', compressedFile);
+      return API.post(`/api/analyze/selfie-style?gender=${gender}&lang=${lang}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (e) => {
+          if (onProgress) onProgress(Math.round((e.loaded * 100) / e.total));
+        },
+        timeout: 90000,
+      });
+    }, 2, 1500);
+  } catch (error) {
+    console.error('Selfie style analysis failed:', error);
+    throw error;
+  }
+};
+
+export const saveSelfieStyleHistory = async (uid, data) => {
+  if (!auth.currentUser) return;
+  try {
+    await addDoc(collection(db, 'users', uid, 'selfie_style_history'), {
+      face_shape: data.face_shape?.shape || 'oval',
+      skin_tone: data.skin_analysis?.skin_tone || '',
+      gender: data.gender || 'male',
+      timestamp: new Date().toISOString(),
+      fullData: data,
+    });
+  } catch (e) {
+    console.warn('[API] Failed to save selfie style history:', e);
+  }
+};
+
