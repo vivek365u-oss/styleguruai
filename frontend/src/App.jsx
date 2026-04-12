@@ -29,56 +29,64 @@ const NotFoundPage   = lazy(() => import('./pages/NotFoundPage'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ProfilePage    = lazy(() => import('./pages/ProfilePage'));
 
-// ── Premium Loading Screen ──
+// ── Premium Loading Screen — uses real logo image ──
 const LoadingFallback = () => (
   <div style={{
     minHeight: '100vh', display: 'flex', flexDirection: 'column',
     alignItems: 'center', justifyContent: 'center',
-    background: '#0B0F1A', gap: 32, position: 'relative', overflow: 'hidden'
+    background: '#0B0F1A', gap: 24, position: 'relative', overflow: 'hidden'
   }}>
-    {/* Soft glow background */}
+    {/* Ambient glow */}
     <div style={{
       position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-      width: 200, height: 200, background: 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)',
+      width: 280, height: 280,
+      background: 'radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%)',
       pointerEvents: 'none'
     }} />
 
-    {/* Spinning logo container */}
+    {/* Logo with spinning skin-tone ring */}
     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {/* Outer gradient spinning ring */}
+      {/* Spinning skin-tone gradient ring */}
       <div style={{
-        position: 'absolute', inset: -10, borderRadius: '50%',
-        background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%)',
-        animation: 'spinSmooth 1.2s linear infinite',
-        mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-        WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-        maskComposite: 'exclude', WebkitMaskComposite: 'xor',
-        padding: 2
+        position: 'absolute', inset: -6, borderRadius: '50%',
+        background: 'conic-gradient(#FDDBB4, #F1C27D, #E0AC69, #C68642, #A0522D, #8D5524, #6B3A2A, #4A1A1A, #2D0F0F, #FDDBB4)',
+        animation: 'spinSmooth 2s linear infinite',
+        mask: 'radial-gradient(farthest-side, transparent calc(100% - 4px), #fff calc(100% - 3px))',
+        WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 4px), #fff calc(100% - 3px))',
+        filter: 'blur(0.5px)'
       }} />
-
-      {/* Inner glass logo block */}
-      <div style={{
-        width: 56, height: 56, borderRadius: 16,
-        background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255,255,255,0.1)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        boxShadow: '0 8px 32px rgba(139,92,246,0.25)',
-        animation: 'pulse-glow 2.5s ease-in-out infinite'
-      }}>
-        <span style={{
-          fontSize: '22px', fontWeight: 800, fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif",
-          background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
-        }}>SG</span>
-      </div>
+      {/* Logo image — perfectly square, no distortion */}
+      <img
+        src="/logo.png"
+        alt="StyleGuru AI"
+        style={{
+          width: 80, height: 80,
+          borderRadius: 22,
+          objectFit: 'cover',
+          boxShadow: '0 8px 36px rgba(139,92,246,0.35)',
+          animation: 'pulse-glow 2.5s ease-in-out infinite',
+          display: 'block'
+        }}
+      />
     </div>
 
-    {/* Text content */}
+    {/* Brand text */}
     <div style={{ textAlign: 'center', zIndex: 1, animation: 'fadeSlideIn 0.8s ease forwards' }}>
       <p style={{
-        fontSize: '18px', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif", color: '#F9FAFB', margin: '0 0 6px', letterSpacing: '0.02em'
-      }}>StyleGuru <span style={{ background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>AI</span></p>
-      <p style={{ fontSize: '10px', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#9CA3AF', margin: 0, fontWeight: 500 }}>
+        fontSize: '18px', fontWeight: 700,
+        fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif",
+        color: '#F9FAFB', margin: '0 0 6px', letterSpacing: '0.02em'
+      }}>
+        StyleGuru{' '}
+        <span style={{
+          background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%)',
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+        }}>AI</span>
+      </p>
+      <p style={{
+        fontSize: '10px', letterSpacing: '0.25em', textTransform: 'uppercase',
+        color: '#9CA3AF', margin: 0, fontWeight: 500
+      }}>
         Loading Intelligence
       </p>
     </div>
