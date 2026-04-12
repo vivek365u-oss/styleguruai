@@ -286,50 +286,40 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     if (onGenderChange) onGenderChange(newGender);
   };
 
-  const handleFile = async (file, skipLimit = false) => {
+  const handleFile = async (file, pendingResult = null) => {
     if (!file) return;
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) { onError('Only JPG, PNG, or WebP images are allowed.'); return; }
     if (file.size > 10 * 1024 * 1024) { onError('Image is too large. Maximum size is 10MB.'); return; }
 
     // 'skipped' means user closed the subscription modal without watching the ad
-    if (skipLimit === 'skipped') {
+    if (pendingResult === 'skipped') {
       if (onAdSkipped) onAdSkipped();
       return;
     }
 
-    onLoadingStart();
-
-    // LIMIT CHECK
-    if (!skipLimit) {
-        const limitCheck = await consumeUserLimit('analysis');
-        if (!limitCheck.success && limitCheck.requires_ad) {
-            window.dispatchEvent(new CustomEvent('open_subscription_modal', {
-                detail: {
-                    onSuccess: (byAd = false) => {
-                        handleFile(file, byAd);
-                    }
-                }
-            }));
-            // Don't set error — modal is showing. Signal loading stopped.
-            if (onAdSkipped) onAdSkipped();
-            setShowProgress(false);
-            return;
-        }
+    if (pendingResult && pendingResult !== 'skipped' && pendingResult !== false) {
+      console.log("[UploadSection] Proceeding with unlocked result");
+      completeProgress();
+      setTimeout(() => {
+        onAnalysisComplete(pendingResult);
+        setShowProgress(false);
+      }, 800);
+      return;
     }
 
+    onLoadingStart();
     const reader = new FileReader();
     reader.onload = (e) => { setPreview(e.target.result); onImageSelected(e.target.result); };
     reader.readAsDataURL(file);
     console.log("[UploadSection] Starting analysis for mode:", mode, "gender:", gender);
-    onLoadingStart();
     setShowProgress(true);
     startProgress();
     // Map language code for backend (hinglish -> en, hi -> hi)
     const backendLang = language === 'hi' ? 'hi' : 'en';
 
+    let res;
     try {
-      let res;
       if (mode === 'seasonal') {
         res = await analyzeImageSeasonal(file, season, backendLang, handleProgress);
       } else if (gender === 'female') {
@@ -337,15 +327,6 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       } else {
         res = await analyzeImage(file, backendLang, handleProgress);
       }
-
-      console.log("[UploadSection] Analysis successful!");
-      completeProgress();
-      setTimeout(() => {
-        const finalGender = mode === 'seasonal' ? 'seasonal' : gender;
-        console.log("[UploadSection] Passing gender:", finalGender, "to ResultsDisplay");
-        onAnalysisComplete({ ...res.data, gender: finalGender, seasonalGender: mode === 'seasonal' ? gender : 'male', bodyType, occasion, budget, eyeColor });
-        setShowProgress(false);
-      }, 800);
     } catch (err) {
       console.error("[UploadSection] Analysis error:", err);
       setShowProgress(false);
@@ -356,39 +337,61 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
         if (typeof detail === 'object') onError(detail.message || 'Analysis failed.');
         else onError(detail || 'Could not connect to server. Is the backend running?');
       }
+      return; // Stop here! No limit consumed.
     }
+
+    const finalGender = mode === 'seasonal' ? 'seasonal' : gender;
+    const finalPayload = { ...res.data, gender: finalGender, seasonalGender: mode === 'seasonal' ? gender : 'male', bodyType, occasion, budget, eyeColor };
+
+    // LIMIT CHECK (AFTER ANALYSIS IS SUCCESSFUL)
+    const limitCheck = await consumeUserLimit('analysis');
+    if (!limitCheck.success && limitCheck.requires_ad) {
+        setShowProgress(false);
+        window.dispatchEvent(new CustomEvent('open_subscription_modal', {
+            detail: {
+                onSuccess: (watchedOrSkipped) => {
+                    handleFile(file, watchedOrSkipped === true ? finalPayload : 'skipped');
+                }
+            }
+        }));
+        if (onAdSkipped) onAdSkipped();
+        return;
+    }
+
+    console.log("[UploadSection] Analysis successful!");
+    completeProgress();
+    setTimeout(() => {
+      console.log("[UploadSection] Passing gender:", finalGender, "to ResultsDisplay");
+      onAnalysisComplete(finalPayload);
+      setShowProgress(false);
+    }, 800);
   };
 
-  const handleCoupleAnalysis = async (skipLimit = false) => {
+  const handleCoupleAnalysis = async (pendingResult = null) => {
     if (!partner1 || !partner2) {
       onError('Please select photos for both partners.');
       return;
     }
 
-    // 'skipped' means user closed the subscription modal without watching the ad
-    if (skipLimit === 'skipped') {
+    // 'skipped' means user closed the subscription modal
+    if (pendingResult === 'skipped') {
       if (onAdSkipped) onAdSkipped();
       return;
     }
 
-    onLoadingStart();
-    // LIMIT CHECK (Couple requires 2 analysis credits or we just consume 1 for now)
-    if (!skipLimit) {
-        const limitCheck = await consumeUserLimit('analysis');
-        if (!limitCheck.success && limitCheck.requires_ad) {
-            window.dispatchEvent(new CustomEvent('open_subscription_modal', {
-                detail: {
-                    onSuccess: (byAd = false) => {
-                        handleCoupleAnalysis(byAd);
-                    }
-                }
-            }));
-            // Don't set error — modal is showing. Signal loading stopped.
-            if (onAdSkipped) onAdSkipped();
-            setShowProgress(false);
-            return;
-        }
+    if (pendingResult && pendingResult !== 'skipped' && pendingResult !== false) {
+      completeProgress();
+      setTimeout(() => {
+        onImageSelected([partner1, partner2]);
+        onAnalysisComplete(pendingResult);
+        setShowProgress(false);
+      }, 800);
+      return;
     }
+
+    onLoadingStart();
+    setShowProgress(true);
+    startProgress();
 
     const dataURLtoFile = (dataurl, filename) => {
       let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
@@ -397,37 +400,55 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       return new File([u8arr], filename, { type: mime });
     };
 
-    setShowProgress(true);
-    startProgress();
-    // Map language code for backend
     const backendLang = language === 'hi' ? 'hi' : 'en';
 
+    let res1, res2;
     try {
       const file1 = dataURLtoFile(partner1, 'partner1.jpg');
       const file2 = dataURLtoFile(partner2, 'partner2.jpg');
 
       handleProgress(10);
-      const res1 = partner1Gender === 'female' ? await analyzeImageFemale(file1, backendLang, () => { }) : await analyzeImage(file1, backendLang, () => { });
+      res1 = partner1Gender === 'female' ? await analyzeImageFemale(file1, backendLang, () => { }) : await analyzeImage(file1, backendLang, () => { });
       handleProgress(50);
-      const res2 = partner2Gender === 'female' ? await analyzeImageFemale(file2, backendLang, () => { }) : await analyzeImage(file2, backendLang, () => { });
+      res2 = partner2Gender === 'female' ? await analyzeImageFemale(file2, backendLang, () => { }) : await analyzeImage(file2, backendLang, () => { });
       handleProgress(100);
-
-      completeProgress();
-      setTimeout(() => {
-        onImageSelected([partner1, partner2]);
-        onAnalysisComplete({
-          type: 'couple',
-          partner1: { ...res1.data, gender: partner1Gender },
-          partner2: { ...res2.data, gender: partner2Gender },
-          occasion
-        });
-        setShowProgress(false);
-      }, 800);
     } catch (err) {
       console.error("[UploadSection] Couple analysis error:", err);
       setShowProgress(false);
-      onError('Couple analysis failed. Ensure both photos have clear faces.');
+      const detail = err.response?.data?.detail;
+      if (typeof detail === 'object') onError(detail.message || 'Couple analysis failed. Ensure both photos have clear faces.');
+      else onError('Couple analysis failed. Ensure both photos have clear faces.');
+      return; // Stop here!
     }
+
+    const finalPayload = {
+      type: 'couple',
+      partner1: { ...res1.data, gender: partner1Gender },
+      partner2: { ...res2.data, gender: partner2Gender },
+      occasion
+    };
+
+    // LIMIT CHECK (AFTER ANALYSIS IS SUCCESSFUL)
+    const limitCheck = await consumeUserLimit('analysis');
+    if (!limitCheck.success && limitCheck.requires_ad) {
+        setShowProgress(false);
+        window.dispatchEvent(new CustomEvent('open_subscription_modal', {
+            detail: {
+                onSuccess: (watchedOrSkipped) => {
+                    handleCoupleAnalysis(watchedOrSkipped === true ? finalPayload : 'skipped');
+                }
+            }
+        }));
+        if (onAdSkipped) onAdSkipped();
+        return;
+    }
+
+    completeProgress();
+    setTimeout(() => {
+      onImageSelected([partner1, partner2]);
+      onAnalysisComplete(finalPayload);
+      setShowProgress(false);
+    }, 800);
   };
 
   const handleDrop = (e) => {
