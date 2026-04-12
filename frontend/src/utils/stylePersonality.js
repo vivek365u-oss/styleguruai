@@ -259,7 +259,6 @@ export function readUserPersonalityData() {
 
     const activeProfile = primaryProfile || lastAnalysis;
     const analysisCount = parseInt(localStorage.getItem('sg_analysis_count') || '0');
-    const outfitCheckCount = parseInt(localStorage.getItem('sg_outfit_check_count') || '0');
     const streak = parseInt(localStorage.getItem('sg_streak_count') || '0');
     const gender = localStorage.getItem('sg_gender_pref') || 'male';
 
@@ -275,7 +274,6 @@ export function readUserPersonalityData() {
       skinTone,
       skinHex,
       analysisCount,
-      outfitCheckCount,
       streak,
       gender,
       wardrobeCount: Array.isArray(wardrobe) ? wardrobe.length : 0,
@@ -286,7 +284,7 @@ export function readUserPersonalityData() {
     };
   } catch {
     return {
-      skinTone: '', skinHex: '#C68642', analysisCount: 0, outfitCheckCount: 0,
+      skinTone: '', skinHex: '#C68642', analysisCount: 0,
       streak: 0, gender: 'male', wardrobeCount: 0,
       historyTones: [], hasSkinTone: false, lastAnalysis: null,
       historyLength: 0,
