@@ -767,6 +767,24 @@ export const deletePushSubscription = async (uid, subId) => {
 // ANALYTICS — FIRESTORE
 // ============================================
 
+export const logEvent = async (eventName, meta = {}) => {
+  try {
+    const user = auth.currentUser;
+    const uid = user ? user.uid : 'anonymous';
+    if (!user) {
+      console.log(`[Analytics] ${eventName}`, meta);
+      return;
+    }
+    await addDoc(collection(db, 'users', uid, 'events'), {
+      type: eventName,
+      ...meta,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (e) {
+    console.error('logEvent error:', e);
+  }
+};
+
 export const logShareEvent = async (uid, skinTone) => {
   if (!auth.currentUser) return;
   try {
