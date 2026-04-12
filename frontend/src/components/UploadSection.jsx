@@ -304,7 +304,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       setTimeout(() => {
         onAnalysisComplete(pendingResult);
         setShowProgress(false);
-      }, 800);
+      }, 200);
       return;
     }
 
@@ -364,7 +364,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       console.log("[UploadSection] Passing gender:", finalGender, "to ResultsDisplay");
       onAnalysisComplete(finalPayload);
       setShowProgress(false);
-    }, 800);
+    }, 200);
   };
 
   const handleCoupleAnalysis = async (pendingResult = null) => {
@@ -385,7 +385,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
         onImageSelected([partner1, partner2]);
         onAnalysisComplete(pendingResult);
         setShowProgress(false);
-      }, 800);
+      }, 200);
       return;
     }
 
@@ -448,7 +448,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       onImageSelected([partner1, partner2]);
       onAnalysisComplete(finalPayload);
       setShowProgress(false);
-    }, 800);
+    }, 200);
   };
 
   const handleDrop = (e) => {
