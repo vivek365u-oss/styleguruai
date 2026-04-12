@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePlan } from '../context/PlanContext';
 import { createRazorpayOrder, verifyRazorpayPayment, auth } from '../api/styleApi';
@@ -8,10 +8,12 @@ export default function SubscriptionModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [loadingTier, setLoadingTier] = useState(null);
   const [onSuccessCallback, setOnSuccessCallback] = useState(null);
+  const adWatchedRef = useRef(false);
   const { isPro, refreshPlan } = usePlan();
 
   useEffect(() => {
     const handleOpen = (e) => {
+      adWatchedRef.current = false; // reset on every open
       setIsOpen(true);
       if (e.detail && e.detail.onSuccess) {
         setOnSuccessCallback(() => e.detail.onSuccess);
@@ -20,7 +22,7 @@ export default function SubscriptionModal() {
       }
     };
     window.addEventListener('open_subscription_modal', handleOpen);
-    
+
     // Load Razorpay Script dynamically if not already loaded
     if (!window.Razorpay) {
       const script = document.createElement('script');
@@ -28,9 +30,17 @@ export default function SubscriptionModal() {
       script.async = true;
       document.body.appendChild(script);
     }
-    
+
     return () => window.removeEventListener('open_subscription_modal', handleOpen);
   }, []);
+
+  // Called when user closes without watching ad
+  const handleClose = () => {
+    setIsOpen(false);
+    if (!adWatchedRef.current && onSuccessCallback) {
+      onSuccessCallback('skipped');
+    }
+  };
 
   const handleCheckout = async (tier) => {
     if (!window.Razorpay) {
@@ -44,9 +54,9 @@ export default function SubscriptionModal() {
       const res = await createRazorpayOrder(tier);
       if (!res.success) throw new Error("Order creation failed");
 
-      // 2. Open Razorpay Checklout
+      // 2. Open Razorpay Checkout
       const options = {
-        key: res.key, // Use test key sent from backend
+        key: res.key,
         amount: res.order.amount,
         currency: res.order.currency,
         name: "ToneFit AI",
@@ -63,11 +73,12 @@ export default function SubscriptionModal() {
               tier: tier
             });
             alert("Payment Successful! Welcome to ToneFit PRO.");
+            adWatchedRef.current = true; // payment counts as success
             setIsOpen(false);
-            await refreshPlan(); // Refresh limits state globally
+            await refreshPlan();
             if (onSuccessCallback) {
               setTimeout(() => {
-                onSuccessCallback();
+                onSuccessCallback(true);
               }, 500);
             }
           } catch (verifyError) {
@@ -85,10 +96,10 @@ export default function SubscriptionModal() {
 
       const rzp = new window.Razorpay(options);
       rzp.on('payment.failed', function (response) {
-         alert(`Payment Failed: ${response.error.description}`);
+        alert(`Payment Failed: ${response.error.description}`);
       });
       rzp.open();
-      
+
     } catch (err) {
       console.error(err);
       alert("Failed to initiate checkout. Please try again.");
@@ -101,14 +112,15 @@ export default function SubscriptionModal() {
     setLoadingTier('ad');
     // Open Monetag Direct Link in new tab
     window.open('https://omg10.com/4/10863757', '_blank');
-    
+
     // Fake progress timer for the ad view
     setTimeout(() => {
-        setIsOpen(false);
-        setLoadingTier(null);
-        if (onSuccessCallback) {
-            onSuccessCallback(true); // pass true for `skipLimit / isAd` parameter
-        }
+      adWatchedRef.current = true; // mark as watched
+      setIsOpen(false);
+      setLoadingTier(null);
+      if (onSuccessCallback) {
+        onSuccessCallback(true); // pass true for ad-watched / skipLimit
+      }
     }, 4000);
   };
 
@@ -117,48 +129,62 @@ export default function SubscriptionModal() {
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsOpen(false)} className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" />
-        
-        <motion.div 
-            initial={{ scale: 0.95, opacity: 0, y: 20 }} 
-            animate={{ scale: 1, opacity: 1, y: 0 }} 
-            exit={{ scale: 0.95, opacity: 0, y: 20 }} 
-            className="bg-[#0A0F1C] border border-white/10 w-full max-w-lg rounded-[2.5rem] p-6 relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto"
+        {/* Backdrop — signals skip on click */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={handleClose}
+          className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
+        />
+
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.95, opacity: 0, y: 20 }}
+          className="bg-[#0A0F1C] border border-white/10 w-full max-w-lg rounded-[2.5rem] p-6 relative z-10 shadow-2xl max-h-[90vh] overflow-y-auto"
         >
-          <button onClick={() => setIsOpen(false)} className="absolute top-6 right-6 w-10 h-10 bg-white/5 rounded-full flex flex-col items-center justify-center text-white/50 hover:text-white transition-colors">
+          {/* Close button — signals skip */}
+          <button
+            onClick={handleClose}
+            className="absolute top-6 right-6 w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
+            title="Close"
+          >
             ✕
           </button>
-          
+
+          {/* Header */}
           <div className="text-center mb-8 mt-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center text-3xl">
-                ✨
-              </div>
-              <h2 className="text-3xl font-black text-white uppercase tracking-tighter">ToneFit Pro</h2>
-              <p className="text-sm font-bold text-white/40 uppercase tracking-widest mt-2">{isPro ? 'You are currently a Pro user' : 'Unlock Your Full Style Potential'}</p>
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center text-3xl">
+              ✨
+            </div>
+            <h2 className="text-3xl font-black text-white uppercase tracking-tighter">ToneFit Pro</h2>
+            <p className="text-sm font-bold text-white/40 uppercase tracking-widest mt-2">
+              {isPro ? 'You are currently a Pro user' : 'Unlock Your Full Style Potential'}
+            </p>
           </div>
 
           <div className="space-y-4">
-            
-            {/* TIER 1: YEARLY (Highlight) */}
+
+            {/* ─────────────── TIER 1: YEARLY (Highlight) ─────────────── */}
             <div className="relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-500" />
               <div className="relative border border-purple-500/50 bg-[#131024] rounded-3xl p-6 transition-transform group-active:scale-[0.98]">
-                <div className="absolute top-0 right-6 -translate-y-1/2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-[9px] font-black uppercase px-3 py-1 rounded-full tracking-widest shadow-lg">Save 60%</div>
-                
+                <div className="absolute top-0 right-6 -translate-y-1/2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-[9px] font-black uppercase px-3 py-1 rounded-full tracking-widest shadow-lg">
+                  Save 60%
+                </div>
                 <h3 className="text-xl font-black text-white uppercase tracking-tight">Yearly Master</h3>
                 <div className="flex items-end gap-1 mt-1 mb-4">
                   <span className="text-4xl font-black text-white">₹2,499</span>
                   <span className="text-xs font-bold text-white/40 mb-1">/year</span>
                 </div>
-                
                 <ul className="space-y-2 mb-6">
                   <li className="flex items-center gap-2 text-xs font-bold text-white/70"><span className="text-purple-400">✓</span> Unlimited DNA Analysis</li>
                   <li className="flex items-center gap-2 text-xs font-bold text-white/70"><span className="text-purple-400">✓</span> Zero Ads Experience</li>
                   <li className="flex items-center gap-2 text-xs font-bold text-white/70"><span className="text-purple-400">✓</span> Unlimited Wardrobe Size</li>
                   <li className="flex items-center gap-2 text-xs font-bold text-white/70"><span className="text-purple-400">✓</span> Advanced Face/Body Analytics</li>
                 </ul>
-                
-                <button 
+                <button
                   onClick={() => handleCheckout('yearly')}
                   disabled={loadingTier === 'yearly'}
                   className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black uppercase text-[11px] tracking-[0.2em] shadow-xl disabled:opacity-50"
@@ -168,45 +194,86 @@ export default function SubscriptionModal() {
               </div>
             </div>
 
-            {/* TIER 2: MONTHLY */}
+            {/* ─────────────── AD SECTION (between Yearly and Monthly) ─────────────── */}
+            <div className="relative">
+              {/* Divider label */}
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.25em]">Or try for free</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+
+              <div className="border border-white/10 bg-gradient-to-br from-blue-950/40 to-indigo-950/40 rounded-3xl p-5">
+                {/* Helper label */}
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-base">📺</span>
+                  <div>
+                    <h4 className="text-sm font-black text-white/90 tracking-tight">Watch Ad to Unlock</h4>
+                    <p className="text-[10px] text-blue-400/80 font-semibold">Watch a short ad to unlock your result for free</p>
+                  </div>
+                  <div className="ml-auto px-2 py-1 rounded-lg bg-blue-500/15 border border-blue-500/20">
+                    <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest">Free</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Buy Coins */}
+                  <button
+                    onClick={() => handleCheckout('coins')}
+                    disabled={loadingTier !== null}
+                    className="py-3 px-2 rounded-xl border border-yellow-500/20 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 text-[10px] font-bold uppercase tracking-widest transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
+                  >
+                    {loadingTier === 'coins' ? 'Processing...' : '🪙 Buy 50 Coins (₹199)'}
+                  </button>
+
+                  {/* Watch Ad */}
+                  <button
+                    onClick={handleWatchAd}
+                    disabled={loadingTier !== null}
+                    className="py-3 px-2 rounded-xl border border-blue-500/30 bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 text-[10px] font-bold uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-1 relative overflow-hidden group"
+                  >
+                    {/* Animated shimmer */}
+                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-400/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                    {loadingTier === 'ad' ? (
+                      <>
+                        <span className="inline-block w-3 h-3 rounded-full border-2 border-blue-400/30 border-t-blue-400 animate-spin" />
+                        <span>Watching…</span>
+                      </>
+                    ) : (
+                      '📺 Watch Ad (Free)'
+                    )}
+                  </button>
+                </div>
+
+                {/* Helper text under ad buttons */}
+                <p className="text-center text-[9px] text-white/25 font-semibold mt-2 tracking-wide">
+                  ✦ Watch a short ad to unlock your analysis result for free ✦
+                </p>
+              </div>
+            </div>
+
+            {/* ─────────────── TIER 2: MONTHLY ─────────────── */}
             <div className="border border-white/10 bg-white/5 rounded-3xl p-6">
               <h3 className="text-lg font-black text-white uppercase tracking-tight">Monthly</h3>
               <div className="flex items-end gap-1 mt-1 mb-4">
                 <span className="text-3xl font-black text-white">₹499</span>
                 <span className="text-xs font-bold text-white/40 mb-1">/month</span>
               </div>
-              <button 
+              <button
                 onClick={() => handleCheckout('monthly')}
                 disabled={loadingTier === 'monthly'}
                 className="w-full py-3 rounded-2xl bg-white/10 text-white hover:bg-white/20 font-black uppercase text-[10px] tracking-[0.2em] transition-colors disabled:opacity-50"
               >
-                  {loadingTier === 'monthly' ? 'Processing...' : 'Subscribe Monthly'}
+                {loadingTier === 'monthly' ? 'Processing...' : 'Subscribe Monthly'}
               </button>
             </div>
 
-            {/* TIER 3: COINS (PAYG) */}
-            <div className="border border-white/5 bg-transparent rounded-3xl p-4 text-center">
-              <h4 className="text-xs font-black text-white/50 uppercase tracking-widest mb-2">Need a Quick Scan?</h4>
-              <div className="grid grid-cols-2 gap-3">
-                  <button 
-                    onClick={() => handleCheckout('coins')}
-                    disabled={loadingTier !== null}
-                    className="py-3 px-2 rounded-xl border border-yellow-500/20 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 text-[10px] font-bold uppercase tracking-widest transition-colors disabled:opacity-50"
-                  >
-                    {loadingTier === 'coins' ? 'Processing...' : 'Buy 50 Coins (₹199)'}
-                  </button>
-
-                  <button 
-                    onClick={handleWatchAd}
-                    disabled={loadingTier !== null}
-                    className="py-3 px-2 rounded-xl border border-blue-500/20 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 text-[10px] font-bold uppercase tracking-widest transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
-                  >
-                    {loadingTier === 'ad' ? 'Watching...' : '📺 Watch Ad (Free)'}
-                  </button>
-              </div>
-            </div>
-
           </div>
+
+          {/* Footer note */}
+          <p className="text-center text-[9px] text-white/20 font-medium mt-5 tracking-wide">
+            Prices in INR • Cancel anytime • Secure payments via Razorpay
+          </p>
         </motion.div>
       </div>
     </AnimatePresence>

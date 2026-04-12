@@ -247,7 +247,7 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
   );
 }
 
-function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSelected, onGenderChange, setUploadProgress }) {
+function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSelected, onGenderChange, setUploadProgress, onAdSkipped }) {
   const { theme } = useContext(ThemeContext);
   const { t, language } = useLanguage();
   const isDark = theme === 'dark';
@@ -292,8 +292,14 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     if (!validTypes.includes(file.type)) { onError('Only JPG, PNG, or WebP images are allowed.'); return; }
     if (file.size > 10 * 1024 * 1024) { onError('Image is too large. Maximum size is 10MB.'); return; }
 
+    // 'skipped' means user closed the subscription modal without watching the ad
+    if (skipLimit === 'skipped') {
+      if (onAdSkipped) onAdSkipped();
+      return;
+    }
+
     onLoadingStart();
-    
+
     // LIMIT CHECK
     if (!skipLimit) {
         const limitCheck = await consumeUserLimit('analysis');
@@ -305,7 +311,8 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                     }
                 }
             }));
-            onError("You've reached your free Ad-Free limits! Please Upgrade to Pro.");
+            // Don't set error — modal is showing. Signal loading stopped.
+            if (onAdSkipped) onAdSkipped();
             setShowProgress(false);
             return;
         }
@@ -358,6 +365,12 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       return;
     }
 
+    // 'skipped' means user closed the subscription modal without watching the ad
+    if (skipLimit === 'skipped') {
+      if (onAdSkipped) onAdSkipped();
+      return;
+    }
+
     onLoadingStart();
     // LIMIT CHECK (Couple requires 2 analysis credits or we just consume 1 for now)
     if (!skipLimit) {
@@ -370,7 +383,8 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                     }
                 }
             }));
-            onError("You've reached your free Ad-Free limits! Please Upgrade to Pro.");
+            // Don't set error — modal is showing. Signal loading stopped.
+            if (onAdSkipped) onAdSkipped();
             setShowProgress(false);
             return;
         }

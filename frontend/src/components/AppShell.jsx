@@ -812,7 +812,9 @@ export default function AppShell({ user, onLogout }) {
     const params = new URLSearchParams(window.location.search);
     return params.get('tab') || 'home';
   });
+  const [tabHistory, setTabHistory]         = useState(['home']);
   const [results, setResults]               = useState(null);
+  const [adSkipped, setAdSkipped]           = useState(false);
   const [loading, setLoading]               = useState(false);
   const [error, setError]                   = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -846,9 +848,43 @@ export default function AppShell({ user, onLogout }) {
     }).catch(() => {});
   }, [user?.uid]);
 
+  // ── Back-stack navigation via popstate ──────────────────────
+  useEffect(() => {
+    // Push initial state
+    window.history.replaceState({ tab: activeTab }, '');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const onPop = () => {
+      setTabHistory(history => {
+        if (history.length <= 1) {
+          // Nothing to go back to — restore current state so app doesn't exit
+          window.history.pushState({ tab: history[0] || 'home' }, '');
+          return history;
+        }
+        const newHistory = history.slice(0, -1);
+        const prevTab = newHistory[newHistory.length - 1];
+        setActiveTab(prevTab);
+        setError(null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.history.pushState({ tab: prevTab }, '');
+        return newHistory;
+      });
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
   const handleTabChange = useCallback((tab) => {
     setActiveTab(tab);
+    setTabHistory(h => {
+      // Don't duplicate same tab consecutively
+      if (h[h.length - 1] === tab) return h;
+      return [...h, tab];
+    });
     if (tab !== 'analyze') setError(null);
+    window.history.pushState({ tab }, '');
     window.scrollTo({ top:0, behavior:'smooth' });
   }, []);
 
@@ -865,7 +901,7 @@ export default function AppShell({ user, onLogout }) {
   }, []);
 
   const handleReset = useCallback(() => {
-    setResults(null); setError(null); setUploadedImage(null);
+    setResults(null); setError(null); setUploadedImage(null); setAdSkipped(false);
   }, []);
 
   const handleLogout = useCallback(() => {
@@ -963,16 +999,78 @@ export default function AppShell({ user, onLogout }) {
 
           {activeTab === 'analyze' && (
             <div key="analyze" style={{ animation:'fadeSlideIn 0.3s ease' }}>
-              <SectionHeader C={C} label="AI Analysis" title={results?'Your Style Profile':'Upload a Photo'} subtitle={!results?'Get personalized color palette & outfit recommendations':undefined}
-                action={results && (
-                  <button onClick={handleReset} style={{ background:C.glass, backdropFilter:'blur(12px)', border:`1px solid ${C.border}`, color:C.muted, borderRadius:10, padding:'10px 18px', fontSize:'12px', cursor:'pointer', transition:'all 0.2s', fontFamily:PJS }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor=VIOLET; e.currentTarget.style.color=C.text; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor=C.border; e.currentTarget.style.color=C.muted; }}
-                  >↑ New Scan</button>
-                )}
+              <SectionHeader C={C}
+                label="AI Analysis"
+                title={results ? 'Your Style Profile' : adSkipped ? 'Analysis Cancelled' : 'Upload a Photo'}
+                subtitle={!results && !adSkipped ? 'Get personalized color palette & outfit recommendations' : undefined}
+                action={
+                  results ? (
+                    // ── Result exists → show Refresh ──
+                    <button
+                      onClick={handleReset}
+                      style={{ background:C.glass, backdropFilter:'blur(12px)', border:`1px solid ${C.border}`, color:C.muted, borderRadius:10, padding:'10px 18px', fontSize:'12px', cursor:'pointer', transition:'all 0.2s', fontFamily:PJS }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor=VIOLET; e.currentTarget.style.color=C.text; }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor=C.border; e.currentTarget.style.color=C.muted; }}
+                    >
+                      🔄 Refresh
+                    </button>
+                  ) : adSkipped ? (
+                    // ── Ad skipped → show New Analysis ──
+                    <button
+                      onClick={() => { setAdSkipped(false); handleReset(); }}
+                      style={{ background:'linear-gradient(135deg,#8B5CF6,#6366F1)', border:'none', color:'white', borderRadius:10, padding:'10px 18px', fontSize:'12px', fontWeight:700, cursor:'pointer', transition:'all 0.2s', fontFamily:PJS, boxShadow:'0 4px 16px rgba(139,92,246,0.35)' }}
+                      onMouseEnter={e => { e.currentTarget.style.opacity='0.88'; }}
+                      onMouseLeave={e => { e.currentTarget.style.opacity='1'; }}
+                    >
+                      🆕 New Analysis
+                    </button>
+                  ) : null
+                }
               />
-              {!results && !loading && !error && (
-                <UploadSection onLoadingStart={() => setLoading(true)} onAnalysisComplete={handleAnalysisComplete} onError={setError} onImageSelected={setUploadedImage} setUploadProgress={setUploadProgress} currentGender={currentGender} setCurrentGender={setCurrentGender} isPro={isPro} usage={usage} coins={coins} onCoinEmpty={() => {}} />
+
+              {/* ── Ad-skipped state — no result, show helper message ── */}
+              {adSkipped && !results && !loading && (
+                <div style={{ textAlign:'center', padding:'40px 24px', background:C.glass, backdropFilter:'blur(16px)', border:`1px solid ${C.border}`, borderRadius:20, marginBottom:24 }}>
+                  <p style={{ fontSize:'40px', marginBottom:12 }}>🎬</p>
+                  <p style={{ fontFamily:PJS, fontSize:'16px', fontWeight:700, color:C.text, marginBottom:8 }}>No result generated</p>
+                  <p style={{ fontFamily:PJS, fontSize:'13px', color:C.muted, lineHeight:'1.7', marginBottom:24 }}>
+                    Analysis cancelled. Start a new analysis to continue.
+                  </p>
+                  <button
+                    onClick={() => { setAdSkipped(false); handleReset(); }}
+                    style={{ background:'linear-gradient(135deg,#8B5CF6,#6366F1)', border:'none', color:'white', borderRadius:12, padding:'14px 32px', fontSize:'14px', fontWeight:700, cursor:'pointer', fontFamily:PJS, boxShadow:'0 6px 20px rgba(139,92,246,0.4)' }}
+                    onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 10px 28px rgba(139,92,246,0.5)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 6px 20px rgba(139,92,246,0.4)'; }}
+                  >
+                    🆕 New Analysis
+                  </button>
+                </div>
+              )}
+
+              {/* ── Normal upload screen ── */}
+              {!results && !loading && !error && !adSkipped && (
+                <UploadSection
+                  onLoadingStart={() => setLoading(true)}
+                  onAnalysisComplete={handleAnalysisComplete}
+                  onError={(err) => {
+                    // If 'skipped' signal arrives here (edge case), handle gracefully
+                    if (err === '__ad_skipped__') {
+                      setLoading(false);
+                      setAdSkipped(true);
+                    } else {
+                      setError(err);
+                    }
+                  }}
+                  onImageSelected={setUploadedImage}
+                  setUploadProgress={setUploadProgress}
+                  currentGender={currentGender}
+                  setCurrentGender={setCurrentGender}
+                  isPro={isPro}
+                  usage={usage}
+                  coins={coins}
+                  onAdSkipped={() => { setLoading(false); setAdSkipped(true); }}
+                  onCoinEmpty={() => {}}
+                />
               )}
               {loading && <LoadingScreenWithProgress progress={uploadProgress} />}
               {error && !loading && (
