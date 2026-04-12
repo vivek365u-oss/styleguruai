@@ -1,6 +1,6 @@
 {
   "name": "StyleGuru AI",
-  "short_name": "StyleGuru",
+  "short_name": "StyleGuru AI",
   "description": "AI-powered fashion advisor based on your skin tone. Get personalized outfit recommendations.",
   "start_url": "/",
   "display": "standalone",

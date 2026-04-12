@@ -59,8 +59,8 @@ export default function SubscriptionModal() {
         key: res.key,
         amount: res.order.amount,
         currency: res.order.currency,
-        name: "ToneFit AI",
-        description: `Upgrade to ToneFit ${tier.toUpperCase()}`,
+        name: "StyleGuru AI",
+        description: `Upgrade to StyleGuru AI ${tier.toUpperCase()}`,
         image: "https://styleguruai.in/favicon.svg",
         order_id: res.order.id,
         handler: async function (response) {
@@ -72,7 +72,7 @@ export default function SubscriptionModal() {
               razorpay_signature: response.razorpay_signature,
               tier: tier
             });
-            alert("Payment Successful! Welcome to ToneFit PRO.");
+            alert("Payment Successful! Welcome to StyleGuru AI PRO.");
             adWatchedRef.current = true; // payment counts as success
             setIsOpen(false);
             await refreshPlan();
@@ -86,8 +86,8 @@ export default function SubscriptionModal() {
           }
         },
         prefill: {
-          name: auth?.currentUser?.displayName || "ToneFit User",
-          email: auth?.currentUser?.email || "user@tonefit.com"
+          name: auth?.currentUser?.displayName || "StyleGuru User",
+          email: auth?.currentUser?.email || "user@styleguruai.in"
         },
         theme: {
           color: "#8B5CF6"
@@ -158,7 +158,7 @@ export default function SubscriptionModal() {
             <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl mx-auto mb-4 flex items-center justify-center text-3xl">
               ✨
             </div>
-            <h2 className="text-3xl font-black text-white uppercase tracking-tighter">ToneFit Pro</h2>
+            <h2 className="text-3xl font-black text-white uppercase tracking-tighter">StyleGuru AI Pro</h2>
             <p className="text-sm font-bold text-white/40 uppercase tracking-widest mt-2">
               {isPro ? 'You are currently a Pro user' : 'Unlock Your Full Style Potential'}
             </p>
