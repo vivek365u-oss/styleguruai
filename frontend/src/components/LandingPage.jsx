@@ -74,8 +74,7 @@ function MobileMenu({ open, onClose, navItems, onItemClick, onLoginClick }) {
       {/* Top bar */}
       <div className="flex items-center justify-between px-6 py-5" style={{ borderBottom: '1px solid #1C1C1C' }}>
         <div className="flex items-center gap-2.5">
-          <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-          </div>
+          <img src="/logo.png" alt="Logo" style={{ width: 32, height: 32, objectFit: 'contain', background: 'none' }} />
           <span style={{ fontSize: '14px', fontWeight: 600, color: '#F0EDE6', letterSpacing: '0.02em' }}>StyleGuruAI</span>
         </div>
         <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#6B6B6B', cursor: 'pointer', fontSize: '22px', padding: '4px' }}>
