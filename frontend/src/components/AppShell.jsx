@@ -941,18 +941,9 @@ export default function AppShell({ user, onLogout }) {
       <nav style={{ position:'fixed', top:0, left:0, right:0, zIndex:100, height:60, background:navScrolled?C.navBg:C.navBgScroll, backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)', borderBottom:`1px solid ${navScrolled?C.border:'transparent'}`, display:'flex', alignItems:'center', padding:'0 20px', gap:12, transition:'all 0.3s' }}>
         {/* Logo */}
         <button onClick={() => handleTabChange('home')} style={{ display:'flex', alignItems:'center', gap:10, background:'none', border:'none', cursor:'pointer', padding:0, flexShrink:0 }}>
-          <img
-            src="/logo.png"
-            alt="StyleGuru AI"
-            style={{
-              width: 32, height: 32,
-              borderRadius: 8,
-              objectFit: 'cover',
-              boxShadow: '0 4px 12px rgba(139,92,246,0.4)',
-              display: 'block',
-              flexShrink: 0,
-            }}
-          />
+          <div style={{ width:32, height:32, borderRadius:8, background:GRAD, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 12px rgba(139,92,246,0.4)' }}>
+            <span style={{ fontSize:'12px', fontWeight:800, color:'white', fontFamily:PJS }}>SG</span>
+          </div>
           <span style={{ fontSize:'14px', fontWeight:700, color:C.text, fontFamily:PJS }}>
             StyleGuru <span style={{ background:GRAD, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>AI</span>
           </span>
