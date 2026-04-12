@@ -808,7 +808,10 @@ export default function AppShell({ user, onLogout }) {
   // Get theme-aware colors
   const C = useMemo(() => getThemeColors(theme), [theme]);
 
-  const [activeTab, setActiveTab]           = useState('home');
+  const [activeTab, setActiveTab]           = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('tab') || 'home';
+  });
   const [results, setResults]               = useState(null);
   const [loading, setLoading]               = useState(false);
   const [error, setError]                   = useState(null);

@@ -9,6 +9,8 @@ import { CartProvider } from './context/CartProvider';
 import { useAuthState } from './hooks/useAuthState';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeContext } from './context/ThemeContext';
+import { usePWA } from './hooks/usePWA';
+import InstallPromptModal from './components/InstallPromptModal';
 
 // ── Core shells (eagerly loaded for fast paint) ──
 import LandingPage   from './components/LandingPage';
@@ -174,6 +176,7 @@ function AppRoutes({ user, setUser }) {
 function App() {
   const authState = useAuthState();
   const [theme, setTheme] = useState(() => localStorage.getItem('tonefit_theme') || 'dark');
+  const { isInstallable, isInstalled, promptInstall, dismissInstall } = usePWA();
 
   const user = authState.user
     ? { name: authState.user.name, email: authState.user.email }
@@ -208,6 +211,9 @@ function App() {
             <CartProvider>
               <div className={`min-h-screen transition-colors duration-300 ${theme}`}>
                 <AppRoutes user={user} setUser={setUser} />
+                {isInstallable && !isInstalled && (
+                  <InstallPromptModal onInstall={promptInstall} onDismiss={dismissInstall} />
+                )}
               </div>
             </CartProvider>
           </PlanProvider>
