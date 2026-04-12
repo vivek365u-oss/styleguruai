@@ -905,7 +905,7 @@ export default function AppShell({ user, onLogout }) {
           <div style={{ width:32, height:32, borderRadius:8, background:GRAD, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 12px rgba(139,92,246,0.4)' }}>
             <span style={{ fontSize:'12px', fontWeight:800, color:'white', fontFamily:PJS }}>SG</span>
           </div>
-          <span className="hidden sm:inline" style={{ fontSize:'14px', fontWeight:700, color:C.text, fontFamily:PJS }}>
+          <span style={{ fontSize:'14px', fontWeight:700, color:C.text, fontFamily:PJS }}>
             StyleGuru <span style={{ background:GRAD, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>AI</span>
           </span>
         </button>

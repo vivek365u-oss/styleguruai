@@ -342,14 +342,21 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
             </button>
           </div>
 
-          {/* Mobile Hamburger */}
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="md:hidden"
-            style={{ background: 'none', border: 'none', color: '#F0EDE6', cursor: 'pointer', padding: '8px', fontSize: '20px' }}
-          >
-            ☰
-          </button>
+          {/* Mobile Right */}
+          <div className="flex md:hidden items-center gap-2">
+            <button
+              onClick={onLoginClick}
+              style={{ background: 'none', border: '1px solid #242424', color: '#F0EDE6', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '6px 12px', cursor: 'pointer', transition: 'border-color 0.2s' }}
+            >
+              Login
+            </button>
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              style={{ background: 'none', border: 'none', color: '#F0EDE6', cursor: 'pointer', padding: '8px', fontSize: '20px' }}
+            >
+              ☰
+            </button>
+          </div>
         </div>
       </nav>
 
