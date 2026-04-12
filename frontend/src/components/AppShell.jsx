@@ -1058,6 +1058,7 @@ export default function AppShell({ user, onLogout }) {
                       setLoading(false);
                       setAdSkipped(true);
                     } else {
+                      setLoading(false);
                       setError(err);
                     }
                   }}
