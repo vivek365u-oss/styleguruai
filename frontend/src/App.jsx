@@ -27,21 +27,59 @@ const NotFoundPage   = lazy(() => import('./pages/NotFoundPage'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ProfilePage    = lazy(() => import('./pages/ProfilePage'));
 
-// ── Minimal luxury loading screen ──
+// ── Premium Loading Screen ──
 const LoadingFallback = () => (
   <div style={{
     minHeight: '100vh', display: 'flex', flexDirection: 'column',
     alignItems: 'center', justifyContent: 'center',
-    background: '#0A0A0A', gap: 20
+    background: '#0B0F1A', gap: 32, position: 'relative', overflow: 'hidden'
   }}>
+    {/* Soft glow background */}
     <div style={{
-      width: 36, height: 36,
-      border: '1px solid #242424', borderTop: '1px solid #C9A96E',
-      borderRadius: '50%', animation: 'spinSmooth 0.8s linear infinite'
+      position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+      width: 200, height: 200, background: 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)',
+      pointerEvents: 'none'
     }} />
-    <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#6B6B6B' }}>
-      StyleGuru AI
-    </p>
+
+    {/* Spinning logo container */}
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {/* Outer gradient spinning ring */}
+      <div style={{
+        position: 'absolute', inset: -10, borderRadius: '50%',
+        background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%)',
+        animation: 'spinSmooth 1.2s linear infinite',
+        mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+        WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+        maskComposite: 'exclude', WebkitMaskComposite: 'xor',
+        padding: 2
+      }} />
+
+      {/* Inner glass logo block */}
+      <div style={{
+        width: 56, height: 56, borderRadius: 16,
+        background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(16px)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: '0 8px 32px rgba(139,92,246,0.25)',
+        animation: 'pulse-glow 2.5s ease-in-out infinite'
+      }}>
+        <span style={{
+          fontSize: '22px', fontWeight: 800, fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif",
+          background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%)',
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+        }}>SG</span>
+      </div>
+    </div>
+
+    {/* Text content */}
+    <div style={{ textAlign: 'center', zIndex: 1, animation: 'fadeSlideIn 0.8s ease forwards' }}>
+      <p style={{
+        fontSize: '18px', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif", color: '#F9FAFB', margin: '0 0 6px', letterSpacing: '0.02em'
+      }}>StyleGuru <span style={{ background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>AI</span></p>
+      <p style={{ fontSize: '10px', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#9CA3AF', margin: 0, fontWeight: 500 }}>
+        Loading Intelligence
+      </p>
+    </div>
   </div>
 );
 
