@@ -109,14 +109,16 @@ class SkinToneClassifier:
     # Extended for darker Indian skin tones
     # ─────────────────────────────────────────────
     ITA_CATEGORIES = [
-    (55,   90,  "very_light",    "fair",     1, "Very fair, burns easily"),
-    (41,   55,  "light",         "light",    2, "Fair to light skin"),
-    (28,   41,  "intermediate",  "wheatish", 3, "Medium/wheatish skin"),
-    (10,   28,  "tan",           "medium",   3, "Medium tan skin"),
-    (-15,  10,  "brown",         "dusky",    4, "Dusky skin"),
-    (-40, -15,  "dark",          "brown",    5, "Brown/dark skin"),
-    (-90, -40,  "very_dark",     "dark",     6, "Very dark skin"),
-]
+        (55,   90,  "ultra_fair",    "ultra_fair",   1, "Porcelain/Ultra Fair skin, burns easily"),
+        (41,   55,  "fair",          "fair",         2, "Fair skin"),
+        (28,   41,  "light",         "light",        3, "Light Wheatish skin"),
+        (15,   28,  "medium_light",  "medium_light", 3, "Medium Wheatish skin"),
+        (5,    15,  "medium",        "medium",       4, "True Medium skin"),
+        (-5,   5,   "medium_dark",   "medium_dark",  4, "Caramel/Dusky skin"),
+        (-25,  -5,  "olive",         "olive",        5, "Deep Olive/Dusky skin"),
+        (-50, -25,  "brown",         "brown",        5, "Rich Brown/Dark skin"),
+        (-90, -50,  "dark",          "dark",         6, "Deep Ebony/Very Dark skin"),
+    ]
 
     # ─────────────────────────────────────────────
     # MONK SKIN TONE SCALE MAPPING (1-10)
@@ -139,27 +141,33 @@ class SkinToneClassifier:
     # SEASON MAPPING (Color Analysis)
     # ─────────────────────────────────────────────
     SEASON_MAP = {
-        ("fair", "warm"):     "Light Spring",
-        ("fair", "cool"):     "Light Summer",
-        ("fair", "neutral"):  "Light Spring",
-        ("light", "warm"):    "Warm Spring",
-        ("light", "cool"):    "Cool Summer",
-        ("light", "neutral"): "Light Summer",
-        ("wheatish", "warm"): "Warm Autumn",
-        ("wheatish", "cool"): "Cool Summer",
-        ("wheatish", "neutral"): "Soft Autumn",
-        ("medium", "warm"):   "Warm Autumn",
-        ("medium", "cool"):   "Cool Summer",
-        ("medium", "neutral"): "Soft Autumn",
-        ("dusky", "warm"):    "Deep Autumn",
-        ("dusky", "cool"):    "Deep Winter",
-        ("dusky", "neutral"): "Soft Autumn",
-        ("brown", "warm"):    "Deep Autumn",
-        ("brown", "cool"):    "Deep Winter",
-        ("brown", "neutral"): "Deep Autumn",
-        ("dark", "warm"):     "Deep Autumn",
-        ("dark", "cool"):     "Deep Winter",
-        ("dark", "neutral"):  "Deep Winter",
+        ("ultra_fair", "warm"):   "Light Spring",
+        ("ultra_fair", "cool"):   "Light Summer",
+        ("ultra_fair", "neutral"):"Light Spring",
+        ("fair", "warm"):         "Warm Spring",
+        ("fair", "cool"):         "Cool Summer",
+        ("fair", "neutral"):      "Light Summer",
+        ("light", "warm"):        "Warm Autumn",
+        ("light", "cool"):        "Cool Summer",
+        ("light", "neutral"):     "Soft Autumn",
+        ("medium_light", "warm"): "Warm Autumn",
+        ("medium_light", "cool"): "Cool Summer",
+        ("medium_light", "neutral"): "Soft Autumn",
+        ("medium", "warm"):       "Warm Autumn",
+        ("medium", "cool"):       "Cool Summer",
+        ("medium", "neutral"):    "Soft Autumn",
+        ("medium_dark", "warm"):  "Deep Autumn",
+        ("medium_dark", "cool"):  "Deep Winter",
+        ("medium_dark", "neutral"): "Deep Autumn",
+        ("olive", "warm"):        "Deep Autumn",
+        ("olive", "cool"):        "Deep Winter",
+        ("olive", "neutral"):     "Soft Autumn",
+        ("brown", "warm"):        "Deep Autumn",
+        ("brown", "cool"):        "Deep Winter",
+        ("brown", "neutral"):     "Deep Autumn",
+        ("dark", "warm"):         "Deep Autumn",
+        ("dark", "cool"):         "Deep Winter",
+        ("dark", "neutral"):      "Deep Winter",
     }
 
     # ─────────────────────────────────────────────
@@ -167,13 +175,15 @@ class SkinToneClassifier:
     # Maps internal categories to recommendation engine categories
     # ─────────────────────────────────────────────
     INDIAN_TO_REC = {
-        "fair":     "fair",
-        "light":    "light",
-        "wheatish": "light",
-        "medium":   "medium",
-        "dusky":    "olive",
-        "brown":    "brown",
-        "dark":     "dark",
+        "ultra_fair":   "ultra_fair",
+        "fair":         "fair",
+        "light":        "light",
+        "medium_light": "medium_light",
+        "medium":       "medium",
+        "medium_dark":  "medium_dark",
+        "olive":        "olive",
+        "brown":        "brown",
+        "dark":         "dark",
     }
 
     def __init__(self):

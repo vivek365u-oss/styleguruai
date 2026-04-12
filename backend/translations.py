@@ -97,19 +97,19 @@ MESSAGES = {
 # Mapping for static labels used in recommendation logic
 LABELS = {
     "en": {
-        "fair": "Fair", "light": "Light", "medium": "Medium", "olive": "Olive", "brown": "Brown", "dark": "Dark",
+        "ultra_fair": "Porcelain/Ultra Fair", "fair": "Fair", "light": "Light Wheatish", "medium_light": "Golden Wheatish", "medium": "True Medium", "medium_dark": "Caramel/Dusky", "olive": "Olive/Deep Dusky", "brown": "Rich Brown", "dark": "Deep Ebony",
         "warm": "Warm", "cool": "Cool", "neutral": "Neutral",
         "summer": "Summer", "winter": "Winter", "spring": "Spring", "autumn": "Autumn", "monsoon": "Monsoon",
         "shirt": "Shirt", "pant": "Pant", "shoes": "Shoes", "top": "Top", "bottom": "Bottom", "dupatta": "Dupatta"
     },
     "hinglish": {
-        "fair": "Fair", "light": "Light/Wheatish", "medium": "Medium", "olive": "Olive/Dusky", "brown": "Brown", "dark": "Dark",
+        "ultra_fair": "Ultra Fair", "fair": "Fair", "light": "Light Wheatish", "medium_light": "Golden Wheatish", "medium": "Medium", "medium_dark": "Caramel/Dusky", "olive": "Olive/Gehua", "brown": "Brown", "dark": "Dark",
         "warm": "Warm", "cool": "Cool", "neutral": "Neutral",
         "summer": "Summer", "winter": "Winter", "spring": "Spring", "autumn": "Autumn", "monsoon": "Monsoon",
         "shirt": "Shirt", "pant": "Pant", "shoes": "Shoes", "top": "Top", "bottom": "Bottom", "dupatta": "Dupatta"
     },
     "hi": {
-        "fair": "गोरा (Fair)", "light": "हल्का (Light)", "medium": "सांवला (Medium)", "olive": "गेहुआं (Olive)", "brown": "गहरा (Brown)", "dark": "बहुत गहरा (Dark)",
+        "ultra_fair": "बहुत गोरा (Ultra Fair)", "fair": "गोरा (Fair)", "light": "हल्का गेहुआं (Light Wheatish)", "medium_light": "सुनहरा गेहुआं (Golden Wheatish)", "medium": "सांवला (Medium)", "medium_dark": "गहरा सांवला (Caramel/Dusky)", "olive": "गेहुआं (Olive)", "brown": "गहरा (Brown)", "dark": "बहुत गहरा (Dark)",
         "warm": "वार्म", "cool": "कूल", "neutral": "न्यूट्रल",
         "summer": "गर्मी (Summer)", "winter": "सर्दी (Winter)", "spring": "वसंत (Spring)", "autumn": "पतझड़ (Autumn)", "monsoon": "मानसून (Monsoon)",
         "shirt": "शर्ट", "pant": "पैंट", "shoes": "जूते", "top": "टॉप", "bottom": "बॉटम", "dupatta": "दुपट्टा"

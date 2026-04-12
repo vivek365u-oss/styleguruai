@@ -93,6 +93,55 @@ class RecommendationEngine:
 
     def _get_shirt_colors(self, category, undertone):
         recommendations = {
+            ("ultra_fair", "warm"): [
+                {**self.COLORS["pastel_pink"], "reason": "Soft pink makes ultra-fair warm skin glow"},
+                {**self.COLORS["peach"], "reason": "Brings out your golden warmth"},
+                {**self.COLORS["coral"], "reason": "Vibrant and flattering contrast"},
+                {**self.COLORS["mint_green"], "reason": "Fresh cool pop on a warm base"},
+                {**self.COLORS["navy_blue"], "reason": "Classic anchor color"},
+                {**self.COLORS["white"], "reason": "Pure clean look"},
+            ],
+            ("ultra_fair", "cool"): [
+                {**self.COLORS["powder_blue"], "reason": "Enhances cool undertones perfectly"},
+                {**self.COLORS["lavender"], "reason": "Sophisticated pastel"},
+                {**self.COLORS["emerald"], "reason": "Rich jewel tone contrast"},
+                {**self.COLORS["royal_blue"], "reason": "Striking power color"},
+                {**self.COLORS["charcoal"], "reason": "Softer alternative to stark black"},
+                {**self.COLORS["dusty_rose"], "reason": "Elegant moody pink"},
+            ],
+            ("medium_light", "warm"): [
+                {**self.COLORS["rust"], "reason": "Earthy rust makes golden undertones shine"},
+                {**self.COLORS["mustard"], "reason": "Rich yellow was made for you"},
+                {**self.COLORS["olive_green"], "reason": "Perfect earthy balance"},
+                {**self.COLORS["maroon"], "reason": "Deep warm red looks regal"},
+                {**self.COLORS["camel"], "reason": "Sophisticated warm neutral"},
+                {**self.COLORS["navy_blue"], "reason": "Classic high contrast"},
+            ],
+            ("medium_light", "cool"): [
+                {**self.COLORS["teal"], "reason": "Rich cool-blue green is perfect"},
+                {**self.COLORS["wine_red"], "reason": "Sophisticated cool red"},
+                {**self.COLORS["charcoal"], "reason": "Sleek and polished"},
+                {**self.COLORS["cobalt_blue"], "reason": "Intense cool blue contrast"},
+                {**self.COLORS["forest_green"], "reason": "Deep green works beautifully"},
+                {**self.COLORS["lavender"], "reason": "Soft purple pops nicely"},
+            ],
+            ("medium_dark", "warm"): [
+                {**self.COLORS["chocolate"], "reason": "Rich brown is your power neutral"},
+                {**self.COLORS["forest_green"], "reason": "Deep earthy green looks lush"},
+                {**self.COLORS["maroon"], "reason": "Deep warm red is stunning"},
+                {**self.COLORS["mustard"], "reason": "Golden tones match your skin"},
+                {**self.COLORS["navy_blue"], "reason": "Classic and polished"},
+                {**self.COLORS["coral"], "reason": "Bright warm pop of color"},
+            ],
+            ("medium_dark", "cool"): [
+                {**self.COLORS["cobalt_blue"], "reason": "Deep rich blue is your best friend"},
+                {**self.COLORS["emerald"], "reason": "Stunning jewel tone contrast"},
+                {**self.COLORS["burgundy"], "reason": "Sophisticated deep red"},
+                {**self.COLORS["charcoal"], "reason": "Excellent dark neutral"},
+                {**self.COLORS["royal_blue"], "reason": "Vivid and commanding"},
+                {**self.COLORS["white"], "reason": "Crisp striking contrast"},
+            ],
+
             ("fair", "warm"): [
                 {**self.COLORS["navy_blue"], "reason": self._localize("creates_contrast")},
                 {**self.COLORS["forest_green"], "reason": self._localize("warm_glow")},
@@ -204,14 +253,14 @@ class RecommendationEngine:
             {**self.COLORS["charcoal"], "reason": self._localize("classic_choice")},
             {**self.COLORS["black"], "reason": self._localize("classic_choice")},
         ]
-        if category in ["fair", "light"]:
+        if category in ["ultra_fair", "fair", "light"]:
             specific = [
                 {**self.COLORS["khaki"], "reason": "Casual and flattering for lighter skin"},
                 {**self.COLORS["beige"], "reason": "Light neutral that pairs beautifully"},
                 {**self.COLORS["olive_green"], "reason": "Earth tone pants are trendy and versatile"},
                 {**self.COLORS["gray"], "reason": "Cool neutral for a polished look"},
             ]
-        elif category in ["medium", "olive"]:
+        elif category in ["medium_light", "medium", "medium_dark", "olive"]:
             specific = [
                 {**self.COLORS["beige"], "reason": "Great contrast with medium skin"},
                 {**self.COLORS["khaki"], "reason": "Casual and always works"},
@@ -329,7 +378,7 @@ class RecommendationEngine:
         
         
     def _get_outfit_combos(self, category, undertone):
-        if category in ["fair", "light"]:
+        if category in ["ultra_fair", "fair", "light"]:
             return [
                 {"shirt": "Navy blue polo", "pant": "Beige chinos", "shoes": "White sneakers", "occasion": "College / Casual", "vibe": "Clean and preppy"},
                 {"shirt": "Burgundy henley", "pant": "Dark blue jeans", "shoes": "Brown loafers", "occasion": "Casual date", "vibe": "Stylish and relaxed"},
@@ -337,7 +386,7 @@ class RecommendationEngine:
                 {"shirt": "Olive green t-shirt", "pant": "Black joggers", "shoes": "White sneakers", "occasion": "Weekend", "vibe": "Chill and trendy"},
                 {"shirt": "Forest green shirt", "pant": "Khaki pants", "shoes": "Tan shoes", "occasion": "Semi-formal", "vibe": "Smart casual"},
             ]
-        elif category in ["medium", "olive"]:
+        elif category in ["medium_light", "medium", "medium_dark", "olive"]:
             return [
                 {"shirt": "Crisp white shirt", "pant": "Navy blue chinos", "shoes": "Brown leather shoes", "occasion": "Office / Interview", "vibe": "Classic and confident"},
                 {"shirt": "Maroon round-neck t-shirt", "pant": "Dark blue jeans", "shoes": "White sneakers", "occasion": "College / Friends", "vibe": "Bold and stylish"},
@@ -365,13 +414,13 @@ class RecommendationEngine:
                 "hi": "सबसे पहले एक सफेद और नेवी ब्लू शर्ट लें — ये हर अवसर पर काम आती हैं।"
             }),
         ]
-        if category in ["fair", "light"]:
+        if category in ["ultra_fair", "fair", "light"]:
             specific = [
                 "You can pull off both pastels and bold colors — experiment!",
                 "Jewel tones (emerald, sapphire, ruby) look especially rich on you",
                 "Avoid head-to-toe light colors — add one dark/bold piece for contrast",
             ]
-        elif category in ["medium", "olive"]:
+        elif category in ["medium_light", "medium", "medium_dark", "olive"]:
             specific = [
                 "You have the most versatile skin tone — most colors work for you!",
                 "Earth tones (olive, rust, mustard) are your secret weapon",
@@ -386,7 +435,7 @@ class RecommendationEngine:
         return specific + common
 
     def _get_occasion_advice(self, category, undertone):
-        base = "navy" if category in ["fair", "light", "medium"] else "royal blue or white"
+        base = "navy" if category in ["ultra_fair", "fair", "light", "medium_light", "medium", "medium_dark"] else "royal blue or white"
         return {
             "College Daily": f"Well-fitted t-shirt in your best color + dark jeans + clean sneakers. Best bet: {base} tones.",
             "Job Interview": "White or light blue formal shirt + charcoal/navy trousers + leather shoes. Stick to classics.",
@@ -396,14 +445,14 @@ class RecommendationEngine:
         }
 
     def _get_ethnic_suggestions(self, category, undertone):
-        if category in ["fair", "light"]:
+        if category in ["ultra_fair", "fair", "light"]:
             return [
                 "Kurta colors: Deep maroon, navy, forest green, or royal blue",
                 "Wedding outfit: Dark sherwani with gold/silver embroidery",
                 "Festival wear: Rich jewel-toned kurta with white/cream pajama",
                 "Nehru jacket in emerald or navy adds instant sophistication",
             ]
-        elif category in ["medium", "olive"]:
+        elif category in ["medium_light", "medium", "medium_dark", "olive"]:
             return [
                 "Kurta colors: White, cream, sky blue, maroon, or olive green",
                 "Wedding outfit: Ivory/cream sherwani with golden work — stunning!",
@@ -458,7 +507,7 @@ class RecommendationEngine:
         }
 
     def _get_kurti_colors(self, category, undertone):
-        if category in ["fair", "light"]:
+        if category in ["ultra_fair", "fair", "light"]:
             return [
                 {**self.COLORS["maroon"], "reason": "Deep maroon kurti looks stunning on fair skin"},
                 {**self.COLORS["navy_blue"], "reason": "Navy kurti is a classic choice"},
@@ -466,7 +515,7 @@ class RecommendationEngine:
                 {**self.COLORS["burgundy"], "reason": "Burgundy adds sophistication"},
                 {**self.COLORS["teal"], "reason": "Teal kurti pops beautifully"},
             ]
-        elif category in ["medium", "olive"]:
+        elif category in ["medium_light", "medium", "medium_dark", "olive"]:
             return [
                 {**self.COLORS["white"], "reason": "White kurti looks fresh and clean"},
                 {**self.COLORS["coral"], "reason": "Coral kurti glows on medium skin"},
@@ -484,7 +533,7 @@ class RecommendationEngine:
             ]
 
     def _get_lehenga_colors(self, category, undertone):
-        if category in ["fair", "light"]:
+        if category in ["ultra_fair", "fair", "light"]:
             return [
                 {**self.COLORS["maroon"], "reason": "Classic bridal maroon lehenga for fair skin"},
                 {**self.COLORS["navy_blue"], "reason": "Navy lehenga with gold work looks royal"},
@@ -492,7 +541,7 @@ class RecommendationEngine:
                 {**self.COLORS["burgundy"], "reason": "Burgundy lehenga looks rich and elegant"},
                 {**self.COLORS["mustard"], "reason": "Mustard lehenga is trendy and flattering"},
             ]
-        elif category in ["medium", "olive"]:
+        elif category in ["medium_light", "medium", "medium_dark", "olive"]:
             return [
                 {**self.COLORS["coral"], "reason": "Coral lehenga glows on medium skin"},
                 {**self.COLORS["royal_blue"], "reason": "Royal blue lehenga looks stunning"},
@@ -515,13 +564,13 @@ class RecommendationEngine:
             {**self.COLORS["navy_blue"], "reason": "Navy bottom — versatile and elegant"},
             {**self.COLORS["charcoal"], "reason": "Charcoal grey — polished and professional"},
         ]
-        if category in ["fair", "light"]:
+        if category in ["ultra_fair", "fair", "light"]:
             specific = [
                 {**self.COLORS["beige"], "reason": "Beige palazzo looks soft and feminine"},
                 {**self.COLORS["olive_green"], "reason": "Olive palazzo is trendy"},
                 {**self.COLORS["lavender"], "reason": "Lavender skirt looks elegant"},
             ]
-        elif category in ["medium", "olive"]:
+        elif category in ["medium_light", "medium", "medium_dark", "olive"]:
             specific = [
                 {**self.COLORS["white"], "reason": "White palazzo creates great contrast"},
                 {**self.COLORS["beige"], "reason": "Beige bottom is versatile"},
@@ -537,6 +586,55 @@ class RecommendationEngine:
 
     def _get_dress_colors(self, category, undertone):
         recommendations = {
+            ("ultra_fair", "warm"): [
+                {**self.COLORS["pastel_pink"], "reason": "Soft pink makes ultra-fair warm skin glow"},
+                {**self.COLORS["peach"], "reason": "Brings out your golden warmth"},
+                {**self.COLORS["coral"], "reason": "Vibrant and flattering contrast"},
+                {**self.COLORS["mint_green"], "reason": "Fresh cool pop on a warm base"},
+                {**self.COLORS["navy_blue"], "reason": "Classic anchor color"},
+                {**self.COLORS["white"], "reason": "Pure clean look"},
+            ],
+            ("ultra_fair", "cool"): [
+                {**self.COLORS["powder_blue"], "reason": "Enhances cool undertones perfectly"},
+                {**self.COLORS["lavender"], "reason": "Sophisticated pastel"},
+                {**self.COLORS["emerald"], "reason": "Rich jewel tone contrast"},
+                {**self.COLORS["royal_blue"], "reason": "Striking power color"},
+                {**self.COLORS["charcoal"], "reason": "Softer alternative to stark black"},
+                {**self.COLORS["dusty_rose"], "reason": "Elegant moody pink"},
+            ],
+            ("medium_light", "warm"): [
+                {**self.COLORS["rust"], "reason": "Earthy rust makes golden undertones shine"},
+                {**self.COLORS["mustard"], "reason": "Rich yellow was made for you"},
+                {**self.COLORS["olive_green"], "reason": "Perfect earthy balance"},
+                {**self.COLORS["maroon"], "reason": "Deep warm red looks regal"},
+                {**self.COLORS["camel"], "reason": "Sophisticated warm neutral"},
+                {**self.COLORS["navy_blue"], "reason": "Classic high contrast"},
+            ],
+            ("medium_light", "cool"): [
+                {**self.COLORS["teal"], "reason": "Rich cool-blue green is perfect"},
+                {**self.COLORS["wine_red"], "reason": "Sophisticated cool red"},
+                {**self.COLORS["charcoal"], "reason": "Sleek and polished"},
+                {**self.COLORS["cobalt_blue"], "reason": "Intense cool blue contrast"},
+                {**self.COLORS["forest_green"], "reason": "Deep green works beautifully"},
+                {**self.COLORS["lavender"], "reason": "Soft purple pops nicely"},
+            ],
+            ("medium_dark", "warm"): [
+                {**self.COLORS["chocolate"], "reason": "Rich brown is your power neutral"},
+                {**self.COLORS["forest_green"], "reason": "Deep earthy green looks lush"},
+                {**self.COLORS["maroon"], "reason": "Deep warm red is stunning"},
+                {**self.COLORS["mustard"], "reason": "Golden tones match your skin"},
+                {**self.COLORS["navy_blue"], "reason": "Classic and polished"},
+                {**self.COLORS["coral"], "reason": "Bright warm pop of color"},
+            ],
+            ("medium_dark", "cool"): [
+                {**self.COLORS["cobalt_blue"], "reason": "Deep rich blue is your best friend"},
+                {**self.COLORS["emerald"], "reason": "Stunning jewel tone contrast"},
+                {**self.COLORS["burgundy"], "reason": "Sophisticated deep red"},
+                {**self.COLORS["charcoal"], "reason": "Excellent dark neutral"},
+                {**self.COLORS["royal_blue"], "reason": "Vivid and commanding"},
+                {**self.COLORS["white"], "reason": "Crisp striking contrast"},
+            ],
+
             ("fair", "warm"): [
                 {**self.COLORS["burgundy"], "reason": "Rich color that makes fair skin glow"},
                 {**self.COLORS["forest_green"], "reason": "Deep green looks elegant on fair skin"},
@@ -633,7 +731,7 @@ class RecommendationEngine:
         return self._get_dress_colors(category, undertone)
 
     def _get_saree_suggestions(self, category, undertone):
-        if category in ["fair", "light"]:
+        if category in ["ultra_fair", "fair", "light"]:
             return [
                 {"type": "Silk Saree", "colors": "Deep maroon, navy blue, forest green", "reason": "Rich colors create stunning contrast with fair skin", "occasion": "Weddings & Festivals"},
                 {"type": "Chiffon Saree", "colors": "Pastel pink, lavender, mint green", "reason": "Soft colors complement fair complexion beautifully", "occasion": "Day functions"},
@@ -641,7 +739,7 @@ class RecommendationEngine:
                 {"type": "Cotton Saree", "colors": "Olive green, rust, mustard", "reason": "Earth tones add warmth to fair skin", "occasion": "Casual & Office"},
                 {"type": "Suits & Salwar", "colors": "Teal, emerald, deep purple", "reason": "Rich tones enhance fair complexion", "occasion": "Daily wear"},
             ]
-        elif category in ["medium", "olive"]:
+        elif category in ["medium_light", "medium", "medium_dark", "olive"]:
             return [
                 {"type": "Silk Saree", "colors": "White, cream, sky blue, coral", "reason": "Light colors create beautiful contrast with medium skin", "occasion": "Weddings & Festivals"},
                 {"type": "Chiffon Saree", "colors": "Maroon, navy, olive green", "reason": "These colors make medium skin tone glow", "occasion": "Parties & Functions"},
@@ -659,7 +757,7 @@ class RecommendationEngine:
             ]
 
     def _get_makeup_suggestions(self, category, undertone):
-        if category in ["fair", "light"]:
+        if category in ["ultra_fair", "fair", "light"]:
             return [
                 {"product": "Foundation", "shade": "Ivory to Light Beige", "brands": "Lakme, Maybelline, MAC", "tip": "Always match your neck color, not just face"},
                 {"product": "Lipstick", "shades": "Nude pink, coral, berry red, mauve", "tip": "Avoid very dark shades — they can look harsh on fair skin"},
@@ -667,7 +765,7 @@ class RecommendationEngine:
                 {"product": "Eyeshadow", "shades": "Earthy browns, champagne, soft purples", "tip": "Warm neutrals make eyes pop beautifully"},
                 {"product": "Kajal/Eyeliner", "shade": "Black or dark brown", "tip": "Black kajal creates beautiful contrast"},
             ]
-        elif category in ["medium", "olive"]:
+        elif category in ["medium_light", "medium", "medium_dark", "olive"]:
             return [
                 {"product": "Foundation", "shade": "Warm Beige to Medium Tan", "brands": "Lakme, Sugar, Nykaa", "tip": "Go for foundations with warm/golden undertones"},
                 {"product": "Lipstick", "shades": "Brick red, terracotta, deep nude, berry", "tip": "Earth tones look gorgeous on medium skin"},
@@ -709,7 +807,7 @@ class RecommendationEngine:
             ]
 
     def _get_female_outfit_combos(self, category, undertone):
-        if category in ["fair", "light"]:
+        if category in ["ultra_fair", "fair", "light"]:
             return [
                 {"top": "White cotton kurta", "bottom": "Navy blue palazzo", "dupatta": "Floral print", "shoes": "Tan sandals", "occasion": "College / Casual", "vibe": "Fresh and elegant"},
                 {"top": "Burgundy crop top", "bottom": "High waist black jeans", "dupatta": "-", "shoes": "Nude heels", "occasion": "Date / Party", "vibe": "Bold and stylish"},
@@ -717,7 +815,7 @@ class RecommendationEngine:
                 {"top": "Pastel pink western top", "bottom": "White palazzo", "dupatta": "-", "shoes": "White sneakers", "occasion": "Weekend / Brunch", "vibe": "Soft and feminine"},
                 {"top": "Navy blazer + white top", "bottom": "Beige trousers", "dupatta": "-", "shoes": "Nude pumps", "occasion": "Interview / Formal", "vibe": "Confident and polished"},
             ]
-        elif category in ["medium", "olive"]:
+        elif category in ["medium_light", "medium", "medium_dark", "olive"]:
             return [
                 {"top": "Coral kurti", "bottom": "White palazzo", "dupatta": "Gold border", "shoes": "Gold sandals", "occasion": "Festival / Function", "vibe": "Radiant and festive"},
                 {"top": "White cotton top", "bottom": "Navy blue jeans", "dupatta": "-", "shoes": "Brown sandals", "occasion": "College / Casual", "vibe": "Classic and fresh"},
@@ -741,13 +839,13 @@ class RecommendationEngine:
             "A good pair of black jeans goes with everything",
             "Own at least one good white and one black outfit",
         ]
-        if category in ["fair", "light"]:
+        if category in ["ultra_fair", "fair", "light"]:
             specific = [
                 "You can wear both pastels AND bold colors — lucky you!",
                 "Deep jewel tones (emerald, sapphire, ruby) look stunning on you",
                 "Gold jewellery complements warm fair skin, silver for cool",
             ]
-        elif category in ["medium", "olive"]:
+        elif category in ["medium_light", "medium", "medium_dark", "olive"]:
             specific = [
                 "Most versatile skin tone — earth tones are your superpower!",
                 "Warm metals (gold, copper) look incredible on you",

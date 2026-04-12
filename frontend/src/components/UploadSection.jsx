@@ -17,12 +17,15 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
       q: 'What is your skin tone?',
       key: 'tone',
       options: [
-        { label: 'Fair / Very Light', value: 'fair', color: '#F5DEB3' },
-        { label: 'Light', value: 'light', color: '#D2A679' },
-        { label: 'Medium / Wheatish', value: 'medium', color: '#C68642' },
-        { label: 'Olive / Dusky', value: 'olive', color: '#A0724A' },
-        { label: 'Brown / Dark Brown', value: 'brown', color: '#7B4F2E' },
-        { label: 'Very Dark', value: 'dark', color: '#4A2C0A' },
+        { label: 'Porcelain / Ultra Fair', value: 'ultra_fair', color: '#FFE6D5' },
+        { label: 'Fair', value: 'fair', color: '#F5DEB3' },
+        { label: 'Light Wheatish', value: 'light', color: '#E8C396' },
+        { label: 'Golden Wheatish', value: 'medium_light', color: '#D2A679' },
+        { label: 'True Medium', value: 'medium', color: '#C68642' },
+        { label: 'Caramel / Dusky', value: 'medium_dark', color: '#B36B39' },
+        { label: 'Olive / Deep Dusky', value: 'olive', color: '#A0724A' },
+        { label: 'Rich Brown', value: 'brown', color: '#7B4F2E' },
+        { label: 'Deep Ebony', value: 'dark', color: '#4A2C0A' },
       ]
     },
     {
