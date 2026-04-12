@@ -176,6 +176,12 @@ function OutfitChecker() {
         setTimeout(() => {
           setResult(res.data);
           setShowProgress(false);
+          
+          // Increment outfit check count for profile visibility
+          const currentCount = parseInt(localStorage.getItem('sg_outfit_check_count') || '0');
+          localStorage.setItem('sg_outfit_check_count', (currentCount + 1).toString());
+          window.dispatchEvent(new CustomEvent('sg_outfit_check_updated'));
+
           // Persist score for home page intelligence
           if (res.data?.compatibility?.compatibility_score !== undefined) {
              localStorage.setItem('sg_last_fit_score', res.data.compatibility.compatibility_score.toString());

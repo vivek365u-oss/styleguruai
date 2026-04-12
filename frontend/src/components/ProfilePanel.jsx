@@ -96,7 +96,11 @@ export default function ProfilePanel() {
   useEffect(() => {
     loadData();
     window.addEventListener('sg_wardrobe_updated', loadData);
-    return () => window.removeEventListener('sg_wardrobe_updated', loadData);
+    window.addEventListener('sg_outfit_check_updated', loadData);
+    return () => {
+      window.removeEventListener('sg_wardrobe_updated', loadData);
+      window.removeEventListener('sg_outfit_check_updated', loadData);
+    };
   }, []);
 
   const handleSaveProfile = async () => {
@@ -204,10 +208,24 @@ export default function ProfilePanel() {
                 </div>
 
                 {isPro ? (
-                    <div className={`py-8 text-center border rounded-[1.5rem] shadow-inner ${isDark ? 'bg-white/5 border-white/5' : 'bg-white border-purple-100'}`}>
-                        <div className={`w-12 h-12 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-full mx-auto mb-3 flex items-center justify-center text-white font-black text-xl shadow-lg ${isDark ? 'shadow-yellow-500/20' : 'shadow-amber-500/30'}`}>∞</div>
-                        <p className={`text-xl font-black uppercase tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>Unlimited Access</p>
-                        <p className={`text-[9px] font-bold uppercase tracking-widest mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>AI Scans • Outfit Checks • No Ads</p>
+                    <div className="space-y-4">
+                        <div className={`py-6 text-center border rounded-[1.5rem] shadow-inner ${isDark ? 'bg-white/5 border-white/5' : 'bg-white border-purple-100'}`}>
+                            <div className={`w-12 h-12 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-full mx-auto mb-3 flex items-center justify-center text-white font-black text-xl shadow-lg ${isDark ? 'shadow-yellow-500/20' : 'shadow-amber-500/30'}`}>∞</div>
+                            <p className={`text-xl font-black uppercase tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>Unlimited Pro Access</p>
+                            <p className={`text-[9px] font-bold uppercase tracking-widest mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>AI Scans • Outfit Checks • No Ads</p>
+                        </div>
+                        
+                        {/* Pro Activity Tracking */}
+                        <div className="grid grid-cols-2 gap-3">
+                           <div className={`p-4 rounded-2xl border text-center ${isDark ? 'bg-white/5 border-white/5' : 'bg-white border-gray-100 shadow-sm'}`}>
+                              <p className={`text-2xl font-black ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>{stats.analyses}</p>
+                              <p className={`text-[8px] font-bold uppercase tracking-widest ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Total DNA Scans</p>
+                           </div>
+                           <div className={`p-4 rounded-2xl border text-center ${isDark ? 'bg-white/5 border-white/5' : 'bg-white border-gray-100 shadow-sm'}`}>
+                              <p className={`text-2xl font-black ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>{parseInt(localStorage.getItem('sg_outfit_check_count') || '0')}</p>
+                              <p className={`text-[8px] font-bold uppercase tracking-widest ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Fit Checks Done</p>
+                           </div>
+                        </div>
                     </div>
                 ) : (
                     <>
@@ -257,6 +275,7 @@ export default function ProfilePanel() {
                     </>
                 )}
             </div>
+
 
 
             {/* ── SECTIONS ────────────────────────── */}
