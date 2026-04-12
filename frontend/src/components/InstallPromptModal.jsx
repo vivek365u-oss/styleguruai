@@ -27,12 +27,12 @@ export default function InstallPromptModal({ onInstall, onDismiss }) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 8px 16px rgba(139,92,246,0.3)'
           }}>
-            <span style={{ fontSize: '20px', fontWeight: 800, color: 'white', fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif" }}>SG</span>
+            <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           
           <div style={{ flex: 1 }}>
             <h3 style={{ margin: '0 0 4px', fontSize: '15px', fontWeight: 700, color: '#F9FAFB', fontFamily: "'Inter', sans-serif" }}>
-              Install StyleGuru AI
+              Install StyleGuruAI
             </h3>
             <p style={{ margin: 0, fontSize: '12px', color: '#9CA3AF', lineHeight: '1.4', fontFamily: "'Inter', sans-serif" }}>
               Get the full premium experience. Add to to your home screen for fast access and offline wardrobe.

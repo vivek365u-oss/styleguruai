@@ -1,5 +1,5 @@
 // Zero-cost image storage using IndexedDB
-const DB_NAME = 'StyleGuruWardrobe';
+const DB_NAME = 'StyleGuruAIWardrobe';
 const STORE_NAME = 'images';
 
 // Open or create the database

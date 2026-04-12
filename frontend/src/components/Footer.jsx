@@ -1,5 +1,5 @@
 /**
- * Footer.jsx — StyleGuru AI Premium Footer v2
+ * Footer.jsx — StyleGuruAI Premium Footer v2
  * Glassmorphism design system
  */
 import { Link } from 'react-router-dom';
@@ -42,12 +42,11 @@ export default function Footer() {
           {/* Brand */}
           <div style={{ gridColumn: 'span 2' }}>
             <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 16 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: GRAD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(139,92,246,0.4)', flexShrink: 0 }}>
-                <span style={{ fontSize: '12px', fontWeight: 800, color: 'white' }}>SG</span>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
               <span style={{ fontSize: '14px', fontWeight: 700 }}>
-                <span style={{ color: TEXT }}>StyleGuru </span>
-                <span style={{ background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>AI</span>
+                <span style={{ color: TEXT }}>StyleGuruAI </span>
               </span>
             </Link>
             <p style={{ fontSize: '13px', color: MUTED, lineHeight: '1.7', maxWidth: 260, fontWeight: 400 }}>
@@ -102,7 +101,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <p style={{ fontSize: '12px', color: SUBTLE }}>
-            © 2026 StyleGuru AI. All rights reserved.
+            © 2026 StyleGuruAI. All rights reserved.
           </p>
           <p style={{ fontSize: '11px', color: SUBTLE, letterSpacing: '0.03em' }}>
             Designed for Indian skin tones · Built in India 🇮🇳

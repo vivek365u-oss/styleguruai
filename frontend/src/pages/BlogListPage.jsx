@@ -8,8 +8,8 @@ export default function BlogListPage() {
   return (
     <div style={{ maxWidth: 1000, margin: '0 auto', padding: '24px 24px 80px' }}>
       <SEOHead
-        title="Fashion Blog — StyleGuru AI"
-        description="Read fashion tips, skin tone guides, and AI styling articles on the StyleGuru AI blog."
+        title="Fashion Blog — StyleGuruAI"
+        description="Read fashion tips, skin tone guides, and AI styling articles on the StyleGuruAI blog."
       />
 
       {/* Header */}

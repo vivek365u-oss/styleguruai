@@ -1,5 +1,5 @@
 // ============================================================
-// StyleGuru — Shopping Cart Component
+// StyleGuruAI — Shopping Cart Component
 // Display cart items and checkout
 // ============================================================
 import { useContext } from 'react';
@@ -131,7 +131,7 @@ function ShoppingCart({ onClose, onProceedToCheckout, isOpen }) {
             </span>
           </div>
           <div className={`text-xs p-3 rounded-xl mt-4 text-center border animate-pulse-slow ${isDark ? 'bg-purple-500/10 border-purple-500/20 text-purple-300' : 'bg-purple-50' + ' border-purple-100 text-purple-700'}`}>
-            ✨ <span className="font-bold">StyleGuru AI is now completely free!</span> Enjoy unlimited style analysis.
+            ✨ <span className="font-bold">StyleGuruAI is now completely free!</span> Enjoy unlimited style analysis.
           </div>
         </div>
 

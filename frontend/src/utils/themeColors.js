@@ -1,5 +1,5 @@
 /**
- * themeColors.js — StyleGuru AI v5.0
+ * themeColors.js — StyleGuruAI v5.0
  * ════════════════════════════════════════
  * Centralized Theme Color System
  * Two complete palettes: DARK + LIGHT

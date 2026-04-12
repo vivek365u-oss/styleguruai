@@ -1,5 +1,5 @@
 // ============================================================
-// StyleGuru — Admin Analytics Dashboard
+// StyleGuruAI — Admin Analytics Dashboard
 // Protected: Only accessible by admin UID
 // ============================================================
 import { useState, useEffect, useContext } from 'react';

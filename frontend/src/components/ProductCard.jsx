@@ -1,5 +1,5 @@
 // ============================================================
-// StyleGuru — Product Card
+// StyleGuruAI — Product Card
 // Individual product with Add to Cart button
 // ============================================================
 import { useState, useContext } from 'react';
@@ -46,7 +46,7 @@ function ProductCard({ product }) {
                <path d="M6 3h12l1 5h1l1 13H3L4 9h1l1-6z" />
                <path d="M9 3v2m6-2v2" />
             </svg>
-            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20 select-none">StyleGuru Signature Collection</span>
+            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20 select-none">StyleGuruAI Signature Collection</span>
             <div className="absolute bottom-4 left-0 right-0">
                <span className="text-[7px] font-bold text-purple-500/40 uppercase tracking-[0.5em]">Verified Trend 2025</span>
             </div>

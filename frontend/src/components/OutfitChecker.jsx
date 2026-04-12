@@ -12,7 +12,7 @@ import { getCategoriesByGender, getCategoryIcon, ALL_CATEGORIES } from '../const
 // ── Outfit Shop Card — same style as analyze results ─────────
 function OutfitShopCard({ color, isDark, gender = 'male' }) {
   const [budget, setBudget] = useState(null);
-  const AMAZON_TAG = 'styleguruai-21';
+  const AMAZON_TAG = 'StyleGuruAI-21';
 
   const budgets = [
     { label: '₹500', max: 500 },

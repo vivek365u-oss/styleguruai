@@ -57,12 +57,11 @@ function PublicNav() {
     }}>
       {/* Logo */}
       <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
-        <div style={{ width: 32, height: 32, borderRadius: 8, background: GRAD, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(139,92,246,0.4)' }}>
-          <span style={{ fontSize: '12px', fontWeight: 800, color: 'white' }}>SG</span>
+        <div style={{ width: 32, height: 32, borderRadius: 8, background: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
         </div>
         <span className="hidden sm:inline" style={{ fontSize: '14px', fontWeight: 700, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-          <span style={{ color: TEXT }}>StyleGuru </span>
-          <span style={{ background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>AI</span>
+          <span style={{ color: TEXT }}>StyleGuruAI </span>
         </span>
       </Link>
 

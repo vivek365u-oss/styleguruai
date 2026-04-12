@@ -40,7 +40,7 @@ export default function ProfilePanel() {
   const [destroyConfirmText, setDestroyConfirmText] = useState('');
   const [destroying, setDestroying] = useState(false);
 
-  const SUPPORT_EMAIL = 'styleguruai.in.gmail@gmail.com';
+  const SUPPORT_EMAIL = 'StyleGuruAI.in.gmail@gmail.com';
 
   const loadData = async () => {
     try {
@@ -129,7 +129,7 @@ export default function ProfilePanel() {
 
   const handleShare = async () => {
     const shareData = {
-      title: 'StyleGuru AI',
+      title: 'StyleGuruAI',
       text: 'Check out ToneFit - My AI Style Companion for perfect outfit colors!',
       url: window.location.origin
     };

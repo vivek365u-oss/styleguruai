@@ -4,12 +4,12 @@ import { LanguageContext } from './LanguageContext';
 
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('styleguru_lang') || defaultLanguage;
+    return localStorage.getItem('StyleGuruAI_lang') || defaultLanguage;
   });
 
   const changeLanguage = (lang) => {
     setLanguage(lang);
-    localStorage.setItem('styleguru_lang', lang);
+    localStorage.setItem('StyleGuruAI_lang', lang);
   };
 
   const t = (key) => translations[language]?.[key] || translations['en']?.[key] || key;

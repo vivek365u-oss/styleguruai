@@ -1,4 +1,4 @@
-// StyleGuru — Style Bot (Rule-based Fashion Chatbot)
+// StyleGuruAI — Style Bot (Rule-based Fashion Chatbot)
 // Floating chat button with conversational styling advice
 // Updated: 2026-04-09 (Expert Edition v1.1)
 // ============================================================

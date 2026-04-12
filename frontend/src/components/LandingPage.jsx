@@ -74,10 +74,9 @@ function MobileMenu({ open, onClose, navItems, onItemClick, onLoginClick }) {
       {/* Top bar */}
       <div className="flex items-center justify-between px-6 py-5" style={{ borderBottom: '1px solid #1C1C1C' }}>
         <div className="flex items-center gap-2.5">
-          <div style={{ width: 32, height: 32, background: '#C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: '#0A0A0A', letterSpacing: '0.05em' }}>SG</span>
+          <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
-          <span style={{ fontSize: '14px', fontWeight: 600, color: '#F0EDE6', letterSpacing: '0.02em' }}>StyleGuru AI</span>
+          <span style={{ fontSize: '14px', fontWeight: 600, color: '#F0EDE6', letterSpacing: '0.02em' }}>StyleGuruAI</span>
         </div>
         <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#6B6B6B', cursor: 'pointer', fontSize: '22px', padding: '4px' }}>
           ✕
@@ -216,7 +215,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
 
   const testimonials = [
     { quote: "Finally an AI that understood my warm Indian skin tone perfectly. The color recommendations were spot-on.", author: "Priya S.", location: "Mumbai" },
-    { quote: "I never knew which colors suited me until StyleGuru AI analyzed my photo. Now I shop with confidence.", author: "Rahul K.", location: "Delhi" },
+    { quote: "I never knew which colors suited me until StyleGuruAI analyzed my photo. Now I shop with confidence.", author: "Rahul K.", location: "Delhi" },
     { quote: "The outfit combinations it suggested for my olive skin were exactly what I needed for my interview.", author: "Ananya M.", location: "Bangalore" },
   ];
 
@@ -262,7 +261,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
   return (
     <div style={{ background: '#0A0A0A', color: '#F0EDE6', minHeight: '100vh', overflowX: 'hidden', fontFamily: "'Inter', 'DM Sans', sans-serif" }}>
       <SEOHead
-        title="StyleGuru AI — AI Fashion Advisor for Your Skin Tone"
+        title="StyleGuruAI — AI Fashion Advisor for Your Skin Tone"
         description="Discover your perfect colors and outfits with AI-powered skin tone analysis. Personalized fashion advice for every Indian skin tone."
       />
 
@@ -299,10 +298,10 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
         <div className="max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between" style={{ height: 64 }}>
           {/* Logo */}
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <div style={{ width: 30, height: 30, background: '#C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <span style={{ fontSize: '10px', fontWeight: 700, color: '#0A0A0A', letterSpacing: '0.05em' }}>SG</span>
+            <div style={{ width: 30, height: 30, background: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
-            <span style={{ fontSize: '13px', fontWeight: 500, color: '#F0EDE6', letterSpacing: '0.06em', textTransform: 'uppercase' }}>StyleGuru AI</span>
+            <span style={{ fontSize: '13px', fontWeight: 500, color: '#F0EDE6', letterSpacing: '0.06em', textTransform: 'uppercase' }}>StyleGuruAI</span>
           </div>
 
           {/* Desktop Nav */}
@@ -437,7 +436,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
                   <div style={{ width: '100%', height: 440, overflow: 'hidden', position: 'relative' }}>
                     <img
                       src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=680&q=85&auto=format&fit=crop"
-                      alt="AI Fashion Analysis — StyleGuru AI"
+                      alt="AI Fashion Analysis — StyleGuruAI"
                       style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(20%) contrast(1.05)' }}
                     />
                     {/* Analysis overlay */}
@@ -468,7 +467,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
 
                 {/* Side label — desktop only */}
                 <div style={{ position: 'absolute', top: '50%', right: -48, transform: 'translateY(-50%) rotate(90deg)', transformOrigin: 'center' }} className="hidden lg:block">
-                  <p style={{ fontSize: '8px', letterSpacing: '0.3em', color: '#242424', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>StyleGuru AI — Personalized Color Science</p>
+                  <p style={{ fontSize: '8px', letterSpacing: '0.3em', color: '#242424', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>StyleGuruAI — Personalized Color Science</p>
                 </div>
               </div>
             </div>
@@ -605,7 +604,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
             Every Skin Tone. Every Style.
           </h2>
           <p style={{ fontSize: '14px', color: '#6B6B6B', marginTop: '12px', maxWidth: 480, margin: '12px auto 0' }}>
-            StyleGuru AI is built specifically for the rich spectrum of Indian skin tones.
+            StyleGuruAI is built specifically for the rich spectrum of Indian skin tones.
           </p>
         </div>
 
@@ -674,7 +673,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
             Your Style Journey<br />Starts Here
           </h2>
           <p style={{ fontSize: '14px', color: '#6B6B6B', marginBottom: '40px', maxWidth: 420, margin: '0 auto 40px' }}>
-            Join thousands of users across India who have discovered their perfect style with StyleGuru AI.
+            Join thousands of users across India who have discovered their perfect style with StyleGuruAI.
           </p>
           <button onClick={onGetStarted} className="btn-gold" style={{ padding: '18px 56px', fontSize: '11px' }}>
             Get Started Free →
@@ -691,10 +690,10 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
             {/* Brand */}
             <div className="md:col-span-2">
               <div className="flex items-center gap-2.5 mb-4">
-                <div style={{ width: 28, height: 28, background: '#C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: '9px', fontWeight: 700, color: '#0A0A0A' }}>SG</span>
+                <div style={{ width: 28, height: 28, background: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 </div>
-                <span style={{ fontSize: '13px', fontWeight: 500, color: '#F0EDE6', letterSpacing: '0.06em', textTransform: 'uppercase' }}>StyleGuru AI</span>
+                <span style={{ fontSize: '13px', fontWeight: 500, color: '#F0EDE6', letterSpacing: '0.06em', textTransform: 'uppercase' }}>StyleGuruAI</span>
               </div>
               <p style={{ fontSize: '13px', color: '#6B6B6B', lineHeight: '1.7', maxWidth: 280 }}>
                 AI-powered fashion intelligence for every skin tone. Made in India 🇮🇳
@@ -739,7 +738,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
 
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p style={{ fontSize: '11px', color: '#3A3A3A', letterSpacing: '0.05em' }}>
-              © 2026 StyleGuru AI. All rights reserved.
+              © 2026 StyleGuruAI. All rights reserved.
             </p>
             <p className="luxe-label" style={{ color: '#3A3A3A', fontSize: '9px' }}>
               Designed for Indian skin tones · Built in India 🇮🇳

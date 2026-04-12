@@ -1,5 +1,5 @@
 // ============================================================
-// StyleGuru — Product Showcase Component
+// StyleGuruAI — Product Showcase Component
 // Fetch and display products from /api/products/by-color
 // ============================================================
 import { useState, useEffect, useContext } from 'react';

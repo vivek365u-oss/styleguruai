@@ -1,5 +1,5 @@
 // ============================================================
-// StyleGuru — In-Store Color Scanner
+// StyleGuruAI — In-Store Color Scanner
 // Camera-based real-time color detection & palette matching
 // ============================================================
 import { useState, useRef, useEffect, useContext, useCallback } from 'react';

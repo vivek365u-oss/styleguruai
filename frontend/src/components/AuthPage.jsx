@@ -101,10 +101,10 @@ function AuthPage({ onLoginSuccess }) {
         {/* Top: Brand */}
         <div style={{ position: 'relative', zIndex: 10 }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-            <div style={{ width: 32, height: 32, background: '#C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: '10px', fontWeight: 700, color: '#0A0A0A', letterSpacing: '0.05em' }}>SG</span>
+            <div style={{ width: 32, height: 32, background: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
-            <span style={{ fontSize: '13px', fontWeight: 500, color: '#F0EDE6', letterSpacing: '0.1em', textTransform: 'uppercase' }}>StyleGuru AI</span>
+            <span style={{ fontSize: '13px', fontWeight: 500, color: '#F0EDE6', letterSpacing: '0.1em', textTransform: 'uppercase' }}>StyleGuruAI</span>
           </Link>
         </div>
 
@@ -148,10 +148,10 @@ function AuthPage({ onLoginSuccess }) {
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-12">
             <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-              <div style={{ width: 36, height: 36, background: '#C9A96E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '11px', fontWeight: 700, color: '#0A0A0A' }}>SG</span>
+              <div style={{ width: 36, height: 36, background: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
-              <span style={{ fontSize: '14px', fontWeight: 500, color: '#F0EDE6', letterSpacing: '0.1em', textTransform: 'uppercase' }}>StyleGuru AI</span>
+              <span style={{ fontSize: '14px', fontWeight: 500, color: '#F0EDE6', letterSpacing: '0.1em', textTransform: 'uppercase' }}>StyleGuruAI</span>
             </Link>
           </div>
 
@@ -298,7 +298,7 @@ function AuthPage({ onLoginSuccess }) {
 
           {/* Footer note */}
           <p style={{ textAlign: 'center', fontSize: '10px', color: '#2A2A2A', letterSpacing: '0.08em', marginTop: '32px', textTransform: 'uppercase' }}>
-            © 2026 StyleGuru AI · Made in India
+            © 2026 StyleGuruAI · Made in India
           </p>
         </div>
       </div>

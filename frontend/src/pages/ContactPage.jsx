@@ -23,7 +23,7 @@ export default function ContactPage() {
 
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 24px 80px' }}>
-      <SEOHead title="Contact — StyleGuru AI" description="Get in touch with the StyleGuru AI team." />
+      <SEOHead title="Contact — StyleGuruAI" description="Get in touch with the StyleGuruAI team." />
 
       <p style={LABEL}>Support</p>
       <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(28px,5vw,48px)', fontWeight: 300, color: C.text, lineHeight: 1.2, marginBottom: 16 }}>
@@ -38,8 +38,8 @@ export default function ContactPage() {
         <div style={{ padding: '28px', background: C.surface, border: `1px solid ${C.border}` }}>
           <p style={{ ...LABEL, marginBottom: 20 }}>Contact Information</p>
           {[
-            { icon: '✉️', label: 'Email Us', value: 'styleguruai.in.gmail@gmail.com', href: 'mailto:styleguruai.in.gmail@gmail.com' },
-            { icon: '🤝', label: 'Partnerships', value: 'styleguruai.in.gmail@gmail.com', href: 'mailto:styleguruai.in.gmail@gmail.com' },
+            { icon: '✉️', label: 'Email Us', value: 'StyleGuruAI.in.gmail@gmail.com', href: 'mailto:StyleGuruAI.in.gmail@gmail.com' },
+            { icon: '🤝', label: 'Partnerships', value: 'StyleGuruAI.in.gmail@gmail.com', href: 'mailto:StyleGuruAI.in.gmail@gmail.com' },
           ].map(item => (
             <div key={item.label} style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 20 }}>
               <span style={{ fontSize: '20px', flexShrink: 0 }}>{item.icon}</span>

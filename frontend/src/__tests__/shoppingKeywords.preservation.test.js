@@ -18,7 +18,7 @@ import { describe, it, expect } from 'vitest';
 // ── Replicate ShoppingLinks logic from ResultsDisplay.jsx ────────────────────
 // Source: frontend/src/components/ResultsDisplay.jsx — ShoppingLinks component
 
-const AMAZON_TAG = 'styleguruai-21';
+const AMAZON_TAG = 'StyleGuruAI-21';
 
 /**
  * Build topPicksMap exactly as in ResultsDisplay.jsx ShoppingLinks.
@@ -102,7 +102,7 @@ function resolveShoppingLinks(colorName, category = 'shirt', budget = null) {
  * Source: frontend/src/components/OutfitChecker.jsx — OutfitShopCard component
  */
 function buildOutfitShopCardURLs(color, budget = null) {
-  const AMAZON_TAG = 'styleguruai-21';
+  const AMAZON_TAG = 'StyleGuruAI-21';
   const colorDisplay = color.name.toLowerCase();
   const colorLower = colorDisplay.replace(/\s+/g, '+');
 

@@ -1,5 +1,5 @@
 /**
- * SelfieStyleAdvisor.jsx — StyleGuru AI
+ * SelfieStyleAdvisor.jsx — StyleGuruAI
  * ═══════════════════════════════════════════════════
  * Premium Selfie → Style Recommendation Component
  *

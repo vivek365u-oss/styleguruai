@@ -65,7 +65,7 @@ class ErrorBoundary extends React.Component {
 
             {/* Error Description */}
             <p className="text-red-200/80 text-center mb-6">
-              We're sorry, but StyleGuru encountered an unexpected error. 
+              We're sorry, but StyleGuruAI encountered an unexpected error. 
               Try refreshing or clearing your cache if the problem persists.
             </p>
 
@@ -126,7 +126,7 @@ class ErrorBoundary extends React.Component {
 
             {/* Support Message */}
             <p className="text-white/40 text-xs text-center mt-6">
-              If this persists, please contact support at styleguruai.in.gmail@gmail.com
+              If this persists, please contact support at StyleGuruAI.in.gmail@gmail.com
             </p>
           </div>
         </div>

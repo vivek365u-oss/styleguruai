@@ -29,13 +29,13 @@ function isBugCondition(colorName, generatedURL) {
 // Source: frontend/src/components/OutfitChecker.jsx — OutfitShopCard component (post-fix)
 // colorDisplay = color.name.toLowerCase()
 // colorLower   = colorDisplay.replace(/\s+/g, '+')
-// Amazon URL:  `https://www.amazon.in/s?k=${encodeURIComponent(colorDisplay + ' men oversized tshirt streetwear trending 2025')}&rh=n%3A1968024031&sort=review-rank&tag=styleguruai-21`
+// Amazon URL:  `https://www.amazon.in/s?k=${encodeURIComponent(colorDisplay + ' men oversized tshirt streetwear trending 2025')}&rh=n%3A1968024031&sort=review-rank&tag=StyleGuruAI-21`
 // Flipkart URL:`https://www.flipkart.com/men-tshirts?q=${encodeURIComponent(colorDisplay + ' men oversized tshirt')}&sort=popularity`
 // Myntra URL:  `https://www.myntra.com/tshirts?rawQuery=${colorLower}+men+oversized`
 // Meesho URL:  `https://meesho.com/search?q=${encodeURIComponent(colorDisplay + ' men oversized tshirt trending')}`
 
 function buildOutfitShopCardURLs(color) {
-  const AMAZON_TAG = 'styleguruai-21';
+  const AMAZON_TAG = 'StyleGuruAI-21';
   const colorDisplay = color.name.toLowerCase();
   const colorLower = colorDisplay.replace(/\s+/g, '+');
 
@@ -51,12 +51,12 @@ function buildOutfitShopCardURLs(color) {
 // Source: frontend/src/components/ResultsDisplay.jsx — ShoppingLinks component (post-fix)
 // Fallback cfg (when category not in categoryConfig):
 //   cfg = { amzKw: `${colorDisplay} ${isFemale ? 'women' : 'men'} ${category} oversized trending 2025`, ... fkCat: 'men-tshirts', ... }
-// Amazon fallback URL: `https://www.amazon.in/s?k=${encodeURIComponent(cfg.amzKw)}&rh=n%3A1968024031&sort=featured&tag=styleguruai-21`
+// Amazon fallback URL: `https://www.amazon.in/s?k=${encodeURIComponent(cfg.amzKw)}&rh=n%3A1968024031&sort=featured&tag=StyleGuruAI-21`
 // Note: Flipkart fallback URL still uses colorDisplay only; Amazon fallback now has trending keywords.
 
 function buildShoppingLinksFallbackAmazonURL(colorName, category = 'shirt', gender = 'male') {
   const isFemale = gender === 'female';
-  const AMAZON_TAG = 'styleguruai-21';
+  const AMAZON_TAG = 'StyleGuruAI-21';
   const colorDisplay = colorName.toLowerCase().replace(/\s+/g, ' ');
   const amzKw = `${colorDisplay} ${isFemale ? 'women' : 'men'} ${category} oversized trending 2025`;
   return `https://www.amazon.in/s?k=${encodeURIComponent(amzKw)}&rh=n%3A1968024031&sort=featured&tag=${AMAZON_TAG}`;

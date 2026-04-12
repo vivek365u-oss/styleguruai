@@ -1,5 +1,5 @@
 /**
- * stylePersonality.js — StyleGuru AI v4.0
+ * stylePersonality.js — StyleGuruAI v4.0
  * ════════════════════════════════════════════
  * Evolving Personality System
  * Derives style archetype from user behavior,

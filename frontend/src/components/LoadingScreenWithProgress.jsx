@@ -104,7 +104,7 @@ export function LoadingScreenWithProgress({ progress }) {
         {isError ? 'Analysis Failed' : label}
       </h2>
       <p className={`text-sm mb-6 text-center ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
-        {isError ? 'Please try again with a clearer photo' : 'StyleGuru AI is crafting your style profile...'}
+        {isError ? 'Please try again with a clearer photo' : 'StyleGuruAI is crafting your style profile...'}
       </p>
 
       {/* Stage step pills */}

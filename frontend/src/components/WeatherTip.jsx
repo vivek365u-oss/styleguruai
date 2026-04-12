@@ -1,5 +1,5 @@
 // ============================================================
-// StyleGuru — Weather-Based Style Tip
+// StyleGuruAI — Weather-Based Style Tip
 // Uses wttr.in (no API key needed) for weather data
 // ============================================================
 import { useState, useEffect } from 'react';

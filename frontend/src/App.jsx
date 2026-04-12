@@ -1,4 +1,4 @@
-// StyleGuru AI — Unified SPA Architecture v3.0
+// StyleGuruAI — Unified SPA Architecture v3.0
 // Login = state change only, no page redirect
 import React, { useState, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
@@ -65,11 +65,11 @@ const LoadingFallback = () => (
         boxShadow: '0 8px 32px rgba(139,92,246,0.25)',
         animation: 'pulse-glow 2.5s ease-in-out infinite'
       }}>
-        <span style={{
-          fontSize: '22px', fontWeight: 800, fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif",
-          background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
-        }}>SG</span>
+        <img
+          src="/logo.png"
+          alt="StyleGuruAI Logo"
+          style={{ width: 42, height: 42, objectFit: 'contain' }}
+        />
       </div>
     </div>
 
@@ -77,7 +77,7 @@ const LoadingFallback = () => (
     <div style={{ textAlign: 'center', zIndex: 1, animation: 'fadeSlideIn 0.8s ease forwards' }}>
       <p style={{
         fontSize: '18px', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif", color: '#F9FAFB', margin: '0 0 6px', letterSpacing: '0.02em'
-      }}>StyleGuru <span style={{ background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>AI</span></p>
+      }}>StyleGuruAI</p>
       <p style={{ fontSize: '10px', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#9CA3AF', margin: 0, fontWeight: 500 }}>
         Loading Intelligence
       </p>

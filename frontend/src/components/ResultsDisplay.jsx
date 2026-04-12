@@ -1,5 +1,5 @@
 // ============================================================
-// StyleGuru — Tab-Based Results Display (App-like UX)
+// StyleGuruAI — Tab-Based Results Display (App-like UX)
 // ============================================================
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -17,7 +17,7 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   const isFemale = gender === "female";
   const colorDisplay = colorName.toLowerCase().replace(/\s+/g, ' ');
   const colorSlug = colorName.toLowerCase().replace(/\s+/g, '-');
-  const AMAZON_TAG = 'styleguruai-21';
+  const AMAZON_TAG = 'StyleGuruAI-21';
   const [budget, setBudget] = useState(null); // null = no filter
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
@@ -269,10 +269,10 @@ function downloadPalette(colors, skinTone) {
   // Title
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 16px Arial';
-  ctx.fillText(`StyleGuru AI — ${skinTone} Skin Palette`, 20, 30);
+  ctx.fillText(`StyleGuruAI — ${skinTone} Skin Palette`, 20, 30);
   ctx.fillStyle = '#a855f7';
   ctx.font = '11px Arial';
-  ctx.fillText('styleguruai.in', 20, 48);
+  ctx.fillText('StyleGuruAI.in', 20, 48);
 
   // Color swatches
   const swatchW = 70, swatchH = 100, startX = 20, startY = 65, gap = 10;
@@ -291,7 +291,7 @@ function downloadPalette(colors, skinTone) {
   });
 
   const link = document.createElement('a');
-  link.download = `styleguruai-${skinTone}-palette.png`;
+  link.download = `StyleGuruAI-${skinTone}-palette.png`;
   link.href = canvas.toDataURL();
   link.click();
 }
@@ -454,7 +454,7 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
     const undertone = analysis.skin_tone.undertone;
     const season = analysis.skin_tone.color_season;
     const celebName = celeb?.name || celebList[0]?.name || '';
-    const msg = `✨ My StyleGuru AI Style Profile!\n\n🎨 Skin Tone: ${skinTone} (${undertone} undertone)\n🍂 Color Season: ${season}\n⭐ Celebrity Match: ${celebName}\n💯 Style Score: ${styleScore}/100\n\nGet your FREE AI style analysis 👇\nhttps://www.styleguruai.in`;
+    const msg = `✨ My StyleGuruAI Style Profile!\n\n🎨 Skin Tone: ${skinTone} (${undertone} undertone)\n🍂 Color Season: ${season}\n⭐ Celebrity Match: ${celebName}\n💯 Style Score: ${styleScore}/100\n\nGet your FREE AI style analysis 👇\nhttps://www.StyleGuruAI.in`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
@@ -582,7 +582,7 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
 // ── Complete the Look ────────────────────────────────────────
 function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
   const { t } = useLanguage();
-  const AMAZON_TAG = 'styleguruai-21';
+  const AMAZON_TAG = 'StyleGuruAI-21';
   const isFemale = gender === 'female';
   const pant = pantColors?.[0];
   if (!shirtColor) return null;
@@ -1357,7 +1357,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
 
       {/* Bottom Ad Card — Consolidated to prevent console 400 errors */}
       <div className={`mt-8 rounded-3xl p-6 border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-200 shadow-sm'}`}>
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 text-center">StyleGuru AI Partner Content</p>
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 text-center">StyleGuruAI Partner Content</p>
         <AdSense />
       </div>
 

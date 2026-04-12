@@ -1,5 +1,5 @@
 // ============================================================
-// StyleGuru — Shopping Cart Context
+// StyleGuruAI — Shopping Cart Context
 // Global cart state management for products
 // ============================================================
 import { useState, useCallback, useEffect } from 'react';

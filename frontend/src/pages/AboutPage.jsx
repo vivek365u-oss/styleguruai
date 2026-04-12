@@ -6,8 +6,8 @@ export default function AboutPage() {
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 24px 80px' }}>
       <SEOHead
-        title="About — StyleGuru AI"
-        description="StyleGuru AI is an AI-powered fashion advisor that helps users choose the best outfits based on their skin tone."
+        title="About — StyleGuruAI"
+        description="StyleGuruAI is an AI-powered fashion advisor that helps users choose the best outfits based on their skin tone."
       />
 
       {/* Header */}
@@ -19,13 +19,13 @@ export default function AboutPage() {
         fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: 300,
         color: C.text, lineHeight: 1.2, marginBottom: 24,
       }}>
-        About StyleGuru AI
+        About StyleGuruAI
       </h1>
       <div style={{ height: 1, background: C.border, width: 64, marginBottom: 40 }} />
 
       {/* Intro */}
       <p style={{ fontSize: '16px', color: C.muted, lineHeight: '1.8', marginBottom: 16, fontFamily: "'Inter',sans-serif" }}>
-        StyleGuru AI is an AI-powered fashion advisor that helps you choose the best outfits based on your unique skin tone.
+        StyleGuruAI is an AI-powered fashion advisor that helps you choose the best outfits based on your unique skin tone.
       </p>
       <p style={{ fontSize: '16px', color: C.muted, lineHeight: '1.8', marginBottom: 40, fontFamily: "'Inter',sans-serif" }}>
         Upload your photo and receive personalized recommendations for colors, outfits, and styling tips — all powered by advanced color science and AI.
