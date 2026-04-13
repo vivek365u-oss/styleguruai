@@ -306,7 +306,7 @@ export const analyzeImageFemale = async (file, lang = 'en', onProgress) => {
   }
 };
 
-export const analyzeImageSeasonal = async (file, season, lang = 'en', onProgress) => {
+export const analyzeImageSeasonal = async (file, season, lang = 'en', onProgress, gender = 'male') => {
   try {
     validateImageFile(file);
     const compressedFile = await compressImage(file);
@@ -315,7 +315,7 @@ export const analyzeImageSeasonal = async (file, season, lang = 'en', onProgress
     return await retryRequest(async () => {
       const formData = new FormData();
       formData.append('file', compressedFile);
-      return API.post(`/api/analyze/seasonal?season=${season}&lang=${lang}`, formData, {
+      return API.post(`/api/analyze/seasonal?season=${season}&lang=${lang}&gender=${gender}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (e) => {
           if (onProgress) onProgress(Math.round((e.loaded * 100) / e.total));

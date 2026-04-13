@@ -1,5 +1,6 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
+import { saveHistory, auth } from '../api/styleApi';
 
 function hexToRGB(hex) {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -21,6 +22,33 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
   const { partner1, partner2, occasion } = data;
   const p1Img = uploadedImages[0];
   const p2Img = uploadedImages[1];
+
+  // Bug C1 fix: auto-dismiss banner after 2.5 seconds
+  const [showBanner, setShowBanner] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowBanner(false), 2500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Bug C3 fix: save couple result to history on mount
+  useEffect(() => {
+    const saveCouple = async () => {
+      try {
+        if (auth.currentUser && partner1?.analysis?.skin_tone) {
+          // Save partner1's skin tone as the 'user' entry (logged-in user typically is partner1)
+          await saveHistory({
+            skinTone: partner1.analysis.skin_tone.category,
+            type: 'couple',
+            occasion,
+            partnerTone: partner2?.analysis?.skin_tone?.category || ''
+          });
+        }
+      } catch (e) {
+        console.warn('[CoupleResults] History save failed (non-critical):', e);
+      }
+    };
+    saveCouple();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 1. Calculate the harmonized color palette
   const p1Colors = [
@@ -47,11 +75,19 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
   // If no strict matches, just take the best 2 from each to create a contrasting but cohesive palette
   if (harmonized.length < 4) {
     const needed = 4 - harmonized.length;
-    for (let i = 0; i < Math.ceil(needed / 2) && i < p1Colors.length; i++) {
-      if (!harmonized.some(h => h.name === p1Colors[i].name)) harmonized.push({ ...p1Colors[i], matched: false, owner: 'Partner 1' });
+    // Bug C4 fix: track exactly how many we need, don't overfill
+    let remaining = needed;
+    for (let i = 0; i < p1Colors.length && remaining > 0; i++) {
+      if (!harmonized.some(h => h.name === p1Colors[i].name)) {
+        harmonized.push({ ...p1Colors[i], matched: false, owner: 'Partner 1' });
+        remaining--;
+      }
     }
-    for (let i = 0; i < Math.ceil(needed / 2) && i < p2Colors.length; i++) {
-      if (!harmonized.some(h => h.name === p2Colors[i].name)) harmonized.push({ ...p2Colors[i], matched: false, owner: 'Partner 2' });
+    for (let i = 0; i < p2Colors.length && remaining > 0; i++) {
+      if (!harmonized.some(h => h.name === p2Colors[i].name)) {
+        harmonized.push({ ...p2Colors[i], matched: false, owner: 'Partner 2' });
+        remaining--;
+      }
     }
   }
 
@@ -99,15 +135,17 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
 
   return (
     <div className="space-y-6 pb-6 animate-fade-in relative z-10 bg-transparent">
-      {/* Confetti effect */}
-      <div className="fixed inset-0 pointer-events-none z-50 flex items-start justify-center pt-20">
-        <div className="text-center scale-in">
-          <p className="text-4xl mb-2">👩‍❤️‍👨</p>
-          <p className="text-white font-black text-lg bg-rose-600/90 px-6 py-3 rounded-2xl shadow-2xl">
-            Couple Match Found!
-          </p>
+      {/* Bug C1 fix: Banner auto-dismisses after 2.5s — was permanently visible */}
+      {showBanner && (
+        <div className="fixed inset-0 pointer-events-none z-50 flex items-start justify-center pt-20 transition-opacity duration-500">
+          <div className="text-center scale-in">
+            <p className="text-4xl mb-2">👩‍❤️‍👨</p>
+            <p className="text-white font-black text-lg bg-rose-600/90 px-6 py-3 rounded-2xl shadow-2xl">
+              Couple Match Found!
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className={`flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
         <span className={`text-xs font-semibold ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Styled for:</span>
@@ -178,14 +216,16 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
               
               <div className="flex flex-col gap-2 relative z-10">
                 <div className={`flex items-start gap-2 p-2 rounded-xl ${isDark ? 'bg-black/20' : 'bg-gray-50'}`}>
-                  <span className="text-xs mt-0.5">{p1Label.split(' ')[0]}</span>
+                  {/* Bug C2 fix: show full label (emoji + text), not just emoji */}
+                  <span className="text-xs mt-0.5 whitespace-nowrap">{p1Label}</span>
                   <div>
                     <span className={`text-[10px] font-bold uppercase ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Partner 1</span>
                     <p className={`text-sm ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{outfit.p1}</p>
                   </div>
                 </div>
                 <div className={`flex items-start gap-2 p-2 rounded-xl border border-dashed ${isDark ? 'bg-rose-500/5 border-rose-500/20' : 'bg-rose-50 border-rose-200'}`}>
-                  <span className="text-xs mt-0.5">{p2Label.split(' ')[0]}</span>
+                  {/* Bug C2 fix: show full label (emoji + text), not just emoji */}
+                  <span className="text-xs mt-0.5 whitespace-nowrap">{p2Label}</span>
                   <div>
                     <span className={`text-[10px] font-bold uppercase ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>Partner 2</span>
                     <p className={`text-sm ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{outfit.p2}</p>

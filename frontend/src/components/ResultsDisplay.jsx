@@ -12,6 +12,20 @@ import AffiliateLink from './AffiliateLink';
 import AdSense from '../AdSense';
 import { FashionIcons, IconRenderer } from './Icons';
 
+// ── Bug N5 Fix: Module-level savedColors cache (one Firestore read per session) ──
+// All ColorCards within same render share this cache instead of N separate reads
+let _scCacheUid = null;
+let _scCachePromise = null;
+const fetchSavedColorsOnce = (uid) => {
+  if (_scCacheUid !== uid || !_scCachePromise) {
+    _scCacheUid = uid;
+    _scCachePromise = getSavedColors(uid).catch(() => []);
+  }
+  return _scCachePromise;
+};
+// Call this to invalidate after save/delete so next render re-fetches
+export const invalidateSavedColorsCache = () => { _scCachePromise = null; _scCacheUid = null; };
+
 // ── Shopping Links ───────────────────────────────────────────
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   const isFemale = gender === "female";
@@ -49,25 +63,25 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
 
   const product = getProductCategory();
 
-  // 2. Build Myntra dynamic slug (e.g., navy-shirt)
-  // Myntra search logic: slug works best for popular combos, /search?q= for everything else.
-  // The user requested: myntra.com/color-product
-  const myntraUrl = `https://www.myntra.com/${colorSlug}-${product}`;
+  const myntraSlug = `https://www.myntra.com/${colorSlug}-${product}`;
+  // Bug N4 fix: only append ? if there IS a price param — avoids dangling ?  
+  const myntraFull = budget?.myntraMax
+    ? `${myntraSlug}?p=price%5B0%5D%3D0%20TO%20${budget.myntraMax}`
+    : myntraSlug;
 
-  // 3. Other platforms (updated to match same categories)
+  // Search keywords for other platforms
   const amzKw = `${colorDisplay} ${gender} ${product} trending 2025`;
-  const fkKw = `${colorDisplay} ${gender} ${product}`;
+  const fkKw  = `${colorDisplay} ${gender} ${product}`;
   const meeKw = `${colorDisplay} ${gender} ${product}`;
 
-  const amzPriceParam = budget?.amzMax ? `%2Cp_36%3A-${budget.amzMax * 100}` : '';
-  const fkPriceParam = budget?.fkMax ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budget.fkMax}` : '';
-  const myntraPriceParam = budget?.myntraMax ? `&p=price%5B0%5D%3D0%20TO%20${budget.myntraMax}` : '';
+  const amzPriceParam  = budget?.amzMax  ? `%2Cp_36%3A-${budget.amzMax * 100}` : '';
+  const fkPriceParam   = budget?.fkMax   ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budget.fkMax}` : '';
 
   const links = [
-    { name: 'Amazon', url: `https://www.amazon.in/s?k=${encodeURIComponent(amzKw)}&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`, icon: FashionIcons.Shopping, bg: 'bg-orange-500/10 border-orange-500/30 text-orange-600 dark:text-orange-400 font-bold' },
-    { name: 'Flipkart', url: `https://www.flipkart.com/search?q=${encodeURIComponent(fkKw)}&sort=popularity_desc${fkPriceParam}`, icon: FashionIcons.Shopping, bg: 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400 font-bold' },
-    { name: 'Myntra', url: `${myntraUrl}${myntraUrl.includes('?') ? '&' : '?'}${myntraPriceParam.slice(1)}`, icon: FashionIcons.Dress, bg: 'bg-pink-500/10 border-pink-500/30 text-pink-600 dark:text-pink-400 font-bold' },
-    { name: 'Meesho', url: `https://meesho.com/search?q=${encodeURIComponent(meeKw)}`, icon: FashionIcons.Shopping, bg: 'bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400 font-bold' },
+    { name: 'Amazon',   url: `https://www.amazon.in/s?k=${encodeURIComponent(amzKw)}&rh=n%3A1968024031${amzPriceParam}&sort=featured&tag=${AMAZON_TAG}`,           icon: FashionIcons.Shopping, bg: 'bg-orange-500/10 border-orange-500/30 text-orange-600 dark:text-orange-400 font-bold' },
+    { name: 'Flipkart', url: `https://www.flipkart.com/search?q=${encodeURIComponent(fkKw)}&sort=popularity_desc${fkPriceParam}`,                                    icon: FashionIcons.Shopping, bg: 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400 font-bold' },
+    { name: 'Myntra',   url: myntraFull,                                                                                                                              icon: FashionIcons.Dress,    bg: 'bg-pink-500/10 border-pink-500/30 text-pink-600 dark:text-pink-400 font-bold' },
+    { name: 'Meesho',   url: `https://meesho.com/search?q=${encodeURIComponent(meeKw)}`,                                                                             icon: FashionIcons.Shopping, bg: 'bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400 font-bold' },
   ];
 
   return (
@@ -117,61 +131,38 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
   const [loading, setLoading] = useState(true);
   const isLoggedIn = !!auth.currentUser;
 
-  // Load saved status when component mounts
+  // Bug N5 Fix: use shared module-level cache instead of individual Firestore reads
   useEffect(() => {
     const loadSavedStatus = async () => {
-      if (!isLoggedIn) {
-        setLoading(false);
-        return;
-      }
-
+      if (!isLoggedIn) { setLoading(false); return; }
       try {
-        const savedColors = await getSavedColors(auth.currentUser.uid);
-        // Check if this color hex is already saved
+        const savedColors = await fetchSavedColorsOnce(auth.currentUser.uid);
         const foundColor = savedColors.find(sc => sc.hex === color.hex);
-        if (foundColor) {
-          setSaved(true);
-          setSavedColorId(foundColor.id);
-        }
+        if (foundColor) { setSaved(true); setSavedColorId(foundColor.id); }
       } catch (err) {
         console.error('Error loading saved color status:', err);
       } finally {
         setLoading(false);
       }
     };
-
     loadSavedStatus();
   }, [color.hex, isLoggedIn]);
 
   const toggleSave = async (e) => {
     e.stopPropagation();
-    if (!isLoggedIn) {
-      alert('Please login to save colors');
-      return;
-    }
-
+    if (!isLoggedIn) { alert('Please login to save colors'); return; }
     setSavingColor(true);
-
     try {
       if (saved && savedColorId) {
-        // Delete saved color
         const { db } = await import('../firebase');
         const { deleteDoc, doc } = await import('firebase/firestore');
         await deleteDoc(doc(db, 'users', auth.currentUser.uid, 'saved_colors', savedColorId));
-        setSaved(false);
-        setSavedColorId(null);
-        console.log('Color unsaved:', color.name);
+        setSaved(false); setSavedColorId(null);
+        invalidateSavedColorsCache(); // Bug N5: invalidate cache after delete
       } else {
-        // Save new color
-        const colorId = await saveSavedColor(auth.currentUser.uid, {
-          name: color.name,
-          hex: color.hex,
-          category,
-          gender,
-          reason: color.reason || ''
-        });
-        setSaved(true);
-        setSavedColorId(colorId);
+        const colorId = await saveSavedColor(auth.currentUser.uid, { name: color.name, hex: color.hex, category, gender, reason: color.reason || '' });
+        setSaved(true); setSavedColorId(colorId);
+        invalidateSavedColorsCache(); // Bug N5: invalidate cache after save
       }
     } catch (err) {
       console.error('Error saving color:', err);
@@ -372,8 +363,8 @@ const CELEBRITY_MAP = {
   },
 };
 
-// ── Profile Hero Card ────────────────────────────────────────
-function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSeasonal, isDark, photoQuality }) {
+// Bug N2 fix: ProfileCard now receives eyeColor and bodyType props for complete DNA saving
+function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSeasonal, isDark, photoQuality, eyeColor, bodyType }) {
   const { t } = useLanguage();
   const toneColors = { fair: "#F5DEB3", light: "#D2A679", medium: "#C68642", olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A" };
   const wrapperCls = isDark
@@ -422,18 +413,21 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
     setSavingDNA(true);
     try {
       const uid = auth.currentUser.uid;
+      // Bug N2 fix: include eyeColor and bodyType from parent props
       const profileData = {
-        skinTone: analysis.skin_tone.category,
-        undertone: analysis.skin_tone.undertone,
-        season: analysis.skin_tone.color_season,
-        gender: isFemale ? 'female' : 'male',
+        skinTone:     analysis.skin_tone.category,
+        undertone:    analysis.skin_tone.undertone,
+        season:       analysis.skin_tone.color_season,
+        gender:       isFemale ? 'female' : 'male',
+        eyeColor:     eyeColor  || 'brown',      // ← now saved
+        bodyType:     bodyType  || 'average',    // ← now saved
         last_updated: new Date().toISOString()
       };
 
       await Promise.all([
         savePrimaryProfile(uid, profileData),
         saveStyleInsights(uid, recommendations),
-        saveUserPreferences(uid, { gender: isFemale ? 'female' : 'male' })
+        saveUserPreferences(uid, { gender: isFemale ? 'female' : 'male', bodyType: bodyType || 'average', eyeColor: eyeColor || 'brown' })
       ]);
 
       setIsDNAsaved(true);
@@ -1045,8 +1039,9 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const photo_quality = finalData.photo_quality || { score: 80, warnings: [] };
   const isFemale = finalData.gender === "female";
   const isSeasonal = finalData.gender === "seasonal";
-  const seasonalGender = data.seasonalGender || "male";
-  const bodyType = data.bodyType || null;
+  const seasonalGender = finalData.seasonalGender || "male"; // Bug S2 fix: was data.seasonalGender
+  const bodyType      = finalData.bodyType   || null;
+  const eyeColor      = finalData.eyeColor   || 'brown'; // Bug N2: extract for ProfileCard + DNA
   const userOccasion = data.occasion || 'casual';
   const userBudget = data.budget || 'any';
 
@@ -1156,6 +1151,8 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         isSeasonal={isSeasonal}
         isDark={isDark}
         photoQuality={photo_quality}
+        eyeColor={eyeColor}
+        bodyType={bodyType}
       />
 
       {/* Actions: Download / Share */}

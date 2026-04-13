@@ -93,6 +93,14 @@ function SkinToneQuiz({ isDark, onResult, gender }) {
     },
   };
 
+  // ── Bug N1 Fix: Map quiz tone values to palette entries ─────────────────────
+  // ultra_fair (Porcelain) → fair palette (lightest supported)
+  // medium_light (Golden Wheatish) → between light & medium → light palette
+  // medium_dark (Caramel/Dusky) → between medium & olive → olive palette
+  RECS.ultra_fair   = RECS.fair;
+  RECS.medium_light = RECS.light;
+  RECS.medium_dark  = RECS.olive;
+
   const BODY_TYPE_TIPS = {
     slim: ['Layering adds visual bulk — try oversized tees over shirts', 'Horizontal stripes and bold patterns work great for you', 'Baggy jeans and cargo pants suit your frame perfectly', 'Avoid very tight fitted clothes — go for relaxed fits'],
     athletic: ['V-neck tees highlight your shoulders beautifully', 'Slim-fit or straight-cut pants balance your proportions', 'Avoid overly baggy clothes — they hide your physique', 'Polo shirts and fitted tees are your best friends'],
@@ -324,7 +332,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     let res;
     try {
       if (mode === 'seasonal') {
-        res = await analyzeImageSeasonal(file, season, backendLang, handleProgress);
+        res = await analyzeImageSeasonal(file, season, backendLang, handleProgress, gender);
       } else if (gender === 'female') {
         res = await analyzeImageFemale(file, backendLang, handleProgress);
       } else {
@@ -496,7 +504,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           <div className="flex justify-center mb-6">
             <div className={`rounded-2xl p-1.5 flex gap-1 flex-wrap border ${isDark ? 'bg-white/10 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
               <button
-                onClick={() => { setMode('normal'); handleGenderChange('male'); }}
+                onClick={() => setMode('normal')}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${mode === 'normal'
                     ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
                     : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'
@@ -505,7 +513,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                 <span className="w-4 h-4"><IconRenderer icon={FashionIcons.Shirt} /></span> Normal
               </button>
               <button
-                onClick={() => { setMode('seasonal'); handleGenderChange('male'); }}
+                onClick={() => setMode('seasonal')}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 ${mode === 'seasonal'
                     ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg'
                     : isDark ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-800'
