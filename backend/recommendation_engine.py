@@ -881,6 +881,7 @@ class RecommendationEngine:
                 "hinglish": f"Aapka complexion medium hai aur undertone {undertone} hai. Earth tones aur bright colors aap par bilkul set rahenge.",
                 "hi": f"आपकी रंगत मध्यम (medium) है और अंडरटोन {undertone} है। अर्थ टोन्स और चमकीले रंग आप पर बहुत आकर्षक लगेंगे।"
             }
+        }
         res = summaries.get(category, summaries["medium"])
         return res.get(self.lang, res.get("en", ""))
 
