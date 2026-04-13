@@ -76,11 +76,14 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
 
   const OCCASIONS = getOccasions();
 
+  // English day names used for log matching regardless of display language
+  const DAY_KEYS_EN = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+
   const getLogForDay = (weekdayIndex) => {
-    const dayName = WEEKDAYS[weekdayIndex].label.toLowerCase();
+    const dayKeyEn = DAY_KEYS_EN[weekdayIndex];
     return logs.find(log => {
-        const logDate = new Date(log.date);
-        return logDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() === dayName;
+      const logDate = new Date(log.date);
+      return logDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() === dayKeyEn;
     });
   };
 
@@ -123,7 +126,7 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
     const bestTop = rankedWardrobe.find(i => topCats.includes(i.category)) || 
                     { 
                         name: activeGender === 'male' ? 'Premium Shirt' : 'Elegant Kurti', 
-                        hex: bestColors[index % bestColors.length]?.hex || '#FFFFFF', 
+                        hex: bestColors.length > 0 ? bestColors[index % bestColors.length]?.hex : '#7C3AED', 
                         engineScore: 85,
                         category: activeGender === 'male' ? 'cat_formal_shirt' : 'cat_kurti'
                     };
@@ -131,7 +134,7 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
     const bestBottom = rankedWardrobe.find(i => bottomCats.includes(i.category) && i.id !== bestTop.id) || 
                        { 
                            name: activeGender === 'male' ? 'Formal Trousers' : 'Silk Palazzo', 
-                           hex: pantColors[index % pantColors.length]?.hex || '#1e3a8a', 
+                           hex: pantColors.length > 0 ? pantColors[index % pantColors.length]?.hex : '#1e3a8a', 
                            engineScore: 80,
                            category: activeGender === 'male' ? 'cat_formal_trouser' : 'cat_palazzo'
                        };
@@ -286,7 +289,11 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
 
             {!dayInfo.isExecuted ? (
                 <button 
-                  onClick={() => window.open(`https://www.myntra.com/search?q=${dayInfo.top.name}%20${dayInfo.top.category}`, '_blank')}
+                  onClick={() => {
+                    const itemName = encodeURIComponent(dayInfo.top.name || 'shirt');
+                    const itemCat  = encodeURIComponent(dayInfo.top.category || '');
+                    window.open(`https://www.myntra.com/search?q=${itemName}${itemCat ? '%20' + itemCat : ''}`, '_blank');
+                  }}
                   className="mt-8 w-full py-5 bg-black text-white rounded-3xl text-[10px] font-black uppercase tracking-widest shadow-2xl hover:scale-[1.02] active:scale-95 transition-all"
                 >
                     🛒 Unlock via Myntra

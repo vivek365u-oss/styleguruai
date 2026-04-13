@@ -264,10 +264,16 @@ export default function StyleNavigator({ user, onAnalyze }) {
         setWardrobe(userWardrobe || []);
         if (locked) setInsights(locked);
 
+        // Bug #14 fix: set trendGender immediately from first data load
+        const resolvedGender = activeProfile?.gender || userPrefs?.gender || 'male';
+        const tg = (resolvedGender.toLowerCase().includes('female') || resolvedGender === 'women') ? 'female' : 'male';
+        setTrendGender(tg);
+
         const today = new Date().toLocaleDateString('en-CA');
         if (logs?.length > 0 && logs[0].date === today) setIsWorn(true);
 
-        if (activeProfile) {
+        // Bug #13 fix: only call API if no locked insights exist yet
+        if (activeProfile && !locked) {
           const res = await getStyleInsights(
             activeProfile.skinTone || activeProfile.skin_tone?.category,
             activeProfile.undertone || activeProfile.skin_tone?.undertone,
@@ -289,13 +295,14 @@ export default function StyleNavigator({ user, onAnalyze }) {
     })();
   }, []);
 
-  // Auto-set trendGender from profile
+  // Bug #14 fix: trendGender secondary sync (for cases where profile loads async after mount)
   useEffect(() => {
-    if (profile || prefs) {
+    if ((profile || prefs) && trendGender === null) {
       const g = profile?.gender || prefs?.gender || 'male';
       setTrendGender((g.toLowerCase().includes('female') || g === 'women') ? 'female' : 'male');
     }
   }, [profile, prefs]);
+
 
   // ── Derived data ───────────────────────────────────
   const gender    = useMemo(() => {
@@ -366,7 +373,9 @@ export default function StyleNavigator({ user, onAnalyze }) {
       });
       setIsWorn(true);
     } catch (e) { console.error(e); } finally { setLogging(false); }
-  }, [auth.currentUser, isWorn, logging, outfit, mood]);
+  // Bug #11 fix: auth.currentUser is a mutable Firebase object, NOT React state.
+  // Removed from deps — it changes silently outside React's tracking.
+  }, [isWorn, logging, outfit, mood]);
 
   // ── Render helpers ─────────────────────────────────
   const card = (style) => ({
@@ -682,6 +691,7 @@ export default function StyleNavigator({ user, onAnalyze }) {
 
           {/* Avoid Colors */}
           <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>❌ Colors to Avoid</p>
+          {/* Bug #15 fix: position:relative needed for the absolute overlay to anchor correctly */}
           <div style={{ position: 'relative' }}>
             <div style={{ ...card({ padding:'16px 18px', marginBottom:14 }), filter: !isPro ? 'blur(4px)' : 'none', opacity: !isPro ? 0.6 : 1, userSelect: !isPro ? 'none' : 'auto' }}>
               {(insights?.colors_to_avoid || (function() {

@@ -110,6 +110,28 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
     if (auth.currentUser) getWardrobe(auth.currentUser.uid).then(setWardrobe);
   }, []);
 
+  // ── Shared helper: get the best available analysis data ──
+  const getAnalysisData = () => {
+    if (analysisData) return analysisData;
+    try {
+      return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData || null;
+    } catch { return null; }
+  };
+
+  // ── Shared helper: resolve active gender robustly ──
+  // Priority: latest analysis > primary profile cache > preferences fallback
+  const getActiveGender = () => {
+    const data = getAnalysisData();
+    if (data?.gender) return data.gender;
+    try {
+      const primary = JSON.parse(localStorage.getItem('sg_primary_profile') || 'null');
+      if (primary?.gender) return primary.gender;
+      const insights = JSON.parse(localStorage.getItem('sg_locked_insights') || 'null');
+      if (insights?.gender) return insights.gender;
+    } catch {}
+    return 'male'; // true last resort
+  };
+
   const primaryTools = [
     { id: 'stylist',  icon: FashionIcons.Star,      title: 'AI Stylist',          desc: 'Face shape & hairstyle recs',    grad: ['#7c3aed40','#5b21b640'], border: '#8b5cf630', color: '#8b5cf6' },
     { id: 'stylebot', icon: FashionIcons.AI,        title: t('aiStyleBot'),       desc: t('styleBotDesc'),                grad: ['#581c8740','#312e8140'], border: '#a855f730', color: '#a855f7' },
@@ -147,36 +169,34 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
       </div>
     </div>
   );
-  if (activeTool === 'calendar') return (
-    <OutfitCalendar
-      isDark={C.isDark}
-      onClose={() => setActiveTool(null)}
-      bestColors={(() => {
-        const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
-        const rec  = data?.analysis?.recommendations || data?.recommendations || {};
-        return [...(rec.best_shirt_colors || rec.best_dress_colors || rec.seasonal_colors || []), ...(rec.best_top_colors || [])].filter((c, i, a) => a.findIndex(x => x.hex === c.hex) === i);
-      })()}
-      pantColors={(() => {
-        const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
-        const rec  = data?.analysis?.recommendations || data?.recommendations || {};
-        return rec.best_pant_colors || rec.best_bottom_colors || [];
-      })()}
-      gender={(() => {
-        const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
-        return data?.gender || 'male';
-      })()}
-      wardrobe={wardrobe}
-    />
-  );
+  if (activeTool === 'calendar') {
+    const calData   = getAnalysisData();
+    const calRec    = calData?.analysis?.recommendations || calData?.recommendations || {};
+    const calBest   = [
+      ...(calRec.best_shirt_colors || calRec.best_dress_colors || calRec.seasonal_colors || []),
+      ...(calRec.best_top_colors   || [])
+    ].filter((c, i, a) => a.findIndex(x => x.hex === c.hex) === i);
+    const calPant   = calRec.best_pant_colors || calRec.best_bottom_colors || [];
+    const calGender = getActiveGender();
+    const calProfile = calData || null;
+    return (
+      <OutfitCalendar
+        isDark={C.isDark}
+        onClose={() => setActiveTool(null)}
+        bestColors={calBest}
+        pantColors={calPant}
+        gender={calGender}
+        profile={calProfile}
+        wardrobe={wardrobe}
+      />
+    );
+  }
   if (activeTool === 'wardrobe') return (
     <div style={{ animation: 'fadeSlideIn 0.3s ease', paddingBottom: 40 }}>
       <BackBtn />
       <WardrobePanel
         onShowResult={onShowResult}
-        gender={(() => {
-          const data = analysisData || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null')?.fullData;
-          return data?.gender || 'male';
-        })()}
+        gender={getActiveGender()}
       />
     </div>
   );

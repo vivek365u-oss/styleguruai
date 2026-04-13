@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { getWardrobe, deleteWardrobeItem, getWardrobeCount } from '../api/styleApi';
+import { getWardrobe, deleteWardrobeItem } from '../api/styleApi';
 import { auth } from '../api/styleApi';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -77,8 +77,8 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
     try {
       const data = await getWardrobe(auth.currentUser.uid);
       setItems(data);
-      const count = await getWardrobeCount(auth.currentUser.uid);
-      if (count >= wardrobeLimit) setCapWarning(true);
+      // Use data.length directly — avoids a second full Firestore read
+      if (data.length >= wardrobeLimit) setCapWarning(true);
     } catch {
       setError(t('somethingWrong'));
     } finally {
@@ -100,10 +100,10 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
              cat.includes('skirt') || cat.includes('palazzo') || cat.includes('cargo') ||
              cat.includes('shorts') || cat.includes('churidar');
     if (filter === 'ethnic')
-      return cat.includes('ethnic') || cat.includes('kurta') || cat.includes('kurti') ||
-             cat.includes('saree') || cat.includes('lehenga') || cat.includes('sherwani') ||
-             cat.includes('anarkali') || cat.includes('sharara') || cat.includes('dhoti') ||
-             cat.includes('nehru');
+      return cat.includes('ethnic') || cat.includes('kurta') || cat.includes('kurta_set') ||
+             cat.includes('kurti') || cat.includes('saree') || cat.includes('lehenga') ||
+             cat.includes('sherwani') || cat.includes('anarkali') || cat.includes('sharara') ||
+             cat.includes('dhoti') || cat.includes('nehru');
     if (filter === 'formal')
       return cat.includes('formal') || cat.includes('blazer') || cat.includes('tuxedo') ||
              cat.includes('suit') || tags.includes('office');
