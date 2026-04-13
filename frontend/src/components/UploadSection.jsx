@@ -623,7 +623,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           </div>
 
           {/* Wizard Flow: Step 0 - Body Type */}
-          {currentStep === 0 && (
+          {mode !== 'couple' && currentStep === 0 && (
             <div className={`rounded-3xl p-6 mb-5 border animate-fadeIn ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>1. {t('bodyTypeTitle') || 'Body Type'}</h3>
@@ -664,7 +664,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           )}
 
           {/* Wizard Flow: Step 1 - Eye Color */}
-          {currentStep === 1 && (
+          {mode !== 'couple' && currentStep === 1 && (
             <div className={`rounded-3xl p-6 mb-5 border animate-fadeIn ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>2. {t('eyeColorTitle') || 'Eye Color'}</h3>
@@ -713,7 +713,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           )}
 
           {/* Wizard Flow: Step 2 - Occasion */}
-          {currentStep === 2 && (
+          {mode !== 'couple' && currentStep === 2 && (
             <div className={`rounded-3xl p-6 mb-5 border animate-fadeIn ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>3. {t('occasionTitle') || 'Occasion'}</h3>
@@ -763,7 +763,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           )}
 
           {/* Wizard Flow: Step 3 - Budget */}
-          {currentStep === 3 && (
+          {mode !== 'couple' && currentStep === 3 && (
             <div className={`rounded-3xl p-6 mb-5 border animate-fadeIn ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>4. {t('budgetTitle') || 'Budget'}</h3>
@@ -811,16 +811,20 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           )}
 
           {/* Wizard Flow: Step 4 - Upload Photo */}
-          {currentStep === 4 && (
+          {(mode === 'couple' || currentStep === 4) && (
             <div className="animate-fadeIn">
               <div className="flex items-center justify-between mb-4 px-2">
-                <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>5. {t('uploadTitle') || 'Upload Photo'}</h3>
-                <button
-                  onClick={() => setCurrentStep(0)}
-                  className="text-xs font-bold text-purple-500 hover:text-purple-400 transition"
-                >
-                  🔄 Change Settings
-                </button>
+                <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  {mode === 'couple' ? 'Upload Couple Photos' : `5. ${t('uploadTitle') || 'Upload Photo'}`}
+                </h3>
+                {mode !== 'couple' && (
+                  <button
+                    onClick={() => setCurrentStep(0)}
+                    className="text-xs font-bold text-purple-500 hover:text-purple-400 transition"
+                  >
+                    🔄 Change Settings
+                  </button>
+                )}
               </div>
 
               {mode === 'couple' ? (

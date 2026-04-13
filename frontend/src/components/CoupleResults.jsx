@@ -19,12 +19,13 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
-  const { partner1, partner2, occasion } = data;
+  const { partner1, partner2 } = data; // Occasion removed from props since wizard step is bypassed
   const p1Img = uploadedImages[0];
   const p2Img = uploadedImages[1];
 
   // Bug C1 fix: auto-dismiss banner after 2.5 seconds
   const [showBanner, setShowBanner] = useState(true);
+  const [activeOutfitTab, setActiveOutfitTab] = useState('casual'); // New internal tab state
   useEffect(() => {
     const timer = setTimeout(() => setShowBanner(false), 2500);
     return () => clearTimeout(timer);
@@ -39,7 +40,6 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
           await saveHistory({
             skinTone: partner1.analysis.skin_tone.category,
             type: 'couple',
-            occasion,
             partnerTone: partner2?.analysis?.skin_tone?.category || ''
           });
         }
@@ -98,40 +98,101 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
     wedding: {
       title: '💍 Wedding / Festive',
       outfits: [
-        { title: 'Tonal Harmony', p1: 'Deep jewel tone Lehenga/Suit', p2: 'Matching Sherwani or pocket square in the exact same hue' },
-        { title: 'Classic Contrast', p1: 'Ivory/Gold ethnic wear', p2: 'Rich dark tone (Navy/Burgundy) ethnic wear' }
+        { 
+          title: 'Tonal Harmony', 
+          p1: 'Deep jewel-tone Lehenga / Anarkali / Gown', 
+          p2: 'Matching Sherwani or Kurta set in the exact same hue',
+          accessories: 'P1: Heavy Kundan choker, Polki earrings. P2: Contrast pocket square, embellished Mojaris.',
+          vibe: 'Royal & Highly Coordinated'
+        },
+        { 
+          title: 'Classic Contrast', 
+          p1: 'Ivory or Champagne Gold ethnic wear with fine embroidery', 
+          p2: 'Rich dark tone (Navy/Burgundy) ethnic wear',
+          accessories: 'P1: Pearl drops, gold potli bag. P2: Classic metallic watch, sleek formal shoes.',
+          vibe: 'Elegant & Sophisticated'
+        }
       ]
     },
     casual: {
-      title: '😎 Casual Vibes',
+      title: '😎 Streetwear / Casual',
       outfits: [
-        { title: 'Streetwear Match', p1: 'Oversized graphic tee + Cargo', p2: 'Color-coordinated crop top + baggy jeans' },
-        { title: 'Denim Duo', p1: 'White top + Light wash denim', p2: 'White top + Light wash denim' }
+        { 
+          title: 'Urban Denim Duo', 
+          p1: 'White fitted top + Light wash wide-leg denim', 
+          p2: 'White oversized tee + Light wash straight denim',
+          accessories: 'P1: Chunky white sneakers, silver hoops, mini backpack. P2: White sneakers, minimalist chain.',
+          vibe: 'Relaxed & Trendy'
+        },
+        { 
+          title: 'Color-Block Match', 
+          p1: 'Color-coded crop top + Cargo pants', 
+          p2: 'Matching oversized graphic tee + Relaxed cargo pants',
+          accessories: 'P1: Crossbody bag, bucket hat, slim sunglasses. P2: Beanie, retro sneakers.',
+          vibe: 'Edgy & Modern'
+        }
       ]
     },
     party: {
-      title: '🎉 Party Night',
+      title: '🎉 Party / Club',
       outfits: [
-        { title: 'Night Out Contrast', p1: 'Black outfit with bright accent', p2: 'Bright colored outfit (matching the accent)' },
-        { title: 'Metallic Pop', p1: 'Sequin or metallic element', p2: 'Dark neutral base (Black/Navy)' }
+        { 
+          title: 'Night Out Contrast', 
+          p1: 'Sleek black outfit with a bright neon/metallic accent', 
+          p2: 'Bright colored outfit (matching Partner 1\'s accent color)',
+          accessories: 'P1: Metallic clutch, statement rings, stiletto boots. P2: Leather jacket, silver chain, Chelsea boots.',
+          vibe: 'Bold & Electrifying'
+        },
+        { 
+          title: 'Glam & Neutral', 
+          p1: 'Sequin or metallic element dress/top', 
+          p2: 'Dark neutral base (Black/Navy) with subtle texture',
+          accessories: 'P1: Dainty silver jewelry, sling bag. P2: Matte black watch, textured belt.',
+          vibe: 'Chic & Balanced'
+        }
       ]
     },
     date: {
       title: '❤️ Romantic Date',
       outfits: [
-        { title: 'Soft Coordination', p1: 'Pastel or soft toned outfit', p2: 'Complementary soft tone (e.g. Sage + Rose)' },
-        { title: 'Evening Elegance', p1: 'Deep saturated color', p2: 'Dark neutral (Black/Charcoal) with a subtle matching accessory' }
+        { 
+          title: 'Soft Coordination', 
+          p1: 'Pastel or soft-toned slip dress / elegant top', 
+          p2: 'Complementary soft tone shirt (e.g., Sage + Rose) + Chinos',
+          accessories: 'P1: Delicate pendant, strappy heels, mini clutch. P2: Brown leather watch, suede loafers.',
+          vibe: 'Sweet & Harmonious'
+        },
+        { 
+          title: 'Evening Elegance', 
+          p1: 'Deep saturated color (Ruby/Emerald) midi/maxi dress', 
+          p2: 'Dark neutral (Black/Charcoal) blazer over crisp shirt with subtle matching pocket square',
+          accessories: 'P1: Diamond studs, stilettos. P2: Classic dress watch, Oxfords.',
+          vibe: 'Luxurious & Sensual'
+        }
       ]
     },
-    office: {
-      title: '💼 Office / Formal',
+    vacation: {
+      title: '🌴 Vacation / Resort',
       outfits: [
-        { title: 'Power Couple', p1: 'Navy blazer + trousers', p2: 'Grey suit + subtle patterned tie/scarf' }
+        { 
+          title: 'Tropical Contrast', 
+          p1: 'Flowy floral maxi dress', 
+          p2: 'Linen shirt (in one of the floral colors) + Tailored shorts',
+          accessories: 'P1: Wide-brim straw hat, oversized sunglasses, woven tote. P2: Aviators, canvas espadrilles.',
+          vibe: 'Breezy & Refreshing'
+        },
+        { 
+          title: 'Resort Whites', 
+          p1: 'All-white linen set or crochet dress', 
+          p2: 'White linen shirt + Khaki/Beige trousers',
+          accessories: 'P1: Gold layered necklaces, slide sandals. P2: Leather slide sandals, beaded bracelet.',
+          vibe: 'Clean & Luxurious'
+        }
       ]
     }
   };
 
-  const currentOccasion = occasionConfigs[occasion] || occasionConfigs.casual;
+  const currentOccasion = occasionConfigs[activeOutfitTab] || occasionConfigs.casual;
 
   return (
     <div className="space-y-6 pb-6 animate-fade-in relative z-10 bg-transparent">
@@ -147,12 +208,7 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
         </div>
       )}
 
-      <div className={`flex items-center gap-2 flex-wrap rounded-xl px-3 py-2 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-        <span className={`text-xs font-semibold ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Styled for:</span>
-        <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${isDark ? 'bg-rose-500/20 border-rose-500/30 text-rose-300' : 'bg-rose-100 border-rose-300 text-rose-700'}`}>
-          {currentOccasion.title}
-        </span>
-      </div>
+      {/* Removed static 'Styled for' block since we are adding dynamic tabs */}
 
       {/* Side by Side Profiles */}
       <div className="grid grid-cols-2 gap-3">
@@ -207,29 +263,64 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
 
       {/* Outfit Match Ideas */}
       <div>
-        <p className={`text-xs font-semibold uppercase tracking-wide mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>👗 Matching Outfit Ideas</p>
-        <div className="space-y-3">
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <p className={`text-xs font-semibold uppercase tracking-wide flex-shrink-0 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>👗 Matching Ideas</p>
+          <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar w-full max-w-[280px]">
+            {Object.keys(occasionConfigs).map(key => (
+              <button
+                key={key}
+                onClick={() => setActiveOutfitTab(key)}
+                className={`text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-full border whitespace-nowrap transition-all ${activeOutfitTab === key
+                    ? (isDark ? 'bg-rose-500/20 border-rose-500/30 text-rose-300' : 'bg-rose-100 border-rose-300 text-rose-700')
+                    : (isDark ? 'bg-white/5 border-white/10 text-white/50 hover:text-white/80' : 'bg-gray-50 border-gray-200 text-gray-500 hover:text-gray-800')
+                  }`}
+              >
+                {occasionConfigs[key].title.split(' ')[0]} {key.charAt(0).toUpperCase() + key.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
           {currentOccasion.outfits.map((outfit, i) => (
             <div key={i} className={`rounded-3xl p-4 border relative overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
               <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-rose-500/10 to-transparent blur-2xl rounded-bl-[100px]" />
-              <p className={`font-black text-sm mb-3 ${isDark ? 'text-rose-300' : 'text-rose-600'}`}>{outfit.title}</p>
               
-              <div className="flex flex-col gap-2 relative z-10">
-                <div className={`flex items-start gap-2 p-2 rounded-xl ${isDark ? 'bg-black/20' : 'bg-gray-50'}`}>
-                  {/* Bug C2 fix: show full label (emoji + text), not just emoji */}
-                  <span className="text-xs mt-0.5 whitespace-nowrap">{p1Label}</span>
-                  <div>
-                    <span className={`text-[10px] font-bold uppercase ${isDark ? 'text-white/40' : 'text-gray-400'}`}>Partner 1</span>
-                    <p className={`text-sm ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{outfit.p1}</p>
+              <div className="flex justify-between items-start mb-3">
+                <p className={`font-black text-sm ${isDark ? 'text-rose-300' : 'text-rose-600'}`}>{outfit.title}</p>
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase ${isDark ? 'bg-purple-500/10 border-purple-500/20 text-purple-300' : 'bg-purple-50 border-purple-200 text-purple-600'}`}>
+                  {outfit.vibe}
+                </span>
+              </div>
+              
+              <div className="flex flex-col gap-2 relative z-10 w-full">
+                {/* Outfits block */}
+                <div className={`grid grid-cols-2 gap-2 p-2 rounded-xl mb-1 ${isDark ? 'bg-black/20' : 'bg-gray-50'}`}>
+                  <div className="pr-2 border-r border-gray-200 dark:border-white/10">
+                    <span className={`text-[10px] font-bold uppercase flex items-center gap-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
+                      <span className="whitespace-nowrap">{p1Label}</span> (OUTFIT)
+                    </span>
+                    <p className={`text-xs mt-1 leading-snug ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{outfit.p1}</p>
+                  </div>
+                  <div className="pl-1">
+                    <span className={`text-[10px] font-bold uppercase flex items-center gap-1 ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>
+                      <span className="whitespace-nowrap">{p2Label}</span> (OUTFIT)
+                    </span>
+                    <p className={`text-xs mt-1 leading-snug ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{outfit.p2}</p>
                   </div>
                 </div>
-                <div className={`flex items-start gap-2 p-2 rounded-xl border border-dashed ${isDark ? 'bg-rose-500/5 border-rose-500/20' : 'bg-rose-50 border-rose-200'}`}>
-                  {/* Bug C2 fix: show full label (emoji + text), not just emoji */}
-                  <span className="text-xs mt-0.5 whitespace-nowrap">{p2Label}</span>
-                  <div>
-                    <span className={`text-[10px] font-bold uppercase ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>Partner 2</span>
-                    <p className={`text-sm ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{outfit.p2}</p>
-                  </div>
+
+                {/* Accessories Block */}
+                <div className={`p-3 rounded-xl border border-dashed ${isDark ? 'bg-amber-500/5 border-amber-500/20' : 'bg-amber-50 border-amber-200'}`}>
+                   <span className={`text-[10px] font-bold uppercase mb-1.5 flex items-center gap-1 ${isDark ? 'text-amber-300' : 'text-amber-600'}`}>
+                     💎 Deep Accessory Analysis
+                   </span>
+                   <p className={`text-xs leading-relaxed ${isDark ? 'text-amber-100/70' : 'text-amber-800/80'}`}>
+                     {outfit.accessories.split('. P2:').map((part, idx) => {
+                       if (idx === 0) return <span key={idx}><strong className="opacity-90">Partner 1:</strong> {part.replace('P1:', '')}<br/></span>;
+                       return <span key={idx} className="block mt-1"><strong className="opacity-90">Partner 2:</strong> {part}</span>;
+                     })}
+                   </p>
                 </div>
               </div>
             </div>
