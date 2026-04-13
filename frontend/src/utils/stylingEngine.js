@@ -169,61 +169,78 @@ export const getAccessoryAdvice = (gender, season, event = 'casual') => {
 /**
  * Maps color recommendations to specific actionable items from the registry
  */
-export const getActionableAdvice = (bestColors, gender, skinTone = 'medium') => {
+export const getActionableAdvice = (insights, gender, skinTone = 'medium') => {
     // Dynamic Fallbacks for Different Skin Types (Fair, Light, Medium, Olive, Brown, Dark)
     const getDynamicFallbacks = (tone = 'medium') => {
         const t = tone.toLowerCase();
-        if (t === 'fair' || t === 'light') return [
-            { name: 'Navy Blue', hex: '#000080' },
-            { name: 'Burgundy', hex: '#800020' },
-            { name: 'Forest Green', hex: '#228B22' },
-            { name: 'Dusty Rose', hex: '#C4767A' }
-        ];
-        if (t === 'dark' || t === 'brown') return [
-            { name: 'Bright White', hex: '#FFFFFF' },
-            { name: 'Electric Blue', hex: '#0047AB' },
-            { name: 'Mustard Yellow', hex: '#FFDB58' },
-            { name: 'Hot Pink', hex: '#FF69B4' }
-        ];
-        if (t === 'olive') return [
-            { name: 'Emerald', hex: '#50C878' },
-            { name: 'Rust', hex: '#B7410E' },
-            { name: 'Ivory', hex: '#FFFFF0' },
-            { name: 'Wine', hex: '#722F37' }
-        ];
-        // Default Medium
-        return [
-            { name: 'Royal Blue', hex: '#4169E1' },
-            { name: 'Charcoal Grey', hex: '#36454F' },
-            { name: 'Wine Red', hex: '#722F37' },
-            { name: 'Burnt Orange', hex: '#CC5500' }
-        ];
+        if (t === 'fair' || t === 'light') return [{ name: 'Navy Blue', hex: '#000080' }, { name: 'Burgundy', hex: '#800020' }, { name: 'Forest Green', hex: '#228B22' }, { name: 'Dusty Rose', hex: '#C4767A' }];
+        if (t === 'dark' || t === 'brown') return [{ name: 'Bright White', hex: '#FFFFFF' }, { name: 'Electric Blue', hex: '#0047AB' }, { name: 'Mustard Yellow', hex: '#FFDB58' }, { name: 'Hot Pink', hex: '#FF69B4' }];
+        if (t === 'olive') return [{ name: 'Emerald', hex: '#50C878' }, { name: 'Rust', hex: '#B7410E' }, { name: 'Ivory', hex: '#FFFFF0' }, { name: 'Wine', hex: '#722F37' }];
+        return [{ name: 'Royal Blue', hex: '#4169E1' }, { name: 'Charcoal Grey', hex: '#36454F' }, { name: 'Wine Red', hex: '#722F37' }, { name: 'Burnt Orange', hex: '#CC5500' }];
     };
 
-    const colorsToUse = (bestColors && bestColors.length > 0) 
-        ? bestColors 
-        : getDynamicFallbacks(skinTone);
-    
-    // Normalize to handle both [{name, hex}] and ['colorName'] formats
-    const normalizedColors = colorsToUse.map(c => typeof c === 'string' ? { name: c } : c);
-    
     const suggestions = [];
-    
-    // Use top 4 colors for variety
-    normalizedColors.slice(0, 4).forEach((colorObj, idx) => {
-        const color = colorObj.name;
-        if (gender === 'female') {
-            if (idx === 0) suggestions.push({ item: `${color} Festive Silk Saree`, category: 'cat_saree_silk', color: color, hex: colorObj.hex });
-            if (idx === 1) suggestions.push({ item: `${color} Designer Kurti Set`, category: 'cat_kurti', color: color, hex: colorObj.hex });
-            if (idx === 2) suggestions.push({ item: `${color} Elegant Maxi Dress`, category: 'cat_dress', color: color, hex: colorObj.hex });
-            if (idx === 3) suggestions.push({ item: `${color} Stylish Peplum Top`, category: 'cat_top', color: color, hex: colorObj.hex });
+
+    // Check if `insights` is an array (legacy flat structure) or an object (new categorized structure)
+    const isCategorized = insights && !Array.isArray(insights) && typeof insights === 'object' && Object.keys(insights).some(k => k.includes('best_'));
+
+    if (gender === 'female') {
+        if (isCategorized) {
+            const kurtis = insights.best_kurti_colors || [];
+            if (kurtis[0]) suggestions.push({ item: `${kurtis[0].name} Designer Kurti Set`, category: 'cat_kurti', hex: kurtis[0].hex, search: `women ${kurtis[0].name} fusion kurti set ethnic India` });
+            
+            const sarees = insights.best_saree_colors || insights.best_lehenga_colors || [];
+            if (sarees[0]) suggestions.push({ item: `${sarees[0].name} Pre-Draped Saree`, category: 'cat_saree_silk', hex: sarees[0].hex, search: `women ${sarees[0].name} pre draped saree ethnic India` });
+            if (sarees[1]) suggestions.push({ item: `${sarees[1].name} Festive Lehenga`, category: 'cat_lehenga', hex: sarees[1].hex, search: `women ${sarees[1].name} festive lehenga` });
+
+            const tops = insights.best_top_colors || insights.best_dress_colors || [];
+            if (tops[0]) suggestions.push({ item: `${tops[0].name} Satin Button-Down`, category: 'cat_top', hex: tops[0].hex, search: `women ${tops[0].name} satin button down shirt formal` });
+            if (tops[1]) suggestions.push({ item: `${tops[1].name} Oversized Top`, category: 'cat_tshirt', hex: tops[1].hex, search: `women ${tops[1].name} oversized top streetwear India` });
+
+            const blazers = insights.best_female_blazer_colors || [];
+            if (blazers[0]) suggestions.push({ item: `${blazers[0].name} Oversized Power Blazer`, category: 'cat_outerwear', hex: blazers[0].hex, search: `women ${blazers[0].name} oversized power blazer formal` });
+
+            const bottoms = insights.best_bottom_colors || [];
+            if (bottoms[0]) suggestions.push({ item: `${bottoms[0].name} Cargo Pants`, category: 'cat_bottom', hex: bottoms[0].hex, search: `women ${bottoms[0].name} cargo pants streetwear` });
+            if (bottoms[1]) suggestions.push({ item: `${bottoms[1].name} Wide Leg Trousers`, category: 'cat_bottom', hex: bottoms[1].hex, search: `women ${bottoms[1].name} wide leg trousers formal` });
         } else {
-            if (idx === 0) suggestions.push({ item: `${color} Slim Fit Formal Shirt`, category: 'cat_formal_shirt', color: color, hex: colorObj.hex });
-            if (idx === 1) suggestions.push({ item: `${color} Traditional Kurta Set`, category: 'cat_kurta_set', color: color, hex: colorObj.hex });
-            if (idx === 2) suggestions.push({ item: `${color} Premium Casual Polo`, category: 'cat_polo', color: color, hex: colorObj.hex });
-            if (idx === 3) suggestions.push({ item: `${color} Modern Linen Blazer`, category: 'cat_blazer', color: color, hex: colorObj.hex });
+            const colors = (Array.isArray(insights) && insights.length) ? insights : getDynamicFallbacks(skinTone);
+            const norms = colors.slice(0, 4).map(c => typeof c === 'string' ? {name: c, hex: '#888'} : c);
+            if (norms[0]) suggestions.push({ item: `${norms[0].name} Festive Silk Saree`, category: 'cat_saree', hex: norms[0].hex, search: `women ${norms[0].name} festive silk saree` });
+            if (norms[1]) suggestions.push({ item: `${norms[1].name} Designer Kurti Set`, category: 'cat_kurti', hex: norms[1].hex, search: `women ${norms[1].name} designer kurti` });
+            if (norms[2]) suggestions.push({ item: `${norms[2].name} Elegant Maxi Dress`, category: 'cat_dress', hex: norms[2].hex, search: `women ${norms[2].name} elegant maxi dress` });
+            if (norms[3]) suggestions.push({ item: `${norms[3].name} Satin Button-Down`, category: 'cat_top', hex: norms[3].hex, search: `women ${norms[3].name} satin button down` });
         }
-    });
+    } else {
+        if (isCategorized) {
+            const tshirts = insights.best_tshirt_colors || [];
+            if (tshirts[0]) suggestions.push({ item: `${tshirts[0].name} Oversized Graphic Tee`, category: 'cat_tshirt', hex: tshirts[0].hex, search: `men ${tshirts[0].name} oversized graphic t-shirt streetwear India 2025` });
+            if (tshirts[1]) suggestions.push({ item: `${tshirts[1].name} Textured Knit Polo`, category: 'cat_polo', hex: tshirts[1].hex, search: `men ${tshirts[1].name} textured knit polo` });
+
+            const shirts = insights.best_shirt_colors || [];
+            if (shirts[0]) suggestions.push({ item: `${shirts[0].name} Slim Fit Formal Shirt`, category: 'cat_formal_shirt', hex: shirts[0].hex, search: `men ${shirts[0].name} slim fit formal shirt` });
+            
+            const kurtas = insights.best_kurta_colors || [];
+            if (kurtas[0]) suggestions.push({ item: `${kurtas[0].name} Silk Blend Kurta`, category: 'cat_kurta', hex: kurtas[0].hex, search: `men ${kurtas[0].name} silk blend kurta ethnic` });
+
+            const blazers = insights.best_blazer_colors || [];
+            if (blazers[0]) suggestions.push({ item: `${blazers[0].name} Unstructured Blazer`, category: 'cat_blazer', hex: blazers[0].hex, search: `men ${blazers[0].name} unstructured blazer formal casual` });
+
+            const hoodies = insights.best_hoodie_colors || [];
+            if (hoodies[0]) suggestions.push({ item: `${hoodies[0].name} Premium Hoodie`, category: 'cat_outerwear', hex: hoodies[0].hex, search: `men ${hoodies[0].name} premium hoodie streetwear` });
+
+            const bottoms = insights.best_pant_colors || [];
+            if (bottoms[0]) suggestions.push({ item: `${bottoms[0].name} Tailored Trousers`, category: 'cat_bottom', hex: bottoms[0].hex, search: `men ${bottoms[0].name} tailored formal trousers` });
+            if (bottoms[1]) suggestions.push({ item: `${bottoms[1].name} Parachute Pants`, category: 'cat_bottom', hex: bottoms[1].hex, search: `men ${bottoms[1].name} parachute pants streetwear` });
+        } else {
+            const colors = (Array.isArray(insights) && insights.length) ? insights : getDynamicFallbacks(skinTone);
+            const norms = colors.slice(0, 4).map(c => typeof c === 'string' ? {name: c, hex: '#888'} : c);
+            if (norms[0]) suggestions.push({ item: `${norms[0].name} Slim Fit Formal Shirt`, category: 'cat_formal_shirt', hex: norms[0].hex, search: `men ${norms[0].name} slim fit formal shirt` });
+            if (norms[1]) suggestions.push({ item: `${norms[1].name} Traditional Kurta Set`, category: 'cat_kurta_set', hex: norms[1].hex, search: `men ${norms[1].name} traditional kurta` });
+            if (norms[2]) suggestions.push({ item: `${norms[2].name} Textured Knit Polo`, category: 'cat_polo', hex: norms[2].hex, search: `men ${norms[2].name} textured knit polo` });
+            if (norms[3]) suggestions.push({ item: `${norms[3].name} Modern Linen Blazer`, category: 'cat_blazer', hex: norms[3].hex, search: `men ${norms[3].name} modern linen blazer` });
+        }
+    }
     
     return suggestions;
 };

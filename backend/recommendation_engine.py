@@ -9,6 +9,10 @@ class OutfitRecommendation:
     undertone: str
     confidence: str
     best_shirt_colors: List[Dict[str, str]]
+    best_tshirt_colors: List[Dict[str, str]]
+    best_kurta_colors: List[Dict[str, str]]
+    best_blazer_colors: List[Dict[str, str]]
+    best_hoodie_colors: List[Dict[str, str]]
     best_pant_colors: List[Dict[str, str]]
     accent_colors: List[Dict[str, str]]
     colors_to_avoid: List[Dict[str, str]]
@@ -69,6 +73,10 @@ class RecommendationEngine:
             undertone=self._localize_label(undertone),
             confidence=skin_tone.confidence,
             best_shirt_colors=self._get_shirt_colors(category, undertone),
+            best_tshirt_colors=self._get_tshirt_colors(category, undertone),
+            best_kurta_colors=self._get_kurta_colors(category, undertone),
+            best_blazer_colors=self._get_blazer_colors(category, undertone),
+            best_hoodie_colors=self._get_hoodie_colors(category, undertone),
             best_pant_colors=self._get_pant_colors(category, undertone),
             accent_colors=self._get_accent_colors(category, undertone),
             colors_to_avoid=self._get_avoid_colors(category, undertone),
@@ -504,6 +512,8 @@ class RecommendationEngine:
             "style_tips": self._get_female_style_tips(category, undertone),
             "occasion_advice": self._get_occasion_advice(category, undertone),
             "ethnic_wear": self._get_saree_suggestions(category, undertone),
+            "best_saree_colors": self._get_saree_colors(category, undertone),
+            "best_female_blazer_colors": self._get_female_blazer_colors(category, undertone),
         }
 
     def _get_kurti_colors(self, category, undertone):
@@ -871,9 +881,39 @@ class RecommendationEngine:
                 "hinglish": f"Aapka complexion medium hai aur undertone {undertone} hai. Earth tones aur bright colors aap par bilkul set rahenge.",
                 "hi": f"आपकी रंगत मध्यम (medium) है और अंडरटोन {undertone} है। अर्थ टोन्स और चमकीले रंग आप पर बहुत आकर्षक लगेंगे।"
             }
-        }
         res = summaries.get(category, summaries["medium"])
         return res.get(self.lang, res.get("en", ""))
+
+    def _get_tshirt_colors(self, category, undertone):
+        base = self._get_shirt_colors(category, undertone)
+        return [{"name": c["name"], "hex": c["hex"], "reason": "A casual classic " + c["name"].lower() + " t-shirt looks perfect on your tone."} for c in base]
+
+    def _get_kurta_colors(self, category, undertone):
+        base = self._get_pant_colors(category, undertone) + self._get_shirt_colors(category, undertone)
+        return [{"name": c["name"], "hex": c["hex"], "reason": "Ethnic " + c["name"].lower() + " brings out your cultural charm."} for c in base[:5]]
+
+    def _get_blazer_colors(self, category, undertone):
+        base = self._get_pant_colors(category, undertone)
+        return [{"name": c["name"], "hex": c["hex"], "reason": "A sharp " + c["name"].lower() + " blazer commands attention."} for c in reversed(base[:5])]
+
+    def _get_hoodie_colors(self, category, undertone):
+        base = self._get_shirt_colors(category, undertone)
+        return [{"name": c["name"], "hex": c["hex"], "reason": "Streetwear in " + c["name"].lower() + " elevates your casual look."} for c in reversed(base[:5])]
+
+    def _get_female_blazer_colors(self, category, undertone):
+        try:
+            base = self._get_dress_colors(category, undertone)
+        except AttributeError:
+            base = self._get_shirt_colors(category, undertone)
+        return [{"name": c["name"], "hex": c["hex"], "reason": "Power dressing in " + c["name"].lower() + " adds immediate elegance."} for c in reversed(base[:5])]
+
+    def _get_saree_colors(self, category, undertone):
+        try:
+            base = self._get_lehenga_colors(category, undertone)
+        except AttributeError:
+            base = self._get_shirt_colors(category, undertone)
+        return [{"name": c["name"], "hex": c["hex"], "reason": "A graceful " + c["name"].lower() + " saree highlights your undertones."} for c in base]
+
 
     def get_seasonal_recommendations(self, skin_tone: SkinToneResult, season: str, lang: str = "en", gender: str = "male") -> dict:
         self.lang = lang if lang in MESSAGES else "en"

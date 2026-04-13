@@ -668,26 +668,56 @@ export default function StyleNavigator({ user, onAnalyze }) {
             </p>
           </div>
 
-          {/* Best Colors Grid */}
-          <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>✅ Best Colors For You</p>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:16 }}>
-            {bestColors.map((color, i) => (
-              <div key={i} style={{ ...card({ padding:0, overflow:'hidden' }) }}>
-                <div style={{ height:64, background:color.hex, position:'relative' }}>
-                  <button
-                    onClick={() => setShopItem(`${color.name} ${gender === 'female' ? 'kurti dress top' : 'shirt polo kurta'}`)}
-                    style={{ position:'absolute', bottom:6, right:6, background:'rgba(0,0,0,0.5)', border:'none', color:'white', borderRadius:6, padding:'3px 7px', fontSize:'8px', cursor:'pointer', fontFamily:PJS }}
-                  >
-                    🛍 Shop
-                  </button>
+          {/* Categorized Best Colors Render */}
+          {(() => {
+            const ColorGrid = ({ title, colors, searchFormat }) => {
+              if (!colors || !colors.length) return null;
+              const displayColors = colors.slice(0, 3); // 3 items per category row
+              return (
+                <div style={{ marginBottom: 16 }}>
+                  <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>{title}</p>
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
+                    {displayColors.map((color, i) => (
+                      <div key={i} style={{ ...card({ padding:0, overflow:'hidden' }) }}>
+                        <div style={{ height:64, background:color.hex, position:'relative' }}>
+                          <button
+                            onClick={() => setShopItem(searchFormat(color.name))}
+                            style={{ position:'absolute', bottom:6, right:6, background:'rgba(0,0,0,0.5)', border:'none', color:'white', borderRadius:6, padding:'3px 7px', fontSize:'8px', cursor:'pointer', fontFamily:PJS }}
+                          >
+                            🛍 Shop
+                          </button>
+                        </div>
+                        <div style={{ padding:'10px 10px 12px' }}>
+                          <p style={{ fontSize:'11px', color:C.text, fontFamily:PJS, fontWeight:600, margin:'0 0 2px' }}>{color.name}</p>
+                          <p style={{ fontSize:'9px', color:C.muted, fontFamily:PJS, margin:0 }}>{color.hex}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div style={{ padding:'10px 10px 12px' }}>
-                  <p style={{ fontSize:'11px', color:C.text, fontFamily:PJS, fontWeight:600, margin:'0 0 2px' }}>{color.name}</p>
-                  <p style={{ fontSize:'9px', color:C.muted, fontFamily:PJS, margin:0 }}>{color.hex}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              );
+            };
+
+            const fallbackColors = bestColors;
+            
+            if (gender === 'female') {
+              return (
+                <>
+                  <ColorGrid title="👗 Dresses & Tops" colors={insights?.best_top_colors || fallbackColors} searchFormat={(c) => `women ${c} top dress`} />
+                  <ColorGrid title="🥻 Ethnics & Sarees" colors={insights?.best_saree_colors || insights?.best_kurti_colors || fallbackColors} searchFormat={(c) => `women ${c} saree ethnic`} />
+                  <ColorGrid title="🧥 Outerwear & Blazers" colors={insights?.best_female_blazer_colors || fallbackColors} searchFormat={(c) => `women ${c} blazer shrug`} />
+                </>
+              );
+            } else {
+              return (
+                <>
+                  <ColorGrid title="👕 Casual Tees & Polos" colors={insights?.best_tshirt_colors || fallbackColors} searchFormat={(c) => `men ${c} oversized t-shirt polo`} />
+                  <ColorGrid title="👔 Formal & Blazers" colors={insights?.best_blazer_colors || insights?.best_shirt_colors || fallbackColors} searchFormat={(c) => `men ${c} blazer formal shirt`} />
+                  <ColorGrid title="🪔 Kurtas & Ethnic" colors={insights?.best_kurta_colors || fallbackColors} searchFormat={(c) => `men ${c} kurta ethnic`} />
+                </>
+              );
+            }
+          })()}
 
           {/* Avoid Colors */}
           <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>❌ Colors to Avoid</p>
@@ -809,7 +839,7 @@ export default function StyleNavigator({ user, onAnalyze }) {
                 </div>
                 {!gap.inWardrobe && (
                   <button
-                    onClick={() => { if(!isLocked) setShopItem(gap.item) }}
+                    onClick={() => { if(!isLocked) setShopItem(gap.search || gap.item) }}
                     style={{ fontSize:'11px', color:'white', background: isLocked ? C.glass2 : GRAD, border:'none', borderRadius:10, padding:'8px 14px', cursor:'pointer', fontFamily:PJS, fontWeight:600, flexShrink:0, boxShadow: isLocked ? 'none': '0 3px 10px rgba(139,92,246,0.3)' }}
                   >
                     {isLocked ? '🔒 Pro' : 'Shop →'}
