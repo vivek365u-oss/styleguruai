@@ -853,7 +853,12 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                       {p.file ? (
                         <img src={p.file} className="w-24 h-24 object-cover rounded-xl border border-white/20 mb-2 cursor-pointer shadow-lg" onClick={() => p.ref.current?.click()} />
                       ) : (
-                        <IconRenderer icon={FashionIcons.Analysis} className="w-8 h-8 opacity-30" />
+                        <div 
+                          onClick={() => p.ref.current?.click()}
+                          className={`w-24 h-24 flex items-center justify-center rounded-xl border-2 border-dashed cursor-pointer transition-all hover:scale-105 ${isDark ? 'border-rose-400/30 hover:bg-rose-500/10' : 'border-rose-300 hover:bg-rose-100/50'}`}
+                        >
+                          <IconRenderer icon={FashionIcons.Analysis} className={`w-8 h-8 opacity-40 ${isDark ? 'text-white' : 'text-rose-400'}`} />
+                        </div>
                       )}
                     </div>
                   ))}
