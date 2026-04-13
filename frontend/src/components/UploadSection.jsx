@@ -864,7 +864,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                   ))}
                   <div className="col-span-2 mt-2">
                     <button
-                      onClick={handleCoupleAnalysis}
+                      onClick={() => handleCoupleAnalysis()}
                       disabled={!partner1 || !partner2}
                       className={`w-full py-4 rounded-2xl font-black text-lg text-white shadow-xl transition-all hover:scale-[1.02] ${(!partner1 || !partner2) ? 'bg-gray-400 opacity-50 cursor-not-allowed' : 'bg-gradient-to-r from-rose-500 to-pink-600 shadow-rose-500/30'}`}
                     >
