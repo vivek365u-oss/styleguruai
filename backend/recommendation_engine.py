@@ -875,7 +875,7 @@ class RecommendationEngine:
         res = summaries.get(category, summaries["medium"])
         return res.get(self.lang, res.get("en", ""))
 
-    def get_seasonal_recommendations(self, skin_tone: SkinToneResult, season: str, lang: str = "en") -> dict:
+    def get_seasonal_recommendations(self, skin_tone: SkinToneResult, season: str, lang: str = "en", gender: str = "male") -> dict:
         self.lang = lang if lang in MESSAGES else "en"
         category = skin_tone.category
         undertone = skin_tone.subcategory
@@ -1037,6 +1037,7 @@ class RecommendationEngine:
             "fabrics_avoid": season_info["avoid_fabrics"],
             "outfit_tips": season_info["outfit_tips"],
             "seasonal_colors": boosted_colors,
+            "outfit_combos": season_info["female_outfits"] if gender == "female" else season_info["male_outfits"],
             "male_outfits": season_info["male_outfits"],
             "female_outfits": season_info["female_outfits"],
             "base_shirt_colors": base_shirt,

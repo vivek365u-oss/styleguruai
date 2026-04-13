@@ -523,16 +523,17 @@ async def analyze_seasonal(
     file: UploadFile = File(...),
     season: str = "summer",
     lang: str = "en",
+    gender: str = "male",
     current_user: dict = Depends(get_current_user)
 ):
     start_time = time.time()
     try:
         image, face, full_quality, skin_color, skin_tone, color_season = await process_image_core(file)
-        seasonal_recs = recommendation_engine.get_seasonal_recommendations(skin_tone, season, lang=lang)
+        seasonal_recs = recommendation_engine.get_seasonal_recommendations(skin_tone, season, lang=lang, gender=gender)
         processing_time = round(time.time() - start_time, 2)
         return JSONResponse(content={
             "success": True,
-            "gender": "seasonal",
+            "gender": gender,
             "season": season,
             "processing_time_seconds": processing_time,
             "photo_quality": {
