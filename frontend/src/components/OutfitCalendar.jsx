@@ -3,7 +3,24 @@ import { scoreWardrobeItem, getAccessoryAdvice, generateStylerBrief } from '../u
 import { useLanguage } from '../i18n/LanguageContext';
 import { auth, getDailyOutfitLogs, loadUserPreferences, loadStyleInsights } from '../api/styleApi';
 
-function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, profile }) {
+// ── Occasion-Aware Fallback Outfits (when wardrobe is empty) ──────────────────
+// Each occasion gets a DIFFERENT outfit so calendar is never repetitive per day
+const FALLBACK_MALE = {
+  OFFICE:  { topName: 'Navy Blue Formal Shirt',   botName: 'Charcoal Tailored Trousers', topCat: 'cat_formal_shirt',  botCat: 'cat_formal_trouser' },
+  PARTY:   { topName: 'Burgundy Party Shirt',     botName: 'Slim Black Jeans',           topCat: 'cat_party_shirt',   botCat: 'cat_jeans'          },
+  CAMPUS:  { topName: 'White Cotton Crew Tee',    botName: 'Olive Slim Chinos',          topCat: 'cat_tshirt',        botCat: 'cat_chinos'         },
+  WEEKEND: { topName: 'Sage Green Polo Shirt',    botName: 'Beige Clean Chinos',         topCat: 'cat_polo',          botCat: 'cat_chinos'         },
+};
+const FALLBACK_FEMALE = {
+  OFFICE:  { topName: 'Ivory Structured Blazer', botName: 'Cigarette Trousers',         topCat: 'cat_blazer',        botCat: 'cat_formal_trouser' },
+  PARTY:   { topName: 'Mauve Co-ord Set Top',    botName: 'Wide Leg Palazzo Pants',     topCat: 'cat_top',           botCat: 'cat_palazzo'        },
+  CAMPUS:  { topName: 'Printed Casual Kurti',    botName: 'Cotton Palazzo',             topCat: 'cat_kurti',         botCat: 'cat_palazzo'        },
+  WEEKEND: { topName: 'Dusty Rose Crop Top',     botName: 'High Waist Mom Jeans',       topCat: 'cat_top',           botCat: 'cat_mom_jeans'      },
+};
+
+// ── Component ────────────────────────────────────────────────────────────────
+// gender prop: passed from ToolsTab for reliable DNA-aware gender resolution
+function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, profile, gender: genderProp }) {
   const { t } = useLanguage();
   const [selectedDay, setSelectedDay] = useState(0);
   const [logs, setLogs] = useState([]);
@@ -91,8 +108,19 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
     const log = getLogForDay(index);
     const occasion = OCCASIONS[index];
     const context = { weather: occasion.weather, event: occasion.event, mood };
-    const activeGender = lockedDNA?.gender || profile?.gender || profile?.gender_mode || 'female';
-    const userProfile = { ...profile, gender: activeGender };
+
+    // ── Gender Resolution (Priority chain) ──────────────────────────────────
+    // 1. Locked DNA (most trusted) → 2. Profile gender → 3. Passed genderProp → 4. 'male' safe default
+    const rawGender = lockedDNA?.gender || profile?.gender || profile?.gender_mode || genderProp || 'male';
+    const activeGender = (rawGender.toLowerCase().includes('female') || rawGender === 'women') ? 'female' : 'male';
+
+    // ── Season Resolution (profile can have different shapes from different API versions) ──
+    const activeSeason = profile?.season
+      || profile?.skin_tone?.color_season
+      || profile?.analysis?.skin_tone?.color_season
+      || 'Spring';
+
+    const userProfile = { ...profile, gender: activeGender, season: activeSeason };
 
     if (log) {
         return {
@@ -101,50 +129,56 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
             occasion,
             isExecuted: true,
             brief: "You wore this look! History saved in the cloud.",
-            accessories: getAccessoryAdvice(activeGender, userProfile.season, occasion.event)
+            accessories: getAccessoryAdvice(activeGender, activeSeason, occasion.event)
         };
     }
 
-    // Use Engine to find best items
+    // ── Use Scoring Engine on Wardrobe items (if any) ────────────────────────
+    const historyItems = logs.map(l => ({ itemId: l.id, date: l.date }));
     const rankedWardrobe = wardrobe
         ?.map(item => ({
             ...item,
-            engineScore: scoreWardrobeItem(item, context, userProfile, logs.map(l => ({ itemId: l.id, date: l.date })), lockedDNA)
+            engineScore: scoreWardrobeItem(item, context, userProfile, historyItems, lockedDNA)
         }))
-        .filter(i => i.engineScore > 0) // Strict Gender Wall applied here
+        .filter(i => i.engineScore > 0) // Gender wall applied inside engine
         .sort((a, b) => b.engineScore - a.engineScore) || [];
 
-    // Gender-Strict Categories
-    const topCats = activeGender === 'male' 
-        ? ['shirts', 'tshirts', 'cat_formal_shirt', 'cat_kurta_set', 'cat_sherwani']
-        : ['tops', 'kurti', 'cat_kurti', 'cat_saree_silk', 'cat_dress_mini', 'cat_dress_maxi'];
+    // ── Gender-Strict Categories for wardrobe search ─────────────────────────
+    const topCats = activeGender === 'male'
+        ? ['shirts', 'tshirts', 'cat_formal_shirt', 'cat_kurta_set', 'cat_sherwani', 'cat_party_shirt', 'cat_polo', 'cat_tshirt']
+        : ['tops', 'kurti', 'cat_kurti', 'cat_saree_silk', 'cat_dress_mini', 'cat_dress_maxi', 'cat_top', 'cat_blazer'];
 
     const bottomCats = activeGender === 'male'
-        ? ['pants', 'cat_formal_trouser', 'cat_jeans', 'cat_cargo']
-        : ['pants', 'bottoms', 'cat_palazzo', 'cat_mom_jeans'];
+        ? ['pants', 'cat_formal_trouser', 'cat_jeans', 'cat_cargo', 'cat_chinos']
+        : ['pants', 'bottoms', 'cat_palazzo', 'cat_mom_jeans', 'cat_skirt'];
 
-    const bestTop = rankedWardrobe.find(i => topCats.includes(i.category)) || 
-                    { 
-                        name: activeGender === 'male' ? 'Premium Shirt' : 'Elegant Kurti', 
-                        hex: bestColors.length > 0 ? bestColors[index % bestColors.length]?.hex : '#7C3AED', 
+    // ── Occasion-Aware Fallbacks (used ONLY when wardrobe is empty) ───────────
+    // Each occasion → different outfit, gender-correct, never repeats
+    const fallbackMap = activeGender === 'male' ? FALLBACK_MALE : FALLBACK_FEMALE;
+    const fallback = fallbackMap[occasion.event] || fallbackMap['WEEKEND'];
+
+    const bestTop = rankedWardrobe.find(i => topCats.includes(i.category)) ||
+                    {
+                        name: fallback.topName,
+                        hex: bestColors.length > 0 ? bestColors[index % bestColors.length]?.hex : '#7C3AED',
                         engineScore: 85,
-                        category: activeGender === 'male' ? 'cat_formal_shirt' : 'cat_kurti'
+                        category: fallback.topCat
                     };
-                    
-    const bestBottom = rankedWardrobe.find(i => bottomCats.includes(i.category) && i.id !== bestTop.id) || 
-                       { 
-                           name: activeGender === 'male' ? 'Formal Trousers' : 'Silk Palazzo', 
-                           hex: pantColors.length > 0 ? pantColors[index % pantColors.length]?.hex : '#1e3a8a', 
+
+    const bestBottom = rankedWardrobe.find(i => bottomCats.includes(i.category) && i.id !== bestTop.id) ||
+                       {
+                           name: fallback.botName,
+                           hex: pantColors.length > 0 ? pantColors[index % pantColors.length]?.hex : '#1e3a8a',
                            engineScore: 80,
-                           category: activeGender === 'male' ? 'cat_formal_trouser' : 'cat_palazzo'
+                           category: fallback.botCat
                        };
 
-    const accessorizing = getAccessoryAdvice(activeGender, userProfile.season, occasion.event);
+    const accessorizing = getAccessoryAdvice(activeGender, activeSeason, occasion.event);
     const stylingBrief = generateStylerBrief(bestTop, bestBottom, context, userProfile);
 
-    return { 
-      top: bestTop, 
-      bottom: bestBottom, 
+    return {
+      top: bestTop,
+      bottom: bestBottom,
       occasion,
       engineScore: Math.round(((bestTop.engineScore || 70) + (bestBottom.engineScore || 70)) / 2),
       isFromWardrobe: !!(bestTop.id || bestBottom.id),
