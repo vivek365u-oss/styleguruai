@@ -887,33 +887,37 @@ class RecommendationEngine:
 
     def _get_tshirt_colors(self, category, undertone):
         base = self._get_shirt_colors(category, undertone)
-        return [{"name": c["name"], "hex": c["hex"], "reason": "A casual classic " + c["name"].lower() + " t-shirt looks perfect on your tone."} for c in base]
+        accents = self._get_accent_colors(category, undertone)
+        mixed = accents[:2] + base[1:4]
+        return [{"name": c["name"], "hex": c["hex"], "reason": "A casual classic " + c["name"].lower() + " t-shirt looks perfect on your tone."} for c in mixed]
 
     def _get_kurta_colors(self, category, undertone):
         base = self._get_pant_colors(category, undertone) + self._get_shirt_colors(category, undertone)
-        return [{"name": c["name"], "hex": c["hex"], "reason": "Ethnic " + c["name"].lower() + " brings out your cultural charm."} for c in base[:5]]
+        return [{"name": c["name"], "hex": c["hex"], "reason": "Ethnic " + c["name"].lower() + " brings out your cultural charm."} for c in base[1:6]]
 
     def _get_blazer_colors(self, category, undertone):
-        base = self._get_pant_colors(category, undertone)
-        return [{"name": c["name"], "hex": c["hex"], "reason": "A sharp " + c["name"].lower() + " blazer commands attention."} for c in reversed(base[:5])]
+        base = self._get_pant_colors(category, undertone) + self._get_shirt_colors(category, undertone)
+        filtered = [c for c in base if c["name"] in ["Navy Blue", "Charcoal", "Black", "Burgundy", "Olive Green", "Dark Brown", "Rust", "Emerald Green"]]
+        if not filtered: filtered = base[:4] # fallback
+        return [{"name": c["name"], "hex": c["hex"], "reason": "A sharp " + c["name"].lower() + " blazer commands attention."} for c in filtered[:4]]
 
     def _get_hoodie_colors(self, category, undertone):
-        base = self._get_shirt_colors(category, undertone)
-        return [{"name": c["name"], "hex": c["hex"], "reason": "Streetwear in " + c["name"].lower() + " elevates your casual look."} for c in reversed(base[:5])]
+        base = self._get_shirt_colors(category, undertone) + self._get_pant_colors(category, undertone)
+        return [{"name": c["name"], "hex": c["hex"], "reason": "Streetwear in " + c["name"].lower() + " elevates your casual look."} for c in reversed(base[-4:])]
 
     def _get_female_blazer_colors(self, category, undertone):
         try:
-            base = self._get_dress_colors(category, undertone)
+            base = self._get_pant_colors(category, undertone) + self._get_dress_colors(category, undertone)
         except AttributeError:
             base = self._get_shirt_colors(category, undertone)
-        return [{"name": c["name"], "hex": c["hex"], "reason": "Power dressing in " + c["name"].lower() + " adds immediate elegance."} for c in reversed(base[:5])]
+        return [{"name": c["name"], "hex": c["hex"], "reason": "Power dressing in " + c["name"].lower() + " adds immediate elegance."} for c in base[::2][:4]]
 
     def _get_saree_colors(self, category, undertone):
         try:
             base = self._get_lehenga_colors(category, undertone)
         except AttributeError:
             base = self._get_shirt_colors(category, undertone)
-        return [{"name": c["name"], "hex": c["hex"], "reason": "A graceful " + c["name"].lower() + " saree highlights your undertones."} for c in base]
+        return [{"name": c["name"], "hex": c["hex"], "reason": "A graceful " + c["name"].lower() + " saree highlights your undertones."} for c in reversed(base)]
 
 
     def get_seasonal_recommendations(self, skin_tone: SkinToneResult, season: str, lang: str = "en", gender: str = "male") -> dict:

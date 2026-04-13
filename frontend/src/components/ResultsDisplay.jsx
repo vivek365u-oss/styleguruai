@@ -658,18 +658,17 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 
   if (isFemale) {
     const sections = [
-      { title: 'dressColors', colors: recommendations.best_dress_colors || [], cat: 'dress' },
-      { title: 'topColors', colors: recommendations.best_top_colors || [], cat: 'top' },
-      { title: 'kurtiColors', colors: recommendations.best_kurti_colors || [], cat: 'kurti' },
-      { title: 'lehengaColors', colors: recommendations.best_lehenga_colors || [], cat: 'lehenga' },
-      { title: 'bottomColors', colors: recommendations.best_bottom_colors || recommendations.best_pant_colors || [], cat: 'bottom' },
+      { title: 'Tops & Shirts', colors: recommendations.best_top_colors || recommendations.best_dress_colors || [], cat: 'top' },
+      { title: 'Sarees & Ethnics', colors: recommendations.best_saree_colors || recommendations.best_kurti_colors || [], cat: 'saree' },
+      { title: 'Blazers & Layers', colors: recommendations.best_female_blazer_colors || [], cat: 'dress' },
+      { title: 'Pants & Bottoms', colors: recommendations.best_bottom_colors || recommendations.best_pant_colors || [], cat: 'bottom' },
     ].filter(s => s.colors.length > 0);
 
     return (
       <div className="space-y-5">
         {sections.map((sec) => (
           <div key={sec.title}>
-            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>{t(sec.title)}</p>
+            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>{sec.title}</p>
             <div className="grid grid-cols-1 gap-2">
               {sec.colors.map((color, i) => <ColorCard key={i} color={color} category={sec.cat} gender="female" isDark={isDark} />)}
             </div>
@@ -697,30 +696,25 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
   }
 
   // Male
-  const shirtColors = recommendations.best_shirt_colors || [];
-  const pantColors = recommendations.best_pant_colors || recommendations.base_pant_colors || [];
+  const maleSections = [
+    { title: 'T-Shirts & Polos', colors: recommendations.best_tshirt_colors || recommendations.best_shirt_colors || [], cat: 'shirt' },
+    { title: 'Formal Shirts & Blazers', colors: recommendations.best_blazer_colors || recommendations.best_shirt_colors || [], cat: 'shirt' },
+    { title: 'Kurtas & Ethnic', colors: recommendations.best_kurta_colors || [], cat: 'shirt' },
+    { title: 'Pants & Cargo Colors', colors: recommendations.best_pant_colors || recommendations.base_pant_colors || [], cat: 'pant' }
+  ].filter(s => s.colors.length > 0);
+
   return (
     <div className="space-y-5">
-      {shirtColors.length > 0 && (
-        <div>
+      {maleSections.map((sec) => (
+        <div key={sec.title}>
           <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2 flex items-center gap-1`}>
-             <IconRenderer icon={FashionIcons.Shirt} className="w-3 h-3" /> T-Shirt / Top Colors
+             <IconRenderer icon={sec.cat === 'pant' ? FashionIcons.Trousers : FashionIcons.Shirt} className="w-3 h-3" /> {sec.title}
           </p>
           <div className="grid grid-cols-1 gap-2">
-            {shirtColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} className={`stagger-${Math.min(i + 1, 6)}`} />)}
+             {sec.colors.map((color, i) => <ColorCard key={i} color={color} category={sec.cat} gender="male" isDark={isDark} className={sec.cat === 'shirt' ? `stagger-${Math.min(i + 1, 6)}` : ''} />)}
           </div>
         </div>
-      )}
-      {pantColors.length > 0 && (
-        <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2 flex items-center gap-1`}>
-             <IconRenderer icon={FashionIcons.Trousers} className="w-3 h-3" /> Pants / Cargo Colors
-          </p>
-          <div className="grid grid-cols-1 gap-2">
-            {pantColors.map((color, i) => <ColorCard key={i} color={color} category="pant" gender="male" isDark={isDark} />)}
-          </div>
-        </div>
-      )}
+      ))}
       {avoidColors.length > 0 && (
         <div>
           <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2 flex items-center gap-1">
@@ -733,9 +727,13 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
       )}
 
       {/* Complete the Look */}
-      {shirtColors.length > 0 && (
-        <CompleteTheLook shirtColor={shirtColors[0]} pantColors={pantColors} isDark={isDark} gender="male" />
-      )}
+      {(() => {
+        const fallbackShirtColors = recommendations.best_shirt_colors || recommendations.best_tshirt_colors || [];
+        const fallbackPantColors = recommendations.best_pant_colors || recommendations.base_pant_colors || [];
+        return fallbackShirtColors.length > 0 ? (
+          <CompleteTheLook shirtColor={fallbackShirtColors[0]} pantColors={fallbackPantColors} isDark={isDark} gender="male" />
+        ) : null;
+      })()}
     </div>
   );
 }
