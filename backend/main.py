@@ -142,8 +142,8 @@ app.add_middleware(
 def perform_db_startup_checks():
     """Background task to avoid blocking the event loop on server startup"""
     try:
-        from core_utils import get_firestore_db
-        db = get_firestore_db()
+        from firebase_admin import firestore as _fs
+        db = _fs.client()
         
         # Check if products exist
         all_products = list(db.collection("products").limit(1).stream())
