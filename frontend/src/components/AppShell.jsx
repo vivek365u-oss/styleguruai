@@ -368,7 +368,7 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
 // ══════════════════════════════════════════════════════
 // PROFILE SECTION
 // ══════════════════════════════════════════════════════
-function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggleTheme }) {
+function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggleTheme, isPro, usage }) {
   const { language, changeLanguage } = useLanguage();
   const [editingName, setEditingName] = useState(false);
   const [displayName, setDisplayName] = useState(() => localStorage.getItem('sg_display_name') || user?.name || '');
@@ -453,6 +453,12 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
   const analysisCount = personalityData.analysisCount;
   const streak = parseInt(localStorage.getItem('sg_streak_count') || '0');
   const wardrobeCount = personalityData.wardrobeCount;
+  const savedColorsCount = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]').length;
+    } catch { return 0; }
+  }, []);
+
 
   const handleShareProfile = async () => {
     const text = `My StyleGuruAI Profile 🎨\n\nStyle Archetype: ${archetype.name} ${archetype.emoji}\nStyle Score: ${styleScore}/100\nLevel: ${level.label}\nAnalyses Done: ${analysisCount}\n\nCheck yours at StyleGuruAI.in`;
@@ -604,6 +610,109 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
           <p style={{ fontSize: '10px', color: C.muted, fontFamily: PJS, margin: '6px 0 0' }}>{analysisCount}/{level.next} scans</p>
         </GlassCard>
       )}
+
+      {/* ── PLAN & USAGE TRACKER (NEW) ── */}
+      <GlassCard C={C} hoverable={false} style={{ padding: '20px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
+         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+            <div>
+               <p style={{ fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, marginBottom: 4 }}>Your Membership</p>
+               <h3 style={{ fontFamily: PDI, fontSize: '20px', color: C.text, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {isPro ? 'Pro Member' : 'Free Plan'}
+                  {isPro && <span style={{ fontSize: '14px' }}>✨</span>}
+               </h3>
+            </div>
+            {isPro ? (
+               <div style={{ padding: '4px 10px', borderRadius: 8, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', color: '#F59E0B', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  ACTIVE
+               </div>
+            ) : (
+               <button 
+                  onClick={() => window.dispatchEvent(new CustomEvent('open_subscription_modal'))}
+                  style={{ padding: '6px 12px', borderRadius: 8, background: GRAD, border: 'none', color: 'white', fontSize: '10px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(139,92,246,0.3)' }}
+               >
+                  UPGRADE
+               </button>
+            )}
+         </div>
+
+         {/* Stats Container */}
+         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {!isPro ? (
+               <>
+                  <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
+                     <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 6 }}>AI Analyses Used</p>
+                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                        <span style={{ fontSize: '16px', fontWeight: 700, color: C.text }}>{Math.max(0, 3 - (usage?.adFreeAnalysesLeft || 0))}<span style={{ fontSize: '11px', fontWeight: 400, opacity: 0.5 }}> / 3</span></span>
+                        <div style={{ width: 40, height: 4, background: C.border, borderRadius: 2, overflow: 'hidden' }}>
+                           <div style={{ width: `${(Math.max(0, 3 - (usage?.adFreeAnalysesLeft || 0)) / 3) * 100}%`, height: '100%', background: VIOLET }} />
+                        </div>
+                     </div>
+                  </div>
+                  <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
+                     <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 6 }}>Outfit Checks Used</p>
+                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                        <span style={{ fontSize: '16px', fontWeight: 700, color: C.text }}>{Math.max(0, 3 - (usage?.adFreeOutfitChecks || 0))}<span style={{ fontSize: '11px', fontWeight: 400, opacity: 0.5 }}> / 3</span></span>
+                        <div style={{ width: 40, height: 4, background: C.border, borderRadius: 2, overflow: 'hidden' }}>
+                           <div style={{ width: `${(Math.max(0, 3 - (usage?.adFreeOutfitChecks || 0)) / 3) * 100}%`, height: '100%', background: INDIGO }} />
+                        </div>
+                     </div>
+                  </div>
+                  <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
+                     <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 6 }}>History Slots</p>
+                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                        <span style={{ fontSize: '16px', fontWeight: 700, color: C.text }}>{usage?.analysisHistoryCount || 0}<span style={{ fontSize: '11px', fontWeight: 400, opacity: 0.5 }}> / 10</span></span>
+                        <div style={{ width: 40, height: 4, background: C.border, borderRadius: 2, overflow: 'hidden' }}>
+                           <div style={{ width: `${((usage?.analysisHistoryCount || 0) / 10) * 100}%`, height: '100%', background: '#EC4899' }} />
+                        </div>
+                     </div>
+                  </div>
+                  <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
+                     <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 6 }}>Color Slots</p>
+                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                        <span style={{ fontSize: '16px', fontWeight: 700, color: C.text }}>{savedColorsCount || 0}<span style={{ fontSize: '11px', fontWeight: 400, opacity: 0.5 }}> / 10</span></span>
+                        <div style={{ width: 40, height: 4, background: C.border, borderRadius: 2, overflow: 'hidden' }}>
+                           <div style={{ width: `${((savedColorsCount || 0) / 10) * 100}%`, height: '100%', background: '#10B981' }} />
+                        </div>
+                     </div>
+                  </div>
+               </>
+            ) : (
+               <>
+                  <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
+                     <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 4 }}>Saved in Wardrobe</p>
+                     <p style={{ fontSize: '18px', fontWeight: 700, color: C.text, margin: 0 }}>{wardrobeCount || 0}</p>
+                     <p style={{ fontSize: '8px', color: C.muted, marginTop: 4 }}>Unlimited Storage</p>
+                  </div>
+                  <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
+                     <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 4 }}>Saved History</p>
+                     <p style={{ fontSize: '18px', fontWeight: 700, color: C.text, margin: 0 }}>{usage?.analysisHistoryCount || 0}</p>
+                     <p style={{ fontSize: '8px', color: C.muted, marginTop: 4 }}>Infinite Archives</p>
+                  </div>
+                  <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
+                     <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 4 }}>Favorite Colors</p>
+                     <p style={{ fontSize: '18px', fontWeight: 700, color: C.text, margin: 0 }}>{savedColorsCount || 0}</p>
+                     <p style={{ fontSize: '8px', color: C.muted, marginTop: 4 }}>No Limits</p>
+                  </div>
+                  <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
+                     <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 4 }}>Outfit Checks</p>
+                     <p style={{ fontSize: '18px', fontWeight: 700, color: C.text, margin: 0 }}>∞</p>
+                     <p style={{ fontSize: '8px', color: C.muted, marginTop: 4 }}>Premium AI Power</p>
+                  </div>
+               </>
+            )}
+         </div>
+
+         {isPro && (
+            <button 
+               onClick={() => window.dispatchEvent(new CustomEvent('open_subscription_modal'))}
+               style={{ width: '100%', marginTop: 14, padding: '10px', borderRadius: 10, background: 'none', border: `1px dashed ${C.border}`, color: C.muted, fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+               onMouseEnter={e => { e.currentTarget.style.borderColor = VIOLET; e.currentTarget.style.color = C.text; }}
+               onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.muted; }}
+            >
+               Change Subscription Period (Monthly/Yearly)
+            </button>
+         )}
+      </GlassCard>
 
       {/* ── PREFERENCES (with Theme Toggle) ── */}
       <p style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, margin: '16px 0 10px' }}>Preferences</p>
@@ -984,12 +1093,20 @@ export default function AppShell({ user, onLogout }) {
           >
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
-          {/* Profile avatar */}
+          {/* Profile avatar with Pro Badge */}
           <button
             onClick={() => handleTabChange('profile')}
-            style={{ width: 36, height: 36, borderRadius: '50%', background: activeTab === 'profile' ? GRAD : C.glass2, border: `1px solid ${activeTab === 'profile' ? 'transparent' : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s', boxShadow: activeTab === 'profile' ? C.btnShadow : 'none', fontSize: '14px', fontWeight: 700, color: activeTab === 'profile' ? 'white' : C.text, fontFamily: PJS }}
+            style={{ width: 36, height: 36, borderRadius: '50%', background: activeTab === 'profile' ? GRAD : C.glass2, border: `1px solid ${activeTab === 'profile' ? 'transparent' : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s', boxShadow: activeTab === 'profile' ? C.btnShadow : 'none', fontSize: '14px', fontWeight: 700, color: activeTab === 'profile' ? 'white' : C.text, fontFamily: PJS, position: 'relative' }}
           >
             {avatarLetter}
+            {isPro && (
+              <div 
+                title="Pro Member"
+                style={{ position: 'absolute', top: -4, right: -4, background: '#F59E0B', width: 14, height: 14, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '7px', border: `2px solid ${C.navBg}`, boxShadow: '0 0 8px rgba(245,158,11,0.5)' }}
+              >
+                🌟
+              </div>
+            )}
           </button>
         </div>
       </nav>
@@ -1139,6 +1256,8 @@ export default function AppShell({ user, onLogout }) {
               onLogout={handleLogout}
               onTabChange={handleTabChange}
               onToast={setToast}
+              isPro={isPro}
+              usage={usage}
             />
           )}
 

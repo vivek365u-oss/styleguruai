@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { PlanContext } from './PlanContext';
 import { getUserLimits } from '../api/styleApi';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
+import { onSnapshot, doc } from 'firebase/firestore';
 
 export function PlanProvider({ children }) {
   const [plan, setPlan] = useState('free');
@@ -15,11 +16,8 @@ export function PlanProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const refreshPlan = useCallback(async () => {
-    if (!auth.currentUser) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
+    // Keep this for manual refreshes if needed, but onSnapshot handles reactivity
+    if (!auth.currentUser) return;
     try {
       const res = await getUserLimits();
       if (res.success && res.data) {
@@ -32,25 +30,49 @@ export function PlanProvider({ children }) {
           adFreeOutfitChecks: res.data.adFreeOutfitChecks ?? 3,
         });
       }
-    } catch (err) {
-      console.error("Failed to load plan:", err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { }
   }, []);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    let unsubscribeSnap = null;
+    
+    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
       if (user) {
-        refreshPlan();
+        // ── Real-time Listener ────────────────
+        unsubscribeSnap = onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setIsPro(data.is_pro || false);
+            setPlan(data.planName || 'free');
+            setCoins(data.coins || 0);
+            setUsage({
+              adFreeAnalysesLeft: data.adFreeAnalysesLeft ?? 3,
+              analysisHistoryCount: data.analysisHistoryCount ?? 0,
+              adFreeOutfitChecks: data.adFreeOutfitChecks ?? 3,
+            });
+            console.log("[PlanProvider] Real-time sync updated:", data.is_pro ? "PRO" : "FREE");
+          } else {
+            // Document doesn't exist, try refreshing via API once
+            refreshPlan();
+          }
+          setLoading(false);
+        }, (err) => {
+          console.error("[PlanProvider] Snap error:", err);
+          refreshPlan(); // Fallback to API if snap fails
+        });
       } else {
+        if (unsubscribeSnap) unsubscribeSnap();
         setIsPro(false);
         setPlan('free');
         setCoins(0);
         setLoading(false);
       }
     });
-    return () => unsubscribe();
+
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeSnap) unsubscribeSnap();
+    };
   }, [refreshPlan]);
 
   return (
