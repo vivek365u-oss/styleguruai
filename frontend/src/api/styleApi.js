@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { auth, googleProvider, db } from '../firebase';
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
-import { doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, limit, deleteDoc, increment } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, limit, deleteDoc, increment, updateDoc } from 'firebase/firestore';
 import { compressImage, validateImageFile } from '../utils/imageCompression';
 import { retryRequest, startKeepAlive, healthCheck } from '../utils/apiRetry';
 
@@ -202,7 +202,11 @@ export const saveHistory = async (rawDetails) => {
   
   try {
     const docRef = await addDoc(collection(db, 'users', user.uid, 'history'), entry);
-    console.log('[API] History saved successfully:', docRef.id);
+    // ── SYNC COUNTER (FIX) ──
+    await updateDoc(doc(db, 'users', user.uid), {
+      analysisHistoryCount: increment(1)
+    });
+    console.log('[API] History saved and counter synced:', docRef.id);
   } catch (err) {
     console.error('[API] Failed to save history to Firestore:', err);
     // Fallback: save to localStorage temporarily for this session
@@ -579,6 +583,10 @@ export const saveWardrobeItem = async (uid, item) => {
     };
 
     const ref = await addDoc(collection(db, 'users', uid, 'wardrobe'), enhancedItem);
+    // ── SYNC COUNTER (FIX) ──
+    await updateDoc(doc(db, 'users', uid), {
+      wardrobeCount: increment(1)
+    });
     return ref.id;
   } catch (e) {
     handleFirestoreError('saveWardrobeItem', e);
@@ -623,6 +631,10 @@ export const deleteWardrobeItem = async (uid, itemId) => {
   if (!auth.currentUser) return;
   try {
     await deleteDoc(doc(db, 'users', uid, 'wardrobe', itemId));
+    // ── SYNC COUNTER (FIX) ──
+    await updateDoc(doc(db, 'users', uid), {
+      wardrobeCount: increment(-1)
+    });
     // Update cache
     const cached = getCachedWardrobe(uid);
     setCachedWardrobe(uid, cached.filter(c => c.id !== itemId));
@@ -670,6 +682,10 @@ export const saveSavedColor = async (uid, color) => {
     const ref = await addDoc(collection(db, 'users', uid, 'saved_colors'), {
       ...color,
       saved_at: new Date().toISOString(),
+    });
+    // ── SYNC COUNTER (FIX) ──
+    await updateDoc(doc(db, 'users', uid), {
+      savedColorsCount: increment(1)
     });
     
     // Update local cache

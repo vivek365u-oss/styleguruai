@@ -86,10 +86,10 @@ function GlassCard({ children, style, onClick, hoverable = true, C }) {
 }
 
 // ── Section Header ──────────────────────────────────
-function SectionHeader({ label, title, subtitle, action, C }) {
+function SectionHeader({ label, title, subtitle, action, trailing, C }) {
   return (
     <div style={{ marginBottom: 28, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', paddingTop: 8 }}>
-      <div>
+      <div style={{ flex: 1, minWidth: 200 }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
           <div style={{ width: 20, height: 2, background: GRAD, borderRadius: 1 }} />
           <span style={{ fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 600, fontFamily: PJS }}>
@@ -99,7 +99,10 @@ function SectionHeader({ label, title, subtitle, action, C }) {
         <h2 style={{ fontFamily: PDI, fontSize: 'clamp(20px,4vw,30px)', fontWeight: 300, color: C.text, lineHeight: 1.2, margin: 0 }}>{title}</h2>
         {subtitle && <p style={{ fontSize: '13px', color: C.muted, marginTop: 5, fontFamily: PJS }}>{subtitle}</p>}
       </div>
-      {action}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {action}
+        {trailing}
+      </div>
     </div>
   );
 }
@@ -375,6 +378,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
   const [copied, setCopied] = useState(false);
   const [notifOn, setNotifOn] = useState(() => localStorage.getItem('sg_notif_on') === 'true');
   const [destroying, setDestroying] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Language pill options
   const LANGUAGES = [
@@ -450,14 +454,10 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
   const secondary = personality.secondary;
 
   const avatarLetter = (displayName?.[0] || user?.email?.[0] || 'U').toUpperCase();
-  const analysisCount = personalityData.analysisCount;
+  const analysisCount = usage?.analysisCount || personalityData.analysisCount; // Fallback to personalityData
   const streak = parseInt(localStorage.getItem('sg_streak_count') || '0');
-  const wardrobeCount = personalityData.wardrobeCount;
-  const savedColorsCount = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem('sg_saved_colors') || '[]').length;
-    } catch { return 0; }
-  }, []);
+  const wardrobeCount = usage?.wardrobeCount ?? personalityData.wardrobeCount;
+  const savedColorsCount = usage?.savedColorsCount ?? 0;
 
 
   const handleShareProfile = async () => {
@@ -494,8 +494,139 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
   });
 
   return (
-    <div style={{ animation: 'fadeSlideIn 0.35s ease' }}>
-      <SectionHeader C={C} label="Your Account" title="Profile" />
+    <div style={{ animation: 'fadeSlideIn 0.35s ease', position: 'relative' }}>
+      <SectionHeader 
+        C={C} 
+        label="Your Account" 
+        title="Profile" 
+        trailing={
+          <button 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            style={{ 
+              background: isMenuOpen ? GRAD : C.glass2, 
+              border: `1px solid ${isMenuOpen ? 'transparent' : C.border}`,
+              borderRadius: 12, width: 42, height: 42, display: 'flex', flexDirection: 'column', 
+              justifyContent: 'center', alignItems: 'center', gap: 4, cursor: 'pointer', transition: 'all 0.2s' 
+            }}
+          >
+            <div style={{ width: 18, height: 2, background: isMenuOpen ? 'white' : C.text, borderRadius: 1 }} />
+            <div style={{ width: 18, height: 2, background: isMenuOpen ? 'white' : C.text, borderRadius: 1 }} />
+            <div style={{ width: 18, height: 2, background: isMenuOpen ? 'white' : C.text, borderRadius: 1 }} />
+          </button>
+        }
+      />
+
+      {/* Settings Menu Overlay */}
+      {isMenuOpen && (
+        <div 
+          onClick={() => setIsMenuOpen(false)}
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', animation: 'fadeIn 0.2s ease' }}
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            style={{ 
+              position: 'absolute', top: 80, right: 20, width: 'calc(100% - 40px)', maxWidth: 320, 
+              background: C.navBg, border: `1px solid ${C.border}`, borderRadius: 24, padding: '8px 0', 
+              boxShadow: '0 20px 50px rgba(0,0,0,0.3)', animation: 'slideDown 0.3s ease', overflow: 'hidden'
+            }}
+          >
+            <div style={{ padding: '20px 24px 10px' }}>
+               <p style={{ fontSize: '10px', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 700, margin: '0 0 16px' }}>Settings & Preferences</p>
+            </div>
+
+            {/* Theme row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 24px' }}>
+              <span style={{ fontSize: '20px' }}>{theme === 'dark' ? '🌙' : '☀️'}</span>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 500 }}>App Theme</p>
+                <p style={{ fontSize: '10px', color: C.muted, margin: 0 }}>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</p>
+              </div>
+              <ThemeToggle theme={theme} onToggle={() => { toggleTheme(); onToast({ message: `Switched mode`, type: 'success' }); }} C={C} />
+            </div>
+
+            <div style={{ height: 1, background: C.divider, margin: '8px 24px' }} />
+
+            {/* Language row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 24px' }}>
+              <span style={{ fontSize: '18px' }}>🌐</span>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: '13px', color: C.text, margin: '0 0 8px', fontFamily: PJS, fontWeight: 500 }}>Language</p>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {LANGUAGES.map(lang => (
+                    <button key={lang.code}
+                      onClick={() => handleLangChange(lang.code)}
+                      style={{
+                        padding: '4px 12px', borderRadius: 20,
+                        background: language === lang.code ? GRAD : C.glass2,
+                        border: `1px solid ${language === lang.code ? 'transparent' : C.border}`,
+                        color: language === lang.code ? 'white' : C.muted,
+                        fontSize: '11px', fontWeight: language === lang.code ? 700 : 400,
+                        cursor: 'pointer', transition: 'all 0.2s', fontFamily: PJS
+                      }}>
+                      {lang.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ height: 1, background: C.divider, margin: '8px 24px' }} />
+
+            {/* Notification toggle */}
+            <div 
+              onClick={handleNotifToggle}
+              style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 24px', cursor: 'pointer' }}
+            >
+              <span style={{ fontSize: '18px' }}>🔔</span>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 500 }}>Notifications</p>
+                <p style={{ fontSize: '10px', color: C.muted, margin: 0 }}>{notifOn ? 'Enabled' : 'Disabled'}</p>
+              </div>
+              <div style={{ width: 36, height: 20, borderRadius: 10, background: notifOn ? GRAD : C.border, position: 'relative' }}>
+                <div style={{ position: 'absolute', top: 2, left: notifOn ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: 'white' }} />
+              </div>
+            </div>
+
+            <div style={{ height: 1, background: C.divider, margin: '8px 24px' }} />
+
+            {/* Buttons list */}
+            <div style={{ padding: '8px 0' }}>
+               {[
+                 { icon: '💬', label: 'Contact Support', action: () => window.open('mailto:StyleGuruAI.in.gmail@gmail.com', '_blank') },
+                 { icon: '⭐', label: 'Rate the App', action: () => window.open('https://play.google.com/store/apps/details?id=com.StyleGuruAI', '_blank') },
+                 { icon: '🗑️', label: 'Clear Local Data', danger: true, action: () => {
+                    if (window.confirm('Clear all local data?')) { 
+                      localStorage.clear(); onToast({ message: 'Data cleared', type: 'success' }); 
+                    }
+                 }},
+                 { icon: '🚪', label: 'Sign Out', action: onLogout },
+                 { icon: '⚠️', label: 'Delete Account Permanently', danger: true, action: handleDestroyAccount },
+               ].map((item, i) => (
+                 <button 
+                  key={i} 
+                  onClick={item.action}
+                  style={{ 
+                    width: '100%', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12, 
+                    background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = C.glass}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                 >
+                   <span style={{ fontSize: '18px' }}>{item.icon}</span>
+                   <span style={{ fontSize: '13px', color: item.danger ? C.warnText : C.text, fontFamily: PJS, fontWeight: 500 }}>{item.label}</span>
+                 </button>
+               ))}
+            </div>
+
+            <button 
+              onClick={() => setIsMenuOpen(false)}
+              style={{ width: '100%', padding: '16px', background: C.glass2, border: 'none', borderTop: `1px solid ${C.border}`, color: C.muted, fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+            >
+              CLOSE MENU
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* User Identity Card */}
       <GlassCard C={C} hoverable={false} style={{ padding: '24px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
@@ -714,123 +845,6 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
          )}
       </GlassCard>
 
-      {/* ── PREFERENCES (with Theme Toggle) ── */}
-      <p style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, margin: '16px 0 10px' }}>Preferences</p>
-      <GlassCard C={C} hoverable={false} style={{ padding: '0 0 0 0', marginBottom: 16 }}>
-
-        {/* Theme row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px' }}>
-          <span style={{ fontSize: '20px', flexShrink: 0 }}>{theme === 'dark' ? '🌙' : '☀️'}</span>
-          <div style={{ flex: 1 }}>
-            <p style={{ fontSize: '13px', color: C.text, margin: '0 0 2px', fontFamily: PJS, fontWeight: 500 }}>App Theme</p>
-            <p style={{ fontSize: '11px', color: C.muted, margin: 0, fontFamily: PJS }}>{theme === 'dark' ? 'Dark Mode — navy & glass' : 'Light Mode — clean & bright'}</p>
-          </div>
-          <ThemeToggle theme={theme} onToggle={() => { toggleTheme(); onToast({ message: `Switched to ${theme === 'dark' ? 'light' : 'dark'} mode`, type: 'success' }); }} C={C} />
-        </div>
-
-        <div style={{ height: 1, background: C.divider, margin: '0 18px' }} />
-
-        {[
-          {
-            icon: '🌐', label: 'Language',
-            value: null, // rendered separately as pill toggle
-            isLang: true,
-            action: () => { },
-          },
-          {
-            icon: '🔔', label: 'Notifications',
-            value: notifOn ? 'Enabled ✓ — daily style tips active'
-              : (typeof Notification !== 'undefined' && Notification.permission === 'denied'
-                ? '🚫 Blocked — allow in browser settings'
-                : 'Tap to enable daily style tips'),
-            isToggle: true,
-            toggleOn: notifOn,
-            action: handleNotifToggle,
-          },
-          {
-            icon: '🗑️', label: 'Clear My Data', value: 'Reset all local analysis data', danger: true,
-            action: () => {
-              if (window.confirm('Clear all your local data? This cannot be undone.')) {
-                ['sg_last_analysis', 'sg_analysis_count', 'sg_streak_count', 'sg_last_checkin',
-                  'sg_analysis_history', 'sg_saved_colors', 'sg_wardrobe_queue', 'sg_primary_profile',
-                  'sg_gender_pref', 'sg_display_name',
-                ].forEach(k => localStorage.removeItem(k));
-                onToast({ message: 'Local data cleared', type: 'success' });
-              }
-            },
-          },
-        ].map((item, i, arr) => (
-          <div key={item.label}>
-            <div
-              style={{
-                display: 'flex', alignItems: 'center', gap: 14, padding: item.isLang ? '12px 18px' : '14px 18px',
-                cursor: item.isLang ? 'default' : 'pointer',
-                borderRadius: i === arr.length - 1 ? '0 0 16px 16px' : 0,
-                transition: 'background 0.2s',
-              }}
-              onClick={!item.isLang ? item.action : undefined}
-              onMouseEnter={e => { if (!item.isLang) e.currentTarget.style.background = C.glass2; }}
-              onMouseLeave={e => { if (!item.isLang) e.currentTarget.style.background = 'none'; }}
-            >
-              <span style={{ fontSize: '18px', flexShrink: 0 }}>{item.icon}</span>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '13px', color: item.danger ? C.warnText : C.text, margin: '0 0 4px', fontFamily: PJS, fontWeight: 500 }}>{item.label}</p>
-                {item.isLang ? (
-                  /* Language 3-pill toggle — instant, no dropdown */
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    {LANGUAGES.map(lang => (
-                      <button key={lang.code}
-                        onClick={() => handleLangChange(lang.code)}
-                        style={{
-                          padding: '5px 14px', borderRadius: 20,
-                          background: language === lang.code ? GRAD : C.glass2,
-                          border: `1px solid ${language === lang.code ? 'transparent' : C.border}`,
-                          color: language === lang.code ? 'white' : C.muted,
-                          fontSize: '12px', fontWeight: language === lang.code ? 700 : 400,
-                          cursor: 'pointer', transition: 'all 0.2s', fontFamily: PJS,
-                          boxShadow: language === lang.code ? '0 2px 8px rgba(139,92,246,0.35)' : 'none',
-                        }}>
-                        {lang.label}
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p style={{ fontSize: '11px', color: C.muted, margin: 0, fontFamily: PJS }}>{item.value}</p>
-                )}
-              </div>
-              {item.isToggle ? (
-                <div style={{
-                  width: 36, height: 20, borderRadius: 10, flexShrink: 0,
-                  background: item.toggleOn ? GRAD : C.isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)',
-                  position: 'relative', transition: 'background 0.3s'
-                }}>
-                  <div style={{
-                    position: 'absolute', top: 2, left: item.toggleOn ? 18 : 2, width: 16, height: 16,
-                    borderRadius: '50%', background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.3)', transition: 'left 0.3s'
-                  }} />
-                </div>
-              ) : !item.isLang ? (
-                <span style={{ color: C.muted, fontSize: '14px' }}>›</span>
-              ) : null}
-            </div>
-            {i < arr.length - 1 && <div style={{ height: 1, background: C.divider, margin: '0 18px' }} />}
-          </div>
-        ))}
-      </GlassCard>
-
-      {/* Support & Feedback */}
-      <p style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, margin: '4px 0 10px' }}>Support & Feedback</p>
-      <GlassCard C={C} hoverable={false} style={{ padding: '4px 0', marginBottom: 16 }}>
-        {[
-          { icon: '💬', label: 'Contact Support', value: 'StyleGuruAI.in.gmail@gmail.com', action: () => window.open('mailto:StyleGuruAI.in.gmail@gmail.com', '_blank') },
-          { icon: '⭐', label: 'Rate the App', value: 'Leave a review & help us grow', action: () => { try { window.open('https://play.google.com/store/apps/details?id=com.StyleGuruAI', '_blank'); } catch { onToast({ message: 'Thanks for your support!', type: 'success' }); } } },
-          { icon: '🐛', label: 'Report an Issue', value: 'Found a bug? Tell us about it', action: () => window.open('mailto:StyleGuruAI.in.gmail@gmail.com?subject=Bug Report&body=Describe the issue:', '_blank') },
-          { icon: '📋', label: 'Privacy Policy', value: 'How we handle your data', action: () => window.open('/privacy', '_blank') },
-        ].map((item, i, arr) => (
-          <div key={item.label}>
-            <button
-              onClick={item.action}
-              style={{ ...rowBtn(), borderRadius: i === 0 ? '16px 16px 0 0' : i === arr.length - 1 ? '0 0 16px 16px' : 0 }}
               onMouseEnter={e => e.currentTarget.style.background = C.glass2}
               onMouseLeave={e => e.currentTarget.style.background = 'none'}
             >

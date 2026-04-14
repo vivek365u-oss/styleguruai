@@ -9,7 +9,9 @@ export function PlanProvider({ children }) {
   const [usage, setUsage] = useState({ 
     adFreeAnalysesLeft: 3, 
     analysisHistoryCount: 0, 
-    adFreeOutfitChecks: 3 
+    adFreeOutfitChecks: 3,
+    wardrobeCount: 0,
+    savedColorsCount: 0
   });
   const [isPro, setIsPro] = useState(false);
   const [coins, setCoins] = useState(0);
@@ -28,6 +30,8 @@ export function PlanProvider({ children }) {
           adFreeAnalysesLeft: res.data.adFreeAnalysesLeft ?? 3,
           analysisHistoryCount: res.data.analysisHistoryCount ?? 0,
           adFreeOutfitChecks: res.data.adFreeOutfitChecks ?? 3,
+          wardrobeCount: res.data.wardrobeCount ?? 0,
+          savedColorsCount: res.data.savedColorsCount ?? 0,
         });
       }
     } catch (err) { }
@@ -49,6 +53,8 @@ export function PlanProvider({ children }) {
               adFreeAnalysesLeft: data.adFreeAnalysesLeft ?? 3,
               analysisHistoryCount: data.analysisHistoryCount ?? 0,
               adFreeOutfitChecks: data.adFreeOutfitChecks ?? 3,
+              wardrobeCount: data.wardrobeCount ?? 0,
+              savedColorsCount: data.savedColorsCount ?? 0,
             });
             console.log("[PlanProvider] Real-time sync updated:", data.is_pro ? "PRO" : "FREE");
           } else {
