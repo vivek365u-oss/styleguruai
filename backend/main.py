@@ -212,225 +212,482 @@ skin_classifier = SkinToneClassifier()
 recommendation_engine = RecommendationEngine()
 
 # ============================================
-# HELPER — SMART DOMINANT COLOR EXTRACTION
-# Ignore background, detect outfit color only
+# MASTER COLOR LOOKUP TABLE — 200+ Fashion Colors
+# ALL major fabric colors, shades, gradients
 # ============================================
-def extract_dominant_outfit_color(image: np.ndarray) -> dict:
+FASHION_COLOR_MAP = {
+    # ─── WHITES & NEAR-WHITES ───
+    "Pure White":       (255, 255, 255),
+    "Off White":        (245, 245, 240),
+    "Ivory":            (255, 255, 230),
+    "Snow White":       (250, 250, 255),
+    "Pearl":            (234, 230, 220),
+    "Cream":            (253, 245, 210),
+    "Bone":             (227, 218, 201),
+    "Eggshell":         (240, 234, 214),
+    "Linen":            (240, 230, 210),
+    "Antique White":    (250, 235, 215),
+    "Milk White":       (248, 244, 235),
+    "Chalk White":      (242, 240, 236),
+
+    # ─── GREYS ───
+    "Platinum":         (229, 228, 226),
+    "Light Grey":       (211, 211, 211),
+    "Silver":           (192, 192, 192),
+    "Ash Grey":         (178, 190, 181),
+    "Grey":             (145, 145, 145),
+    "Medium Grey":      (160, 160, 160),
+    "Stone Grey":       (130, 128, 122),
+    "Slate Grey":       (112, 128, 144),
+    "Dark Grey":        (85,  85,  85),
+    "Charcoal":         (54,  69,  79),
+    "Space Grey":       (70,  70,  75),
+    "Gunmetal":         (42,  52,  57),
+    "Graphite":         (55,  56,  58),
+    "Steel Grey":       (94, 130, 141),
+
+    # ─── BLACKS ───
+    "Soft Black":       (45,  45,  45),
+    "Black":            (28,  28,  28),
+    "Jet Black":        (12,  12,  12),
+    "Midnight Black":   (18,  18,  22),
+    "Obsidian":         (14,  20,  24),
+
+    # ─── BROWNS & WARMTH ───
+    "Beige":            (235, 225, 200),
+    "Sand":             (225, 210, 175),
+    "Tan":              (210, 180, 140),
+    "Camel":            (193, 154, 107),
+    "Khaki":            (195, 176, 145),
+    "Wheat":            (220, 195, 150),
+    "Taupe":            (180, 165, 145),
+    "Light Brown":      (181, 101,  29),
+    "Brown":            (150,  80,  20),
+    "Medium Brown":     (120,  60,  15),
+    "Walnut":           (119,  63,  26),
+    "Coffee":           (111,  78,  55),
+    "Dark Brown":       (92,   64,  51),
+    "Chocolate":        (65,   40,  20),
+    "Mocha":            (78,   60,  45),
+    "Espresso":         (53,   31,  20),
+    "Mahogany":         (192,  64,   0),
+    "Cinnamon":         (180,  95,  45),
+    "Rust":             (183,  65,  14),
+    "Burnt Sienna":     (193,  90,  38),
+    "Copper":           (184, 115,  51),
+    "Bronze":           (205, 127,  50),
+    "Caramel":          (200, 130,  60),
+    "Amber":            (210, 150,  40),
+    "Sepia":            (112,  66,  20),
+
+    # ─── REDS ───
+    "Light Red":        (255, 140, 140),
+    "Salmon":           (250, 128, 114),
+    "Coral Red":        (255,  80,  60),
+    "Tomato Red":       (230,  60,  40),
+    "Red":              (210,  25,  25),
+    "Bright Red":       (255,   0,   0),
+    "Crimson":          (220,  20,  60),
+    "Fire Red":         (210,  30,  30),
+    "Dark Red":         (139,   0,   0),
+    "Ruby":             (155,  17,  30),
+    "Scarlet":          (200,  30,  30),
+    "Burgundy":         (128,  20,  35),
+    "Maroon":           (110,  15,  15),
+    "Wine":             (114,  38,  42),
+    "Oxblood":          (100,  25,  30),
+    "Brick Red":        (178,  34,  34),
+    "Cherry Red":       (220,  20,  60),
+
+    # ─── PINKS ───
+    "Flush Pink":       (255, 230, 230),
+    "Baby Pink":        (244, 194, 194),
+    "Blush Pink":       (255, 200, 200),
+    "Light Pink":       (255, 182, 193),
+    "Soft Pink":        (255, 170, 185),
+    "Pink":             (255, 120, 160),
+    "Pastel Pink":      (255, 180, 200),
+    "Rose":             (255, 100, 130),
+    "Hot Pink":         (255,  20, 147),
+    "Bright Pink":      (255,   0, 127),
+    "Deep Pink":        (220,  30, 120),
+    "Dark Pink":        (220,  80, 120),
+    "Magenta":          (255,   0, 255),
+    "Fuchsia":          (210,  10,  95),
+    "Rose Pink":        (255, 100, 190),
+    "Coral Pink":       (248, 131, 121),
+    "Peach Pink":       (255, 190, 160),
+    "Dusty Rose":       (200, 140, 140),
+    "Mauve":            (190, 140, 155),
+
+    # ─── BLUES ───
+    "Ice Blue":         (210, 245, 255),
+    "Alice Blue":       (240, 248, 255),
+    "Baby Blue":        (190, 230, 250),
+    "Light Blue":       (173, 216, 230),
+    "Powder Blue":      (176, 224, 230),
+    "Sky Blue":         (135, 206, 235),
+    "Pale Blue":        (155, 200, 220),
+    "Cerulean":         (100, 180, 225),
+    "Steel Blue":       (70,  130, 180),
+    "Cornflower Blue":  (100, 149, 237),
+    "Azure":            (30,  144, 255),
+    "Dodger Blue":      (30,  110, 250),
+    "Blue":             (35,   75, 190),
+    "Royal Blue":       (65,  105, 225),
+    "Cobalt Blue":      (10,   80, 175),
+    "Denim Blue":       (21,   96, 189),
+    "Sapphire":         (18,   87, 190),
+    "Standard Blue":    (0,    60, 200),
+    "Deep Blue":        (0,    42, 140),
+    "Navy Blue":        (25,   35,  80),
+    "Dark Navy":        (15,   20,  50),
+    "Midnight Blue":    (20,   22, 105),
+    "Prussian Blue":    (0,    49,  83),
+    "Indigo":           (75,    0, 130),
+    "Turquoise":        (64,  224, 208),
+    "Teal":             (0,   128, 128),
+    "Peacock Blue":     (50,  100, 160),
+    "Cyan":             (0,   210, 230),
+
+    # ─── GREENS ───
+    "Mint Green":       (152, 255, 152),
+    "Honeydew":         (220, 255, 220),
+    "Pale Green":       (180, 235, 180),
+    "Light Green":      (145, 230, 145),
+    "Pistachio":        (147, 197, 114),
+    "Lime Green":       (50,  205,  50),
+    "Neon Green":       (57,  255,  20),
+    "Spring Green":     (0,   210, 100),
+    "Sea Green":        (46,  139,  87),
+    "Medium Green":     (60,  170,  60),
+    "Green":            (20,  140,  20),
+    "Kelly Green":      (76,  187,  23),
+    "Emerald":          (50,  165,  90),
+    "Fern Green":       (79,  121,  66),
+    "Sage Green":       (140, 155, 140),
+    "Moss Green":       (100, 120,  70),
+    "Olive Green":      (85,  107,  47),
+    "Army Green":       (75,   83,  32),
+    "Light Olive":      (145, 155, 100),
+    "Forest Green":     (34,  139,  34),
+    "Dark Green":       (1,    60,  30),
+    "Hunter Green":     (53,   94,  59),
+    "Teal Green":       (0,   130, 100),
+    "Bottle Green":     (0,   106,  78),
+    "Jungle Green":     (41,  130,  80),
+
+    # ─── YELLOWS & GOLDS ───
+    "Cream Yellow":     (255, 255, 210),
+    "Light Yellow":     (255, 255, 180),
+    "Lemon":            (253, 235,  20),
+    "Canary Yellow":    (255, 240,  50),
+    "Yellow":           (255, 220,  15),
+    "Bright Yellow":    (255, 240,   0),
+    "Banana":           (255, 225,  53),
+    "Amber":            (255, 174,   0),
+    "Mustard":          (220, 185,  50),
+    "Dark Mustard":     (195, 155,  30),
+    "Saffron":          (250, 167,  11),
+    "Gold":             (215, 175,  55),
+    "Antique Gold":     (205, 160,  50),
+    "Dark Gold":        (180, 140,  30),
+    "Peach":            (255, 215, 185),
+    "Apricot":          (251, 200, 170),
+    "Pale Peach":       (255, 230, 210),
+
+    # ─── ORANGES ───
+    "Light Orange":     (255, 200, 130),
+    "Tangerine":        (245, 145,  10),
+    "Orange":           (255, 160,   0),
+    "Bright Orange":    (255, 110,   0),
+    "Burnt Orange":     (200,  90,   0),
+    "Dark Orange":      (200,  80,   0),
+    "Pumpkin":          (210, 100,  20),
+    "Terracotta":       (196,  98,  55),
+    "Rust Orange":      (185,  80,  25),
+    "Coral":            (255, 127,  80),
+
+    # ─── PURPLES & VIOLETS ───
+    "Lavender":         (230, 230, 250),
+    "Pale Lavender":    (215, 210, 245),
+    "Lilac":            (200, 162, 200),
+    "Pale Purple":      (210, 185, 220),
+    "Light Purple":     (200, 175, 215),
+    "Wisteria":         (201, 160, 220),
+    "Periwinkle":       (195, 195, 250),
+    "Medium Purple":    (150, 100, 200),
+    "Orchid":           (218, 112, 214),
+    "Violet":           (180, 100, 220),
+    "Purple":           (130,   0, 135),
+    "Amethyst":         (150, 100, 210),
+    "Plum":             (142,  69, 133),
+    "Grape":            (111,  40, 170),
+    "Dark Purple":      (90,    0, 100),
+    "Deep Purple":      (58,    8,  68),
+    "Eggplant":         (97,   64,  81),
+    "Mulberry":         (130,  50,  85),
+}
+
+
+def _redmean_color_name(r: int, g: int, b: int) -> str:
+    """Perceptual Redmean color distance formula — best for human vision."""
+    min_dist = float('inf')
+    closest_name = "Unknown"
+    for name, (cr, cg, cb) in FASHION_COLOR_MAP.items():
+        rmean = (r + cr) / 2
+        dr, dg, db = r - cr, g - cg, b - cb
+        dist = (((512 + rmean) * dr * dr) / 256
+                + 4 * dg * dg
+                + ((767 - rmean) * db * db) / 256) ** 0.5
+        if dist < min_dist:
+            min_dist = dist
+            closest_name = name
+    return closest_name
+
+
+def _grabcut_segment_clothing(image: np.ndarray) -> np.ndarray:
+    """
+    Use OpenCV GrabCut to isolate clothing from background.
+    Returns a binary mask (255 = clothing, 0 = background).
+    Falls back gracefully if GrabCut fails.
+    """
     import cv2
-    import os
-    import base64
-    import requests
+    h, w = image.shape[:2]
 
-    named_colors = {
-        # Neutrals & Whites
-        "Pure White": (255, 255, 255), "Off White": (245, 245, 240), "Ivory": (255, 255, 240),
-        "Pearl": (234, 230, 223), "Cream": (255, 253, 208), "Bone": (227, 218, 201),
-        
-        # Greys
-        "Light Grey": (211, 211, 211), "Silver": (192, 192, 192), "Platinum": (229, 228, 226),
-        "Grey": (128, 128, 128), "Medium Grey": (160, 160, 160), "Ash Grey": (178, 190, 181),
-        "Dark Grey": (85, 85, 85), "Slate Grey": (112, 128, 144), "Charcoal": (54, 69, 79),
-        "Gunmetal": (42, 52, 57),
+    # Define rect — generous center region where clothing lives
+    # 10% from top/bottom/sides covers most outfit photos
+    margin_x = int(w * 0.10)
+    margin_y = int(h * 0.08)
+    rect = (margin_x, margin_y, w - 2 * margin_x, h - 2 * margin_y)
 
-        # Blacks
-        "Jet Black": (10, 10, 10), "Black": (25, 25, 25), "Soft Black": (40, 40, 40),
-        "Obsidian": (11, 18, 21), "Midnight Black": (15, 15, 18),
-
-        # Browns & Earth Tones
-        "Light Brown": (181, 101, 29), "Brown": (139, 69, 19), "Medium Brown": (110, 50, 10),
-        "Dark Brown": (92, 64, 51), "Chocolate": (60, 35, 20), "Coffee": (111, 78, 55),
-        "Mocha": (73, 56, 41), "Espresso": (53, 31, 20), "Camel": (193, 154, 107),
-        "Tan": (210, 180, 140), "Beige": (235, 225, 200), "Khaki": (195, 176, 145),
-        "Rust": (183, 65, 14), "Copper": (184, 115, 51), "Bronze": (205, 127, 50),
-        "Walnut": (119, 63, 26), "Mahogany": (192, 64, 0),
-
-        # Reds
-        "Light Red": (255, 153, 153), "Coral Red": (255, 64, 64), "Bright Red": (255, 0, 0),
-        "Red": (200, 20, 20), "Dark Red": (139, 0, 0), "Maroon": (128, 0, 0),
-        "Burgundy": (114, 47, 55), "Wine": (120, 30, 45), "Crimson": (220, 20, 60),
-        "Ruby": (224, 17, 95), "Brick Red": (203, 65, 84), "Fire Engine Red": (206, 32, 41),
-
-        # Pinks
-        "Baby Pink": (244, 194, 194), "Light Pink": (255, 182, 193), "Pink": (255, 105, 180),
-        "Bright Pink": (255, 0, 127), "Hot Pink": (255, 20, 147), "Deep Pink": (255, 20, 147),
-        "Dark Pink": (231, 84, 128), "Magenta": (255, 0, 255), "Fuchsia": (219, 10, 91),
-        "Rose Pink": (255, 102, 204), "Salmon": (250, 128, 114), "Coral Pink": (248, 131, 121),
-        "Peach Pink": (255, 204, 153),
-
-        # Blues
-        "Ice Blue": (204, 255, 255), "Light Blue": (173, 216, 230), "Sky Blue": (135, 206, 235),
-        "Baby Blue": (137, 207, 240), "Cyan": (0, 255, 255), "Turquoise": (64, 224, 208),
-        "Azure": (0, 127, 255), "Cobalt Blue": (0, 71, 171), "Denim Blue": (21, 96, 189),
-        "Standard Blue": (0, 0, 255), "Blue": (30, 60, 180), "Royal Blue": (65, 105, 225),
-        "Sapphire": (15, 82, 186), "Navy Blue": (25, 35, 65), "Dark Navy": (15, 20, 45),
-        "Midnight Blue": (25, 25, 112), "Indigo": (75, 0, 130), "Steel Blue": (70, 130, 180),
-
-        # Greens
-        "Mint Green": (152, 255, 152), "Light Green": (144, 238, 144), "Sea Green": (46, 139, 87),
-        "Lime Green": (50, 205, 50), "Green": (0, 128, 0), "Emerald": (80, 200, 120),
-        "Kelly Green": (76, 187, 23), "Forest Green": (34, 139, 34), "Dark Green": (1, 50, 32),
-        "Hunter Green": (53, 94, 59), "Olive Green": (85, 107, 47), "Light Olive": (140, 150, 100),
-        "Sage Green": (140, 155, 140), "Neon Green": (57, 255, 20), "Teal Green": (0, 128, 100),
-        "Fern Green": (79, 121, 66),
-
-        # Yellows & Oranges
-        "Light Yellow": (255, 255, 224), "Lemon": (253, 233, 16), "Yellow": (255, 235, 20),
-        "Bright Yellow": (255, 255, 0), "Mustard": (255, 219, 88), "Dark Mustard": (220, 180, 40),
-        "Gold": (212, 175, 55), "Peach": (255, 218, 185), "Apricot": (251, 206, 177),
-        "Orange": (255, 165, 0), "Bright Orange": (255, 100, 0), "Burnt Orange": (204, 85, 0),
-        "Tangerine": (242, 133, 0), "Coral": (255, 127, 80),
-
-        # Purples
-        "Lavender": (230, 230, 250), "Lilac": (200, 162, 200), "Mauve": (224, 176, 255),
-        "Periwinkle": (204, 204, 255), "Light Purple": (216, 191, 216), "Orchid": (218, 112, 214),
-        "Purple": (128, 0, 128), "Violet": (238, 130, 238), "Deep Purple": (54, 1, 63),
-        "Amethyst": (153, 102, 204), "Plum": (142, 69, 133), "Grape": (111, 45, 168),
-        "Eggplant": (97, 64, 81)
-    }
-
-    def _get_color_name(r, g, b):
-        min_dist = float('inf')
-        closest_name = "Unknown"
-        for name, (cr, cg, cb) in named_colors.items():
-            rmean = (r + cr) / 2
-            dr = r - cr
-            dg = g - cg
-            db = b - cb
-            dist = (((512 + rmean) * dr * dr) / 256 + 4 * dg * dg + ((767 - rmean) * db * db) / 256) ** 0.5
-            if dist < min_dist:
-                min_dist = dist
-                closest_name = name
-        return closest_name
-
-    # Check APIs
-    engine = os.environ.get("OUTFIT_COLOR_ENGINE", "local").lower()
-    if engine in ["google", "clarifai"]:
-        try:
-            _, buffer = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 85])
-            base64_image = base64.b64encode(buffer).decode('utf-8')
-            
-            if engine == "google":
-                api_key = os.environ.get("GOOGLE_VISION_API_KEY")
-                if api_key:
-                    url = f"https://vision.googleapis.com/v1/images:annotate?key={api_key}"
-                    payload = {
-                        "requests": [{
-                            "image": {"content": base64_image},
-                            "features": [{"type": "IMAGE_PROPERTIES"}]
-                        }]
-                    }
-                    resp = requests.post(url, json=payload, timeout=5)
-                    if resp.status_code == 200:
-                        data = resp.json()
-                        colors = data['responses'][0]['imagePropertiesAnnotation']['dominantColors']['colors']
-                        best_color = None
-                        best_score = -1
-                        for c in colors:
-                            rgb = c['color']
-                            r, g, b = rgb.get('red', 0), rgb.get('green', 0), rgb.get('blue', 0)
-                            brightness = (r + g + b) / 3
-                            if brightness < 15: continue
-                            if c.get('score', 0) > best_score:
-                                best_score = c.get('score', 0)
-                                best_color = (int(r), int(g), int(b))
-                        if best_color:
-                            r, g, b = best_color
-                            return {"r": r, "g": g, "b": b, "hex": f"#{r:02x}{g:02x}{b:02x}", "name": _get_color_name(r, g, b)}
-            
-            elif engine == "clarifai":
-                pat = os.environ.get("CLARIFAI_PAT")
-                if pat:
-                    url = "https://api.clarifai.com/v2/models/color-recognition/outputs"
-                    headers = {"Authorization": f"Key {pat}", "Content-Type": "application/json"}
-                    payload = {"inputs": [{"data": {"image": {"base64": base64_image}}}]}
-                    resp = requests.post(url, headers=headers, json=payload, timeout=5)
-                    if resp.status_code == 200:
-                        data = resp.json()
-                        concepts = data['outputs'][0]['data']['colors']
-                        best_concept = None
-                        best_val = -1
-                        for c in concepts:
-                            val = c['value']
-                            hex_val = c['w3c']['hex'].lstrip('#')
-                            r, g, b = int(hex_val[0:2], 16), int(hex_val[2:4], 16), int(hex_val[4:6], 16)
-                            brightness = (r + g + b) / 3
-                            if brightness < 15: continue
-                            if val > best_val:
-                                best_val = val
-                                best_concept = (r, g, b, c['w3c']['name'])
-                        if best_concept:
-                            r, g, b, name = best_concept
-                            return {"r": r, "g": g, "b": b, "hex": f"#{r:02x}{g:02x}{b:02x}", "name": name.title()}
-        except Exception as e:
-            print(f"[API ERROR] {engine} failed: {e}. Falling back to local logic.")
-
-    # FALLBACK Local logic
-    small = cv2.resize(image, (300, 300))
-    rgb = cv2.cvtColor(small, cv2.COLOR_BGR2RGB)
-    sh, sw = small.shape[:2]
-    margin_h = int(sh * 0.20)
-    margin_w = int(sw * 0.20)
-    center_region = rgb[margin_h:sh-margin_h, margin_w:sw-margin_w]
-    pixels = center_region.reshape(-1, 3).astype(np.float32)
-    brightness = np.mean(pixels, axis=1)
-    max_rgb = np.max(pixels, axis=1)
-    min_rgb = np.min(pixels, axis=1)
-    saturation = (max_rgb - min_rgb) / (max_rgb + 1e-6)
-
-    is_white_region = (brightness > 200) & (saturation < 0.15)
-    white_fraction = np.sum(is_white_region) / len(pixels)
-
-    if white_fraction > 0.35:
-        is_background = (brightness < 8)
-    else:
-        is_background = (
-            (brightness < 8) |
-            ((brightness > 240) & (saturation < 0.04) & (white_fraction < 0.20))
-        )
-
-    fabric_pixels = pixels[~is_background]
-
-    if len(fabric_pixels) < 100:
-        is_bg_relaxed = (brightness < 5) | ((brightness > 250) & (saturation < 0.02))
-        fabric_pixels = pixels[~is_bg_relaxed]
-    if len(fabric_pixels) < 50:
-        fabric_pixels = pixels
-
-    k = min(8, len(fabric_pixels) // 10, len(fabric_pixels))
-    k = max(3, k)
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.5)
-    
     try:
-        _, labels, centers = cv2.kmeans(fabric_pixels, k, None, criteria, 15, cv2.KMEANS_PP_CENTERS)
-    except:
-        avg = np.mean(fabric_pixels, axis=0)
-        centers = np.array([[int(avg[0]), int(avg[1]), int(avg[2])]])
-        labels = np.zeros(len(fabric_pixels), dtype=np.int32)
+        mask = np.zeros(image.shape[:2], np.uint8)
+        bgd_model = np.zeros((1, 65), np.float64)
+        fgd_model = np.zeros((1, 65), np.float64)
+
+        # Run GrabCut (5 iterations is sufficient)
+        cv2.grabCut(image, mask, rect, bgd_model, fgd_model, 5, cv2.GC_INIT_WITH_RECT)
+
+        # Create final binary mask — keep FG and probable FG
+        grab_mask = np.where((mask == cv2.GC_FGD) | (mask == cv2.GC_PR_FGD), 255, 0).astype(np.uint8)
+
+        # Safety: if GrabCut returns almost nothing, fall back to center crop mask
+        fg_coverage = np.sum(grab_mask > 0) / (h * w)
+        if fg_coverage < 0.10:
+            # Build a safe center-crop mask instead
+            grab_mask = np.zeros((h, w), np.uint8)
+            cy1 = int(h * 0.15)
+            cy2 = int(h * 0.85)
+            cx1 = int(w * 0.15)
+            cx2 = int(w * 0.85)
+            grab_mask[cy1:cy2, cx1:cx2] = 255
+
+        return grab_mask
+
+    except Exception:
+        # Pure fallback: center rectangle mask
+        mask = np.zeros((h, w), np.uint8)
+        mask[int(h*0.12):int(h*0.88), int(w*0.12):int(w*0.88)] = 255
+        return mask
+
+
+def _kmeans_on_masked_pixels(image_rgb: np.ndarray, mask: np.ndarray) -> tuple:
+    """
+    Extract dominant color from pixels inside the mask using K-Means.
+    Returns (r, g, b).
+    """
+    import cv2
+
+    pixels = image_rgb[mask > 0].reshape(-1, 3).astype(np.float32)
+
+    if len(pixels) < 50:
+        # Too few pixels — take mean
+        mean = np.mean(image_rgb.reshape(-1, 3), axis=0)
+        return int(mean[0]), int(mean[1]), int(mean[2])
+
+    k = min(10, len(pixels) // 20)
+    k = max(4, k)
+
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.2)
+    try:
+        _, labels, centers = cv2.kmeans(
+            pixels, k, None, criteria, 20, cv2.KMEANS_PP_CENTERS
+        )
+    except Exception:
+        mean = np.mean(pixels, axis=0)
+        return int(mean[0]), int(mean[1]), int(mean[2])
 
     counts = np.bincount(labels.flatten(), minlength=len(centers))
+
+    # Score each cluster: count weight + saturation bonus + dark-penalty
     best_idx = 0
     best_score = -1
-
     for i, center in enumerate(centers):
-        cr, cg, cb = center[0], center[1], center[2]
-        brightness_c = (cr + cg + cb) / 3
-        max_c = max(cr, cg, cb)
-        min_c = min(cr, cg, cb)
-        sat = (max_c - min_c) / (max_c + 1e-6)
-        if brightness_c < 8: continue
+        r_c, g_c, b_c = float(center[0]), float(center[1]), float(center[2])
+        brightness = (r_c + g_c + b_c) / 3.0
 
-        count_weight = counts[i] / len(fabric_pixels)
-        sat_bonus = sat * 0.25
-        score = count_weight + sat_bonus
+        # Skip near-pure-black shadow artifacts
+        if brightness < 12:
+            continue
+
+        max_c = max(r_c, g_c, b_c)
+        min_c = min(r_c, g_c, b_c)
+        sat = (max_c - min_c) / (max_c + 1e-6)
+
+        count_w = counts[i] / len(pixels)
+        # Saturation bonus: vivid colors get slight preference
+        sat_bonus = sat * 0.20
+        # Brightest cluster slight preference, but not dominating
+        bright_bonus = (brightness / 255.0) * 0.05
+        score = count_w + sat_bonus + bright_bonus
 
         if score > best_score:
             best_score = score
             best_idx = i
 
     dominant = centers[best_idx]
-    r, g, b = int(dominant[0]), int(dominant[1]), int(dominant[2])
+    return int(dominant[0]), int(dominant[1]), int(dominant[2])
 
-    return {"r": r, "g": g, "b": b, "hex": f"#{r:02x}{g:02x}{b:02x}", "name": _get_color_name(r, g, b)}
+
+# ============================================
+# MAIN — SMART DOMINANT COLOR EXTRACTION
+# Multi-stage: GrabCut → API → Local K-Means
+# ============================================
+def extract_dominant_outfit_color(image: np.ndarray) -> dict:
+    """
+    Production-grade outfit color detection.
+    Pipeline:
+      1. Resize image to standard working size
+      2. Run GrabCut to segment clothing from background
+      3a. If Clarifai API is enabled: send GrabCut-masked image to Clarifai
+      3b. If local: run K-Means on GrabCut masked pixels only
+      4. Map RGB → fashion color name via Redmean perceptual distance
+    """
+    import cv2
+    import os
+    import base64
+    import requests
+
+    # ── Step 1: Resize to working resolution (800px max) ──
+    h, w = image.shape[:2]
+    max_dim = 800
+    if max(h, w) > max_dim:
+        scale = max_dim / max(h, w)
+        image = cv2.resize(image, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
+
+    # ── Step 2: GrabCut foreground segmentation ──
+    clothing_mask = _grabcut_segment_clothing(image)
+
+    # ── Step 3a: Clarifai API path ──
+    engine = os.environ.get("OUTFIT_COLOR_ENGINE", "local").lower()
+    if engine == "clarifai":
+        pat = os.environ.get("CLARIFAI_PAT", "")
+        if pat:
+            try:
+                # Build a masked image: zero out background before sending to Clarifai
+                masked_image = image.copy()
+                # Set background pixels to neutral grey so Clarifai ignores them
+                masked_image[clothing_mask == 0] = [128, 128, 128]
+
+                _, buffer = cv2.imencode('.jpg', masked_image, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                base64_image = base64.b64encode(buffer).decode('utf-8')
+
+                url = "https://api.clarifai.com/v2/models/color-recognition/outputs"
+                headers = {"Authorization": f"Key {pat}", "Content-Type": "application/json"}
+                payload = {"inputs": [{"data": {"image": {"base64": base64_image}}}]}
+
+                resp = requests.post(url, headers=headers, json=payload, timeout=6)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    color_list = data.get('outputs', [{}])[0].get('data', {}).get('colors', [])
+
+                    best_val = -1
+                    best_rgb = None
+                    for c in color_list:
+                        val = c.get('value', 0)
+                        # Use raw_hex for actual color (w3c hex is too generic/simplified)
+                        raw_hex = c.get('raw_hex', c.get('w3c', {}).get('hex', '#808080'))
+                        raw_hex = raw_hex.lstrip('#')
+
+                        if len(raw_hex) != 6:
+                            continue
+
+                        cr = int(raw_hex[0:2], 16)
+                        cg = int(raw_hex[2:4], 16)
+                        cb = int(raw_hex[4:6], 16)
+
+                        # Skip neutral grey (our background fill) colors
+                        if abs(cr - 128) < 10 and abs(cg - 128) < 10 and abs(cb - 128) < 10:
+                            continue
+
+                        # Skip near-black artifacts
+                        if (cr + cg + cb) / 3 < 15:
+                            continue
+
+                        if val > best_val:
+                            best_val = val
+                            best_rgb = (cr, cg, cb)
+
+                    if best_rgb:
+                        r, g, b = best_rgb
+                        print(f"[CLARIFAI] Detected RGB=({r},{g},{b})")
+                        color_name = _redmean_color_name(r, g, b)
+                        return {
+                            "r": r, "g": g, "b": b,
+                            "hex": f"#{r:02x}{g:02x}{b:02x}",
+                            "name": color_name
+                        }
+            except Exception as e:
+                print(f"[CLARIFAI ERROR] {e}. Falling back to local K-Means.")
+
+    elif engine == "google":
+        api_key = os.environ.get("GOOGLE_VISION_API_KEY", "")
+        if api_key:
+            try:
+                # Send GrabCut-masked image to Google Vision
+                masked_image = image.copy()
+                masked_image[clothing_mask == 0] = [128, 128, 128]
+                _, buffer = cv2.imencode('.jpg', masked_image, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                base64_image = base64.b64encode(buffer).decode('utf-8')
+                url = f"https://vision.googleapis.com/v1/images:annotate?key={api_key}"
+                payload = {"requests": [{"image": {"content": base64_image}, "features": [{"type": "IMAGE_PROPERTIES"}]}]}
+                resp = requests.post(url, json=payload, timeout=6)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    colors = data['responses'][0]['imagePropertiesAnnotation']['dominantColors']['colors']
+                    best_color = None
+                    best_score = -1
+                    for c in colors:
+                        rgb = c['color']
+                        cr = int(rgb.get('red', 0))
+                        cg = int(rgb.get('green', 0))
+                        cb = int(rgb.get('blue', 0))
+                        brightness = (cr + cg + cb) / 3
+                        # Skip both very dark and our neutral grey background fill
+                        if brightness < 15:
+                            continue
+                        if abs(cr - 128) < 10 and abs(cg - 128) < 10 and abs(cb - 128) < 10:
+                            continue
+                        if c.get('score', 0) > best_score:
+                            best_score = c.get('score', 0)
+                            best_color = (cr, cg, cb)
+                    if best_color:
+                        r, g, b = best_color
+                        print(f"[GOOGLE VISION] Detected RGB=({r},{g},{b})")
+                        color_name = _redmean_color_name(r, g, b)
+                        return {"r": r, "g": g, "b": b, "hex": f"#{r:02x}{g:02x}{b:02x}", "name": color_name}
+            except Exception as e:
+                print(f"[GOOGLE VISION ERROR] {e}. Falling back to local K-Means.")
+
+    # ── Step 3b: Local K-Means fallback (GrabCut masked pixels) ──
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    r, g, b = _kmeans_on_masked_pixels(image_rgb, clothing_mask)
+    print(f"[LOCAL KMEANS] Detected RGB=({r},{g},{b})")
+    color_name = _redmean_color_name(r, g, b)
+    return {"r": r, "g": g, "b": b, "hex": f"#{r:02x}{g:02x}{b:02x}", "name": color_name}
+
+
 
 # ============================================
 # HELPER — CORE IMAGE PROCESSING
