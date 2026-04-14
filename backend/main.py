@@ -299,21 +299,70 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
     r, g, b = int(dominant[0]), int(dominant[1]), int(dominant[2])
 
     named_colors = {
-        "White": (250, 250, 250), "Off White": (240, 240, 230), "Cream": (255, 253, 208),
-        "Black": (25, 25, 25), "Charcoal": (45, 45, 50), "Dark Grey": (75, 75, 75), 
-        "Grey": (128, 128, 128), "Light Grey": (192, 192, 192), 
-        "Navy Blue": (25, 35, 65), "Dark Navy": (15, 20, 45), 
-        "Royal Blue": (50, 90, 210), "Sky Blue": (135, 206, 235), "Cobalt Blue": (0, 71, 171), 
-        "Teal": (0, 128, 128), "Red": (200, 20, 40), "Maroon": (110, 10, 10), 
-        "Burgundy": (100, 30, 45), "Pink": (255, 105, 180), "Hot Pink": (255, 20, 147), 
-        "Pastel Pink": (255, 209, 220), "Purple": (110, 20, 110), "Lavender": (220, 210, 240), 
-        "Green": (10, 110, 20), "Forest Green": (25, 90, 35), "Olive Green": (80, 90, 45), 
-        "Mint Green": (150, 240, 170), "Emerald": (40, 180, 100), "Yellow": (245, 210, 10), 
-        "Mustard": (220, 180, 40), "Orange": (240, 130, 10), "Coral": (245, 110, 75), 
-        "Peach": (255, 205, 170), "Brown": (125, 65, 25), "Dark Brown": (60, 35, 20), 
-        "Chocolate": (90, 45, 15), "Tan": (200, 160, 120), "Beige": (235, 225, 200), 
-        "Khaki": (185, 165, 130), "Camel": (193, 154, 107), "Rust": (170, 60, 20),
-        "Gold": (210, 180, 50), "Silver": (180, 180, 180),
+        # Neutrals & Whites
+        "Pure White": (255, 255, 255), "Off White": (245, 245, 240), "Ivory": (255, 255, 240),
+        "Pearl": (234, 230, 223), "Cream": (255, 253, 208), "Bone": (227, 218, 201),
+        
+        # Greys
+        "Light Grey": (211, 211, 211), "Silver": (192, 192, 192), "Platinum": (229, 228, 226),
+        "Grey": (128, 128, 128), "Medium Grey": (160, 160, 160), "Ash Grey": (178, 190, 181),
+        "Dark Grey": (85, 85, 85), "Slate Grey": (112, 128, 144), "Charcoal": (54, 69, 79),
+        "Gunmetal": (42, 52, 57),
+
+        # Blacks
+        "Jet Black": (10, 10, 10), "Black": (25, 25, 25), "Soft Black": (40, 40, 40),
+        "Obsidian": (11, 18, 21), "Midnight Black": (15, 15, 18),
+
+        # Browns & Earth Tones
+        "Light Brown": (181, 101, 29), "Brown": (139, 69, 19), "Medium Brown": (110, 50, 10),
+        "Dark Brown": (92, 64, 51), "Chocolate": (60, 35, 20), "Coffee": (111, 78, 55),
+        "Mocha": (73, 56, 41), "Espresso": (53, 31, 20), "Camel": (193, 154, 107),
+        "Tan": (210, 180, 140), "Beige": (235, 225, 200), "Khaki": (195, 176, 145),
+        "Rust": (183, 65, 14), "Copper": (184, 115, 51), "Bronze": (205, 127, 50),
+        "Walnut": (119, 63, 26), "Mahogany": (192, 64, 0),
+
+        # Reds
+        "Light Red": (255, 153, 153), "Coral Red": (255, 64, 64), "Bright Red": (255, 0, 0),
+        "Red": (200, 20, 20), "Dark Red": (139, 0, 0), "Maroon": (128, 0, 0),
+        "Burgundy": (114, 47, 55), "Wine": (120, 30, 45), "Crimson": (220, 20, 60),
+        "Ruby": (224, 17, 95), "Brick Red": (203, 65, 84), "Fire Engine Red": (206, 32, 41),
+
+        # Pinks
+        "Baby Pink": (244, 194, 194), "Light Pink": (255, 182, 193), "Pink": (255, 105, 180),
+        "Bright Pink": (255, 0, 127), "Hot Pink": (255, 20, 147), "Deep Pink": (255, 20, 147),
+        "Dark Pink": (231, 84, 128), "Magenta": (255, 0, 255), "Fuchsia": (219, 10, 91),
+        "Rose Pink": (255, 102, 204), "Salmon": (250, 128, 114), "Coral Pink": (248, 131, 121),
+        "Peach Pink": (255, 204, 153),
+
+        # Blues
+        "Ice Blue": (204, 255, 255), "Light Blue": (173, 216, 230), "Sky Blue": (135, 206, 235),
+        "Baby Blue": (137, 207, 240), "Cyan": (0, 255, 255), "Turquoise": (64, 224, 208),
+        "Azure": (0, 127, 255), "Cobalt Blue": (0, 71, 171), "Denim Blue": (21, 96, 189),
+        "Standard Blue": (0, 0, 255), "Blue": (30, 60, 180), "Royal Blue": (65, 105, 225),
+        "Sapphire": (15, 82, 186), "Navy Blue": (25, 35, 65), "Dark Navy": (15, 20, 45),
+        "Midnight Blue": (25, 25, 112), "Indigo": (75, 0, 130), "Steel Blue": (70, 130, 180),
+
+        # Greens
+        "Mint Green": (152, 255, 152), "Light Green": (144, 238, 144), "Sea Green": (46, 139, 87),
+        "Lime Green": (50, 205, 50), "Green": (0, 128, 0), "Emerald": (80, 200, 120),
+        "Kelly Green": (76, 187, 23), "Forest Green": (34, 139, 34), "Dark Green": (1, 50, 32),
+        "Hunter Green": (53, 94, 59), "Olive Green": (85, 107, 47), "Light Olive": (140, 150, 100),
+        "Sage Green": (140, 155, 140), "Neon Green": (57, 255, 20), "Teal Green": (0, 128, 100),
+        "Fern Green": (79, 121, 66),
+
+        # Yellows & Oranges
+        "Light Yellow": (255, 255, 224), "Lemon": (253, 233, 16), "Yellow": (255, 235, 20),
+        "Bright Yellow": (255, 255, 0), "Mustard": (255, 219, 88), "Dark Mustard": (220, 180, 40),
+        "Gold": (212, 175, 55), "Peach": (255, 218, 185), "Apricot": (251, 206, 177),
+        "Orange": (255, 165, 0), "Bright Orange": (255, 100, 0), "Burnt Orange": (204, 85, 0),
+        "Tangerine": (242, 133, 0), "Coral": (255, 127, 80),
+
+        # Purples
+        "Lavender": (230, 230, 250), "Lilac": (200, 162, 200), "Mauve": (224, 176, 255),
+        "Periwinkle": (204, 204, 255), "Light Purple": (216, 191, 216), "Orchid": (218, 112, 214),
+        "Purple": (128, 0, 128), "Violet": (238, 130, 238), "Deep Purple": (54, 1, 63),
+        "Amethyst": (153, 102, 204), "Plum": (142, 69, 133), "Grape": (111, 45, 168),
+        "Eggplant": (97, 64, 81)
     }
 
     min_dist = float('inf')
