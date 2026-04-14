@@ -282,8 +282,8 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
         min_c = min(cr, cg, cb)
         sat = (max_c - min_c) / (max_c + 1e-6)
 
-        # Skip near-black (shadow artifacts) only
-        if brightness_c < 12:
+        # Skip near-black pure shadow artifacts only
+        if brightness_c < 8:
             continue
 
         count_weight = counts[i] / len(fabric_pixels)
@@ -299,25 +299,33 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
     r, g, b = int(dominant[0]), int(dominant[1]), int(dominant[2])
 
     named_colors = {
-        "White": (255, 255, 255), "Off White": (245, 245, 235), "Cream": (255, 253, 208),
-        "Black": (0, 0, 0), "Dark Grey": (64, 64, 64), "Grey": (128, 128, 128),
-        "Light Grey": (192, 192, 192), "Navy Blue": (0, 0, 128), "Royal Blue": (65, 105, 225),
-        "Sky Blue": (135, 206, 235), "Cobalt Blue": (0, 71, 171), "Teal": (0, 128, 128),
-        "Red": (220, 20, 60), "Maroon": (128, 0, 0), "Burgundy": (114, 47, 55),
-        "Pink": (255, 105, 180), "Hot Pink": (255, 20, 147), "Pastel Pink": (255, 209, 220),
-        "Purple": (128, 0, 128), "Lavender": (230, 230, 250), "Green": (0, 128, 0),
-        "Forest Green": (34, 139, 34), "Olive Green": (85, 107, 47), "Mint Green": (152, 255, 152),
-        "Emerald": (80, 200, 120), "Yellow": (255, 215, 0), "Mustard": (255, 219, 88),
-        "Orange": (255, 165, 0), "Coral": (255, 127, 80), "Peach": (255, 218, 185),
-        "Brown": (139, 69, 19), "Chocolate": (123, 63, 0), "Tan": (210, 180, 140),
-        "Beige": (245, 245, 220), "Khaki": (195, 176, 145), "Camel": (193, 154, 107),
-        "Rust": (183, 65, 14), "Gold": (255, 215, 0), "Silver": (192, 192, 192),
+        "White": (250, 250, 250), "Off White": (240, 240, 230), "Cream": (255, 253, 208),
+        "Black": (25, 25, 25), "Charcoal": (45, 45, 50), "Dark Grey": (75, 75, 75), 
+        "Grey": (128, 128, 128), "Light Grey": (192, 192, 192), 
+        "Navy Blue": (25, 35, 65), "Dark Navy": (15, 20, 45), 
+        "Royal Blue": (50, 90, 210), "Sky Blue": (135, 206, 235), "Cobalt Blue": (0, 71, 171), 
+        "Teal": (0, 128, 128), "Red": (200, 20, 40), "Maroon": (110, 10, 10), 
+        "Burgundy": (100, 30, 45), "Pink": (255, 105, 180), "Hot Pink": (255, 20, 147), 
+        "Pastel Pink": (255, 209, 220), "Purple": (110, 20, 110), "Lavender": (220, 210, 240), 
+        "Green": (10, 110, 20), "Forest Green": (25, 90, 35), "Olive Green": (80, 90, 45), 
+        "Mint Green": (150, 240, 170), "Emerald": (40, 180, 100), "Yellow": (245, 210, 10), 
+        "Mustard": (220, 180, 40), "Orange": (240, 130, 10), "Coral": (245, 110, 75), 
+        "Peach": (255, 205, 170), "Brown": (125, 65, 25), "Dark Brown": (60, 35, 20), 
+        "Chocolate": (90, 45, 15), "Tan": (200, 160, 120), "Beige": (235, 225, 200), 
+        "Khaki": (185, 165, 130), "Camel": (193, 154, 107), "Rust": (170, 60, 20),
+        "Gold": (210, 180, 50), "Silver": (180, 180, 180),
     }
 
     min_dist = float('inf')
     closest_name = "Unknown"
     for name, (cr, cg, cb) in named_colors.items():
-        dist = ((r-cr)**2 + (g-cg)**2 + (b-cb)**2) ** 0.5
+        # Redmean perceptual color distance formula for superior accuracy
+        rmean = (r + cr) / 2
+        dr = r - cr
+        dg = g - cg
+        db = b - cb
+        dist = (((512 + rmean) * dr * dr) / 256 + 4 * dg * dg + ((767 - rmean) * db * db) / 256) ** 0.5
+        
         if dist < min_dist:
             min_dist = dist
             closest_name = name
