@@ -840,7 +840,7 @@ export default function AppShell({ user, onLogout }) {
   // Firestore sync on login
   useEffect(() => {
     if (!auth.currentUser) return;
-    getHistory().then(res => {
+    getHistory(isPro ? 100 : 10).then(res => {
       const firestoreCount = res?.data?.history?.length || 0;
       const localCount = parseInt(localStorage.getItem('sg_analysis_count') || '0');
       if (firestoreCount > localCount) localStorage.setItem('sg_analysis_count', firestoreCount.toString());

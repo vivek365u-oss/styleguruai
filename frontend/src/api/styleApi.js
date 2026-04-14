@@ -214,7 +214,7 @@ export const saveHistory = async (rawDetails) => {
   }
 };
 
-export const getHistory = async () => {
+export const getHistory = async (limitCount = 10) => {
   const user = auth.currentUser;
   if (!user) return { data: { total: 0, history: [] } };
 
@@ -222,7 +222,7 @@ export const getHistory = async () => {
     const q = query(
       collection(db, 'users', user.uid, 'history'),
       orderBy('date', 'desc'),
-      limit(10)
+      limit(limitCount)
     );
     const snap = await getDocs(q);
     const history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -241,7 +241,7 @@ export const getHistory = async () => {
     console.error('[API] getHistory failed:', err);
     // If complex query fails (likely index error), try simple query
     try {
-      const simpleQ = query(collection(db, 'users', user.uid, 'history'), limit(10));
+      const simpleQ = query(collection(db, 'users', user.uid, 'history'), limit(limitCount));
       const snap = await getDocs(simpleQ);
       const history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       // Sort manually

@@ -56,7 +56,7 @@ export default function ProfilePanel() {
       setEditData({ name: currentUser.displayName || '', email: currentUser.email });
 
       const [historyRes, colorsRes, prefsRes, dnaRes] = await Promise.all([
-        getHistory(),
+        getHistory(isPro ? 100 : 10),
         getSavedColors(currentUser.uid),
         loadUserPreferences(currentUser.uid),
         loadProfile(currentUser.uid)
@@ -234,9 +234,13 @@ export default function ProfilePanel() {
                           <div className="space-y-1">
                              <div className="flex justify-between text-xs font-bold">
                                 <span className={isDark ? 'text-white/80' : 'text-gray-700'}>History Saved</span>
-                                <span className={isDark ? 'text-white' : 'text-pink-600'}>{usage?.analysisHistoryCount || 0} / 5 Slots</span>
+                                <span className={isDark ? 'text-white' : 'text-pink-600'}>
+                                  {isPro ? `${usage?.analysisHistoryCount || 0} / ∞` : `${usage?.analysisHistoryCount || 0} / 10 Slots`}
+                                </span>
                              </div>
-                             <div className={`w-full rounded-full h-1.5 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}><div className="bg-pink-500 h-1.5 rounded-full" style={{ width: `${((usage?.analysisHistoryCount || 0) / 5) * 100}%` }}></div></div>
+                             <div className={`w-full rounded-full h-1.5 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
+                                <div className="bg-pink-500 h-1.5 rounded-full" style={{ width: isPro ? '100%' : `${((usage?.analysisHistoryCount || 0) / 10) * 100}%` }}></div>
+                             </div>
                           </div>
                           
                           {/* Coin Balance */}

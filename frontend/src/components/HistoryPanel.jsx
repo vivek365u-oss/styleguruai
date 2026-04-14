@@ -9,7 +9,8 @@ import { FashionIcons, IconRenderer } from './Icons';
 function HistoryPanel({ onShowResult }) {
   const { theme } = useContext(ThemeContext);
   const { t, language } = useLanguage();
-  const historyLimit = 20; // Increased for all users
+  const { isPro } = usePlan();
+  const historyLimit = isPro ? 100 : 10;
   const isDark = theme === 'dark';
   const { user } = useAuthState();
   const [history, setHistory] = useState([]);
@@ -28,7 +29,7 @@ function HistoryPanel({ onShowResult }) {
     } else {
       setLoading(false);
     }
-  }, [user?.uid]);
+  }, [user?.uid, isPro]);
 
   // Re-fetch when switching tabs to ensure freshness
   useEffect(() => {
@@ -39,7 +40,7 @@ function HistoryPanel({ onShowResult }) {
 
   const fetchHistory = async () => {
     try {
-      const res = await getHistory();
+      const res = await getHistory(historyLimit);
       setHistory(res.data.history || []);
     } catch {
       setError(t('failedHistory'));
