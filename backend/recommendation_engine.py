@@ -1089,7 +1089,7 @@ class RecommendationEngine:
             "base_pant_colors": base_pant,
         }
 
-    def check_outfit_compatibility(self, skin_tone: SkinToneResult, outfit_color: dict, lang: str = "en") -> dict:
+    def check_outfit_compatibility(self, skin_tone: SkinToneResult, outfit_color: dict, gender: str = "male", clothing_type: str = "top", lang: str = "en") -> dict:
         self.lang = lang if lang in MESSAGES else "en"
         category = skin_tone.category
         undertone = skin_tone.subcategory
@@ -1100,7 +1100,12 @@ class RecommendationEngine:
         outfit_hex = outfit_color["hex"]
         outfit_name = outfit_color.get("name", "This color")
 
-        best_colors = self._get_shirt_colors(category, undertone)
+        is_bottom = (clothing_type in ["bottom", "pant", "jeans", "trouser", "skirt"])
+        if is_bottom:
+            best_colors = self._get_pant_colors(category, undertone)
+        else:
+            best_colors = self._get_shirt_colors(category, undertone)
+            
         avoid_colors = self._get_avoid_colors(category, undertone)
 
         # ============================================

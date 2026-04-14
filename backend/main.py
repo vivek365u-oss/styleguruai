@@ -12,7 +12,7 @@ import firebase_admin
 from firebase_admin import credentials, auth as firebase_auth, firestore as firebase_firestore
 import razorpay
 
-from fastapi import FastAPI, UploadFile, File, BackgroundTasks, Request, Depends, HTTPException, status
+from fastapi import FastAPI, UploadFile, File, BackgroundTasks, Request, Depends, Form, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
@@ -217,98 +217,9 @@ recommendation_engine = RecommendationEngine()
 # ============================================
 def extract_dominant_outfit_color(image: np.ndarray) -> dict:
     import cv2
-
-    small = cv2.resize(image, (300, 300))
-    rgb = cv2.cvtColor(small, cv2.COLOR_BGR2RGB)
-
-    sh, sw = small.shape[:2]
-
-    # Center crop — background is mostly on the edges
-    margin_h = int(sh * 0.20)
-    margin_w = int(sw * 0.20)
-    center_region = rgb[margin_h:sh-margin_h, margin_w:sw-margin_w]
-
-    pixels = center_region.reshape(-1, 3).astype(np.float32)
-
-    brightness = np.mean(pixels, axis=1)
-    max_rgb = np.max(pixels, axis=1)
-    min_rgb = np.min(pixels, axis=1)
-    saturation = (max_rgb - min_rgb) / (max_rgb + 1e-6)
-
-    # ── Step 1: Detect if the dominant region is already a light/white outfit ──
-    # Count how many pixels are high-brightness low-saturation (white/off-white range)
-    is_white_region = (brightness > 200) & (saturation < 0.15)
-    white_fraction = np.sum(is_white_region) / len(pixels)
-
-    if white_fraction > 0.35:
-        # The outfit IS white/off-white — do NOT filter these out.
-        # Only remove very dark (shadow/black) pixels
-        is_background = (brightness < 8)
-    else:
-        # Standard background filter: remove plain walls, floors, neutral BG
-        # Keep white shirts by NOT filtering brightness > 215 blindly
-        is_background = (
-            (brightness < 8) |
-            # Only filter very-bright if saturation is also extremely low AND
-            # white fraction is low (meaning it's likely the background, not clothing)
-            ((brightness > 240) & (saturation < 0.04) & (white_fraction < 0.20))
-        )
-
-    fabric_pixels = pixels[~is_background]
-
-    if len(fabric_pixels) < 100:
-        # Softer fallback — only strip pure black and pure white background
-        is_bg_relaxed = (brightness < 5) | ((brightness > 250) & (saturation < 0.02))
-        fabric_pixels = pixels[~is_bg_relaxed]
-
-    if len(fabric_pixels) < 50:
-        fabric_pixels = pixels
-
-    # K-means with multiple clusters
-    k = min(8, len(fabric_pixels) // 10, len(fabric_pixels))
-    k = max(3, k)
-
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.5)
-
-    try:
-        _, labels, centers = cv2.kmeans(
-            fabric_pixels, k, None, criteria, 15, cv2.KMEANS_PP_CENTERS
-        )
-    except:
-        avg = np.mean(fabric_pixels, axis=0)
-        r_v, g_v, b_v = int(avg[0]), int(avg[1]), int(avg[2])
-        centers = np.array([[r_v, g_v, b_v]])
-        labels = np.zeros(len(fabric_pixels), dtype=np.int32)
-
-    counts = np.bincount(labels.flatten(), minlength=len(centers))
-
-    # ── Best cluster: count weight + small saturation bonus ──
-    # IMPORTANT: Do NOT skip white/bright clusters — they may be the outfit.
-    best_idx = 0
-    best_score = -1
-
-    for i, center in enumerate(centers):
-        cr, cg, cb = center[0], center[1], center[2]
-        brightness_c = (cr + cg + cb) / 3
-        max_c = max(cr, cg, cb)
-        min_c = min(cr, cg, cb)
-        sat = (max_c - min_c) / (max_c + 1e-6)
-
-        # Skip near-black pure shadow artifacts only
-        if brightness_c < 8:
-            continue
-
-        count_weight = counts[i] / len(fabric_pixels)
-        # Saturation bonus is smaller now so white clusters can still win by count
-        sat_bonus = sat * 0.25
-        score = count_weight + sat_bonus
-
-        if score > best_score:
-            best_score = score
-            best_idx = i
-
-    dominant = centers[best_idx]
-    r, g, b = int(dominant[0]), int(dominant[1]), int(dominant[2])
+    import os
+    import base64
+    import requests
 
     named_colors = {
         # Neutrals & Whites
@@ -377,21 +288,149 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
         "Eggplant": (97, 64, 81)
     }
 
-    min_dist = float('inf')
-    closest_name = "Unknown"
-    for name, (cr, cg, cb) in named_colors.items():
-        # Redmean perceptual color distance formula for superior accuracy
-        rmean = (r + cr) / 2
-        dr = r - cr
-        dg = g - cg
-        db = b - cb
-        dist = (((512 + rmean) * dr * dr) / 256 + 4 * dg * dg + ((767 - rmean) * db * db) / 256) ** 0.5
-        
-        if dist < min_dist:
-            min_dist = dist
-            closest_name = name
+    def _get_color_name(r, g, b):
+        min_dist = float('inf')
+        closest_name = "Unknown"
+        for name, (cr, cg, cb) in named_colors.items():
+            rmean = (r + cr) / 2
+            dr = r - cr
+            dg = g - cg
+            db = b - cb
+            dist = (((512 + rmean) * dr * dr) / 256 + 4 * dg * dg + ((767 - rmean) * db * db) / 256) ** 0.5
+            if dist < min_dist:
+                min_dist = dist
+                closest_name = name
+        return closest_name
 
-    return {"r": r, "g": g, "b": b, "hex": f"#{r:02x}{g:02x}{b:02x}", "name": closest_name}
+    # Check APIs
+    engine = os.environ.get("OUTFIT_COLOR_ENGINE", "local").lower()
+    if engine in ["google", "clarifai"]:
+        try:
+            _, buffer = cv2.imencode('.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 85])
+            base64_image = base64.b64encode(buffer).decode('utf-8')
+            
+            if engine == "google":
+                api_key = os.environ.get("GOOGLE_VISION_API_KEY")
+                if api_key:
+                    url = f"https://vision.googleapis.com/v1/images:annotate?key={api_key}"
+                    payload = {
+                        "requests": [{
+                            "image": {"content": base64_image},
+                            "features": [{"type": "IMAGE_PROPERTIES"}]
+                        }]
+                    }
+                    resp = requests.post(url, json=payload, timeout=5)
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        colors = data['responses'][0]['imagePropertiesAnnotation']['dominantColors']['colors']
+                        best_color = None
+                        best_score = -1
+                        for c in colors:
+                            rgb = c['color']
+                            r, g, b = rgb.get('red', 0), rgb.get('green', 0), rgb.get('blue', 0)
+                            brightness = (r + g + b) / 3
+                            if brightness < 15: continue
+                            if c.get('score', 0) > best_score:
+                                best_score = c.get('score', 0)
+                                best_color = (int(r), int(g), int(b))
+                        if best_color:
+                            r, g, b = best_color
+                            return {"r": r, "g": g, "b": b, "hex": f"#{r:02x}{g:02x}{b:02x}", "name": _get_color_name(r, g, b)}
+            
+            elif engine == "clarifai":
+                pat = os.environ.get("CLARIFAI_PAT")
+                if pat:
+                    url = "https://api.clarifai.com/v2/models/color-recognition/outputs"
+                    headers = {"Authorization": f"Key {pat}", "Content-Type": "application/json"}
+                    payload = {"inputs": [{"data": {"image": {"base64": base64_image}}}]}
+                    resp = requests.post(url, headers=headers, json=payload, timeout=5)
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        concepts = data['outputs'][0]['data']['colors']
+                        best_concept = None
+                        best_val = -1
+                        for c in concepts:
+                            val = c['value']
+                            hex_val = c['w3c']['hex'].lstrip('#')
+                            r, g, b = int(hex_val[0:2], 16), int(hex_val[2:4], 16), int(hex_val[4:6], 16)
+                            brightness = (r + g + b) / 3
+                            if brightness < 15: continue
+                            if val > best_val:
+                                best_val = val
+                                best_concept = (r, g, b, c['w3c']['name'])
+                        if best_concept:
+                            r, g, b, name = best_concept
+                            return {"r": r, "g": g, "b": b, "hex": f"#{r:02x}{g:02x}{b:02x}", "name": name.title()}
+        except Exception as e:
+            print(f"[API ERROR] {engine} failed: {e}. Falling back to local logic.")
+
+    # FALLBACK Local logic
+    small = cv2.resize(image, (300, 300))
+    rgb = cv2.cvtColor(small, cv2.COLOR_BGR2RGB)
+    sh, sw = small.shape[:2]
+    margin_h = int(sh * 0.20)
+    margin_w = int(sw * 0.20)
+    center_region = rgb[margin_h:sh-margin_h, margin_w:sw-margin_w]
+    pixels = center_region.reshape(-1, 3).astype(np.float32)
+    brightness = np.mean(pixels, axis=1)
+    max_rgb = np.max(pixels, axis=1)
+    min_rgb = np.min(pixels, axis=1)
+    saturation = (max_rgb - min_rgb) / (max_rgb + 1e-6)
+
+    is_white_region = (brightness > 200) & (saturation < 0.15)
+    white_fraction = np.sum(is_white_region) / len(pixels)
+
+    if white_fraction > 0.35:
+        is_background = (brightness < 8)
+    else:
+        is_background = (
+            (brightness < 8) |
+            ((brightness > 240) & (saturation < 0.04) & (white_fraction < 0.20))
+        )
+
+    fabric_pixels = pixels[~is_background]
+
+    if len(fabric_pixels) < 100:
+        is_bg_relaxed = (brightness < 5) | ((brightness > 250) & (saturation < 0.02))
+        fabric_pixels = pixels[~is_bg_relaxed]
+    if len(fabric_pixels) < 50:
+        fabric_pixels = pixels
+
+    k = min(8, len(fabric_pixels) // 10, len(fabric_pixels))
+    k = max(3, k)
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.5)
+    
+    try:
+        _, labels, centers = cv2.kmeans(fabric_pixels, k, None, criteria, 15, cv2.KMEANS_PP_CENTERS)
+    except:
+        avg = np.mean(fabric_pixels, axis=0)
+        centers = np.array([[int(avg[0]), int(avg[1]), int(avg[2])]])
+        labels = np.zeros(len(fabric_pixels), dtype=np.int32)
+
+    counts = np.bincount(labels.flatten(), minlength=len(centers))
+    best_idx = 0
+    best_score = -1
+
+    for i, center in enumerate(centers):
+        cr, cg, cb = center[0], center[1], center[2]
+        brightness_c = (cr + cg + cb) / 3
+        max_c = max(cr, cg, cb)
+        min_c = min(cr, cg, cb)
+        sat = (max_c - min_c) / (max_c + 1e-6)
+        if brightness_c < 8: continue
+
+        count_weight = counts[i] / len(fabric_pixels)
+        sat_bonus = sat * 0.25
+        score = count_weight + sat_bonus
+
+        if score > best_score:
+            best_score = score
+            best_idx = i
+
+    dominant = centers[best_idx]
+    r, g, b = int(dominant[0]), int(dominant[1]), int(dominant[2])
+
+    return {"r": r, "g": g, "b": b, "hex": f"#{r:02x}{g:02x}{b:02x}", "name": _get_color_name(r, g, b)}
 
 # ============================================
 # HELPER — CORE IMAGE PROCESSING
@@ -647,6 +686,8 @@ async def check_outfit_compatibility(
     selfie: UploadFile = File(...),
     outfit: UploadFile = File(...),
     lang: str = "en",
+    gender: str = Form(default="male"),
+    clothing_type: str = Form(default="top"),
     current_user: dict = Depends(get_current_user)
 ):
     start_time = time.time()
@@ -682,7 +723,7 @@ async def check_outfit_compatibility(
 
         # Smart color extraction — background ignore, kapde ka color detect
         outfit_color = extract_dominant_outfit_color(outfit_image)
-        result = recommendation_engine.check_outfit_compatibility(skin_tone, outfit_color, lang=lang)
+        result = recommendation_engine.check_outfit_compatibility(skin_tone, outfit_color, gender=gender, clothing_type=clothing_type, lang=lang)
 
         processing_time = round(time.time() - start_time, 2)
         return JSONResponse(content={
