@@ -139,15 +139,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.on_event("startup")
-async def startup_event():
-    """Check products on startup and clear old ones without gender field"""
-    # Skip if Firebase not initialized - the startup check can run on first request instead
-    if not FIREBASE_INITIALIZED:
-        print("[STARTUP] ℹ️  Firebase not initialized - skipping product check (will run on first request)")
-        return
-    
+def perform_db_startup_checks():
+    """Background task to avoid blocking the event loop on server startup"""
     try:
+        from core_utils import get_firestore_db
         db = get_firestore_db()
         
         # Check if products exist
@@ -185,6 +180,23 @@ async def startup_event():
             print("[STARTUP] ℹ️  No products found - seeding will start on first request")
     except Exception as e:
         print(f"[STARTUP] ⚠️  Error during startup check: {str(e)}")
+
+@app.on_event("startup")
+async def startup_event():
+    """Check products on startup and clear old ones without gender field"""
+    # Skip if Firebase not initialized - the startup check can run on first request instead
+    if not FIREBASE_INITIALIZED:
+        print("[STARTUP] ℹ️  Firebase not initialized - skipping product check (will run on first request)")
+        return
+    
+    # CRITICAL RENDER FIX: We push this to a background thread so Uvicorn's event loop is not blocked.
+    # Otherwise, Render's port scan timeout kills the application during slow synchronous DB initialization.
+    import asyncio
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, perform_db_startup_checks)
 
 @app.get("/")
 async def root():
