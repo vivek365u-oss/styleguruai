@@ -168,7 +168,7 @@ function OutfitChecker() {
     setShowProgress(true);
     startProgress(); // Start fake progressive loading
     try {
-      const res = await checkOutfitCompatibility(selfieFile, outfitFile, language);
+      const res = await checkOutfitCompatibility(selfieFile, outfitFile, language, gender, 'top');
       console.log("[OutfitChecker] Analysis successful!");
       completeProgress(); // Complete progress animation
       

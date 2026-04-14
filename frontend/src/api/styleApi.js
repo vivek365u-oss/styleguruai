@@ -333,7 +333,7 @@ export const analyzeImageSeasonal = async (file, season, lang = 'en', onProgress
   }
 };
 
-export const checkOutfitCompatibility = async (selfieFile, outfitFile, lang = 'en', onProgress) => {
+export const checkOutfitCompatibility = async (selfieFile, outfitFile, lang = 'en', gender = 'male', clothingType = 'top', onProgress) => {
   try {
     validateImageFile(selfieFile);
     validateImageFile(outfitFile);
@@ -345,6 +345,8 @@ export const checkOutfitCompatibility = async (selfieFile, outfitFile, lang = 'e
       const formData = new FormData();
       formData.append('selfie', compressedSelfie);
       formData.append('outfit', compressedOutfit);
+      formData.append('gender', gender);
+      formData.append('clothing_type', clothingType);
       return API.post(`/api/outfit/check?lang=${lang}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (e) => {
@@ -358,6 +360,7 @@ export const checkOutfitCompatibility = async (selfieFile, outfitFile, lang = 'e
     throw error;
   }
 };
+
 
 
 export const testTone = (tone, undertone = 'warm') =>
