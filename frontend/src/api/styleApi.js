@@ -186,6 +186,7 @@ export const saveHistory = async (rawDetails) => {
   // Normalize data for UI consistency
   const skinToneObj = rawDetails.analysis?.skin_tone || rawDetails.skin_tone;
   const skinColorObj = rawDetails.analysis?.skin_color || rawDetails.skin_color;
+  const gender = rawDetails.gender || localStorage.getItem('sg_gender') || 'male';
   
   const historyEntry = {
     skinTone: skinToneObj?.category || 'medium',
@@ -193,6 +194,7 @@ export const saveHistory = async (rawDetails) => {
     season: skinToneObj?.color_season || 'Spring',
     confidence: skinToneObj?.confidence || 'medium',
     skinHex: skinColorObj?.hex || '#C68642',
+    gender: gender,
     date: new Date().toISOString(),
     timestamp: Date.now(),
     fullData: rawDetails
@@ -202,18 +204,26 @@ export const saveHistory = async (rawDetails) => {
   
   try {
     const docRef = await addDoc(collection(db, 'users', user.uid, 'history'), entry);
-    // ── SYNC COUNTER (FIX) ──
+    // ── ATOMIC COUNTER SYNC ──
     await updateDoc(doc(db, 'users', user.uid), {
       analysisHistoryCount: increment(1)
     });
-    console.log('[API] History saved and counter synced:', docRef.id);
+
+    // ── PROMOTE TO PRIMARY PROFILE ──
+    const profileRef = doc(db, 'users', user.uid, 'profile', 'data');
+    await setDoc(profileRef, {
+      ...historyEntry,
+      last_analysis_date: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }, { merge: true });
+
+    // ── SYNC LOCAL CACHE ──
+    localStorage.setItem('sg_gender', gender);
+    localStorage.setItem('sg_last_analysis', JSON.stringify(entry));
+
+    console.log('[API] History saved and profile promoted:', docRef.id);
   } catch (err) {
     console.error('[API] Failed to save history to Firestore:', err);
-    // Fallback: save to localStorage temporarily for this session
-    try {
-      const temp = JSON.parse(localStorage.getItem('sg_temp_history') || '[]');
-      localStorage.setItem('sg_temp_history', JSON.stringify([entry, ...temp].slice(0, 10)));
-    } catch {}
     throw err;
   }
 };

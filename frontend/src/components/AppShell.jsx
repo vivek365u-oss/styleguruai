@@ -179,7 +179,7 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
     return count;
   }, []);
 
-  const genderPref = localStorage.getItem('sg_gender_pref') || 'male';
+  const genderPref = localStorage.getItem('sg_gender') || 'male';
   const tone = (personalityData.skinTone || 'medium').toLowerCase();
   const tipObj = getLocalizedTip(genderPref, tone, language);
   const todayTip = tipObj?.tip || archetype.tip;
@@ -454,7 +454,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
   const secondary = personality.secondary;
 
   const avatarLetter = (displayName?.[0] || user?.email?.[0] || 'U').toUpperCase();
-  const analysisCount = usage?.analysisCount || personalityData.analysisCount; // Fallback to personalityData
+  const analysisCount = usage?.analysisHistoryCount || personalityData.analysisCount; // Fallback to personalityData
   const streak = parseInt(localStorage.getItem('sg_streak_count') || '0');
   const wardrobeCount = usage?.wardrobeCount ?? personalityData.wardrobeCount;
   const savedColorsCount = usage?.savedColorsCount ?? 0;
@@ -872,7 +872,7 @@ export default function AppShell({ user, onLogout }) {
   const [error, setError] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedImage, setUploadedImage] = useState(null);
-  const [currentGender, setCurrentGender] = useState(localStorage.getItem('sg_gender_pref') || 'male');
+  const [currentGender, setCurrentGender] = useState(localStorage.getItem('sg_gender') || 'male');
   const [lastAnalysis, setLastAnalysis] = useState(() => {
     try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; }
   });

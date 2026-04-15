@@ -80,8 +80,14 @@ export function useAuthState() {
             localStorage.setItem('sg_last_analysis', JSON.stringify(firestoreEntry));
 
             // Apply saved preferences
-            if (profile.gender_mode) localStorage.setItem('sg_gender', profile.gender_mode);
+            if (profile.gender) localStorage.setItem('sg_gender', profile.gender);
+            if (profile.gender_mode) localStorage.setItem('sg_gender', profile.gender_mode); // Backward compat
             if (profile.language) localStorage.setItem('sg_language', profile.language);
+            
+            // Sync counts to localStorage if they exist in profile or we fetch them separately
+            if (profile.analysisHistoryCount !== undefined) localStorage.setItem('sg_analysis_count', profile.analysisHistoryCount);
+            if (profile.wardrobeCount !== undefined) localStorage.setItem('sg_wardrobe_count', profile.wardrobeCount);
+            if (profile.savedColorsCount !== undefined) localStorage.setItem('sg_colors_count', profile.savedColorsCount);
           } catch (localStorageErr) {
             console.warn('localStorage sync failed:', localStorageErr);
             // Don't fail auth for localStorage issues

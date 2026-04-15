@@ -267,7 +267,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   const [uploadProgress, setUploadProgress_internal] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
   const { progress, startProgress, completeProgress } = useAnalysisProgress();
-  const [gender, setGender] = useState('male');
+  const [gender, setGender] = useState(() => localStorage.getItem('sg_gender') || 'male');
   const [mode, setMode] = useState('normal');
   const [season, setSeason] = useState('summer');
   const [bodyType, setBodyType] = useState('average');
@@ -294,6 +294,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
 
   const handleGenderChange = (newGender) => {
     setGender(newGender);
+    localStorage.setItem('sg_gender', newGender);
     if (onGenderChange) onGenderChange(newGender);
   };
 

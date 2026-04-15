@@ -260,7 +260,7 @@ export function readUserPersonalityData() {
     const activeProfile = primaryProfile || lastAnalysis;
     const analysisCount = parseInt(localStorage.getItem('sg_analysis_count') || '0');
     const streak = parseInt(localStorage.getItem('sg_streak_count') || '0');
-    const gender = localStorage.getItem('sg_gender_pref') || 'male';
+    const gender = localStorage.getItem('sg_gender') || 'male';
 
     const skinTone = activeProfile?.skinTone || activeProfile?.skin_tone?.category || '';
     const skinHex = activeProfile?.skinHex || activeProfile?.skin_tone?.hex || '#C68642';

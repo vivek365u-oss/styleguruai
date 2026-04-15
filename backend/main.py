@@ -299,30 +299,26 @@ FASHION_COLOR_MAP = {
     "Brick Red":        (178,  34,  34),
     "Cherry Red":       (220,  20,  60),
 
-    # ─── PINKS (Retail-Accurate — mall/brand names) ───
-    "Flush Pink":       (255, 235, 235),   # barely-there hint of pink
-    "Baby Pink":        (248, 200, 210),   # very pale, pastel pink
-    "Blush Pink":       (245, 185, 195),   # soft blush, bridal range
-    "Blush":            (240, 175, 185),   # makeup/blush shade
-    "Light Pink":       (255, 180, 200),   # standard light pink
-    "Soft Pink":        (250, 165, 182),   # slightly deeper pastel
-    "Pastel Pink":      (255, 175, 195),   # pastel range
-    "Dusty Rose":       (210, 145, 150),   # muted, earthy rose (Zara/H&M label)
-    "Mauve":            (195, 145, 160),   # grey-pink, muted
-    "Rose":             (230, 130, 145),   # true rose — like rose flower, muted warm pink
-    "Coral Pink":       (248, 131, 121),   # orange-tinted pink
-    "Peach Pink":       (255, 185, 155),   # peachy pink
-    "Pink":             (255, 105, 155),   # standard retail "Pink" label
-    "Dark Pink":        (230,  75, 130),   # deeper saturated pink
-    "Hot Pink":         (245,  70, 145),   # ← #f55897 maps HERE (vivid electric pink)
-    "Bright Pink":      (250,  20, 130),   # brighter electric pink
-    "Neon Pink":        (255,   5, 110),   # neon/fluorescent pink
-    "Deep Pink":        (215,  20, 110),   # darkest vivid pink
-    "Fuchsia":          (200,   0, 130),   # blue-tinted vivid pink (H&M Fuchsia)
-    "Magenta":          (255,   0, 200),   # true magenta — red+blue equal
-    "Hot Magenta":      (240,   0, 180),   # hot magenta
-    "Rose Pink":        (255,  90, 170),   # rose-tinted vivid pink
-    "Berry Pink":       (175,  50, 110),   # deep berry pink
+    # ─── PINKS ───
+    "Flush Pink":       (255, 230, 230),
+    "Baby Pink":        (244, 194, 194),
+    "Blush Pink":       (255, 200, 200),
+    "Light Pink":       (255, 182, 193),
+    "Soft Pink":        (255, 170, 185),
+    "Pink":             (255, 120, 160),
+    "Pastel Pink":      (255, 180, 200),
+    "Rose":             (255, 100, 130),
+    "Hot Pink":         (255,  20, 147),
+    "Bright Pink":      (255,   0, 127),
+    "Deep Pink":        (220,  30, 120),
+    "Dark Pink":        (220,  80, 120),
+    "Magenta":          (255,   0, 255),
+    "Fuchsia":          (210,  10,  95),
+    "Rose Pink":        (255, 100, 190),
+    "Coral Pink":       (248, 131, 121),
+    "Peach Pink":       (255, 190, 160),
+    "Dusty Rose":       (200, 140, 140),
+    "Mauve":            (190, 140, 155),
 
     # ─── BLUES ───
     "Ice Blue":         (210, 245, 255),
@@ -1162,6 +1158,8 @@ def init_user_limits_if_needed(uid: str, db):
             "coins": 0,
             "adFreeAnalysesLeft": 3,
             "analysisHistoryCount": 0,
+            "wardrobeCount": 0,
+            "savedColorsCount": 0,
             "adFreeOutfitChecks": 3,
             "planName": "free",
             "created_at": datetime.utcnow().isoformat()
