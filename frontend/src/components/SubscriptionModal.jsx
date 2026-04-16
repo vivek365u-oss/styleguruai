@@ -113,15 +113,41 @@ export default function SubscriptionModal() {
     // Open Monetag Direct Link in new tab
     window.open('https://omg10.com/4/10863757', '_blank');
 
-    // Fake progress timer for the ad view
-    setTimeout(() => {
-      adWatchedRef.current = true; // mark as watched
+    const adStartTime = Date.now();
+    let hiddenOnce = false;
+
+    const visibilityHandler = () => {
+      if (document.visibilityState === 'hidden') {
+        hiddenOnce = true;
+      } else if (document.visibilityState === 'visible') {
+        const elapsed = Date.now() - adStartTime;
+        if (hiddenOnce && elapsed > 2000) {
+          // User returned after at least 2 seconds
+          cleanupAndSuccess();
+        }
+      }
+    };
+
+    let failsafeTimeout;
+
+    const cleanupAndSuccess = () => {
+      document.removeEventListener('visibilitychange', visibilityHandler);
+      clearTimeout(failsafeTimeout);
+      adWatchedRef.current = true;
       setIsOpen(false);
       setLoadingTier(null);
       if (onSuccessCallback) {
-        onSuccessCallback(true); // pass true for ad-watched / skipLimit
+        onSuccessCallback(true);
       }
-    }, 4000);
+    };
+
+    // Attach listener
+    document.addEventListener('visibilitychange', visibilityHandler);
+
+    // Fallback in case the browser doesn't fire visibilitychange (e.g. desktop split view)
+    failsafeTimeout = setTimeout(() => {
+       cleanupAndSuccess();
+    }, 12000);
   };
 
   if (!isOpen) return null;
@@ -135,7 +161,7 @@ export default function SubscriptionModal() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={handleClose}
-          className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
+          className="absolute inset-0 bg-slate-950/95"
         />
 
         <motion.div
@@ -168,7 +194,7 @@ export default function SubscriptionModal() {
 
             {/* ─────────────── TIER 1: YEARLY (Highlight) ─────────────── */}
             <div className="relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-500" />
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl opacity-30 group-hover:opacity-60 transition duration-500 shadow-[0_0_15px_rgba(139,92,246,0.3)]" />
               <div className="relative border border-purple-500/50 bg-[#131024] rounded-3xl p-6 transition-transform group-active:scale-[0.98]">
                 <div className="absolute top-0 right-6 -translate-y-1/2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-[9px] font-black uppercase px-3 py-1 rounded-full tracking-widest shadow-lg">
                   Save 60%
