@@ -262,18 +262,34 @@ export default function StyleNavigator({ user, onAnalyze }) {
         setProfile(activeProfile);
         setPrefs(userPrefs);
         setWardrobe(userWardrobe || []);
-        if (locked) setInsights(locked);
+        
+        // Track current DNA variables
+        const currentTone = (activeProfile?.skinTone || activeProfile?.skin_tone?.category || 'medium').toLowerCase();
+        const currentGender = (activeProfile?.gender || userPrefs?.gender || 'male').toLowerCase().includes('female') ? 'female' : 'male';
+
+        // Bug Fix: Check if locked insights exist AND if they match the current DNA
+        let validInsights = locked;
+        if (locked) {
+           const lockedTone = (locked.source_tone || '').toLowerCase();
+           const lockedGender = (locked.source_gender || '').toLowerCase();
+           
+           // If DNA changed since insights generation, invalidate insights!
+           if (lockedTone && (lockedTone !== currentTone || lockedGender !== currentGender)) {
+              console.log('[StyleCompass] DNA changed! Regenerating insights...');
+              validInsights = null; 
+           }
+        }
+
+        if (validInsights) setInsights(validInsights);
 
         // Bug #14 fix: set trendGender immediately from first data load
-        const resolvedGender = activeProfile?.gender || userPrefs?.gender || 'male';
-        const tg = (resolvedGender.toLowerCase().includes('female') || resolvedGender === 'women') ? 'female' : 'male';
-        setTrendGender(tg);
+        setTrendGender(currentGender);
 
         const today = new Date().toLocaleDateString('en-CA');
         if (logs?.length > 0 && logs[0].date === today) setIsWorn(true);
 
-        // Bug #13 fix: only call API if no locked insights exist yet
-        if (activeProfile && !locked) {
+        // Bug #13 fix: only call API if no valid insights exist for current DNA
+        if (activeProfile && !validInsights) {
           const res = await getStyleInsights(
             activeProfile.skinTone || activeProfile.skin_tone?.category,
             activeProfile.undertone || activeProfile.skin_tone?.undertone,
@@ -283,8 +299,13 @@ export default function StyleNavigator({ user, onAnalyze }) {
             activeProfile.gender || userPrefs?.gender || 'male'
           );
           if (res?.success) {
-            setInsights(res.insights);
-            saveStyleInsights(uid, res.insights).catch(() => {});
+            const enrichedInsights = {
+               ...res.insights,
+               source_tone: currentTone,
+               source_gender: currentGender
+            };
+            setInsights(enrichedInsights);
+            saveStyleInsights(uid, enrichedInsights).catch(() => {});
           }
         }
       } catch (e) {
@@ -317,14 +338,21 @@ export default function StyleNavigator({ user, onAnalyze }) {
 
   // Best colors from analysis or fallback color science
   const bestColors = useMemo(() => {
-    const fromInsights = insights?.best_shirt_colors || insights?.best_dress_colors || insights?.best_colors || [];
+    let fromInsights = [];
+    if (gender === 'female' && insights?.best_dress_colors?.length > 0) fromInsights = insights.best_dress_colors;
+    else if (gender === 'male' && insights?.best_shirt_colors?.length > 0) fromInsights = insights.best_shirt_colors;
+    else if (insights?.best_colors?.length > 0) fromInsights = insights.best_colors;
+    else if (insights?.best_shirt_colors?.length > 0) fromInsights = insights.best_shirt_colors; // fallback
+    else if (insights?.best_dress_colors?.length > 0) fromInsights = insights.best_dress_colors; // fallback
+    
     if (fromInsights.length > 0) return fromInsights.slice(0, 6);
+    
     const palette = TONE_PALETTE[toneKey]?.[undertone] || TONE_PALETTE.medium.neutral;
     return palette.map((hex, i) => ({
       name: ['Primary Tone', 'Secondary Tone', 'Accent Color', 'Neutral Base', 'Power Color', 'Contrast'][i] || `Color ${i+1}`,
       hex,
     }));
-  }, [insights, toneKey, undertone]);
+  }, [insights, toneKey, undertone, gender]);
 
   // Outfit for current mood
   const outfit = useMemo(() => {
