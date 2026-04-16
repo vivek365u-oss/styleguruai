@@ -1,7 +1,7 @@
 // StyleGuruAI — Unified SPA Architecture v3.0
 // Login = state change only, no page redirect
-import React, { useState, Suspense, lazy } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { logout } from './api/styleApi';
 import { LanguageProvider } from './i18n/LanguageProvider';
 import { PlanProvider } from './context/PlanProvider';
@@ -11,6 +11,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeContext } from './context/ThemeContext';
 import { usePWA } from './hooks/usePWA';
 import InstallPromptModal from './components/InstallPromptModal';
+import { trackPageView, trackUTMParams, trackUserReturn, setUserProperties } from './utils/analytics';
 
 // ── Core shells (eagerly loaded for fast paint) ──
 import LandingPage   from './components/LandingPage';
@@ -107,6 +108,36 @@ function AuthErrorUI({ error, onRetry }) {
 // ── Main Routes ──
 function AppRoutes({ user, setUser }) {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // ── SPA Page View Tracking (fires on every route change) ──
+  useEffect(() => {
+    trackPageView(location.pathname, document.title);
+  }, [location.pathname]);
+
+  // ── UTM Campaign Tracking (fires once on initial load) ──
+  useEffect(() => {
+    trackUTMParams();
+  }, []);
+
+  // ── User Retention Tracking ──
+  useEffect(() => {
+    if (user) {
+      const analysisCount = parseInt(localStorage.getItem('sg_analysis_count') || '0', 10);
+      const firstVisit = localStorage.getItem('sg_first_visit');
+      const now = Date.now();
+      if (!firstVisit) {
+        localStorage.setItem('sg_first_visit', now.toString());
+      }
+      const daysSince = firstVisit ? Math.floor((now - parseInt(firstVisit, 10)) / 86400000) : 0;
+      trackUserReturn(analysisCount, daysSince);
+      setUserProperties({
+        user_type: user ? 'registered' : 'anonymous',
+        analysis_count: analysisCount,
+        days_active: daysSince,
+      });
+    }
+  }, [user?.email]);
 
   const handleLogout = () => {
     logout();
@@ -191,7 +222,13 @@ function App() {
     return <AuthErrorUI error={authState.error} onRetry={() => window.location.reload()} />;
   }
 
-  if (authState.loading) {
+  // To prevent stopping Googlebot from indexing, we only show full-screen load
+  // if there's a strong hint the user is logged in natively (from previous sessions).
+  // Otherwise, we let the app render paths like /about directly, while the LandingPage
+  // will be shown for unauthenticated users instead of an empty loading page.
+  const presumedLoggedIn = !!localStorage.getItem('sg_last_analysis');
+
+  if (authState.loading && presumedLoggedIn) {
     return <LoadingFallback />;
   }
 

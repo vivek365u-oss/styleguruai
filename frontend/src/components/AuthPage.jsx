@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { registerUser, loginUser, saveAuth, googleLogin } from '../api/styleApi';
 import { useLanguage } from '../i18n/LanguageContext';
 import { Link } from 'react-router-dom';
+import { trackSignUp, trackLogin } from '../utils/analytics';
 
 /* ══════════════════════════════════════════════
    AuthPage — Premium Editorial Split Screen
@@ -28,6 +29,8 @@ function AuthPage({ onLoginSuccess }) {
         ? await loginUser({ email: form.email, password: form.password })
         : await registerUser({ email: form.email, password: form.password, full_name: form.full_name });
       saveAuth(res.data);
+      if (mode === 'login') trackLogin('email');
+      else trackSignUp('email');
       onLoginSuccess({ name: res.data.user_name, email: res.data.email });
     } catch (err) {
       const msg =
@@ -48,6 +51,7 @@ function AuthPage({ onLoginSuccess }) {
     try {
       const user = await googleLogin();
       saveAuth({ user_name: user.name, email: user.email });
+      trackLogin('google');
       onLoginSuccess({ name: user.name, email: user.email });
     } catch {
       setError(t('googleFailed'));

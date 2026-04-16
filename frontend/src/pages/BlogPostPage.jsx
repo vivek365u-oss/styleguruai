@@ -1,12 +1,42 @@
 import { useParams, Navigate, Link } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 import SEOHead from '../components/SEOHead';
 import { blogPosts } from '../data/blogPosts';
+import { trackBlogRead, trackBlogScroll, trackCTAClick } from '../utils/analytics';
 
 const C = { text: '#F0EDE6', muted: '#6B6B6B', border: '#242424', surface: '#141414', gold: '#C9A96E' };
 
 export default function BlogPostPage() {
   const { slug } = useParams();
   const post = blogPosts.find((p) => p.slug === slug);
+  const scrollTracked = useRef({ 50: false, 75: false, 100: false });
+
+  // Track blog read on mount
+  useEffect(() => {
+    if (post) {
+      trackBlogRead(post.slug, post.title);
+      scrollTracked.current = { 50: false, 75: false, 100: false };
+    }
+  }, [post?.slug]);
+
+  // Track scroll depth (50%, 75%, 100%)
+  useEffect(() => {
+    if (!post) return;
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (docHeight <= 0) return;
+      const pct = Math.round((scrollTop / docHeight) * 100);
+      [50, 75, 100].forEach(threshold => {
+        if (pct >= threshold && !scrollTracked.current[threshold]) {
+          scrollTracked.current[threshold] = true;
+          trackBlogScroll(post.slug, threshold);
+        }
+      });
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [post?.slug]);
 
   if (!post) return <Navigate to="/404" replace />;
 
@@ -69,6 +99,7 @@ export default function BlogPostPage() {
         </p>
         <Link
           to="/"
+          onClick={() => trackCTAClick('analyze_my_style', 'blog_post')}
           style={{ display: 'inline-block', padding: '14px 32px', background: C.gold, color: '#0A0A0A', fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', fontWeight: 600, fontFamily: "'Inter',sans-serif", transition: 'opacity 0.2s' }}
           onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
           onMouseLeave={e => e.currentTarget.style.opacity = '1'}
