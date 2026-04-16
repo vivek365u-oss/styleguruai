@@ -189,3 +189,166 @@ export function trackOutboundClick(url, linkText) {
     outbound: true,
   });
 }
+
+// ══════════════════════════════════════════════════
+//  8. DEEP FEATURE / TAB TRACKING
+// ══════════════════════════════════════════════════
+
+/** Track which in-app tab/section the user visits */
+export function trackTabView(tabId) {
+  gtag('event', 'tab_view', {
+    tab_name: tabId,
+    timestamp: new Date().toISOString(),
+  });
+
+  // Also fire specific named events for each tab
+  const tabEvents = {
+    home: 'view_home',
+    analyze: 'view_analyze',
+    history: 'view_history',
+    wardrobe: 'view_wardrobe',
+    navigator: 'view_style_compass',
+    tools: 'view_tools',
+    scanner: 'view_color_scanner',
+    profile: 'view_profile',
+  };
+  const specificEvent = tabEvents[tabId];
+  if (specificEvent) {
+    gtag('event', specificEvent, { source: 'tab_navigation' });
+  }
+}
+
+/** Track shopping page interactions */
+export function trackShoppingView(category, itemCount) {
+  gtag('event', 'view_shopping', {
+    shopping_category: category || 'all',
+    item_count: itemCount || 0,
+  });
+}
+
+/** Track shopping item click */
+export function trackShoppingItemClick(itemName, itemPrice, itemUrl) {
+  gtag('event', 'shopping_item_click', {
+    item_name: itemName,
+    item_price: itemPrice || 0,
+    item_url: itemUrl || '',
+    event_category: 'monetization',
+  });
+}
+
+/** Track Style Compass usage */
+export function trackStyleCompassUse(action, detail) {
+  gtag('event', 'style_compass_use', {
+    compass_action: action, // 'view', 'filter', 'recommend', 'save'
+    compass_detail: detail || '',
+  });
+}
+
+/** Track Color Scanner usage */
+export function trackColorScannerUse(action, color) {
+  gtag('event', 'color_scanner_use', {
+    scanner_action: action, // 'scan', 'match', 'save'
+    color_detected: color || '',
+  });
+}
+
+/** Track wardrobe interaction */
+export function trackWardrobeInteraction(action, itemCount) {
+  gtag('event', 'wardrobe_interaction', {
+    wardrobe_action: action, // 'view', 'add', 'remove', 'check_outfit'
+    item_count: itemCount || 0,
+  });
+}
+
+/** Track history panel usage */
+export function trackHistoryView(entryCount) {
+  gtag('event', 'history_view', {
+    history_entries: entryCount || 0,
+  });
+}
+
+/** Track tools tab usage */
+export function trackToolUse(toolName) {
+  gtag('event', 'tool_use', {
+    tool_name: toolName, // 'outfit_checker', 'color_scanner', 'style_quiz'
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  9. SUBSCRIPTION / MONETIZATION EVENTS
+// ══════════════════════════════════════════════════
+
+/** Track subscription modal open */
+export function trackSubscriptionView(source) {
+  gtag('event', 'subscription_view', {
+    source: source || 'unknown', // 'profile', 'limit_reached', 'banner'
+  });
+}
+
+/** Track subscription purchase */
+export function trackSubscriptionPurchase(plan, price) {
+  gtag('event', 'purchase', {
+    currency: 'INR',
+    value: price || 0,
+    items: [{ item_name: plan || 'pro', quantity: 1 }],
+  });
+}
+
+/** Track upgrade button click */
+export function trackUpgradeClick(source) {
+  gtag('event', 'upgrade_click', {
+    source: source || 'unknown',
+    event_category: 'monetization',
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  10. TIME-ON-PAGE TRACKING
+// ══════════════════════════════════════════════════
+
+let _pageEnterTime = Date.now();
+
+/** Call when entering a new tab/page */
+export function markPageEnter() {
+  _pageEnterTime = Date.now();
+}
+
+/** Call when leaving a tab/page — sends time spent */
+export function trackTimeOnPage(pageName) {
+  const seconds = Math.round((Date.now() - _pageEnterTime) / 1000);
+  if (seconds > 1) {
+    gtag('event', 'time_on_page', {
+      page_name: pageName,
+      time_seconds: seconds,
+      time_bucket: seconds < 10 ? 'bounce' : seconds < 30 ? 'short' : seconds < 120 ? 'medium' : 'deep',
+    });
+  }
+  _pageEnterTime = Date.now();
+}
+
+// ══════════════════════════════════════════════════
+//  11. LEGACY COMPATIBILITY (AppShell uses these)
+// ══════════════════════════════════════════════════
+
+/** Event names enum for AppShell compatibility */
+export const EVENTS = {
+  ANALYSIS_COMPLETE: 'analysis_complete',
+  SELFIE_UPLOAD: 'selfie_upload',
+  WARDROBE_ADD: 'wardrobe_add',
+  COLOR_SAVE: 'color_save',
+  SHARE: 'share',
+  TAB_VIEW: 'tab_view',
+  CTA_CLICK: 'cta_click',
+  SHOPPING_CLICK: 'shopping_item_click',
+  TOOL_USE: 'tool_use',
+  UPGRADE_CLICK: 'upgrade_click',
+};
+
+/** Legacy logEvent function used by AppShell */
+export function logEvent(eventName, params = {}) {
+  gtag('event', eventName, {
+    ...params,
+    event_timestamp: new Date().toISOString(),
+  });
+}
+

@@ -17,7 +17,7 @@ import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import { getLocalizedTip } from '../data/localTips';
-import { logEvent, EVENTS } from '../utils/analytics';
+import { logEvent, EVENTS, trackTabView, trackTimeOnPage, markPageEnter } from '../utils/analytics';
 import StyleBot from './StyleBot';
 import { usePlan } from '../context/PlanContext';
 import { useCart } from '../context/CartContext';
@@ -930,7 +930,14 @@ export default function AppShell({ user, onLogout }) {
   }, []);
 
   const handleTabChange = useCallback((tab) => {
-    setActiveTab(tab);
+    // Track time on previous tab before switching
+    trackTimeOnPage(activeTab);
+    setActiveTab(prev => {
+      // Fire deep tab view tracking for the new tab
+      trackTabView(tab);
+      markPageEnter();
+      return tab;
+    });
     setTabHistory(h => {
       // Don't duplicate same tab consecutively
       if (h[h.length - 1] === tab) return h;
@@ -939,7 +946,7 @@ export default function AppShell({ user, onLogout }) {
     if (tab !== 'analyze') setError(null);
     window.history.pushState({ tab }, '');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+  }, [activeTab]);
 
   const handleAnalysisComplete = useCallback(async (data) => {
     setLoading(false); setResults(data); setActiveTab('analyze');
