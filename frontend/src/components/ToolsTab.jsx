@@ -9,6 +9,7 @@ import SelfieStyleAdvisor from './SelfieStyleAdvisor';
 import { getWardrobe, auth } from '../api/styleApi';
 import { FashionIcons, IconRenderer } from './Icons';
 import { getThemeColors, GRAD, VIOLET, PJS, PDI } from '../utils/themeColors';
+import { trackToolUse } from '../utils/analytics';
 
 // ── Shared Card Helper ──────────────────────────────
 const cardStyle = (C) => ({
@@ -223,6 +224,7 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
           <button
             key={tool.id}
             onClick={() => {
+              trackToolUse(tool.id);
               if (tool.id === 'scanner') {
                 onOpenScanner?.();
               } else {

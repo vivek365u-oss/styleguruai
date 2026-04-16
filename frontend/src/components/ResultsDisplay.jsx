@@ -11,6 +11,7 @@ import ColorRecommendationsShop from './ColorRecommendationsShop';
 import AffiliateLink from './AffiliateLink';
 import AdSense from '../AdSense';
 import { FashionIcons, IconRenderer } from './Icons';
+import { trackWardrobeInteraction, trackCTAClick } from '../utils/analytics';
 
 // ── Bug N5 Fix: Module-level savedColors cache (one Firestore read per session) ──
 // All ColorCards within same render share this cache instead of N separate reads
@@ -162,6 +163,7 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
       } else {
         const colorId = await saveSavedColor(auth.currentUser.uid, { name: color.name, hex: color.hex, category, gender, reason: color.reason || '' });
         setSaved(true); setSavedColorId(colorId);
+        trackWardrobeInteraction('add', 1);
         invalidateSavedColorsCache(); // Bug N5: invalidate cache after save
       }
     } catch (err) {
@@ -431,6 +433,7 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
       ]);
 
       setIsDNAsaved(true);
+      trackCTAClick('lock_dna', 'profile_card');
       // Trigger a custom event to notify other components (like StyleNavigator)
       window.dispatchEvent(new CustomEvent('sg_dna_updated'));
       console.log("Style DNA Locked Successfully");

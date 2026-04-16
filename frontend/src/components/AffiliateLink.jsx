@@ -3,6 +3,7 @@
 // Tracks clicks on shopping links for analytics
 // ============================================================
 import { useState } from 'react';
+import { trackShoppingItemClick } from '../utils/analytics';
 
 function AffiliateLink({ 
   href, 
@@ -28,6 +29,9 @@ function AffiliateLink({
         console.warn('[Affiliate] ⚠️ Popup may be blocked by browser');
       }
       
+      // Track in GA4
+      trackShoppingItemClick(color + ' ' + category, price || 0, href);
+
       // Track click in background (non-blocking)
       const token = localStorage.getItem('authToken');
       if (!token) {

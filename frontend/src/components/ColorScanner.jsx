@@ -5,6 +5,7 @@
 import { useState, useRef, useEffect, useContext, useCallback } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { FashionIcons, IconRenderer } from './Icons';
+import { trackColorScannerUse } from '../utils/analytics';
 
 function hexToRgb(hex) {
   if (!hex || hex.length < 7) return { r: 128, g: 128, b: 128 };
@@ -143,6 +144,10 @@ function ColorScanner({ savedPalette = [], onClose }) {
         score,
         verdict: score >= 80 ? 'Perfect match!' : score >= 60 ? 'Good match' : score >= 40 ? 'Decent' : 'Not your color',
       });
+      // Fire tracking once for high confidence match
+      if (score >= 80 && !frozen) {
+        trackColorScannerUse('match', hex);
+      }
     }
 
     animRef.current = requestAnimationFrame(loop);
@@ -156,7 +161,10 @@ function ColorScanner({ savedPalette = [], onClose }) {
   }, [cameraReady, detectColor]);
 
   // Freeze/unfreeze
-  const toggleFreeze = () => setFrozen(!frozen);
+  const toggleFreeze = () => {
+    setFrozen(!frozen);
+    if (!frozen) trackColorScannerUse('scan', detectedHex);
+  };
 
   if (error) {
     return (

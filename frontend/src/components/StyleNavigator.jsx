@@ -19,6 +19,10 @@ import {
   savePrimaryProfile, saveStyleInsights, loadStyleInsights,
   getStyleInsights,
 } from '../api/styleApi';
+import {
+  trackStyleCompassUse, trackShoppingItemClick,
+  trackTabView, trackWardrobeInteraction
+} from '../utils/analytics';
 import { scoreWardrobeItem, getActionableAdvice, getAccessoryAdvice } from '../utils/stylingEngine';
 import { getThemeColors } from '../utils/themeColors';
 
@@ -245,6 +249,17 @@ export default function StyleNavigator({ user, onAnalyze }) {
   const [trendGender,setTrendGender] = useState(null);  // auto-set from profile
   const [trendCat,   setTrendCat]  = useState('All');
 
+  const handleTabChange = (newTab) => {
+    setTab(newTab);
+    trackTabView(newTab);
+    trackStyleCompassUse('view', newTab);
+  };
+
+  const handleMoodChange = (newMood) => {
+    setMood(newMood);
+    trackStyleCompassUse('filter', newMood);
+  };
+
   useEffect(() => {
     if (!auth.currentUser) { setLoading(false); return; }
     const uid = auth.currentUser.uid;
@@ -400,6 +415,7 @@ export default function StyleNavigator({ user, onAnalyze }) {
         top: outfit.top, bottom: outfit.bottom, vibe: mood,
       });
       setIsWorn(true);
+      trackWardrobeInteraction('check_outfit', wardrobe.length);
     } catch (e) { console.error(e); } finally { setLogging(false); }
   // Bug #11 fix: auth.currentUser is a mutable Firebase object, NOT React state.
   // Removed from deps — it changes silently outside React's tracking.
@@ -511,7 +527,7 @@ export default function StyleNavigator({ user, onAnalyze }) {
           { id:'closet',   label:'👝 Closet' },
           { id:'trending', label:'🔥 Trending' },
         ].map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{
+          <button key={t.id} onClick={() => handleTabChange(t.id)} style={{
             flex:1, minWidth:64, padding:'9px 6px', borderRadius:10, border:'none', cursor:'pointer',
             background: tab === t.id ? GRAD : 'transparent',
             color: tab === t.id ? 'white' : C.muted,
@@ -541,7 +557,7 @@ export default function StyleNavigator({ user, onAnalyze }) {
                    if (isLocked) {
                        window.dispatchEvent(new CustomEvent('open_subscription_modal'));
                    } else {
-                       setMood(m.id);
+                       handleMoodChange(m.id);
                    }
                 }} style={{
                   ...pill(mood === m.id),
@@ -591,7 +607,10 @@ export default function StyleNavigator({ user, onAnalyze }) {
                         <p style={{ fontSize:'12px', color:C.text, fontFamily:PJS, fontWeight:600, lineHeight:'1.4', margin:0 }}>{piece.value}</p>
                       </div>
                       <button
-                        onClick={() => setShopItem(piece.value)}
+                        onClick={() => {
+                          setShopItem(piece.value);
+                          trackShoppingItemClick(piece.value, 0, 'compass_recommendation');
+                        }}
                         style={{ marginTop:8, width:'100%', padding:'6px', borderRadius:8, background:C.glass, border:`1px solid ${C.border}`, color:C.muted, fontSize:'9px', cursor:'pointer', fontFamily:PJS, transition:'all 0.2s' }}
                         onMouseEnter={e => { e.currentTarget.style.borderColor=VIOLET; e.currentTarget.style.color=VIOLET; }}
                         onMouseLeave={e => { e.currentTarget.style.borderColor=C.border; e.currentTarget.style.color=C.muted; }}

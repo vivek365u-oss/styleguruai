@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { usePlan } from '../context/PlanContext';
 import { createRazorpayOrder, verifyRazorpayPayment, auth } from '../api/styleApi';
 import { FashionIcons, IconRenderer } from './Icons';
+import { trackSubscriptionView, trackUpgradeClick, trackSubscriptionPurchase } from '../utils/analytics';
 
 export default function SubscriptionModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,6 +16,8 @@ export default function SubscriptionModal() {
     const handleOpen = (e) => {
       adWatchedRef.current = false; // reset on every open
       setIsOpen(true);
+      const source = e.detail?.source || 'unknown';
+      trackSubscriptionView(source);
       if (e.detail && e.detail.onSuccess) {
         setOnSuccessCallback(() => e.detail.onSuccess);
       } else {
@@ -49,6 +52,7 @@ export default function SubscriptionModal() {
     }
 
     setLoadingTier(tier);
+    trackUpgradeClick(tier);
     try {
       // 1. Ask backend to create the Order
       const res = await createRazorpayOrder(tier);
@@ -75,6 +79,8 @@ export default function SubscriptionModal() {
             alert("Payment Successful! Welcome to StyleGuruAI PRO.");
             adWatchedRef.current = true; // payment counts as success
             setIsOpen(false);
+            const prices = { yearly: 2499, monthly: 499, coins: 199 };
+            trackSubscriptionPurchase(tier, prices[tier] || 0);
             await refreshPlan();
             if (onSuccessCallback) {
               setTimeout(() => {
@@ -136,6 +142,7 @@ export default function SubscriptionModal() {
       adWatchedRef.current = true;
       setIsOpen(false);
       setLoadingTier(null);
+      trackSubscriptionPurchase('ad_watch', 0);
       if (onSuccessCallback) {
         onSuccessCallback(true);
       }

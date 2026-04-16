@@ -7,6 +7,7 @@ import { usePlan } from '../context/PlanContext';
 import { getLocalWardrobeImage, deleteLocalWardrobeImage } from '../utils/indexedDB';
 import { getFiltersByGender, ALL_CATEGORIES, getCategoryLabel } from '../constants/fashionCategories';
 import { FashionIcons, IconRenderer } from './Icons';
+import { trackWardrobeInteraction } from '../utils/analytics';
 
 // ── Helpers ──────────────────────────────────────────────────
 function WardrobeImage({ imageId, fallbackColor }) {
@@ -70,6 +71,8 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
   useEffect(() => {
     if (!auth.currentUser) { setLoading(false); return; }
     fetchWardrobe();
+    // Track wardrobe view on mount
+    trackWardrobeInteraction('view', items.length);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wardrobeLimit]);
 
@@ -136,6 +139,7 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
     try {
       await deleteWardrobeItem(uid, item.id);
       if (item.imageId) await deleteLocalWardrobeImage(item.imageId);
+      trackWardrobeInteraction('remove', items.length);
       showToast(t('outfitRemoved'));
     } catch {
       fetchWardrobe();
@@ -193,7 +197,10 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
         {getFiltersByGender(gender).map(f => (
           <button
             key={f.id}
-            onClick={() => setFilter(f.id)}
+            onClick={() => {
+              setFilter(f.id);
+              trackWardrobeInteraction('filter', items.length);
+            }}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-tight transition-all border whitespace-nowrap shadow-sm ${
               filter === f.id
                 ? 'bg-purple-600 border-purple-600 text-white shadow-purple-500/30'

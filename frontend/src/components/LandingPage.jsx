@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import SEOHead from './SEOHead';
 import { useLanguage } from '../i18n/LanguageContext';
+import { trackCTAClick } from '../utils/analytics';
 
 /* ══════════════════════════════════════════════
    LOGIN GATE MODAL
@@ -182,6 +183,20 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
 
+  const handleGetStarted = () => {
+    trackCTAClick('get_started', 'hero');
+    onGetStarted();
+  };
+
+  const handleFeatureClick = (feature, id) => {
+    trackCTAClick('explore_feature', id);
+    if (user) {
+      onGetStarted();
+    } else {
+      setGateFeature(feature);
+    }
+  };
+
   // Scroll listener for navbar
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 60);
@@ -328,14 +343,14 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
             <button
-              onClick={onLoginClick}
+              onClick={() => { trackCTAClick('login', 'navbar'); onLoginClick(); }}
               style={{ background: 'none', border: '1px solid #242424', color: '#F0EDE6', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', padding: '9px 20px', cursor: 'pointer', transition: 'border-color 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.borderColor = '#C9A96E'}
               onMouseLeave={e => e.currentTarget.style.borderColor = '#242424'}
             >
               Login
             </button>
-            <button onClick={onGetStarted} className="btn-gold" style={{ padding: '9px 20px' }}>
+            <button onClick={handleGetStarted} className="btn-gold" style={{ padding: '9px 20px' }}>
               Get Started
             </button>
           </div>
@@ -405,7 +420,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 fade-up" style={{ animationDelay: '0.4s', opacity: 0 }}>
-                <button onClick={onGetStarted} className="btn-gold" style={{ padding: '16px 44px', fontSize: '11px' }}>
+                <button onClick={handleGetStarted} className="btn-gold" style={{ padding: '16px 44px', fontSize: '11px' }}>
                   Analyze My Style →
                 </button>
                 <button
@@ -704,12 +719,21 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
               <p className="luxe-label mb-4" style={{ color: '#3A3A3A', fontSize: '9px' }}>Product</p>
               {['Analyze', 'History', 'Wardrobe', 'Tools', 'Blog'].map(link => (
                 <div key={link} style={{ marginBottom: '10px' }}>
-                  <button
-                    onClick={() => link === 'Blog' ? window.location.href = '/blog' : handleFeatureClick(link, link.toLowerCase())}
-                    style={{ background: 'none', border: 'none', color: '#6B6B6B', fontSize: '13px', cursor: 'pointer', padding: 0, transition: 'color 0.2s' }}
-                    onMouseEnter={e => e.target.style.color = '#F0EDE6'}
-                    onMouseLeave={e => e.target.style.color = '#6B6B6B'}
-                  >{link}</button>
+                  {link === 'Blog' ? (
+                    <a
+                      href="/blog"
+                      style={{ background: 'none', border: 'none', color: '#6B6B6B', fontSize: '13px', cursor: 'pointer', padding: 0, transition: 'color 0.2s', textDecoration: 'none' }}
+                      onMouseEnter={e => e.target.style.color = '#F0EDE6'}
+                      onMouseLeave={e => e.target.style.color = '#6B6B6B'}
+                    >Blog</a>
+                  ) : (
+                    <button
+                      onClick={() => handleFeatureClick(link, link.toLowerCase())}
+                      style={{ background: 'none', border: 'none', color: '#6B6B6B', fontSize: '13px', cursor: 'pointer', padding: 0, transition: 'color 0.2s' }}
+                      onMouseEnter={e => e.target.style.color = '#F0EDE6'}
+                      onMouseLeave={e => e.target.style.color = '#6B6B6B'}
+                    >{link}</button>
+                  )}
                 </div>
               ))}
             </div>
