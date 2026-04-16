@@ -210,14 +210,6 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
     return () => clearInterval(timer);
   }, []);
 
-  const handleFeatureClick = (feature, id) => {
-    if (user) {
-      onGetStarted();
-    } else {
-      setGateFeature(feature);
-    }
-  };
-
   const navItems = [
     { id: 'home', label: 'Home', requiresAuth: false },
     { id: 'analyze', label: 'Analyze', requiresAuth: true },
