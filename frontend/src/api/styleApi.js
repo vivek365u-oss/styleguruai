@@ -425,8 +425,22 @@ export const saveProfile = async (uid, profile) => {
 export const loadProfile = async (uid) => {
   if (!auth.currentUser) return null;
   try {
-    const snap = await getDoc(doc(db, 'users', uid, 'profile', 'data'));
-    return snap.exists() ? snap.data() : null;
+    const [profileSnap, userSnap] = await Promise.all([
+      getDoc(doc(db, 'users', uid, 'profile', 'data')),
+      getDoc(doc(db, 'users', uid))
+    ]);
+    
+    let profileData = profileSnap.exists() ? profileSnap.data() : null;
+    
+    // Merge counts from the root user document so the UI knows the exact cloud state
+    if (profileData && userSnap.exists()) {
+      const userData = userSnap.data();
+      profileData.wardrobeCount = userData.wardrobeCount || 0;
+      profileData.analysisHistoryCount = userData.analysisHistoryCount || 0;
+      profileData.savedColorsCount = userData.savedColorsCount || 0;
+    }
+    
+    return profileData;
   } catch (e) {
     handleFirestoreError('loadProfile', e);
     return null;
@@ -450,20 +464,24 @@ export const savePrimaryProfile = async (uid, profileData) => {
 export const loadPrimaryProfile = async (uid) => {
   if (!auth.currentUser) return null;
   try {
-    // Check cache first
-    const cached = localStorage.getItem('sg_primary_profile');
-    if (cached) return JSON.parse(cached);
-
+    // ALWAYS fetch from Firebase first to ensure cross-device sync
     const snap = await getDoc(doc(db, 'users', uid, 'profile', 'primary'));
     if (snap.exists()) {
       const data = snap.data();
       localStorage.setItem('sg_primary_profile', JSON.stringify(data));
       return data;
     }
+    
+    // Only fallback if Firebase document doesn't exist but local cache is present
+    const cached = localStorage.getItem('sg_primary_profile');
+    if (cached) return JSON.parse(cached);
+    
     return null;
   } catch (e) {
     handleFirestoreError('loadPrimaryProfile', e);
-    return null;
+    // Fallback to cache if network request fails
+    const cached = localStorage.getItem('sg_primary_profile');
+    return cached ? JSON.parse(cached) : null;
   }
 };
 
@@ -510,20 +528,22 @@ export const saveStyleInsights = async (uid, insights) => {
 export const loadStyleInsights = async (uid) => {
   if (!auth.currentUser) return null;
   try {
-    // Check cache
-    const cached = localStorage.getItem('sg_locked_insights');
-    if (cached) return JSON.parse(cached);
-
+    // ALWAYS fetch from Firebase first to ensure cross-device sync
     const snap = await getDoc(doc(db, 'users', uid, 'profile', 'insights'));
     if (snap.exists()) {
       const data = snap.data();
       localStorage.setItem('sg_locked_insights', JSON.stringify(data));
       return data;
     }
+    
+    const cached = localStorage.getItem('sg_locked_insights');
+    if (cached) return JSON.parse(cached);
+    
     return null;
   } catch (e) {
     handleFirestoreError('loadStyleInsights', e);
-    return null;
+    const cached = localStorage.getItem('sg_locked_insights');
+    return cached ? JSON.parse(cached) : null;
   }
 };
 
