@@ -77,7 +77,7 @@ const LoadingFallback = () => (
     <div style={{ textAlign: 'center', zIndex: 1, animation: 'fadeSlideIn 0.8s ease forwards' }}>
       <p style={{
         fontSize: '18px', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif", color: '#F9FAFB', margin: '0 0 6px', letterSpacing: '0.02em'
-      }}>StyleGuruAI</p>
+      }}>StyleGuru AI</p>
       <p style={{ fontSize: '10px', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#9CA3AF', margin: 0, fontWeight: 500 }}>
         Loading Intelligence
       </p>
