@@ -127,8 +127,8 @@ export default function SubscriptionModal() {
         hiddenOnce = true;
       } else if (document.visibilityState === 'visible') {
         const elapsed = Date.now() - adStartTime;
-        if (hiddenOnce && elapsed > 2000) {
-          // User returned after at least 2 seconds
+        if (hiddenOnce && elapsed > 5000) {
+          // User returned after at least 5 seconds
           cleanupAndSuccess();
         }
       }
@@ -154,7 +154,7 @@ export default function SubscriptionModal() {
     // Fallback in case the browser doesn't fire visibilitychange (e.g. desktop split view)
     failsafeTimeout = setTimeout(() => {
        cleanupAndSuccess();
-    }, 12000);
+    }, 15000);
   };
 
   if (!isOpen) return null;

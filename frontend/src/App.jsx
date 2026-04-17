@@ -1,102 +1,60 @@
-// StyleGuruAI — Unified SPA Architecture v3.0
-// Login = state change only, no page redirect
-import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, Suspense, lazy } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { logout } from './api/styleApi';
 import { LanguageProvider } from './i18n/LanguageProvider';
 import { PlanProvider } from './context/PlanProvider';
 import { CartProvider } from './context/CartProvider';
+import SplashScreen from './components/SplashScreen';
 import { useAuthState } from './hooks/useAuthState';
 import ErrorBoundary from './components/ErrorBoundary';
-import { ThemeContext } from './context/ThemeContext';
-import { usePWA } from './hooks/usePWA';
-import InstallPromptModal from './components/InstallPromptModal';
-import { trackPageView, trackUTMParams, trackUserReturn, setUserProperties } from './utils/analytics';
 
-// ── Core shells (eagerly loaded for fast paint) ──
-import LandingPage   from './components/LandingPage';
-import AuthPage      from './components/AuthPage';
-import AppShell      from './components/AppShell';
-import PublicLayout  from './layouts/PublicLayout';
+// Eagerly loaded components for fast initial render
+import LandingPage from './components/LandingPage';
+import AuthPage from './components/AuthPage';
 
-// ── Static pages (lazy for code splitting) ──
-const AboutPage      = lazy(() => import('./pages/AboutPage'));
-const PrivacyPage    = lazy(() => import('./pages/PrivacyPage'));
-const ContactPage    = lazy(() => import('./pages/ContactPage'));
-const TermsPage      = lazy(() => import('./pages/TermsPage'));
-const BlogListPage   = lazy(() => import('./pages/BlogListPage'));
-const BlogPostPage   = lazy(() => import('./pages/BlogPostPage'));
-const NotFoundPage   = lazy(() => import('./pages/NotFoundPage'));
+// Lazy loaded components for code splitting
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const BlogListPage = lazy(() => import('./pages/BlogListPage'));
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
-const ProfilePage    = lazy(() => import('./pages/ProfilePage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+// OrderSuccessPage lazy import removed
 
-// ── Premium Loading Screen ──
+import { ThemeContext } from './context/ThemeContext';
+
 const LoadingFallback = () => (
-  <div style={{
-    minHeight: '100vh', display: 'flex', flexDirection: 'column',
-    alignItems: 'center', justifyContent: 'center',
-    background: '#0B0F1A', gap: 32, position: 'relative', overflow: 'hidden'
-  }}>
-    {/* Soft glow background */}
-    <div style={{
-      position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-      width: 200, height: 200, background: 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)',
-      pointerEvents: 'none'
-    }} />
-
-    {/* Spinning logo container */}
-    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {/* Outer gradient spinning ring */}
-      <div style={{
-        position: 'absolute', inset: -10, borderRadius: '50%',
-        background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%)',
-        animation: 'spinSmooth 1.2s linear infinite',
-        mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-        WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-        maskComposite: 'exclude', WebkitMaskComposite: 'xor',
-        padding: 2
-      }} />
-
-      {/* Inner glass logo block */}
-      <div style={{
-        width: 56, height: 56, borderRadius: 16,
-        background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255,255,255,0.1)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        boxShadow: '0 8px 32px rgba(139,92,246,0.25)',
-        animation: 'pulse-glow 2.5s ease-in-out infinite'
-      }}>
-        <img
-          src="/logo.png"
-          alt="StyleGuruAI Logo"
-          style={{ width: 42, height: 42, objectFit: 'contain' }}
-        />
-      </div>
+  <div className="min-h-screen bg-gradient-to-br from-[#050816] via-purple-950 to-[#050816] flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="absolute inset-0 z-0">
+      <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-purple-600 rounded-full opacity-20 blur-[100px] animate-pulse"></div>
+      <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-pink-600 rounded-full opacity-20 blur-[100px] animate-pulse" style={{ animationDelay: '1s' }}></div>
     </div>
-
-    {/* Text content */}
-    <div style={{ textAlign: 'center', zIndex: 1, animation: 'fadeSlideIn 0.8s ease forwards' }}>
-      <p style={{
-        fontSize: '18px', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif", color: '#F9FAFB', margin: '0 0 6px', letterSpacing: '0.02em'
-      }}>StyleGuru AI</p>
-      <p style={{ fontSize: '10px', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#9CA3AF', margin: 0, fontWeight: 500 }}>
-        Loading Intelligence
-      </p>
+    <div className="relative z-10 flex flex-col items-center">
+      <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl shadow-2xl shadow-purple-500/40 flex items-center justify-center mb-6 animate-bounce">
+        <span className="text-white text-3xl font-black tracking-tighter">SG</span>
+      </div>
+      <h2 className="text-2xl font-black text-white tracking-widest uppercase opacity-80 animate-pulse">StyleGuru</h2>
     </div>
   </div>
 );
 
-// ── Auth error ──
+/**
+ * Auth Error Component - Shown when profile loading fails
+ */
 function AuthErrorUI({ error, onRetry }) {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0A0A0A', padding: 24 }}>
-      <div style={{ textAlign: 'center', maxWidth: 360 }}>
-        <p style={{ fontSize: '32px', marginBottom: 16 }}>⚠️</p>
-        <h2 style={{ color: '#F0EDE6', fontSize: '20px', fontWeight: 300, marginBottom: 8 }}>Something went wrong</h2>
-        <p style={{ color: '#6B6B6B', fontSize: '14px', marginBottom: 24 }}>{error}</p>
+    <div className="min-h-screen bg-gradient-to-br from-[#050816] via-purple-950 to-[#050816] flex flex-col items-center justify-center p-4">
+      <div className="max-w-sm text-center space-y-4">
+        <div className="text-6xl">⚠️</div>
+        <h2 className="text-2xl font-bold text-white">Something went wrong</h2>
+        <p className="text-purple-200/80">{error}</p>
         <button
           onClick={onRetry}
-          style={{ background: '#C9A96E', color: '#0A0A0A', border: 'none', padding: '12px 32px', fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}
+          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-lg text-white font-semibold transition-all"
         >
           Retry
         </button>
@@ -105,152 +63,111 @@ function AuthErrorUI({ error, onRetry }) {
   );
 }
 
-// ── Main Routes ──
+function PrivateRoute({ user, children }) {
+  if (!user) return <Navigate to="/" replace />;
+  return children;
+}
+
 function AppRoutes({ user, setUser }) {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // ── SPA Page View Tracking (fires on every route change) ──
-  useEffect(() => {
-    trackPageView(location.pathname, document.title);
-  }, [location.pathname]);
-
-  // ── UTM Campaign Tracking (fires once on initial load) ──
-  useEffect(() => {
-    trackUTMParams();
-  }, []);
-
-  // ── User Retention Tracking ──
-  useEffect(() => {
-    if (user) {
-      const analysisCount = parseInt(localStorage.getItem('sg_analysis_count') || '0', 10);
-      const firstVisit = localStorage.getItem('sg_first_visit');
-      const now = Date.now();
-      if (!firstVisit) {
-        localStorage.setItem('sg_first_visit', now.toString());
-      }
-      const daysSince = firstVisit ? Math.floor((now - parseInt(firstVisit, 10)) / 86400000) : 0;
-      trackUserReturn(analysisCount, daysSince);
-      setUserProperties({
-        user_type: user ? 'registered' : 'anonymous',
-        analysis_count: analysisCount,
-        days_active: daysSince,
-      });
-    }
-  }, [user?.email]);
 
   const handleLogout = () => {
     logout();
     setUser(null);
-    ['sg_last_analysis','sg_analysis_count','sg_streak_count','sg_last_checkin',
-     'sg_daily_drop_date','sg_analysis_history','sg_saved_colors','sg_wardrobe_queue',
-     'tonefit_user_status'
-    ].forEach(k => localStorage.removeItem(k));
-    // No navigate — stay on / which will show LandingPage (user=null)
+    // Clear fashion data on logout to prevent persistence for the next user/guest
+    const keysToClear = [
+      'sg_last_analysis',
+      'sg_analysis_count',
+      'sg_streak_count',
+      'sg_last_checkin',
+      'sg_daily_drop_date',
+      'sg_analysis_history',
+      'sg_saved_colors',
+      'sg_wardrobe_queue'
+    ];
+    keysToClear.forEach(key => localStorage.removeItem(key));
+    localStorage.removeItem('tonefit_user_status');
+    navigate('/');
   };
 
 
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
-        {/* ROOT — Inline conditional: no intermediate component = no remount on re-render */}
-        <Route path="/" element={
-          user
-            ? <AppShell user={user} onLogout={handleLogout} />
-            : <LandingPage
-                user={null}
-                onGetStarted={() => navigate('/auth')}
-                onLoginClick={() => navigate('/auth')}
-              />
+        <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} />} />
+        <Route path="/login" element={<Navigate to="/" replace />} />
+        <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
+        {/* OrderSuccess route removed */}
+        <Route path="/profile" element={
+          <PrivateRoute user={user}>
+            <ProfilePage />
+          </PrivateRoute>
         } />
-
-
-        {/* AUTH */}
-        <Route path="/auth" element={
-          user ? <Navigate to="/" replace /> : <AuthPage onLoginSuccess={setUser} />
-        } />
-
-        {/* Legacy redirects */}
-        <Route path="/dashboard" element={<Navigate to="/" replace />} />
-        <Route path="/loading"   element={<LoadingFallback />} />
-        <Route path="/profile"   element={user ? <Navigate to="/" replace /> : <Navigate to="/auth" replace />} />
-        <Route path="/settings"  element={<Navigate to="/" replace />} />
-
-        {/* ════════════════════════════════════
-            PUBLIC STATIC PAGES
-            All wrapped in PublicLayout:
-            → Premium Navbar + Footer on every page
-            → <Outlet /> renders page content only
-            → Zero UI leakage between pages
-            ════════════════════════════════════ */}
-        <Route element={<PublicLayout />}>
-          <Route path="/about"      element={<AboutPage />} />
-          <Route path="/privacy"    element={<PrivacyPage />} />
-          <Route path="/contact"    element={<ContactPage />} />
-          <Route path="/terms"      element={<TermsPage />} />
-          <Route path="/blog"       element={<BlogListPage />} />
-          <Route path="/blog/:slug" element={<BlogPostPage />} />
-        </Route>
-
-        {/* Admin */}
+        <Route path="/settings" element={<Navigate to="/profile" replace />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/blog" element={<BlogListPage />} />
+        <Route path="/blog/:slug" element={<BlogPostPage />} />
         <Route path="/admin" element={
-          user ? <AdminDashboard /> : <Navigate to="/auth" replace />
+          <PrivateRoute user={user}>
+            <AdminDashboard />
+          </PrivateRoute>
         } />
-
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>
   );
 }
 
-// ── App Root ──
 function App() {
   const authState = useAuthState();
-  const [theme, setTheme] = useState(() => localStorage.getItem('tonefit_theme') || 'dark');
-  const { isInstallable, isInstalled, promptInstall, dismissInstall } = usePWA();
+  const [showSplash, setShowSplash] = useState(true);
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('tonefit_theme') || 'dark';
+  });
 
-  const user = authState.user
-    ? { name: authState.user.name, email: authState.user.email }
+  const user = authState.user ?
+    { name: authState.user.name, email: authState.user.email }
     : null;
 
   const setUser = (newUser) => {
-    if (newUser === null) logout();
-    // authState handles the actual update via Firebase listener
+    if (newUser === null) {
+      logout();
+    }
   };
 
+  // Handle auth errors with retry
   if (authState.authError && !authState.loading) {
-    return <AuthErrorUI error={authState.error} onRetry={() => window.location.reload()} />;
+    return (
+      <AuthErrorUI
+        error={authState.error}
+        onRetry={() => window.location.reload()}
+      />
+    );
   }
 
-  // To prevent stopping Googlebot from indexing, we only show full-screen load
-  // if there's a strong hint the user is logged in natively (from previous sessions).
-  // Otherwise, we let the app render paths like /about directly, while the LandingPage
-  // will be shown for unauthenticated users instead of an empty loading page.
-  const presumedLoggedIn = !!localStorage.getItem('sg_last_analysis');
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+  }
 
-  if (authState.loading && presumedLoggedIn) {
+  if (authState.loading) {
     return <LoadingFallback />;
   }
 
   return (
     <ErrorBoundary>
       <LanguageProvider>
-        <ThemeContext.Provider value={{
-          theme,
-          setTheme,
-          toggleTheme: () => setTheme(prev => {
-            const next = prev === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('tonefit_theme', next);
-            return next;
-          })
-        }}>
+        <ThemeContext.Provider value={{ theme, setTheme, toggleTheme: () => setTheme(prev => {
+          const next = prev === 'dark' ? 'light' : 'dark';
+          localStorage.setItem('tonefit_theme', next);
+          return next;
+        }) }}>
           <PlanProvider>
             <CartProvider>
-              <div className={`min-h-screen transition-colors duration-300 ${theme}`}>
-                <AppRoutes user={user} setUser={setUser} />
-                {isInstallable && !isInstalled && (
-                  <InstallPromptModal onInstall={promptInstall} onDismiss={dismissInstall} />
-                )}
+              <div className="min-h-screen">
+                <AppRoutes user={user} setUser={setUser} theme={theme} toggleTheme={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')} />
               </div>
             </CartProvider>
           </PlanProvider>

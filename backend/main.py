@@ -25,6 +25,7 @@ from slowapi.errors import RateLimitExceeded
 from image_processor import ImageProcessor
 from skin_tone_classifier import SkinToneClassifier
 from recommendation_engine import RecommendationEngine
+from face_shape_detector import FaceShapeDetector
 
 # ============================================
 # FIREBASE INIT (Graceful handling)
@@ -210,6 +211,7 @@ async def health():
 image_processor = ImageProcessor()
 skin_classifier = SkinToneClassifier()
 recommendation_engine = RecommendationEngine()
+face_shape_detector = FaceShapeDetector()
 
 # ============================================
 # MASTER COLOR LOOKUP TABLE — 200+ Fashion Colors
@@ -1928,31 +1930,135 @@ from face_shape_detector import face_shape_detector
 class SelfieStyleRequest(BaseModel):
     gender: str = "male"  # male | female
 
+@app.get("/api/analyze/selfie-style/usage")
+async def get_selfie_analysis_usage(
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Get current user's selfie analysis usage for the current month.
+    Returns usage count and whether they've hit the limit.
+    """
+    if not FIREBASE_INITIALIZED:
+        return {
+            "success": True,
+            "usage_tracking_enabled": False,
+            "message": "Usage tracking not available"
+        }
+    
+    try:
+        db = firebase_firestore.client()
+        user_ref = db.collection("users").document(current_user["uid"])
+        user_doc = user_ref.get()
+        
+        from datetime import datetime
+        current_month = datetime.now().strftime("%Y-%m")
+        FREE_MONTHLY_LIMIT = 2
+        
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            usage_data = user_data.get("selfie_analysis_usage", {})
+            month_usage = usage_data.get(current_month, 0)
+        else:
+            month_usage = 0
+        
+        return {
+            "success": True,
+            "usage_tracking_enabled": True,
+            "current_month": current_month,
+            "usage_count": month_usage,
+            "limit": FREE_MONTHLY_LIMIT,
+            "remaining": max(0, FREE_MONTHLY_LIMIT - month_usage),
+            "limit_reached": month_usage >= FREE_MONTHLY_LIMIT
+        }
+    except Exception as e:
+        print(f"[USAGE CHECK] Error: {e}")
+        raise HTTPException(status_code=500, detail={"error": "server_error", "message": "Could not fetch usage data"})
+
 @app.post("/api/analyze/selfie-style")
 @limiter.limit("5/minute")
 async def analyze_selfie_style(
     request: Request,
     file: UploadFile = File(...),
     gender: str = "male",
+    texture: str = "straight",
+    watched: bool = False,
     lang: str = "en",
     current_user: dict = Depends(get_current_user)
 ):
     """
     Full selfie analysis:
-      1. Image quality gate (existing pipeline)
-      2. Face detection (existing MediaPipe)
-      3. Skin tone extraction (existing classifier)
-      4. Face shape detection (new geometric landmark analysis)
-      5. Hairstyle recommendations (new rule-based engine)
+      1. Usage limit check (2 free per month, or unlimited with ad watch)
+      2. Image quality gate (existing pipeline)
+      3. Face detection (existing MediaPipe)
+      4. Skin tone extraction (existing classifier)
+      5. Face shape detection (new geometric landmark analysis)
+      6. Hairstyle recommendations (new rule-based engine)
+      7. Beard recommendations (for male users)
     Returns all data needed by the frontend SelfieStyleAdvisor component.
     """
     start_time = time.time()
     try:
+        # ── Step 0: Usage Limit Check ────────────────────
+        if FIREBASE_INITIALIZED:
+            try:
+                db = firebase_firestore.client()
+                user_ref = db.collection("users").document(current_user["uid"])
+                user_doc = user_ref.get()
+                
+                # Get current month key (e.g., "2026-04")
+                from datetime import datetime
+                current_month = datetime.now().strftime("%Y-%m")
+                
+                if user_doc.exists:
+                    user_data = user_doc.to_dict()
+                    usage_data = user_data.get("selfie_analysis_usage", {})
+                    month_usage = usage_data.get(current_month, 0)
+                    
+                    # Check if user has exceeded free limit (2 per month)
+                    FREE_MONTHLY_LIMIT = 2
+                    if month_usage >= FREE_MONTHLY_LIMIT and not watched:
+                        # User has exceeded limit and hasn't watched ad
+                        raise HTTPException(
+                            status_code=403,
+                            detail={
+                                "error": "usage_limit_reached",
+                                "message": f"You've used your {FREE_MONTHLY_LIMIT} free analyses this month. Watch a short ad to continue!",
+                                "current_usage": month_usage,
+                                "limit": FREE_MONTHLY_LIMIT,
+                                "month": current_month
+                            }
+                        )
+                    
+                    # Increment usage counter (only if not watched, or if watched after limit)
+                    if not watched or month_usage >= FREE_MONTHLY_LIMIT:
+                        user_ref.update({
+                            f"selfie_analysis_usage.{current_month}": month_usage + 1,
+                            "last_selfie_analysis": datetime.now().isoformat()
+                        })
+                        print(f"[USAGE] User {current_user['uid']} - Analysis #{month_usage + 1} for {current_month}")
+                else:
+                    # First time user - create usage tracking
+                    user_ref.set({
+                        "uid": current_user["uid"],
+                        "email": current_user.get("email", ""),
+                        "selfie_analysis_usage": {current_month: 1},
+                        "last_selfie_analysis": datetime.now().isoformat(),
+                        "created_at": datetime.now().isoformat()
+                    }, merge=True)
+                    print(f"[USAGE] New user {current_user['uid']} - First analysis")
+                    
+            except HTTPException:
+                raise  # Re-raise usage limit errors
+            except Exception as e:
+                print(f"[USAGE] Tracking error (non-blocking): {e}")
+                # Continue with analysis even if tracking fails
+        
         # ── Step 1-3: Existing Pipeline ──────────────────
         image, face, full_quality, skin_color, skin_tone, color_season = await process_image_core(file)
 
         # ── Step 4: Face Shape Detection ─────────────────
         face_shape_result = {"shape": "oval", "confidence": 0.5, "ratios": {}, "data": {}, "fallback": True}
+        landmarks_dict = {}
 
         try:
             # Re-run MediaPipe to get landmarks (image_processor returns dict face, not landmarks)
@@ -1976,6 +2082,9 @@ async def analyze_selfie_style(
                         i: (int(lm.x * w), int(lm.y * h))
                         for i, lm in enumerate(landmarks_raw)
                     }
+                    # Store for frontend visualization
+                    landmarks_dict = {str(k): list(v) for k, v in landmarks.items()}
+                    
                     face_shape_result = face_shape_detector.detect_shape(landmarks)
                     print(f"[SELFIE] Face shape: {face_shape_result['shape']} ({face_shape_result['confidence']:.0%} confidence)")
         except Exception as e:
@@ -1987,8 +2096,21 @@ async def analyze_selfie_style(
             shape=shape_key,
             gender=gender,
             skin_tone=skin_tone.category,
+            texture=texture,  # ✅ Now using texture parameter
             limit=5
         )
+
+        # ── Step 6: Beard Recommendations (Male only) ────
+        beard_recs = []
+        if gender.lower() == "male":
+            try:
+                beard_recs = face_shape_detector.get_beard_recommendations(
+                    shape=shape_key,
+                    skin_tone=skin_tone.category,
+                    limit=3
+                )
+            except Exception as e:
+                print(f"[SELFIE] Beard recommendations skipped: {e}")
 
         # ── Compose final response ────────────────────────
         processing_time = round(time.time() - start_time, 2)
@@ -2020,8 +2142,10 @@ async def analyze_selfie_style(
                 "celebrity_examples": face_shape_result.get("data", {}).get("celebrity_examples", []),
                 "ratios": face_shape_result.get("ratios", {}),
                 "is_fallback": face_shape_result.get("fallback", False),
+                "landmarks": landmarks_dict,  # ✅ Added for frontend visualization
             },
             "hairstyle_recommendations": hairstyle_recs,
+            "beard_recommendations": beard_recs,  # ✅ Added beard recommendations
             "style_tips": {
                 "primary": f"Your {face_shape_result.get('data', {}).get('display','oval')} face shape pairs beautifully with tailored hairstyles that enhance your natural bone structure.",
                 "skin_tone_tip": f"With your {skin_tone.category} skin tone and {skin_tone.subcategory} undertone, warm-toned hair colors will complement you best.",

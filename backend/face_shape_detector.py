@@ -1192,6 +1192,7 @@ class FaceShapeDetector:
         shape: str,
         gender: str,
         skin_tone: Optional[str] = None,
+        texture: Optional[str] = None,
         limit: int = 5,
     ) -> List[Dict]:
         """
@@ -1201,6 +1202,7 @@ class FaceShapeDetector:
             shape:      Detected face shape key (oval, round, square, etc.)
             gender:     'male' or 'female'
             skin_tone:  Optional skin tone (fair, light, medium, olive, brown, dark)
+            texture:    Optional hair texture (straight, wavy, curly, coily)
             limit:      Max number of recommendations to return
 
         Returns:
@@ -1217,6 +1219,62 @@ class FaceShapeDetector:
         recommendations = shape_data.get(gender, [])
         # Sort by rank and limit
         return sorted(recommendations, key=lambda r: r.get("rank", 99))[:limit]
+
+    def get_beard_recommendations(
+        self,
+        shape: str,
+        skin_tone: Optional[str] = None,
+        limit: int = 3,
+    ) -> List[Dict]:
+        """
+        Get beard style recommendations based on face shape.
+
+        Args:
+            shape:      Detected face shape key (oval, round, square, etc.)
+            skin_tone:  Optional skin tone (fair, light, medium, olive, brown, dark)
+            limit:      Max number of recommendations to return
+
+        Returns:
+            List of beard recommendation dicts
+        """
+        shape = shape.lower().strip()
+
+        # Beard recommendations database
+        BEARD_RECOMMENDATIONS = {
+            "oval": [
+                {"name": "Full Beard", "reason": "Your balanced oval face can carry any beard style. A full beard adds masculinity without overwhelming your features."},
+                {"name": "Goatee", "reason": "A classic goatee highlights your natural chin definition and works perfectly with oval proportions."},
+                {"name": "Stubble", "reason": "Light stubble adds texture and ruggedness while maintaining your clean, balanced look."},
+            ],
+            "round": [
+                {"name": "Chin Strap", "reason": "A chin strap creates vertical lines that elongate your round face, adding definition to your jawline."},
+                {"name": "Goatee with Soul Patch", "reason": "This style draws attention downward, creating the illusion of length and slimming your face."},
+                {"name": "Van Dyke", "reason": "The pointed shape of a Van Dyke adds angles to soften roundness and creates a more defined chin."},
+            ],
+            "square": [
+                {"name": "Full Rounded Beard", "reason": "A rounded full beard softens your strong angular jaw while maintaining masculine appeal."},
+                {"name": "Circle Beard", "reason": "The circular shape counterbalances your square angles, creating visual harmony."},
+                {"name": "Short Boxed Beard", "reason": "A neatly trimmed boxed beard complements your strong jawline without adding excessive bulk."},
+            ],
+            "heart": [
+                {"name": "Full Beard", "reason": "A fuller beard adds width to your narrow chin, balancing your wider forehead perfectly."},
+                {"name": "Mutton Chops", "reason": "Mutton chops add volume at the jaw level, creating balance with your wider upper face."},
+                {"name": "Chin Curtain", "reason": "This style adds definition along your jawline, balancing your heart-shaped proportions."},
+            ],
+            "oblong": [
+                {"name": "Horizontal Beard", "reason": "A wider, horizontal beard adds width to your long face, creating better proportions."},
+                {"name": "Short Full Beard", "reason": "Keep it short and wide to avoid adding more length to your already elongated face."},
+                {"name": "Mutton Chops", "reason": "Side-focused facial hair adds horizontal width, balancing your face's length."},
+            ],
+            "diamond": [
+                {"name": "Full Beard", "reason": "A full beard adds width to your narrow chin and jaw, balancing your prominent cheekbones."},
+                {"name": "Goatee", "reason": "A goatee draws attention to your chin, creating balance with your wide cheekbone area."},
+                {"name": "Anchor Beard", "reason": "The anchor shape adds definition to your jawline while complementing your angular features."},
+            ],
+        }
+
+        recommendations = BEARD_RECOMMENDATIONS.get(shape, BEARD_RECOMMENDATIONS["oval"])
+        return recommendations[:limit]
 
 
 # ──────────────────────────────────────────────────────

@@ -5,7 +5,7 @@ import { doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, limit
 import { compressImage, validateImageFile } from '../utils/imageCompression';
 import { retryRequest, startKeepAlive, healthCheck } from '../utils/apiRetry';
 
-const API = axios.create({ 
+const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
   timeout: 30000 // 30s global timeout
 });
@@ -182,12 +182,12 @@ export const destroyUserAccount = async (uid) => {
 export const saveHistory = async (rawDetails) => {
   const user = auth.currentUser;
   if (!user) return;
-  
+
   // Normalize data for UI consistency
   const skinToneObj = rawDetails.analysis?.skin_tone || rawDetails.skin_tone;
   const skinColorObj = rawDetails.analysis?.skin_color || rawDetails.skin_color;
   const gender = rawDetails.gender || localStorage.getItem('sg_gender') || 'male';
-  
+
   const historyEntry = {
     skinTone: skinToneObj?.category || 'medium',
     undertone: skinToneObj?.undertone || 'neutral',
@@ -201,7 +201,7 @@ export const saveHistory = async (rawDetails) => {
   };
 
   const entry = { ...historyEntry };
-  
+
   try {
     const docRef = await addDoc(collection(db, 'users', user.uid, 'history'), entry);
     // ── ATOMIC COUNTER SYNC ──
@@ -240,7 +240,7 @@ export const getHistory = async (limitCount = 10) => {
     );
     const snap = await getDocs(q);
     const history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    
+
     // Merge with temp history if any
     let finalHistory = history;
     try {
@@ -248,7 +248,7 @@ export const getHistory = async (limitCount = 10) => {
       if (temp.length > 0) {
         finalHistory = [...temp, ...history].slice(0, 10);
       }
-    } catch {}
+    } catch { }
 
     return { data: { total: finalHistory.length, history: finalHistory } };
   } catch (err) {
@@ -262,8 +262,8 @@ export const getHistory = async (limitCount = 10) => {
       history.sort((a, b) => new Date(b.date) - new Date(a.date));
       return { data: { total: history.length, history } };
     } catch (e) {
-       console.error('[API] Simple fallback query also failed:', e);
-       return { data: { total: 0, history: [] } };
+      console.error('[API] Simple fallback query also failed:', e);
+      return { data: { total: 0, history: [] } };
     }
   }
 };
@@ -279,7 +279,7 @@ export const analyzeImage = async (file, lang = 'en', onProgress) => {
     // Compress image before upload
     const compressedFile = await compressImage(file);
     console.log(`✓ Image compressed: ${(file.size / 1024).toFixed(2)}KB → ${(compressedFile.size / 1024).toFixed(2)}KB`);
-    
+
     return await retryRequest(async () => {
       const formData = new FormData();
       formData.append('file', compressedFile);
@@ -302,7 +302,7 @@ export const analyzeImageFemale = async (file, lang = 'en', onProgress) => {
     validateImageFile(file);
     const compressedFile = await compressImage(file);
     console.log(`✓ Image compressed: ${(file.size / 1024).toFixed(2)}KB → ${(compressedFile.size / 1024).toFixed(2)}KB`);
-    
+
     return await retryRequest(async () => {
       const formData = new FormData();
       formData.append('file', compressedFile);
@@ -325,7 +325,7 @@ export const analyzeImageSeasonal = async (file, season, lang = 'en', onProgress
     validateImageFile(file);
     const compressedFile = await compressImage(file);
     console.log(`✓ Image compressed: ${(file.size / 1024).toFixed(2)}KB → ${(compressedFile.size / 1024).toFixed(2)}KB`);
-    
+
     return await retryRequest(async () => {
       const formData = new FormData();
       formData.append('file', compressedFile);
@@ -350,7 +350,7 @@ export const checkOutfitCompatibility = async (selfieFile, outfitFile, lang = 'e
     const compressedSelfie = await compressImage(selfieFile);
     const compressedOutfit = await compressImage(outfitFile);
     console.log(`✓ Images compressed`);
-    
+
     return await retryRequest(async () => {
       const formData = new FormData();
       formData.append('selfie', compressedSelfie);
@@ -429,9 +429,9 @@ export const loadProfile = async (uid) => {
       getDoc(doc(db, 'users', uid, 'profile', 'data')),
       getDoc(doc(db, 'users', uid))
     ]);
-    
+
     let profileData = profileSnap.exists() ? profileSnap.data() : null;
-    
+
     // Merge counts from the root user document so the UI knows the exact cloud state
     if (profileData && userSnap.exists()) {
       const userData = userSnap.data();
@@ -439,7 +439,7 @@ export const loadProfile = async (uid) => {
       profileData.analysisHistoryCount = userData.analysisHistoryCount || 0;
       profileData.savedColorsCount = userData.savedColorsCount || 0;
     }
-    
+
     return profileData;
   } catch (e) {
     handleFirestoreError('loadProfile', e);
@@ -471,11 +471,11 @@ export const loadPrimaryProfile = async (uid) => {
       localStorage.setItem('sg_primary_profile', JSON.stringify(data));
       return data;
     }
-    
+
     // Only fallback if Firebase document doesn't exist but local cache is present
     const cached = localStorage.getItem('sg_primary_profile');
     if (cached) return JSON.parse(cached);
-    
+
     return null;
   } catch (e) {
     handleFirestoreError('loadPrimaryProfile', e);
@@ -535,10 +535,10 @@ export const loadStyleInsights = async (uid) => {
       localStorage.setItem('sg_locked_insights', JSON.stringify(data));
       return data;
     }
-    
+
     const cached = localStorage.getItem('sg_locked_insights');
     if (cached) return JSON.parse(cached);
-    
+
     return null;
   } catch (e) {
     handleFirestoreError('loadStyleInsights', e);
@@ -552,17 +552,17 @@ export const updateUserFeedback = async (uid, category, value, signal) => {
   try {
     const prefRef = doc(db, 'users', uid, 'profile', 'preferences');
     const signalField = signal === 'like' ? 'feedback_likes' : 'feedback_rejects';
-    
+
     // We increment/append to the feedback object
     const snap = await getDoc(prefRef);
     let prefs = snap.exists() ? snap.data() : {};
     let feedback = prefs[signalField] || {};
-    
+
     feedback[category] = (feedback[category] || []);
     if (!feedback[category].includes(value)) {
-        feedback[category].push(value);
+      feedback[category].push(value);
     }
-    
+
     await setDoc(prefRef, {
       [signalField]: feedback,
       updated_at: new Date().toISOString(),
@@ -584,7 +584,7 @@ export const saveWardrobeItem = async (uid, item) => {
     // 1. Strict Gender Safety Net
     const isFemaleCat = ['cat_saree_silk', 'cat_kurti', 'cat_makeup', 'cat_dress', 'cat_top', 'cat_skirt', 'lehenga'].some(x => item.category?.toLowerCase().includes(x));
     const isMaleCat = ['sherwani', 'cat_formal_shirt', 'tuxedo', 'cat_kurta_set', 'cat_polo', 'cat_blazer'].some(x => item.category?.toLowerCase().includes(x));
-    
+
     let safetyGender = item.gender || 'male';
     if (isFemaleCat) safetyGender = 'female';
     if (isMaleCat && !isFemaleCat) safetyGender = 'male';
@@ -720,12 +720,12 @@ export const saveSavedColor = async (uid, color) => {
     await updateDoc(doc(db, 'users', uid), {
       savedColorsCount: increment(1)
     });
-    
+
     // Update local cache
     const current = getCachedColors(uid);
     const newColor = { id: ref.id, ...color, saved_at: new Date().toISOString() };
     setCachedColors(uid, [newColor, ...current]);
-    
+
     return ref.id;
   } catch (e) {
     handleFirestoreError('saveSavedColor', e);
@@ -868,7 +868,7 @@ export const consumeUserLimit = async (action) => {
     return res.data;
   } catch (error) {
     if (error.response && error.response.status === 400 && error.response.data?.requires_ad) {
-        return { success: false, requires_ad: true };
+      return { success: false, requires_ad: true };
     }
     console.error(`Failed to consume limit for ${action}:`, error);
     return { success: false, error: 'Failed to consume limit' };
@@ -982,7 +982,20 @@ export const getDailyOutfitLogs = async (uid, limitCount = 31) => {
 // SELFIE → STYLE RECOMMENDATION
 // ============================================
 
-export const analyzeSelfieStyle = async (file, gender = 'male', lang = 'en', onProgress) => {
+export const getSelfieAnalysisUsage = async () => {
+  try {
+    return await retryRequest(async () => {
+      return API.get('/api/analyze/selfie-style/usage', {
+        timeout: 10000,
+      });
+    }, 2, 1000);
+  } catch (error) {
+    console.error('Failed to fetch selfie analysis usage:', error);
+    throw error;
+  }
+};
+
+export const analyzeSelfieStyle = async (file, gender = 'male', texture = 'straight', watched = false, lang = 'en', onProgress) => {
   try {
     validateImageFile(file);
     const compressedFile = await compressImage(file);
@@ -991,7 +1004,7 @@ export const analyzeSelfieStyle = async (file, gender = 'male', lang = 'en', onP
     return await retryRequest(async () => {
       const formData = new FormData();
       formData.append('file', compressedFile);
-      return API.post(`/api/analyze/selfie-style?gender=${gender}&lang=${lang}`, formData, {
+      return API.post(`/api/analyze/selfie-style?gender=${gender}&texture=${texture}&watched=${watched}&lang=${lang}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (e) => {
           if (onProgress) onProgress(Math.round((e.loaded * 100) / e.total));
