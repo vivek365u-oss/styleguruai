@@ -121,7 +121,6 @@ function AppRoutes({ user, setUser }) {
 
 function App() {
   const authState = useAuthState();
-  const [showSplash, setShowSplash] = useState(true);
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('tonefit_theme') || 'dark';
   });
@@ -144,10 +143,6 @@ function App() {
         onRetry={() => window.location.reload()}
       />
     );
-  }
-
-  if (showSplash) {
-    return <SplashScreen onComplete={() => setShowSplash(false)} />;
   }
 
   if (authState.loading) {
