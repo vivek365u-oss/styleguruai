@@ -208,8 +208,7 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
       </div>
       {expanded && (
         <div className={`px-3 pb-3 border-t ${dividerCls} pt-2 scale-in`} onClick={e => e.stopPropagation()}>
-          {color.reason && <p className={`${reasonCls} text-xs mb-2 leading-relaxed`}>{color.reason}</p>}
-          <ShoppingLinks colorName={color.name} category={category} gender={gender} />
+          {color.reason && <p className={`${reasonCls} text-xs leading-relaxed`}>{color.reason}</p>}
         </div>
       )}
     </div>
@@ -998,7 +997,6 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
     { id: 'colors', label: 'Colors', emoji: '🎨' },
     { id: 'outfits', label: 'Outfits', emoji: '👔' },
     { id: 'accessories', label: 'Accessories', emoji: '✨' },
-    { id: 'shopping', label: 'Shop', emoji: '🛍️' },
   ];
 
   const tabBarBg = isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200';
@@ -1068,6 +1066,33 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         isDark={isDark}
         photoQuality={photo_quality}
       />
+
+      {/* Style DNA Button */}
+      <button
+        onClick={() => {
+          const dnaData = {
+            skinTone: analysis.skin_tone.category,
+            undertone: analysis.skin_tone.undertone,
+            colorSeason: analysis.skin_tone.color_season,
+            skinHex: analysis.skin_color?.hex || '#C68642',
+            gender: finalData.gender || 'male',
+            bestColors: (recommendations.best_shirt_colors || recommendations.best_dress_colors || []).slice(0, 6),
+          };
+          localStorage.setItem('sg_last_analysis', JSON.stringify(dnaData));
+          window.dispatchEvent(new CustomEvent('sg_dna_set', { detail: dnaData }));
+          // Visual feedback
+          const btn = document.getElementById('set-dna-btn');
+          if (btn) { btn.textContent = '✅ Style DNA Set!'; btn.style.background = 'rgba(16,185,129,0.15)'; btn.style.borderColor = 'rgba(16,185,129,0.4)'; btn.style.color = '#10B981'; setTimeout(() => { btn.textContent = '🧬 Set as My Style DNA'; btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = ''; }, 2500); }
+        }}
+        id="set-dna-btn"
+        className={`w-full py-3 rounded-2xl border text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${
+          isDark
+            ? 'bg-purple-500/10 border-purple-500/30 text-purple-300 hover:bg-purple-500/20'
+            : 'bg-purple-50 border-purple-300 text-purple-700 hover:bg-purple-100'
+        }`}
+      >
+        🧬 Set as My Style DNA
+      </button>
 
       {/* Actions: Download / Share */}
       <div className="flex flex-col sm:flex-row gap-2 mt-4">
@@ -1189,7 +1214,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           const dy = Math.abs(e.changedTouches[0].clientY - window._tabTouchStartY);
           // Only swipe horizontally if mainly horizontal gesture
           if (Math.abs(diff) < dy * 0.8) return;
-          const tabOrder = ['colors', 'outfits', 'accessories', 'shopping'];
+          const tabOrder = ['colors', 'outfits', 'accessories'];
           const idx = tabOrder.indexOf(activeTab);
           if (diff > 50 && idx < tabOrder.length - 1) setActiveTab(tabOrder[idx + 1]);
           if (diff < -50 && idx > 0) setActiveTab(tabOrder[idx - 1]);
@@ -1230,18 +1255,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             isDark={isDark}
           />
         )}
-        {activeTab === 'shopping' && (
-          <div className="space-y-4">
-            <p className={`text-sm font-semibold ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
-              Shop curated products based on your color analysis.
-            </p>
-            <ColorRecommendationsShop
-              recommendations={recommendations}
-              gender={finalData.gender || 'male'}
-              isDark={isDark}
-            />
-          </div>
-        )}
+        {/* Shop tab removed — shopping links removed from analysis */}
       </div>
 
       {/* Related Blog Posts */}
