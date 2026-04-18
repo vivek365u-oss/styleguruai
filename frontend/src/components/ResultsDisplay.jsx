@@ -4,7 +4,7 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../context/ThemeContext';
-import { publishToCommunityFeed, auth, saveSavedColor, getSavedColors, saveHistory } from '../api/styleApi';
+import { publishToCommunityFeed, auth, saveSavedColor, getSavedColors, saveHistory, savePrimaryProfile } from '../api/styleApi';
 import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';
 import ColorRecommendationsShop from './ColorRecommendationsShop';
@@ -645,26 +645,36 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
   }
 
   // Male
-  const shirtColors = recommendations.best_shirt_colors || [];
-  const pantColors = recommendations.best_pant_colors || recommendations.base_pant_colors || [];
+  const shirtColors   = recommendations.best_shirt_colors   || [];
+  const pantColors    = recommendations.best_pant_colors    || recommendations.base_pant_colors || [];
+  const kurataColors  = recommendations.best_kurta_colors   || [];
+  const hoodieColors  = recommendations.best_hoodie_colors  || [];
+  const blazerColors  = recommendations.best_blazer_colors  || [];
+
+  const maleSections = [
+    { label: '👕 T-Shirt / Top Colors',   colors: shirtColors,  cat: 'shirt' },
+    { label: '👖 Pants / Cargo Colors',   colors: pantColors,   cat: 'pant'  },
+    { label: '🥷 Kurta Colors',           colors: kurataColors, cat: 'kurta' },
+    { label: '🧥 Hoodie / Sweatshirt',    colors: hoodieColors, cat: 'hoodie'},
+    { label: '🕴️ Blazer / Formal Shirt',  colors: blazerColors, cat: 'blazer'},
+  ].filter(s => s.colors.length > 0);
+
   return (
     <div className="space-y-5">
-      {shirtColors.length > 0 && (
-        <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>👕 T-Shirt / Top Colors</p>
+      {maleSections.map((sec) => (
+        <div key={sec.label}>
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>{sec.label}</p>
           <div className="grid grid-cols-1 gap-2">
-            {shirtColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} className={`stagger-${Math.min(i + 1, 6)}`} />)}
+            {sec.colors.map((color, i) => <ColorCard key={i} color={color} category={sec.cat} gender="male" isDark={isDark} className={`stagger-${Math.min(i + 1, 6)}`} />)}
           </div>
         </div>
+      ))}
+
+      {/* Fallback: if backend sends shirt colors but not categorized */}
+      {maleSections.length === 0 && shirtColors.length === 0 && (
+        <p className={`${sectionLabelCls} text-xs text-center py-6`}>No color data available. Try analyzing again.</p>
       )}
-      {pantColors.length > 0 && (
-        <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>👖 Pants / Cargo Colors</p>
-          <div className="grid grid-cols-1 gap-2">
-            {pantColors.map((color, i) => <ColorCard key={i} color={color} category="pant" gender="male" isDark={isDark} />)}
-          </div>
-        </div>
-      )}
+
       {avoidColors.length > 0 && (
         <div>
           <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2">🚫 Avoid These</p>
@@ -1067,22 +1077,55 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         photoQuality={photo_quality}
       />
 
-      {/* Style DNA Button */}
+      {/* Style DNA Button — saves to BOTH localStorage AND Firestore */}
       <button
-        onClick={() => {
+        onClick={async () => {
+          const btn = document.getElementById('set-dna-btn');
+          if (btn) { btn.textContent = '⏳ Saving...'; btn.disabled = true; }
+
           const dnaData = {
             skinTone: analysis.skin_tone.category,
             undertone: analysis.skin_tone.undertone,
             colorSeason: analysis.skin_tone.color_season,
             skinHex: analysis.skin_color?.hex || '#C68642',
             gender: finalData.gender || 'male',
-            bestColors: (recommendations.best_shirt_colors || recommendations.best_dress_colors || []).slice(0, 6),
+            bestColors: [
+              ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || []),
+            ].slice(0, 6),
+            // Extra fields for StyleNavigator compatibility
+            skin_tone: { category: analysis.skin_tone.category, undertone: analysis.skin_tone.undertone, color_season: analysis.skin_tone.color_season },
+            updatedAt: new Date().toISOString(),
           };
+
+          // 1. Save to localStorage (instant, for StyleNavigator fallback)
           localStorage.setItem('sg_last_analysis', JSON.stringify(dnaData));
+
+          // 2. Save to Firestore (persistent, cross-device)
+          try {
+            if (auth.currentUser) {
+              await savePrimaryProfile(auth.currentUser.uid, dnaData);
+            }
+          } catch (e) {
+            console.error('[DNA] Firestore save failed:', e);
+          }
+
+          // 3. Notify StyleNavigator to reload
           window.dispatchEvent(new CustomEvent('sg_dna_set', { detail: dnaData }));
-          // Visual feedback
-          const btn = document.getElementById('set-dna-btn');
-          if (btn) { btn.textContent = '✅ Style DNA Set!'; btn.style.background = 'rgba(16,185,129,0.15)'; btn.style.borderColor = 'rgba(16,185,129,0.4)'; btn.style.color = '#10B981'; setTimeout(() => { btn.textContent = '🧬 Set as My Style DNA'; btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = ''; }, 2500); }
+
+          // 4. Visual feedback
+          if (btn) {
+            btn.textContent = '✅ Style DNA Saved!';
+            btn.style.background = 'rgba(16,185,129,0.15)';
+            btn.style.borderColor = 'rgba(16,185,129,0.4)';
+            btn.style.color = '#10B981';
+            btn.disabled = false;
+            setTimeout(() => {
+              btn.textContent = '🧬 Set as My Style DNA';
+              btn.style.background = '';
+              btn.style.borderColor = '';
+              btn.style.color = '';
+            }, 3000);
+          }
         }}
         id="set-dna-btn"
         className={`w-full py-3 rounded-2xl border text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${
