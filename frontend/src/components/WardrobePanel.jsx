@@ -14,6 +14,7 @@ import {
 } from '../constants/fashionCategories';
 import { FashionIcons, IconRenderer } from './Icons';
 import { trackWardrobeInteraction } from '../utils/analytics';
+import { buildMyntraSearchUrl } from '../utils/myntraUrl';
 
 // getCategoryGroup is now imported from fashionCategories — 100% accurate lookup
 // No keyword matching needed here anymore.
@@ -318,8 +319,16 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
               {/* Shop CTA — opens Myntra search for this category */}
               <button
                 onClick={() => {
-                  const q = encodeURIComponent(sectionMeta.label.toLowerCase());
-                  window.open(`https://www.myntra.com/search?q=${q}`, '_blank');
+                  // Map section label to Myntra category-path URL
+                  const lower = sectionMeta.label.toLowerCase();
+                  let itemType = 'shirt';
+                  if (lower.includes('bottom') || lower.includes('pant')) itemType = 'pant';
+                  else if (lower.includes('dress')) itemType = 'dress';
+                  else if (lower.includes('ethnic')) itemType = 'kurti';
+                  else if (lower.includes('top') || lower.includes('shirt')) itemType = 'top';
+                  else if (lower.includes('foot') || lower.includes('shoe')) itemType = 'shoe';
+                  const url = buildMyntraSearchUrl(sectionMeta.label, gender, itemType);
+                  window.open(url, '_blank');
                 }}
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[11px] font-black uppercase tracking-wider shadow-lg hover:scale-[1.03] active:scale-95 transition-all"
               >

@@ -25,6 +25,7 @@ import {
 } from '../utils/analytics';
 import { scoreWardrobeItem, getActionableAdvice, getAccessoryAdvice } from '../utils/stylingEngine';
 import { getThemeColors } from '../utils/themeColors';
+import { buildMyntraSearchUrl } from '../utils/myntraUrl';
 
 // ── Skin tone → hex ─────────────────────────────────
 const TONE_HEX = {
@@ -218,9 +219,20 @@ const TREND_CATS = {
 
 // ── Shop URL builder ────────────────────────────────
 const buildShopUrl = (item, store, gender) => {
-  const g = gender.toLowerCase().includes('female') ? 'women' : 'men';
-  const q = `${g} ${item} India`;
-  if (store === 'myntra')   return `https://www.myntra.com/search?f=Gender:${g}&q=${encodeURIComponent(item)}`;
+  const gKey = gender.toLowerCase().includes('female') ? 'female' : 'male';
+  const gStr = gKey === 'female' ? 'women' : 'men';
+  const q = `${gStr} ${item} India`;
+
+  // Smart item type detection for Myntra path
+  const lower = item.toLowerCase();
+  let itemType = 'shirt';
+  if (lower.includes('pant') || lower.includes('trouser') || lower.includes('jean') || lower.includes('cargo') || lower.includes('palazzo') || lower.includes('bottom')) itemType = 'pant';
+  else if (lower.includes('dress') || lower.includes('gown') || lower.includes('coord') || lower.includes('co-ord')) itemType = 'dress';
+  else if (lower.includes('kurti') || lower.includes('saree') || lower.includes('lehenga') || lower.includes('sharara') || lower.includes('anarkali')) itemType = 'kurti';
+  else if (lower.includes('shoe') || lower.includes('boot') || lower.includes('heel') || lower.includes('sneaker') || lower.includes('sandal')) itemType = 'shoe';
+  else if (lower.includes('top') || lower.includes('blouse') || lower.includes('crop')) itemType = 'top';
+
+  if (store === 'myntra')   return buildMyntraSearchUrl(item, gKey, itemType);
   if (store === 'amazon')   return `https://www.amazon.in/s?k=${encodeURIComponent(q)}`;
   if (store === 'flipkart') return `https://www.flipkart.com/search?q=${encodeURIComponent(q)}`;
   if (store === 'meesho')   return `https://www.meesho.com/search?q=${encodeURIComponent(q)}`;

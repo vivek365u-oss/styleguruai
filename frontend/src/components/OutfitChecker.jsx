@@ -7,6 +7,7 @@ import { useAnalysisProgress } from '../hooks/useAnalysisProgress';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import { compressImage, saveLocalWardrobeImage } from '../utils/indexedDB';
 import { getCategoriesByGender, getCategoryIcon, ALL_CATEGORIES } from '../constants/fashionCategories';
+import { buildMyntraUrl } from '../utils/myntraUrl';
 // PaywallModal import removed
 
 // ── Outfit Shop Card — same style as analyze results ─────────
@@ -25,22 +26,24 @@ function OutfitShopCard({ color, isDark, gender = 'male' }) {
   const generateShoppingLinks = () => {
     const isFemale = gender === 'female';
     const colorDisplay = color.name.toLowerCase().replace(/\s+/g, ' ');
-    // Gender-aware product keyword
-    const product = isFemale ? 'top' : 'shirt';
     const genderStr = isFemale ? 'women' : 'men';
+    const product = isFemale ? 'top' : 'shirt';
+    const itemType = isFemale ? 'top' : 'shirt';
 
     const baseKw = `${genderStr} ${colorDisplay} ${product}`;
-    const amzKw = `${baseKw} trending 2025`;
+    const amzKw  = `${baseKw} trending 2025`;
 
     const budgetMax = budget?.max;
-    const amzPrice = budgetMax ? `%2Cp_36%3A-${budgetMax * 100}` : '';
-    const fkPrice = budgetMax ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budgetMax}` : '';
-    const myntraPrice = budgetMax ? `&price_range=${budgetMax}` : '';
+    const amzPrice  = budgetMax ? `%2Cp_36%3A-${budgetMax * 100}` : '';
+    const fkPrice   = budgetMax ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budgetMax}` : '';
+
+    // ── Myntra: use category-path URL (most accurate) ───────────────────────
+    const myntraLink = buildMyntraUrl({ color: color.name, gender, itemType });
 
     return {
       amazon:  `https://www.amazon.in/s?k=${encodeURIComponent(amzKw)}&rh=${isFemale ? 'n%3A7534543031' : 'n%3A1968024031'}${amzPrice}&sort=review-rank&tag=${AMAZON_TAG}`,
       flipkart:`https://www.flipkart.com/search?q=${encodeURIComponent(baseKw)}&sort=review-rank${fkPrice}`,
-      myntra:  `https://www.myntra.com/search?q=${encodeURIComponent(baseKw)}${myntraPrice}`,
+      myntra:  myntraLink,
       meesho:  `https://meesho.com/search?q=${encodeURIComponent(baseKw)}`,
     };
   };

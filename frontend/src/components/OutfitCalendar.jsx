@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { scoreWardrobeItem, getAccessoryAdvice, generateStylerBrief } from '../utils/stylingEngine';
 import { useLanguage } from '../i18n/LanguageContext';
 import { auth, getDailyOutfitLogs, loadUserPreferences, loadStyleInsights } from '../api/styleApi';
+import { buildMyntraSearchUrl } from '../utils/myntraUrl';
 
 // ── Occasion-Aware Fallback Outfits (when wardrobe is empty) ──────────────────
 // Each occasion gets a DIFFERENT outfit so calendar is never repetitive per day
@@ -324,9 +325,16 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
             {!dayInfo.isExecuted ? (
                 <button 
                   onClick={() => {
-                    const itemName = encodeURIComponent(dayInfo.top.name || 'shirt');
-                    const itemCat  = encodeURIComponent(dayInfo.top.category || '');
-                    window.open(`https://www.myntra.com/search?q=${itemName}${itemCat ? '%20' + itemCat : ''}`, '_blank');
+                    const itemName = dayInfo.top.name || 'shirt';
+                    // Detect item type for correct Myntra category path
+                    const lower = itemName.toLowerCase();
+                    let itemType = 'shirt';
+                    if (lower.includes('trouser') || lower.includes('pant') || lower.includes('jean')) itemType = 'pant';
+                    else if (lower.includes('dress') || lower.includes('coord')) itemType = 'dress';
+                    else if (lower.includes('kurti') || lower.includes('saree') || lower.includes('lehenga')) itemType = 'kurti';
+                    else if (lower.includes('top') || lower.includes('blouse')) itemType = 'top';
+                    const gender = dayInfo.top.gender || 'male';
+                    window.open(buildMyntraSearchUrl(itemName, gender, itemType), '_blank');
                   }}
                   className="mt-8 w-full py-5 bg-black text-white rounded-3xl text-[10px] font-black uppercase tracking-widest shadow-2xl hover:scale-[1.02] active:scale-95 transition-all"
                 >

@@ -8,6 +8,7 @@ import { publishToCommunityFeed, auth, saveSavedColor, getSavedColors, saveHisto
 import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';
 import ColorRecommendationsShop from './ColorRecommendationsShop';
+import { buildMyntraUrl } from '../utils/myntraUrl';
 import AffiliateLink from './AffiliateLink';
 import AdSense from '../AdSense';
 
@@ -109,18 +110,18 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   // Clean category key: strip 'cat_' prefix, find in map
   const catKey = (category || 'shirt').toLowerCase().replace(/^cat_/, '');
   const productEntry = PRODUCT_MAP[catKey];
-  const product = productEntry
-    ? productEntry[isFemale ? 'female' : 'male']
-    : (isFemale ? 'top' : 'shirt'); // safe fallback
+  
+  // ── Build accurate Myntra category-path URL ─────────────────────
+  // Uses buildMyntraUrl: maps cat_id → Myntra category path (NOT search?q=)
+  // e.g. cat_crop_top → /crop-tops?rawQuery=blue+crop+top+women
+  const catIdFull = category?.startsWith('cat_') ? category : `cat_${catKey}`;
+  const myntraUrl  = buildMyntraUrl({ color: colorName, catId: catIdFull, gender, itemType: catKey });
 
   const genderStr = isFemale ? 'women' : 'men';
-  // Color: clean up, keep only meaningful color name
   const colorClean = colorName.trim().toLowerCase();
+  const product = productEntry ? productEntry[isFemale ? 'female' : 'male'] : (isFemale ? 'top' : 'shirt');
 
   // ── Build accurate search query for each store ──────────
-  // Myntra: /search?q=query works reliably with color+product
-  // Key insight: put PRODUCT first, then color → better Myntra algorithm match
-  const myntraQ   = encodeURIComponent(`${genderStr} ${colorClean} ${product}`);
   const amazonQ   = encodeURIComponent(`${genderStr} ${colorClean} ${product} trending`);
   const flipkartQ = encodeURIComponent(`${genderStr} ${colorClean} ${product}`);
   const meeshoQ   = encodeURIComponent(`${colorClean} ${product} ${genderStr}`);
@@ -129,13 +130,11 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   const amzNode = isFemale ? 'n%3A7534543031' : 'n%3A1968024031';
   const amzPrice = budget?.max ? `%2Cp_36%3A-${budget.max * 100}` : '';
   const fkPrice  = budget?.max ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budget.max}` : '';
-  const myntraPrice = budget?.max ? `&p=price[0]%3D0%20TO%20${budget.max}` : '';
 
   const links = [
     {
       name: 'Myntra', icon: '👗',
-      // Tested: /search?q= is the correct working format
-      url: `https://www.myntra.com/search?q=${myntraQ}${myntraPrice}`,
+      url: myntraUrl,
       bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold'
     },
     {
