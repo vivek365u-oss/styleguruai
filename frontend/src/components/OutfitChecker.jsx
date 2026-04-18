@@ -173,11 +173,12 @@ function OutfitChecker() {
       
       // Wait for animation to finish, then show results
         setTimeout(() => {
-          setResult(res.data);
+          const payload = res.data?.data ? res.data.data : res.data;
+          setResult(payload);
           setShowProgress(false);
           // Persist score for home page intelligence
-          if (res.data?.compatibility?.compatibility_score !== undefined) {
-             localStorage.setItem('sg_last_fit_score', res.data.compatibility.compatibility_score.toString());
+          if (payload?.compatibility?.compatibility_score !== undefined) {
+             localStorage.setItem('sg_last_fit_score', payload.compatibility.compatibility_score.toString());
              localStorage.setItem('sg_last_fit_date', new Date().toISOString());
              window.dispatchEvent(new CustomEvent('sg_score_updated'));
           }
