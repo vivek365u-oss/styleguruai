@@ -4,15 +4,16 @@ import { logout } from './api/styleApi';
 import { LanguageProvider } from './i18n/LanguageProvider';
 import { PlanProvider } from './context/PlanProvider';
 import { CartProvider } from './context/CartProvider';
+import SplashScreen from './components/SplashScreen';
 import { useAuthState } from './hooks/useAuthState';
 import ErrorBoundary from './components/ErrorBoundary';
 
 // Eagerly loaded components for fast initial render
 import LandingPage from './components/LandingPage';
 import AuthPage from './components/AuthPage';
-import AppShell from './components/AppShell';
 
 // Lazy loaded components for code splitting
+const Dashboard = lazy(() => import('./components/AppShell'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
@@ -22,6 +23,7 @@ const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+// OrderSuccessPage lazy import removed
 
 import { ThemeContext } from './context/ThemeContext';
 
@@ -94,7 +96,7 @@ function AppRoutes({ user, setUser }) {
       <Routes>
         <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} />} />
         <Route path="/login" element={<Navigate to="/" replace />} />
-        <Route path="/dashboard" element={<AppShell user={user} onLogout={handleLogout} />} />
+        <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
         {/* OrderSuccess route removed */}
         <Route path="/profile" element={
           <PrivateRoute user={user}>
@@ -121,6 +123,7 @@ function AppRoutes({ user, setUser }) {
 
 function App() {
   const authState = useAuthState();
+  const [showSplash, setShowSplash] = useState(true);
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('tonefit_theme') || 'dark';
   });
@@ -143,6 +146,10 @@ function App() {
         onRetry={() => window.location.reload()}
       />
     );
+  }
+
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />;
   }
 
   if (authState.loading) {

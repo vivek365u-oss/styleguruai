@@ -2013,10 +2013,15 @@ async def analyze_selfie_style(
                     user_data = user_doc.to_dict()
                     usage_data = user_data.get("selfie_analysis_usage", {})
                     month_usage = usage_data.get(current_month, 0)
+                    is_pro = user_data.get("is_pro", False)
                     
                     # Check if user has exceeded free limit (2 per month)
                     FREE_MONTHLY_LIMIT = 2
-                    if month_usage >= FREE_MONTHLY_LIMIT and not watched:
+                    
+                    # Pro users are never blocked
+                    if is_pro:
+                        print(f"[USAGE] Pro user {current_user['uid']} - bypassing limit check.")
+                    elif month_usage >= FREE_MONTHLY_LIMIT and not watched:
                         # User has exceeded limit and hasn't watched ad
                         raise HTTPException(
                             status_code=403,
@@ -2030,12 +2035,13 @@ async def analyze_selfie_style(
                         )
                     
                     # Increment usage counter (only if not watched, or if watched after limit)
+                    # For Pro users, we still track usage for analytics, but it doesn't block them.
                     if not watched or month_usage >= FREE_MONTHLY_LIMIT:
                         user_ref.update({
                             f"selfie_analysis_usage.{current_month}": month_usage + 1,
                             "last_selfie_analysis": datetime.now().isoformat()
                         })
-                        print(f"[USAGE] User {current_user['uid']} - Analysis #{month_usage + 1} for {current_month}")
+                        print(f"[USAGE] User {current_user['uid']} ({'PRO' if is_pro else 'FREE'}) - Analysis #{month_usage + 1} for {current_month}")
                 else:
                     # First time user - create usage tracking
                     user_ref.set({
