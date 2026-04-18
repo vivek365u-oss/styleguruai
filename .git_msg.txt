@@ -1,0 +1,6 @@
+fix: shopping links accuracy, settings panel mobile, wardrobe grouping, outfit bg detection
+
+- ResultsDisplay: Rebuilt ShoppingLinks with PRODUCT_MAP (80+ gender-aware category mappings). All stores use search?q= with correct color and product. Female categories corrected.
+- AppShell: Settings panel now mobile-safe with maxHeight 100dvh-110px, overflowY auto, flex column. Close button always visible at bottom.
+- WardrobePanel: Added grouped category view (Ethnic, Tops, Dresses, Bottoms, Outerwear, Footwear, Accessories) with emoji section headers. Extracted WardrobeItem component.
+- backend/main.py: Added _detect_background_color and _is_background_pixel helpers. GrabCut now has 4-layer bg removal. KMeans clusters matching bg color excluded. Outfit DNA no longer picks up background noise.

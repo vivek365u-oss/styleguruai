@@ -146,6 +146,62 @@ export const getCategoryLabel = (id) => ALL_CATEGORIES.find(c => c.id === id)?.l
 export const getCategoryIcon  = (id) => ALL_CATEGORIES.find(c => c.id === id)?.icon  || 'Shopping';
 export const getCategoryEmoji = (id) => ALL_CATEGORIES.find(c => c.id === id)?.emoji || '👗';
 
+// ── Wardrobe Section Definitions ─────────────────────────────────────────────
+// Single source of truth for how categories are GROUPED in the wardrobe.
+// Changing FASHION_CATEGORIES above automatically reflects here.
+export const WARDROBE_SECTIONS = {
+    ETHNIC:      { label: 'Ethnic & Traditional',  emoji: '🥻', order: 1 },
+    FUSION:      { label: 'Fusion & Co-ords',       emoji: '✨', order: 2 },
+    TOPS:        { label: 'Tops & Shirts',           emoji: '👚', order: 3 },
+    DRESSES:     { label: 'Dresses',                emoji: '👗', order: 4 },
+    FORMAL:      { label: 'Formal Wear',             emoji: '👔', order: 5 },
+    CASUAL:      { label: 'Casual Tops',             emoji: '👕', order: 6 },
+    BOTTOMS:     { label: 'Bottoms & Pants',         emoji: '👖', order: 7 },
+    OUTERWEAR:   { label: 'Outerwear',              emoji: '🧥', order: 8 },
+    FOOTWEAR:    { label: 'Footwear',               emoji: '👟', order: 9 },
+    ACCESSORIES: { label: 'Accessories',            emoji: '💎', order: 10 },
+    UNISEX:      { label: 'Streetwear',             emoji: '🏙️', order: 11 },
+    OTHER:       { label: 'Other',                  emoji: '👘', order: 12 },
+};
+
+// ── Auto-build cat_id → section key map from FASHION_CATEGORIES ──────────────
+// This is derived from the actual structure — never out of sync.
+const _buildGroupMap = () => {
+    const map = {};
+    // Male sections
+    Object.entries(FASHION_CATEGORIES.MALE).forEach(([section, items]) => {
+        items.forEach(item => { map[item.id] = section; });
+    });
+    // Female sections
+    Object.entries(FASHION_CATEGORIES.FEMALE).forEach(([section, items]) => {
+        items.forEach(item => { map[item.id] = section; });
+    });
+    // Unisex
+    FASHION_CATEGORIES.UNISEX.forEach(item => { map[item.id] = 'UNISEX'; });
+    return map;
+};
+export const CATEGORY_GROUP_MAP = _buildGroupMap();
+
+/**
+ * Returns the wardrobe section key for a given category id.
+ * e.g. getCategoryGroup('cat_crop_top') → 'TOPS'
+ *      getCategoryGroup('cat_lehenga')   → 'ETHNIC'
+ */
+export const getCategoryGroup = (catId) => {
+    if (!catId) return 'OTHER';
+    return CATEGORY_GROUP_MAP[catId] || 'OTHER';
+};
+
+/**
+ * Returns the section metadata object for a given category id.
+ * e.g. getCategorySectionMeta('cat_crop_top') → { label: 'Tops & Shirts', emoji: '👚', order: 3 }
+ */
+export const getCategorySectionMeta = (catId) => {
+    const section = getCategoryGroup(catId);
+    return WARDROBE_SECTIONS[section] || WARDROBE_SECTIONS.OTHER;
+};
+
+
 // ── Wardrobe filter tabs (gender-aware human labels) ────────────
 export const getFiltersByGender = (gender) => {
     if (gender === 'female') {

@@ -5,31 +5,19 @@ import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
 import { getLocalWardrobeImage, deleteLocalWardrobeImage } from '../utils/indexedDB';
-import { getFiltersByGender, ALL_CATEGORIES, getCategoryLabel } from '../constants/fashionCategories';
+import {
+  getFiltersByGender,
+  getCategoryLabel,
+  getCategoryEmoji,
+  getCategoryGroup,
+  WARDROBE_SECTIONS,
+} from '../constants/fashionCategories';
 import { FashionIcons, IconRenderer } from './Icons';
 import { trackWardrobeInteraction } from '../utils/analytics';
 
-// ── Category grouping for wardrobe display ──────────────────────
-const WARDROBE_GROUPS = [
-  { id: 'ethnic',      label: 'Ethnic & Traditional', emoji: '🥻', keys: ['ethnic','kurta','kurti','saree','lehenga','sherwani','anarkali','sharara','nehru','dhoti','palazzo_suit','indo_western','cape_set'] },
-  { id: 'fusion',      label: 'Fusion & Co-ords',     emoji: '✨',   keys: ['coord_set','fusion','indowest'] },
-  { id: 'tops',        label: 'Tops & Shirts',         emoji: '👚',   keys: ['crop','blouse','corset','puff_top','shirt_female','tank_top','sweater','tshirt','polo','casual_shirt','formal_shirt','oversized_tee','graphic_tee'] },
-  { id: 'dresses',     label: 'Dresses',               emoji: '👗',   keys: ['dress','bodycon','maxi','mini','midi'] },
-  { id: 'formal',      label: 'Formal Wear',           emoji: '👔',   keys: ['formal','blazer','tuxedo','waistcoat','blazer_f'] },
-  { id: 'casual',      label: 'Casual',                emoji: '👕',   keys: ['tshirt','polo','casual','oversized','graphic','loungewear'] },
-  { id: 'bottoms',     label: 'Bottoms & Pants',       emoji: '👖',   keys: ['jeans','cargo','chino','shorts','skirt','palazzo_f','track','trouser','palazzo'] },
-  { id: 'outerwear',   label: 'Outerwear',             emoji: '🧥',   keys: ['hoodie','jacket','bomber','sweatshirt','shrug','cardigan'] },
-  { id: 'shoes',       label: 'Footwear',              emoji: '👟',   keys: ['shoe','sneaker','heel','boot','sandal','loafer','flat','juttis'] },
-  { id: 'accessories', label: 'Accessories',           emoji: '💎',   keys: ['watch','wallet','bag','sunglass','earring','necklace','bangles','dupatta','clutch','handbag'] },
-];
+// getCategoryGroup is now imported from fashionCategories — 100% accurate lookup
+// No keyword matching needed here anymore.
 
-function getItemGroup(item) {
-  const cat = (item.category || '').toLowerCase().replace(/^cat_/, '');
-  for (const group of WARDROBE_GROUPS) {
-    if (group.keys.some(k => cat.includes(k))) return group.id;
-  }
-  return 'other';
-}
 
 // ── Helpers ──────────────────────────────────────────────────
 function WardrobeImage({ imageId, fallbackColor }) {
@@ -178,59 +166,11 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
     }
   };
 
-  const filteredItems = items.filter(item => {
-    if (filter === 'all') return true;
-    const cat = (item.category || '').toLowerCase();
-    const tags = (item.tags || []).join(' ').toLowerCase();
-
-    if (filter === 'tops')
-      return cat.includes('top') || cat.includes('shirt') || cat.includes('tshirt') ||
-             cat.includes('blouse') || cat.includes('kurti') || cat.includes('polo') ||
-             cat.includes('corset') || cat.includes('crop') || cat.includes('tank') ||
-             cat.includes('tunic') || cat.includes('puff') || cat.includes('sweater') ||
-             cat.includes('oversized_tee') || cat.includes('graphic_tee') || cat.includes('cami');
-    if (filter === 'dresses')
-      return cat.includes('dress') || cat.includes('bodycon') || cat.includes('maxi') ||
-             cat.includes('mini') || cat.includes('midi');
-    if (filter === 'bottoms')
-      return cat.includes('trouser') || cat.includes('pant') || cat.includes('jeans') ||
-             cat.includes('skirt') || cat.includes('palazzo_f') || cat.includes('palazzo') ||
-             cat.includes('cargo') || cat.includes('shorts') || cat.includes('churidar') ||
-             cat.includes('chino') || cat.includes('track');
-    if (filter === 'ethnic')
-      return cat.includes('ethnic') || cat.includes('kurta') || cat.includes('kurti') ||
-             cat.includes('saree') || cat.includes('lehenga') || cat.includes('sherwani') ||
-             cat.includes('anarkali') || cat.includes('sharara') || cat.includes('nehru') ||
-             cat.includes('dhoti') || cat.includes('palazzo_suit') || cat.includes('indo_western') ||
-             cat.includes('ethnic_coord') || cat.includes('cape_set');
-    if (filter === 'formal')
-      return cat.includes('formal') || cat.includes('blazer') || cat.includes('tuxedo') ||
-             cat.includes('waistcoat') || cat.includes('suit') || tags.includes('office');
-    if (filter === 'casual')
-      return cat.includes('casual') || cat.includes('tshirt') || cat.includes('polo') ||
-             cat.includes('oversized') || cat.includes('graphic') || cat.includes('loungewear') ||
-             tags.includes('casual');
-    if (filter === 'outerwear')
-      return cat.includes('hoodie') || cat.includes('jacket') || cat.includes('bomber') ||
-             cat.includes('sweatshirt') || cat.includes('shrug') || cat.includes('cardigan');
-    if (filter === 'streetwear')
-      return cat.includes('hoodie') || cat.includes('bomber') || cat.includes('oversized') ||
-             cat.includes('graphic') || cat.includes('sneaker') || cat.includes('unisex') ||
-             cat.includes('sweatshirt') || cat.includes('loungewear') || tags.includes('street');
-    if (filter === 'shoes')
-      return cat.includes('shoe') || cat.includes('sneaker') || cat.includes('heel') ||
-             cat.includes('boot') || cat.includes('sandal') || cat.includes('loafer') ||
-             cat.includes('flat') || cat.includes('heels') || cat.includes('sports_shoe') ||
-             cat.includes('flats') || cat.includes('juttis');
-    if (filter === 'accessories')
-      return cat.includes('jewelry') || cat.includes('watch') || cat.includes('bag') ||
-             cat.includes('belt') || cat.includes('glass') || cat.includes('sunglass') ||
-             cat.includes('earring') || cat.includes('necklace') || cat.includes('bracelet') ||
-             cat.includes('wallet') || cat.includes('clutch') || cat.includes('handbag') ||
-             cat.includes('bangles') || cat.includes('dupatta') || cat.includes('accessory');
-
-    return cat === filter || cat.includes(filter);
-  });
+  // ── Exact filter using centralized CATEGORY_GROUP_MAP (no keyword guessing) ──
+  // getCategoryGroup('cat_crop_top') → 'TOPS', getCategoryGroup('cat_lehenga') → 'ETHNIC', etc.
+  const filteredItems = filter === 'all'
+    ? items
+    : items.filter(item => getCategoryGroup(item.category) === filter);
 
 
 
@@ -296,24 +236,39 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
       </div>
 
       {/* Closet Filters - Gender Aware */}
+      {/* Filter tabs are derived from WARDROBE_SECTIONS to stay in sync */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-        {getFiltersByGender(gender).map(f => (
-          <button
-            key={f.id}
-            onClick={() => {
-              setFilter(f.id);
-              trackWardrobeInteraction('filter', items.length);
-            }}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-tight transition-all border whitespace-nowrap shadow-sm ${
-              filter === f.id
-                ? 'bg-purple-600 border-purple-600 text-white shadow-purple-500/30'
-                : 'bg-[var(--bg-accent)] border-[var(--border-primary)] opacity-60 hover:opacity-100 hover:scale-105 active:scale-95'
-            }`}
-          >
-            <span className="w-3 h-3"><IconRenderer icon={f.icon || FashionIcons.Shirt} /></span>
-            {t(`cat_${f.id}`) || f.label}
-          </button>
-        ))}
+        {/* All tab */}
+        <button
+          onClick={() => { setFilter('all'); trackWardrobeInteraction('filter', items.length); }}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-tight transition-all border whitespace-nowrap shadow-sm ${
+            filter === 'all'
+              ? 'bg-purple-600 border-purple-600 text-white shadow-purple-500/30'
+              : 'bg-[var(--bg-accent)] border-[var(--border-primary)] opacity-60 hover:opacity-100 hover:scale-105 active:scale-95'
+          }`}
+        >
+          <span className="w-3 h-3"><IconRenderer icon={FashionIcons.Wardrobe} /></span>
+          All
+        </button>
+        {/* Dynamic section tabs — only show sections that have items */}
+        {Object.entries(WARDROBE_SECTIONS)
+          .filter(([key]) => key !== 'OTHER')
+          .sort(([, a], [, b]) => a.order - b.order)
+          .filter(([sectionKey]) => items.some(i => getCategoryGroup(i.category) === sectionKey))
+          .map(([sectionKey, section]) => (
+            <button
+              key={sectionKey}
+              onClick={() => { setFilter(sectionKey); trackWardrobeInteraction('filter', items.length); }}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-tight transition-all border whitespace-nowrap shadow-sm ${
+                filter === sectionKey
+                  ? 'bg-purple-600 border-purple-600 text-white shadow-purple-500/30'
+                  : 'bg-[var(--bg-accent)] border-[var(--border-primary)] opacity-60 hover:opacity-100 hover:scale-105 active:scale-95'
+              }`}
+            >
+              <span className="text-sm leading-none">{section.emoji}</span>
+              {section.label.split(' ')[0]}
+            </button>
+          ))}
       </div>
 
       {capWarning && (
@@ -332,56 +287,92 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
           <p className="text-sm opacity-50">{t('analyzeToSave')}</p>
         </div>
       ) : filter !== 'all' ? (
-        // ── FILTERED: flat list ────────────────────────────────────────────────
-        filteredItems.length === 0 ? (
-          <div className="text-center py-16 opacity-50">
-            <p className="text-sm">👚 No items in this category yet.</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filteredItems.map(item => <WardrobeItem key={item.id} item={item} expandedId={expandedId} setExpandedId={setExpandedId} deletingId={deletingId} handleDelete={handleDelete} t={t} formatDate={formatDate} isDark={isDark} />)}
-          </div>
-        )
+        // ── SINGLE SECTION FILTER VIEW ─────────────────────────
+        (() => {
+          // Use getCategoryGroup for exact matching — no keyword guessing
+          const sectionItems = items.filter(i => getCategoryGroup(i.category) === filter);
+          const sectionMeta = WARDROBE_SECTIONS[filter] || { label: filter, emoji: '👗' };
+          return sectionItems.length === 0 ? (
+            <div className="text-center py-16 opacity-50">
+              <p className="text-2xl mb-2">{sectionMeta.emoji}</p>
+              <p className="text-sm font-bold">{sectionMeta.label}</p>
+              <p className="text-xs mt-1">No items saved here yet.</p>
+            </div>
+          ) : (
+            <div>
+              {/* Section header */}
+              <div className="flex items-center gap-2 mb-4 px-1">
+                <span className="text-xl">{sectionMeta.emoji}</span>
+                <p className={`text-[12px] font-black uppercase tracking-widest ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{sectionMeta.label}</p>
+                <div className={`flex-1 h-px ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
+                <span className={`text-[10px] font-bold ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{sectionItems.length} items</span>
+              </div>
+              <div className="space-y-3">
+                {sectionItems.map(item => <WardrobeItem key={item.id} item={item} expandedId={expandedId} setExpandedId={setExpandedId} deletingId={deletingId} handleDelete={handleDelete} t={t} formatDate={formatDate} isDark={isDark} />)}
+              </div>
+            </div>
+          );
+        })()
       ) : (
-        // ── ALL: Grouped by category ─────────────────────────────────────────────────
+        // ── ALL: Precisely grouped by WARDROBE_SECTIONS ─────────────────────────
+        // getCategoryGroup() maps each cat_id → section key (100% accurate, no guessing)
         <div className="space-y-6">
           {(() => {
+            // Build section → items map
             const grouped = {};
             items.forEach(item => {
-              const grp = getItemGroup(item);
+              const grp = getCategoryGroup(item.category);
               if (!grouped[grp]) grouped[grp] = [];
               grouped[grp].push(item);
             });
 
-            const sections = WARDROBE_GROUPS
-              .filter(g => grouped[g.id]?.length > 0)
-              .map(g => ({ ...g, items: grouped[g.id] }));
+            // Sort sections by WARDROBE_SECTIONS order, only show non-empty ones
+            const sections = Object.entries(WARDROBE_SECTIONS)
+              .filter(([key]) => grouped[key]?.length > 0)
+              .sort(([, a], [, b]) => a.order - b.order)
+              .map(([key, meta]) => ({ key, ...meta, items: grouped[key] }));
 
-            // Items that didn't match any group
-            const other = grouped['other'] || [];
-            if (other.length > 0) sections.push({ id: 'other', label: 'Other', emoji: '👗', items: other });
+            // Also show any 'OTHER' items at the bottom
+            if (grouped['OTHER']?.length > 0) {
+              sections.push({ key: 'OTHER', ...WARDROBE_SECTIONS.OTHER, items: grouped['OTHER'] });
+            }
 
             if (sections.length === 0) return (
               <div className="text-center py-16 opacity-50"><p className="text-sm">No items saved yet.</p></div>
             );
 
             return sections.map(section => (
-              <div key={section.id}>
+              <div key={section.key}>
                 {/* Section Header */}
-                <div className={`flex items-center gap-2 mb-3 px-1`}>
-                  <span className="text-base">{section.emoji}</span>
-                  <p className={`text-[11px] font-black uppercase tracking-widest ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{section.label}</p>
+                <div className="flex items-center gap-2 mb-3 px-1">
+                  <span className="text-xl leading-none">{section.emoji}</span>
+                  <p className={`text-[11px] font-black uppercase tracking-widest ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
+                    {section.label}
+                  </p>
                   <div className={`flex-1 h-px ${isDark ? 'bg-white/10' : 'bg-gray-200'}`} />
-                  <span className={`text-[10px] font-bold ${isDark ? 'text-white/20' : 'text-gray-400'}`}>{section.items.length}</span>
+                  <span className={`text-[10px] font-bold ${isDark ? 'text-white/20' : 'text-gray-400'}`}>
+                    {section.items.length}
+                  </span>
                 </div>
                 <div className="space-y-3">
-                  {section.items.map(item => <WardrobeItem key={item.id} item={item} expandedId={expandedId} setExpandedId={setExpandedId} deletingId={deletingId} handleDelete={handleDelete} t={t} formatDate={formatDate} isDark={isDark} />)}
+                  {section.items.map(item => (
+                    <WardrobeItem
+                      key={item.id}
+                      item={item}
+                      expandedId={expandedId}
+                      setExpandedId={setExpandedId}
+                      deletingId={deletingId}
+                      handleDelete={handleDelete}
+                      t={t}
+                      formatDate={formatDate}
+                      isDark={isDark}
+                    />
+                  ))}
                 </div>
               </div>
             ));
           })()}
         </div>
-
       )}
 
       {toast && (
