@@ -1,174 +1,231 @@
 /**
- * Enhanced Loading Screen — Real Multi-Stage Progress Animation
- * Production-level UX: staged steps, animated ring, fade-in/out
+ * LoadingScreenWithProgress.jsx — Human-feeling loading screen v2
+ * No AI-generated look. Clean, warm, editorial design.
+ * Fast feel, never stuck, no heavy emoji overload.
  */
 
 import React, { useContext, useEffect, useState } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 
-
-// Stage definitions shown as step pills
-const STAGE_STEPS = [
-  { key: 'upload',     emoji: '📤', label: 'Uploading...',        threshold: 0  },
-  { key: 'detect',     emoji: '🔬', label: 'Detecting colors...',  threshold: 20 },
-  { key: 'analyze',    emoji: '🎨', label: 'Analyzing skin tone...',threshold: 40 },
-  { key: 'match',      emoji: '👔', label: 'Matching outfits...',  threshold: 70 },
-  { key: 'finalize',   emoji: '✨', label: 'Generating results...', threshold: 90 },
+const TIPS = [
+  'Skin tone is best read in natural daylight 🌤️',
+  'Warm undertones love earthy, amber & rust shades',
+  'Cool undertones pop with blues, lavenders & berries',
+  'Your color season is determined by tone + undertone',
+  'Neutral undertones can wear almost any palette',
+  'Skin-tone matching improves outfit confidence by 40%',
+  'Most Indian skin tones are warm or neutral-warm',
 ];
 
 export function LoadingScreenWithProgress({ progress }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const [displayedPercent, setDisplayedPercent] = useState(0);
 
-  // Normalize: support both object {percent, label} and raw number
   const rawPercent = typeof progress === 'number'
     ? progress
     : (progress?.percent ?? 0);
-  const label = typeof progress === 'object' && progress !== null
-    ? (progress.label || 'Analyzing your style...')
-    : 'Analyzing your style...';
-  const activeEmoji = typeof progress === 'object' && progress !== null
-    ? (progress.emoji || '🔍')
-    : '🔍';
-  const isError = typeof progress === 'object' && progress !== null && progress.isError;
+  const label = (typeof progress === 'object' && progress?.label) || 'Analyzing your photo...';
+  const isError = progress?.isError || false;
 
-  // Smooth counter animation
+  const [displayed, setDisplayed] = useState(0);
+  const [tipIdx, setTipIdx] = useState(0);
+
+  // Smooth percent counter
   useEffect(() => {
-    let frame;
-    const animate = () => {
-      setDisplayedPercent(prev => {
-        if (prev < rawPercent) {
-          const step = Math.max(1, Math.ceil((rawPercent - prev) / 6));
-          return Math.min(prev + step, rawPercent);
-        }
-        return prev;
+    let raf;
+    const run = () => {
+      setDisplayed(prev => {
+        const diff = rawPercent - prev;
+        if (Math.abs(diff) < 0.2) return rawPercent;
+        return prev + diff * 0.12; // eased approach
       });
-      frame = requestAnimationFrame(animate);
+      raf = requestAnimationFrame(run);
     };
-    frame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frame);
+    raf = requestAnimationFrame(run);
+    return () => cancelAnimationFrame(raf);
   }, [rawPercent]);
 
-  // SVG circle progress (128x128, r=54)
-  const RADIUS = 54;
-  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-  const strokeDashoffset = CIRCUMFERENCE * (1 - displayedPercent / 100);
+  // Rotate tips every 3.5s
+  useEffect(() => {
+    const t = setInterval(() => setTipIdx(i => (i + 1) % TIPS.length), 3500);
+    return () => clearInterval(t);
+  }, []);
 
-  // Active stage
-  const activeStageIdx = STAGE_STEPS.reduce((acc, stage, i) => {
-    return displayedPercent >= stage.threshold ? i : acc;
-  }, 0);
+  const pct = Math.min(Math.round(displayed), 100);
+
+  // Step nodes
+  const steps = [
+    { label: 'Upload',     threshold: 5  },
+    { label: 'Skin Tone',  threshold: 35 },
+    { label: 'Palette',    threshold: 65 },
+    { label: 'Outfit',     threshold: 85 },
+    { label: 'Done',       threshold: 100 },
+  ];
+
+  const bg = isDark ? '#050816' : '#F8F7FF';
+  const cardBg = isDark ? 'rgba(255,255,255,0.04)' : '#FFFFFF';
+  const border = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(139,92,246,0.12)';
+  const textPrimary = isDark ? '#FFFFFF' : '#1A1A2E';
+  const textMuted = isDark ? 'rgba(255,255,255,0.35)' : '#6366F1';
+  const GRAD = 'linear-gradient(90deg, #6366F1, #8B5CF6, #EC4899)';
 
   return (
-    <div className={`flex flex-col items-center justify-center min-h-[65vh] px-6 py-8 animate-fadeIn`}>
+    <div style={{
+      minHeight: '70vh',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      padding: '32px 24px',
+      background: bg,
+      fontFamily: "'Outfit', 'Inter', sans-serif",
+    }}>
 
-      {/* Circular progress ring */}
-      <div className="relative w-36 h-36 mb-6" style={{ filter: 'drop-shadow(0 0 20px rgba(168,85,247,0.35))' }}>
-        {/* Background track */}
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 128 128">
-          <circle cx="64" cy="64" r={RADIUS} fill="none"
-            stroke={isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}
-            strokeWidth="8" />
-        </svg>
-        {/* Progress arc */}
-        <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 128 128">
-          <defs>
-            <linearGradient id="pgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#a855f7" />
-              <stop offset="100%" stopColor="#ec4899" />
-            </linearGradient>
-          </defs>
-          <circle
-            cx="64" cy="64" r={RADIUS}
-            fill="none"
-            stroke="url(#pgGrad)"
-            strokeWidth="8"
-            strokeLinecap="round"
-            strokeDasharray={CIRCUMFERENCE}
-            strokeDashoffset={strokeDashoffset}
-            style={{ transition: 'stroke-dashoffset 0.3s ease' }}
-          />
-        </svg>
-        {/* Center emoji + percent */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-4xl mb-0.5 animate-bounce-subtle">{isError ? '❌' : activeEmoji}</span>
-          <span className={`text-sm font-black tabular-nums ${isDark ? 'text-white' : 'text-gray-800'}`}>
-            {displayedPercent}%
-          </span>
+      {/* Top: Logo + pulsing ring */}
+      <div style={{ marginBottom: 32, position: 'relative' }}>
+        {/* Outer glow ring */}
+        <div style={{
+          position: 'absolute', inset: -14,
+          borderRadius: '50%',
+          background: `conic-gradient(#8B5CF6 ${pct}%, transparent ${pct}%)`,
+          animation: 'spin 3s linear infinite',
+          opacity: 0.25,
+        }} />
+
+        {/* App logo */}
+        <div style={{
+          width: 88, height: 88,
+          background: 'linear-gradient(135deg, #6366F1, #8B5CF6, #EC4899)',
+          borderRadius: 26,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 40,
+          boxShadow: '0 16px 48px rgba(139,92,246,0.45)',
+          position: 'relative', zIndex: 1,
+          overflow: 'hidden',
+        }}>
+          {/* Shine sweep */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+            animation: 'shimmer 2s ease-in-out infinite',
+          }} />
+          <span style={{ position: 'relative', zIndex: 2, color: 'white', fontWeight: 300 }}>∞</span>
         </div>
       </div>
 
-      {/* Title */}
-      <h2 className={`text-xl font-black mb-1 text-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
-        {isError ? 'Analysis Failed' : label}
-      </h2>
-      <p className={`text-sm mb-6 text-center ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
-        {isError ? 'Please try again with a clearer photo' : 'StyleGuruAI is crafting your style profile...'}
+      {/* Status label */}
+      <p style={{
+        fontSize: 18, fontWeight: 800,
+        color: textPrimary,
+        marginBottom: 6, textAlign: 'center',
+        letterSpacing: '-0.02em',
+      }}>
+        {isError ? '⚠️ Analysis Failed' : label}
+      </p>
+      <p style={{
+        fontSize: 12, color: textMuted,
+        marginBottom: 28, textAlign: 'center',
+        letterSpacing: '0.04em',
+      }}>
+        {isError ? 'Please retry with a clearer photo' : 'StyleGuruAI is crafting your style profile'}
       </p>
 
-      {/* Stage step pills */}
+      {/* Progress bar */}
       {!isError && (
-        <div className="flex items-center gap-1.5 flex-wrap justify-center mb-6">
-          {STAGE_STEPS.map((stage, i) => {
-            const isDone    = i < activeStageIdx;
-            const isActive  = i === activeStageIdx;
-            return (
-              <div
-                key={stage.key}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border transition-all duration-300 ${
-                  isDone
-                    ? isDark
-                      ? 'bg-green-500/20 border-green-500/30 text-green-300'
-                      : 'bg-green-100 border-green-400 text-green-700'
-                    : isActive
-                      ? isDark
-                        ? 'bg-purple-500/30 border-purple-500/50 text-purple-200 scale-105 shadow-md shadow-purple-500/20'
-                        : 'bg-purple-100 border-purple-500 text-purple-700 scale-105 shadow-sm'
-                      : isDark
-                        ? 'bg-white/5 border-white/10 text-white/30'
-                        : 'bg-gray-100 border-gray-200 text-gray-400'
-                }`}
-              >
-                <span>{isDone ? '✅' : isActive ? stage.emoji : '○'}</span>
-                <span>{stage.label.replace('...', '')}</span>
-              </div>
-            );
-          })}
-        </div>
+        <>
+          <div style={{
+            width: '100%', maxWidth: 280,
+            height: 6, borderRadius: 99,
+            background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(99,102,241,0.12)',
+            overflow: 'hidden', marginBottom: 12,
+          }}>
+            <div style={{
+              height: '100%',
+              width: `${pct}%`,
+              background: GRAD,
+              borderRadius: 99,
+              transition: 'width 0.3s ease',
+              boxShadow: '0 0 12px rgba(139,92,246,0.5)',
+            }} />
+          </div>
+
+          {/* Percent + step label */}
+          <p style={{ fontSize: 12, color: textMuted, marginBottom: 28, letterSpacing: '0.06em' }}>
+            {pct}% complete
+          </p>
+
+          {/* Step nodes */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 32 }}>
+            {steps.map((step, i) => {
+              const done = pct >= step.threshold;
+              const active = pct < step.threshold && (i === 0 || pct >= steps[i - 1].threshold);
+              return (
+                <React.Fragment key={step.label}>
+                  <div style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                    opacity: done || active ? 1 : 0.35,
+                    transition: 'opacity 0.4s',
+                  }}>
+                    <div style={{
+                      width: 10, height: 10, borderRadius: '50%',
+                      background: done ? '#10B981' : active ? '#8B5CF6' : (isDark ? 'rgba(255,255,255,0.15)' : '#E5E7EB'),
+                      boxShadow: active ? '0 0 8px rgba(139,92,246,0.6)' : 'none',
+                      transition: 'all 0.4s',
+                    }} />
+                    <span style={{ fontSize: 9, color: textMuted, letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+                      {step.label}
+                    </span>
+                  </div>
+                  {i < steps.length - 1 && (
+                    <div style={{
+                      flex: 1, height: 1,
+                      background: pct >= step.threshold
+                        ? 'linear-gradient(90deg, #10B981, #8B5CF6)'
+                        : (isDark ? 'rgba(255,255,255,0.08)' : '#E5E7EB'),
+                      transition: 'background 0.5s',
+                      marginBottom: 14,
+                    }} />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
+
+          {/* Rotating tip */}
+          <div style={{
+            width: '100%', maxWidth: 300,
+            padding: '12px 16px',
+            background: cardBg,
+            border: `1px solid ${border}`,
+            borderRadius: 16,
+            textAlign: 'center',
+          }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 6 }}>
+              Style Tip
+            </p>
+            <p style={{ fontSize: 12, color: isDark ? 'rgba(255,255,255,0.55)' : '#374151', lineHeight: 1.6, transition: 'opacity 0.5s' }}>
+              {TIPS[tipIdx]}
+            </p>
+          </div>
+        </>
       )}
 
-      {/* Progress bar (supplemental) */}
-      {!isError && (
-        <div className={`w-full max-w-xs h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300"
-            style={{ width: `${displayedPercent}%` }}
-          />
-        </div>
-      )}
-
-      {/* Error detail */}
+      {/* Error card */}
       {isError && (
-        <div className={`mt-4 px-4 py-3 rounded-2xl border text-center ${isDark ? 'bg-red-500/10 border-red-500/30' : 'bg-red-50 border-red-300'}`}>
-          <p className={`text-sm font-semibold ${isDark ? 'text-red-300' : 'text-red-600'}`}>
-            {progress?.label || 'Analysis failed. Please try again.'}
+        <div style={{
+          padding: '16px 24px', borderRadius: 16,
+          background: isDark ? 'rgba(239,68,68,0.1)' : '#FEF2F2',
+          border: '1px solid rgba(239,68,68,0.3)',
+          textAlign: 'center',
+        }}>
+          <p style={{ fontSize: 13, color: isDark ? '#FCA5A5' : '#DC2626', fontWeight: 600 }}>
+            {progress?.label || 'Could not analyze photo. Please use a clear, well-lit selfie.'}
           </p>
         </div>
       )}
 
-      {/* Subtle pulse dots */}
-      {!isError && (
-        <div className="flex gap-2 mt-6">
-          {[0, 1, 2].map(i => (
-            <div
-              key={i}
-              className="w-2 h-2 rounded-full bg-purple-500/60 animate-pulse"
-              style={{ animationDelay: `${i * 0.2}s` }}
-            />
-          ))}
-        </div>
-      )}
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes shimmer { 0%,100% { transform: translateX(-100%); } 50% { transform: translateX(100%); } }
+      `}</style>
     </div>
   );
 }

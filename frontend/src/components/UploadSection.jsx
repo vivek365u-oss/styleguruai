@@ -1,10 +1,11 @@
 import { useState, useRef, useContext } from 'react';
-import { analyzeImage, analyzeImageFemale, analyzeImageSeasonal, consumeUserLimit } from '../api/styleApi';
+import { analyzeImage, analyzeImageFemale, analyzeImageSeasonal, consumeUserLimit, saveUserPreferences, auth } from '../api/styleApi';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import { useAnalysisProgress } from '../hooks/useAnalysisProgress';
 import { FashionIcons, IconRenderer } from './Icons';
+import { compressImage } from '../utils/imageCompressor';
 
 // ── Skin Tone Quiz ────────────────────────────────────────────
 function SkinToneQuiz({ isDark, onResult, gender }) {
@@ -294,7 +295,14 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
 
   const handleGenderChange = (newGender) => {
     setGender(newGender);
+    // Keep localStorage as quick cache
     localStorage.setItem('sg_gender', newGender);
+    // Also persist to Firestore for cross-device sync
+    if (auth.currentUser) {
+      saveUserPreferences(auth.currentUser.uid, { gender: newGender }).catch(err =>
+        console.warn('[UploadSection] Failed to sync gender to Firestore:', err)
+      );
+    }
     if (onGenderChange) onGenderChange(newGender);
   };
 
@@ -330,14 +338,22 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
     // Map language code for backend (hinglish -> en, hi -> hi)
     const backendLang = language === 'hi' ? 'hi' : 'en';
 
+    // ── Compress image before upload ──────────────────────────
+    let fileToAnalyze = file;
+    try {
+      fileToAnalyze = await compressImage(file);
+    } catch (compErr) {
+      console.warn('[UploadSection] Compression failed, using original:', compErr);
+    }
+
     let res;
     try {
       if (mode === 'seasonal') {
-        res = await analyzeImageSeasonal(file, season, backendLang, handleProgress, gender);
+        res = await analyzeImageSeasonal(fileToAnalyze, season, backendLang, handleProgress, gender);
       } else if (gender === 'female') {
-        res = await analyzeImageFemale(file, backendLang, handleProgress);
+        res = await analyzeImageFemale(fileToAnalyze, backendLang, handleProgress);
       } else {
-        res = await analyzeImage(file, backendLang, handleProgress);
+        res = await analyzeImage(fileToAnalyze, backendLang, handleProgress);
       }
     } catch (err) {
       console.error("[UploadSection] Analysis error:", err);

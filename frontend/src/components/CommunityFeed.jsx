@@ -1,226 +1,402 @@
-import React, { useState, useEffect, useContext } from 'react';
+/**
+ * CommunityFeed.jsx — Premium Community Feed v2
+ * Real-time Firestore listener, glassmorphic cards, like system
+ * No localStorage dependency — all Firebase
+ */
+
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
-import { getCommunityFeed, likeCommunityPost, publishToCommunityFeed, auth } from '../api/styleApi';
+import { auth } from '../api/styleApi';
 import { logEvent, EVENTS } from '../utils/analytics';
 import { useLanguage } from '../i18n/LanguageContext';
 
-function CommunityFeed() {
-  const { t, language } = useLanguage();
-  const { theme } = useContext(ThemeContext);
-  const isDark = theme === 'dark';
-  const [feed, setFeed] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+// ── Firestore helpers (dynamic import for smaller initial bundle) ──
+async function getDb() {
+  const { db } = await import('../firebase');
+  return db;
+}
 
-  useEffect(() => {
-    loadFeed();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+async function listenToFeed(callback) {
+  const { collection, query, orderBy, limit, onSnapshot } = await import('firebase/firestore');
+  const db = await getDb();
+  const q = query(collection(db, 'community_feed'), orderBy('published_at', 'desc'), limit(40));
+  return onSnapshot(q, (snap) => {
+    const posts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    callback(posts);
+  }, (err) => {
+    console.error('[CommunityFeed] Firestore error:', err);
+    callback([]);
+  });
+}
 
-  const loadFeed = async () => {
-    setLoading(true);
-    setError(null);
+async function toggleLikePost(postId, uid) {
+  const { doc, runTransaction, arrayUnion, arrayRemove, increment } = await import('firebase/firestore');
+  const db = await getDb();
+  const postRef = doc(db, 'community_feed', postId);
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(postRef);
+    if (!snap.exists()) return;
+    const likedBy = snap.data().likedBy || [];
+    const hasLiked = likedBy.includes(uid);
+    tx.update(postRef, {
+      likedBy: hasLiked ? arrayRemove(uid) : arrayUnion(uid),
+      likes: increment(hasLiked ? -1 : 1),
+    });
+  });
+}
+
+async function postToCommunity(uid, postData) {
+  const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+  const db = await getDb();
+  await addDoc(collection(db, 'community_feed'), {
+    uid: uid || 'anonymous',
+    ...postData,
+    likes: 0,
+    likedBy: [],
+    published_at: serverTimestamp(),
+  });
+}
+
+// ── Skeleton card ───────────────────────────────────────────────
+function SkeletonCard({ isDark }) {
+  const base = isDark ? 'bg-white/8 animate-pulse rounded-2xl' : 'bg-gray-100 animate-pulse rounded-2xl';
+  return (
+    <div className={`rounded-3xl p-4 border ${isDark ? 'bg-white/5 border-white/8' : 'bg-white border-gray-100 shadow-sm'}`}>
+      <div className="flex items-center gap-3 mb-4">
+        <div className={`w-11 h-11 rounded-full ${base}`} />
+        <div className="flex-1 space-y-2">
+          <div className={`h-3 rounded-full w-2/3 ${base}`} />
+          <div className={`h-2.5 rounded-full w-1/2 ${base}`} />
+        </div>
+      </div>
+      <div className={`h-2 rounded-full w-full mb-2 ${base}`} />
+      <div className="flex gap-2">
+        {[1,2,3,4,5].map(i => <div key={i} className={`flex-1 aspect-square rounded-xl ${base}`} />)}
+      </div>
+    </div>
+  );
+}
+
+// ── Post Card ───────────────────────────────────────────────────
+function PostCard({ post, isDark, currentUid }) {
+  const hasLiked = (post.likedBy || []).includes(currentUid);
+  const [liking, setLiking] = useState(false);
+
+  const handleLike = async (e) => {
+    e.stopPropagation();
+    if (!currentUid || liking) return;
+    setLiking(true);
     try {
-      const data = await getCommunityFeed(30);
-      setFeed(data);
-    } catch {
-      setError(t('couldNotLoadFeed'));
+      await toggleLikePost(post.id, currentUid);
+      logEvent(EVENTS.FEED_INTERACTION, { type: 'like_post' });
+    } catch (err) {
+      console.error('[PostCard] like error:', err);
     } finally {
-      setLoading(false);
+      setLiking(false);
     }
   };
 
+  const getTimeAgo = (ts) => {
+    if (!ts) return 'Just now';
+    const date = ts?.toDate?.() || new Date(ts);
+    const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    return `${Math.floor(seconds / 86400)}d ago`;
+  };
+
+  const skinLabel = [post.skinTone, post.undertone].filter(Boolean).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' · ');
+  const bestColors = (post.bestColors || []).slice(0, 5);
+
+  return (
+    <div className={`rounded-3xl p-4 border transition-all hover:scale-[1.005] ${
+      isDark
+        ? 'bg-white/[0.04] border-white/[0.07] hover:border-purple-500/30 hover:bg-white/[0.07]'
+        : 'bg-white border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200'
+    }`}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2.5">
+          {/* Skin tone avatar */}
+          <div
+            className="w-11 h-11 rounded-full border-2 shadow-md flex-shrink-0"
+            style={{
+              background: post.skinHex
+                ? `radial-gradient(circle at 35% 35%, ${post.skinHex}dd, ${post.skinHex}99)`
+                : 'linear-gradient(135deg, #C68642, #A0724A)',
+              borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)',
+            }}
+          />
+          <div>
+            <p className={`text-sm font-black leading-tight ${isDark ? 'text-white' : 'text-gray-800'}`}>
+              {skinLabel || 'Skin Tone'}
+            </p>
+            <p className={`text-[10px] leading-tight flex items-center gap-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
+              {post.colorSeason && <span>{post.colorSeason} Season</span>}
+              {post.gender && <span>· {post.gender === 'female' ? '👩' : '👨'}</span>}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-1.5">
+          <span className={`text-[10px] font-medium ${isDark ? 'text-white/25' : 'text-gray-400'}`}>
+            {getTimeAgo(post.published_at)}
+          </span>
+          <button
+            onClick={handleLike}
+            disabled={!currentUid || liking}
+            className={`text-xs font-bold px-2.5 py-1 rounded-lg border transition-all select-none ${
+              hasLiked
+                ? isDark ? 'bg-pink-500/20 border-pink-500/40 text-pink-400' : 'bg-pink-50 border-pink-200 text-pink-500'
+                : isDark ? 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'
+            } ${liking ? 'opacity-50 scale-95' : 'hover:scale-105'}`}
+          >
+            {hasLiked ? '🔥' : '🤍'} {post.likes || 0}
+          </button>
+        </div>
+      </div>
+
+      {/* OOTD image */}
+      {post.ootdImage && (
+        <div className="w-full aspect-[4/5] overflow-hidden rounded-2xl mb-3 border shadow-sm"
+          style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }}>
+          <img src={post.ootdImage} alt="OOTD" className="w-full h-full object-cover" loading="lazy" />
+        </div>
+      )}
+
+      {/* Color palette grid */}
+      {bestColors.length > 0 ? (
+        <div className="flex gap-1.5">
+          {bestColors.map((color, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
+              <div
+                className="w-full aspect-square rounded-xl border shadow-sm transition-transform group-hover:scale-110"
+                style={{
+                  backgroundColor: color.hex || '#888',
+                  borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+                }}
+              />
+              <span className={`text-[8px] font-semibold truncate w-full text-center ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
+                {(color.name || 'Color').split(' ')[0]}
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className={`text-xs text-center py-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
+          No palette shared
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ── Main CommunityFeed ───────────────────────────────────────────
+function CommunityFeed() {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+  const { t } = useLanguage();
+
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const currentUid = auth.currentUser?.uid || null;
+
+  // Real-time Firestore listener
+  useEffect(() => {
+    let unsubscribe;
+    setLoading(true);
+
+    listenToFeed((data) => {
+      setPosts(data);
+      setLoading(false);
+    }).then((unsub) => {
+      unsubscribe = unsub;
+    }).catch((err) => {
+      console.error('[CommunityFeed] Failed to subscribe:', err);
+      setError('Could not connect to community feed.');
+      setLoading(false);
+    });
+
+    return () => { if (unsubscribe) unsubscribe(); };
+  }, []);
 
   const handleOOTDUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!currentUid) { alert('Please login to post your OOTD.'); return; }
+
+    // Get DNA from Firestore
+    let dnaData = null;
+    try {
+      const { doc, getDoc } = await import('firebase/firestore');
+      const db = await getDb();
+      const snap = await getDoc(doc(db, 'users', currentUid, 'primary_profile', 'data'));
+      if (snap.exists()) dnaData = snap.data();
+    } catch {}
+
+    // Fallback to localStorage cache
+    if (!dnaData) {
+      try { dnaData = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch {}
+    }
+
+    if (!dnaData) {
+      alert('Please analyze your photo first to set your Style DNA before posting.');
+      return;
+    }
 
     setUploading(true);
     try {
-      // Get current user context
-      const lastA = (() => { try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; } })();
-      if (!lastA) throw new Error(t('completeAnalysisFirst'));
-
-      // Compress image
+      // Compress image to ~300px for community (privacy + speed)
+      const canvas = document.createElement('canvas');
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target.result;
-        img.onload = async () => {
-          const canvas = document.createElement('canvas');
-          const MAX_SIZE = 300;
-          let width = img.width;
-          let height = img.height;
-          if (width > height) {
-            if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
-          } else {
-            if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
-          }
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          const base64Image = canvas.toDataURL('image/jpeg', 0.5); // high compression
+      await new Promise((resolve, reject) => {
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.src = ev.target.result;
+          img.onload = async () => {
+            const MAX = 400;
+            let w = img.width, h = img.height;
+            if (w > h) { if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; } } else { if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; } }
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const base64 = canvas.toDataURL('image/jpeg', 0.6);
 
-          // Assemble post
-          const postData = {
-            skinTone: lastA.skinTone || 'medium',
-            undertone: lastA.undertone || 'warm',
-            skinHex: lastA.skinHex || '#C68642',
-            colorSeason: lastA.season || 'unknown',
-            gender: lastA.fullData?.gender || 'male',
-            bestColors: (lastA.fullData?.recommendations?.best_shirt_colors || []).slice(0, 5),
-            ootdImage: base64Image
+            const post = {
+              skinTone: dnaData.skinTone || 'medium',
+              undertone: dnaData.undertone || 'warm',
+              skinHex: dnaData.skinHex || '#C68642',
+              colorSeason: dnaData.colorSeason || '',
+              gender: dnaData.gender || 'male',
+              bestColors: (dnaData.bestColors || []).slice(0, 5),
+              ootdImage: base64,
+            };
+
+            await postToCommunity(currentUid, post);
+            logEvent(EVENTS.FEED_INTERACTION, { type: 'post_ootd', gender: post.gender });
+            resolve();
           };
-
-          const uid = auth.currentUser?.uid || 'anonymous';
-          await publishToCommunityFeed(uid, postData);
-          logEvent(EVENTS.FEED_INTERACTION, { type: 'post_ootd', gender: postData.gender });
-          await loadFeed(); // refresh feed
+          img.onerror = reject;
         };
-      };
-    } catch (e) {
-      alert(e.message);
+        reader.onerror = reject;
+      });
+    } catch (err) {
+      console.error('[CommunityFeed] Upload error:', err);
+      alert('Failed to post. Please try again.');
     } finally {
       setUploading(false);
+      // Reset input
+      e.target.value = '';
     }
   };
 
-  const handleLike = async (postId) => {
-    // Optimistic UI update
-    setFeed(prev => prev.map(p => p.id === postId ? { ...p, likes: (p.likes || 0) + 1, hasLiked: true } : p));
-    logEvent(EVENTS.FEED_INTERACTION, { type: 'like_post' });
-    await likeCommunityPost(postId);
-  };
+  const handleSharePalette = async () => {
+    if (!currentUid) { alert('Please login to share your palette.'); return; }
 
-  const getTimeAgo = (dateStr) => {
-    if (!dateStr) return t('timeAgoUnknown');
-    const seconds = Math.floor((new Date() - new Date(dateStr)) / 1000);
-    const intervals = [
-      { seconds: 31536000, label: t('timeAgoYear') },
-      { seconds: 2592000, label: t('timeAgoMonth') },
-      { seconds: 86400, label: t('timeAgoDay') },
-      { seconds: 3600, label: t('timeAgoHour') },
-      { seconds: 60, label: t('timeAgoMinute') },
-    ];
-    for (const i of intervals) {
-      const count = Math.floor(seconds / i.seconds);
-      if (count >= 1) return language === 'hi' ? `${count} ${i.label} पहले` : `${count}${i.label} ago`;
+    let dnaData = null;
+    try {
+      const { doc, getDoc } = await import('firebase/firestore');
+      const db = await getDb();
+      const snap = await getDoc(doc(db, 'users', currentUid, 'primary_profile', 'data'));
+      if (snap.exists()) dnaData = snap.data();
+    } catch {}
+    if (!dnaData) {
+      try { dnaData = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch {}
     }
-    return language === 'hi' ? 'अभी' : 'Just now';
+    if (!dnaData) { alert('Set your Style DNA first by analyzing a photo.'); return; }
+
+    try {
+      await postToCommunity(currentUid, {
+        skinTone: dnaData.skinTone || 'medium',
+        undertone: dnaData.undertone || 'warm',
+        skinHex: dnaData.skinHex || '#C68642',
+        colorSeason: dnaData.colorSeason || '',
+        gender: dnaData.gender || 'male',
+        bestColors: (dnaData.bestColors || []).slice(0, 5),
+      });
+      logEvent(EVENTS.FEED_INTERACTION, { type: 'share_palette' });
+    } catch (err) {
+      console.error('[CommunityFeed] Share palette error:', err);
+      alert('Failed to share. Please try again.');
+    }
   };
 
-  if (loading) {
-    return (
-      <div className="flex flex-col justify-center items-center py-20 space-y-4">
-        <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-        <p className={`text-sm font-bold animate-pulse ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Loading community colors...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-20">
-        <p className={`text-sm ${isDark ? 'text-red-400' : 'text-red-500'}`}>{error}</p>
-        <button onClick={loadFeed} className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-xl font-bold text-xs">
-          Try Again
-        </button>
-      </div>
-    );
-  }
+  const bg = isDark ? '' : '';
+  const cardBg = isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100';
 
   return (
-    <div className="space-y-6 pb-6">
-      <div className="text-center">
-        <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 mb-2 border ${isDark ? 'bg-purple-500/10 border-purple-500/20' : 'bg-purple-50 border-purple-200'}`}>
-          <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></span>
-          <span className={`text-[10px] font-bold uppercase tracking-wider ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>LIVE FEED</span>
+    <div className="space-y-6 pb-8">
+      {/* Header */}
+      <div className="text-center pt-2">
+        <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 mb-3 border ${isDark ? 'bg-purple-500/10 border-purple-500/20' : 'bg-purple-50 border-purple-200'}`}>
+          <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
+          <span className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>Live Community</span>
         </div>
-        <h2 className={`text-xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>Community Palettes & OOTD</h2>
-        <p className={`text-xs mt-1 mb-4 max-w-[250px] mx-auto ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
-          Anonymous OOTDs and color palettes from users around the world.
+        <h2 className={`text-2xl font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Style Palettes</h2>
+        <p className={`text-xs max-w-[240px] mx-auto mb-5 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
+          Real palettes from StyleGuru users around India
         </p>
 
-        <label className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl cursor-pointer font-black text-sm uppercase tracking-wider transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg ${
-              uploading 
-                ? 'bg-gray-500 text-white cursor-wait'
-                : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-500/30'
-            }`}>
-          <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={handleOOTDUpload} />
-          {uploading ? 'Uploading...' : '📸 Post your OOTD'}
-        </label>
+        {/* Action buttons */}
+        <div className="flex items-center justify-center gap-3 flex-wrap">
+          {/* Share Palette */}
+          <button
+            onClick={handleSharePalette}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-black shadow-lg shadow-purple-900/30 hover:scale-[1.03] active:scale-[0.97] transition-all"
+          >
+            🎨 Share My Palette
+          </button>
+
+          {/* Post OOTD */}
+          <label className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-black border cursor-pointer transition-all hover:scale-[1.03] active:scale-[0.97] ${
+            uploading
+              ? 'bg-gray-500 text-white border-transparent cursor-wait'
+              : isDark ? 'bg-white/5 border-white/15 text-white/70 hover:text-white hover:border-purple-500/40' : 'bg-white border-gray-200 text-gray-600 hover:border-purple-400 shadow-sm'
+          }`}>
+            <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={handleOOTDUpload} />
+            {uploading ? '⏳ Posting...' : '📸 Post OOTD'}
+          </label>
+        </div>
       </div>
 
+      {/* Feed */}
       <div className="space-y-4 max-w-lg mx-auto">
-        {feed.map((post) => (
-          <div key={post.id} className={`rounded-3xl p-4 border transition-all hover:scale-[1.01] shadow-sm ${
-            isDark ? 'bg-white/5 border-white/10 hover:border-purple-500/30 hover:bg-white/10' : 'bg-white border-gray-200 hover:border-purple-400'
-          }`}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div 
-                  className="w-10 h-10 rounded-full border-2 shadow-inner" 
-                  style={{ backgroundColor: post.skinHex || '#C68642', borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }} 
-                />
-                <div>
-                  <p className={`text-sm font-black capitalize ${isDark ? 'text-white' : 'text-gray-800'}`}>
-                    {post.skinTone} {post.undertone ? `· ${post.undertone}` : ''}
-                  </p>
-                  <p className={`text-[10px] ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
-                    {post.colorSeason || 'Unknown'} Season · {post.gender || 'male'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-col items-end gap-1">
-                <span className={`text-[10px] font-medium ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
-                  {getTimeAgo(post.published_at)}
-                </span>
-                <button 
-                  onClick={() => !post.hasLiked && handleLike(post.id)}
-                  className={`text-xs font-bold px-2 py-1 rounded-lg border transition ${post.hasLiked ? (isDark ? 'bg-pink-500/20 border-pink-500/40 text-pink-400' : 'bg-pink-50 border-pink-200 text-pink-500') : (isDark ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white/60' : 'bg-gray-50 border-gray-200 hover:bg-gray-100 text-gray-500')}`}
-                >
-                  🔥 {post.likes || 0}
-                </button>
-              </div>
-            </div>
+        {/* Loading skeletons */}
+        {loading && [1, 2, 3].map(i => <SkeletonCard key={i} isDark={isDark} />)}
 
-            {/* OOTD Image if exists */}
-            {post.ootdImage && (
-              <div className="w-full aspect-[4/5] overflow-hidden rounded-2xl mb-4 border shadow-sm" style={{ borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}>
-                <img src={post.ootdImage} alt="OOTD" className="w-full h-full object-cover" />
-              </div>
-            )}
-
-            {/* Colors Grid */}
-            <div className={`grid gap-2 ${post.bestColors?.length > 0 ? `grid-cols-${Math.min((post.bestColors||[]).length, 5)}` : 'grid-cols-5'}`}>
-              {(post.bestColors || []).slice(0, 5).map((color, i) => (
-                <div key={i} className="flex flex-col items-center gap-1 group">
-                  <div 
-                    className="w-full aspect-square rounded-xl sm:rounded-2xl border shadow-sm transition-transform group-hover:scale-110"
-                    style={{ backgroundColor: color.hex, borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}
-                  />
-                  <span className={`text-[8px] sm:text-[9px] font-bold truncate w-full text-center ${isDark ? 'text-white/40' : 'text-gray-500'}`}>
-                    {color.name ? color.name.split(' ')[0] : 'Color'}
-                  </span>
-                </div>
-              ))}
-            </div>
-            
-            {(post.bestColors || []).length === 0 && (
-               <p className={`text-xs text-center py-2 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>No colors shared</p>
-            )}
-            
+        {/* Error */}
+        {!loading && error && (
+          <div className="text-center py-12">
+            <p className="text-4xl mb-3">⚠️</p>
+            <p className={`text-sm font-bold ${isDark ? 'text-white/60' : 'text-gray-600'}`}>{error}</p>
           </div>
+        )}
+
+        {/* Posts */}
+        {!loading && !error && posts.map(post => (
+          <PostCard key={post.id} post={post} isDark={isDark} currentUid={currentUid} />
         ))}
 
-        {feed.length === 0 && (
-          <div className="text-center py-10">
-            <p className="text-4xl mb-3">🎨</p>
-            <p className={`text-sm font-bold ${isDark ? 'text-white/70' : 'text-gray-600'}`}>No palettes yet!</p>
-            <p className={`text-xs mt-1 ${isDark ? 'text-white/40' : 'text-gray-500'}`}>Be the first to share your color palette.</p>
+        {/* Empty state */}
+        {!loading && !error && posts.length === 0 && (
+          <div className="text-center py-16">
+            <div className="text-5xl mb-4">🎨</div>
+            <p className={`text-base font-black mb-1 ${isDark ? 'text-white/70' : 'text-gray-700'}`}>
+              No palettes yet!
+            </p>
+            <p className={`text-sm mb-6 ${isDark ? 'text-white/35' : 'text-gray-400'}`}>
+              Be the first to share your color palette.
+            </p>
+            <button
+              onClick={handleSharePalette}
+              className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-black shadow-lg hover:scale-[1.03] active:scale-[0.97] transition-all"
+            >
+              🎨 Share My Palette
+            </button>
           </div>
         )}
       </div>

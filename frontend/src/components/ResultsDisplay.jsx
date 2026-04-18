@@ -208,12 +208,36 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
       </div>
       {expanded && (
         <div className={`px-3 pb-3 border-t ${dividerCls} pt-2 scale-in`} onClick={e => e.stopPropagation()}>
-          {color.reason && <p className={`${reasonCls} text-xs leading-relaxed`}>{color.reason}</p>}
+          {color.reason && <p className={`${reasonCls} text-xs leading-relaxed mb-3`}>{color.reason}</p>}
+          {/* Inline shop buttons — no component dependency */}
+          <p className={`text-[10px] font-bold uppercase tracking-wider mb-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>🛍 Shop This Color</p>
+          <div className="grid grid-cols-2 gap-1.5">
+            {[
+              { name: 'Myntra',   url: `https://www.myntra.com/search?q=${encodeURIComponent((gender === 'female' ? 'women' : 'men') + ' ' + color.name + ' ' + (category || ''))}`, dot: '#f13ab1' },
+              { name: 'Amazon',   url: `https://www.amazon.in/s?k=${encodeURIComponent((gender === 'female' ? 'women' : 'men') + ' ' + color.name + ' ' + (category || ''))}`,      dot: '#ff9900' },
+              { name: 'Flipkart', url: `https://www.flipkart.com/search?q=${encodeURIComponent((gender === 'female' ? 'women' : 'men') + ' ' + color.name + ' ' + (category || ''))}`, dot: '#2874f0' },
+              { name: 'Meesho',   url: `https://www.meesho.com/search?q=${encodeURIComponent((gender === 'female' ? 'women' : 'men') + ' ' + color.name + ' ' + (category || ''))}`,  dot: '#ff44af' },
+            ].map(store => (
+              <a
+                key={store.name}
+                href={store.url}
+                target="_blank" rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+                className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-bold border transition-all hover:scale-[1.02] active:scale-95 ${
+                  isDark ? 'bg-white/5 border-white/10 text-white/60 hover:border-purple-500/40 hover:text-white' : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-purple-50 hover:border-purple-300'
+                }`}
+              >
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: store.dot, display: 'inline-block', flexShrink: 0 }} />
+                {store.name}
+              </a>
+            ))}
+          </div>
         </div>
       )}
     </div>
   );
 }
+
 
 // ── Outfit Card ──────────────────────────────────────────────
 function OutfitCard({ combo, index, isDark }) {
@@ -607,24 +631,33 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
   }
 
   if (isFemale) {
-    const sections = [
-      { title: 'dressColors', colors: recommendations.best_dress_colors || [], cat: 'dress' },
-      { title: 'topColors', colors: recommendations.best_top_colors || [], cat: 'top' },
-      { title: 'kurtiColors', colors: recommendations.best_kurti_colors || [], cat: 'kurti' },
-      { title: 'lehengaColors', colors: recommendations.best_lehenga_colors || [], cat: 'lehenga' },
-      { title: 'bottomColors', colors: recommendations.best_bottom_colors || recommendations.best_pant_colors || [], cat: 'bottom' },
+    const femaleSections = [
+      { label: '👗 Dress Colors',           colors: recommendations.best_dress_colors   || [], cat: 'dress'   },
+      { label: '👚 Top / Blouse Colors',    colors: recommendations.best_top_colors     || [], cat: 'top'     },
+      { label: '🥻 Kurti Colors',           colors: recommendations.best_kurti_colors   || [], cat: 'kurti'   },
+      { label: '🎀 Lehenga Colors',         colors: recommendations.best_lehenga_colors || [], cat: 'lehenga' },
+      { label: '🪭 Saree Colors',           colors: recommendations.best_saree_colors   || [], cat: 'saree'   },
+      { label: '✨ Sharara / Suit Colors',  colors: recommendations.best_sharara_colors || recommendations.best_suit_colors || [], cat: 'sharara' },
+      { label: '🌸 Dupatta / Stole',       colors: recommendations.best_dupatta_colors  || [], cat: 'dupatta' },
+      { label: '👖 Bottom Colors',          colors: recommendations.best_bottom_colors  || recommendations.best_pant_colors || [], cat: 'bottom'  },
     ].filter(s => s.colors.length > 0);
 
     return (
       <div className="space-y-5">
-        {sections.map((sec) => (
-          <div key={sec.title}>
-            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>{t(sec.title)}</p>
+        {femaleSections.map((sec) => (
+          <div key={sec.label}>
+            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>{sec.label}</p>
             <div className="grid grid-cols-1 gap-2">
               {sec.colors.map((color, i) => <ColorCard key={i} color={color} category={sec.cat} gender="female" isDark={isDark} />)}
             </div>
           </div>
         ))}
+
+        {/* Fallback */}
+        {femaleSections.length === 0 && (
+          <p className={`${sectionLabelCls} text-xs text-center py-6`}>No color data available. Try analyzing again.</p>
+        )}
+
         {avoidColors.length > 0 && (
           <div>
             <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2">🚫 {t('avoidThese')}</p>
@@ -643,6 +676,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
       </div>
     );
   }
+
 
   // Male
   const shirtColors   = recommendations.best_shirt_colors   || [];

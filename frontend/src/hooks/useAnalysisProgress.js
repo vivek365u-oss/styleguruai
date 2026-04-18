@@ -1,154 +1,126 @@
 /**
- * ISSUE 2 & 3 FIX: Proper Loading Progress with Fake Realistic Animation
- * This hook manages progress state w fake progressive loading
+ * useAnalysisProgress.js — Fixed: animation never gets stuck at 95%
+ * 
+ * FIX: After reaching 95%, continue slow heartbeat (0.1% per 600ms)
+ * so the bar always looks alive until completeProgress() is called.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
-const stages = [
-  { label: 'Uploading image...', percent: 0, emoji: '📤', duration: 400 },
-  { label: 'Detecting colors...', percent: 20, emoji: '🎨', duration: 800 },
-  { label: 'Analyzing skin tone...', percent: 40, emoji: '🔬', duration: 1000 },
-  { label: 'Extracting undertone...', percent: 60, emoji: '🎭', duration: 800 },
-  { label: 'Matching outfits...', percent: 80, emoji: '👔', duration: 600 },
-  { label: 'Generating recommendations...', percent: 90, emoji: '✨', duration: 1000 },
+const STAGES = [
+  { label: 'Preparing your photo...',         percent: 0,  emoji: '📸', duration: 600  },
+  { label: 'Detecting skin tone...',           percent: 18, emoji: '🔬', duration: 900  },
+  { label: 'Reading color values...',          percent: 38, emoji: '🎨', duration: 1000 },
+  { label: 'Matching your undertone...',       percent: 58, emoji: '🎭', duration: 800  },
+  { label: 'Building outfit palette...',       percent: 76, emoji: '👔', duration: 700  },
+  { label: 'Generating recommendations...',    percent: 88, emoji: '✨', duration: 500  },
 ];
 
 export function useAnalysisProgress() {
   const [progress, setProgress] = useState({
     percent: 0,
-    label: 'Starting analysis...',
+    label: 'Starting...',
     emoji: '🔍',
-    timeRemaining: null,
     isError: false,
-    errorMessage: '',
   });
 
-  const progressIntervalRef = useRef(null);
+  const intervalRef = useRef(null);
+  const heartbeatRef = useRef(null);
   const startTimeRef = useRef(null);
-  const totalDurationRef = useRef(4800); // Slightly longer simulation
+  const isCompleted = useRef(false);
+
+  const clearAll = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+  };
 
   const startProgress = useCallback(() => {
-    setProgress({
-      percent: 0,
-      label: 'Starting analysis...',
-      emoji: '🔍',
-      timeRemaining: Math.ceil(totalDurationRef.current / 1000),
-      isError: false,
-      errorMessage: '',
-    });
-
+    clearAll();
+    isCompleted.current = false;
     startTimeRef.current = Date.now();
-    let stageIndex = 0;
-    let elapsed = 0;
 
-    // Simulate progressive loading through stages
-    progressIntervalRef.current = setInterval(() => {
-      const now = Date.now();
-      elapsed = now - startTimeRef.current;
-      const totalDuration = totalDurationRef.current;
+    setProgress({ percent: 2, label: STAGES[0].label, emoji: STAGES[0].emoji, isError: false });
 
-      // Find current stage
-      let currentStage = stages[0];
-      let accumulatedTime = 0;
+    let stageIdx = 0;
+    const totalDuration = STAGES.reduce((s, st) => s + st.duration, 0);
 
-      for (let i = 0; i < stages.length; i++) {
-        accumulatedTime += stages[i].duration;
-        if (elapsed < accumulatedTime) {
-          currentStage = stages[i];
+    intervalRef.current = setInterval(() => {
+      if (isCompleted.current) { clearInterval(intervalRef.current); return; }
+
+      const elapsed = Date.now() - startTimeRef.current;
+      let accTime = 0;
+      let currentStage = STAGES[0];
+      let nextStage = STAGES[1];
+
+      for (let i = 0; i < STAGES.length; i++) {
+        accTime += STAGES[i].duration;
+        if (elapsed < accTime) {
+          currentStage = STAGES[i];
+          nextStage = STAGES[i + 1] || { percent: 95 };
+          stageIdx = i;
           break;
+        }
+        if (i === STAGES.length - 1) {
+          // All stages done — go to heartbeat mode
+          clearInterval(intervalRef.current);
+
+          // Heartbeat: slow crawl from current to max 94.9%
+          heartbeatRef.current = setInterval(() => {
+            if (isCompleted.current) { clearInterval(heartbeatRef.current); return; }
+            setProgress(prev => ({
+              ...prev,
+              percent: Math.min(prev.percent + 0.1, 94.9),
+              label: 'Almost ready...',
+              emoji: '⏳',
+            }));
+          }, 600);
+          return;
         }
       }
 
-      // Calculate percentage within current stage
-      const stageStart = accumulatedTime - currentStage.duration;
-      const nextPercent = stages[stageIndex + 1]?.percent || 95;
-      const stageProgress = Math.min(
-        ((elapsed - stageStart) / currentStage.duration) * (nextPercent - currentStage.percent),
-        (nextPercent - currentStage.percent)
-      );
-
-      // Max out at 95%
-      const currentPercent = Math.min(currentStage.percent + stageProgress, 95);
-      // Min 1 second remaining until complete
-      const timeRemaining = Math.max(Math.ceil((totalDuration - elapsed) / 1000), 1);
+      const stageStart = accTime - currentStage.duration;
+      const stageElapsed = elapsed - stageStart;
+      const pctDiff = (nextStage.percent || 95) - currentStage.percent;
+      const stageProgress = Math.min((stageElapsed / currentStage.duration) * pctDiff, pctDiff);
+      const percent = Math.round(Math.min(currentStage.percent + stageProgress, 94.9));
 
       setProgress(prev => ({
         ...prev,
-        percent: Math.round(currentPercent),
+        percent,
         label: currentStage.label,
         emoji: currentStage.emoji,
-        timeRemaining: timeRemaining,
       }));
 
-      // Stop at 95% when duration exhausted, wait for completeProgress
       if (elapsed >= totalDuration) {
-        clearInterval(progressIntervalRef.current);
-        setProgress(prev => ({
-          ...prev,
-          percent: 95,
-          label: 'Finalizing style profile...',
-          emoji: '⏳',
-          timeRemaining: 1,
-        }));
+        clearInterval(intervalRef.current);
+        setProgress(prev => ({ ...prev, percent: Math.min(prev.percent, 94), label: 'Almost ready...', emoji: '⏳' }));
+        heartbeatRef.current = setInterval(() => {
+          if (isCompleted.current) { clearInterval(heartbeatRef.current); return; }
+          setProgress(prev => ({ ...prev, percent: Math.min(prev.percent + 0.1, 94.9) }));
+        }, 600);
       }
-    }, 100);
+    }, 80);
   }, []);
 
   const completeProgress = useCallback(() => {
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-    }
-    setProgress(prev => ({
-      ...prev,
-      percent: 100,
-      label: 'Complete!',
-      emoji: '✅',
-      timeRemaining: 0,
-    }));
+    isCompleted.current = true;
+    clearAll();
+    setProgress({ percent: 100, label: 'Style profile ready!', emoji: '✅', isError: false });
   }, []);
 
-  const setError = useCallback((errorMessage) => {
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-    }
-    setProgress(prev => ({
-      ...prev,
-      isError: true,
-      errorMessage: errorMessage,
-      label: 'Analysis failed',
-      emoji: '❌',
-    }));
+  const setError = useCallback((msg = 'Analysis failed') => {
+    isCompleted.current = true;
+    clearAll();
+    setProgress({ percent: 0, label: msg, emoji: '❌', isError: true });
   }, []);
 
   const reset = useCallback(() => {
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-    }
-    setProgress({
-      percent: 0,
-      label: 'Starting analysis...',
-      emoji: '🔍',
-      timeRemaining: null,
-      isError: false,
-      errorMessage: '',
-    });
+    isCompleted.current = true;
+    clearAll();
+    setProgress({ percent: 0, label: 'Starting...', emoji: '🔍', isError: false });
   }, []);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-      }
-    };
-  }, []);
+  useEffect(() => () => clearAll(), []);
 
-  return {
-    progress,
-    startProgress,
-    completeProgress,
-    setError,
-    reset,
-  };
+  return { progress, startProgress, completeProgress, setError, reset };
 }
