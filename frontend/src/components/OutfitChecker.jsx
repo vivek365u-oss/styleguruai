@@ -24,31 +24,27 @@ function OutfitShopCard({ color, isDark, gender = 'male' }) {
   // Generate shopping links with budget filtering
   const generateShoppingLinks = () => {
     const isFemale = gender === 'female';
-    const colorSlug = color.name.toLowerCase().replace(/\s+/g, '-');
     const colorDisplay = color.name.toLowerCase().replace(/\s+/g, ' ');
-
-    // Match categories as requested
+    // Gender-aware product keyword
     const product = isFemale ? 'top' : 'shirt';
-    
-    // Myntra dynamic URL
-    const myntraUrl = `https://www.myntra.com/${colorSlug}-${product}`;
-    
-    const amzKw = `${colorDisplay} ${gender} ${product} trending 2025`;
-    const fkKw = `${colorDisplay} ${gender} ${product}`;
-    const meeKw = `${colorDisplay} ${gender} ${product}`;
+    const genderStr = isFemale ? 'women' : 'men';
+
+    const baseKw = `${genderStr} ${colorDisplay} ${product}`;
+    const amzKw = `${baseKw} trending 2025`;
 
     const budgetMax = budget?.max;
     const amzPrice = budgetMax ? `%2Cp_36%3A-${budgetMax * 100}` : '';
     const fkPrice = budgetMax ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budgetMax}` : '';
-    const myntraPrice = budgetMax ? `&p=price%5B0%5D%3D0%20TO%20${budgetMax}` : '';
+    const myntraPrice = budgetMax ? `&price_range=${budgetMax}` : '';
 
     return {
-      amazon: `https://www.amazon.in/s?k=${encodeURIComponent(amzKw)}&rh=${isFemale ? 'n%3A7534543031' : 'n%3A1968024031'}${amzPrice}&sort=review-rank&tag=${AMAZON_TAG}`,
-      flipkart: `https://www.flipkart.com/search?q=${encodeURIComponent(fkKw)}&sort=review-rank${fkPrice}`,
-      myntra: `${myntraUrl}${myntraUrl.includes('?') ? '&' : '?'}${myntraPrice.slice(1)}`,
-      meesho: `https://meesho.com/search?q=${encodeURIComponent(meeKw)}`,
+      amazon:  `https://www.amazon.in/s?k=${encodeURIComponent(amzKw)}&rh=${isFemale ? 'n%3A7534543031' : 'n%3A1968024031'}${amzPrice}&sort=review-rank&tag=${AMAZON_TAG}`,
+      flipkart:`https://www.flipkart.com/search?q=${encodeURIComponent(baseKw)}&sort=review-rank${fkPrice}`,
+      myntra:  `https://www.myntra.com/search?q=${encodeURIComponent(baseKw)}${myntraPrice}`,
+      meesho:  `https://meesho.com/search?q=${encodeURIComponent(baseKw)}`,
     };
   };
+
 
   const shopLinks = generateShoppingLinks();
 
@@ -489,22 +485,90 @@ function OutfitChecker() {
                       </div>
 
                       {!selectedCat ? (
-                        <div className="flex flex-wrap gap-2">
-                          {getCategoriesByGender(result?.gender || gender).map(cat => (
-                            <button
-                              key={cat.id}
-                              onClick={() => setSelectedCat(cat.id)}
-                              className={`flex items-center gap-2 px-4 py-3 rounded-2xl text-[11px] font-black uppercase tracking-tight border transition-all ${
-                                isDark 
-                                  ? 'bg-white/10 border-white/10 text-white/70 hover:bg-purple-500/20' 
-                                  : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-purple-300'
-                              }`}
-                            >
-                              <span>{cat.icon}</span>
-                              {cat.label}
-                            </button>
-                          ))}
+                        <div className="space-y-4 max-h-72 overflow-y-auto pr-1">
+                          {/* Group categories by type for better UX */}
+                          {(() => {
+                            const cats = getCategoriesByGender(result?.gender || gender);
+                            // Group by first part of id (e.g. cat_saree → ethnic)
+                            const GROUPS = gender === 'female'
+                              ? [
+                                  { label: '🥻 Ethnic & Traditional', keys: ['saree','lehenga','anarkali','kurti','sharara','dhoti','indo','cape','palazzo_suit'] },
+                                  { label: '✨ Fusion & Co-ords',       keys: ['coord','fusion','indowest'] },
+                                  { label: '👚 Tops & Shirts',          keys: ['crop','blouse','corset','puff','shirt_female','tank','sweater'] },
+                                  { label: '👗 Dresses',                keys: ['dress','bodycon','maxi','mini','midi'] },
+                                  { label: '👖 Bottoms',                keys: ['jeans','mom','skirt','palazzo_f','shorts','track'] },
+                                  { label: '🧥 Outerwear',              keys: ['hoodie','blazer','shrug','sweatshirt'] },
+                                  { label: '👠 Footwear',               keys: ['heel','flat','sneaker','sandal','boot'] },
+                                  { label: '💎 Accessories',            keys: ['earring','necklace','bangles','handbag','sunglass','dupatta'] },
+                                ]
+                              : [
+                                  { label: '👘 Ethnic & Traditional', keys: ['sherwani','kurta','nehru','dhoti','ethnic_coord'] },
+                                  { label: '👔 Formal Wear',          keys: ['formal','blazer','tuxedo','waistcoat'] },
+                                  { label: '👕 Casual Tops',          keys: ['tshirt','oversized','polo','casual','coord_set'] },
+                                  { label: '👖 Bottoms',              keys: ['jeans','cargo','chino','shorts','track'] },
+                                  { label: '🧥 Outerwear',            keys: ['hoodie','jacket','bomber','sweatshirt'] },
+                                  { label: '👟 Footwear',             keys: ['sneaker','loafer','boot','formal_shoe','sports'] },
+                                  { label: '⌚ Accessories',          keys: ['watch','wallet','sunglass','backpack'] },
+                                ];
+
+                            const grouped = GROUPS.map(group => ({
+                              ...group,
+                              items: cats.filter(cat =>
+                                group.keys.some(k => cat.id.toLowerCase().includes(k))
+                              )
+                            })).filter(g => g.items.length > 0);
+
+                            // Any ungrouped?
+                            const allGrouped = grouped.flatMap(g => g.items.map(i => i.id));
+                            const leftover = cats.filter(c => !allGrouped.includes(c.id));
+
+                            return (
+                              <>
+                                {grouped.map(group => (
+                                  <div key={group.label}>
+                                    <p className={`text-[9px] font-black uppercase tracking-widest mb-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{group.label}</p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {group.items.map(cat => (
+                                        <button
+                                          key={cat.id}
+                                          onClick={() => setSelectedCat(cat.id)}
+                                          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold border transition-all hover:scale-[1.02] active:scale-95 ${
+                                            isDark
+                                              ? 'bg-white/8 border-white/10 text-white/70 hover:bg-purple-500/20 hover:border-purple-500/30 hover:text-white'
+                                              : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-purple-400 hover:bg-purple-50'
+                                          }`}
+                                        >
+                                          <span className="text-base leading-none">{cat.emoji || '👗'}</span>
+                                          <span>{cat.label}</span>
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                                {leftover.length > 0 && (
+                                  <div>
+                                    <p className={`text-[9px] font-black uppercase tracking-widest mb-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Other</p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {leftover.map(cat => (
+                                        <button
+                                          key={cat.id}
+                                          onClick={() => setSelectedCat(cat.id)}
+                                          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold border transition-all ${
+                                            isDark ? 'bg-white/8 border-white/10 text-white/70 hover:bg-purple-500/20' : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-purple-400'
+                                          }`}
+                                        >
+                                          <span>{cat.emoji || '👗'}</span>
+                                          <span>{cat.label}</span>
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()}
                         </div>
+
                       ) : (
                         <div className="space-y-6">
                            {/* STEP: Vibe & Occasion */}

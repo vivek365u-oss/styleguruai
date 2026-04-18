@@ -97,38 +97,52 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
     if (filter === 'tops')
       return cat.includes('top') || cat.includes('shirt') || cat.includes('tshirt') ||
              cat.includes('blouse') || cat.includes('kurti') || cat.includes('polo') ||
-             cat.includes('corset') || cat.includes('crop');
+             cat.includes('corset') || cat.includes('crop') || cat.includes('tank') ||
+             cat.includes('tunic') || cat.includes('puff') || cat.includes('sweater') ||
+             cat.includes('oversized_tee') || cat.includes('graphic_tee') || cat.includes('cami');
+    if (filter === 'dresses')
+      return cat.includes('dress') || cat.includes('bodycon') || cat.includes('maxi') ||
+             cat.includes('mini') || cat.includes('midi');
     if (filter === 'bottoms')
       return cat.includes('trouser') || cat.includes('pant') || cat.includes('jeans') ||
-             cat.includes('skirt') || cat.includes('palazzo') || cat.includes('cargo') ||
-             cat.includes('shorts') || cat.includes('churidar');
+             cat.includes('skirt') || cat.includes('palazzo_f') || cat.includes('palazzo') ||
+             cat.includes('cargo') || cat.includes('shorts') || cat.includes('churidar') ||
+             cat.includes('chino') || cat.includes('track');
     if (filter === 'ethnic')
-      return cat.includes('ethnic') || cat.includes('kurta') || cat.includes('kurta_set') ||
-             cat.includes('kurti') || cat.includes('saree') || cat.includes('lehenga') ||
-             cat.includes('sherwani') || cat.includes('anarkali') || cat.includes('sharara') ||
-             cat.includes('dhoti') || cat.includes('nehru');
+      return cat.includes('ethnic') || cat.includes('kurta') || cat.includes('kurti') ||
+             cat.includes('saree') || cat.includes('lehenga') || cat.includes('sherwani') ||
+             cat.includes('anarkali') || cat.includes('sharara') || cat.includes('nehru') ||
+             cat.includes('dhoti') || cat.includes('palazzo_suit') || cat.includes('indo_western') ||
+             cat.includes('ethnic_coord') || cat.includes('cape_set');
     if (filter === 'formal')
       return cat.includes('formal') || cat.includes('blazer') || cat.includes('tuxedo') ||
-             cat.includes('suit') || tags.includes('office');
+             cat.includes('waistcoat') || cat.includes('suit') || tags.includes('office');
     if (filter === 'casual')
-      return cat.includes('casual') || cat.includes('tshirt') || cat.includes('hoodie') ||
-             cat.includes('polo') || cat.includes('oversized') || tags.includes('casual');
+      return cat.includes('casual') || cat.includes('tshirt') || cat.includes('polo') ||
+             cat.includes('oversized') || cat.includes('graphic') || cat.includes('loungewear') ||
+             tags.includes('casual');
+    if (filter === 'outerwear')
+      return cat.includes('hoodie') || cat.includes('jacket') || cat.includes('bomber') ||
+             cat.includes('sweatshirt') || cat.includes('shrug') || cat.includes('cardigan');
     if (filter === 'streetwear')
       return cat.includes('hoodie') || cat.includes('bomber') || cat.includes('oversized') ||
-             cat.includes('graphic') || cat.includes('sneaker') || tags.includes('street') ||
-             cat.includes('unisex');
+             cat.includes('graphic') || cat.includes('sneaker') || cat.includes('unisex') ||
+             cat.includes('sweatshirt') || cat.includes('loungewear') || tags.includes('street');
     if (filter === 'shoes')
       return cat.includes('shoe') || cat.includes('sneaker') || cat.includes('heel') ||
              cat.includes('boot') || cat.includes('sandal') || cat.includes('loafer') ||
-             cat.includes('mojari') || cat.includes('oxford') || cat.includes('mule');
+             cat.includes('flat') || cat.includes('heels') || cat.includes('sports_shoe') ||
+             cat.includes('flats') || cat.includes('juttis');
     if (filter === 'accessories')
       return cat.includes('jewelry') || cat.includes('watch') || cat.includes('bag') ||
              cat.includes('belt') || cat.includes('glass') || cat.includes('sunglass') ||
              cat.includes('earring') || cat.includes('necklace') || cat.includes('bracelet') ||
-             cat.includes('wallet') || cat.includes('clutch') || cat.includes('accessory');
+             cat.includes('wallet') || cat.includes('clutch') || cat.includes('handbag') ||
+             cat.includes('bangles') || cat.includes('dupatta') || cat.includes('accessory');
 
-    return cat === filter;
+    return cat === filter || cat.includes(filter);
   });
+
 
 
   const handleDelete = async (item) => {
