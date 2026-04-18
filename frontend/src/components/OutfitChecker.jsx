@@ -6,7 +6,7 @@ import { usePlan } from '../context/PlanContext';
 import { useAnalysisProgress } from '../hooks/useAnalysisProgress';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import { compressImage, saveLocalWardrobeImage } from '../utils/indexedDB';
-import { getCategoriesByGender, getCategoryIcon, ALL_CATEGORIES } from '../constants/fashionCategories';
+import { getCategoriesByGender, getCategoryIcon, ALL_CATEGORIES, getCategoryGroup, getCategorySectionMeta } from '../constants/fashionCategories';
 import { buildMyntraUrl } from '../utils/myntraUrl';
 // PaywallModal import removed
 
@@ -490,48 +490,39 @@ function OutfitChecker() {
 
                       {!selectedCat ? (
                         <div className="space-y-4 max-h-72 overflow-y-auto pr-1">
-                          {/* Group categories by type for better UX */}
+                          {/* Group categories perfectly matching Wardrobe Tabs (Male + Female combined) */}
                           {(() => {
-                            const cats = getCategoriesByGender(result?.gender || gender);
-                            // Group by first part of id (e.g. cat_saree → ethnic)
-                            const GROUPS = gender === 'female'
-                              ? [
-                                  { label: '🥻 Ethnic & Traditional', keys: ['saree','lehenga','anarkali','kurti','sharara','dhoti','indo','cape','palazzo_suit'] },
-                                  { label: '✨ Fusion & Co-ords',       keys: ['coord','fusion','indowest'] },
-                                  { label: '👚 Tops & Shirts',          keys: ['crop','blouse','corset','puff','shirt_female','tank','sweater'] },
-                                  { label: '👗 Dresses',                keys: ['dress','bodycon','maxi','mini','midi'] },
-                                  { label: '👖 Bottoms',                keys: ['jeans','mom','skirt','palazzo_f','shorts','track'] },
-                                  { label: '🧥 Outerwear',              keys: ['hoodie','blazer','shrug','sweatshirt'] },
-                                  { label: '👠 Footwear',               keys: ['heel','flat','sneaker','sandal','boot'] },
-                                  { label: '💎 Accessories',            keys: ['earring','necklace','bangles','handbag','sunglass','dupatta'] },
-                                ]
-                              : [
-                                  { label: '👘 Ethnic & Traditional', keys: ['sherwani','kurta','nehru','dhoti','ethnic_coord'] },
-                                  { label: '👔 Formal Wear',          keys: ['formal','blazer','tuxedo','waistcoat'] },
-                                  { label: '👕 Casual Tops',          keys: ['tshirt','oversized','polo','casual','coord_set'] },
-                                  { label: '👖 Bottoms',              keys: ['jeans','cargo','chino','shorts','track'] },
-                                  { label: '🧥 Outerwear',            keys: ['hoodie','jacket','bomber','sweatshirt'] },
-                                  { label: '👟 Footwear',             keys: ['sneaker','loafer','boot','formal_shoe','sports'] },
-                                  { label: '⌚ Accessories',          keys: ['watch','wallet','sunglass','backpack'] },
-                                ];
+                            const groupsMap = {};
+                            
+                            // Iterate all categories in the app
+                            ALL_CATEGORIES.forEach(cat => {
+                              const sectionKey = getCategoryGroup(cat.id);
+                              if (sectionKey === 'UNISEX' || sectionKey === 'OTHER') return;
+                              
+                              if (!groupsMap[sectionKey]) {
+                                groupsMap[sectionKey] = {
+                                  ...getCategorySectionMeta(cat.id),
+                                  items: []
+                                };
+                              }
+                              
+                              // Avoid duplicate generic labels (e.g. "Jeans", "Shorts" exist in both male/female)
+                              if (!groupsMap[sectionKey].items.find(i => i.label === cat.label)) {
+                                groupsMap[sectionKey].items.push(cat);
+                              }
+                            });
 
-                            const grouped = GROUPS.map(group => ({
-                              ...group,
-                              items: cats.filter(cat =>
-                                group.keys.some(k => cat.id.toLowerCase().includes(k))
-                              )
-                            })).filter(g => g.items.length > 0);
-
-                            // Any ungrouped?
-                            const allGrouped = grouped.flatMap(g => g.items.map(i => i.id));
-                            const leftover = cats.filter(c => !allGrouped.includes(c.id));
+                            // Sort sections by their official Wardrobe order (1 to 10)
+                            const grouped = Object.values(groupsMap).sort((a, b) => a.order - b.order);
 
                             return (
                               <>
                                 {grouped.map(group => (
                                   <div key={group.label}>
-                                    <p className={`text-[9px] font-black uppercase tracking-widest mb-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>{group.label}</p>
-                                    <div className="flex flex-wrap gap-1.5">
+                                    <p className={`text-[9px] font-black uppercase tracking-widest mb-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
+                                      {group.emoji} {group.label}
+                                    </p>
+                                    <div className="flex flex-wrap gap-1.5 mb-4">
                                       {group.items.map(cat => (
                                         <button
                                           key={cat.id}
@@ -542,32 +533,13 @@ function OutfitChecker() {
                                               : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-purple-400 hover:bg-purple-50'
                                           }`}
                                         >
-                                          <span className="text-base leading-none">{cat.emoji || '👗'}</span>
+                                          <span className="text-base leading-none">{cat.emoji || group.emoji}</span>
                                           <span>{cat.label}</span>
                                         </button>
                                       ))}
                                     </div>
                                   </div>
                                 ))}
-                                {leftover.length > 0 && (
-                                  <div>
-                                    <p className={`text-[9px] font-black uppercase tracking-widest mb-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Other</p>
-                                    <div className="flex flex-wrap gap-1.5">
-                                      {leftover.map(cat => (
-                                        <button
-                                          key={cat.id}
-                                          onClick={() => setSelectedCat(cat.id)}
-                                          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold border transition-all ${
-                                            isDark ? 'bg-white/8 border-white/10 text-white/70 hover:bg-purple-500/20' : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-purple-400'
-                                          }`}
-                                        >
-                                          <span>{cat.emoji || '👗'}</span>
-                                          <span>{cat.label}</span>
-                                        </button>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
                               </>
                             );
                           })()}
