@@ -27,35 +27,6 @@ const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 
 import { ThemeContext } from './context/ThemeContext';
 
-// Shared logo component — same style as SplashScreen
-const AppLogo = () => (
-  <div style={{
-    width: 88, height: 88,
-    background: 'linear-gradient(135deg, #6B4EFF 0%, #8B5CF6 45%, #EC4899 100%)',
-    borderRadius: 26,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    boxShadow: '0 20px 50px -8px rgba(139,92,246,0.65)',
-    position: 'relative', overflow: 'hidden', flexShrink: 0
-  }}>
-    <span style={{ fontSize: 42, color: 'white', fontWeight: 300, letterSpacing: '-1px', position: 'relative', zIndex: 2 }}>∞</span>
-  </div>
-);
-
-const LoadingFallback = () => (
-  <div style={{
-    minHeight: '100vh',
-    background: 'linear-gradient(135deg, #050816 0%, #1a0a2e 50%, #050816 100%)',
-    display: 'flex', flexDirection: 'column',
-    alignItems: 'center', justifyContent: 'center',
-    position: 'relative', overflow: 'hidden'
-  }}>
-    {/* Ambient glow */}
-    <div style={{ position: 'absolute', width: '60vw', height: '60vw', background: 'radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(80px)', zIndex: 0 }} />
-    <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
-      <AppLogo />
-    </div>
-  </div>
-);
 
 /**
  * Auth Error Component - Shown when profile loading fails
@@ -107,7 +78,7 @@ function AppRoutes({ user, setUser }) {
 
 
   return (
-    <Suspense fallback={<LoadingFallback />}>
+    <Suspense fallback={null}>
       <Routes>
         <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} />} />
         <Route path="/login" element={<Navigate to="/" replace />} />
