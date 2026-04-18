@@ -531,10 +531,20 @@ def _grabcut_segment_clothing(image: np.ndarray) -> np.ndarray:
     Falls back gracefully if GrabCut fails.
     """
     import cv2
-    h, w = image.shape[:2]
+    original_h, original_w = image.shape[:2]
+
+    # Resize image to a maximum of 300px for segmentation to speed up by 10x
+    scale = 1.0
+    if max(original_w, original_h) > 300:
+        scale = 300.0 / max(original_w, original_h)
+        small_image = cv2.resize(image, (int(original_w * scale), int(original_h * scale)))
+    else:
+        small_image = image
+
+    h, w = small_image.shape[:2]
 
     # Layer 1: Detect background color from actual image corners
-    bg_rgb = _detect_background_color(image)
+    bg_rgb = _detect_background_color(small_image)
     bg_bgr = (bg_rgb[2], bg_rgb[1], bg_rgb[0])
 
     # Define rect — clothing lives in center ~80% of image
@@ -548,7 +558,7 @@ def _grabcut_segment_clothing(image: np.ndarray) -> np.ndarray:
         fgd_model = np.zeros((1, 65), np.float64)
 
         # Layer 2: GrabCut (increase to 8 iterations for better segmentation)
-        cv2.grabCut(image, mask, rect, bgd_model, fgd_model, 8, cv2.GC_INIT_WITH_RECT)
+        cv2.grabCut(small_image, mask, rect, bgd_model, fgd_model, 8, cv2.GC_INIT_WITH_RECT)
 
         grab_mask = np.where((mask == cv2.GC_FGD) | (mask == cv2.GC_PR_FGD), 255, 0).astype(np.uint8)
 
@@ -568,7 +578,7 @@ def _grabcut_segment_clothing(image: np.ndarray) -> np.ndarray:
 
         # Layer 4: Remove pixels inside mask that match the background color
         # This catches background leakage through GrabCut holes
-        image_rgb = image[:, :, ::-1]  # BGR -> RGB
+        image_rgb = small_image[:, :, ::-1]  # BGR -> RGB
         ys, xs = np.where(grab_mask > 0)
         for y, x in zip(ys[::4], xs[::4]):  # Sample every 4th pixel for speed
             r_px, g_px, b_px = image_rgb[y, x]
@@ -578,12 +588,16 @@ def _grabcut_segment_clothing(image: np.ndarray) -> np.ndarray:
                 x1, x2 = max(0, x-3), min(w, x+4)
                 grab_mask[y1:y2, x1:x2] = 0
 
+        # Resize mask back to original resolution
+        if scale != 1.0:
+            grab_mask = cv2.resize(grab_mask, (original_w, original_h), interpolation=cv2.INTER_NEAREST)
+
         return grab_mask
 
     except Exception:
         # Pure fallback: center rectangle mask
-        mask = np.zeros((h, w), np.uint8)
-        mask[int(h*0.10):int(h*0.90), int(w*0.10):int(w*0.90)] = 255
+        mask = np.zeros((original_h, original_w), np.uint8)
+        mask[int(original_h*0.10):int(original_h*0.90), int(original_w*0.10):int(original_w*0.90)] = 255
         return mask
 
 

@@ -927,11 +927,6 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                     <div className="flex flex-col items-center">
                       <img src={preview} alt="Preview" className="w-40 h-40 object-cover rounded-2xl shadow-2xl mb-4 border-2 border-purple-500/30" />
                       <p className={`animate-pulse ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{t('analyzingPhoto')}</p>
-                      {uploadProgress > 0 && uploadProgress < 100 && (
-                        <div className={`mt-3 w-48 rounded-full h-1.5 ${isDark ? 'bg-white/10' : 'bg-gray-200'}`}>
-                          <div className="bg-purple-500 h-1.5 rounded-full transition-all" style={{ width: `${uploadProgress}%` }}></div>
-                        </div>
-                      )}
                     </div>
                   ) : (
                     <>
