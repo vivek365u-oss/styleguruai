@@ -516,7 +516,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
         }
       />
 
-      {/* Settings Menu Overlay */}
+      {/* Settings Menu Overlay — Mobile Safe */}
       {isMenuOpen && (
         <div 
           onClick={() => setIsMenuOpen(false)}
@@ -525,108 +525,124 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
           <div 
             onClick={e => e.stopPropagation()}
             style={{ 
-              position: 'absolute', top: 80, right: 20, width: 'calc(100% - 40px)', maxWidth: 320, 
-              background: C.navBg, border: `1px solid ${C.border}`, borderRadius: 24, padding: '8px 0', 
-              boxShadow: '0 20px 50px rgba(0,0,0,0.3)', animation: 'slideDown 0.3s ease', overflow: 'hidden'
+              position: 'absolute', top: 70, right: 16, left: 16,
+              maxWidth: 360, margin: '0 auto',
+              background: C.navBg, border: `1px solid ${C.border}`, borderRadius: 24,
+              boxShadow: '0 20px 50px rgba(0,0,0,0.35)', animation: 'slideDown 0.3s ease',
+              // Mobile safe: cap height so panel never goes off screen
+              maxHeight: 'calc(100dvh - 110px)',
+              display: 'flex', flexDirection: 'column', overflow: 'hidden'
             }}
           >
-            <div style={{ padding: '20px 24px 10px' }}>
-               <p style={{ fontSize: '10px', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 700, margin: '0 0 16px' }}>Settings & Preferences</p>
-            </div>
-
-            {/* Theme row */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 24px' }}>
-              <span style={{ fontSize: '20px' }}>{theme === 'dark' ? '🌙' : '☀️'}</span>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 500 }}>App Theme</p>
-                <p style={{ fontSize: '10px', color: C.muted, margin: 0 }}>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</p>
+            {/* Scrollable content area */}
+            <div style={{ overflowY: 'auto', flex: 1, WebkitOverflowScrolling: 'touch' }}>
+              <div style={{ padding: '20px 24px 10px' }}>
+                 <p style={{ fontSize: '10px', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 700, margin: '0 0 16px' }}>Settings & Preferences</p>
               </div>
-              <ThemeToggle theme={theme} onToggle={() => { toggleTheme(); onToast({ message: `Switched mode`, type: 'success' }); }} C={C} />
-            </div>
 
-            <div style={{ height: 1, background: C.divider, margin: '8px 24px' }} />
+              {/* Theme row */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 24px' }}>
+                <span style={{ fontSize: '20px' }}>{theme === 'dark' ? '🌙' : '☀️'}</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 500 }}>App Theme</p>
+                  <p style={{ fontSize: '10px', color: C.muted, margin: 0 }}>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</p>
+                </div>
+                <ThemeToggle theme={theme} onToggle={() => { toggleTheme(); onToast({ message: `Switched mode`, type: 'success' }); }} C={C} />
+              </div>
 
-            {/* Language row */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 24px' }}>
-              <span style={{ fontSize: '18px' }}>🌐</span>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '13px', color: C.text, margin: '0 0 8px', fontFamily: PJS, fontWeight: 500 }}>Language</p>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {LANGUAGES.map(lang => (
-                    <button key={lang.code}
-                      onClick={() => handleLangChange(lang.code)}
-                      style={{
-                        padding: '4px 12px', borderRadius: 20,
-                        background: language === lang.code ? GRAD : C.glass2,
-                        border: `1px solid ${language === lang.code ? 'transparent' : C.border}`,
-                        color: language === lang.code ? 'white' : C.muted,
-                        fontSize: '11px', fontWeight: language === lang.code ? 700 : 400,
-                        cursor: 'pointer', transition: 'all 0.2s', fontFamily: PJS
-                      }}>
-                      {lang.label}
-                    </button>
-                  ))}
+              <div style={{ height: 1, background: C.divider, margin: '8px 24px' }} />
+
+              {/* Language row */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 24px' }}>
+                <span style={{ fontSize: '18px' }}>🌐</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: '13px', color: C.text, margin: '0 0 8px', fontFamily: PJS, fontWeight: 500 }}>Language</p>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    {LANGUAGES.map(lang => (
+                      <button key={lang.code}
+                        onClick={() => handleLangChange(lang.code)}
+                        style={{
+                          padding: '4px 12px', borderRadius: 20,
+                          background: language === lang.code ? GRAD : C.glass2,
+                          border: `1px solid ${language === lang.code ? 'transparent' : C.border}`,
+                          color: language === lang.code ? 'white' : C.muted,
+                          fontSize: '11px', fontWeight: language === lang.code ? 700 : 400,
+                          cursor: 'pointer', transition: 'all 0.2s', fontFamily: PJS
+                        }}>
+                        {lang.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div style={{ height: 1, background: C.divider, margin: '8px 24px' }} />
+              <div style={{ height: 1, background: C.divider, margin: '8px 24px' }} />
 
-            {/* Notification toggle */}
-            <div 
-              onClick={handleNotifToggle}
-              style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 24px', cursor: 'pointer' }}
-            >
-              <span style={{ fontSize: '18px' }}>🔔</span>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 500 }}>Notifications</p>
-                <p style={{ fontSize: '10px', color: C.muted, margin: 0 }}>{notifOn ? 'Enabled' : 'Disabled'}</p>
+              {/* Notification toggle */}
+              <div 
+                onClick={handleNotifToggle}
+                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 24px', cursor: 'pointer' }}
+              >
+                <span style={{ fontSize: '18px' }}>🔔</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 500 }}>Notifications</p>
+                  <p style={{ fontSize: '10px', color: C.muted, margin: 0 }}>{notifOn ? 'Enabled' : 'Disabled'}</p>
+                </div>
+                <div style={{ width: 36, height: 20, borderRadius: 10, background: notifOn ? GRAD : C.border, position: 'relative', flexShrink: 0 }}>
+                  <div style={{ position: 'absolute', top: 2, left: notifOn ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+                </div>
               </div>
-              <div style={{ width: 36, height: 20, borderRadius: 10, background: notifOn ? GRAD : C.border, position: 'relative' }}>
-                <div style={{ position: 'absolute', top: 2, left: notifOn ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: 'white' }} />
+
+              <div style={{ height: 1, background: C.divider, margin: '8px 24px' }} />
+
+              {/* Buttons list */}
+              <div style={{ padding: '8px 0' }}>
+                 {[
+                   { icon: '💬', label: 'Contact Support', action: () => window.open('mailto:StyleGuruAI.in.gmail@gmail.com', '_blank') },
+                   { icon: '⭐', label: 'Rate the App', action: () => window.open('https://play.google.com/store/apps/details?id=com.StyleGuruAI', '_blank') },
+                   { icon: '🗑️', label: 'Clear Local Data', danger: true, action: () => {
+                      if (window.confirm('Clear all local data?')) { 
+                        localStorage.clear(); onToast({ message: 'Data cleared', type: 'success' }); 
+                      }
+                   }},
+                   { icon: '🚪', label: 'Sign Out', action: onLogout },
+                   { icon: '⚠️', label: 'Delete Account Permanently', danger: true, action: handleDestroyAccount },
+                 ].map((item, i) => (
+                   <button 
+                    key={i} 
+                    onClick={item.action}
+                    style={{ 
+                      width: '100%', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12, 
+                      background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = C.glass}
+                    onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                   >
+                     <span style={{ fontSize: '18px' }}>{item.icon}</span>
+                     <span style={{ fontSize: '13px', color: item.danger ? C.warnText : C.text, fontFamily: PJS, fontWeight: 500 }}>{item.label}</span>
+                   </button>
+                 ))}
               </div>
             </div>
 
-            <div style={{ height: 1, background: C.divider, margin: '8px 24px' }} />
-
-            {/* Buttons list */}
-            <div style={{ padding: '8px 0' }}>
-               {[
-                 { icon: '💬', label: 'Contact Support', action: () => window.open('mailto:StyleGuruAI.in.gmail@gmail.com', '_blank') },
-                 { icon: '⭐', label: 'Rate the App', action: () => window.open('https://play.google.com/store/apps/details?id=com.StyleGuruAI', '_blank') },
-                 { icon: '🗑️', label: 'Clear Local Data', danger: true, action: () => {
-                    if (window.confirm('Clear all local data?')) { 
-                      localStorage.clear(); onToast({ message: 'Data cleared', type: 'success' }); 
-                    }
-                 }},
-                 { icon: '🚪', label: 'Sign Out', action: onLogout },
-                 { icon: '⚠️', label: 'Delete Account Permanently', danger: true, action: handleDestroyAccount },
-               ].map((item, i) => (
-                 <button 
-                  key={i} 
-                  onClick={item.action}
-                  style={{ 
-                    width: '100%', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12, 
-                    background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s'
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = C.glass}
-                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
-                 >
-                   <span style={{ fontSize: '18px' }}>{item.icon}</span>
-                   <span style={{ fontSize: '13px', color: item.danger ? C.warnText : C.text, fontFamily: PJS, fontWeight: 500 }}>{item.label}</span>
-                 </button>
-               ))}
-            </div>
-
+            {/* ── Sticky Close Button — Always visible at bottom ── */}
             <button 
               onClick={() => setIsMenuOpen(false)}
-              style={{ width: '100%', padding: '16px', background: C.glass2, border: 'none', borderTop: `1px solid ${C.border}`, color: C.muted, fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+              style={{ 
+                flexShrink: 0, width: '100%', padding: '16px', 
+                background: C.glass2, border: 'none', 
+                borderTop: `1px solid ${C.border}`, 
+                color: C.text, fontSize: '13px', fontWeight: 700, 
+                cursor: 'pointer', borderRadius: '0 0 24px 24px',
+                letterSpacing: '0.05em'
+              }}
             >
-              CLOSE MENU
+              ✕  Close
             </button>
           </div>
         </div>
       )}
+
 
       {/* User Identity Card */}
       <GlassCard C={C} hoverable={false} style={{ padding: '24px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>

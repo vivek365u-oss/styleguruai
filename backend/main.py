@@ -469,73 +469,166 @@ def _redmean_color_name(r: int, g: int, b: int) -> str:
     return closest_name
 
 
+def _detect_background_color(image: np.ndarray) -> tuple:
+    """
+    Sample image border regions to determine the actual background color.
+    Returns (r, g, b) of the dominant background color.
+    Uses corner + edge sampling for robustness.
+    """
+    h, w = image.shape[:2]
+    # Sample outer 8% border on all four sides
+    margin_h = max(1, int(h * 0.08))
+    margin_w = max(1, int(w * 0.08))
+
+    top    = image[:margin_h, :, :]
+    bottom = image[h-margin_h:, :, :]
+    left   = image[:, :margin_w, :]
+    right  = image[:, w-margin_w:, :]
+
+    border_pixels = np.concatenate([
+        top.reshape(-1, 3),
+        bottom.reshape(-1, 3),
+        left.reshape(-1, 3),
+        right.reshape(-1, 3),
+    ], axis=0).astype(np.float32)
+
+    if len(border_pixels) == 0:
+        return (255, 255, 255)  # Assume white
+
+    # Mean of border pixels = likely background
+    mean = np.mean(border_pixels, axis=0)
+    return (int(mean[2]), int(mean[1]), int(mean[0]))  # BGR → RGB
+
+
+def _is_background_pixel(r, g, b, bg_rgb, threshold=35):
+    """
+    Returns True if (r,g,b) is close to the detected background color.
+    Also catches common background colors: near-white, near-black, pure grey.
+    """
+    bg_r, bg_g, bg_b = bg_rgb
+    # Close to detected background
+    if abs(r - bg_r) < threshold and abs(g - bg_g) < threshold and abs(b - bg_b) < threshold:
+        return True
+    # Near-pure-white background
+    if r > 220 and g > 220 and b > 220:
+        return True
+    # Near-pure-black (shadow artifact)
+    if r < 20 and g < 20 and b < 20:
+        return True
+    # Neutral grey (from our own fill)
+    if abs(r - 128) < 12 and abs(g - 128) < 12 and abs(b - 128) < 12:
+        return True
+    return False
+
+
 def _grabcut_segment_clothing(image: np.ndarray) -> np.ndarray:
     """
-    Use OpenCV GrabCut to isolate clothing from background.
-    Returns a binary mask (255 = clothing, 0 = background).
+    Multi-layer GrabCut segmentation to isolate clothing from background.
+    Layer 1: Detect actual background color from image borders
+    Layer 2: GrabCut with rectangle init
+    Layer 3: Dilation to capture more foreground
+    Layer 4: Color-similarity exclusion for background-colored pixels inside mask
     Falls back gracefully if GrabCut fails.
     """
     import cv2
     h, w = image.shape[:2]
 
-    # Define rect — generous center region where clothing lives
-    # 10% from top/bottom/sides covers most outfit photos
-    margin_x = int(w * 0.10)
-    margin_y = int(h * 0.08)
-    rect = (margin_x, margin_y, w - 2 * margin_x, h - 2 * margin_y)
+    # Layer 1: Detect background color from actual image corners
+    bg_rgb = _detect_background_color(image)
+    bg_bgr = (bg_rgb[2], bg_rgb[1], bg_rgb[0])
+
+    # Define rect — clothing lives in center ~80% of image
+    margin_x = int(w * 0.08)
+    margin_y = int(h * 0.06)
+    rect = (margin_x, margin_y, w - 2*margin_x, h - 2*margin_y)
 
     try:
         mask = np.zeros(image.shape[:2], np.uint8)
         bgd_model = np.zeros((1, 65), np.float64)
         fgd_model = np.zeros((1, 65), np.float64)
 
-        # Run GrabCut (5 iterations is sufficient)
-        cv2.grabCut(image, mask, rect, bgd_model, fgd_model, 5, cv2.GC_INIT_WITH_RECT)
+        # Layer 2: GrabCut (increase to 8 iterations for better segmentation)
+        cv2.grabCut(image, mask, rect, bgd_model, fgd_model, 8, cv2.GC_INIT_WITH_RECT)
 
-        # Create final binary mask — keep FG and probable FG
         grab_mask = np.where((mask == cv2.GC_FGD) | (mask == cv2.GC_PR_FGD), 255, 0).astype(np.uint8)
 
-        # Safety: if GrabCut returns almost nothing, fall back to center crop mask
+        # Layer 3: Morphological dilation to capture clothing edges better
+        kernel = np.ones((5, 5), np.uint8)
+        grab_mask = cv2.dilate(grab_mask, kernel, iterations=1)
+        # Erode back slightly to remove border noise
+        grab_mask = cv2.erode(grab_mask, kernel, iterations=1)
+
+        # Safety: if GrabCut returns almost nothing, fall back to center-crop mask
         fg_coverage = np.sum(grab_mask > 0) / (h * w)
-        if fg_coverage < 0.10:
-            # Build a safe center-crop mask instead
+        if fg_coverage < 0.08:
             grab_mask = np.zeros((h, w), np.uint8)
-            cy1 = int(h * 0.15)
-            cy2 = int(h * 0.85)
-            cx1 = int(w * 0.15)
-            cx2 = int(w * 0.85)
+            cy1, cy2 = int(h * 0.12), int(h * 0.88)
+            cx1, cx2 = int(w * 0.12), int(w * 0.88)
             grab_mask[cy1:cy2, cx1:cx2] = 255
+
+        # Layer 4: Remove pixels inside mask that match the background color
+        # This catches background leakage through GrabCut holes
+        image_rgb = image[:, :, ::-1]  # BGR -> RGB
+        ys, xs = np.where(grab_mask > 0)
+        for y, x in zip(ys[::4], xs[::4]):  # Sample every 4th pixel for speed
+            r_px, g_px, b_px = image_rgb[y, x]
+            if _is_background_pixel(int(r_px), int(g_px), int(b_px), bg_rgb, threshold=30):
+                # Expand exclusion zone around this background pixel
+                y1, y2 = max(0, y-3), min(h, y+4)
+                x1, x2 = max(0, x-3), min(w, x+4)
+                grab_mask[y1:y2, x1:x2] = 0
 
         return grab_mask
 
     except Exception:
         # Pure fallback: center rectangle mask
         mask = np.zeros((h, w), np.uint8)
-        mask[int(h*0.12):int(h*0.88), int(w*0.12):int(w*0.88)] = 255
+        mask[int(h*0.10):int(h*0.90), int(w*0.10):int(w*0.90)] = 255
         return mask
 
 
-def _kmeans_on_masked_pixels(image_rgb: np.ndarray, mask: np.ndarray) -> tuple:
+def _kmeans_on_masked_pixels(image_rgb: np.ndarray, mask: np.ndarray, bg_rgb: tuple = None) -> tuple:
     """
-    Extract dominant color from pixels inside the mask using K-Means.
+    Extract dominant clothing color from pixels inside the mask using K-Means.
+    Excludes background-colored and near-white/black pixels before clustering.
     Returns (r, g, b).
     """
     import cv2
 
-    pixels = image_rgb[mask > 0].reshape(-1, 3).astype(np.float32)
+    pixels_raw = image_rgb[mask > 0].reshape(-1, 3)
+
+    # ── Filter: remove pixels that look like background or neutrals ───────
+    if bg_rgb is not None:
+        keep = []
+        for px in pixels_raw:
+            r, g, b = int(px[0]), int(px[1]), int(px[2])
+            if not _is_background_pixel(r, g, b, bg_rgb, threshold=40):
+                keep.append(px)
+        pixels_filtered = np.array(keep, dtype=np.float32) if keep else pixels_raw.astype(np.float32)
+    else:
+        # Filter near-white and near-black without bg_rgb
+        keep = [p for p in pixels_raw
+                if not (p[0] > 225 and p[1] > 225 and p[2] > 225)  # near-white
+                and not (p[0] < 20 and p[1] < 20 and p[2] < 20)]   # near-black
+        pixels_filtered = np.array(keep, dtype=np.float32) if keep else pixels_raw.astype(np.float32)
+
+    pixels = pixels_filtered
 
     if len(pixels) < 50:
-        # Too few pixels — take mean
-        mean = np.mean(image_rgb.reshape(-1, 3), axis=0)
+        # Too few pixels after filtering — use mean of remaining or raw mean
+        if len(pixels) > 0:
+            mean = np.mean(pixels, axis=0)
+        else:
+            mean = np.mean(pixels_raw.astype(np.float32), axis=0)
         return int(mean[0]), int(mean[1]), int(mean[2])
 
     k = min(10, len(pixels) // 20)
     k = max(4, k)
 
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.2)
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 40, 0.1)
     try:
         _, labels, centers = cv2.kmeans(
-            pixels, k, None, criteria, 20, cv2.KMEANS_PP_CENTERS
+            pixels, k, None, criteria, 25, cv2.KMEANS_PP_CENTERS
         )
     except Exception:
         mean = np.mean(pixels, axis=0)
@@ -543,15 +636,19 @@ def _kmeans_on_masked_pixels(image_rgb: np.ndarray, mask: np.ndarray) -> tuple:
 
     counts = np.bincount(labels.flatten(), minlength=len(centers))
 
-    # Score each cluster: count weight + saturation bonus + dark-penalty
+    # Score: count weight + saturation bonus + dark-penalty + background-exclusion
     best_idx = 0
     best_score = -1
     for i, center in enumerate(centers):
         r_c, g_c, b_c = float(center[0]), float(center[1]), float(center[2])
         brightness = (r_c + g_c + b_c) / 3.0
 
-        # Skip near-pure-black shadow artifacts
-        if brightness < 12:
+        # Skip shadow artifacts (very dark)
+        if brightness < 15:
+            continue
+
+        # Skip clusters that are still too close to background
+        if bg_rgb and _is_background_pixel(int(r_c), int(g_c), int(b_c), bg_rgb, threshold=45):
             continue
 
         max_c = max(r_c, g_c, b_c)
@@ -559,10 +656,8 @@ def _kmeans_on_masked_pixels(image_rgb: np.ndarray, mask: np.ndarray) -> tuple:
         sat = (max_c - min_c) / (max_c + 1e-6)
 
         count_w = counts[i] / len(pixels)
-        # Saturation bonus: vivid colors get slight preference
-        sat_bonus = sat * 0.20
-        # Brightest cluster slight preference, but not dominating
-        bright_bonus = (brightness / 255.0) * 0.05
+        sat_bonus = sat * 0.25          # Vivid/saturated colors preferred
+        bright_bonus = min((brightness / 255.0) * 0.05, 0.05)
         score = count_w + sat_bonus + bright_bonus
 
         if score > best_score:
@@ -582,10 +677,11 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
     Production-grade outfit color detection.
     Pipeline:
       1. Resize image to standard working size
-      2. Run GrabCut to segment clothing from background
-      3a. If Clarifai API is enabled: send GrabCut-masked image to Clarifai
-      3b. If local: run K-Means on GrabCut masked pixels only
-      4. Map RGB → fashion color name via Redmean perceptual distance
+      2. Detect actual background color from image borders
+      3. Run GrabCut (with bg-aware Layer 4) to segment clothing
+      4a. If Clarifai API: send masked image, skip bg-colored results
+      4b. Local: K-Means on masked pixels with bg exclusion
+      5. Map RGB → fashion color name
     """
     import cv2
     import os
@@ -599,18 +695,22 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
         scale = max_dim / max(h, w)
         image = cv2.resize(image, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
 
-    # ── Step 2: GrabCut foreground segmentation ──
-    clothing_mask = _grabcut_segment_clothing(image)
+    # ── Step 2: Detect real background color ──
+    bg_rgb = _detect_background_color(image)
+    print(f"[OUTFIT] Detected background RGB={bg_rgb}")
 
-    # ── Step 3a: Clarifai API path ──
+    # ── Step 3: GrabCut foreground segmentation (bg-aware) ──
+    clothing_mask = _grabcut_segment_clothing(image)
+    print(f"[OUTFIT] GrabCut fg coverage: {np.sum(clothing_mask > 0) / clothing_mask.size * 100:.1f}%")
+
+    # ── Step 4a: Clarifai API path ──
     engine = os.environ.get("OUTFIT_COLOR_ENGINE", "local").lower()
     if engine == "clarifai":
         pat = os.environ.get("CLARIFAI_PAT", "")
         if pat:
             try:
-                # Build a masked image: zero out background before sending to Clarifai
                 masked_image = image.copy()
-                # Set background pixels to neutral grey so Clarifai ignores them
+                # Fill background with detected bg color (so Clarifai can distinguish it)
                 masked_image[clothing_mask == 0] = [128, 128, 128]
 
                 _, buffer = cv2.imencode('.jpg', masked_image, [cv2.IMWRITE_JPEG_QUALITY, 90])
@@ -629,7 +729,6 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
                     best_rgb = None
                     for c in color_list:
                         val = c.get('value', 0)
-                        # Use raw_hex for actual color (w3c hex is too generic/simplified)
                         raw_hex = c.get('raw_hex', c.get('w3c', {}).get('hex', '#808080'))
                         raw_hex = raw_hex.lstrip('#')
 
@@ -640,11 +739,9 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
                         cg = int(raw_hex[2:4], 16)
                         cb = int(raw_hex[4:6], 16)
 
-                        # Skip neutral grey (our background fill) colors
-                        if abs(cr - 128) < 10 and abs(cg - 128) < 10 and abs(cb - 128) < 10:
+                        # Skip background-colored pixels and neutrals
+                        if _is_background_pixel(cr, cg, cb, bg_rgb, threshold=40):
                             continue
-
-                        # Skip near-black artifacts
                         if (cr + cg + cb) / 3 < 15:
                             continue
 
@@ -656,11 +753,7 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
                         r, g, b = best_rgb
                         print(f"[CLARIFAI] Detected RGB=({r},{g},{b})")
                         color_name = _redmean_color_name(r, g, b)
-                        return {
-                            "r": r, "g": g, "b": b,
-                            "hex": f"#{r:02x}{g:02x}{b:02x}",
-                            "name": color_name
-                        }
+                        return {"r": r, "g": g, "b": b, "hex": f"#{r:02x}{g:02x}{b:02x}", "name": color_name}
             except Exception as e:
                 print(f"[CLARIFAI ERROR] {e}. Falling back to local K-Means.")
 
@@ -668,7 +761,6 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
         api_key = os.environ.get("GOOGLE_VISION_API_KEY", "")
         if api_key:
             try:
-                # Send GrabCut-masked image to Google Vision
                 masked_image = image.copy()
                 masked_image[clothing_mask == 0] = [128, 128, 128]
                 _, buffer = cv2.imencode('.jpg', masked_image, [cv2.IMWRITE_JPEG_QUALITY, 90])
@@ -686,11 +778,10 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
                         cr = int(rgb.get('red', 0))
                         cg = int(rgb.get('green', 0))
                         cb = int(rgb.get('blue', 0))
-                        brightness = (cr + cg + cb) / 3
-                        # Skip both very dark and our neutral grey background fill
-                        if brightness < 15:
+                        # Skip background and neutral colors
+                        if _is_background_pixel(cr, cg, cb, bg_rgb, threshold=40):
                             continue
-                        if abs(cr - 128) < 10 and abs(cg - 128) < 10 and abs(cb - 128) < 10:
+                        if (cr + cg + cb) / 3 < 15:
                             continue
                         if c.get('score', 0) > best_score:
                             best_score = c.get('score', 0)
@@ -703,12 +794,13 @@ def extract_dominant_outfit_color(image: np.ndarray) -> dict:
             except Exception as e:
                 print(f"[GOOGLE VISION ERROR] {e}. Falling back to local K-Means.")
 
-    # ── Step 3b: Local K-Means fallback (GrabCut masked pixels) ──
+    # ── Step 4b: Local K-Means (bg-aware) ──
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    r, g, b = _kmeans_on_masked_pixels(image_rgb, clothing_mask)
+    r, g, b = _kmeans_on_masked_pixels(image_rgb, clothing_mask, bg_rgb=bg_rgb)
     print(f"[LOCAL KMEANS] Detected RGB=({r},{g},{b})")
     color_name = _redmean_color_name(r, g, b)
     return {"r": r, "g": g, "b": b, "hex": f"#{r:02x}{g:02x}{b:02x}", "name": color_name}
+
 
 
 
