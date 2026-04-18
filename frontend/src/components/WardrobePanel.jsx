@@ -250,25 +250,34 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
           <span className="w-3 h-3"><IconRenderer icon={FashionIcons.Wardrobe} /></span>
           All
         </button>
-        {/* Dynamic section tabs — only show sections that have items */}
+        {/* All category tabs — ALWAYS show all sections (not just ones with items) */}
+        {/* User can browse empty categories and shop to fill them */}
         {Object.entries(WARDROBE_SECTIONS)
           .filter(([key]) => key !== 'OTHER')
           .sort(([, a], [, b]) => a.order - b.order)
-          .filter(([sectionKey]) => items.some(i => getCategoryGroup(i.category) === sectionKey))
-          .map(([sectionKey, section]) => (
-            <button
-              key={sectionKey}
-              onClick={() => { setFilter(sectionKey); trackWardrobeInteraction('filter', items.length); }}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-tight transition-all border whitespace-nowrap shadow-sm ${
-                filter === sectionKey
-                  ? 'bg-purple-600 border-purple-600 text-white shadow-purple-500/30'
-                  : 'bg-[var(--bg-accent)] border-[var(--border-primary)] opacity-60 hover:opacity-100 hover:scale-105 active:scale-95'
-              }`}
-            >
-              <span className="text-sm leading-none">{section.emoji}</span>
-              {section.label.split(' ')[0]}
-            </button>
-          ))}
+          .map(([sectionKey, section]) => {
+            const count = items.filter(i => getCategoryGroup(i.category) === sectionKey).length;
+            return (
+              <button
+                key={sectionKey}
+                onClick={() => { setFilter(sectionKey); trackWardrobeInteraction('filter', items.length); }}
+                className={`relative flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-tight transition-all border whitespace-nowrap shadow-sm ${
+                  filter === sectionKey
+                    ? 'bg-purple-600 border-purple-600 text-white shadow-purple-500/30'
+                    : 'bg-[var(--bg-accent)] border-[var(--border-primary)] opacity-60 hover:opacity-100 hover:scale-105 active:scale-95'
+                }`}
+              >
+                <span className="text-sm leading-none">{section.emoji}</span>
+                {section.label.split(' ')[0]}
+                {/* Item count badge */}
+                <span className={`ml-0.5 text-[9px] font-black px-1.5 py-0.5 rounded-full ${
+                  count > 0
+                    ? filter === sectionKey ? 'bg-white/20 text-white' : 'bg-purple-500/15 text-purple-600 dark:text-purple-400'
+                    : filter === sectionKey ? 'bg-white/10 text-white/50' : 'bg-gray-200/60 dark:bg-white/5 text-gray-400 dark:text-white/20'
+                }`}>{count}</span>
+              </button>
+            );
+          })}
       </div>
 
       {capWarning && (
@@ -293,10 +302,29 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
           const sectionItems = items.filter(i => getCategoryGroup(i.category) === filter);
           const sectionMeta = WARDROBE_SECTIONS[filter] || { label: filter, emoji: '👗' };
           return sectionItems.length === 0 ? (
-            <div className="text-center py-16 opacity-50">
-              <p className="text-2xl mb-2">{sectionMeta.emoji}</p>
-              <p className="text-sm font-bold">{sectionMeta.label}</p>
-              <p className="text-xs mt-1">No items saved here yet.</p>
+            // ── EMPTY SECTION — Show shop CTA to fill this category ──
+            <div className="text-center py-14">
+              <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-5 border ${
+                isDark ? 'border-white/10 bg-white/5' : 'border-gray-200 bg-gray-50'
+              }`}>
+                <span className="text-4xl">{sectionMeta.emoji}</span>
+              </div>
+              <p className={`text-sm font-black mb-1 ${isDark ? 'text-white/60' : 'text-gray-600'}`}>
+                {sectionMeta.label}
+              </p>
+              <p className={`text-xs mb-5 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>
+                No items saved here yet. Shop to fill this section!
+              </p>
+              {/* Shop CTA — opens Myntra search for this category */}
+              <button
+                onClick={() => {
+                  const q = encodeURIComponent(sectionMeta.label.toLowerCase());
+                  window.open(`https://www.myntra.com/search?q=${q}`, '_blank');
+                }}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[11px] font-black uppercase tracking-wider shadow-lg hover:scale-[1.03] active:scale-95 transition-all"
+              >
+                <span>🛍️</span> Shop {sectionMeta.label.split(' ')[0]} on Myntra
+              </button>
             </div>
           ) : (
             <div>
