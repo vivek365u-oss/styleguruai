@@ -7,16 +7,16 @@ import { buildMyntraSearchUrl } from '../utils/myntraUrl';
 // ── Occasion-Aware Fallback Outfits (when wardrobe is empty) ──────────────────
 // Each occasion gets a DIFFERENT outfit so calendar is never repetitive per day
 const FALLBACK_MALE = {
-  OFFICE:  { topName: 'Navy Blue Formal Shirt',   botName: 'Charcoal Tailored Trousers', topCat: 'cat_formal_shirt',  botCat: 'cat_formal_trouser' },
-  PARTY:   { topName: 'Burgundy Party Shirt',     botName: 'Slim Black Jeans',           topCat: 'cat_party_shirt',   botCat: 'cat_jeans'          },
-  CAMPUS:  { topName: 'White Cotton Crew Tee',    botName: 'Olive Slim Chinos',          topCat: 'cat_tshirt',        botCat: 'cat_chinos'         },
-  WEEKEND: { topName: 'Sage Green Polo Shirt',    botName: 'Beige Clean Chinos',         topCat: 'cat_polo',          botCat: 'cat_chinos'         },
+  OFFICE:  { topName: 'Formal Shirt',   botName: 'Tailored Trousers', topCat: 'cat_formal_shirt',  botCat: 'cat_formal_trouser' },
+  PARTY:   { topName: 'Party Shirt',    botName: 'Slim Jeans',        topCat: 'cat_party_shirt',   botCat: 'cat_jeans'          },
+  CAMPUS:  { topName: 'Crew Tee',       botName: 'Slim Chinos',       topCat: 'cat_tshirt',        botCat: 'cat_chinos'         },
+  WEEKEND: { topName: 'Polo Shirt',     botName: 'Clean Chinos',      topCat: 'cat_polo',          botCat: 'cat_chinos'         },
 };
 const FALLBACK_FEMALE = {
-  OFFICE:  { topName: 'Ivory Structured Blazer', botName: 'Cigarette Trousers',         topCat: 'cat_blazer',        botCat: 'cat_formal_trouser' },
-  PARTY:   { topName: 'Mauve Co-ord Set Top',    botName: 'Wide Leg Palazzo Pants',     topCat: 'cat_top',           botCat: 'cat_palazzo'        },
-  CAMPUS:  { topName: 'Printed Casual Kurti',    botName: 'Cotton Palazzo',             topCat: 'cat_kurti',         botCat: 'cat_palazzo'        },
-  WEEKEND: { topName: 'Dusty Rose Crop Top',     botName: 'High Waist Mom Jeans',       topCat: 'cat_top',           botCat: 'cat_mom_jeans'      },
+  OFFICE:  { topName: 'Structured Blazer', botName: 'Cigarette Trousers',     topCat: 'cat_blazer',        botCat: 'cat_formal_trouser' },
+  PARTY:   { topName: 'Co-ord Set Top',    botName: 'Wide Leg Palazzo',       topCat: 'cat_top',           botCat: 'cat_palazzo'        },
+  CAMPUS:  { topName: 'Casual Kurti',      botName: 'Cotton Palazzo',         topCat: 'cat_kurti',         botCat: 'cat_palazzo'        },
+  WEEKEND: { topName: 'Crop Top',          botName: 'High Waist Mom Jeans',   topCat: 'cat_top',           botCat: 'cat_mom_jeans'      },
 };
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -158,18 +158,26 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
     const fallbackMap = activeGender === 'male' ? FALLBACK_MALE : FALLBACK_FEMALE;
     const fallback = fallbackMap[occasion.event] || fallbackMap['WEEKEND'];
 
-    const bestTop = rankedWardrobe.find(i => topCats.includes(i.category)) ||
-                    {
-                        name: fallback.topName,
-                        hex: bestColors.length > 0 ? bestColors[index % bestColors.length]?.hex : '#7C3AED',
+    const matchingTops = rankedWardrobe.filter(i => topCats.includes(i.category));
+    const matchingBottoms = rankedWardrobe.filter(i => bottomCats.includes(i.category));
+
+    const bestTopObj = bestColors.length > 0 ? bestColors[index % bestColors.length] : null;
+    const bestPantObj = pantColors.length > 0 ? pantColors[(index + 1) % pantColors.length] : null;
+
+    const bestTop = matchingTops.length > 0 
+                    ? matchingTops[index % matchingTops.length] 
+                    : {
+                        name: bestTopObj ? `${bestTopObj.name || 'Signature'} ${fallback.topName}` : fallback.topName,
+                        hex: bestTopObj ? bestTopObj.hex : '#7C3AED',
                         engineScore: 85,
                         category: fallback.topCat
                     };
 
-    const bestBottom = rankedWardrobe.find(i => bottomCats.includes(i.category) && i.id !== bestTop.id) ||
-                       {
-                           name: fallback.botName,
-                           hex: pantColors.length > 0 ? pantColors[index % pantColors.length]?.hex : '#1e3a8a',
+    const bestBottom = matchingBottoms.length > 0 
+                       ? matchingBottoms[(index + 1) % matchingBottoms.length] 
+                       : {
+                           name: bestPantObj ? `${bestPantObj.name || 'Classic'} ${fallback.botName}` : fallback.botName,
+                           hex: bestPantObj ? bestPantObj.hex : '#1e3a8a',
                            engineScore: 80,
                            category: fallback.botCat
                        };
