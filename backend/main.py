@@ -1926,9 +1926,6 @@ async def get_navigator_insights(
 # SELFIE → STYLE RECOMMENDATION
 # ============================================
 from face_shape_detector import face_shape_detector
-from recommendation_engine import RecommendationEngine
-
-reco_engine = RecommendationEngine()
 
 class SelfieStyleRequest(BaseModel):
     gender: str = "male"  # male | female
@@ -2121,39 +2118,6 @@ async def analyze_selfie_style(
             except Exception as e:
                 print(f"[SELFIE] Beard recommendations skipped: {e}")
 
-        # ── Step 7: Fashion Color Recommendations ────────
-        color_recs = {}
-        try:
-            from skin_tone_classifier import SkinToneResult
-            st_result = SkinToneResult(
-                category=skin_tone.category,
-                subcategory=skin_tone.subcategory,
-                confidence=skin_tone.confidence
-            )
-            
-            if gender.lower() == "male":
-                m_recs = reco_engine.get_recommendations(st_result, lang=lang)
-                color_recs = {
-                    "top_label": "T-shirt & Top",
-                    "top_colors": m_recs.best_tshirt_colors,
-                    "bottom_label": "Pant & Cargo",
-                    "bottom_colors": m_recs.best_pant_colors,
-                    "accent_colors": m_recs.accent_colors,
-                    "avoid_colors": m_recs.colors_to_avoid
-                }
-            else:
-                f_recs = reco_engine.get_female_recommendations(st_result, lang=lang)
-                color_recs = {
-                    "top_label": "Dress & Top",
-                    "top_colors": f_recs.get("best_dress_colors", []),
-                    "bottom_label": "Bottom & Skirt",
-                    "bottom_colors": f_recs.get("best_bottom_colors", []),
-                    "accent_colors": f_recs.get("accessories", []),
-                    "avoid_colors": f_recs.get("colors_to_avoid", [])
-                }
-        except Exception as e:
-            print(f"[SELFIE] Recommendation engine failed: {e}")
-
         # ── Compose final response ────────────────────────
         processing_time = round(time.time() - start_time, 2)
         return JSONResponse(content={
@@ -2184,14 +2148,13 @@ async def analyze_selfie_style(
                 "celebrity_examples": face_shape_result.get("data", {}).get("celebrity_examples", []),
                 "ratios": face_shape_result.get("ratios", {}),
                 "is_fallback": face_shape_result.get("fallback", False),
-                "landmarks": landmarks_dict,
+                "landmarks": landmarks_dict,  # ✅ Added for frontend visualization
             },
             "hairstyle_recommendations": hairstyle_recs,
-            "beard_recommendations": beard_recs,
-            "color_recommendations": color_recs, # ✅ Restored missing colors
+            "beard_recommendations": beard_recs,  # ✅ Added beard recommendations
             "style_tips": {
                 "primary": f"Your {face_shape_result.get('data', {}).get('display','oval')} face shape pairs beautifully with tailored hairstyles that enhance your natural bone structure.",
-                "skin_tone_tip": f"With your {skin_tone.category} skin tone and {skin_tone.subcategory} undertone, your {color_season} season colors will complement you best.",
+                "skin_tone_tip": f"With your {skin_tone.category} skin tone and {skin_tone.subcategory} undertone, warm-toned hair colors will complement you best.",
                 "color_season": color_season,
             }
         })

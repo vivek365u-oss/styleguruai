@@ -155,46 +155,17 @@ function AnalysisLoader({ progress, C }) {
   );
 }
 
-const actionBtnStyle = (C, color) => ({
-  background: C.glass2, border: `1px solid ${C.border}`,
-  borderRadius: 8, padding: '6px 10px', fontSize: 10, fontWeight: 700,
-  color: C.text, fontFamily: PJS, cursor: 'pointer', whiteSpace: 'nowrap',
-  display: 'flex', alignItems: 'center', gap: 4, transition: 'all 0.2s'
-});
-
-function ColorSection({ title, colors, C }) {
-  if (!colors || colors.length === 0) return null;
-  return (
-    <div style={{ marginTop: 16 }}>
-      <h3 style={{ margin: '0 0 10px', fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: PJS }}>
-        🎯 Best {title} Colors
-      </h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 10 }}>
-        {colors.slice(0, 4).map((c, i) => (
-          <div key={i} style={{
-            background: C.glass2, border: `1px solid ${C.border}`,
-            borderRadius: 12, padding: '10px', display: 'flex', flexDirection: 'column', gap: 8,
-          }}>
-            <div style={{ width: '100%', height: 36, borderRadius: 8, background: c.hex, border: '1px solid rgba(0,0,0,0.1)' }} />
-            <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: C.text, textAlign: 'center', fontFamily: PJS }}>{c.name}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // ── Face Shape Card ─────────────────────────────────
 function FaceShapeCard({ faceShape, C }) {
-  const { 
-    display, icon, description, 
-    characteristics = [], 
-    celebrity_examples = [], 
-    shape, confidence, 
-    secondary, 
-    is_fallback 
+  const {
+    display, icon, description,
+    characteristics = [],
+    celebrity_examples = [],
+    shape, confidence,
+    secondary,
+    is_fallback
   } = faceShape;
-  
+
   const confPct = Math.round(confidence * 100);
 
   return (
@@ -234,8 +205,8 @@ function FaceShapeCard({ faceShape, C }) {
       </p>
 
       {secondary && (
-        <div style={{ 
-          background: `${VIOLET}08`, border: `1px solid ${VIOLET}15`, 
+        <div style={{
+          background: `${VIOLET}08`, border: `1px solid ${VIOLET}15`,
           borderRadius: 12, padding: '10px 14px', marginBottom: 16,
           display: 'flex', gap: 10, alignItems: 'center'
         }}>
@@ -426,29 +397,29 @@ function BeardMockup({ visualHint, faceShape, C }) {
   return (
     <div style={{
       width: 100, height: 110, background: C.glass2, borderRadius: 12,
-      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
       position: 'relative', overflow: 'hidden', border: `1px solid ${C.border}`
     }}>
       {/* Face Silhouette based on shape */}
       <svg viewBox="0 0 100 110" style={{ width: '85%', height: '85%' }}>
         {/* Face Outline */}
-        <path 
+        <path
           d={faceShape === 'round' ? "M50,10 Q85,15 85,55 Q85,95 50,100 Q15,95 15,55 Q15,15 50,10" :
-             faceShape === 'square' ? "M50,10 L80,10 L80,90 L50,100 L20,90 L20,10 Z" :
-             faceShape === 'heart' ? "M50,20 Q85,10 85,50 Q85,85 50,105 Q15,85 15,50 Q15,10 50,20" :
-             "M50,10 Q80,15 80,55 Q80,95 50,105 Q20,95 20,55 Q20,15 50,10"} 
+            faceShape === 'square' ? "M50,10 L80,10 L80,90 L50,100 L20,90 L20,10 Z" :
+              faceShape === 'heart' ? "M50,20 Q85,10 85,50 Q85,85 50,105 Q15,85 15,50 Q15,10 50,20" :
+                "M50,10 Q80,15 80,55 Q80,95 50,105 Q20,95 20,55 Q20,15 50,10"}
           fill="none" stroke={C.muted} strokeWidth="1" strokeDasharray="2 2"
         />
         {/* Features */}
         <path d="M40,45 Q43,43 46,45 M54,45 Q57,43 60,45" fill="none" stroke={C.muted} strokeWidth="1" />
         <path d="M48,60 L50,62 L52,60" fill="none" stroke={C.muted} strokeWidth="1" />
-        
+
         {/* The Beard Overlay */}
-        <path 
-          d={currentPath} 
-          fill={VIOLET} 
+        <path
+          d={currentPath}
+          fill={VIOLET}
           fillOpacity="0.4"
-          stroke={VIOLET} 
+          stroke={VIOLET}
           strokeWidth="1.5"
           style={{ filter: 'drop-shadow(0 0 4px rgba(139,92,246,0.3))' }}
         />
@@ -468,7 +439,7 @@ function BeardCard({ rec, rank, faceShape, C }) {
     <GlassCard C={C} style={{ padding: '16px 20px', border: `1px solid ${C.border2}` }}>
       <div style={{ display: 'flex', gap: 16 }}>
         <BeardMockup visualHint={rec.visual_hint} faceShape={faceShape} C={C} />
-        
+
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
             <span style={{ fontSize: 16 }}>🧔</span>
@@ -479,7 +450,7 @@ function BeardCard({ rec, rank, faceShape, C }) {
           <p style={{ margin: '0 0 10px', fontSize: 12, color: C.text2, lineHeight: 1.5, fontFamily: PJS }}>
             {rec.reason}
           </p>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
               <span style={{ fontSize: 12 }}>💡</span>
@@ -610,12 +581,12 @@ function UploadArea({ gender, setGender, onFileSelect, C }) {
 // ────────────────────────────────────────────────────
 function StyleResults({ data, previewUrl, gender, onReset, C }) {
   const [expandedIdx, setExpandedIdx] = useState(0);
-  const { 
-    face_shape, 
-    skin_analysis, 
-    hairstyle_recommendations = [], 
-    beard_recommendations = [], 
-    style_tips 
+  const {
+    face_shape,
+    skin_analysis,
+    hairstyle_recommendations = [],
+    beard_recommendations = [],
+    style_tips
   } = data;
 
   const toggleCard = (i) => setExpandedIdx(prev => prev === i ? -1 : i);
@@ -627,58 +598,6 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
       saveSelfieStyleHistory(uid, data).catch(() => { });
     }
   }, [data]);
-
-  const handleSaveToCard = async (e) => {
-    const btn = e.currentTarget;
-    const originalText = btn.innerHTML;
-    try {
-      btn.innerHTML = '🕒 Saving...';
-      btn.disabled = true;
-      const uid = auth.currentUser?.uid;
-      if (!uid) return;
-
-      // 1. Promote to Primary DNA
-      await savePrimaryProfile(uid, {
-        skinTone: skin_analysis.skin_tone,
-        undertone: skin_analysis.undertone,
-        season: skin_analysis.color_season,
-        faceShape: face_shape.shape,
-        hex: skin_analysis.skin_color.hex,
-        gender: gender,
-        data: data
-      });
-
-      // 2. Add to Style History
-      await saveSelfieStyleHistory(uid, data);
-
-      btn.innerHTML = '✅ DNA Set!';
-      btn.style.background = '#10B981';
-      setTimeout(() => {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-        btn.style.background = C.glass2;
-      }, 3000);
-    } catch (err) {
-      console.error('Failed to set DNA:', err);
-      btn.innerHTML = '❌ Error';
-      setTimeout(() => {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-      }, 2000);
-    }
-  };
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'My StyleGuru Profile',
-        text: `I just analyzed my style! I have an ${face_shape.display} face and ${skin_analysis.skin_tone} skin. Check out StyleGuru AI!`,
-        url: window.location.href,
-      }).catch(() => { });
-    } else {
-      window.open(`https://wa.me/?text=Check%20out%20my%20StyleGuru%20Report!%20Face:%20${face_shape.display}`);
-    }
-  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, animation: 'fadeSlideIn 0.35s ease' }}>
@@ -723,19 +642,6 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
         )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, justifyContent: 'center' }}>
           <SkinToneBanner skinAnalysis={skin_analysis} C={C} />
-          
-          {/* Action Bar */}
-          <div style={{
-            display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4,
-            scrollbarWidth: 'none', msOverflowStyle: 'none'
-          }}>
-            <button onClick={handleSaveToCard} style={actionBtnStyle(C, VIOLET)}>🆔 Set DNA</button>
-            <button onClick={handleShare} style={actionBtnStyle(C, '#25D366')}>📱 Share</button>
-            <button onClick={() => {}} style={actionBtnStyle(C, '#3B82F6')}>👥 Community</button>
-            <button onClick={() => {}} style={actionBtnStyle(C, '#F59E0B')}>⬇️ Download</button>
-            <button onClick={() => {}} style={actionBtnStyle(C, '#EC4899')}>🎨 Palette</button>
-          </div>
-
           {style_tips?.primary && (
             <div style={{
               background: C.glass, border: `1px solid ${C.border}`, borderRadius: 12,
@@ -757,7 +663,7 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <div style={{ flex: 1, height: 1, background: C.divider }} />
           <span style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: PJS, whiteSpace: 'nowrap' }}>
-            ✂️ Recommended Hairstyles
+            ✂️ Hairstyle Recommendations
           </span>
           <div style={{ flex: 1, height: 1, background: C.divider }} />
         </div>
@@ -776,36 +682,6 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
         </div>
       </div>
 
-      {/* ── Color Recommendations & Shop ── */}
-      {data.color_recommendations && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <ColorSection 
-            title={data.color_recommendations.top_label || "Top Wear"} 
-            colors={data.color_recommendations.top_colors} 
-            C={C} 
-          />
-          <ColorSection 
-            title={data.color_recommendations.bottom_label || "Bottom Wear"} 
-            colors={data.color_recommendations.bottom_colors} 
-            C={C} 
-          />
-          
-          <button
-            style={{
-              padding: '14px', borderRadius: 14, background: `${VIOLET}15`,
-              border: `1px solid ${VIOLET}30`, color: VIOLET,
-              fontSize: 14, fontWeight: 700, fontFamily: PJS, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              marginTop: 8, transition: 'all 0.2s'
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = `${VIOLET}25`}
-            onMouseLeave={e => e.currentTarget.style.background = `${VIOLET}15`}
-          >
-            🛒 Shop Recommended Outfits
-          </button>
-        </div>
-      )}
-
       {/* ── Beard Recommendations (Male only) ── */}
       {gender === 'male' && beard_recommendations.length > 0 && (
         <div style={{ marginTop: 8 }}>
@@ -819,12 +695,12 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {beard_recommendations.map((rec, i) => (
-              <BeardCard 
-                key={i} 
-                rec={rec} 
-                rank={i + 1} 
-                faceShape={face_shape?.shape} 
-                C={C} 
+              <BeardCard
+                key={i}
+                rec={rec}
+                rank={i + 1}
+                faceShape={face_shape?.shape}
+                C={C}
               />
             ))}
           </div>
