@@ -1031,42 +1031,51 @@ class FaceShapeDetector:
         "oblong":  [1.70, 0.85, 0.75],
     }
 
+    def _get_max_width(self, landmarks: Dict[int, Tuple[int, int]], point_pairs: List[Tuple[int, int]]) -> float:
+        """Finds the maximum width across a set of landmark pairs."""
+        max_w = 0.0
+        for p1_idx, p2_idx in point_pairs:
+            p1 = landmarks.get(p1_idx)
+            p2 = landmarks.get(p2_idx)
+            if p1 and p2:
+                w = self._dist(p1, p2)
+                if w > max_w: max_w = w
+        return max_w
+
     def detect_shape(self, landmarks: Dict[int, Tuple[int, int]]) -> Dict:
         """
-        Classify face shape using archetypcal similarity scoring.
-        Returns top matches and full metadata.
+        Classify face shape using multi-point similarity scoring.
+        Handles hair occlusion and head tilt by taking regional maximums.
         """
         try:
-            # Extract key points
+            # ── Regional Target Points ──────────────────────────
+            FOREHEAD_PAIRS = [(54, 284), (103, 332), (67, 297), (109, 338)]
+            CHEEK_PAIRS    = [(234, 454), (127, 356), (116, 345), (123, 352)]
+            JAW_PAIRS      = [(172, 397), (136, 365), (150, 379), (149, 378), (176, 400)]
+            
             fh_top = landmarks.get(self.FOREHEAD_TOP)
             ch_bot = landmarks.get(self.CHIN_BOTTOM)
-            r_temp = landmarks.get(self.RIGHT_TEMPLE)
-            l_temp = landmarks.get(self.LEFT_TEMPLE)
-            r_chk  = landmarks.get(self.RIGHT_CHEEK)
-            l_chk  = landmarks.get(self.LEFT_CHEEK)
-            r_jaw  = landmarks.get(self.RIGHT_JAW)
-            l_jaw  = landmarks.get(self.LEFT_JAW)
 
-            # Verify core landmarks
-            if not all([fh_top, ch_bot, r_chk, l_chk, r_jaw, l_jaw]):
-                logger.warning("Missing core landmarks for face shape detection")
+            if not fh_top or not ch_bot:
                 return self._fallback_result()
 
-            # ── Step 1: Core Measurements ──────────────────────
-            face_h = self._dist(fh_top, ch_bot)
-            cheek_w = self._dist(r_chk, l_chk)
-            jaw_w = self._dist(r_jaw, l_jaw)
+            # ── Step 1: Regional Measurements ──────────────────
+            face_h  = self._dist(fh_top, ch_bot)
+            fore_w  = self._get_max_width(landmarks, FOREHEAD_PAIRS)
+            cheek_w = self._get_max_width(landmarks, CHEEK_PAIRS)
+            jaw_w   = self._get_max_width(landmarks, JAW_PAIRS)
             
-            # Forehead can be wide at temples or slightly lower
-            fore_w = self._dist(r_temp, l_temp) if r_temp and l_temp else cheek_w * 0.85
-
-            if cheek_w < 1: return self._fallback_result()
+            # Sanity check widths (cheeks should generally be wide)
+            if cheek_w < 10: return self._fallback_result()
+            
+            # Normalize zero forehead (occluded) to a conservative estimate rather than Oval default
+            if fore_w < 1: fore_w = cheek_w * 0.82 
 
             # ── Step 2: Ratios ─────────────────────────────────
             face_r = face_h / cheek_w
             fore_r = fore_w / cheek_w
-            jaw_r = jaw_w / cheek_w
-            var = abs(fore_r - jaw_r)
+            jaw_r  = jaw_w / cheek_w
+            var    = abs(fore_r - jaw_r)
 
             measurements = {
                 "face_ratio": round(face_r, 3),
@@ -1076,55 +1085,62 @@ class FaceShapeDetector:
             }
 
             # ── Step 3: Fuzzy Classification Scorer ────────────
+            # Target values optimized for the multi-point MAX approach
+            # Square needs high JawRatio; Round needs low FaceRatio; Heart needs high ForeheadRatio
+            ARCHS = {
+                "oval":    [1.38, 0.85, 0.72],
+                "round":   [1.08, 0.86, 0.86],
+                "square":  [1.10, 0.96, 0.98],
+                "heart":   [1.35, 1.02, 0.65],
+                "diamond": [1.42, 0.72, 0.72],
+                "oblong":  [1.70, 0.82, 0.72],
+            }
+
             scores = {}
             user_vec = [face_r, fore_r, jaw_r]
 
-            for shape_name, target_vec in self.ARCHETYPES.items():
-                # Weighted Distance Logic
-                # Face Ratio (v0) is most important for Round/Square vs Oblong
-                # Jaw Ratio (v2) is critical for Square/Heart/Diamond
+            for shape_name, target in ARCHS.items():
+                # Adjusted Weights:
+                # v2 (Jaw Ratio) is critical for Square/Diamond/Heart: Weight 2.5
+                # v1 (Forehead Ratio) is critical for Heart/Diamond/Square: Weight 1.5
+                # v0 (Face Ratio) is critical for Round/Oblong: Weight 1.8
                 dist = math.sqrt(
-                    2.0 * (user_vec[0] - target_vec[0])**2 +
-                    1.0 * (user_vec[1] - target_vec[1])**2 +
-                    1.7 * (user_vec[2] - target_vec[2])**2
+                    1.8 * (user_vec[0] - target[0])**2 +
+                    1.2 * (user_vec[1] - target[1])**2 +
+                    2.8 * (user_vec[2] - target[2])**2
                 )
-                # Distance to Confidence (0.6 is max range)
-                conf = max(0, 1 - (dist / 0.7)) 
+                conf = max(0, 1 - (dist / 0.65)) 
                 
-                # Rule Boosts (Hard modifiers for definitive traits)
+                # Dynamic Boost Logic 
                 if shape_name == "square":
-                    if face_r < 1.25 and jaw_r > 0.88: conf += 0.15
-                    if face_r < 1.15: conf += 0.05
+                    if jaw_r > 0.92 and face_r < 1.25: conf += 0.2
                 elif shape_name == "round":
-                    if face_r < 1.18 and var < 0.08: conf += 0.1
-                elif shape_name == "diamond":
-                    if fore_r < 0.78 and jaw_r < 0.78: conf += 0.15
+                    if face_r < 1.12 and jaw_r > 0.85: conf += 0.15
                 elif shape_name == "heart":
-                    if fore_r > 0.9 and jaw_r < 0.75: conf += 0.15
+                    if fore_r > 0.98 and jaw_r < 0.75: conf += 0.15
+                elif shape_name == "diamond":
+                    if fore_r < 0.80 and jaw_r < 0.80: conf += 0.15
                 elif shape_name == "oblong":
-                    if face_r > 1.55: conf += 0.2
+                    if face_r > 1.6: conf += 0.2
 
                 scores[shape_name] = round(min(1.0, conf), 3)
 
-            # ── Step 4: Final Selection ────────────────────────
+            # ── Step 4: Win Selection ──────────────────────────
             sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
             primary_shape, primary_conf = sorted_scores[0]
             
-            # Secondary match logic
             secondary_traits = None
             if len(sorted_scores) > 1:
                 sec_shape, sec_conf = sorted_scores[1]
-                # If they are close, user has prominent traits of both
-                if sec_conf > 0.45 and (primary_conf - sec_conf) < 0.2:
+                if sec_conf > 0.4 and (primary_conf - sec_conf) < 0.25:
                     secondary_traits = {
                         "shape": sec_shape,
                         "display": FACE_SHAPE_DATA[sec_shape]["display"],
                         "confidence": sec_conf
                     }
 
-            # Log for debugging
-            logger.info(f"Analysis Results: Primary={primary_shape} ({primary_conf*100:.0f}%), Traits={secondary_traits['shape'] if secondary_traits else 'None'}")
-            logger.debug(f"Input Ratios: FR={face_r:.2f}, ForeR={fore_r:.2f}, JawR={jaw_r:.2f}")
+            print(f"[SHAPE v3] Primary: {primary_shape} ({primary_conf*100:.0f}%) | Traits: {secondary_traits['shape'] if secondary_traits else 'None'}")
+            print(f"[SHAPE v3] Measurements: FR={face_r:.2f}, ForeR={fore_r:.2f}, JawR={jaw_r:.2f}")
 
             return {
                 "shape": primary_shape,
@@ -1136,7 +1152,9 @@ class FaceShapeDetector:
             }
 
         except Exception as e:
-            logger.error(f"Face shape detection failure: {e}")
+            logger.error(f"Detection 3.0 error: {e}")
+            import traceback
+            traceback.print_exc()
             return self._fallback_result()
 
     def _fallback_result(self) -> Dict:
