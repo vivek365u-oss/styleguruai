@@ -27,17 +27,32 @@ const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 
 import { ThemeContext } from './context/ThemeContext';
 
+// Shared logo component — same style as SplashScreen
+const AppLogo = () => (
+  <div style={{
+    width: 88, height: 88,
+    background: 'linear-gradient(135deg, #6B4EFF 0%, #8B5CF6 45%, #EC4899 100%)',
+    borderRadius: 26,
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    boxShadow: '0 20px 50px -8px rgba(139,92,246,0.65)',
+    position: 'relative', overflow: 'hidden', flexShrink: 0
+  }}>
+    <span style={{ fontSize: 42, color: 'white', fontWeight: 300, letterSpacing: '-1px', position: 'relative', zIndex: 2 }}>∞</span>
+  </div>
+);
+
 const LoadingFallback = () => (
-  <div className="min-h-screen bg-gradient-to-br from-[#050816] via-purple-950 to-[#050816] flex flex-col items-center justify-center relative overflow-hidden">
-    <div className="absolute inset-0 z-0">
-      <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-purple-600 rounded-full opacity-20 blur-[100px] animate-pulse"></div>
-      <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-pink-600 rounded-full opacity-20 blur-[100px] animate-pulse" style={{ animationDelay: '1s' }}></div>
-    </div>
-    <div className="relative z-10 flex flex-col items-center">
-      <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl shadow-2xl shadow-purple-500/40 flex items-center justify-center mb-6 animate-bounce">
-        <span className="text-white text-3xl font-black tracking-tighter">SG</span>
-      </div>
-      <h2 className="text-2xl font-black text-white tracking-widest uppercase opacity-80 animate-pulse">StyleGuru</h2>
+  <div style={{
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #050816 0%, #1a0a2e 50%, #050816 100%)',
+    display: 'flex', flexDirection: 'column',
+    alignItems: 'center', justifyContent: 'center',
+    position: 'relative', overflow: 'hidden'
+  }}>
+    {/* Ambient glow */}
+    <div style={{ position: 'absolute', width: '60vw', height: '60vw', background: 'radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(80px)', zIndex: 0 }} />
+    <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+      <AppLogo />
     </div>
   </div>
 );
@@ -123,7 +138,7 @@ function AppRoutes({ user, setUser }) {
 
 function App() {
   const authState = useAuthState();
-  const [showSplash, setShowSplash] = useState(true);
+  const [splashDone, setSplashDone] = React.useState(false);
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('tonefit_theme') || 'dark';
   });
@@ -148,12 +163,12 @@ function App() {
     );
   }
 
-  if (showSplash) {
-    return <SplashScreen onComplete={() => setShowSplash(false)} />;
-  }
+  // Show SplashScreen until BOTH splash timer fired AND auth resolved.
+  // This eliminates the 4th blank loading screen entirely.
+  const showSplash = !splashDone || authState.loading;
 
-  if (authState.loading) {
-    return <LoadingFallback />;
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setSplashDone(true)} />;
   }
 
   return (
