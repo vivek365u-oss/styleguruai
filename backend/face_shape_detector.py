@@ -1019,179 +1019,135 @@ class FaceShapeDetector:
         """Euclidean distance between two 2D points."""
         return math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
 
+    # ── Archetype Targets ──────────────────────────────
+    # Based on standard facial morphology studies.
+    # Format: [FaceRatio, ForeheadRatio, JawRatio]
+    ARCHETYPES = {
+        "oval":    [1.40, 0.85, 0.75],
+        "round":   [1.10, 0.85, 0.85],
+        "square":  [1.10, 0.95, 0.95],
+        "heart":   [1.35, 0.98, 0.68],
+        "diamond": [1.40, 0.72, 0.72],
+        "oblong":  [1.70, 0.85, 0.75],
+    }
+
     def detect_shape(self, landmarks: Dict[int, Tuple[int, int]]) -> Dict:
         """
-        Classify face shape from landmark dictionary.
-
-        Args:
-            landmarks: dict of {landmark_index: (pixel_x, pixel_y)}
-
-        Returns:
-            dict with shape, confidence, ratios, and data
+        Classify face shape using archetypcal similarity scoring.
+        Returns top matches and full metadata.
         """
         try:
             # Extract key points
-            forehead_top = landmarks.get(self.FOREHEAD_TOP)
-            chin_bottom  = landmarks.get(self.CHIN_BOTTOM)
-            right_temple = landmarks.get(self.RIGHT_TEMPLE)
-            left_temple  = landmarks.get(self.LEFT_TEMPLE)
-            right_cheek  = landmarks.get(self.RIGHT_CHEEK)
-            left_cheek   = landmarks.get(self.LEFT_CHEEK)
-            right_jaw    = landmarks.get(self.RIGHT_JAW)
-            left_jaw     = landmarks.get(self.LEFT_JAW)
-            fore_right   = landmarks.get(self.FOREHEAD_RIGHT)
-            fore_left    = landmarks.get(self.FOREHEAD_LEFT)
+            fh_top = landmarks.get(self.FOREHEAD_TOP)
+            ch_bot = landmarks.get(self.CHIN_BOTTOM)
+            r_temp = landmarks.get(self.RIGHT_TEMPLE)
+            l_temp = landmarks.get(self.LEFT_TEMPLE)
+            r_chk  = landmarks.get(self.RIGHT_CHEEK)
+            l_chk  = landmarks.get(self.LEFT_CHEEK)
+            r_jaw  = landmarks.get(self.RIGHT_JAW)
+            l_jaw  = landmarks.get(self.LEFT_JAW)
 
-            # Verify all required points exist
-            required = [forehead_top, chin_bottom, right_cheek, left_cheek,
-                        right_jaw, left_jaw, right_temple, left_temple]
-            if any(p is None for p in required):
-                logger.warning("Cannot detect face shape: missing landmarks")
+            # Verify core landmarks
+            if not all([fh_top, ch_bot, r_chk, l_chk, r_jaw, l_jaw]):
+                logger.warning("Missing core landmarks for face shape detection")
                 return self._fallback_result()
 
-            # ── Core Measurements ──────────────────────────────
-            # Face height: top of forehead to bottom of chin
-            face_height = self._dist(forehead_top, chin_bottom)
+            # ── Step 1: Core Measurements ──────────────────────
+            face_h = self._dist(fh_top, ch_bot)
+            cheek_w = self._dist(r_chk, l_chk)
+            jaw_w = self._dist(r_jaw, l_jaw)
+            
+            # Forehead can be wide at temples or slightly lower
+            fore_w = self._dist(r_temp, l_temp) if r_temp and l_temp else cheek_w * 0.85
 
-            # Face width at widest (cheekbones)
-            cheekbone_width = self._dist(right_cheek, left_cheek)
+            if cheek_w < 1: return self._fallback_result()
 
-            # Forehead width (temple to temple)
-            forehead_width = self._dist(right_temple, left_temple)
+            # ── Step 2: Ratios ─────────────────────────────────
+            face_r = face_h / cheek_w
+            fore_r = fore_w / cheek_w
+            jaw_r = jaw_w / cheek_w
+            var = abs(fore_r - jaw_r)
 
-            # Jaw width (jaw angle to jaw angle)
-            jaw_width = self._dist(right_jaw, left_jaw)
-
-            # Use alternative forehead if temples available
-            if fore_right and fore_left:
-                alt_forehead = self._dist(fore_right, fore_left)
-                forehead_width = (forehead_width + alt_forehead) / 2
-
-            # Guard against zero division
-            if cheekbone_width < 1:
-                return self._fallback_result()
-
-            # ── Key Ratios ─────────────────────────────────────
-            face_ratio      = face_height / cheekbone_width   # >1 = longer; ~1 = equal
-            forehead_ratio  = forehead_width / cheekbone_width # <1 = narrow top
-            jaw_ratio       = jaw_width / cheekbone_width      # <1 = narrow bottom
-            width_variance  = abs(forehead_ratio - jaw_ratio)  # how different top vs bottom
-
-            ratios = {
-                "face_ratio":      round(face_ratio, 3),
-                "forehead_ratio":  round(forehead_ratio, 3),
-                "jaw_ratio":       round(jaw_ratio, 3),
-                "cheek_ratio":     1.0,  # normalized reference
-                "width_variance":  round(width_variance, 3),
-                "measurements": {
-                    "face_height_px":    round(face_height, 1),
-                    "cheekbone_width_px": round(cheekbone_width, 1),
-                    "forehead_width_px": round(forehead_width, 1),
-                    "jaw_width_px":      round(jaw_width, 1),
-                }
+            measurements = {
+                "face_ratio": round(face_r, 3),
+                "forehead_ratio": round(fore_r, 3),
+                "jaw_ratio": round(jaw_r, 3),
+                "width_variance": round(var, 3),
             }
 
-            # ── Shape Classification Decision Tree ─────────────
-            shape, confidence = self._classify(face_ratio, forehead_ratio, jaw_ratio, width_variance)
+            # ── Step 3: Fuzzy Classification Scorer ────────────
+            scores = {}
+            user_vec = [face_r, fore_r, jaw_r]
+
+            for shape_name, target_vec in self.ARCHETYPES.items():
+                # Weighted Distance Logic
+                # Face Ratio (v0) is most important for Round/Square vs Oblong
+                # Jaw Ratio (v2) is critical for Square/Heart/Diamond
+                dist = math.sqrt(
+                    2.0 * (user_vec[0] - target_vec[0])**2 +
+                    1.0 * (user_vec[1] - target_vec[1])**2 +
+                    1.7 * (user_vec[2] - target_vec[2])**2
+                )
+                # Distance to Confidence (0.6 is max range)
+                conf = max(0, 1 - (dist / 0.7)) 
+                
+                # Rule Boosts (Hard modifiers for definitive traits)
+                if shape_name == "square":
+                    if face_r < 1.25 and jaw_r > 0.88: conf += 0.15
+                    if face_r < 1.15: conf += 0.05
+                elif shape_name == "round":
+                    if face_r < 1.18 and var < 0.08: conf += 0.1
+                elif shape_name == "diamond":
+                    if fore_r < 0.78 and jaw_r < 0.78: conf += 0.15
+                elif shape_name == "heart":
+                    if fore_r > 0.9 and jaw_r < 0.75: conf += 0.15
+                elif shape_name == "oblong":
+                    if face_r > 1.55: conf += 0.2
+
+                scores[shape_name] = round(min(1.0, conf), 3)
+
+            # ── Step 4: Final Selection ────────────────────────
+            sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+            primary_shape, primary_conf = sorted_scores[0]
+            
+            # Secondary match logic
+            secondary_traits = None
+            if len(sorted_scores) > 1:
+                sec_shape, sec_conf = sorted_scores[1]
+                # If they are close, user has prominent traits of both
+                if sec_conf > 0.45 and (primary_conf - sec_conf) < 0.2:
+                    secondary_traits = {
+                        "shape": sec_shape,
+                        "display": FACE_SHAPE_DATA[sec_shape]["display"],
+                        "confidence": sec_conf
+                    }
+
+            # Log for debugging
+            logger.info(f"Analysis Results: Primary={primary_shape} ({primary_conf*100:.0f}%), Traits={secondary_traits['shape'] if secondary_traits else 'None'}")
+            logger.debug(f"Input Ratios: FR={face_r:.2f}, ForeR={fore_r:.2f}, JawR={jaw_r:.2f}")
 
             return {
-                "shape":       shape,
-                "confidence":  confidence,
-                "ratios":      ratios,
-                "data":        FACE_SHAPE_DATA.get(shape, FACE_SHAPE_DATA["oval"]),
+                "shape": primary_shape,
+                "confidence": primary_conf,
+                "secondary": secondary_traits,
+                "all_scores": dict(sorted_scores[:3]),
+                "ratios": measurements,
+                "data": FACE_SHAPE_DATA.get(primary_shape, FACE_SHAPE_DATA["oval"]),
             }
 
         except Exception as e:
-            logger.error(f"Face shape detection error: {e}")
+            logger.error(f"Face shape detection failure: {e}")
             return self._fallback_result()
 
-    def _classify(
-        self,
-        face_ratio: float,
-        forehead_ratio: float,
-        jaw_ratio: float,
-        width_variance: float,
-    ) -> Tuple[str, float]:
-        """
-        Classify face shape based on geometric ratios.
-
-        Returns:
-            (shape_name, confidence_score 0-1)
-
-        Thresholds derived from:
-        - Geometric analysis of 1000+ face images
-        - Published papers on face shape detection
-        - Empirical testing on Indian skin tone photos
-        """
-        scores = {}
-
-        # ── OBLONG ─────────────────────────────────────
-        # Significantly longer than wide; all widths relatively equal
-        if face_ratio > 1.45:
-            oblong_score = min(1.0, (face_ratio - 1.45) / 0.35)
-            scores["oblong"] = 0.75 + oblong_score * 0.25
-        elif face_ratio > 1.3:
-            scores["oblong"] = 0.45
-
-        # ── ROUND ──────────────────────────────────────
-        # Face width ≈ face height; all widths similar and wide
-        if face_ratio < 1.18:
-            round_score = min(1.0, (1.18 - face_ratio) / 0.18)
-            # Round faces have width relative to height, and soft jaw/forehead
-            if forehead_ratio > 0.72 and jaw_ratio > 0.72 and width_variance < 0.15:
-                scores["round"] = 0.65 + round_score * 0.35
-            else:
-                scores["round"] = 0.3
-
-        # ── SQUARE ─────────────────────────────────────
-        # Similar face ratio to round; forehead ≈ jaw (both wide and close)
-        if face_ratio < 1.2 and forehead_ratio > 0.8 and jaw_ratio > 0.8 and width_variance < 0.12:
-            scores["square"] = 0.75 + (1 - width_variance / 0.12) * 0.25
-
-        # ── HEART ──────────────────────────────────────
-        # Wide forehead, narrow jaw; pointed chin
-        if forehead_ratio > 0.8 and jaw_ratio < 0.7 and width_variance > 0.12:
-            heart_score = min(1.0, (forehead_ratio - jaw_ratio) / 0.3)
-            scores["heart"] = 0.6 + heart_score * 0.4
-
-        # ── DIAMOND ────────────────────────────────────
-        # Narrow forehead AND narrow jaw; wide cheekbones
-        if forehead_ratio < 0.75 and jaw_ratio < 0.75 and width_variance < 0.15:
-            diamond_score = min(1.0, (0.75 - max(forehead_ratio, jaw_ratio)) / 0.2)
-            scores["diamond"] = 0.6 + diamond_score * 0.4
-
-        # ── OVAL ───────────────────────────────────────
-        # Balanced; slightly longer; forehead slightly wider than jaw; no extremes
-        if (1.2 <= face_ratio <= 1.5 and
-            forehead_ratio >= jaw_ratio and
-            forehead_ratio < 0.9 and
-            jaw_ratio < 0.85):
-            oval_score = 1 - abs(face_ratio - 1.3) / 0.3
-            scores["oval"] = 0.65 + oval_score * 0.35
-
-        # ── Select winner ──────────────────────────────
-        if not scores:
-            # Defaults — oval is the most common
-            return "oval", 0.55
-
-        best = max(scores, key=scores.get)
-        conf = min(0.98, scores[best])
-
-        # Borderline: if top 2 are very close, lower confidence
-        sorted_scores = sorted(scores.values(), reverse=True)
-        if len(sorted_scores) >= 2 and (sorted_scores[0] - sorted_scores[1]) < 0.1:
-            conf = min(conf, 0.65)
-
-        return best, round(conf, 2)
-
     def _fallback_result(self) -> Dict:
-        """Return a safe fallback result when detection fails."""
+        """Safe fallback when data is noisy or landmarks missing."""
         return {
-            "shape":      "oval",
-            "confidence": 0.45,
-            "ratios":     {},
-            "data":       FACE_SHAPE_DATA["oval"],
-            "fallback":   True,
+            "shape": "oval",
+            "confidence": 0.5,
+            "secondary": None,
+            "ratios": {},
+            "data": FACE_SHAPE_DATA["oval"],
+            "fallback": True,
         }
 
     def get_hairstyle_recommendations(

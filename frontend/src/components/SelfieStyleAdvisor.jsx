@@ -157,7 +157,15 @@ function AnalysisLoader({ progress, C }) {
 
 // ── Face Shape Card ─────────────────────────────────
 function FaceShapeCard({ faceShape, C }) {
-  const { display, icon, description, characteristics = [], celebrity_examples = [], shape, confidence, is_fallback } = faceShape;
+  const { 
+    display, icon, description, 
+    characteristics = [], 
+    celebrity_examples = [], 
+    shape, confidence, 
+    secondary, 
+    is_fallback 
+  } = faceShape;
+  
   const confPct = Math.round(confidence * 100);
 
   return (
@@ -175,9 +183,12 @@ function FaceShapeCard({ faceShape, C }) {
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
-            <Badge>Face Shape</Badge>
+            <Badge>Primary Goal</Badge>
             {!is_fallback && (
-              <Badge color="#10B981">{confPct}% match</Badge>
+              <Badge color="#10B981">{confPct}% Match</Badge>
+            )}
+            {secondary && (
+              <Badge color={VIOLET}>+{Math.round(secondary.confidence * 100)}% {secondary.display} traits</Badge>
             )}
           </div>
           <h3 style={{ fontSize: 22, fontWeight: 800, color: C.text, margin: 0, fontFamily: PJS }}>
@@ -192,6 +203,19 @@ function FaceShapeCard({ faceShape, C }) {
       <p style={{ fontSize: 13, color: C.text2, lineHeight: 1.7, fontFamily: PJS, marginBottom: 16 }}>
         {description}
       </p>
+
+      {secondary && (
+        <div style={{ 
+          background: `${VIOLET}08`, border: `1px solid ${VIOLET}15`, 
+          borderRadius: 12, padding: '10px 14px', marginBottom: 16,
+          display: 'flex', gap: 10, alignItems: 'center'
+        }}>
+          <span style={{ fontSize: 18 }}>🌓</span>
+          <p style={{ margin: 0, fontSize: 12, color: C.text2, lineHeight: 1.5, fontFamily: PJS }}>
+            <strong>Secondary Traits:</strong> We also detected strong <strong>{secondary.display}</strong> features, suggesting a unique hybrid structure.
+          </p>
+        </div>
+      )}
 
       {/* Characteristics */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
