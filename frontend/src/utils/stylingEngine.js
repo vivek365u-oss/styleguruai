@@ -13,15 +13,63 @@ export const scoreWardrobeItem = (item, context, profile, history = [], preferen
     // Priority: Locked DNA > Profile Mode > Item Gender
     const activeGender = lockedInsights?.gender || profile.gender || profile.gender_mode;
     
-    // If the item has a target gender and it doesn't match the active user gender, reject immediately
+    // If the item has a gender tag and it doesn't match the active user gender, reject immediately
     if (activeGender && item.gender && item.gender !== activeGender) return 0;
     
-    // CATEGORIAL ENFORCEMENT: Reject female-only categories for males and vice-versa
-    const femaleOnly = ['saree', 'kurti', 'lehenga', 'maxi', 'dress', 'cat_saree_silk', 'cat_kurti', 'cat_makeup'];
-    const maleOnly = ['sherwani', 'cat_formal_shirt', 'tuxedo', 'cat_kurta_set'];
-    
-    if (activeGender === 'male' && femaleOnly.some(cat => item.category?.toLowerCase().includes(cat))) return 0;
-    if (activeGender === 'female' && maleOnly.some(cat => item.category?.toLowerCase().includes(cat))) return 0;
+    // ── CATEGORICAL GENDER WALL ──────────────────────────────────────────────
+    // Built dynamically from FASHION_CATEGORIES — same source of truth as fashionCategories.js
+    // Female-exclusive IDs (ALL female category ids from FASHION_CATEGORIES.FEMALE)
+    const FEMALE_IDS = new Set([
+        // ETHNIC
+        'cat_saree_silk','cat_saree_chiffon','cat_saree_cotton','cat_lehenga','cat_anarkali',
+        'cat_kurti','cat_kurti_set','cat_sharara','cat_palazzo_suit','cat_dhoti_pants',
+        // FUSION
+        'cat_indo_western','cat_coord_set_f','cat_cape_set',
+        // TOPS
+        'cat_crop_top','cat_blouse','cat_corset','cat_puff_top','cat_shirt_female',
+        'cat_tank_top','cat_sweater',
+        // DRESSES
+        'cat_dress_maxi','cat_dress_mini','cat_dress_midi','cat_bodycon','cat_shirt_dress',
+        // BOTTOMS
+        'cat_jeans_female','cat_mom_jeans','cat_skirt','cat_palazzo_f','cat_shorts_female','cat_track_f',
+        // OUTERWEAR
+        'cat_hoodie_f','cat_blazer_f','cat_shrug','cat_sweatshirt_f',
+        // FOOTWEAR
+        'cat_heels','cat_flats','cat_sneakers_f','cat_sandals','cat_boots_f',
+        // ACCESSORIES
+        'cat_earrings','cat_necklace','cat_bangles','cat_handbag','cat_sunglasses_f','cat_dupatta',
+    ]);
+
+    // Male-exclusive IDs (ALL male category ids from FASHION_CATEGORIES.MALE)
+    const MALE_IDS = new Set([
+        // ETHNIC
+        'cat_sherwani','cat_kurta_set','cat_nehru_jacket','cat_dhoti_kurta','cat_ethnic_coord',
+        // FORMAL
+        'cat_formal_shirt','cat_blazer','cat_tuxedo','cat_formal_trouser','cat_waistcoat',
+        // CASUAL
+        'cat_tshirt','cat_oversized_tee','cat_polo','cat_casual_shirt','cat_coord_set_male',
+        // BOTTOMS
+        'cat_jeans','cat_cargo','cat_chinos','cat_shorts','cat_track_pants',
+        // OUTERWEAR
+        'cat_hoodie','cat_jacket','cat_bomber','cat_sweatshirt',
+        // FOOTWEAR
+        'cat_sneakers','cat_loafers','cat_boots','cat_formal_shoe','cat_sports_shoe',
+        // ACCESSORIES
+        'cat_watch','cat_wallet','cat_sunglasses','cat_backpack',
+    ]);
+
+    // Apply strict gender wall using the comprehensive ID sets
+    if (activeGender === 'male'   && FEMALE_IDS.has(item.category)) return 0;
+    if (activeGender === 'female' && MALE_IDS.has(item.category))   return 0;
+
+    // Fallback keyword-based check for legacy/custom categories not in the above sets
+    const femaleKeywords = ['saree','kurti','lehenga','maxi_dress','bodycon','blouse','dupatta','heels',
+                            'cat_crop','cat_dress','cat_skirt','cat_palazzo_f','cat_shrug'];
+    const maleKeywords   = ['sherwani','kurta_set','formal_shirt','tuxedo','cat_cargo',
+                            'cat_polo','cat_coord_set_male'];
+    if (activeGender === 'male'   && femaleKeywords.some(k => item.category?.toLowerCase().includes(k))) return 0;
+    if (activeGender === 'female' && maleKeywords.some(k => item.category?.toLowerCase().includes(k)))   return 0;
+
 
     let score = 0;
     const weights = {
