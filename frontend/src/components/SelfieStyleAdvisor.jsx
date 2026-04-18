@@ -155,6 +155,35 @@ function AnalysisLoader({ progress, C }) {
   );
 }
 
+const actionBtnStyle = (C, color) => ({
+  background: C.glass2, border: `1px solid ${C.border}`,
+  borderRadius: 8, padding: '6px 10px', fontSize: 10, fontWeight: 700,
+  color: C.text, fontFamily: PJS, cursor: 'pointer', whiteSpace: 'nowrap',
+  display: 'flex', alignItems: 'center', gap: 4, transition: 'all 0.2s'
+});
+
+function ColorSection({ title, colors, C }) {
+  if (!colors || colors.length === 0) return null;
+  return (
+    <div style={{ marginTop: 16 }}>
+      <h3 style={{ margin: '0 0 10px', fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: PJS }}>
+        🎯 Best {title} Colors
+      </h3>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 10 }}>
+        {colors.slice(0, 4).map((c, i) => (
+          <div key={i} style={{
+            background: C.glass2, border: `1px solid ${C.border}`,
+            borderRadius: 12, padding: '10px', display: 'flex', flexDirection: 'column', gap: 8,
+          }}>
+            <div style={{ width: '100%', height: 36, borderRadius: 8, background: c.hex, border: '1px solid rgba(0,0,0,0.1)' }} />
+            <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: C.text, textAlign: 'center', fontFamily: PJS }}>{c.name}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Face Shape Card ─────────────────────────────────
 function FaceShapeCard({ faceShape, C }) {
   const { 
@@ -599,6 +628,58 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
     }
   }, [data]);
 
+  const handleSaveToCard = async (e) => {
+    const btn = e.currentTarget;
+    const originalText = btn.innerHTML;
+    try {
+      btn.innerHTML = '🕒 Saving...';
+      btn.disabled = true;
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+
+      // 1. Promote to Primary DNA
+      await savePrimaryProfile(uid, {
+        skinTone: skin_analysis.skin_tone,
+        undertone: skin_analysis.undertone,
+        season: skin_analysis.color_season,
+        faceShape: face_shape.shape,
+        hex: skin_analysis.skin_color.hex,
+        gender: gender,
+        data: data
+      });
+
+      // 2. Add to Style History
+      await saveSelfieStyleHistory(uid, data);
+
+      btn.innerHTML = '✅ DNA Set!';
+      btn.style.background = '#10B981';
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        btn.style.background = C.glass2;
+      }, 3000);
+    } catch (err) {
+      console.error('Failed to set DNA:', err);
+      btn.innerHTML = '❌ Error';
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }, 2000);
+    }
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'My StyleGuru Profile',
+        text: `I just analyzed my style! I have an ${face_shape.display} face and ${skin_analysis.skin_tone} skin. Check out StyleGuru AI!`,
+        url: window.location.href,
+      }).catch(() => { });
+    } else {
+      window.open(`https://wa.me/?text=Check%20out%20my%20StyleGuru%20Report!%20Face:%20${face_shape.display}`);
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, animation: 'fadeSlideIn 0.35s ease' }}>
 
@@ -642,6 +723,19 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
         )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, justifyContent: 'center' }}>
           <SkinToneBanner skinAnalysis={skin_analysis} C={C} />
+          
+          {/* Action Bar */}
+          <div style={{
+            display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4,
+            scrollbarWidth: 'none', msOverflowStyle: 'none'
+          }}>
+            <button onClick={handleSaveToCard} style={actionBtnStyle(C, VIOLET)}>🆔 Set DNA</button>
+            <button onClick={handleShare} style={actionBtnStyle(C, '#25D366')}>📱 Share</button>
+            <button onClick={() => {}} style={actionBtnStyle(C, '#3B82F6')}>👥 Community</button>
+            <button onClick={() => {}} style={actionBtnStyle(C, '#F59E0B')}>⬇️ Download</button>
+            <button onClick={() => {}} style={actionBtnStyle(C, '#EC4899')}>🎨 Palette</button>
+          </div>
+
           {style_tips?.primary && (
             <div style={{
               background: C.glass, border: `1px solid ${C.border}`, borderRadius: 12,
@@ -663,7 +757,7 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <div style={{ flex: 1, height: 1, background: C.divider }} />
           <span style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: PJS, whiteSpace: 'nowrap' }}>
-            ✂️ Hairstyle Recommendations
+            ✂️ Recommended Hairstyles
           </span>
           <div style={{ flex: 1, height: 1, background: C.divider }} />
         </div>
@@ -681,6 +775,36 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
           ))}
         </div>
       </div>
+
+      {/* ── Color Recommendations & Shop ── */}
+      {data.color_recommendations && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <ColorSection 
+            title={data.color_recommendations.top_label || "Top Wear"} 
+            colors={data.color_recommendations.top_colors} 
+            C={C} 
+          />
+          <ColorSection 
+            title={data.color_recommendations.bottom_label || "Bottom Wear"} 
+            colors={data.color_recommendations.bottom_colors} 
+            C={C} 
+          />
+          
+          <button
+            style={{
+              padding: '14px', borderRadius: 14, background: `${VIOLET}15`,
+              border: `1px solid ${VIOLET}30`, color: VIOLET,
+              fontSize: 14, fontWeight: 700, fontFamily: PJS, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              marginTop: 8, transition: 'all 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = `${VIOLET}25`}
+            onMouseLeave={e => e.currentTarget.style.background = `${VIOLET}15`}
+          >
+            🛒 Shop Recommended Outfits
+          </button>
+        </div>
+      )}
 
       {/* ── Beard Recommendations (Male only) ── */}
       {gender === 'male' && beard_recommendations.length > 0 && (
