@@ -1,3 +1,24 @@
+"""
+main.py — StyleGuru AI Backend
+=================================
+FastAPI application serving all StyleGuru AI API endpoints.
+
+Key responsibilities:
+  - Firebase Admin SDK initialization (credentials from env or local file)
+  - JWT-based authentication via Firebase ID tokens
+  - Image upload, analysis, and skin tone classification
+  - Outfit color detection (GrabCut + K-Means + optional Clarifai/Google Vision)
+  - Razorpay payment order creation and server-side webhook verification
+  - Firestore-backed user profile, wardrobe, and history management
+  - Rate limiting (SlowAPI) and error monitoring (Sentry)
+
+Environment variables required:
+  FIREBASE_CREDENTIALS_JSON : Firebase service account JSON string
+  RAZORPAY_KEY_ID           : Razorpay API key ID
+  RAZORPAY_KEY_SECRET       : Razorpay API key secret
+  SENTRY_DSN (optional)     : Sentry DSN for error tracking
+  OUTFIT_COLOR_ENGINE       : "local" | "clarifai" | "google" (default: local)
+"""
 import os
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 import uuid

@@ -1,3 +1,23 @@
+"""
+image_processor.py — StyleGuru AI
+====================================
+Core image processing pipeline for face detection, quality analysis,
+and skin color extraction.
+
+Components:
+  - PhotoQualityResult : Data class for photo quality check results
+  - ImageProcessor     : Main class handling all CV2 / MediaPipe operations
+
+Face detection uses a cascade:
+  1. MediaPipe FaceDetection (primary — fastest, most accurate)
+  2. OpenCV Haar Cascade fallback (for bad lighting / obscured faces)
+  3. CLAHE-enhanced retry on the enhanced low-light image
+
+Skin color extraction uses:
+  - MediaPipe FaceMesh 468-point landmarks for precise region sampling
+  - Geometric fallback (forehead, cheeks, nose, chin) when landmarks fail
+  - HSV-based skin pixel filtering to exclude non-skin areas
+"""
 import cv2
 import numpy as np
 import logging
@@ -7,6 +27,15 @@ logger = logging.getLogger(__name__)
 
 
 class PhotoQualityResult:
+    """Container for photo quality check results.
+
+    Attributes:
+        is_acceptable (bool): True if photo passes all hard-failure checks.
+        problems (list): List of dicts describing hard failures (severity HIGH).
+        warnings (list): List of dicts describing soft warnings (degraded accuracy).
+        quality_score (int): 0–100 score. Starts at 100; deductions applied per issue.
+        specific_message (str): Human-readable summary of the most important issue.
+    """
     def __init__(self):
         self.is_acceptable = True
         self.problems = []
@@ -16,8 +45,18 @@ class PhotoQualityResult:
 
 
 class ImageProcessor:
+    """Full image processing pipeline for StyleGuru AI.
+
+    Handles face detection, quality validation, and skin color extraction.
+    Automatically falls back from MediaPipe → Haar Cascade when needed.
+    """
 
     def __init__(self):
+        """Initialize MediaPipe and OpenCV detectors.
+
+        Gracefully degrades if MediaPipe is not installed — falls back to
+        Haar Cascade for face detection and geometric sampling for skin color.
+        """
         try:
             import mediapipe as mp
             self.mp_face_detection = mp.solutions.face_detection
@@ -46,12 +85,34 @@ class ImageProcessor:
         logger.info("ImageProcessor initialized")
 
     def load_image(self, image_path: str) -> np.ndarray:
+        """Load an image from disk into a BGR numpy array.
+
+        Args:
+            image_path: Absolute or relative path to the image file.
+
+        Returns:
+            BGR numpy array (H, W, 3).
+
+        Raises:
+            ValueError: If the file cannot be read or does not exist.
+        """
         image = cv2.imread(image_path)
         if image is None:
             raise ValueError(f"Cannot read image at: {image_path}")
         return image
 
     def load_image_from_bytes(self, image_bytes: bytes) -> np.ndarray:
+        """Decode an image from raw bytes into a BGR numpy array.
+
+        Args:
+            image_bytes: Raw bytes of a JPEG, PNG, or WebP image.
+
+        Returns:
+            BGR numpy array (H, W, 3).
+
+        Raises:
+            ValueError: If the bytes cannot be decoded as a valid image.
+        """
         nparr = np.frombuffer(image_bytes, np.uint8)
         image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         if image is None:
@@ -105,6 +166,20 @@ class ImageProcessor:
         return compressed_image, original_size_mb, compressed_size_mb
 
     def detect_face(self, image: np.ndarray) -> dict:
+        """Detect the largest face in the image using a cascade strategy.
+
+        Detection order:
+          1. MediaPipe FaceDetection (if available)
+          2. OpenCV Haar Cascade fallback
+          3. CLAHE low-light enhancement + retry both detectors
+
+        Args:
+            image: BGR numpy array.
+
+        Returns:
+            Dict with keys {x, y, width, height, confidence, method},
+            or None if no face is found.
+        """
         processed_image = self._resize_for_processing(image)
         scale_x = image.shape[1] / processed_image.shape[1]
         scale_y = image.shape[0] / processed_image.shape[0]
@@ -127,6 +202,16 @@ class ImageProcessor:
         return self._detect_haar(enhanced)
 
     def _detect_mediapipe(self, image: np.ndarray, scale_x: float = 1.0, scale_y: float = 1.0) -> dict:
+        """Run MediaPipe FaceDetection on the image.
+
+        Args:
+            image: BGR numpy array (already resized for processing).
+            scale_x: X-axis scale factor to map back to original resolution.
+            scale_y: Y-axis scale factor to map back to original resolution.
+
+        Returns:
+            Face dict or None if no face detected with confidence >= 0.5.
+        """
         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         results = self.face_detector.process(rgb_image)
 
@@ -164,6 +249,17 @@ class ImageProcessor:
         }
 
     def _detect_haar(self, image: np.ndarray) -> dict:
+        """Run OpenCV Haar Cascade face detection with progressive relaxation.
+
+        Tries three parameter sets (strict → relaxed) to maximise recall
+        while keeping false positives low.
+
+        Args:
+            image: BGR numpy array.
+
+        Returns:
+            Largest face dict or None if no face found.
+        """
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         for (scale, neighbors, min_size) in [
             (1.1, 5, (80, 80)),
@@ -188,6 +284,16 @@ class ImageProcessor:
         return None
 
     def _get_face_landmarks(self, image: np.ndarray, face: dict) -> dict:
+        """Extract 468 MediaPipe FaceMesh landmarks from the image.
+
+        Args:
+            image: BGR numpy array.
+            face: Face bounding box dict (unused directly; kept for API consistency).
+
+        Returns:
+            Dict mapping landmark index (int) → (x, y) pixel coordinates,
+            or None if MediaPipe is unavailable or detection fails.
+        """
         if not self.mediapipe_available or self.face_mesh_detector is None:
             return None
         try:
@@ -205,6 +311,22 @@ class ImageProcessor:
             return None
 
     def validate_face_for_skin_analysis(self, image: np.ndarray, face: dict) -> dict:
+        """Run heuristic checks to confirm a detected region is a human face.
+
+        Validates: face size ratio, aspect ratio, HSV skin coverage,
+        RGB channel ordering, and contrast (to reject charts/documents).
+
+        Args:
+            image: BGR numpy array (full resolution).
+            face: Face bounding box dict from detect_face().
+
+        Returns:
+            Dict with keys:
+              - valid (bool): True if all checks pass.
+              - reason (str): Human-readable explanation.
+              - skin_ratio (float): Fraction of face pixels classified as skin.
+              - face_ratio (float): Fraction of image area occupied by face.
+        """
         x, y, w, h = face["x"], face["y"], face["width"], face["height"]
         img_height, img_width = image.shape[:2]
         img_area = img_height * img_width
@@ -273,6 +395,18 @@ class ImageProcessor:
         }
 
     def analyze_photo_quality(self, image: np.ndarray, face: dict = None) -> PhotoQualityResult:
+        """Run comprehensive photo quality checks and return a scored result.
+
+        Checks (always): brightness, blur.
+        Checks (if face provided): face size, shadow imbalance, face angle, skin coverage.
+
+        Args:
+            image: BGR numpy array.
+            face: Optional face bounding box dict for face-specific checks.
+
+        Returns:
+            PhotoQualityResult with is_acceptable, quality_score, and specific_message.
+        """
         result = PhotoQualityResult()
         self._check_brightness(image, result)
         self._check_blur(image, result)
@@ -291,6 +425,15 @@ class ImageProcessor:
         return result
 
     def _check_brightness(self, image: np.ndarray, result: PhotoQualityResult):
+        """Check average image brightness and append issues to result.
+
+        Thresholds: <60 → too dark (HIGH), 60-90 → slightly dark (WARNING),
+        >230 → overexposed (HIGH), 200-230 → slightly bright (WARNING).
+
+        Args:
+            image: BGR numpy array.
+            result: PhotoQualityResult to mutate with detected issues.
+        """
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         avg_brightness = np.mean(gray)
         if avg_brightness < 60:
@@ -323,6 +466,14 @@ class ImageProcessor:
             result.quality_score -= 10
 
     def _check_blur(self, image: np.ndarray, result: PhotoQualityResult):
+        """Check image sharpness using Laplacian variance.
+
+        Thresholds: <50 → very blurry (HIGH), 50-100 → slightly blurry (WARNING).
+
+        Args:
+            image: BGR numpy array.
+            result: PhotoQualityResult to mutate with detected issues.
+        """
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
         if laplacian_var < 50:
@@ -341,6 +492,15 @@ class ImageProcessor:
             result.quality_score -= 15
 
     def _check_face_size(self, image: np.ndarray, face: dict, result: PhotoQualityResult):
+        """Check that the face occupies a sufficient fraction of the image.
+
+        Thresholds: <4% of image area → too small (HIGH), 4-8% → small (WARNING).
+
+        Args:
+            image: BGR numpy array.
+            face: Face bounding box dict.
+            result: PhotoQualityResult to mutate.
+        """
         img_area = image.shape[0] * image.shape[1]
         face_area = face["width"] * face["height"]
         face_ratio = face_area / img_area
@@ -360,6 +520,16 @@ class ImageProcessor:
             result.quality_score -= 10
 
     def _check_shadow(self, image: np.ndarray, face: dict, result: PhotoQualityResult):
+        """Detect strong lateral shadows by comparing left/right face brightness.
+
+        Thresholds: >60 brightness difference → heavy shadow (HIGH),
+        35-60 → mild shadow (WARNING).
+
+        Args:
+            image: BGR numpy array.
+            face: Face bounding box dict.
+            result: PhotoQualityResult to mutate.
+        """
         x, y, w, h = face["x"], face["y"], face["width"], face["height"]
         mid_x = x + w // 2
         left_face = image[y:y+h, x:mid_x]
@@ -386,6 +556,15 @@ class ImageProcessor:
             result.quality_score -= 12
 
     def _check_face_angle(self, image: np.ndarray, face: dict, result: PhotoQualityResult):
+        """Detect side-turned faces using bounding box aspect ratio.
+
+        A very narrow bounding box (w/h < 0.6) suggests a 45°+ head turn.
+
+        Args:
+            image: BGR numpy array (unused; kept for API consistency).
+            face: Face bounding box dict.
+            result: PhotoQualityResult to mutate.
+        """
         x, y, w, h = face["x"], face["y"], face["width"], face["height"]
         aspect_ratio = w / h
         if aspect_ratio < 0.6:
@@ -404,6 +583,16 @@ class ImageProcessor:
             result.quality_score -= 10
 
     def _check_skin_pixels(self, image: np.ndarray, face: dict, result: PhotoQualityResult):
+        """Verify that enough skin-coloured pixels are visible in the face region.
+
+        Low skin ratio usually means sunglasses, a mask, or heavy hair coverage.
+        Thresholds: <25% → partially covered (MEDIUM), 25-40% → partial (WARNING).
+
+        Args:
+            image: BGR numpy array.
+            face: Face bounding box dict.
+            result: PhotoQualityResult to mutate.
+        """
         x, y, w, h = face["x"], face["y"], face["width"], face["height"]
         face_region = image[y:y+h, x:x+w]
         if face_region.size == 0:
@@ -435,6 +624,14 @@ class ImageProcessor:
             result.quality_score -= 10
 
     def _build_problem_message(self, problems: list) -> str:
+        """Format a user-facing string from one or more hard-failure problems.
+
+        Args:
+            problems: List of problem dicts with 'message' and 'fix' keys.
+
+        Returns:
+            Formatted string with emoji indicators and fix instructions.
+        """
         if len(problems) == 1:
             p = problems[0]
             return f"⚠️ {p['message']}.\n\n✅ Fix: {p['fix']}"
@@ -444,6 +641,14 @@ class ImageProcessor:
         return msg.strip()
 
     def _build_warning_message(self, warnings: list) -> str:
+        """Format a user-facing string from one or more soft warnings.
+
+        Args:
+            warnings: List of warning dicts with 'message' and 'fix' keys.
+
+        Returns:
+            Formatted string with lightbulb emoji and actionable suggestions.
+        """
         if len(warnings) == 1:
             w = warnings[0]
             return f"💡 {w['message']}. {w['fix']}"
@@ -453,12 +658,34 @@ class ImageProcessor:
         return msg.strip()
 
     def extract_skin_color(self, image: np.ndarray, face: dict) -> dict:
+        """Extract the dominant skin colour from the face region.
+
+        Uses MediaPipe landmark-based sampling when available;
+        falls back to a geometric 5-region approach when not.
+
+        Args:
+            image: BGR numpy array.
+            face: Face bounding box dict from detect_face().
+
+        Returns:
+            Dict with keys {r, g, b, hex} (median skin pixel colour).
+        """
         landmarks = self._get_face_landmarks(image, face)
         if landmarks:
             return self._extract_skin_with_landmarks(image, face, landmarks)
         return self._extract_skin_geometric(image, face)
 
     def _extract_skin_with_landmarks(self, image: np.ndarray, face: dict, landmarks: dict) -> dict:
+        """Sample skin pixels from 5 landmark-defined regions (forehead, cheeks, nose, chin).
+
+        Args:
+            image: BGR numpy array.
+            face: Face bounding box dict (unused; kept for API consistency).
+            landmarks: Dict of MediaPipe landmark index → (x, y) pixel coords.
+
+        Returns:
+            Dict with keys {r, g, b, hex}, or falls back to geometric method.
+        """
         all_skin_pixels = []
         forehead_indices = [10, 67, 69, 104, 108, 151, 337, 338, 297, 299]
         left_cheek_indices = [116, 117, 118, 119, 120, 121, 126, 142]
@@ -479,6 +706,15 @@ class ImageProcessor:
         return self._calculate_skin_color(all_skin_pixels)
 
     def _sample_region_pixels(self, image: np.ndarray, points: list) -> list:
+        """Collect HSV-filtered skin pixels from the bounding box of a set of landmark points.
+
+        Args:
+            image: BGR numpy array.
+            points: List of (x, y) pixel coordinates defining the region.
+
+        Returns:
+            List of [B, G, R] pixel values that pass the skin colour filter.
+        """
         if not points:
             return []
         xs = [p[0] for p in points]
@@ -493,6 +729,18 @@ class ImageProcessor:
         return self._filter_skin_pixels(region)
 
     def _extract_skin_geometric(self, image: np.ndarray, face: dict) -> dict:
+        """Extract skin colour using fixed geometric proportions of the face bounding box.
+
+        Samples from: upper forehead, left cheek, right cheek, nose bridge, chin.
+        Used when MediaPipe landmarks are unavailable.
+
+        Args:
+            image: BGR numpy array.
+            face: Face bounding box dict.
+
+        Returns:
+            Dict with keys {r, g, b, hex}.
+        """
         x, y, w, h = face["x"], face["y"], face["width"], face["height"]
         regions_coords = [
             (y + int(h*0.15), y + int(h*0.30), x + int(w*0.30), x + int(w*0.70)),
@@ -521,6 +769,18 @@ class ImageProcessor:
         return self._calculate_skin_color(all_skin_pixels)
 
     def _filter_skin_pixels(self, region: np.ndarray) -> list:
+        """Return pixels within the HSV skin colour range from an image region.
+
+        Uses two HSV ranges to cover the full spectrum of human skin tones:
+          Range 1: H 0-25 (warm reds/oranges)
+          Range 2: H 165-180 (wrap-around reds)
+
+        Args:
+            region: BGR numpy sub-array (face sub-region).
+
+        Returns:
+            List of [B, G, R] values for pixels matching skin hue.
+        """
         if region.size == 0:
             return []
         hsv_region = cv2.cvtColor(region, cv2.COLOR_BGR2HSV)
@@ -535,6 +795,17 @@ class ImageProcessor:
         return skin_pixels.tolist() if len(skin_pixels) > 0 else []
 
     def _calculate_skin_color(self, skin_pixels: list) -> dict:
+        """Compute the median skin colour from a list of pixel values.
+
+        Uses the median (not mean) to be robust against outlier pixels
+        caused by facial hair, shadows, or makeup.
+
+        Args:
+            skin_pixels: List of [B, G, R] float values.
+
+        Returns:
+            Dict with keys {r, g, b, hex}.
+        """
         skin_array = np.array(skin_pixels)
         avg = np.median(skin_array, axis=0)
         b, g, r = avg
@@ -542,6 +813,18 @@ class ImageProcessor:
         return {"r": r, "g": g, "b": b, "hex": f"#{r:02x}{g:02x}{b:02x}"}
 
     def _resize_for_processing(self, image: np.ndarray, max_dim: int = 1280) -> np.ndarray:
+        """Resize an image so its longest dimension does not exceed max_dim.
+
+        Preserves aspect ratio. Returns the original array unchanged if already
+        within limits (no unnecessary copy).
+
+        Args:
+            image: BGR numpy array.
+            max_dim: Maximum allowed dimension in pixels (default 1280).
+
+        Returns:
+            Possibly-resized BGR numpy array.
+        """
         h, w = image.shape[:2]
         if max(h, w) <= max_dim:
             return image
@@ -552,6 +835,17 @@ class ImageProcessor:
         return cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_AREA)
 
     def _enhance_low_light(self, image: np.ndarray) -> np.ndarray:
+        """Apply CLAHE contrast enhancement to improve face detection in dark images.
+
+        Converts to LAB colour space, applies CLAHE on the L* (lightness)
+        channel only, then converts back to BGR. Chroma is unaffected.
+
+        Args:
+            image: BGR numpy array.
+
+        Returns:
+            Contrast-enhanced BGR numpy array.
+        """
         lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
         l, a, b = cv2.split(lab)
         clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))

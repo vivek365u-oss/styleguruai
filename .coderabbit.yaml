@@ -1,0 +1,85 @@
+# CodeRabbit AI Code Review Configuration
+# StyleGuruAI / ToneFit Project
+# Docs: https://coderabbit.ai/docs/configuration/reference
+
+language: "en"
+# "chill" gives friendly suggestions; "assertive" gives strict enforcement
+review_profile: "assertive"
+tone_instructions: "Be concise and direct. Focus on bugs, security issues, and logic errors. Skip stylistic nitpicks unless they affect readability significantly."
+
+early_access: false
+
+reviews:
+  # Automatically review all pull requests (not just drafts)
+  request_changes_workflow: true
+  auto_review:
+    enabled: true
+    ignore_title_keywords:
+      - "WIP"
+      - "Draft"
+      - "DO NOT MERGE"
+    drafts: false
+    base_branches:
+      - "main"
+      - "develop"
+
+  # Summarize the PR changes at the top of every review
+  poem: false
+  collapse_walkthrough: false
+
+  path_filters:
+    # Skip generated files, lock files, and assets
+    - "!**/node_modules/**"
+    - "!**/venv/**"
+    - "!**/__pycache__/**"
+    - "!**/dist/**"
+    - "!**/build/**"
+    - "!**/*.lock"
+    - "!**/package-lock.json"
+    - "!**/*.min.js"
+    - "!**/*.min.css"
+    - "!**/assets/icons/**"
+    - "!**/.snapshots/**"
+    - "!**/tmp/**"
+    - "!**/scratch/**"
+
+  # Custom review instructions tailored to StyleGuruAI
+  custom_instructions: |
+    This is the StyleGuruAI / ToneFit project — a full-stack AI-powered fashion and grooming advisor.
+
+    Stack:
+    - Frontend: React (Vite), Vanilla CSS, Google Fonts, Firebase Auth
+    - Backend: Python (FastAPI/Flask), OpenCV, face_recognition, dlib
+    - Database: Firebase Firestore
+    - Payments: Razorpay
+    - Deployment: Vercel (frontend) + Render (backend)
+    - Analytics: Google Analytics 4 (GA4)
+
+    Key review priorities:
+    1. **Security**: Flag any hardcoded API keys, Firebase/Razorpay credentials, or exposed secrets
+    2. **Firestore safety**: Ensure all writes use atomic increments (FieldValue.increment) and check Firestore security rules
+    3. **Payment integrity**: Razorpay payment flow must always verify server-side before granting access
+    4. **React best practices**: Warn on missing useEffect cleanup, memory leaks, or missing dependency arrays
+    5. **Python/CV**: Flag unsafe image handling, memory leaks in OpenCV, and unhandled exceptions in face detection
+    6. **Performance**: Flag large image processing on the main thread, missing lazy loading, or uncached expensive calls
+
+chat:
+  auto_reply: true
+
+# CodeRabbit integrations (enable if you connect to these services)
+# integrations:
+#   jira:
+#     usage: auto
+
+tools:
+  # Enable all static analysis tools
+  eslint:
+    enabled: true
+  ruff:
+    enabled: true
+  shellcheck:
+    enabled: true
+  yamllint:
+    enabled: true
+  markdownlint:
+    enabled: true

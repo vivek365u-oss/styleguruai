@@ -1,3 +1,19 @@
+"""
+push_service.py — StyleGuru AI
+================================
+Web Push notification service for personalized weekly style tips.
+
+Components:
+  - TIPS_POOL     : Curated list of style tips filterable by skin tone & color season
+  - PushService   : Sends Web Push notifications via pywebpush (VAPID)
+
+Features:
+  - Tip personalisation: matches skin tone + color season to relevant tips
+  - Stale subscription cleanup: auto-deletes 410/404 subscriptions from Firestore
+  - Graceful fallback: falls back to generic tips if pywebpush is unavailable
+
+VAPID keys must be set via constructor args (loaded from environment in main.py).
+"""
 import os
 import json
 import random
