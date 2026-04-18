@@ -266,7 +266,6 @@ function HairstyleCard({ rec, rank, C, expanded, onToggle }) {
           textAlign: 'left',
         }}
       >
-        {/* Rank badge */}
         <div style={{
           width: 36, height: 36, borderRadius: 10, flexShrink: 0,
           background: `${rankColor}18`, border: `1.5px solid ${rankColor}40`,
@@ -278,9 +277,7 @@ function HairstyleCard({ rec, rank, C, expanded, onToggle }) {
 
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <span style={{
-              fontSize: 14, fontWeight: 700, color: C.text, fontFamily: PJS,
-            }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: C.text, fontFamily: PJS }}>
               {rec.name}
             </span>
             {rank === 1 && (
@@ -307,101 +304,146 @@ function HairstyleCard({ rec, rank, C, expanded, onToggle }) {
         </div>
       </button>
 
-      {/* Expanded body */}
       {expanded && (
-        <div style={{
-          padding: '0 18px 18px',
-          animation: 'fadeSlideIn 0.25s ease',
-        }}>
+        <div style={{ padding: '0 18px 18px', animation: 'fadeSlideIn 0.25s ease' }}>
           <div style={{ height: 1, background: C.border, marginBottom: 16 }} />
 
-          {/* Why this style */}
-          <div style={{
-            background: C.glass2, borderRadius: 12, padding: '12px 14px', marginBottom: 14,
-          }}>
-            <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 700, color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: PJS }}>
-              Why This Works For You
-            </p>
-            <p style={{ margin: 0, fontSize: 12, color: C.text2, lineHeight: 1.6, fontFamily: PJS }}>
-              {rec.reason}
-            </p>
-          </div>
-
-          {/* Benefit */}
-          <div style={{
-            background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)',
-            borderRadius: 12, padding: '12px 14px', marginBottom: 14,
-          }}>
-            <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 700, color: '#10B981', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: PJS }}>
-              The Benefit
-            </p>
-            <p style={{ margin: 0, fontSize: 12, color: C.text2, lineHeight: 1.6, fontFamily: PJS }}>
-              {rec.benefit}
-            </p>
-          </div>
-
-          {/* Style Tip */}
-          <div style={{
-            background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)',
-            borderRadius: 12, padding: '12px 14px', marginBottom: rec.avoid_reason ? 14 : 0,
-          }}>
-            <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 700, color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: PJS }}>
-              💡 Stylist Tip
-            </p>
-            <p style={{ margin: 0, fontSize: 12, color: C.text2, lineHeight: 1.6, fontFamily: PJS }}>
-              {rec.style_tip}
-            </p>
-          </div>
-
-          {/* Avoid */}
-          {rec.avoid_reason && (
-            <div style={{
-              background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)',
-              borderRadius: 12, padding: '12px 14px', marginTop: 14,
-            }}>
-              <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 700, color: '#EF4444', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: PJS }}>
-                ⚠️ Avoid
+          {/* New Styling Steps (Backend Update) */}
+          {rec.styling_steps && (
+            <div style={{ background: C.glass2, borderRadius: 12, padding: '12px 14px', marginBottom: 14 }}>
+              <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 700, color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: PJS }}>
+                📝 How to Style
               </p>
-              <p style={{ margin: 0, fontSize: 12, color: C.text2, lineHeight: 1.6, fontFamily: PJS }}>
-                {rec.avoid_reason}
-              </p>
-            </div>
-          )}
-
-          {/* Hair Color */}
-          {rec.hair_color && (
-            <div style={{
-              marginTop: 14, display: 'flex', alignItems: 'flex-start', gap: 10,
-              background: C.glass2, borderRadius: 12, padding: '12px 14px',
-            }}>
-              <span style={{ fontSize: 18, flexShrink: 0 }}>🎨</span>
-              <div>
-                <p style={{ margin: '0 0 3px', fontSize: 11, fontWeight: 700, color: C.text, fontFamily: PJS }}>Hair Color Advice</p>
-                <p style={{ margin: 0, fontSize: 12, color: C.text2, lineHeight: 1.5, fontFamily: PJS }}>{rec.hair_color}</p>
-                {rec.hair_color_avoid && (
-                  <p style={{ margin: '4px 0 0', fontSize: 11, color: '#EF4444', fontFamily: PJS }}>Avoid: {rec.hair_color_avoid}</p>
-                )}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {rec.styling_steps.map((step, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 8, fontSize: 12, color: C.text2, lineHeight: 1.4, fontFamily: PJS }}>
+                    <span style={{ color: VIOLET, fontWeight: 800 }}>{i + 1}</span>
+                    <span>{step}</span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
-          {/* Occasions */}
-          {rec.occasion?.length > 0 && (
-            <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {rec.occasion.map(o => (
-                <span key={o} style={{
-                  background: C.glass2, border: `1px solid ${C.border}`,
-                  borderRadius: 20, padding: '3px 10px',
-                  fontSize: 11, color: C.muted, fontFamily: PJS, textTransform: 'capitalize',
-                }}>
-                  {o}
-                </span>
-              ))}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+            <div style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: 12, padding: '12px 14px' }}>
+              <p style={{ margin: '0 0 4px', fontSize: 10, fontWeight: 700, color: '#10B981', textTransform: 'uppercase', fontFamily: PJS }}>Benefit</p>
+              <p style={{ margin: 0, fontSize: 11, color: C.text2, lineHeight: 1.4, fontFamily: PJS }}>{rec.benefit}</p>
+            </div>
+            <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: 12, padding: '12px 14px' }}>
+              <p style={{ margin: '0 0 4px', fontSize: 10, fontWeight: 700, color: '#F59E0B', textTransform: 'uppercase', fontFamily: PJS }}>Stylist Tip</p>
+              <p style={{ margin: 0, fontSize: 11, color: C.text2, lineHeight: 1.4, fontFamily: PJS }}>{rec.style_tip}</p>
+            </div>
+          </div>
+
+          {/* Maintenance Tip */}
+          {rec.maintenance_tip && (
+            <div style={{ background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 12, padding: '10px 14px', marginBottom: 14 }}>
+              <p style={{ margin: 0, fontSize: 11, color: C.muted, fontFamily: PJS, fontStyle: 'italic' }}>
+                <span style={{ fontWeight: 700, fontStyle: 'normal' }}>Maintenance:</span> {rec.maintenance_tip}
+              </p>
+            </div>
+          )}
+
+          {rec.avoid_reason && (
+            <div style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 12, padding: '12px 14px' }}>
+              <p style={{ margin: '0 0 4px', fontSize: 10, fontWeight: 700, color: '#EF4444', textTransform: 'uppercase', fontFamily: PJS }}>⚠️ Avoid</p>
+              <p style={{ margin: 0, fontSize: 11, color: C.text2, lineHeight: 1.4, fontFamily: PJS }}>{rec.avoid_reason}</p>
             </div>
           )}
         </div>
       )}
     </div>
+  );
+}
+
+// ── Beard Visualization / Mockup Component ───────────
+function BeardMockup({ visualHint, faceShape, C }) {
+  // Define SVG Beard paths for the mockup
+  const paths = {
+    full_beard: "M30,70 Q50,95 70,70 L70,85 Q50,110 30,85 Z",
+    goatee: "M40,75 Q50,85 60,75 Q55,95 45,95 Z",
+    stubble: "M32,72 Q50,92 68,72 M42,78 Q50,85 58,78",
+    van_dyke: "M42,73 Q50,78 58,73 M45,85 Q50,100 55,85",
+    anchor: "M40,78 Q50,92 60,78 M50,85 L50,95 Q50,105 45,105 L55,105 Q50,105 50,95",
+  };
+
+  const currentPath = paths[visualHint] || paths.full_beard;
+
+  return (
+    <div style={{
+      width: 100, height: 110, background: C.glass2, borderRadius: 12,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+      position: 'relative', overflow: 'hidden', border: `1px solid ${C.border}`
+    }}>
+      {/* Face Silhouette based on shape */}
+      <svg viewBox="0 0 100 110" style={{ width: '85%', height: '85%' }}>
+        {/* Face Outline */}
+        <path 
+          d={faceShape === 'round' ? "M50,10 Q85,15 85,55 Q85,95 50,100 Q15,95 15,55 Q15,15 50,10" :
+             faceShape === 'square' ? "M50,10 L80,10 L80,90 L50,100 L20,90 L20,10 Z" :
+             faceShape === 'heart' ? "M50,20 Q85,10 85,50 Q85,85 50,105 Q15,85 15,50 Q15,10 50,20" :
+             "M50,10 Q80,15 80,55 Q80,95 50,105 Q20,95 20,55 Q20,15 50,10"} 
+          fill="none" stroke={C.muted} strokeWidth="1" strokeDasharray="2 2"
+        />
+        {/* Features */}
+        <path d="M40,45 Q43,43 46,45 M54,45 Q57,43 60,45" fill="none" stroke={C.muted} strokeWidth="1" />
+        <path d="M48,60 L50,62 L52,60" fill="none" stroke={C.muted} strokeWidth="1" />
+        
+        {/* The Beard Overlay */}
+        <path 
+          d={currentPath} 
+          fill={VIOLET} 
+          fillOpacity="0.4"
+          stroke={VIOLET} 
+          strokeWidth="1.5"
+          style={{ filter: 'drop-shadow(0 0 4px rgba(139,92,246,0.3))' }}
+        />
+      </svg>
+      <div style={{ position: 'absolute', bottom: 4, left: 0, right: 0, textAlign: 'center' }}>
+        <span style={{ fontSize: 8, fontWeight: 700, color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          Mockup View
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ── Beard Recommendation Card ───────────────────────
+function BeardCard({ rec, rank, faceShape, C }) {
+  return (
+    <GlassCard C={C} style={{ padding: '16px 20px', border: `1px solid ${C.border2}` }}>
+      <div style={{ display: 'flex', gap: 16 }}>
+        <BeardMockup visualHint={rec.visual_hint} faceShape={faceShape} C={C} />
+        
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <span style={{ fontSize: 16 }}>🧔</span>
+            <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: C.text, fontFamily: PJS }}>
+              {rec.name}
+            </h4>
+          </div>
+          <p style={{ margin: '0 0 10px', fontSize: 12, color: C.text2, lineHeight: 1.5, fontFamily: PJS }}>
+            {rec.reason}
+          </p>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+              <span style={{ fontSize: 12 }}>💡</span>
+              <p style={{ margin: 0, fontSize: 11, color: C.muted, fontFamily: PJS }}>
+                <span style={{ fontWeight: 700, color: VIOLET }}>Style Tip:</span> {rec.styling_tips}
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+              <span style={{ fontSize: 12 }}>✂️</span>
+              <p style={{ margin: 0, fontSize: 11, color: C.muted, fontFamily: PJS }}>
+                <span style={{ fontWeight: 700, color: VIOLET }}>Maintenance:</span> {rec.maintenance}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </GlassCard>
   );
 }
 
@@ -515,7 +557,13 @@ function UploadArea({ gender, setGender, onFileSelect, C }) {
 // ────────────────────────────────────────────────────
 function StyleResults({ data, previewUrl, gender, onReset, C }) {
   const [expandedIdx, setExpandedIdx] = useState(0);
-  const { face_shape, skin_analysis, hairstyle_recommendations = [], style_tips } = data;
+  const { 
+    face_shape, 
+    skin_analysis, 
+    hairstyle_recommendations = [], 
+    beard_recommendations = [], 
+    style_tips 
+  } = data;
 
   const toggleCard = (i) => setExpandedIdx(prev => prev === i ? -1 : i);
 
@@ -609,6 +657,31 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
           ))}
         </div>
       </div>
+
+      {/* ── Beard Recommendations (Male only) ── */}
+      {gender === 'male' && beard_recommendations.length > 0 && (
+        <div style={{ marginTop: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <div style={{ flex: 1, height: 1, background: C.divider }} />
+            <span style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: PJS, whiteSpace: 'nowrap' }}>
+              🧔 Facial Hair Suggestions
+            </span>
+            <div style={{ flex: 1, height: 1, background: C.divider }} />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {beard_recommendations.map((rec, i) => (
+              <BeardCard 
+                key={i} 
+                rec={rec} 
+                rank={i + 1} 
+                faceShape={face_shape?.shape} 
+                C={C} 
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Skin Tone Style Tip ── */}
       {style_tips?.skin_tone_tip && (

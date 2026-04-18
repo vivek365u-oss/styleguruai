@@ -132,6 +132,13 @@ HAIRSTYLE_DATABASE = {
                 "benefit": "Easy to maintain. Looks groomed with zero effort after styling.",
                 "avoid_reason": None,
                 "style_tip": "Keep the fringe about 2-3 cm long. Light pomade or cream for definition.",
+                "styling_steps": [
+                    "Towel dry hair until slightly damp.",
+                    "Apply a pea-sized amount of light-hold pomade.",
+                    "Comb the top hair forward and slightly to the side.",
+                    "Use fingers to separate strands for a natural finish."
+                ],
+                "maintenance_tip": "Get a trim every 3-4 weeks to keep the fringe length precise.",
                 "hair_color": "Jet black or dark espresso are ideal. Adds depth and structure.",
                 "hair_color_avoid": None,
                 "occasion": ["casual", "office"],
@@ -1120,19 +1127,19 @@ class FaceShapeDetector:
 
         # ── OBLONG ─────────────────────────────────────
         # Significantly longer than wide; all widths relatively equal
-        if face_ratio > 1.5:
-            oblong_score = min(1.0, (face_ratio - 1.5) / 0.3)
-            scores["oblong"] = 0.7 + oblong_score * 0.3
+        if face_ratio > 1.45:
+            oblong_score = min(1.0, (face_ratio - 1.45) / 0.35)
+            scores["oblong"] = 0.75 + oblong_score * 0.25
         elif face_ratio > 1.3:
-            scores["oblong"] = 0.4
+            scores["oblong"] = 0.45
 
         # ── ROUND ──────────────────────────────────────
         # Face width ≈ face height; all widths similar and wide
-        if face_ratio < 1.15:
-            round_score = min(1.0, (1.15 - face_ratio) / 0.15)
-            # Must also have similar forehead and jaw (both wide)
-            if forehead_ratio > 0.75 and jaw_ratio > 0.75:
-                scores["round"] = 0.6 + round_score * 0.4
+        if face_ratio < 1.18:
+            round_score = min(1.0, (1.18 - face_ratio) / 0.18)
+            # Round faces have width relative to height, and soft jaw/forehead
+            if forehead_ratio > 0.72 and jaw_ratio > 0.72 and width_variance < 0.15:
+                scores["round"] = 0.65 + round_score * 0.35
             else:
                 scores["round"] = 0.3
 
@@ -1242,34 +1249,142 @@ class FaceShapeDetector:
         # Beard recommendations database
         BEARD_RECOMMENDATIONS = {
             "oval": [
-                {"name": "Full Beard", "reason": "Your balanced oval face can carry any beard style. A full beard adds masculinity without overwhelming your features."},
-                {"name": "Goatee", "reason": "A classic goatee highlights your natural chin definition and works perfectly with oval proportions."},
-                {"name": "Stubble", "reason": "Light stubble adds texture and ruggedness while maintaining your clean, balanced look."},
+                {
+                    "name": "Full Beard",
+                    "visual_hint": "full_beard",
+                    "reason": "Your balanced oval face can carry any beard style. A full beard adds masculinity without overwhelming your features.",
+                    "styling_tips": "Keep the neckline clean - 1 inch above the Adam's apple. Use beard oil daily.",
+                    "maintenance": "Trim every 2 weeks using a 10-12mm guard."
+                },
+                {
+                    "name": "Goatee",
+                    "visual_hint": "goatee",
+                    "reason": "A classic goatee highlights your natural chin definition and works perfectly with oval proportions.",
+                    "styling_tips": "Shave cheeks and neck completely clean. Focus on a sharp circle around the mouth.",
+                    "maintenance": "Daily shaving of surrounding areas is required to keep it sharp."
+                },
+                {
+                    "name": "Heavy Stubble",
+                    "visual_hint": "stubble",
+                    "reason": "Light stubble adds texture and ruggedness while maintaining your clean, balanced look.",
+                    "styling_tips": "Let it grow for 3-5 days. Use a trimmer on a 2-3mm setting.",
+                    "maintenance": "Trim every 3 days. Moisturize skin to avoid itchiness."
+                },
             ],
             "round": [
-                {"name": "Chin Strap", "reason": "A chin strap creates vertical lines that elongate your round face, adding definition to your jawline."},
-                {"name": "Goatee with Soul Patch", "reason": "This style draws attention downward, creating the illusion of length and slimming your face."},
-                {"name": "Van Dyke", "reason": "The pointed shape of a Van Dyke adds angles to soften roundness and creates a more defined chin."},
+                {
+                    "name": "Van Dyke",
+                    "visual_hint": "van_dyke",
+                    "reason": "The pointed shape of a Van Dyke adds angles to soften roundness and creates a more defined chin.",
+                    "styling_tips": "Keep the mustache and chin beard disconnected. Point the chin beard slightly.",
+                    "maintenance": "Requires precise trimming to keep the chin-mustache gap clean."
+                },
+                {
+                    "name": "Garibaldi",
+                    "visual_hint": "full_beard",
+                    "reason": "A wide, rounded beard that is shorter at the bottom to elongate the face visually.",
+                    "styling_tips": "Let it grow full but keep the bottom wide and flat to add structure.",
+                    "maintenance": "Trim the bottom horizontally to maintain the square-ish silhouette."
+                },
+                {
+                    "name": "Short Boxed Beard",
+                    "visual_hint": "full_beard",
+                    "reason": "Neat and trimmed close to the face to define the jawline without adding cheek width.",
+                    "styling_tips": "Lower the cheek lines to expose more skin, making the face look longer.",
+                    "maintenance": "Trim weekly on a 5-6mm setting."
+                },
             ],
             "square": [
-                {"name": "Full Rounded Beard", "reason": "A rounded full beard softens your strong angular jaw while maintaining masculine appeal."},
-                {"name": "Circle Beard", "reason": "The circular shape counterbalances your square angles, creating visual harmony."},
-                {"name": "Short Boxed Beard", "reason": "A neatly trimmed boxed beard complements your strong jawline without adding excessive bulk."},
+                {
+                    "name": "Circle Beard",
+                    "visual_hint": "goatee",
+                    "reason": "The circular shape counterbalances your square angles, creating visual harmony.",
+                    "styling_tips": "Ensure the mustache and chin beard connect in a smooth circle.",
+                    "maintenance": "Weekly shaping to keep the circular curve soft."
+                },
+                {
+                    "name": "Anchor Beard",
+                    "visual_hint": "anchor",
+                    "reason": "A pointed beard that traces the jawline, elongating the face and softening the square corners.",
+                    "styling_tips": "The beard should follow the jawline and end in a point at the chin.",
+                    "maintenance": "Daily maintenance to keep the 'anchor' shape distinct."
+                },
+                {
+                    "name": "Royale Beard",
+                    "visual_hint": "van_dyke",
+                    "reason": "A mustache anchored by a chin strip. Minimalist and sharp.",
+                    "styling_tips": "Keep the mustache and chin beard thin and elegant.",
+                    "maintenance": "Precision trimming every 2 days."
+                },
             ],
             "heart": [
-                {"name": "Full Beard", "reason": "A fuller beard adds width to your narrow chin, balancing your wider forehead perfectly."},
-                {"name": "Mutton Chops", "reason": "Mutton chops add volume at the jaw level, creating balance with your wider upper face."},
-                {"name": "Chin Curtain", "reason": "This style adds definition along your jawline, balancing your heart-shaped proportions."},
+                {
+                    "name": "Full Beard (High Volume)",
+                    "visual_hint": "full_beard",
+                    "reason": "A fuller beard adds width to your narrow chin, balancing your wider forehead perfectly.",
+                    "styling_tips": "Focus volume on the jaw sides, not just the chin.",
+                    "maintenance": "Condition daily to keep the volume looking groomed."
+                },
+                {
+                    "name": "Extended Goatee",
+                    "visual_hint": "goatee",
+                    "reason": "Adds mass to the chin and jaw while leaving cheeks clean, narrowing the top-bottom gap.",
+                    "styling_tips": "Let the goatee extend along the jawline toward the ears.",
+                    "maintenance": "Shave upper cheeks regularly."
+                },
+                {
+                    "name": "Mutton Chops",
+                    "visual_hint": "stubble",
+                    "reason": "Mutton chops add volume at the jaw level, creating balance with your wider upper face.",
+                    "styling_tips": "Keep the sideburns wide and connected to a mustache.",
+                    "maintenance": "Shave the chin area daily to keep the chops distinct."
+                },
             ],
             "oblong": [
-                {"name": "Horizontal Beard", "reason": "A wider, horizontal beard adds width to your long face, creating better proportions."},
-                {"name": "Short Full Beard", "reason": "Keep it short and wide to avoid adding more length to your already elongated face."},
-                {"name": "Mutton Chops", "reason": "Side-focused facial hair adds horizontal width, balancing your face's length."},
+                {
+                    "name": "Short Boxed Beard (Wide)",
+                    "visual_hint": "full_beard",
+                    "reason": "A wider, horizontal beard adds width to your long face, creating better proportions.",
+                    "styling_tips": "Keep the beard shorter at the chin than at the sides.",
+                    "maintenance": "Trim the chin area 2mm shorter than the sideburns."
+                },
+                {
+                    "name": "Stubble (Groomed)",
+                    "visual_hint": "stubble",
+                    "reason": "Well-maintained stubble adds horizontal texture without vertical length.",
+                    "styling_tips": "Keep the neckline high to avoid elongating the face.",
+                    "maintenance": "Trim to 3mm every other day."
+                },
+                {
+                    "name": "Chevron Mustache",
+                    "visual_hint": "van_dyke",
+                    "reason": "A thick mustache draws focus horizontally across the face, breaking the vertical length.",
+                    "styling_tips": "Grow the mustache thick and let it cover the top lip slightly.",
+                    "maintenance": "Trim the edges to keep it within the mouth width."
+                },
             ],
             "diamond": [
-                {"name": "Full Beard", "reason": "A full beard adds width to your narrow chin and jaw, balancing your prominent cheekbones."},
-                {"name": "Goatee", "reason": "A goatee draws attention to your chin, creating balance with your wide cheekbone area."},
-                {"name": "Anchor Beard", "reason": "The anchor shape adds definition to your jawline while complementing your angular features."},
+                {
+                    "name": "Balbo Beard",
+                    "visual_hint": "anchor",
+                    "reason": "A beard with no sideburns and a floating mustache, emphasizing the chin and balancing wide cheekbones.",
+                    "styling_tips": "Mustache should be disconnected from the beard.",
+                    "maintenance": "Precision shaving of the sideburn/ear area is critical."
+                },
+                {
+                    "name": "Full Beard (Rounded)",
+                    "visual_hint": "full_beard",
+                    "reason": "A rounded full beard softens your prominent cheekbones and widens the narrow jaw.",
+                    "styling_tips": "Trim the cheeks slightly shorter than the jaw to emphasize the bottom width.",
+                    "maintenance": "Brush downward and trim to a rounded shape."
+                },
+                {
+                    "name": "Chin Strap + Mustache",
+                    "visual_hint": "stubble",
+                    "reason": "Minimalist lines that trace the jaw, adding definition where needed.",
+                    "styling_tips": "Keep the strap very thin and precise along the jawbone.",
+                    "maintenance": "Daily maintenance to prevent the strap from widening."
+                },
             ],
         }
 
