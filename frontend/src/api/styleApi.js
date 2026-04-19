@@ -995,11 +995,40 @@ export const getSelfieAnalysisUsage = async () => {
   }
 };
 
+// ── Selfie-safe compression: keeps 800px for MediaPipe 468-point landmark detection ──
+const compressSelfieForLandmarks = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_DIM = 800; // minimum safe for face landmark accuracy
+        let w = img.width, h = img.height;
+        if (Math.max(w, h) > MAX_DIM) {
+          if (w >= h) { h = Math.round((h * MAX_DIM) / w); w = MAX_DIM; }
+          else         { w = Math.round((w * MAX_DIM) / h); h = MAX_DIM; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(
+          (blob) => resolve(new File([blob], file.name, { type: 'image/jpeg' })),
+          'image/jpeg', 0.82
+        );
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
 export const analyzeSelfieStyle = async (file, gender = 'male', texture = 'straight', watched = false, lang = 'en', onProgress) => {
   try {
     validateImageFile(file);
-    const compressedFile = await compressImage(file);
-    console.log(`✓ Selfie compressed: ${(file.size / 1024).toFixed(2)}KB → ${(compressedFile.size / 1024).toFixed(2)}KB`);
+    // Use landmark-safe compression (800px) — NOT the generic 300px compressor
+    const compressedFile = await compressSelfieForLandmarks(file);
+    console.log(`✓ Selfie landmark-safe: ${(file.size / 1024).toFixed(2)}KB → ${(compressedFile.size / 1024).toFixed(2)}KB`);
 
     return await retryRequest(async () => {
       const formData = new FormData();

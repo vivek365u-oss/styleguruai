@@ -475,7 +475,8 @@ function BeardCard({ rec, rank, faceShape, C }) {
 // Upload Section
 // ────────────────────────────────────────────────────
 function UploadArea({ gender, setGender, onFileSelect, C }) {
-  const fileRef = useRef(null);
+  const fileRef   = useRef(null);
+  const cameraRef = useRef(null);
   const [dragging, setDragging] = useState(false);
 
   const handleDrop = useCallback((e) => {
@@ -508,7 +509,7 @@ function UploadArea({ gender, setGender, onFileSelect, C }) {
                 boxShadow: active ? '0 4px 16px rgba(139,92,246,0.35)' : 'none',
               }}
             >
-              {g === 'male' ? '👨 Male' : '👩 Female'}
+              {g === 'male' ? '\u{1F468} Male' : '\u{1F469} Female'}
             </button>
           );
         })}
@@ -516,16 +517,14 @@ function UploadArea({ gender, setGender, onFileSelect, C }) {
 
       {/* Drop zone */}
       <div
-        onClick={() => fileRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         style={{
           border: `2px dashed ${dragging ? VIOLET : C.border2}`,
           borderRadius: 16,
-          padding: '40px 24px',
+          padding: '32px 24px',
           textAlign: 'center',
-          cursor: 'pointer',
           transition: 'all 0.25s',
           background: dragging ? `${VIOLET}08` : C.glass2,
         }}
@@ -540,24 +539,52 @@ function UploadArea({ gender, setGender, onFileSelect, C }) {
         }}>
           📸
         </div>
-        <p style={{ fontSize: 15, fontWeight: 700, color: C.text, margin: '0 0 6px', fontFamily: PJS }}>
+        <p style={{ fontSize: 15, fontWeight: 700, color: C.text, margin: '0 0 4px', fontFamily: PJS }}>
           Upload Your Selfie
         </p>
-        <p style={{ fontSize: 12, color: C.muted, margin: '0 0 16px', lineHeight: 1.6, fontFamily: PJS }}>
-          Face front-facing, good lighting<br />
-          JPG · PNG · WebP · max 10MB
+        <p style={{ fontSize: 12, color: C.muted, margin: '0 0 20px', lineHeight: 1.6, fontFamily: PJS }}>
+          Face forward · good lighting · hair visible
         </p>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-          padding: '10px 22px', borderRadius: 10,
-          background: GRAD, color: '#fff',
-          fontSize: 13, fontWeight: 600, fontFamily: PJS,
-          boxShadow: '0 4px 16px rgba(139,92,246,0.4)',
-        }}>
-          📂 Browse File
+
+        {/* Gallery + Camera dual buttons */}
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => fileRef.current?.click()}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 7,
+              padding: '11px 22px', borderRadius: 12,
+              background: GRAD, border: 'none', color: '#fff',
+              fontSize: 13, fontWeight: 700, fontFamily: PJS,
+              cursor: 'pointer', boxShadow: '0 4px 16px rgba(139,92,246,0.4)',
+              transition: 'opacity 0.2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+          >
+            🖼️ Gallery
+          </button>
+          <button
+            onClick={() => cameraRef.current?.click()}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 7,
+              padding: '11px 22px', borderRadius: 12,
+              background: C.glass2, border: `1.5px solid ${VIOLET}50`,
+              color: VIOLET,
+              fontSize: 13, fontWeight: 700, fontFamily: PJS,
+              cursor: 'pointer', transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = `${VIOLET}12`; }}
+            onMouseLeave={e => { e.currentTarget.style.background = C.glass2; }}
+          >
+            📷 Camera
+          </button>
         </div>
       </div>
+
+      {/* Hidden file inputs */}
       <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
+        onChange={e => { if (e.target.files?.[0]) onFileSelect(e.target.files[0]); }} />
+      <input ref={cameraRef} type="file" accept="image/*" capture="user" style={{ display: 'none' }}
         onChange={e => { if (e.target.files?.[0]) onFileSelect(e.target.files[0]); }} />
 
       {/* Tips */}
@@ -724,6 +751,49 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
         </GlassCard>
       )}
 
+      {/* ── Shop This Style ── */}
+      {hairstyle_recommendations.length > 0 && (() => {
+        const topStyle = hairstyle_recommendations[0]?.name || 'hairstyle';
+        const query = encodeURIComponent(topStyle + (gender === 'female' ? ' women' : ' men'));
+        const shops = [
+          { name: 'Myntra',        url: `https://www.myntra.com/${query}`,                       color: '#FF3F6C', icon: '🛍️' },
+          { name: 'Ajio',          url: `https://www.ajio.com/search/?text=${query}`,            color: '#E03A3A', icon: '✨'  },
+          { name: 'Amazon',        url: `https://www.amazon.in/s?k=${query}+hair+products`,     color: '#FF9900', icon: '📦'  },
+          { name: 'Nykaa Fashion', url: `https://www.nykaafashion.com/search?q=${query}`,       color: '#FC2779', icon: '🌸'  },
+        ];
+        return (
+          <GlassCard C={C} style={{ padding: '18px 20px' }}>
+            <p style={{ margin: '0 0 12px', fontSize: 11, fontWeight: 700, color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.07em', fontFamily: PJS }}>
+              🛒 Shop This Style: {topStyle}
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {shops.map(shop => (
+                <a
+                  key={shop.name}
+                  href={shop.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    padding: '10px 14px', borderRadius: 12,
+                    background: `${shop.color}12`, border: `1px solid ${shop.color}30`,
+                    color: shop.color, textDecoration: 'none',
+                    fontSize: 12, fontWeight: 700, fontFamily: PJS,
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = `${shop.color}22`; e.currentTarget.style.transform = 'scale(1.02)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = `${shop.color}12`; e.currentTarget.style.transform = 'scale(1)'; }}
+                >
+                  <span style={{ fontSize: 18 }}>{shop.icon}</span>
+                  <span>{shop.name}</span>
+                  <span style={{ marginLeft: 'auto', fontSize: 11, opacity: 0.7 }}>↗</span>
+                </a>
+              ))}
+            </div>
+          </GlassCard>
+        );
+      })()}
+
       {/* ── Reset CTA ── */}
       <button
         onClick={onReset}
@@ -745,25 +815,63 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
 }
 
 // ────────────────────────────────────────────────────
-// ERROR block
+// ERROR block — Retake with Tips
 // ────────────────────────────────────────────────────
 function ErrorBlock({ message, onRetry, C }) {
+  const isFaceError = message && (
+    message.toLowerCase().includes('face') ||
+    message.toLowerCase().includes('detect') ||
+    message.toLowerCase().includes('no_face')
+  );
+  const tips = [
+    { icon: '☀️',  tip: 'Natural daylight baar better hai — khidki ke paas jaao' },
+    { icon: '🕶️', tip: 'Sunglasses hatao — face clearly visible honi chahiye' },
+    { icon: '👤',  tip: 'Sidhe camera ki taraf dekho — profile photo nahi chalega' },
+    { icon: '📱',  tip: 'Camera ko aankh ke level par rakho — upar se mat lo' },
+    { icon: '💍',  tip: 'Koi cheez face ko dhak na kare — duppata / hat side karo' },
+    { icon: '💡',  tip: 'Lighting behind you — flash ya lamp use karo agar dark hai' },
+  ];
   return (
-    <GlassCard C={C} style={{ textAlign: 'center' }}>
-      <p style={{ fontSize: 36, margin: '0 0 12px' }}>😕</p>
-      <p style={{ fontSize: 15, fontWeight: 700, color: C.text, marginBottom: 8, fontFamily: PJS }}>Analysis Failed</p>
-      <p style={{ fontSize: 13, color: C.muted, lineHeight: 1.6, marginBottom: 24, fontFamily: PJS }}>
-        {message}
-      </p>
+    <GlassCard C={C}>
+      <div style={{ textAlign: 'center', marginBottom: 20 }}>
+        <p style={{ fontSize: 36, margin: '0 0 8px' }}>{isFaceError ? '🤔' : '😕'}</p>
+        <p style={{ fontSize: 15, fontWeight: 700, color: C.text, marginBottom: 6, fontFamily: PJS }}>
+          {isFaceError ? 'Face Detect Nahi Hua' : 'Analysis Failed'}
+        </p>
+        <p style={{ fontSize: 12, color: C.muted, lineHeight: 1.6, fontFamily: PJS }}>
+          {isFaceError ? 'Hamara AI tumhara chehra dhang se read nahi kar paya. Neeche diye tips se retry karo:' : message}
+        </p>
+      </div>
+
+      {isFaceError && (
+        <div style={{
+          background: C.glass2, border: `1px solid ${C.border}`,
+          borderRadius: 14, padding: '14px 16px', marginBottom: 18,
+        }}>
+          <p style={{ margin: '0 0 12px', fontSize: 11, fontWeight: 700, color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.07em', fontFamily: PJS }}>
+            💡 Better Photo Tips
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {tips.map((t, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <span style={{ fontSize: 18, flexShrink: 0, lineHeight: 1 }}>{t.icon}</span>
+                <p style={{ margin: 0, fontSize: 12, color: C.text2, lineHeight: 1.5, fontFamily: PJS }}>{t.tip}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <button
         onClick={onRetry}
         style={{
-          background: GRAD, border: 'none', color: '#fff',
-          borderRadius: 12, padding: '12px 32px',
-          fontSize: 14, fontWeight: 600, fontFamily: PJS, cursor: 'pointer',
+          width: '100%', background: GRAD, border: 'none', color: '#fff',
+          borderRadius: 12, padding: '13px 0',
+          fontSize: 14, fontWeight: 700, fontFamily: PJS, cursor: 'pointer',
+          boxShadow: '0 6px 20px rgba(139,92,246,0.4)',
         }}
       >
-        Try Again
+        {isFaceError ? '📷 Retake Selfie' : 'Try Again'}
       </button>
     </GlassCard>
   );
