@@ -69,8 +69,8 @@ class ImageProcessor:
                 static_image_mode=True,
                 max_num_faces=1,
                 refine_landmarks=True,
-                min_detection_confidence=0.5,
-                min_tracking_confidence=0.5
+                min_detection_confidence=0.3,
+                min_tracking_confidence=0.3
             )
             self.mediapipe_available = True
             logger.info("MediaPipe loaded successfully")

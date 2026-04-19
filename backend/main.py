@@ -2194,33 +2194,18 @@ async def analyze_selfie_style(
         landmarks_dict = {}
 
         try:
-            # Re-run MediaPipe to get landmarks (image_processor returns dict face, not landmarks)
-            import mediapipe as mp
-            import cv2
-
-            mp_face_mesh = mp.solutions.face_mesh
-            with mp_face_mesh.FaceMesh(
-                static_image_mode=True,
-                max_num_faces=1,
-                refine_landmarks=True,
-                min_detection_confidence=0.3,   # was 0.5 — lowered for dark / angled selfies
-                min_tracking_confidence=0.3
-            ) as face_mesh:
-                rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                results = face_mesh.process(rgb_image)
-
-                if results.multi_face_landmarks:
-                    h, w = image.shape[:2]
-                    landmarks_raw = results.multi_face_landmarks[0].landmark
-                    landmarks = {
-                        i: (int(lm.x * w), int(lm.y * h))
-                        for i, lm in enumerate(landmarks_raw)
-                    }
-                    # Store for frontend visualization
-                    landmarks_dict = {str(k): list(v) for k, v in landmarks.items()}
-                    
+            landmarks = image_processor._get_face_landmarks(image, face)
+            if landmarks:
+                # Store for frontend visualization
+                landmarks_dict = {str(k): list(v) for k, v in landmarks.items()}
+                
+                try:
                     face_shape_result = face_shape_detector.detect_shape(landmarks)
                     print(f"[SELFIE] Face shape: {face_shape_result['shape']} ({face_shape_result['confidence']:.0%} confidence)")
+                except Exception as loop_e:
+                    print(f"[SELFIE DEBUG] Exception inside detect_shape: {loop_e}")
+            else:
+                print(f"[SELFIE DEBUG] NO LANDMARKS DETECTED by image_processor!")
         except Exception as e:
             print(f"[SELFIE] Face shape detection skipped: {e}")
 
