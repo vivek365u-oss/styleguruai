@@ -75,10 +75,39 @@ class ImageProcessor:
             self.mediapipe_available = True
             logger.info("MediaPipe loaded successfully")
         except Exception as e:
-            logger.warning(f"MediaPipe not available: {e}")
-            self.mediapipe_available = False
-            self.face_detector = None
-            self.face_mesh_detector = None
+            logger.warning(f"MediaPipe solutions not available: {e}. Trying Tasks API...")
+            try:
+                import os
+                import urllib.request
+                import mediapipe as mp
+                from mediapipe.tasks import python
+                from mediapipe.tasks.python import vision
+                
+                # Fetch lightweight model silently
+                model_path = os.path.join(os.path.dirname(__file__), "face_landmarker.task")
+                if not os.path.exists(model_path):
+                    logger.info("Downloading face_landmarker.task (2.8MB)...")
+                    url = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
+                    urllib.request.urlretrieve(url, model_path)
+                
+                base_options = python.BaseOptions(model_asset_path=model_path)
+                options = vision.FaceLandmarkerOptions(
+                    base_options=base_options, 
+                    output_face_blendshapes=False, 
+                    num_faces=1,
+                    min_face_detection_confidence=0.3,
+                    min_tracking_confidence=0.3
+                )
+                self.face_mesh_detector = vision.FaceLandmarker.create_from_options(options)
+                self.mp_face_mesh = None # Mark as tasks API
+                self.face_detector = None # Will safely fallback to Haar cascade for bbox
+                self.mediapipe_available = True
+                logger.info("MediaPipe Tasks loaded successfully")
+            except Exception as e2:
+                logger.warning(f"MediaPipe tasks also failed: {e2}")
+                self.mediapipe_available = False
+                self.face_detector = None
+                self.face_mesh_detector = None
 
         cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
         self.haar_cascade = cv2.CascadeClassifier(cascade_path)
@@ -184,7 +213,8 @@ class ImageProcessor:
         scale_x = image.shape[1] / processed_image.shape[1]
         scale_y = image.shape[0] / processed_image.shape[0]
 
-        if self.mediapipe_available:
+        face = None
+        if self.mediapipe_available and self.face_detector is not None:
             face = self._detect_mediapipe(processed_image, scale_x, scale_y)
             if face:
                 return face
@@ -194,7 +224,7 @@ class ImageProcessor:
             return face
 
         enhanced = self._enhance_low_light(image)
-        if self.mediapipe_available:
+        if self.mediapipe_available and self.face_detector is not None:
             face = self._detect_mediapipe(enhanced, 1.0, 1.0)
             if face:
                 return face
@@ -298,16 +328,29 @@ class ImageProcessor:
             return None
         try:
             rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            results = self.face_mesh_detector.process(rgb_image)
-            if not results.multi_face_landmarks:
-                return None
-            landmarks = results.multi_face_landmarks[0]
             h, w = image.shape[:2]
             points = {}
-            for idx, lm in enumerate(landmarks.landmark):
-                points[idx] = (int(lm.x * w), int(lm.y * h))
+
+            if hasattr(self.face_mesh_detector, 'process'):
+                # Legacy Solutions API
+                results = self.face_mesh_detector.process(rgb_image)
+                if not results.multi_face_landmarks:
+                    return None
+                for idx, lm in enumerate(results.multi_face_landmarks[0].landmark):
+                    points[idx] = (int(lm.x * w), int(lm.y * h))
+            else:
+                # Modern Tasks API
+                import mediapipe as mp
+                mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_image)
+                results = self.face_mesh_detector.detect(mp_image)
+                if getattr(results, 'face_landmarks', None) is None or len(results.face_landmarks) == 0:
+                    return None
+                for idx, lm in enumerate(results.face_landmarks[0]):
+                    points[idx] = (int(lm.x * w), int(lm.y * h))
+                    
             return points
-        except Exception:
+        except Exception as e:
+            logger.error(f"Error extracting landmarks: {e}")
             return None
 
     def validate_face_for_skin_analysis(self, image: np.ndarray, face: dict) -> dict:
