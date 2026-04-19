@@ -478,6 +478,9 @@ function UploadArea({ gender, setGender, onFileSelect, C }) {
   const fileRef   = useRef(null);
   const cameraRef = useRef(null);
   const [dragging, setDragging] = useState(false);
+  // Show Camera button only on touch devices (phones/tablets), not on laptop/desktop
+  const isMobile = typeof window !== 'undefined' &&
+    window.matchMedia('(pointer: coarse)').matches;
 
   const handleDrop = useCallback((e) => {
     e.preventDefault();
@@ -557,27 +560,32 @@ function UploadArea({ gender, setGender, onFileSelect, C }) {
               fontSize: 13, fontWeight: 700, fontFamily: PJS,
               cursor: 'pointer', boxShadow: '0 4px 16px rgba(139,92,246,0.4)',
               transition: 'opacity 0.2s',
+              // On desktop: full width (no camera button alongside)
+              flex: isMobile ? 'unset' : 1,
             }}
             onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
             onMouseLeave={e => e.currentTarget.style.opacity = '1'}
           >
             🖼️ Gallery
           </button>
-          <button
-            onClick={() => cameraRef.current?.click()}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 7,
-              padding: '11px 22px', borderRadius: 12,
-              background: C.glass2, border: `1.5px solid ${VIOLET}50`,
-              color: VIOLET,
-              fontSize: 13, fontWeight: 700, fontFamily: PJS,
-              cursor: 'pointer', transition: 'all 0.2s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = `${VIOLET}12`; }}
-            onMouseLeave={e => { e.currentTarget.style.background = C.glass2; }}
-          >
-            📷 Camera
-          </button>
+          {/* Camera button: only shown on touch devices (phones/tablets) */}
+          {isMobile && (
+            <button
+              onClick={() => cameraRef.current?.click()}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 7,
+                padding: '11px 22px', borderRadius: 12,
+                background: C.glass2, border: `1.5px solid ${VIOLET}50`,
+                color: VIOLET,
+                fontSize: 13, fontWeight: 700, fontFamily: PJS,
+                cursor: 'pointer', transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = `${VIOLET}12`; }}
+              onMouseLeave={e => { e.currentTarget.style.background = C.glass2; }}
+            >
+              📷 Camera
+            </button>
+          )}
         </div>
       </div>
 
