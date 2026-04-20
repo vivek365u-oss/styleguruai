@@ -673,18 +673,6 @@ export const updateWardrobeItemStatus = async (uid, itemId, statusData) => {
     handleFirestoreError('updateWardrobeItemStatus', e);
     return false;
   }
-};
-    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    // Always update cache on successful fetch
-    setCachedWardrobe(uid, items);
-    return items;
-  } catch (e) {
-    handleFirestoreError('getWardrobe', e);
-    // Offline fallback: return cached data
-    console.log('[API] Offline - returning cached wardrobe');
-    return getCachedWardrobe(uid);
-  }
-};
 
 export const deleteWardrobeItem = async (uid, itemId) => {
   if (!auth.currentUser) return;
