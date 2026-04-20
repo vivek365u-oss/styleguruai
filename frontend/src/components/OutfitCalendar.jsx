@@ -8,16 +8,41 @@ import { getWeeklyForecast } from '../utils/weatherService';
 // ── Occasion-Aware Fallback Outfits (when wardrobe is empty) ──────────────────
 // Each occasion gets a DIFFERENT outfit so calendar is never repetitive per day
 const FALLBACK_MALE = {
-  OFFICE:  { topName: 'Formal Shirt',   botName: 'Tailored Trousers', topCat: 'cat_formal_shirt',  botCat: 'cat_formal_trouser' },
-  PARTY:   { topName: 'Party Shirt',    botName: 'Slim Jeans',        topCat: 'cat_party_shirt',   botCat: 'cat_jeans'          },
-  CAMPUS:  { topName: 'Crew Tee',       botName: 'Slim Chinos',       topCat: 'cat_tshirt',        botCat: 'cat_chinos'         },
-  WEEKEND: { topName: 'Polo Shirt',     botName: 'Clean Chinos',      topCat: 'cat_polo',          botCat: 'cat_chinos'         },
+  OFFICE:  [
+    { topName: 'Formal White Shirt', botName: 'Tailored Trousers', topCat: 'cat_formal_shirt',  botCat: 'cat_formal_trouser' },
+    { topName: 'Sky Blue Oxford',    botName: 'Navy Chinos',        topCat: 'cat_formal_shirt',  botCat: 'cat_chinos'         },
+  ],
+  PARTY:   [
+    { topName: 'Black Party Shirt',  botName: 'Slim Chinos',        topCat: 'cat_party_shirt',   botCat: 'cat_chinos'         },
+    { topName: 'Printed Shirt',      botName: 'Black Jeans',        topCat: 'cat_party_shirt',   botCat: 'cat_jeans'          },
+  ],
+  CAMPUS:  [
+    { topName: 'Signature Crew Tee', botName: 'Slim Fit Jeans',     topCat: 'cat_tshirt',        botCat: 'cat_jeans'          },
+    { topName: 'Polo Tee',           botName: 'Relaxed Chinos',     topCat: 'cat_polo',          botCat: 'cat_chinos'         },
+  ],
+  WEEKEND: [
+    { topName: 'Casual Linen Shirt', botName: 'Light Chinos',       topCat: 'cat_casual_shirt',  botCat: 'cat_chinos'         },
+    { topName: 'Graphic Tee',        botName: 'Denim Shorts',       topCat: 'cat_tshirt',        botCat: 'cat_shorts'         },
+  ],
 };
+
 const FALLBACK_FEMALE = {
-  OFFICE:  { topName: 'Structured Blazer', botName: 'Cigarette Trousers',     topCat: 'cat_blazer',        botCat: 'cat_formal_trouser' },
-  PARTY:   { topName: 'Co-ord Set Top',    botName: 'Wide Leg Palazzo',       topCat: 'cat_top',           botCat: 'cat_palazzo'        },
-  CAMPUS:  { topName: 'Casual Kurti',      botName: 'Cotton Palazzo',         topCat: 'cat_kurti',         botCat: 'cat_palazzo'        },
-  WEEKEND: { topName: 'Crop Top',          botName: 'High Waist Mom Jeans',   topCat: 'cat_top',           botCat: 'cat_mom_jeans'      },
+  OFFICE:  [
+    { topName: 'Classic White Shirt',   botName: 'Structured Trousers', topCat: 'cat_shirt_female',  botCat: 'cat_formal_trouser' },
+    { topName: 'Silk Blouse',           botName: 'Pencil Skirt',        topCat: 'cat_blouse',        botCat: 'cat_skirt'          },
+  ],
+  PARTY:   [
+    { topName: 'Satin Slip Top',        botName: 'Wide Leg Trousers',   topCat: 'cat_top',           botCat: 'cat_palazzo'        },
+    { topName: 'LBD (Mini)',            botName: 'Sheer Tights',        topCat: 'cat_dress_mini',    botCat: 'cat_bottom'         },
+  ],
+  CAMPUS:  [
+    { topName: 'Crop Tee',              botName: 'Baggy Jeans',         topCat: 'cat_crop_top',      botCat: 'cat_jeans_female'   },
+    { topName: 'Printed Kurti',         botName: 'Leggings',            topCat: 'cat_kurti',         botCat: 'cat_bottom'         },
+  ],
+  WEEKEND: [
+    { topName: 'Oversized Shirt',       botName: 'Biker Shorts',        topCat: 'cat_shirt_female',  botCat: 'cat_shorts_female'  },
+    { topName: 'Summer Day Dress',      botName: 'Sandals',             topCat: 'cat_dress_midi',    botCat: 'cat_bottom'         },
+  ],
 };
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -163,13 +188,22 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
     const matchingTops = rankedWardrobe.filter(i => topCats.includes(i.category));
     const matchingBottoms = rankedWardrobe.filter(i => bottomCats.includes(i.category));
 
-    const isWardrobeEmpty = matchingTops.length === 0;
+    const fallbackList = (activeGender === 'male' ? FALLBACK_MALE : FALLBACK_FEMALE)[occasion.event] || 
+                       (activeGender === 'male' ? FALLBACK_MALE.WEEKEND : FALLBACK_FEMALE.WEEKEND);
+    
+    // Pick different fallback variant per day if list is available
+    const fallback = fallbackList[index % fallbackList.length];
 
     const bestTopObj = bestColors.length > 0 ? bestColors[index % bestColors.length] : null;
     const bestPantObj = pantColors.length > 0 ? pantColors[(index + 1) % pantColors.length] : null;
 
+    // ── VARIETY SELECTION ENGINE ──────────────────────────────────────
+    // Instead of always picking [0], we stagger selection across the week
+    const topIdx = (index % Math.min(3, matchingTops.length)) || 0;
+    const botIdx = ((index + 1) % Math.min(3, matchingBottoms.length)) || 0;
+
     const bestTop = matchingTops.length > 0 
-                    ? matchingTops[0] 
+                    ? matchingTops[topIdx] 
                     : {
                         name: bestTopObj ? `${bestTopObj.name || 'Signature'} ${fallback.topName}` : fallback.topName,
                         hex: bestTopObj ? bestTopObj.hex : '#7C3AED',
@@ -179,7 +213,7 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
                     };
 
     const bestBottom = matchingBottoms.length > 0 
-                       ? matchingBottoms[0] 
+                       ? matchingBottoms[botIdx] 
                        : {
                            name: bestPantObj ? `${bestPantObj.name || 'Classic'} ${fallback.botName}` : fallback.botName,
                            hex: bestPantObj ? bestPantObj.hex : '#1e3a8a',
