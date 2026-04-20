@@ -101,12 +101,21 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
     shorts_female:  { male: 'shorts', female: 'shorts' },
     track_f:        { male: 'track pants', female: 'track pants' },
     // accessories
-    dupatta:        { male: 'stole', female: 'dupatta' },
+    dupatta:        { male: 'stole scarf', female: 'dupatta stole' },
+    watch:           { male: 'premium minimalist watch', female: 'stylish minimalist watch' },
+    belt:            { male: 'premium leather belt', female: 'waist belt' },
+    wallet:          { male: 'genuine leather wallet', female: 'mini wallet clutch' },
+    sunglasses:      { male: 'retro square sunglasses', female: 'vintage cat eye sunglasses' },
+    backpack:        { male: 'premium laptop backpack', female: 'chic quilted backpack' },
+    earrings:        { male: 'minimal stud earrings', female: 'premium statement earrings' },
+    necklace:        { male: 'minimal chain necklace', female: 'premium layered necklace' },
+    bangles:         { male: 'minimal bracelet', female: 'premium ethnic bangles' },
+    accessory:       { male: 'minimalist accessory', female: 'premium fashion accessory' },
     // fallback
-    top:            { male: 'shirt', female: 'top' },
-    pant:           { male: 'jeans', female: 'trousers' },
-    bottom:         { male: 'trousers', female: 'palazzo' },
-    dress:          { male: 'shirt', female: 'dress' },
+    top:            { male: 'premium casual shirt', female: 'aesthetic minimal top' },
+    pant:           { male: 'relaxed fit trousers', female: 'high waist trousers' },
+    bottom:         { male: 'clean trousers', female: 'palazzo pants' },
+    dress:          { male: 'premium shirt', female: 'stylish midi dress' },
   };
 
   // Clean category key: strip 'cat_' prefix, find in map
@@ -135,14 +144,14 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
 
   const links = [
     {
-      name: 'Myntra', icon: '👗',
+      name: 'Myntra', icon: '🛍️',
       url: myntraUrl,
       bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold'
     },
     {
-      name: 'Amazon', icon: '🛒',
+      name: 'Amazon', icon: '📦',
       url: `https://www.amazon.in/s?k=${amazonQ}&rh=${amzNode}${amzPrice}&sort=featured&tag=${AMAZON_TAG}`,
-      bg: isDark ? 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' : 'bg-orange-50 hover:bg-orange-100 border-orange-300 text-orange-700 font-bold'
+      bg: isDark ? 'bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20 text-amber-300' : 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 font-bold'
     },
     {
       name: 'Flipkart', icon: '🏪',

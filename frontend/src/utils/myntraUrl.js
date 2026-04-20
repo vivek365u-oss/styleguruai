@@ -19,27 +19,27 @@ const MYNTRA_PATHS = {
 
   // ── MALE FORMAL ─────────────────────────────────────────────────────
   cat_formal_shirt:   { path: 'formal-shirts',          kw: 'formal shirt men' },
-  cat_blazer:         { path: 'blazers',                kw: 'blazer men' },
   cat_tuxedo:         { path: 'suits',                  kw: 'suit men' },
   cat_formal_trouser: { path: 'formal-trousers',        kw: 'formal trouser men' },
   cat_waistcoat:      { path: 'waistcoats',             kw: 'waistcoat men' },
 
   // ── MALE CASUAL ─────────────────────────────────────────────────────
-  cat_tshirt:         { path: 'tshirts',                kw: 'men tshirt' },
-  cat_oversized_tee:  { path: 'tshirts',                kw: 'men oversized tshirt' },
-  cat_polo:           { path: 'polos',                  kw: 'men polo shirt' },
-  cat_casual_shirt:   { path: 'casual-shirts',          kw: 'men casual shirt' },
+  cat_shirt:          { path: 'men-casual-shirts',      kw: 'premium casual cotton shirt men' },
+  cat_formal_shirt:   { path: 'men-formal-shirts',      kw: 'luxury formal dress shirt men' },
+  cat_tshirt:         { path: 'men-t-shirts',           kw: 'oversized drop shoulder t-shirt men' },
+  cat_polo:           { path: 'men-t-shirts',           kw: 'premium knit polo shirt men' },
+  cat_blazer:         { path: 'men-blazers',            kw: 'slim fit premium blazer men' },
   cat_coord_set_male: { path: 'co-ords',                kw: 'men coord set' },
 
   // ── MALE BOTTOMS ────────────────────────────────────────────────────
-  cat_jeans:          { path: 'men-jeans',              kw: 'men jeans' },
-  cat_cargo:          { path: 'cargos',                 kw: 'men cargo pants' },
-  cat_chinos:         { path: 'chinos',                 kw: 'men chinos' },
+  cat_jeans:          { path: 'men-jeans',              kw: 'relaxed fit straight leg jeans men' },
+  cat_cargo:          { path: 'men-cargo-pants',        kw: 'premium utility cargo pants men' },
+  cat_chinos:         { path: 'men-chinos',             kw: 'slim fit stretch chinos men' },
   cat_shorts:         { path: 'men-shorts',             kw: 'men shorts' },
   cat_track_pants:    { path: 'track-pants-joggers',    kw: 'men track pants' },
 
   // ── MALE OUTERWEAR ──────────────────────────────────────────────────
-  cat_hoodie:         { path: 'hoodies',                kw: 'men hoodie' },
+  cat_hoodie:         { path: 'men-sweatshirts',        kw: 'heavyweight oversized hoodie men' },
   cat_jacket:         { path: 'jackets',                kw: 'men jacket' },
   cat_bomber:         { path: 'bomber-jackets',         kw: 'men bomber jacket' },
   cat_sweatshirt:     { path: 'sweatshirts',            kw: 'men sweatshirt' },
@@ -52,10 +52,10 @@ const MYNTRA_PATHS = {
   cat_sports_shoe:    { path: 'men-sports-shoes',       kw: 'men sports shoes' },
 
   // ── MALE ACCESSORIES ────────────────────────────────────────────────
-  cat_watch:          { path: 'watches',                kw: 'men watch' },
-  cat_wallet:         { path: 'wallets',                kw: 'men wallet' },
-  cat_belt:           { path: 'belts',                  kw: 'leather belt men' },
-  cat_sunglasses:     { path: 'men-sunglasses',         kw: 'men sunglasses' },
+  cat_watch:          { path: 'watches',                kw: 'premium minimalist analog watch men' },
+  cat_wallet:         { path: 'wallets',                kw: 'genuine leather slim wallet men' },
+  cat_belt:           { path: 'belts',                  kw: 'premium leather dress belt men' },
+  cat_sunglasses:     { path: 'men-sunglasses',         kw: 'retro square sunglasses men' },
   cat_backpack:       { path: 'backpacks',              kw: 'men backpack' },
 
   // ── FEMALE ETHNIC ───────────────────────────────────────────────────
@@ -132,8 +132,8 @@ const MYNTRA_PATHS = {
 // ── Gender → default path when no category is known ──────────────────
 const DEFAULT_PATHS = {
   male: {
-    shirt: { path: 'tshirts',       kw: 'men tshirt' },
-    pant:  { path: 'men-jeans',     kw: 'men jeans' },
+    shirt: { path: 'men-shirts',           kw: 'premium slim fit shirt men' },
+    pant:  { path: 'men-trousers',         kw: 'slim fit tailored trousers men' },
     dress: { path: 'tshirts',       kw: 'men tshirt' },
     shoe:  { path: 'men-sneakers',  kw: 'men sneakers' },
     top:   { path: 'tshirts',       kw: 'men tshirt' },
@@ -142,10 +142,10 @@ const DEFAULT_PATHS = {
     shirt: { path: 'tops',          kw: 'women top' },
     pant:  { path: 'women-jeans',   kw: 'women jeans' },
     dress: { path: 'co-ords',       kw: 'women coord set' },
-    kurti: { path: 'kurtas-kurtis', kw: 'women kurti' },
-    top:   { path: 'tops',          kw: 'women top' },
-    shoe:  { path: 'heels',         kw: 'women heels' },
-    accessory: { path: 'accessories', kw: 'women accessory' },
+    kurti: { path: 'kurtas-kurtis',         kw: 'premium ethnic kurti women' },
+    top:   { path: 'tops',                  kw: 'korean minimal top women' },
+    shoe:  { path: 'heels',                 kw: 'premium block heel sandals women' },
+    accessory: { path: 'accessories',       kw: 'minimalist jewelry women' },
   },
 };
 
