@@ -61,6 +61,8 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
   
   // Custom Event Overrides for the week
   const [eventOverrides, setEventOverrides] = useState({});
+  const [varietySeed, setVarietySeed] = useState(0);
+
 
   useEffect(() => {
     const loadContext = async () => {
@@ -195,9 +197,9 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
     const bestPantObj = pantColors.length > 0 ? pantColors[(index + 1) % pantColors.length] : null;
 
     // ── VARIETY SELECTION ENGINE ──────────────────────────────────────
-    // Instead of always picking [0], we stagger selection across the week
-    const topIdx = (index % Math.min(3, matchingTops.length)) || 0;
-    const botIdx = ((index + 1) % Math.min(3, matchingBottoms.length)) || 0;
+    // Instead of always picking [0], we stagger selection over the week + variety seed
+    const topIdx = (index + varietySeed) % Math.max(1, matchingTops.length);
+    const botIdx = (index + 1 + varietySeed) % Math.max(1, matchingBottoms.length);
 
     const bestTop = matchingTops.length > 0 
                     ? matchingTops[topIdx] 
@@ -237,13 +239,16 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
 
   const handleSmartGenerate = async () => {
      setIsGenerating(true);
+     setVarietySeed(Math.floor(Math.random() * 10)); // Trigger re-calculation
      const newPlan = {};
-     // Run logic for each day
-     for(let i=0; i<7; i++) {
-        newPlan[i] = getOutfitForDay(i);
-     }
-     setPlannedOutfits(newPlan);
-     setTimeout(() => setIsGenerating(false), 800);
+     // Run logic for each day after a tiny delay
+     setTimeout(() => {
+        for(let i=0; i<7; i++) {
+           newPlan[i] = getOutfitForDay(i);
+        }
+        setPlannedOutfits(newPlan);
+        setIsGenerating(false);
+     }, 1000);
   };
 
   const handleLogOutfit = async () => {
@@ -384,11 +389,11 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
                  <div className="space-y-8">
                       <div className="flex flex-col items-center group">
                            <div className="w-16 h-16 rounded-2xl shadow-xl transition-all duration-500 group-hover:scale-110 border-4 border-white/10" style={{ backgroundColor: dayInfo.top.hex }} />
-                           <p className="mt-3 text-[10px] font-black uppercase opacity-60 truncate w-full text-center">{dayInfo.top.name}</p>
+                           <p className="mt-3 text-[10px] font-black uppercase opacity-60 truncate w-full text-center">{dayInfo.top.color_name || dayInfo.top.name}</p>
                       </div>
                       <div className="flex flex-col items-center group">
                            <div className="w-16 h-16 rounded-2xl shadow-xl transition-all duration-500 group-hover:scale-110 border-4 border-white/10" style={{ backgroundColor: dayInfo.bottom.hex }} />
-                           <p className="mt-3 text-[10px] font-black uppercase opacity-60 truncate w-full text-center">{dayInfo.bottom.name}</p>
+                           <p className="mt-3 text-[10px] font-black uppercase opacity-60 truncate w-full text-center">{dayInfo.bottom.color_name || dayInfo.bottom.name}</p>
                       </div>
                  </div>
 
