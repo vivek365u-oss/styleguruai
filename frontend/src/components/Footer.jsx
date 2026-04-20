@@ -46,7 +46,7 @@ export default function Footer() {
                 <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
               <span style={{ fontSize: '14px', fontWeight: 700 }}>
-                <span style={{ color: TEXT }}>StyleGuruAI </span>
+                <span style={{ color: TEXT }}>StyleGuru AI </span>
               </span>
             </Link>
             <p style={{ fontSize: '13px', color: MUTED, lineHeight: '1.7', maxWidth: 260, fontWeight: 400 }}>
@@ -101,7 +101,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <p style={{ fontSize: '12px', color: SUBTLE }}>
-            © 2026 StyleGuruAI. All rights reserved.
+            © 2026 StyleGuru AI. All rights reserved.
           </p>
           <p style={{ fontSize: '11px', color: SUBTLE, letterSpacing: '0.03em' }}>
             Designed for Indian skin tones · Built in India 🇮🇳

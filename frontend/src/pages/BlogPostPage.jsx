@@ -43,7 +43,7 @@ export default function BlogPostPage() {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '56px 24px 80px' }}>
       <SEOHead
-        title={`${post.title} — StyleGuruAI`}
+        title={`${post.title} — StyleGuru AI`}
         description={post.description}
       />
 
@@ -92,7 +92,7 @@ export default function BlogPostPage() {
       <div style={{ marginTop: 16, padding: '36px', background: C.surface, border: `1px solid ${C.border}`, textAlign: 'center' }}>
         <p style={{ fontSize: '24px', marginBottom: 12 }}>✨</p>
         <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: '22px', fontWeight: 300, color: C.text, marginBottom: 8 }}>
-          Try StyleGuruAI — It's Free
+          Try StyleGuru AI — It's Free
         </h3>
         <p style={{ fontSize: '13px', color: C.muted, lineHeight: '1.7', marginBottom: 24, fontFamily: "'Inter',sans-serif" }}>
           Upload your selfie and get instant AI-powered outfit recommendations based on your skin tone.

@@ -16,7 +16,7 @@ function Section({ num, title, children }) {
 export default function PrivacyPage() {
   return (
     <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 24px 80px' }}>
-      <SEOHead title="Privacy Policy — StyleGuruAI" description="Read the StyleGuruAI privacy policy. We do not store or share your uploaded images." />
+      <SEOHead title="Privacy Policy — StyleGuru AI" description="Read the StyleGuru AI privacy policy. We do not store or share your uploaded images." />
 
       <p style={{ fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: C.gold, marginBottom: 12, fontFamily: "'Inter',sans-serif" }}>Legal</p>
       <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(28px,5vw,44px)', fontWeight: 300, color: C.text, lineHeight: 1.2, marginBottom: 8 }}>
@@ -27,7 +27,7 @@ export default function PrivacyPage() {
       </p>
 
       <Section num="1" title="Data Collection & Usage">
-        StyleGuruAI operates on a "Privacy First" architecture. When you upload an image for Skin Tone or Outfit analysis, our AI processes the visual data in a transient state. We do not store original raw images on our permanent servers after the analysis is complete, ensuring your visual identity remains yours.
+        StyleGuru AI operates on a "Privacy First" architecture. When you upload an image for Skin Tone or Outfit analysis, our AI processes the visual data in a transient state. We do not store original raw images on our permanent servers after the analysis is complete, ensuring your visual identity remains yours.
       </Section>
 
       <Section num="2" title="Intelligence Processing">
@@ -49,7 +49,7 @@ export default function PrivacyPage() {
 
       <div style={{ padding: '20px 24px', background: C.surface, border: `1px solid ${C.border}` }}>
         <p style={{ fontSize: '12px', color: C.muted, lineHeight: '1.7', fontFamily: "'Inter',sans-serif", fontStyle: 'italic' }}>
-          By continuing to use StyleGuruAI, you acknowledge and agree to the terms outlined in this Privacy Policy.
+          By continuing to use StyleGuru AI, you acknowledge and agree to the terms outlined in this Privacy Policy.
         </p>
       </div>
     </div>

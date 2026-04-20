@@ -23,7 +23,7 @@ export default function ContactPage() {
 
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 24px 80px' }}>
-      <SEOHead title="Contact — StyleGuruAI" description="Get in touch with the StyleGuruAI team." />
+      <SEOHead title="Contact — StyleGuru AI" description="Get in touch with the StyleGuru AI team." />
 
       <p style={LABEL}>Support</p>
       <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(28px,5vw,48px)', fontWeight: 300, color: C.text, lineHeight: 1.2, marginBottom: 16 }}>
