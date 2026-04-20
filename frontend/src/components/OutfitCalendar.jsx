@@ -182,9 +182,6 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
         ? ['pants', 'cat_formal_trouser', 'cat_jeans', 'cat_cargo', 'cat_chinos']
         : ['pants', 'bottoms', 'cat_palazzo', 'cat_mom_jeans', 'cat_skirt'];
 
-    const fallbackMap = activeGender === 'male' ? FALLBACK_MALE : FALLBACK_FEMALE;
-    const fallback = fallbackMap[occasion.event] || fallbackMap['WEEKEND'];
-
     const matchingTops = rankedWardrobe.filter(i => topCats.includes(i.category));
     const matchingBottoms = rankedWardrobe.filter(i => bottomCats.includes(i.category));
 
