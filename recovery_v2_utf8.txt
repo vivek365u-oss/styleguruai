@@ -1,14 +1,14 @@
-/**
- * AppShell.jsx — StyleGuruAI v5.1
- * ════════════════════════════════════════════════════════
+﻿/**
+ * AppShell.jsx ΓÇö StyleGuruAI v5.1
+ * ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
  * Full Dynamic Theme System (Light + Dark)
- * ✅ Theme-aware: every component uses C.{token}
- * ✅ Toggle switch (ON/OFF pill toggle in Profile)
- * ✅ Light mode: white bg, dark text, box shadows
- * ✅ Dark mode: navy bg, light text, glow borders
- * ✅ Instant theme switch — no flicker
- * ✅ Theme saved to localStorage
- * ════════════════════════════════════════════════════════
+ * Γ£à Theme-aware: every component uses C.{token}
+ * Γ£à Toggle switch (ON/OFF pill toggle in Profile)
+ * Γ£à Light mode: white bg, dark text, box shadows
+ * Γ£à Dark mode: navy bg, light text, glow borders
+ * Γ£à Instant theme switch ΓÇö no flicker
+ * Γ£à Theme saved to localStorage
+ * ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
  */
 
 import { useState, useEffect, useContext, lazy, Suspense, useCallback, useMemo } from 'react';
@@ -26,7 +26,7 @@ import ShoppingCart from './ShoppingCart';
 import { derivePersonality, deriveStyleScore, deriveLevel, readUserPersonalityData } from '../utils/stylePersonality';
 import { DARK, LIGHT, GRAD, VIOLET, INDIGO, PJS, PDI, getThemeColors } from '../utils/themeColors';
 
-// ── Lazy loaded feature sections ──────────────────
+// ΓöÇΓöÇ Lazy loaded feature sections ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 const UploadSection = lazy(() => import('./UploadSection'));
 const ResultsDisplay = lazy(() => import('./ResultsDisplay'));
 const CoupleResults = lazy(() => import('./CoupleResults'));
@@ -40,7 +40,7 @@ const LookbookPanel = lazy(() => import('./LookbookPanel'));
 const SubscriptionModal = lazy(() => import('./SubscriptionModal'));
 
 
-// ── Section Loader ──────────────────────────────────
+// ΓöÇΓöÇ Section Loader ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function SectionLoader({ C }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 0', flexDirection: 'column', gap: 16 }}>
@@ -50,21 +50,21 @@ function SectionLoader({ C }) {
   );
 }
 
-// ── Toast ───────────────────────────────────────────
+// ΓöÇΓöÇ Toast ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function Toast({ message, type = 'default', onClose, C }) {
   useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, [onClose]);
   const bg = type === 'success' ? C.successBg : type === 'error' ? C.dangerBg : C.glass2;
   const brd = type === 'success' ? C.successBorder : type === 'error' ? C.dangerBorder : C.border;
   return (
     <div style={{ position: 'fixed', bottom: 88, left: '50%', transform: 'translateX(-50%)', zIndex: 600, background: bg, backdropFilter: 'blur(20px)', border: `1px solid ${brd}`, borderRadius: 12, padding: '12px 24px', fontSize: '13px', color: C.text, whiteSpace: 'nowrap', animation: 'fadeUp 0.3s ease', boxShadow: C.cardShadow, display: 'flex', alignItems: 'center', gap: 8, fontFamily: PJS }}>
-      {type === 'success' && <span style={{ color: '#10B981' }}>✓</span>}
-      {type === 'error' && <span style={{ color: C.dangerText }}>✗</span>}
+      {type === 'success' && <span style={{ color: '#10B981' }}>Γ£ô</span>}
+      {type === 'error' && <span style={{ color: C.dangerText }}>Γ£ù</span>}
       {message}
     </div>
   );
 }
 
-// ── Glass Card ─────────────────────────────────────
+// ΓöÇΓöÇ Glass Card ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function GlassCard({ children, style, onClick, hoverable = true, C }) {
   const [hov, setHov] = useState(false);
   return (
@@ -87,7 +87,7 @@ function GlassCard({ children, style, onClick, hoverable = true, C }) {
   );
 }
 
-// ── Section Header ──────────────────────────────────
+// ΓöÇΓöÇ Section Header ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function SectionHeader({ label, title, subtitle, action, trailing, C }) {
   return (
     <div style={{ marginBottom: 28, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', paddingTop: 8 }}>
@@ -109,7 +109,7 @@ function SectionHeader({ label, title, subtitle, action, trailing, C }) {
   );
 }
 
-// ── Tag Chip ───────────────────────────────────────
+// ΓöÇΓöÇ Tag Chip ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function Tag({ text, color = VIOLET, C }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', background: `${color}${C.isDark ? '18' : '12'}`, border: `1px solid ${color}${C.isDark ? '30' : '20'}`, borderRadius: 20, padding: '3px 10px', fontSize: '10px', color: color, fontFamily: PJS, fontWeight: 600 }}>
@@ -118,12 +118,12 @@ function Tag({ text, color = VIOLET, C }) {
   );
 }
 
-// ── Theme Toggle Switch ────────────────────────────
+// ΓöÇΓöÇ Theme Toggle Switch ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 function ThemeToggle({ theme, onToggle, C }) {
   const isLight = theme === 'light';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-      <span style={{ fontSize: '13px', color: C.muted, fontFamily: PJS }}>🌙</span>
+      <span style={{ fontSize: '13px', color: C.muted, fontFamily: PJS }}>≡ƒîÖ</span>
       <button
         onClick={onToggle}
         role="switch"
@@ -147,14 +147,14 @@ function ThemeToggle({ theme, onToggle, C }) {
           transition: 'left 0.3s ease',
         }} />
       </button>
-      <span style={{ fontSize: '13px', color: C.muted, fontFamily: PJS }}>☀️</span>
+      <span style={{ fontSize: '13px', color: C.muted, fontFamily: PJS }}>ΓÿÇ∩╕Å</span>
     </div>
   );
 }
 
-// ══════════════════════════════════════════════════════
+// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 // HOME SECTION
-// ══════════════════════════════════════════════════════
+// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
   const { language } = useLanguage();
 
@@ -203,7 +203,7 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
       {/* Welcome */}
       <div style={{ marginBottom: 28 }}>
         <p style={{ fontSize: '12px', color: C.muted, marginBottom: 4, fontFamily: PJS }}>
-          {greeting} 👋
+          {greeting} ≡ƒæï
         </p>
         <h2 style={{ fontFamily: PDI, fontSize: 'clamp(24px,5vw,38px)', fontWeight: 300, lineHeight: 1.15, margin: 0 }}>
           <span style={{ color: C.text }}>Hi, </span>
@@ -247,7 +247,7 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
             {archetype.palette.map((color, i) => (
               <div key={i} title={archetype.paletteNames[i]} style={{ width: 20, height: 20, borderRadius: '50%', background: color, border: `2px solid ${C.border}`, boxShadow: `0 0 6px ${color}50` }} />
             ))}
-            <span style={{ fontSize: '10px', color: C.muted, fontFamily: PJS, marginLeft: 4 }}>Your palette →</span>
+            <span style={{ fontSize: '10px', color: C.muted, fontFamily: PJS, marginLeft: 4 }}>Your palette ΓåÆ</span>
           </div>
         </GlassCard>
       )}
@@ -261,25 +261,25 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
         onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = C.btnShadow; }}
       >
         <div style={{ width: 46, height: 46, borderRadius: 12, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <span style={{ fontSize: '22px' }}>📷</span>
+          <span style={{ fontSize: '22px' }}>≡ƒô╖</span>
         </div>
         <div style={{ textAlign: 'left', flex: 1 }}>
           <p style={{ fontSize: '15px', fontWeight: 700, margin: 0, color: 'white' }}>Analyze My Style</p>
           <p style={{ fontSize: '11px', opacity: 0.8, margin: '3px 0 0', color: 'white' }}>
-            {analysisCount === 0 ? 'Upload a photo → Get color palette & outfit guide' : `${analysisCount} ${analysisCount === 1 ? 'scan' : 'scans'} done • Run a new scan`}
+            {analysisCount === 0 ? 'Upload a photo ΓåÆ Get color palette & outfit guide' : `${analysisCount} ${analysisCount === 1 ? 'scan' : 'scans'} done ΓÇó Run a new scan`}
           </p>
         </div>
-        <span style={{ fontSize: '18px', opacity: 0.8 }}>→</span>
+        <span style={{ fontSize: '18px', opacity: 0.8 }}>ΓåÆ</span>
       </button>
 
       {/* Stats Dashboard */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 16 }}>
         {[
-          { value: analysisCount || '0', label: 'DNA Protocols', icon: '🧬' },
-          { value: streak > 0 ? `${streak}🔥` : '0', label: 'Vibe Streak', icon: '⚡' },
-          { value: personalityData.skinTone ? personalityData.skinTone.split(' ')[0] : '—', label: 'Depth Class', icon: '🎨' },
+          { value: analysisCount || '0', label: 'DNA Protocols', icon: '≡ƒº¼' },
+          { value: streak > 0 ? `${streak}≡ƒöÑ` : '0', label: 'Vibe Streak', icon: 'ΓÜí' },
+          { value: personalityData.skinTone ? personalityData.skinTone.split(' ')[0] : 'ΓÇö', label: 'Depth Class', icon: '≡ƒÄ¿' },
         ].map((s, i) => (
-          <GlassCard key={i} C={C} style={{ padding: '16px 10px', textAlign: 'center', border: s.value !== '0' && s.value !== '—' ? `1px solid ${VIOLET}40` : `1px solid ${C.border}` }}>
+          <GlassCard key={i} C={C} style={{ padding: '16px 10px', textAlign: 'center', border: s.value !== '0' && s.value !== 'ΓÇö' ? `1px solid ${VIOLET}40` : `1px solid ${C.border}` }}>
             <p style={{ fontFamily: PDI, fontSize: s.value?.toString().length > 5 ? '13px' : '22px', color: C.text, margin: '0 0 4px', lineHeight: 1 }}>{s.value}</p>
             <p style={{ fontSize: '7.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, margin: 0, fontWeight: 700 }}>{s.label}</p>
           </GlassCard>
@@ -315,7 +315,7 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
               {lastAnalysis.timestamp ? new Date(lastAnalysis.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Tap to view'}
             </p>
           </div>
-          <div style={{ width: 30, height: 30, borderRadius: '50%', background: C.glass2, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: C.text, fontSize: '14px' }}>→</div>
+          <div style={{ width: 30, height: 30, borderRadius: '50%', background: C.glass2, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: C.text, fontSize: '14px' }}>ΓåÆ</div>
         </GlassCard>
       )}
 
@@ -337,21 +337,21 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
       {personalityData.wardrobeCount > 0 && (
         <GlassCard C={C} onClick={() => onTabChange('wardrobe')} style={{ padding: '16px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{ width: 42, height: 42, borderRadius: 12, background: 'linear-gradient(135deg,#8B5CF6,#EC4899)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <span style={{ fontSize: '20px' }}>👗</span>
+            <span style={{ fontSize: '20px' }}>≡ƒæù</span>
           </div>
           <div style={{ flex: 1 }}>
             <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '0 0 2px', fontFamily: PJS, fontWeight: 700 }}>Your Wardrobe</p>
             <p style={{ fontSize: '14px', fontFamily: PDI, color: C.text, margin: '0 0 1px' }}>{personalityData.wardrobeCount} saved {personalityData.wardrobeCount === 1 ? 'item' : 'items'}</p>
             <p style={{ fontSize: '11px', color: C.muted, margin: 0, fontFamily: PJS }}>Tap to browse your collection</p>
           </div>
-          <div style={{ width: 30, height: 30, borderRadius: '50%', background: C.glass2, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.text, fontSize: '14px' }}>→</div>
+          <div style={{ width: 30, height: 30, borderRadius: '50%', background: C.glass2, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.text, fontSize: '14px' }}>ΓåÆ</div>
         </GlassCard>
       )}
 
       {/* First use prompt */}
       {analysisCount === 0 && (
         <GlassCard C={C} hoverable={false} style={{ padding: '24px 20px', marginBottom: 8, textAlign: 'center' }}>
-          <p style={{ fontSize: '32px', marginBottom: 8 }}>🎨</p>
+          <p style={{ fontSize: '32px', marginBottom: 8 }}>≡ƒÄ¿</p>
           <p style={{ fontSize: '15px', fontFamily: PDI, color: C.text, margin: '0 0 8px' }}>Discover Your Style DNA</p>
           <p style={{ fontSize: '12px', color: C.muted, margin: '0 0 20px', fontFamily: PJS, lineHeight: '1.7' }}>
             Upload a photo to unlock your personalized color palette, skin tone analysis, and AI style archetype.
@@ -362,7 +362,7 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
             onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
             onMouseLeave={e => e.currentTarget.style.opacity = '1'}
           >
-            Start My First Scan →
+            Start My First Scan ΓåÆ
           </button>
         </GlassCard>
       )}
@@ -370,9 +370,9 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
   );
 }
 
-// ══════════════════════════════════════════════════════
+// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 // PROFILE SECTION
-// ══════════════════════════════════════════════════════
+// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggleTheme, isPro, usage }) {
   const { language, changeLanguage } = useLanguage();
   const [editingName, setEditingName] = useState(false);
@@ -386,7 +386,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
   const LANGUAGES = [
     { code: 'en', label: 'EN', full: 'English' },
     { code: 'hinglish', label: 'HI', full: 'Hinglish' },
-    { code: 'hi', label: 'हि', full: 'Hindi' },
+    { code: 'hi', label: 'αñ╣αñ┐', full: 'Hindi' },
   ];
 
   const handleLangChange = (code) => {
@@ -409,8 +409,8 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
     if (perm === 'granted') {
       localStorage.setItem('sg_notif_on', 'true');
       setNotifOn(true);
-      onToast({ message: 'Notifications enabled 🔔', type: 'success' });
-      new Notification('StyleGuruAI', { body: 'Daily style tips & updates enabled! 🎨', icon: '/favicon.ico' });
+      onToast({ message: 'Notifications enabled ≡ƒöö', type: 'success' });
+      new Notification('StyleGuruAI', { body: 'Daily style tips & updates enabled! ≡ƒÄ¿', icon: '/favicon.ico' });
     } else if (perm === 'denied') {
       onToast({ message: 'Allow notifications in browser settings', type: 'error' });
     }
@@ -419,7 +419,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
   const handleDestroyAccount = async () => {
     // Step 1: First confirm
     const step1 = window.confirm(
-      '⚠️ Delete Account?\n\nThis will PERMANENTLY delete:\n• Your profile & Style DNA\n• All analysis history\n• Saved outfits & wardrobe\n• Your Firebase account\n\nThis action CANNOT be undone.'
+      'ΓÜá∩╕Å Delete Account?\n\nThis will PERMANENTLY delete:\nΓÇó Your profile & Style DNA\nΓÇó All analysis history\nΓÇó Saved outfits & wardrobe\nΓÇó Your Firebase account\n\nThis action CANNOT be undone.'
     );
     if (!step1) return;
     // Step 2: Type confirmation
@@ -432,7 +432,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
       const uid = auth.currentUser?.uid;
       if (!uid) throw new Error('Not logged in');
       await destroyUserAccount(uid);
-      onToast({ message: '🔒 Account deleted. Goodbye!', type: 'success' });
+      onToast({ message: '≡ƒöÆ Account deleted. Goodbye!', type: 'success' });
       // Clear all local data
       localStorage.clear();
       // Logout
@@ -463,7 +463,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
 
 
   const handleShareProfile = async () => {
-    const text = `My StyleGuruAI Profile 🎨\n\nStyle Archetype: ${archetype.name} ${archetype.emoji}\nStyle Score: ${styleScore}/100\nLevel: ${level.label}\nAnalyses Done: ${analysisCount}\n\nCheck yours at StyleGuruAI.in`;
+    const text = `My StyleGuruAI Profile ≡ƒÄ¿\n\nStyle Archetype: ${archetype.name} ${archetype.emoji}\nStyle Score: ${styleScore}/100\nLevel: ${level.label}\nAnalyses Done: ${analysisCount}\n\nCheck yours at StyleGuruAI.in`;
     if (navigator.share) {
       try { await navigator.share({ title: 'My Style DNA', text }); } catch { }
     } else {
@@ -518,7 +518,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
         }
       />
 
-      {/* Settings Menu Overlay — Mobile Safe */}
+      {/* Settings Menu Overlay ΓÇö Mobile Safe */}
       {isMenuOpen && (
         <div 
           onClick={() => setIsMenuOpen(false)}
@@ -544,7 +544,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
 
               {/* Theme row */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 24px' }}>
-                <span style={{ fontSize: '20px' }}>{theme === 'dark' ? '🌙' : '☀️'}</span>
+                <span style={{ fontSize: '20px' }}>{theme === 'dark' ? '≡ƒîÖ' : 'ΓÿÇ∩╕Å'}</span>
                 <div style={{ flex: 1 }}>
                   <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 500 }}>App Theme</p>
                   <p style={{ fontSize: '10px', color: C.muted, margin: 0 }}>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</p>
@@ -556,7 +556,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
 
               {/* Language row */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 24px' }}>
-                <span style={{ fontSize: '18px' }}>🌐</span>
+                <span style={{ fontSize: '18px' }}>≡ƒîÉ</span>
                 <div style={{ flex: 1 }}>
                   <p style={{ fontSize: '13px', color: C.text, margin: '0 0 8px', fontFamily: PJS, fontWeight: 500 }}>Language</p>
                   <div style={{ display: 'flex', gap: 6 }}>
@@ -585,7 +585,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
                 onClick={handleNotifToggle}
                 style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 24px', cursor: 'pointer' }}
               >
-                <span style={{ fontSize: '18px' }}>🔔</span>
+                <span style={{ fontSize: '18px' }}>≡ƒöö</span>
                 <div style={{ flex: 1 }}>
                   <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 500 }}>Notifications</p>
                   <p style={{ fontSize: '10px', color: C.muted, margin: 0 }}>{notifOn ? 'Enabled' : 'Disabled'}</p>
@@ -600,15 +600,15 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
               {/* Buttons list */}
               <div style={{ padding: '8px 0' }}>
                  {[
-                   { icon: '💬', label: 'Contact Support', action: () => window.open('mailto:StyleGuruAI.in.gmail@gmail.com', '_blank') },
-                   { icon: '⭐', label: 'Rate the App', action: () => window.open('https://play.google.com/store/apps/details?id=com.StyleGuruAI', '_blank') },
-                   { icon: '🗑️', label: 'Clear Local Data', danger: true, action: () => {
+                   { icon: '≡ƒÆ¼', label: 'Contact Support', action: () => window.open('mailto:StyleGuruAI.in.gmail@gmail.com', '_blank') },
+                   { icon: 'Γ¡É', label: 'Rate the App', action: () => window.open('https://play.google.com/store/apps/details?id=com.StyleGuruAI', '_blank') },
+                   { icon: '≡ƒùæ∩╕Å', label: 'Clear Local Data', danger: true, action: () => {
                       if (window.confirm('Clear all local data?')) { 
                         localStorage.clear(); onToast({ message: 'Data cleared', type: 'success' }); 
                       }
                    }},
-                   { icon: '🚪', label: 'Sign Out', action: onLogout },
-                   { icon: '⚠️', label: 'Delete Account Permanently', danger: true, action: handleDestroyAccount },
+                   { icon: '≡ƒÜ¬', label: 'Sign Out', action: onLogout },
+                   { icon: 'ΓÜá∩╕Å', label: 'Delete Account Permanently', danger: true, action: handleDestroyAccount },
                  ].map((item, i) => (
                    <button 
                     key={i} 
@@ -627,7 +627,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
               </div>
             </div>
 
-            {/* ── Sticky Close Button — Always visible at bottom ── */}
+            {/* ΓöÇΓöÇ Sticky Close Button ΓÇö Always visible at bottom ΓöÇΓöÇ */}
             <button 
               onClick={() => setIsMenuOpen(false)}
               style={{ 
@@ -639,7 +639,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
                 letterSpacing: '0.05em'
               }}
             >
-              ✕  Close
+              Γ£ò  Close
             </button>
           </div>
         </div>
@@ -664,12 +664,12 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
                   style={{ background: C.inputBg, border: `1px solid ${VIOLET}`, borderRadius: 8, padding: '7px 10px', fontSize: '14px', color: C.text, fontFamily: PJS, outline: 'none', flex: 1 }}
                 />
                 <button onClick={handleSaveName} style={{ background: VIOLET, border: 'none', color: 'white', borderRadius: 6, padding: '7px 14px', fontSize: '12px', cursor: 'pointer', fontFamily: PJS }}>Save</button>
-                <button onClick={() => setEditingName(false)} style={{ background: C.glass2, border: `1px solid ${C.border}`, color: C.muted, borderRadius: 6, padding: '7px 10px', fontSize: '12px', cursor: 'pointer', fontFamily: PJS }}>✕</button>
+                <button onClick={() => setEditingName(false)} style={{ background: C.glass2, border: `1px solid ${C.border}`, color: C.muted, borderRadius: 6, padding: '7px 10px', fontSize: '12px', cursor: 'pointer', fontFamily: PJS }}>Γ£ò</button>
               </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <p style={{ fontFamily: PDI, fontSize: '18px', color: C.text, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName || user?.name || 'User'}</p>
-                <button onClick={() => setEditingName(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted, fontSize: '13px', padding: '2px 4px', borderRadius: 4 }} title="Edit name">✏️</button>
+                <button onClick={() => setEditingName(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted, fontSize: '13px', padding: '2px 4px', borderRadius: 4 }} title="Edit name">Γ£Å∩╕Å</button>
               </div>
             )}
             <p style={{ fontSize: '12px', color: C.muted, fontFamily: PJS, margin: '0 0 8px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</p>
@@ -686,7 +686,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
         {[
           { value: analysisCount, label: 'Scans' },
           { value: styleScore, label: 'Score', gradient: true },
-          { value: streak > 0 ? `${streak}🔥` : '0', label: 'Streak' },
+          { value: streak > 0 ? `${streak}≡ƒöÑ` : '0', label: 'Streak' },
           { value: wardrobeCount, label: 'Wardrobe' },
         ].map((s, i) => (
           <GlassCard key={i} C={C} style={{ padding: '14px 8px', textAlign: 'center' }}>
@@ -734,7 +734,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
             </div>
             <div style={{ marginTop: 14, padding: '12px 14px', background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 10, position: 'relative', zIndex: 1 }}>
               <p style={{ fontSize: '11px', color: C.text2, lineHeight: '1.65', margin: 0, fontFamily: PJS }}>
-                💡 <strong>Archetype tip:</strong> {archetype.tip}
+                ≡ƒÆí <strong>Archetype tip:</strong> {archetype.tip}
               </p>
             </div>
           </>
@@ -751,7 +751,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
                 {level.next - analysisCount} more scan{level.next - analysisCount !== 1 ? 's' : ''} needed
               </p>
             </div>
-            <span style={{ fontSize: '22px' }}>🏆</span>
+            <span style={{ fontSize: '22px' }}>≡ƒÅå</span>
           </div>
           <div style={{ width: '100%', height: 8, background: C.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)', borderRadius: 4, overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${Math.min((analysisCount / level.next) * 100, 100)}%`, background: `linear-gradient(90deg,${level.color},${VIOLET})`, borderRadius: 4, transition: 'width 1s ease' }} />
@@ -760,14 +760,14 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
         </GlassCard>
       )}
 
-      {/* ── PLAN & USAGE TRACKER (NEW) ── */}
+      {/* ΓöÇΓöÇ PLAN & USAGE TRACKER (NEW) ΓöÇΓöÇ */}
       <GlassCard C={C} hoverable={false} style={{ padding: '20px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
             <div>
                <p style={{ fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, marginBottom: 4 }}>Your Membership</p>
                <h3 style={{ fontFamily: PDI, fontSize: '20px', color: C.text, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
                   {isPro ? 'Pro Member' : 'Free Plan'}
-                  {isPro && <span style={{ fontSize: '14px' }}>✨</span>}
+                  {isPro && <span style={{ fontSize: '14px' }}>Γ£¿</span>}
                </h3>
             </div>
             {isPro ? (
@@ -844,7 +844,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
                   </div>
                   <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
                      <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 4 }}>Outfit Checks</p>
-                     <p style={{ fontSize: '18px', fontWeight: 700, color: C.text, margin: 0 }}>∞</p>
+                     <p style={{ fontSize: '18px', fontWeight: 700, color: C.text, margin: 0 }}>Γê₧</p>
                      <p style={{ fontSize: '8px', color: C.muted, marginTop: 4 }}>Premium AI Power</p>
                   </div>
                </>
@@ -868,9 +868,9 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
   );
 }
 
-// ══════════════════════════════════════════════════════
+// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 // MAIN APP SHELL
-// ══════════════════════════════════════════════════════
+// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 export default function AppShell({ user, onLogout }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { isPro, usage, coins } = usePlan();
@@ -919,7 +919,7 @@ export default function AppShell({ user, onLogout }) {
     }).catch(() => { });
   }, [user?.uid]);
 
-  // ── Back-stack navigation via popstate ──────────────────────
+  // ΓöÇΓöÇ Back-stack navigation via popstate ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   useEffect(() => {
     // Push initial state
     window.history.replaceState({ tab: activeTab }, '');
@@ -930,7 +930,7 @@ export default function AppShell({ user, onLogout }) {
     const onPop = () => {
       setTabHistory(history => {
         if (history.length <= 1) {
-          // Nothing to go back to — restore current state so app doesn't exit
+          // Nothing to go back to ΓÇö restore current state so app doesn't exit
           window.history.pushState({ tab: history[0] || 'home' }, '');
           return history;
         }
@@ -973,7 +973,7 @@ export default function AppShell({ user, onLogout }) {
     setLastAnalysis(entry);
     const count = parseInt(localStorage.getItem('sg_analysis_count') || '0') + 1;
     localStorage.setItem('sg_analysis_count', count.toString());
-    setToast({ message: '✨ Analysis complete!', type: 'success' });
+    setToast({ message: 'Γ£¿ Analysis complete!', type: 'success' });
     try { await saveHistory(data); } catch (e) { console.warn('Firestore save failed:', e); }
     logEvent(EVENTS.ANALYSIS_COMPLETE);
   }, []);
@@ -1003,12 +1003,12 @@ export default function AppShell({ user, onLogout }) {
 
   // Mobile: 6 clean tabs
   const mobileTabs = [
-    { id: 'home', icon: '🏠', label: 'Home' },
-    { id: 'analyze', icon: '📷', label: 'Analyze' },
-    { id: 'lookbook', icon: '📖', label: 'Lookbook' },
-    { id: 'history', icon: '📋', label: 'History' },
-    { id: 'tools', icon: '🛠️', label: 'Tools' },
-    { id: 'navigator', icon: '🧭', label: 'Compass' },
+    { id: 'home', icon: '≡ƒÅá', label: 'Home' },
+    { id: 'analyze', icon: '≡ƒô╖', label: 'Analyze' },
+    { id: 'lookbook', icon: '≡ƒôû', label: 'Lookbook' },
+    { id: 'history', icon: '≡ƒôï', label: 'History' },
+    { id: 'tools', icon: '≡ƒ¢á∩╕Å', label: 'Tools' },
+    { id: 'navigator', icon: '≡ƒº¡', label: 'Compass' },
   ];
 
   return (
@@ -1017,7 +1017,7 @@ export default function AppShell({ user, onLogout }) {
       <div style={{ position: 'fixed', top: '-20%', left: '-10%', width: '50vw', height: '50vh', background: `radial-gradient(circle,${C.glow1} 0%,transparent 70%)`, pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'fixed', bottom: '-20%', right: '-10%', width: '50vw', height: '50vh', background: `radial-gradient(circle,${C.glow2} 0%,transparent 70%)`, pointerEvents: 'none', zIndex: 0 }} />
 
-      {/* ═══════════ TOP NAV ═══════════ */}
+      {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ TOP NAV ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: 60, background: navScrolled ? C.navBg : C.navBgScroll, backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderBottom: `1px solid ${navScrolled ? C.border : 'transparent'}`, display: 'flex', alignItems: 'center', padding: '0 20px', gap: 12, transition: 'all 0.3s' }}>
         {/* Logo */}
         <button onClick={() => handleTabChange('home')} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
@@ -1045,7 +1045,7 @@ export default function AppShell({ user, onLogout }) {
           })}
         </div>
 
-        {/* Right — Theme quick toggle + Avatar */}
+        {/* Right ΓÇö Theme quick toggle + Avatar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
           {/* Quick theme toggle button */}
           <button
@@ -1055,7 +1055,7 @@ export default function AppShell({ user, onLogout }) {
             onMouseEnter={e => { e.currentTarget.style.borderColor = `${VIOLET}50`; e.currentTarget.style.color = C.text; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.muted; }}
           >
-            {theme === 'dark' ? '☀️' : '🌙'}
+            {theme === 'dark' ? 'ΓÿÇ∩╕Å' : '≡ƒîÖ'}
           </button>
           {/* Profile avatar with Pro Badge */}
           <button
@@ -1068,14 +1068,14 @@ export default function AppShell({ user, onLogout }) {
                 title="Pro Member"
                 style={{ position: 'absolute', top: -4, right: -4, background: '#F59E0B', width: 14, height: 14, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '7px', border: `2px solid ${C.navBg}`, boxShadow: '0 0 8px rgba(245,158,11,0.5)' }}
               >
-                🌟
+                ≡ƒîƒ
               </div>
             )}
           </button>
         </div>
       </nav>
 
-      {/* ═══════════ MAIN CONTENT ═══════════ */}
+      {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ MAIN CONTENT ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
       <main style={{ maxWidth: 760, margin: '0 auto', padding: '76px 16px 100px', position: 'relative', zIndex: 1 }}>
         <AnimatePresence mode="wait">
           <Suspense fallback={<SectionLoader C={C} />}>
@@ -1118,33 +1118,33 @@ export default function AppShell({ user, onLogout }) {
                 subtitle={!results && !adSkipped ? 'Get personalized color palette & outfit recommendations' : undefined}
                 action={
                   results ? (
-                    // ── Result exists → show Refresh ──
+                    // ΓöÇΓöÇ Result exists ΓåÆ show Refresh ΓöÇΓöÇ
                     <button
                       onClick={handleReset}
                       style={{ background: C.glass, backdropFilter: 'blur(12px)', border: `1px solid ${C.border}`, color: C.muted, borderRadius: 10, padding: '10px 18px', fontSize: '12px', cursor: 'pointer', transition: 'all 0.2s', fontFamily: PJS }}
                       onMouseEnter={e => { e.currentTarget.style.borderColor = VIOLET; e.currentTarget.style.color = C.text; }}
                       onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.muted; }}
                     >
-                      🔄 Refresh
+                      ≡ƒöä Refresh
                     </button>
                   ) : adSkipped ? (
-                    // ── Ad skipped → show New Analysis ──
+                    // ΓöÇΓöÇ Ad skipped ΓåÆ show New Analysis ΓöÇΓöÇ
                     <button
                       onClick={() => { setAdSkipped(false); handleReset(); }}
                       style={{ background: 'linear-gradient(135deg,#8B5CF6,#6366F1)', border: 'none', color: 'white', borderRadius: 10, padding: '10px 18px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s', fontFamily: PJS, boxShadow: '0 4px 16px rgba(139,92,246,0.35)' }}
                       onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
                       onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
                     >
-                      🆕 New Analysis
+                      ≡ƒåò New Analysis
                     </button>
                   ) : null
                 }
               />
 
-              {/* ── Ad-skipped state — no result, show helper message ── */}
+              {/* ΓöÇΓöÇ Ad-skipped state ΓÇö no result, show helper message ΓöÇΓöÇ */}
               {adSkipped && !results && !loading && (
                 <div style={{ textAlign: 'center', padding: '40px 24px', background: C.glass, backdropFilter: 'blur(16px)', border: `1px solid ${C.border}`, borderRadius: 20, marginBottom: 24 }}>
-                  <p style={{ fontSize: '40px', marginBottom: 12 }}>🎬</p>
+                  <p style={{ fontSize: '40px', marginBottom: 12 }}>≡ƒÄ¼</p>
                   <p style={{ fontFamily: PJS, fontSize: '16px', fontWeight: 700, color: C.text, marginBottom: 8 }}>No result generated</p>
                   <p style={{ fontFamily: PJS, fontSize: '13px', color: C.muted, lineHeight: '1.7', marginBottom: 24 }}>
                     Analysis cancelled. Start a new analysis to continue.
@@ -1155,12 +1155,12 @@ export default function AppShell({ user, onLogout }) {
                     onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(139,92,246,0.5)'; }}
                     onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(139,92,246,0.4)'; }}
                   >
-                    🆕 New Analysis
+                    ≡ƒåò New Analysis
                   </button>
                 </div>
               )}
 
-              {/* ── Normal upload screen ── */}
+              {/* ΓöÇΓöÇ Normal upload screen ΓöÇΓöÇ */}
               {!results && !loading && !error && !adSkipped && (
                 <UploadSection
                   onLoadingStart={() => setLoading(true)}
@@ -1189,7 +1189,7 @@ export default function AppShell({ user, onLogout }) {
               {loading && <LoadingScreenWithProgress progress={uploadProgress} />}
               {error && !loading && (
                 <div style={{ padding: 32, textAlign: 'center', background: C.dangerBg, backdropFilter: 'blur(12px)', border: `1px solid ${C.dangerBorder}`, borderRadius: 16 }}>
-                  <p style={{ fontSize: '36px', marginBottom: 12 }}>😕</p>
+                  <p style={{ fontSize: '36px', marginBottom: 12 }}>≡ƒÿò</p>
                   <p style={{ color: C.dangerText, fontSize: '14px', marginBottom: 24, lineHeight: '1.6', fontFamily: PJS }}>{error}</p>
                   <button onClick={handleReset} style={{ background: C.dangerBg, border: `1px solid ${C.dangerBorder}`, color: C.dangerText, borderRadius: 10, padding: '12px 28px', cursor: 'pointer', fontSize: '13px', fontFamily: PJS }}>Try Again</button>
                 </div>
@@ -1296,7 +1296,7 @@ export default function AppShell({ user, onLogout }) {
       </AnimatePresence>
     </main>
 
-      {/* ═══════════ MOBILE BOTTOM NAV ═══════════ */}
+      {/* ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ MOBILE BOTTOM NAV ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ */}
       <nav
         className="mobile-bottom-nav md:hidden"
         style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200, background: C.bottomNav, backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', borderTop: `1px solid ${C.border}`, paddingBottom: 'env(safe-area-inset-bottom,4px)' }}
