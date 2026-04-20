@@ -1,0 +1,129 @@
+import { useState, useEffect, useContext } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ThemeContext } from '../context/ThemeContext';
+import { auth, getLookbook, removeFromLookbook } from '../api/styleApi';
+import { MISSIONS } from '../utils/stylingEngine';
+
+function LookbookPanel() {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (!auth.currentUser) return;
+      setLoading(true);
+      const data = await getLookbook(auth.currentUser.uid);
+      setItems(data);
+      setLoading(false);
+    }
+    fetchData();
+  }, []);
+
+  const handleDelete = async (id) => {
+    const success = await removeFromLookbook(auth.currentUser.uid, id);
+    if (success) {
+      setItems(items.filter(item => item.id !== id));
+    }
+  };
+
+  const bgCls = isDark ? 'bg-slate-900' : 'bg-gray-50';
+  const cardBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
+  const textCls = isDark ? 'text-white' : 'text-gray-800';
+  const softTextCls = isDark ? 'text-white/50' : 'text-gray-500';
+
+  return (
+    <div className={`min-h-screen ${bgCls} pb-24`}>
+      <header className="px-6 pt-12 pb-6">
+        <div className="flex items-center gap-3 mb-2">
+          <span className="text-3xl">📖</span>
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-purple-500">Curated Style</p>
+            <h1 className={`text-2xl font-black ${textCls}`}>Digital Lookbook</h1>
+          </div>
+        </div>
+        <p className={`${softTextCls} text-sm`}>Your personal gallery of mission-perfect outfits.</p>
+      </header>
+
+      <main className="px-6">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-12 h-12 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin mb-4" />
+            <p className={`${softTextCls} text-sm font-medium animate-pulse`}>Accessing Style Archive...</p>
+          </div>
+        ) : items.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-20 h-20 bg-purple-500/10 rounded-full flex items-center justify-center mb-4">
+              <span className="text-4xl opacity-50">✨</span>
+            </div>
+            <h3 className={`font-bold ${textCls}`}>Your Lookbook is Empty</h3>
+            <p className={`${softTextCls} text-sm mt-1 max-w-[250px]`}>Save your favorite looks from the analysis results to see them here.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            <AnimatePresence>
+              {items.map((item, idx) => {
+                const mission = Object.values(MISSIONS).find(m => m.id === item.missionId);
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className={`${cardBgCls} rounded-3xl p-5 relative overflow-hidden`}
+                  >
+                    {/* Mission Header */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{mission?.emoji || '👔'}</span>
+                        <span className={`text-xs font-black uppercase tracking-widest ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>
+                          {mission?.label || 'Custom Mission'}
+                        </span>
+                      </div>
+                      <button 
+                        onClick={() => handleDelete(item.id)}
+                        className="p-2 rounded-full hover:bg-red-500/10 text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Color Palette */}
+                    <div className="flex gap-2 mb-4">
+                      {item.colors?.map((c, i) => (
+                        <div 
+                          key={i} 
+                          className="w-10 h-10 rounded-xl border border-white/20 shadow-sm"
+                          style={{ backgroundColor: c.hex }}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Meta */}
+                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center">
+                          <span className="text-[10px] font-bold text-purple-400">💯</span>
+                        </div>
+                        <span className={`text-[10px] font-bold ${softTextCls}`}>Score: {item.score}/100</span>
+                      </div>
+                      <span className={`text-[10px] font-medium ${softTextCls}`}>
+                        {new Date(item.saved_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
+export default LookbookPanel;

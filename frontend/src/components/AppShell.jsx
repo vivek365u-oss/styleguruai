@@ -36,6 +36,7 @@ const ToolsTab = lazy(() => import('./ToolsTab'));
 const StyleNavigator = lazy(() => import('./StyleNavigator'));
 const ProfilePanel = lazy(() => import('./ProfilePanel'));
 const ColorScanner = lazy(() => import('./ColorScanner'));
+const LookbookPanel = lazy(() => import('./LookbookPanel'));
 const SubscriptionModal = lazy(() => import('./SubscriptionModal'));
 
 
@@ -994,15 +995,17 @@ export default function AppShell({ user, onLogout }) {
   const desktopTabs = [
     { id: 'home', label: 'Home' },
     { id: 'analyze', label: 'Analyze' },
+    { id: 'lookbook', label: 'Lookbook' },
     { id: 'history', label: 'History' },
     { id: 'navigator', label: 'Style Compass' },
     { id: 'tools', label: 'Tools' },
   ];
 
-  // Mobile: 5 clean tabs — Profile accessible via top-nav avatar
+  // Mobile: 6 clean tabs
   const mobileTabs = [
     { id: 'home', icon: '🏠', label: 'Home' },
     { id: 'analyze', icon: '📷', label: 'Analyze' },
+    { id: 'lookbook', icon: '📖', label: 'Lookbook' },
     { id: 'history', icon: '📋', label: 'History' },
     { id: 'tools', icon: '🛠️', label: 'Tools' },
     { id: 'navigator', icon: '🧭', label: 'Compass' },
@@ -1086,6 +1089,18 @@ export default function AppShell({ user, onLogout }) {
                 transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
               >
                 <HomeSection C={C} user={user} lastAnalysis={lastAnalysis} onAnalyze={() => handleTabChange('analyze')} onTabChange={handleTabChange} />
+              </motion.div>
+            )}
+
+            {activeTab === 'lookbook' && (
+              <motion.div 
+                key="lookbook" 
+                initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+                transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+              >
+                <LookbookPanel C={C} />
               </motion.div>
             )}
 

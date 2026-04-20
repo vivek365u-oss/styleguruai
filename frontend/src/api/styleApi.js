@@ -1061,4 +1061,51 @@ export const saveSelfieStyleHistory = async (uid, data) => {
     console.warn('[API] Failed to save selfie style history:', e);
   }
 };
+// ============================================
+// LOOKBOOK — FIRESTORE (Phase 3)
+// ============================================
 
+export const saveToLookbook = async (uid, lookData) => {
+  if (!auth.currentUser) return null;
+  try {
+    const docRef = await addDoc(collection(db, 'users', uid, 'lookbook'), {
+      ...lookData,
+      saved_at: new Date().toISOString(),
+    });
+    // Increment lookbook count in profile metadata
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, { lookbookCount: increment(1) });
+    return docRef.id;
+  } catch (e) {
+    handleFirestoreError('saveToLookbook', e);
+    return null;
+  }
+};
+
+export const getLookbook = async (uid) => {
+  if (!auth.currentUser) return [];
+  try {
+    const q = query(
+      collection(db, 'users', uid, 'lookbook'),
+      orderBy('saved_at', 'desc')
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    handleFirestoreError('getLookbook', e);
+    return [];
+  }
+};
+
+export const removeFromLookbook = async (uid, lookId) => {
+  if (!auth.currentUser) return false;
+  try {
+    await deleteDoc(doc(db, 'users', uid, 'lookbook', lookId));
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, { lookbookCount: increment(-1) });
+    return true;
+  } catch (e) {
+    handleFirestoreError('removeFromLookbook', e);
+    return false;
+  }
+};

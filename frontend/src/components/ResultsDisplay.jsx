@@ -4,7 +4,7 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../context/ThemeContext';
-import { publishToCommunityFeed, auth, saveSavedColor, getSavedColors, saveHistory, savePrimaryProfile } from '../api/styleApi';
+import { publishToCommunityFeed, auth, saveSavedColor, getSavedColors, saveHistory, savePrimaryProfile, saveToLookbook } from '../api/styleApi';
 import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';
 import ColorRecommendationsShop from './ColorRecommendationsShop';
@@ -723,48 +723,79 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
         </button>
         <button
           onClick={() => {
-            // Generate shareable style card
+            // Generate shareable Style Card V2 (Phase 3 Upgrade)
             const canvas = document.createElement('canvas');
-            canvas.width = 800; canvas.height = 500;
+            const W = 1080, H = 1350;
+            canvas.width = W; canvas.height = H;
             const ctx = canvas.getContext('2d');
-            // Background gradient
-            const grad = ctx.createLinearGradient(0, 0, 800, 500);
-            grad.addColorStop(0, '#0f0c29'); grad.addColorStop(0.5, '#302b63'); grad.addColorStop(1, '#24243e');
-            ctx.fillStyle = grad; ctx.fillRect(0, 0, 800, 500);
-            // Skin tone circle
-            const skinHex = analysis.skin_color?.hex || '#C68642';
-            ctx.beginPath(); ctx.arc(120, 180, 70, 0, Math.PI * 2);
-            ctx.fillStyle = skinHex; ctx.fill();
-            ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 3; ctx.stroke();
-            // Text
-            ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '14px Arial'; ctx.fillText('MY STYLE PROFILE', 220, 100);
-            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 42px Arial';
-            ctx.fillText(`${analysis.skin_tone.category.charAt(0).toUpperCase() + analysis.skin_tone.category.slice(1)} Skin`, 220, 155);
-            ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '20px Arial';
-            ctx.fillText(`${analysis.skin_tone.undertone} undertone  •  ${analysis.skin_tone.color_season}`, 220, 195);
-            ctx.fillStyle = '#a855f7'; ctx.font = 'bold 28px Arial';
-            ctx.fillText(`Style Score: ${styleScore}/100`, 220, 245);
-            // Color palette
-            const colors = recommendations?.best_shirt_colors?.slice(0, 5) || [];
-            colors.forEach((c, i) => {
-              ctx.beginPath(); ctx.arc(220 + i * 70, 320, 28, 0, Math.PI * 2);
-              ctx.fillStyle = c.hex; ctx.fill();
-              ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 2; ctx.stroke();
+
+            // 1. Premium Background Gradient
+            const mission = Object.values(MISSIONS).find(m => m.id === activeMission);
+            const grad = ctx.createLinearGradient(0, 0, W, H);
+            if (activeMission === 'wedding') { grad.addColorStop(0, '#1e1b4b'); grad.addColorStop(1, '#431407'); }
+            else if (activeMission === 'office') { grad.addColorStop(0, '#0f172a'); grad.addColorStop(1, '#334155'); }
+            else { grad.addColorStop(0, '#0f0c29'); grad.addColorStop(0.5, '#302b63'); grad.addColorStop(1, '#24243e'); }
+            ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+
+            // 2. Mission Texture (Subtle)
+            ctx.globalAlpha = 0.05; ctx.fillStyle = '#ffffff';
+            for(let i=0; i<W; i+=40) { ctx.fillRect(i, 0, 1, H); ctx.fillRect(0, i, W, 1); }
+            ctx.globalAlpha = 1.0;
+
+            // 3. Header
+            ctx.fillStyle = '#a855f7'; ctx.font = 'bold 24px Arial'; ctx.letterSpacing = '4px';
+            ctx.fillText('STYLEGURU AI PROTOCOL', 80, 100);
+            
+            // 4. Mission Badge
+            ctx.fillStyle = 'rgba(168,85,247,0.2)';
+            ctx.beginPath(); ctx.roundRect(80, 140, 300, 60, 30); ctx.fill();
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 24px Arial';
+            ctx.fillText(`${mission?.emoji || '🎯'} ${mission?.label || 'Custom Match'}`, 110, 180);
+
+            // 5. Main Title (Skin Tone)
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 84px Arial';
+            ctx.fillText(analysis.skin_tone.category.toUpperCase(), 80, 320);
+            ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '300 40px Arial';
+            ctx.fillText('SKIN COMPASS: ELITE CLASS', 80, 380);
+
+            // 6. Style DNA Details
+            ctx.fillStyle = '#ffffff'; ctx.font = '28px Arial';
+            ctx.fillText(`• Undertone: ${analysis.skin_tone.undertone.toUpperCase()}`, 80, 460);
+            ctx.fillText(`• Season: ${analysis.skin_tone.color_season.toUpperCase()}`, 80, 510);
+            ctx.fillText(`• Style Score: ${styleScore}/100`, 80, 560);
+
+            // 7. Large Palette Display
+            const cardColors = [
+              ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || []),
+            ].slice(0, 5);
+
+            cardColors.forEach((c, i) => {
+               // Circle shadow
+               ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 20;
+               ctx.beginPath(); ctx.arc(160 + i * 180, 800, 75, 0, Math.PI * 2);
+               ctx.fillStyle = c.hex; ctx.fill();
+               ctx.shadowBlur = 0; // reset
+               ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 4; ctx.stroke();
             });
-            ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '13px Arial';
-            ctx.fillText('Your Best Colors', 220, 380);
-            // Branding
-            ctx.fillStyle = '#a855f7'; ctx.font = 'bold 16px Arial';
-            ctx.fillText('styleguruai.in', 620, 470);
-            // Download
+
+            // 8. Footer / Branding
+            ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = 'bold 20px Arial';
+            ctx.fillText('WWW.STYLEGURUAI.IN', W/2 - 120, H - 100);
+            
+            // Watermark
+            ctx.save(); ctx.translate(W-100, H/2); ctx.rotate(-Math.PI/2);
+            ctx.fillStyle = 'rgba(168,85,247,0.1)'; ctx.font = 'bold 120px Arial';
+            ctx.fillText('STYLEGURU DNA', 0, 0); ctx.restore();
+
+            // 9. Download
             const link = document.createElement('a');
-            link.download = `styleguruai-${analysis.skin_tone.category}-profile.png`;
+            link.download = `styleguru-elite-${activeMission}-${Date.now()}.png`;
             link.href = canvas.toDataURL(); link.click();
           }}
           className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 rounded-xl text-purple-400 font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
           <span>🎨</span>
-          <span>Save Card</span>
+          <span>Elite Style Card</span>
         </button>
       </div>
     </div>
@@ -1410,6 +1441,81 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
 
       {/* NEW: Explainability Section */}
       <DNABreakdown analysis={analysis} isDark={isDark} />
+
+      {/* NEW: Phase 3 Action Center */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+        <button
+          onClick={async () => {
+            const btn = document.getElementById('save-lookbook-btn');
+            if (btn) { btn.textContent = '⏳ Saving...'; btn.disabled = true; }
+            
+            const lookData = {
+              missionId: activeMission,
+              analysis: { skin_tone: analysis.skin_tone },
+              colors: [
+                ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || []),
+              ].slice(0, 5),
+              score: Math.min(98, Math.max(55, Math.round((photo_quality?.score || 85) * 0.7 + (analysis.skin_tone.confidence === 'high' ? 10 : 5)))),
+              timestamp: new Date().toISOString()
+            };
+
+            const ok = await saveToLookbook(auth.currentUser.uid, lookData);
+            if (ok && btn) {
+              btn.textContent = '✅ Saved to Lookbook';
+              btn.style.background = 'rgba(168,85,247,0.15)';
+              btn.style.borderColor = 'rgba(168,85,247,0.4)';
+              btn.disabled = false;
+              setTimeout(() => {
+                btn.textContent = '📖 Save to Lookbook';
+                btn.style.background = ''; btn.style.borderColor = '';
+              }, 3000);
+            }
+          }}
+          id="save-lookbook-btn"
+          className={`flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-bold transition-all hover:scale-[1.02] ${
+            isDark ? 'bg-white/5 border-white/10 text-white/70' : 'bg-gray-50 border-gray-200 text-gray-700'
+          }`}
+        >
+          <span>📖</span> Save to Lookbook
+        </button>
+
+        <button
+          onClick={async () => {
+            const btn = document.getElementById('post-community-btn');
+            if (btn) { btn.textContent = '⏳ Posting...'; btn.disabled = true; }
+
+            const palette = [
+              ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || []),
+            ].slice(0, 5);
+
+            const ok = await publishToCommunityFeed(auth.currentUser.uid, {
+              userName: auth.currentUser?.displayName || 'Elite User',
+              mission: activeMission,
+              palette,
+              score: Math.min(98, Math.max(55, Math.round((photo_quality?.score || 85) * 0.7 + (analysis.skin_tone.confidence === 'high' ? 10 : 5)))),
+              level: 'Premium Elite' // Fallback for now
+            });
+
+            if (ok && btn) {
+              btn.textContent = '🚀 Posted to Feed!';
+              btn.style.background = 'rgba(16,185,129,0.15)';
+              btn.style.borderColor = 'rgba(16,185,129,0.4)';
+              btn.style.color = '#10B981';
+              btn.disabled = false;
+              setTimeout(() => {
+                btn.textContent = '🌍 Post to Community';
+                btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = '';
+              }, 3000);
+            }
+          }}
+          id="post-community-btn"
+          className={`flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-bold transition-all hover:scale-[1.02] ${
+            isDark ? 'bg-purple-500/10 border-purple-500/20 text-purple-300' : 'bg-purple-50 border-purple-200 text-purple-700'
+          }`}
+        >
+          <span>🌍</span> Post to Community
+        </button>
+      </div>
 
       {/* Style DNA Button — saves to BOTH localStorage AND Firestore */}
       <button
