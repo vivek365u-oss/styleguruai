@@ -174,13 +174,18 @@ export const buildMyntraUrl = ({ color, catId, gender, itemType }) => {
   const colorSlug = colorClean.replace(/\s+/g, '-');
   
   // 2. Myntra's most stable URL format: myntra.com/[gender]-[color]-[keyword]
-  // e.g. myntra.com/men-silver-watch
   const slug = `${gSlug}-${colorSlug}-${kwClean}`.replace(/-+/g, '-');
   
-  // 3. Fallback to rawQuery only as a secondary parameter for Myntra's internal tracker
+  // 3. STRICT ADULT FILTER: f=Gender:men,men women OR f=Gender:women,men women
+  // This removes "Bachcha" (kids) results entirely.
+  const genderFilter = isFemale 
+    ? 'f=Gender:men%20women,women' 
+    : 'f=Gender:men,men%20women';
+  
+  // 4. Fallback to rawQuery for search accuracy
   const rawQ = encodeURIComponent(`${colorClean} ${catEntry?.kw || 'shirt'}`);
   
-  return `https://www.myntra.com/${slug}?rawQuery=${rawQ}`;
+  return `https://www.myntra.com/${slug}?${genderFilter}&rawQuery=${rawQ}`;
 };
 
 /**
