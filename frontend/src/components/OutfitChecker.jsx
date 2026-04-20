@@ -126,8 +126,11 @@ function OutfitChecker() {
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const { progress, startProgress, completeProgress, reset: resetProgress } = useAnalysisProgress();
 
+  const isMobile = window.matchMedia('(pointer: coarse)').matches;
   const selfieRef = useRef(null);
   const outfitRef = useRef(null);
+  const selfieCamRef = useRef(null);
+  const outfitCamRef = useRef(null);
 
   const handleSelfie = (file) => {
     setSelfieFile(file);
@@ -347,13 +350,11 @@ function OutfitChecker() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Selfie Upload */}
             <div
-              onClick={() => selfieRef.current?.click()}
-              className={`relative border-2 border-dashed rounded-3xl p-8 text-center cursor-pointer transition-all duration-300 group
+              className={`relative border-2 border-dashed rounded-3xl p-8 text-center transition-all duration-300 group
                 ${isDark
                   ? 'border-blue-500/30 bg-blue-500/5 hover:border-blue-400/60 hover:bg-blue-500/10'
                   : 'border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 hover:border-blue-500 hover:from-blue-100 hover:to-indigo-100 shadow-sm hover:shadow-md'}`}
             >
-              <input ref={selfieRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && handleSelfie(e.target.files[0])} className="hidden" />
               {selfiePreview ? (
                 <div className="flex flex-col items-center">
                   <img src={selfiePreview} alt="Selfie" className="w-32 h-32 object-cover rounded-2xl border-2 border-blue-400 shadow-lg mb-3" />
@@ -367,10 +368,24 @@ function OutfitChecker() {
                     <span className="text-3xl">🤳</span>
                   </div>
                   <p className={`font-black text-base mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('yourSelfie')}</p>
-                  <p className={`text-sm font-semibold mb-2 ${isDark ? 'text-white/40' : 'text-blue-700'}`}>{t('clearFacePhoto')}</p>
-                  <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border
-                    ${isDark ? 'bg-blue-500/20 border-blue-500/30 text-blue-300' : 'bg-blue-600 border-blue-600 text-white shadow-sm'}`}>
-                    📷 Tap to upload
+                  <p className={`text-sm font-semibold mb-3 ${isDark ? 'text-white/40' : 'text-blue-700'}`}>{t('clearFacePhoto')}</p>
+                  <div className="flex gap-2 justify-center px-4 w-full">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); selfieRef.current?.click(); }}
+                      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold border transition-all h-11
+                        ${isDark ? 'bg-blue-500/20 border-blue-500/30 text-blue-300 hover:bg-blue-500/30' : 'bg-blue-600 border-blue-600 text-white shadow-sm hover:bg-blue-700'}`}
+                    >
+                      🖼️ {isMobile ? 'Gallery' : 'Upload'}
+                    </button>
+                    {isMobile && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); selfieCamRef.current?.click(); }}
+                        className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold border transition-all h-11
+                          ${isDark ? 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10' : 'bg-white border-blue-200 text-blue-700 hover:bg-blue-50 shadow-sm'}`}
+                      >
+                        📷 Camera
+                      </button>
+                    )}
                   </div>
                   <p className={`text-xs mt-2 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>JPG, PNG, WebP</p>
                 </>
@@ -379,13 +394,11 @@ function OutfitChecker() {
 
             {/* Outfit Upload */}
             <div
-              onClick={() => outfitRef.current?.click()}
-              className={`relative border-2 border-dashed rounded-3xl p-8 text-center cursor-pointer transition-all duration-300 group
+              className={`relative border-2 border-dashed rounded-3xl p-8 text-center transition-all duration-300 group
                 ${isDark
                   ? 'border-pink-500/30 bg-pink-500/5 hover:border-pink-400/60 hover:bg-pink-500/10'
                   : 'border-pink-400 bg-gradient-to-br from-pink-50 to-rose-50 hover:border-pink-500 hover:from-pink-100 hover:to-rose-100 shadow-sm hover:shadow-md'}`}
             >
-              <input ref={outfitRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && handleOutfit(e.target.files[0])} className="hidden" />
               {outfitPreview ? (
                 <div className="flex flex-col items-center">
                   <img src={outfitPreview} alt="Outfit" className="w-32 h-32 object-cover rounded-2xl border-2 border-pink-400 shadow-lg mb-3" />
@@ -399,15 +412,36 @@ function OutfitChecker() {
                     <span className="text-3xl">👗</span>
                   </div>
                   <p className={`font-black text-base mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('outfitPhoto')}</p>
-                  <p className={`text-sm font-semibold mb-2 ${isDark ? 'text-white/40' : 'text-pink-700'}`}>{t('outfitCheckDesc')}</p>
-                  <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border
-                    ${isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300' : 'bg-pink-600 border-pink-600 text-white shadow-sm'}`}>
-                    📸 Tap to upload
+                  <p className={`text-sm font-semibold mb-3 ${isDark ? 'text-white/40' : 'text-pink-700'}`}>{t('outfitCheckDesc')}</p>
+                  <div className="flex gap-2 justify-center px-4 w-full">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); outfitRef.current?.click(); }}
+                      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold border transition-all h-11
+                        ${isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300 hover:bg-pink-500/30' : 'bg-pink-600 border-pink-600 text-white shadow-sm hover:bg-pink-700'}`}
+                    >
+                      🖼️ {isMobile ? 'Gallery' : 'Upload'}
+                    </button>
+                    {isMobile && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); outfitCamRef.current?.click(); }}
+                        className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold border transition-all h-11
+                          ${isDark ? 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10' : 'bg-white border-pink-200 text-pink-700 hover:bg-pink-50 shadow-sm'}`}
+                      >
+                        📸 Camera
+                      </button>
+                    )}
                   </div>
                   <p className={`text-xs mt-2 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>JPG, PNG, WebP</p>
                 </>
               )}
             </div>
+          </div>
+
+          <div className="hidden">
+            <input ref={selfieRef} type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && handleSelfie(e.target.files[0])} />
+            <input ref={selfieCamRef} type="file" accept="image/*" capture="user" onChange={(e) => e.target.files?.[0] && handleSelfie(e.target.files[0])} />
+            <input ref={outfitRef} type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && handleOutfit(e.target.files[0])} />
+            <input ref={outfitCamRef} type="file" accept="image/*" capture="environment" onChange={(e) => e.target.files?.[0] && handleOutfit(e.target.files[0])} />
           </div>
 
           {error && (
