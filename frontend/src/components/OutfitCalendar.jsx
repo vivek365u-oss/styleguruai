@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { scoreWardrobeItem, getAccessoryAdvice, generateStylerBrief } from '../utils/stylingEngine';
 import { useLanguage } from '../i18n/LanguageContext';
 import { auth, getDailyOutfitLogs, loadUserPreferences, loadStyleInsights, logDailyOutfit } from '../api/styleApi';
