@@ -109,7 +109,12 @@ function AppRoutes({ user, setUser }) {
 
 function App() {
   const authState = useAuthState();
-  const [splashDone, setSplashDone] = React.useState(false);
+  
+  // Use sessionStorage to remember splash shown, AND check localStorage to see if we should even show it to guests
+  const [splashDone, setSplashDone] = React.useState(() => {
+    return sessionStorage.getItem('sg_splash_shown') === 'true';
+  });
+
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('tonefit_theme') || 'dark';
   });
@@ -124,6 +129,15 @@ function App() {
     }
   };
 
+  const handleSplashComplete = () => {
+    setSplashDone(true);
+    sessionStorage.setItem('sg_splash_shown', 'true');
+  };
+
+  // Skip splash if no user is found in storage (Guest experience)
+  const isLikelyGuest = !localStorage.getItem('tonefit_user');
+  const showSplash = !splashDone && (authState.loading ? !isLikelyGuest : !!user);
+
   // Handle auth errors with retry
   if (authState.authError && !authState.loading) {
     return (
@@ -134,12 +148,8 @@ function App() {
     );
   }
 
-  // Show SplashScreen until BOTH splash timer fired AND auth resolved.
-  // This eliminates the 4th blank loading screen entirely.
-  const showSplash = !splashDone || authState.loading;
-
   if (showSplash) {
-    return <SplashScreen onComplete={() => setSplashDone(true)} />;
+    return <SplashScreen onComplete={handleSplashComplete} />;
   }
 
   return (

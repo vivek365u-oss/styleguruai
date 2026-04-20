@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import SEOHead from './SEOHead';
 import { useLanguage } from '../i18n/LanguageContext';
 import { trackCTAClick } from '../utils/analytics';
@@ -714,12 +715,12 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
               {['Analyze', 'History', 'Wardrobe', 'Tools', 'Blog'].map(link => (
                 <div key={link} style={{ marginBottom: '10px' }}>
                   {link === 'Blog' ? (
-                    <a
-                      href="/blog"
+                    <Link
+                      to="/blog"
                       style={{ background: 'none', border: 'none', color: '#6B6B6B', fontSize: '13px', cursor: 'pointer', padding: 0, transition: 'color 0.2s', textDecoration: 'none' }}
                       onMouseEnter={e => e.target.style.color = '#F0EDE6'}
                       onMouseLeave={e => e.target.style.color = '#6B6B6B'}
-                    >Blog</a>
+                    >Blog</Link>
                   ) : (
                     <button
                       onClick={() => handleFeatureClick(link, link.toLowerCase())}
@@ -742,10 +743,10 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
                 { label: 'Terms', href: '/terms' },
               ].map(link => (
                 <div key={link.label} style={{ marginBottom: '10px' }}>
-                  <a href={link.href} style={{ color: '#6B6B6B', fontSize: '13px', textDecoration: 'none', transition: 'color 0.2s' }}
+                  <Link to={link.href} style={{ color: '#6B6B6B', fontSize: '13px', textDecoration: 'none', transition: 'color 0.2s' }}
                     onMouseEnter={e => e.target.style.color = '#F0EDE6'}
                     onMouseLeave={e => e.target.style.color = '#6B6B6B'}
-                  >{link.label}</a>
+                  >{link.label}</Link>
                 </div>
               ))}
             </div>
