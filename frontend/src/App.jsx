@@ -80,8 +80,8 @@ function AppRoutes({ user, setUser }) {
   return (
     <Suspense fallback={null}>
       <Routes>
-        <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} />} />
-        <Route path="/login" element={<Navigate to="/" replace />} />
+        <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage user={user} onLoginClick={() => navigate('/login')} onGetStarted={() => navigate('/login')} />} />
+        <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} />} />
         <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
         {/* OrderSuccess route removed */}
         <Route path="/profile" element={

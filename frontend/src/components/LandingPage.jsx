@@ -212,11 +212,10 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
 
   const navItems = [
     { id: 'home', label: 'Home', requiresAuth: false },
-    { id: 'analyze', label: 'Analyze', requiresAuth: true },
+    { id: 'analyze', label: 'Analysis', requiresAuth: true },
+    { id: 'tools', label: 'Tool', requiresAuth: true },
     { id: 'history', label: 'History', requiresAuth: true },
-    { id: 'wardrobe', label: 'Wardrobe', requiresAuth: true },
-    { id: 'tools', label: 'Tools', requiresAuth: true },
-    { id: 'profile', label: 'Profile', requiresAuth: true },
+    { id: 'wardrobe', label: 'Style Campus', requiresAuth: true },
   ];
 
   const testimonials = [
@@ -335,15 +334,18 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
             <button
+              onClick={() => { trackCTAClick('signup', 'navbar'); onLoginClick(); }}
+              className="btn-gold" style={{ padding: '9px 20px' }}
+            >
+              Sign Up
+            </button>
+            <button
               onClick={() => { trackCTAClick('login', 'navbar'); onLoginClick(); }}
               style={{ background: 'none', border: '1px solid #242424', color: '#F0EDE6', fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', padding: '9px 20px', cursor: 'pointer', transition: 'border-color 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.borderColor = '#C9A96E'}
               onMouseLeave={e => e.currentTarget.style.borderColor = '#242424'}
             >
               Login
-            </button>
-            <button onClick={handleGetStarted} className="btn-gold" style={{ padding: '9px 20px' }}>
-              Get Started
             </button>
           </div>
 
