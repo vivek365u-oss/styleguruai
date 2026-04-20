@@ -1,872 +1,45 @@
-/**
- * AppShell.jsx — StyleGuruAI v5.1
- * ════════════════════════════════════════════════════════
- * Full Dynamic Theme System (Light + Dark)
- * ✅ Theme-aware: every component uses C.{token}
- * ✅ Toggle switch (ON/OFF pill toggle in Profile)
- * ✅ Light mode: white bg, dark text, box shadows
- * ✅ Dark mode: navy bg, light text, glow borders
- * ✅ Instant theme switch — no flicker
- * ✅ Theme saved to localStorage
- * ════════════════════════════════════════════════════════
- */
-
-import { useState, useEffect, useContext, lazy, Suspense, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useContext, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { logout, saveHistory, getHistory, auth, destroyUserAccount } from '../api/styleApi';
+import { auth, logout, API, db, saveHistory, getHistory } from '../api/styleApi';
 import { ThemeContext } from '../context/ThemeContext';
-import { useLanguage } from '../i18n/LanguageContext';
-import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
-import { getLocalizedTip } from '../data/localTips';
-import { logEvent, EVENTS, trackTabView, trackTimeOnPage, markPageEnter } from '../utils/analytics';
-import StyleBot from './StyleBot';
 import { usePlan } from '../context/PlanContext';
 import { useCart } from '../context/CartContext';
-import ShoppingCart from './ShoppingCart';
-import { derivePersonality, deriveStyleScore, deriveLevel, readUserPersonalityData } from '../utils/stylePersonality';
-import { DARK, LIGHT, GRAD, VIOLET, INDIGO, PJS, PDI, getThemeColors } from '../utils/themeColors';
+import { getThemeColors, VIOLET, GRAD, PJS } from '../utils/theme';
+import { EVENTS, logEvent } from '../utils/analytics';
 
-// ── Lazy loaded feature sections ──────────────────
+// Lazy load components for performance
+const HomeSection = lazy(() => import('./HomeSection'));
 const UploadSection = lazy(() => import('./UploadSection'));
 const ResultsDisplay = lazy(() => import('./ResultsDisplay'));
-const CoupleResults = lazy(() => import('./CoupleResults'));
 const HistoryPanel = lazy(() => import('./HistoryPanel'));
 const WardrobePanel = lazy(() => import('./WardrobePanel'));
 const ToolsTab = lazy(() => import('./ToolsTab'));
-const StyleNavigator = lazy(() => import('./StyleNavigator'));
-const ProfilePanel = lazy(() => import('./ProfilePanel'));
+const ProfileSection = lazy(() => import('./ProfileSection'));
+const SectionHeader = lazy(() => import('./SectionHeader'));
+const LoadingScreenWithProgress = lazy(() => import('./LoadingScreenWithProgress'));
 const ColorScanner = lazy(() => import('./ColorScanner'));
+const StyleNavigator = lazy(() => import('./StyleNavigator'));
 const LookbookPanel = lazy(() => import('./LookbookPanel'));
+const CoupleResults = lazy(() => import('./CoupleResults'));
 const SubscriptionModal = lazy(() => import('./SubscriptionModal'));
+const StyleBot = lazy(() => import('./StyleBot'));
+const ShoppingCart = lazy(() => import('./ShoppingCart'));
 
+// Sub-components
+const SectionLoader = ({ C }) => (
+  <div style={{ padding: '60px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }} style={{ width: 40, height: 40, borderRadius: '50%', border: `3px solid ${C.glass}`, borderTopColor: VIOLET }} />
+    <span style={{ fontSize: '12px', color: C.muted, fontFamily: PJS }}>Consulting AI Guru...</span>
+  </div>
+);
 
-// ── Section Loader ──────────────────────────────────
-function SectionLoader({ C }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 0', flexDirection: 'column', gap: 16 }}>
-      <div style={{ width: 32, height: 32, borderRadius: '50%', border: `2px solid ${C.border}`, borderTopColor: VIOLET, animation: 'spinSmooth 0.8s linear infinite' }} />
-      <span style={{ fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS }}>Loading</span>
-    </div>
-  );
-}
-
-// ── Toast ───────────────────────────────────────────
-function Toast({ message, type = 'default', onClose, C }) {
-  useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, [onClose]);
-  const bg = type === 'success' ? C.successBg : type === 'error' ? C.dangerBg : C.glass2;
-  const brd = type === 'success' ? C.successBorder : type === 'error' ? C.dangerBorder : C.border;
-  return (
-    <div style={{ position: 'fixed', bottom: 88, left: '50%', transform: 'translateX(-50%)', zIndex: 600, background: bg, backdropFilter: 'blur(20px)', border: `1px solid ${brd}`, borderRadius: 12, padding: '12px 24px', fontSize: '13px', color: C.text, whiteSpace: 'nowrap', animation: 'fadeUp 0.3s ease', boxShadow: C.cardShadow, display: 'flex', alignItems: 'center', gap: 8, fontFamily: PJS }}>
-      {type === 'success' && <span style={{ color: '#10B981' }}>✓</span>}
-      {type === 'error' && <span style={{ color: C.dangerText }}>✗</span>}
-      {message}
-    </div>
-  );
-}
-
-// ── Glass Card ─────────────────────────────────────
-function GlassCard({ children, style, onClick, hoverable = true, C }) {
-  const [hov, setHov] = useState(false);
-  return (
-    <div
-      onClick={onClick}
-      onMouseEnter={() => hoverable && setHov(true)}
-      onMouseLeave={() => hoverable && setHov(false)}
-      style={{
-        background: hov && onClick ? C.glass2 : C.glass,
-        backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-        border: `1px solid ${hov ? `rgba(139,92,246,${C.isDark ? '0.35' : '0.20'})` : C.border}`,
-        borderRadius: 16,
-        boxShadow: hov && onClick ? C.cardHoverShadow : C.cardShadow,
-        transform: hov && onClick ? 'translateY(-1px)' : 'none',
-        transition: 'all 0.2s ease',
-        cursor: onClick ? 'pointer' : 'default',
-        ...style,
-      }}
-    >{children}</div>
-  );
-}
-
-// ── Section Header ──────────────────────────────────
-function SectionHeader({ label, title, subtitle, action, trailing, C }) {
-  return (
-    <div style={{ marginBottom: 28, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', paddingTop: 8 }}>
-      <div style={{ flex: 1, minWidth: 200 }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-          <div style={{ width: 20, height: 2, background: GRAD, borderRadius: 1 }} />
-          <span style={{ fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 600, fontFamily: PJS }}>
-            {label}
-          </span>
-        </div>
-        <h2 style={{ fontFamily: PDI, fontSize: 'clamp(20px,4vw,30px)', fontWeight: 300, color: C.text, lineHeight: 1.2, margin: 0 }}>{title}</h2>
-        {subtitle && <p style={{ fontSize: '13px', color: C.muted, marginTop: 5, fontFamily: PJS }}>{subtitle}</p>}
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        {action}
-        {trailing}
-      </div>
-    </div>
-  );
-}
-
-// ── Tag Chip ───────────────────────────────────────
-function Tag({ text, color = VIOLET, C }) {
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', background: `${color}${C.isDark ? '18' : '12'}`, border: `1px solid ${color}${C.isDark ? '30' : '20'}`, borderRadius: 20, padding: '3px 10px', fontSize: '10px', color: color, fontFamily: PJS, fontWeight: 600 }}>
-      {text}
-    </span>
-  );
-}
-
-// ── Theme Toggle Switch ────────────────────────────
-function ThemeToggle({ theme, onToggle, C }) {
-  const isLight = theme === 'light';
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-      <span style={{ fontSize: '13px', color: C.muted, fontFamily: PJS }}>🌙</span>
-      <button
-        onClick={onToggle}
-        role="switch"
-        aria-checked={isLight}
-        title={`Switch to ${isLight ? 'dark' : 'light'} mode`}
-        style={{
-          width: 52, height: 28, borderRadius: 14, position: 'relative', cursor: 'pointer',
-          background: isLight ? GRAD : 'rgba(255,255,255,0.12)',
-          border: `1px solid ${isLight ? 'transparent' : C.border}`,
-          transition: 'all 0.3s ease', padding: 0, outline: 'none',
-          boxShadow: isLight ? `0 4px 12px rgba(139,92,246,0.3)` : 'none',
-        }}
-      >
-        {/* Toggle knob */}
-        <div style={{
-          position: 'absolute', top: 3,
-          left: isLight ? 27 : 3,
-          width: 22, height: 22, borderRadius: '50%',
-          background: 'white',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
-          transition: 'left 0.3s ease',
-        }} />
-      </button>
-      <span style={{ fontSize: '13px', color: C.muted, fontFamily: PJS }}>☀️</span>
-    </div>
-  );
-}
-
-// ══════════════════════════════════════════════════════
-// HOME SECTION
-// ══════════════════════════════════════════════════════
-function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
-  const { language } = useLanguage();
-
-  const personalityData = useMemo(() => readUserPersonalityData(), []);
-  const personality = useMemo(() => derivePersonality(personalityData), [personalityData]);
-  const styleScore = useMemo(() => deriveStyleScore(personalityData), [personalityData]);
-  const level = useMemo(() => deriveLevel(personalityData.analysisCount), [personalityData.analysisCount]);
-  const archetype = personality.primary;
-
-  const firstName = user?.name?.split(' ')[0] || 'there';
-
-  const streak = useMemo(() => {
-    const today = new Date().toLocaleDateString('en-CA');
-    const lastCheckin = localStorage.getItem('sg_last_checkin');
-    let count = parseInt(localStorage.getItem('sg_streak_count') || '0');
-    if (lastCheckin !== today) {
-      if (lastCheckin) {
-        const diff = Math.round((new Date(today) - new Date(lastCheckin)) / 86400000);
-        count = diff === 1 ? count + 1 : 1;
-      } else { count = 1; }
-      localStorage.setItem('sg_streak_count', count.toString());
-      localStorage.setItem('sg_last_checkin', today);
-    }
-    return count;
-  }, []);
-
-  const genderPref = localStorage.getItem('sg_gender') || 'male';
-  const tone = (personalityData.skinTone || 'medium').toLowerCase();
-  const tipObj = getLocalizedTip(genderPref, tone, language);
-  const todayTip = tipObj?.tip || archetype.tip;
-  const tipEmoji = tipObj?.emoji || archetype.emoji;
-  const analysisCount = personalityData.analysisCount;
-
-  const greeting = (() => {
-    const h = new Date().getHours();
-    if (h < 5) return 'Up early';
-    if (h < 12) return 'Good morning';
-    if (h < 17) return 'Good afternoon';
-    if (h < 20) return 'Good evening';
-    return 'Good night';
-  })();
-
-  return (
-    <div style={{ animation: 'fadeSlideIn 0.4s ease' }}>
-
-      {/* Welcome */}
-      <div style={{ marginBottom: 28 }}>
-        <p style={{ fontSize: '12px', color: C.muted, marginBottom: 4, fontFamily: PJS }}>
-          {greeting} 👋
-        </p>
-        <h2 style={{ fontFamily: PDI, fontSize: 'clamp(24px,5vw,38px)', fontWeight: 300, lineHeight: 1.15, margin: 0 }}>
-          <span style={{ color: C.text }}>Hi, </span>
-          <span style={{ background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            {firstName}
-          </span>
-        </h2>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8, background: `${level.color}18`, border: `1px solid ${level.color}30`, borderRadius: 20, padding: '4px 12px' }}>
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: level.color }} />
-          <span style={{ fontSize: '8px', color: level.color, fontFamily: PJS, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            {level.label}
-          </span>
-        </div>
-      </div>
-
-      {/* Style Personality Card */}
-      {analysisCount > 0 && (
-        <GlassCard C={C} style={{ padding: '20px 22px', marginBottom: 16, position: 'relative', overflow: 'hidden' }} onClick={() => onTabChange('profile')}>
-          <div style={{ position: 'absolute', top: -30, right: -30, width: 130, height: 130, background: `radial-gradient(circle,${archetype.glowColor},transparent)`, borderRadius: '50%', pointerEvents: 'none' }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, position: 'relative', zIndex: 1 }}>
-            <div style={{ width: 52, height: 52, borderRadius: 14, background: `linear-gradient(135deg,${archetype.gradFrom},${archetype.gradTo})`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 4px 16px ${archetype.glowColor}` }}>
-              <span style={{ fontSize: '24px' }}>{archetype.emoji}</span>
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ fontSize: '9px', fontFamily: PJS, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Your Style DNA
-              </span>
-              <p style={{ fontFamily: PDI, fontSize: '17px', color: C.text, margin: '2px 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {archetype.name}
-              </p>
-              <p style={{ fontSize: '11px', color: C.muted, margin: 0, fontFamily: PJS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {archetype.headline}
-              </p>
-            </div>
-            <div style={{ flexShrink: 0, textAlign: 'right' }}>
-              <p style={{ fontFamily: PDI, fontSize: '24px', background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '0 0 2px', lineHeight: 1 }}>{styleScore}</p>
-              <p style={{ fontSize: '8px', color: C.muted, fontFamily: PJS, letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>Style Score</p>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 14, position: 'relative', zIndex: 1 }}>
-            {archetype.palette.map((color, i) => (
-              <div key={i} title={archetype.paletteNames[i]} style={{ width: 20, height: 20, borderRadius: '50%', background: color, border: `2px solid ${C.border}`, boxShadow: `0 0 6px ${color}50` }} />
-            ))}
-            <span style={{ fontSize: '10px', color: C.muted, fontFamily: PJS, marginLeft: 4 }}>Your palette →</span>
-          </div>
-        </GlassCard>
-      )}
-
-      {/* Primary CTA */}
-      <button
-        onClick={onAnalyze}
-        className="gradient-btn"
-        style={{ width: '100%', padding: '18px 22px', borderRadius: 16, display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16, fontFamily: PJS, boxShadow: C.btnShadow }}
-        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(139,92,246,0.5)'; }}
-        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = C.btnShadow; }}
-      >
-        <div style={{ width: 46, height: 46, borderRadius: 12, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <span style={{ fontSize: '22px' }}>📷</span>
-        </div>
-        <div style={{ textAlign: 'left', flex: 1 }}>
-          <p style={{ fontSize: '15px', fontWeight: 700, margin: 0, color: 'white' }}>Analyze My Style</p>
-          <p style={{ fontSize: '11px', opacity: 0.8, margin: '3px 0 0', color: 'white' }}>
-            {analysisCount === 0 ? 'Upload a photo → Get color palette & outfit guide' : `${analysisCount} ${analysisCount === 1 ? 'scan' : 'scans'} done • Run a new scan`}
-          </p>
-        </div>
-        <span style={{ fontSize: '18px', opacity: 0.8 }}>→</span>
-      </button>
-
-      {/* Stats Dashboard */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 16 }}>
-        {[
-          { value: analysisCount || '0', label: 'DNA Protocols', icon: '🧬' },
-          { value: streak > 0 ? `${streak}🔥` : '0', label: 'Vibe Streak', icon: '⚡' },
-          { value: personalityData.skinTone ? personalityData.skinTone.split(' ')[0] : '—', label: 'Depth Class', icon: '🎨' },
-        ].map((s, i) => (
-          <GlassCard key={i} C={C} style={{ padding: '16px 10px', textAlign: 'center', border: s.value !== '0' && s.value !== '—' ? `1px solid ${VIOLET}40` : `1px solid ${C.border}` }}>
-            <p style={{ fontFamily: PDI, fontSize: s.value?.toString().length > 5 ? '13px' : '22px', color: C.text, margin: '0 0 4px', lineHeight: 1 }}>{s.value}</p>
-            <p style={{ fontSize: '7.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, margin: 0, fontWeight: 700 }}>{s.label}</p>
-          </GlassCard>
-        ))}
-      </div>
-
-      {/* Style Score Bar */}
-      {analysisCount > 0 && (
-        <GlassCard C={C} hoverable={false} style={{ padding: '16px 18px', marginBottom: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <span style={{ fontSize: '11px', color: C.muted, fontFamily: PJS, fontWeight: 500 }}>Style Score Progress</span>
-            <span style={{ fontSize: '12px', fontWeight: 700, color: C.text, fontFamily: PJS }}>{styleScore}/100</span>
-          </div>
-          <div style={{ width: '100%', height: 6, background: C.isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)', borderRadius: 3, overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${styleScore}%`, background: GRAD, borderRadius: 3, transition: 'width 1s ease' }} />
-          </div>
-          {level.next && (
-            <p style={{ fontSize: '10px', color: C.muted, fontFamily: PJS, margin: '8px 0 0' }}>
-              {level.nextLabel} level: {level.next - analysisCount} more scan{level.next - analysisCount !== 1 ? 's' : ''} away
-            </p>
-          )}
-        </GlassCard>
-      )}
-
-      {/* Last Analysis */}
-      {lastAnalysis && (
-        <GlassCard C={C} onClick={() => onTabChange('analyze')} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', marginBottom: 16 }}>
-          <div style={{ width: 46, height: 46, borderRadius: '50%', background: lastAnalysis.skinHex || '#C68642', flexShrink: 0, border: `3px solid ${C.border}`, boxShadow: '0 0 16px rgba(0,0,0,0.3)' }} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '0 0 3px', fontFamily: PJS, fontWeight: 700 }}>Last Scan</p>
-            <p style={{ fontSize: '14px', fontFamily: PDI, color: C.text, margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lastAnalysis.skinTone || 'Your Skin Tone'}</p>
-            <p style={{ fontSize: '11px', color: C.muted, margin: 0, fontFamily: PJS }}>
-              {lastAnalysis.timestamp ? new Date(lastAnalysis.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Tap to view'}
-            </p>
-          </div>
-          <div style={{ width: 30, height: 30, borderRadius: '50%', background: C.glass2, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: C.text, fontSize: '14px' }}>→</div>
-        </GlassCard>
-      )}
-
-      {/* Daily Tip */}
-      <GlassCard C={C} hoverable={false} style={{ padding: '18px 20px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, background: `radial-gradient(circle,rgba(139,92,246,${C.isDark ? '0.12' : '0.06'}),transparent)`, borderRadius: '50%', pointerEvents: 'none' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, position: 'relative', zIndex: 1 }}>
-          <div style={{ width: 16, height: 2, background: GRAD, borderRadius: 1 }} />
-          <span style={{ fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 700, fontFamily: PJS }}>
-            {analysisCount > 0 ? `${archetype.emoji} Style DNA Tip` : "Today's Style Tip"}
-          </span>
-        </div>
-        <p style={{ fontSize: '13px', color: C.text, lineHeight: '1.75', margin: 0, fontFamily: PJS, position: 'relative', zIndex: 1 }}>
-          {tipEmoji} {todayTip}
-        </p>
-      </GlassCard>
-
-      {/* Wardrobe peek */}
-      {personalityData.wardrobeCount > 0 && (
-        <GlassCard C={C} onClick={() => onTabChange('wardrobe')} style={{ padding: '16px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 42, height: 42, borderRadius: 12, background: 'linear-gradient(135deg,#8B5CF6,#EC4899)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <span style={{ fontSize: '20px' }}>👗</span>
-          </div>
-          <div style={{ flex: 1 }}>
-            <p style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '0 0 2px', fontFamily: PJS, fontWeight: 700 }}>Your Wardrobe</p>
-            <p style={{ fontSize: '14px', fontFamily: PDI, color: C.text, margin: '0 0 1px' }}>{personalityData.wardrobeCount} saved {personalityData.wardrobeCount === 1 ? 'item' : 'items'}</p>
-            <p style={{ fontSize: '11px', color: C.muted, margin: 0, fontFamily: PJS }}>Tap to browse your collection</p>
-          </div>
-          <div style={{ width: 30, height: 30, borderRadius: '50%', background: C.glass2, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.text, fontSize: '14px' }}>→</div>
-        </GlassCard>
-      )}
-
-      {/* First use prompt */}
-      {analysisCount === 0 && (
-        <GlassCard C={C} hoverable={false} style={{ padding: '24px 20px', marginBottom: 8, textAlign: 'center' }}>
-          <p style={{ fontSize: '32px', marginBottom: 8 }}>🎨</p>
-          <p style={{ fontSize: '15px', fontFamily: PDI, color: C.text, margin: '0 0 8px' }}>Discover Your Style DNA</p>
-          <p style={{ fontSize: '12px', color: C.muted, margin: '0 0 20px', fontFamily: PJS, lineHeight: '1.7' }}>
-            Upload a photo to unlock your personalized color palette, skin tone analysis, and AI style archetype.
-          </p>
-          <button
-            onClick={onAnalyze}
-            style={{ background: GRAD, border: 'none', color: 'white', borderRadius: 10, padding: '12px 28px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: PJS, boxShadow: C.btnShadow }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
-            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-          >
-            Start My First Scan →
-          </button>
-        </GlassCard>
-      )}
-    </div>
-  );
-}
-
-// ══════════════════════════════════════════════════════
-// PROFILE SECTION
-// ══════════════════════════════════════════════════════
-function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggleTheme, isPro, usage }) {
-  const { language, changeLanguage } = useLanguage();
-  const [editingName, setEditingName] = useState(false);
-  const [displayName, setDisplayName] = useState(() => localStorage.getItem('sg_display_name') || user?.name || '');
-  const [copied, setCopied] = useState(false);
-  const [notifOn, setNotifOn] = useState(() => localStorage.getItem('sg_notif_on') === 'true');
-  const [destroying, setDestroying] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  // Language pill options
-  const LANGUAGES = [
-    { code: 'en', label: 'EN', full: 'English' },
-    { code: 'hinglish', label: 'HI', full: 'Hinglish' },
-    { code: 'hi', label: 'हि', full: 'Hindi' },
-  ];
-
-  const handleLangChange = (code) => {
-    changeLanguage(code);
-    const full = LANGUAGES.find(l => l.code === code)?.full || code;
-    onToast({ message: `Language: ${full}`, type: 'success' });
-  };
-
-  const handleNotifToggle = async () => {
-    if (notifOn) {
-      localStorage.setItem('sg_notif_on', 'false');
-      setNotifOn(false);
-      onToast({ message: 'Notifications disabled', type: 'default' });
-      return;
-    }
-    if (!('Notification' in window)) {
-      onToast({ message: 'Notifications not supported in this browser', type: 'error' }); return;
-    }
-    const perm = await Notification.requestPermission();
-    if (perm === 'granted') {
-      localStorage.setItem('sg_notif_on', 'true');
-      setNotifOn(true);
-      onToast({ message: 'Notifications enabled 🔔', type: 'success' });
-      new Notification('StyleGuruAI', { body: 'Daily style tips & updates enabled! 🎨', icon: '/favicon.ico' });
-    } else if (perm === 'denied') {
-      onToast({ message: 'Allow notifications in browser settings', type: 'error' });
-    }
-  };
-
-  const handleDestroyAccount = async () => {
-    // Step 1: First confirm
-    const step1 = window.confirm(
-      '⚠️ Delete Account?\n\nThis will PERMANENTLY delete:\n• Your profile & Style DNA\n• All analysis history\n• Saved outfits & wardrobe\n• Your Firebase account\n\nThis action CANNOT be undone.'
-    );
-    if (!step1) return;
-    // Step 2: Type confirmation
-    const typed = window.prompt('Type DELETE to confirm account deletion:');
-    if (typed?.trim().toUpperCase() !== 'DELETE') {
-      onToast({ message: 'Account deletion cancelled', type: 'default' }); return;
-    }
-    setDestroying(true);
-    try {
-      const uid = auth.currentUser?.uid;
-      if (!uid) throw new Error('Not logged in');
-      await destroyUserAccount(uid);
-      onToast({ message: '🔒 Account deleted. Goodbye!', type: 'success' });
-      // Clear all local data
-      localStorage.clear();
-      // Logout
-      setTimeout(() => onLogout(), 1200);
-    } catch (err) {
-      console.error('[Delete Account]', err);
-      if (err.code === 'auth/requires-recent-login') {
-        onToast({ message: 'Please logout and login again before deleting.', type: 'error' });
-      } else {
-        onToast({ message: 'Deletion failed. Please try again.', type: 'error' });
-      }
-      setDestroying(false);
-    }
-  };
-
-  const personalityData = useMemo(() => readUserPersonalityData(), []);
-  const personality = useMemo(() => derivePersonality(personalityData), [personalityData]);
-  const styleScore = useMemo(() => deriveStyleScore(personalityData), [personalityData]);
-  const level = useMemo(() => deriveLevel(personalityData.analysisCount), [personalityData.analysisCount]);
-  const archetype = personality.primary;
-  const secondary = personality.secondary;
-
-  const avatarLetter = (displayName?.[0] || user?.email?.[0] || 'U').toUpperCase();
-  const analysisCount = usage?.analysisHistoryCount || personalityData.analysisCount; // Fallback to personalityData
-  const streak = parseInt(localStorage.getItem('sg_streak_count') || '0');
-  const wardrobeCount = usage?.wardrobeCount ?? personalityData.wardrobeCount;
-  const savedColorsCount = usage?.savedColorsCount ?? 0;
-
-
-  const handleShareProfile = async () => {
-    const text = `My StyleGuruAI Profile 🎨\n\nStyle Archetype: ${archetype.name} ${archetype.emoji}\nStyle Score: ${styleScore}/100\nLevel: ${level.label}\nAnalyses Done: ${analysisCount}\n\nCheck yours at StyleGuruAI.in`;
-    if (navigator.share) {
-      try { await navigator.share({ title: 'My Style DNA', text }); } catch { }
-    } else {
-      try { await navigator.clipboard.writeText(text); } catch { }
-      setCopied(true); setTimeout(() => setCopied(false), 2000);
-      onToast({ message: 'Profile copied to clipboard!', type: 'success' });
-    }
-  };
-
-  const handleSaveName = () => {
-    try { localStorage.setItem('sg_display_name', displayName); } catch { }
-    setEditingName(false);
-    onToast({ message: 'Name updated', type: 'success' });
-  };
-
-  const rowBtn = (danger = false) => ({
-    width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px',
-    background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
-    transition: 'background 0.2s', fontFamily: PJS,
-  });
-
-  const actionBtn = (danger = false) => ({
-    flex: 1, padding: '12px', borderRadius: 10,
-    background: danger ? C.dangerBg : C.glass2,
-    border: `1px solid ${danger ? C.dangerBorder : C.border}`,
-    color: danger ? C.dangerText : C.text2,
-    fontSize: '12px', fontWeight: 500, cursor: 'pointer',
-    transition: 'all 0.2s', fontFamily: PJS,
-    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-  });
-
-  return (
-    <div style={{ animation: 'fadeSlideIn 0.35s ease', position: 'relative' }}>
-      <SectionHeader 
-        C={C} 
-        label="Your Account" 
-        title="Profile" 
-        trailing={
-          <button 
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            style={{ 
-              background: isMenuOpen ? GRAD : C.glass2, 
-              border: `1px solid ${isMenuOpen ? 'transparent' : C.border}`,
-              borderRadius: 12, width: 42, height: 42, display: 'flex', flexDirection: 'column', 
-              justifyContent: 'center', alignItems: 'center', gap: 4, cursor: 'pointer', transition: 'all 0.2s' 
-            }}
-          >
-            <div style={{ width: 18, height: 2, background: isMenuOpen ? 'white' : C.text, borderRadius: 1 }} />
-            <div style={{ width: 18, height: 2, background: isMenuOpen ? 'white' : C.text, borderRadius: 1 }} />
-            <div style={{ width: 18, height: 2, background: isMenuOpen ? 'white' : C.text, borderRadius: 1 }} />
-          </button>
-        }
-      />
-
-      {/* Settings Menu Overlay — Mobile Safe */}
-      {isMenuOpen && (
-        <div 
-          onClick={() => setIsMenuOpen(false)}
-          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', animation: 'fadeIn 0.2s ease' }}
-        >
-          <div 
-            onClick={e => e.stopPropagation()}
-            style={{ 
-              position: 'absolute', top: 70, right: 16, left: 16,
-              maxWidth: 360, margin: '0 auto',
-              background: C.navBg, border: `1px solid ${C.border}`, borderRadius: 24,
-              boxShadow: '0 20px 50px rgba(0,0,0,0.35)', animation: 'slideDown 0.3s ease',
-              // Mobile safe: cap height so panel never goes off screen
-              maxHeight: 'calc(100dvh - 110px)',
-              display: 'flex', flexDirection: 'column', overflow: 'hidden'
-            }}
-          >
-            {/* Scrollable content area */}
-            <div style={{ overflowY: 'auto', flex: 1, WebkitOverflowScrolling: 'touch' }}>
-              <div style={{ padding: '20px 24px 10px' }}>
-                 <p style={{ fontSize: '10px', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 700, margin: '0 0 16px' }}>Settings & Preferences</p>
-              </div>
-
-              {/* Theme row */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 24px' }}>
-                <span style={{ fontSize: '20px' }}>{theme === 'dark' ? '🌙' : '☀️'}</span>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 500 }}>App Theme</p>
-                  <p style={{ fontSize: '10px', color: C.muted, margin: 0 }}>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</p>
-                </div>
-                <ThemeToggle theme={theme} onToggle={() => { toggleTheme(); onToast({ message: `Switched mode`, type: 'success' }); }} C={C} />
-              </div>
-
-              <div style={{ height: 1, background: C.divider, margin: '8px 24px' }} />
-
-              {/* Language row */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 24px' }}>
-                <span style={{ fontSize: '18px' }}>🌐</span>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: '13px', color: C.text, margin: '0 0 8px', fontFamily: PJS, fontWeight: 500 }}>Language</p>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    {LANGUAGES.map(lang => (
-                      <button key={lang.code}
-                        onClick={() => handleLangChange(lang.code)}
-                        style={{
-                          padding: '4px 12px', borderRadius: 20,
-                          background: language === lang.code ? GRAD : C.glass2,
-                          border: `1px solid ${language === lang.code ? 'transparent' : C.border}`,
-                          color: language === lang.code ? 'white' : C.muted,
-                          fontSize: '11px', fontWeight: language === lang.code ? 700 : 400,
-                          cursor: 'pointer', transition: 'all 0.2s', fontFamily: PJS
-                        }}>
-                        {lang.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ height: 1, background: C.divider, margin: '8px 24px' }} />
-
-              {/* Notification toggle */}
-              <div 
-                onClick={handleNotifToggle}
-                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 24px', cursor: 'pointer' }}
-              >
-                <span style={{ fontSize: '18px' }}>🔔</span>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 500 }}>Notifications</p>
-                  <p style={{ fontSize: '10px', color: C.muted, margin: 0 }}>{notifOn ? 'Enabled' : 'Disabled'}</p>
-                </div>
-                <div style={{ width: 36, height: 20, borderRadius: 10, background: notifOn ? GRAD : C.border, position: 'relative', flexShrink: 0 }}>
-                  <div style={{ position: 'absolute', top: 2, left: notifOn ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
-                </div>
-              </div>
-
-              <div style={{ height: 1, background: C.divider, margin: '8px 24px' }} />
-
-              {/* Buttons list */}
-              <div style={{ padding: '8px 0' }}>
-                 {[
-                   { icon: '💬', label: 'Contact Support', action: () => window.open('mailto:StyleGuruAI.in.gmail@gmail.com', '_blank') },
-                   { icon: '⭐', label: 'Rate the App', action: () => window.open('https://play.google.com/store/apps/details?id=com.StyleGuruAI', '_blank') },
-                   { icon: '🗑️', label: 'Clear Local Data', danger: true, action: () => {
-                      if (window.confirm('Clear all local data?')) { 
-                        localStorage.clear(); onToast({ message: 'Data cleared', type: 'success' }); 
-                      }
-                   }},
-                   { icon: '🚪', label: 'Sign Out', action: onLogout },
-                   { icon: '⚠️', label: 'Delete Account Permanently', danger: true, action: handleDestroyAccount },
-                 ].map((item, i) => (
-                   <button 
-                    key={i} 
-                    onClick={item.action}
-                    style={{ 
-                      width: '100%', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12, 
-                      background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.background = C.glass}
-                    onMouseLeave={e => e.currentTarget.style.background = 'none'}
-                   >
-                     <span style={{ fontSize: '18px' }}>{item.icon}</span>
-                     <span style={{ fontSize: '13px', color: item.danger ? C.warnText : C.text, fontFamily: PJS, fontWeight: 500 }}>{item.label}</span>
-                   </button>
-                 ))}
-              </div>
-            </div>
-
-            {/* ── Sticky Close Button — Always visible at bottom ── */}
-            <button 
-              onClick={() => setIsMenuOpen(false)}
-              style={{ 
-                flexShrink: 0, width: '100%', padding: '16px', 
-                background: C.glass2, border: 'none', 
-                borderTop: `1px solid ${C.border}`, 
-                color: C.text, fontSize: '13px', fontWeight: 700, 
-                cursor: 'pointer', borderRadius: '0 0 24px 24px',
-                letterSpacing: '0.05em'
-              }}
-            >
-              ✕  Close
-            </button>
-          </div>
-        </div>
-      )}
-
-
-      {/* User Identity Card */}
-      <GlassCard C={C} hoverable={false} style={{ padding: '24px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, background: `radial-gradient(circle,${archetype.glowColor},transparent)`, borderRadius: '50%', pointerEvents: 'none' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 18, position: 'relative', zIndex: 1 }}>
-          <div style={{ width: 68, height: 68, borderRadius: '50%', background: GRAD, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: C.btnShadow }}>
-            <span style={{ fontSize: '26px', fontWeight: 700, color: 'white', fontFamily: PJS }}>{avatarLetter}</span>
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            {editingName ? (
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
-                <input
-                  value={displayName}
-                  onChange={e => setDisplayName(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleSaveName()}
-                  autoFocus
-                  style={{ background: C.inputBg, border: `1px solid ${VIOLET}`, borderRadius: 8, padding: '7px 10px', fontSize: '14px', color: C.text, fontFamily: PJS, outline: 'none', flex: 1 }}
-                />
-                <button onClick={handleSaveName} style={{ background: VIOLET, border: 'none', color: 'white', borderRadius: 6, padding: '7px 14px', fontSize: '12px', cursor: 'pointer', fontFamily: PJS }}>Save</button>
-                <button onClick={() => setEditingName(false)} style={{ background: C.glass2, border: `1px solid ${C.border}`, color: C.muted, borderRadius: 6, padding: '7px 10px', fontSize: '12px', cursor: 'pointer', fontFamily: PJS }}>✕</button>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <p style={{ fontFamily: PDI, fontSize: '18px', color: C.text, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName || user?.name || 'User'}</p>
-                <button onClick={() => setEditingName(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted, fontSize: '13px', padding: '2px 4px', borderRadius: 4 }} title="Edit name">✏️</button>
-              </div>
-            )}
-            <p style={{ fontSize: '12px', color: C.muted, fontFamily: PJS, margin: '0 0 8px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</p>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: `${level.color}18`, border: `1px solid ${level.color}30`, borderRadius: 20, padding: '3px 10px' }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: level.color }} />
-              <span style={{ fontSize: '9px', color: level.color, fontFamily: PJS, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{level.label}</span>
-            </div>
-          </div>
-        </div>
-      </GlassCard>
-
-      {/* Stats Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 16 }}>
-        {[
-          { value: analysisCount, label: 'Scans' },
-          { value: styleScore, label: 'Score', gradient: true },
-          { value: streak > 0 ? `${streak}🔥` : '0', label: 'Streak' },
-          { value: wardrobeCount, label: 'Wardrobe' },
-        ].map((s, i) => (
-          <GlassCard key={i} C={C} style={{ padding: '14px 8px', textAlign: 'center' }}>
-            <p style={{ fontFamily: PDI, fontSize: '22px', margin: '0 0 3px', lineHeight: 1, ...(s.gradient ? { background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' } : { color: C.text }) }}>
-              {s.value}
-            </p>
-            <p style={{ fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, margin: 0 }}>{s.label}</p>
-          </GlassCard>
-        ))}
-      </div>
-
-      {/* AI Personality Card */}
-      <GlassCard C={C} hoverable={false} style={{ padding: '22px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, background: `radial-gradient(circle,${archetype.glowColor},transparent)`, borderRadius: '50%', pointerEvents: 'none' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14, position: 'relative', zIndex: 1 }}>
-          <div style={{ width: 46, height: 46, borderRadius: 12, background: `linear-gradient(135deg,${archetype.gradFrom},${archetype.gradTo})`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 4px 14px ${archetype.glowColor}` }}>
-            <span style={{ fontSize: '22px' }}>{archetype.emoji}</span>
-          </div>
-          <div>
-            <p style={{ fontSize: '9px', fontFamily: PJS, letterSpacing: '0.2em', textTransform: 'uppercase', background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 700, margin: '0 0 3px' }}>Style DNA</p>
-            <p style={{ fontFamily: PDI, fontSize: '17px', color: C.text, margin: 0 }}>{archetype.name}</p>
-          </div>
-        </div>
-
-        <p style={{ fontSize: '13px', color: C.muted, lineHeight: '1.8', margin: '0 0 14px', fontFamily: PJS, position: 'relative', zIndex: 1 }}>
-          {analysisCount > 0 ? archetype.description : 'Complete your first scan to unlock your personalized Style DNA and evolving personality profile.'}
-        </p>
-
-        {analysisCount > 0 && (
-          <>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14, position: 'relative', zIndex: 1 }}>
-              {archetype.tags.map(tag => <Tag key={tag} text={tag} color={VIOLET} C={C} />)}
-              <Tag text={`Secondary: ${secondary.name}`} color={INDIGO} C={C} />
-            </div>
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <p style={{ fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, margin: '0 0 8px' }}>Your Color Palette</p>
-              <div style={{ display: 'flex', gap: 8 }}>
-                {archetype.palette.map((color, i) => (
-                  <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 8, background: color, border: `2px solid ${C.border}`, boxShadow: `0 2px 8px ${color}50` }} />
-                    <span style={{ fontSize: '7px', color: C.muted, fontFamily: PJS }}>{archetype.paletteNames[i]}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div style={{ marginTop: 14, padding: '12px 14px', background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 10, position: 'relative', zIndex: 1 }}>
-              <p style={{ fontSize: '11px', color: C.text2, lineHeight: '1.65', margin: 0, fontFamily: PJS }}>
-                💡 <strong>Archetype tip:</strong> {archetype.tip}
-              </p>
-            </div>
-          </>
-        )}
-      </GlassCard>
-
-      {/* Level Progress */}
-      {level.next && (
-        <GlassCard C={C} hoverable={false} style={{ padding: '16px 20px', marginBottom: 16 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <div>
-              <p style={{ fontSize: '12px', color: C.text2, fontFamily: PJS, fontWeight: 600, margin: '0 0 2px' }}>Progress to {level.nextLabel}</p>
-              <p style={{ fontSize: '11px', color: C.muted, fontFamily: PJS, margin: 0 }}>
-                {level.next - analysisCount} more scan{level.next - analysisCount !== 1 ? 's' : ''} needed
-              </p>
-            </div>
-            <span style={{ fontSize: '22px' }}>🏆</span>
-          </div>
-          <div style={{ width: '100%', height: 8, background: C.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)', borderRadius: 4, overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${Math.min((analysisCount / level.next) * 100, 100)}%`, background: `linear-gradient(90deg,${level.color},${VIOLET})`, borderRadius: 4, transition: 'width 1s ease' }} />
-          </div>
-          <p style={{ fontSize: '10px', color: C.muted, fontFamily: PJS, margin: '6px 0 0' }}>{analysisCount}/{level.next} scans</p>
-        </GlassCard>
-      )}
-
-      {/* ── PLAN & USAGE TRACKER (NEW) ── */}
-      <GlassCard C={C} hoverable={false} style={{ padding: '20px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
-         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-            <div>
-               <p style={{ fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, marginBottom: 4 }}>Your Membership</p>
-               <h3 style={{ fontFamily: PDI, fontSize: '20px', color: C.text, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  {isPro ? 'Pro Member' : 'Free Plan'}
-                  {isPro && <span style={{ fontSize: '14px' }}>✨</span>}
-               </h3>
-            </div>
-            {isPro ? (
-               <div style={{ padding: '4px 10px', borderRadius: 8, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', color: '#F59E0B', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  ACTIVE
-               </div>
-            ) : (
-               <button 
-                  onClick={() => window.dispatchEvent(new CustomEvent('open_subscription_modal'))}
-                  style={{ padding: '6px 12px', borderRadius: 8, background: GRAD, border: 'none', color: 'white', fontSize: '10px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(139,92,246,0.3)' }}
-               >
-                  UPGRADE
-               </button>
-            )}
-         </div>
-
-         {/* Stats Container */}
-         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            {!isPro ? (
-               <>
-                  <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
-                     <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 6 }}>AI Analyses Used</p>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                        <span style={{ fontSize: '16px', fontWeight: 700, color: C.text }}>{Math.max(0, 3 - (usage?.adFreeAnalysesLeft || 0))}<span style={{ fontSize: '11px', fontWeight: 400, opacity: 0.5 }}> / 3</span></span>
-                        <div style={{ width: 40, height: 4, background: C.border, borderRadius: 2, overflow: 'hidden' }}>
-                           <div style={{ width: `${(Math.max(0, 3 - (usage?.adFreeAnalysesLeft || 0)) / 3) * 100}%`, height: '100%', background: VIOLET }} />
-                        </div>
-                     </div>
-                  </div>
-                  <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
-                     <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 6 }}>Outfit Checks Used</p>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                        <span style={{ fontSize: '16px', fontWeight: 700, color: C.text }}>{Math.max(0, 3 - (usage?.adFreeOutfitChecks || 0))}<span style={{ fontSize: '11px', fontWeight: 400, opacity: 0.5 }}> / 3</span></span>
-                        <div style={{ width: 40, height: 4, background: C.border, borderRadius: 2, overflow: 'hidden' }}>
-                           <div style={{ width: `${(Math.max(0, 3 - (usage?.adFreeOutfitChecks || 0)) / 3) * 100}%`, height: '100%', background: INDIGO }} />
-                        </div>
-                     </div>
-                  </div>
-                  <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
-                     <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 6 }}>History Slots</p>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                        <span style={{ fontSize: '16px', fontWeight: 700, color: C.text }}>{usage?.analysisHistoryCount || 0}<span style={{ fontSize: '11px', fontWeight: 400, opacity: 0.5 }}> / 10</span></span>
-                        <div style={{ width: 40, height: 4, background: C.border, borderRadius: 2, overflow: 'hidden' }}>
-                           <div style={{ width: `${((usage?.analysisHistoryCount || 0) / 10) * 100}%`, height: '100%', background: '#EC4899' }} />
-                        </div>
-                     </div>
-                  </div>
-                  <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
-                     <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 6 }}>Color Slots</p>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                        <span style={{ fontSize: '16px', fontWeight: 700, color: C.text }}>{savedColorsCount || 0}<span style={{ fontSize: '11px', fontWeight: 400, opacity: 0.5 }}> / 10</span></span>
-                        <div style={{ width: 40, height: 4, background: C.border, borderRadius: 2, overflow: 'hidden' }}>
-                           <div style={{ width: `${((savedColorsCount || 0) / 10) * 100}%`, height: '100%', background: '#10B981' }} />
-                        </div>
-                     </div>
-                  </div>
-               </>
-            ) : (
-               <>
-                  <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
-                     <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 4 }}>Saved in Wardrobe</p>
-                     <p style={{ fontSize: '18px', fontWeight: 700, color: C.text, margin: 0 }}>{wardrobeCount || 0}</p>
-                     <p style={{ fontSize: '8px', color: C.muted, marginTop: 4 }}>Unlimited Storage</p>
-                  </div>
-                  <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
-                     <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 4 }}>Saved History</p>
-                     <p style={{ fontSize: '18px', fontWeight: 700, color: C.text, margin: 0 }}>{usage?.analysisHistoryCount || 0}</p>
-                     <p style={{ fontSize: '8px', color: C.muted, marginTop: 4 }}>Infinite Archives</p>
-                  </div>
-                  <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
-                     <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 4 }}>Favorite Colors</p>
-                     <p style={{ fontSize: '18px', fontWeight: 700, color: C.text, margin: 0 }}>{savedColorsCount || 0}</p>
-                     <p style={{ fontSize: '8px', color: C.muted, marginTop: 4 }}>No Limits</p>
-                  </div>
-                  <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
-                     <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 4 }}>Outfit Checks</p>
-                     <p style={{ fontSize: '18px', fontWeight: 700, color: C.text, margin: 0 }}>∞</p>
-                     <p style={{ fontSize: '8px', color: C.muted, marginTop: 4 }}>Premium AI Power</p>
-                  </div>
-               </>
-            )}
-         </div>
-
-         {isPro && (
-            <button 
-               onClick={() => window.dispatchEvent(new CustomEvent('open_subscription_modal'))}
-               style={{ width: '100%', marginTop: 14, padding: '10px', borderRadius: 10, background: 'none', border: `1px dashed ${C.border}`, color: C.muted, fontSize: '11px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
-               onMouseEnter={e => { e.currentTarget.style.borderColor = VIOLET; e.currentTarget.style.color = C.text; }}
-               onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.muted; }}
-            >
-               Change Subscription Period (Monthly/Yearly)
-            </button>
-         )}
-      </GlassCard>
-      <div style={{ paddingBottom: 80 }} />
-    </div>
-
-  );
-}
+const Toast = ({ message, type, onClose, C }) => (
+  <motion.div initial={{ opacity: 0, y: 40, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+    style={{ position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)', zIndex: 9999, background: type === 'danger' ? C.dangerBg : C.glass, backdropFilter: 'blur(16px)', border: `1px solid ${type === 'danger' ? C.dangerBorder : C.border}`, padding: '12px 24px', borderRadius: 100, boxShadow: '0 12px 32px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: 10 }}>
+    <span style={{ fontSize: '14px' }}>{type === 'success' ? '✅' : '⚡'}</span>
+    <span style={{ color: type === 'danger' ? C.dangerText : C.text, fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', fontFamily: PJS }}>{message}</span>
+  </motion.div>
+);
 
 // ══════════════════════════════════════════════════════
 // MAIN APP SHELL
@@ -876,7 +49,6 @@ export default function AppShell({ user, onLogout }) {
   const { isPro, usage, coins } = usePlan();
   const { cartOpen, setCartOpen } = useCart();
 
-  // Get theme-aware colors
   const C = useMemo(() => getThemeColors(theme), [theme]);
 
   const [activeTab, setActiveTab] = useState(() => {
@@ -903,7 +75,6 @@ export default function AppShell({ user, onLogout }) {
     return () => window.removeEventListener('scroll', handler);
   }, []);
 
-  // Firestore sync on login
   useEffect(() => {
     if (!auth.currentUser) return;
     getHistory(isPro ? 100 : 10).then(res => {
@@ -917,54 +88,16 @@ export default function AppShell({ user, onLogout }) {
         setLastAnalysis(lastEntry);
       }
     }).catch(() => { });
-  }, [user?.uid]);
+  }, [user?.uid, isPro]);
 
-  // ── Back-stack navigation via popstate ──────────────────────
-  useEffect(() => {
-    // Push initial state
-    window.history.replaceState({ tab: activeTab }, '');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    const onPop = () => {
-      setTabHistory(history => {
-        if (history.length <= 1) {
-          // Nothing to go back to — restore current state so app doesn't exit
-          window.history.pushState({ tab: history[0] || 'home' }, '');
-          return history;
-        }
-        const newHistory = history.slice(0, -1);
-        const prevTab = newHistory[newHistory.length - 1];
-        setActiveTab(prevTab);
-        setError(null);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        window.history.pushState({ tab: prevTab }, '');
-        return newHistory;
-      });
-    };
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
-  }, []);
-
-  const handleTabChange = useCallback((tab) => {
-    // Track time on previous tab before switching
-    trackTimeOnPage(activeTab);
-    setActiveTab(prev => {
-      // Fire deep tab view tracking for the new tab
-      trackTabView(tab);
-      markPageEnter();
-      return tab;
-    });
-    setTabHistory(h => {
-      // Don't duplicate same tab consecutively
-      if (h[h.length - 1] === tab) return h;
-      return [...h, tab];
-    });
-    if (tab !== 'analyze') setError(null);
-    window.history.pushState({ tab }, '');
+  const handleTabChange = useCallback((id) => {
+    setActiveTab(id);
+    setTabHistory(prev => [...prev, id]);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [activeTab]);
+    const url = new URL(window.location);
+    url.searchParams.set('tab', id);
+    window.history.pushState({}, '', url);
+  }, []);
 
   const handleAnalysisComplete = useCallback(async (data) => {
     setLoading(false); setResults(data); setActiveTab('analyze');
@@ -1001,7 +134,6 @@ export default function AppShell({ user, onLogout }) {
     { id: 'tools', label: 'Tools' },
   ];
 
-  // Mobile: 6 clean tabs
   const mobileTabs = [
     { id: 'home', icon: '🏠', label: 'Home' },
     { id: 'analyze', icon: '📷', label: 'Analyze' },
@@ -1019,7 +151,6 @@ export default function AppShell({ user, onLogout }) {
 
       {/* ═══════════ TOP NAV ═══════════ */}
       <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: 60, background: navScrolled ? C.navBg : C.navBgScroll, backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderBottom: `1px solid ${navScrolled ? C.border : 'transparent'}`, display: 'flex', alignItems: 'center', padding: '0 20px', gap: 12, transition: 'all 0.3s' }}>
-        {/* Logo */}
         <button onClick={() => handleTabChange('home')} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
           <img src="/logo.png" alt="StyleGuru AI Logo" style={{ width: 34, height: 34, borderRadius: 10, objectFit: 'cover', boxShadow: '0 4px 12px rgba(139,92,246,0.2)' }} />
           <span style={{ fontSize: '15px', fontWeight: 700, color: C.text, fontFamily: PJS, letterSpacing: '-0.3px' }}>
@@ -1027,7 +158,6 @@ export default function AppShell({ user, onLogout }) {
           </span>
         </button>
 
-        {/* Desktop Nav Tabs */}
         <div className="hidden md:flex" style={{ flex: 1, justifyContent: 'center', gap: 2 }}>
           {desktopTabs.map(tab => {
             const active = activeTab === tab.id;
@@ -1035,8 +165,6 @@ export default function AppShell({ user, onLogout }) {
               <button
                 key={tab.id} onClick={() => handleTabChange(tab.id)}
                 style={{ background: active ? `rgba(139,92,246,${C.isDark ? '0.12' : '0.08'})` : 'transparent', border: 'none', cursor: 'pointer', padding: '6px 14px', borderRadius: 8, fontSize: '13px', fontWeight: active ? 600 : 400, color: active ? C.text : C.muted, transition: 'all 0.2s', fontFamily: PJS, position: 'relative' }}
-                onMouseEnter={e => { if (!active) { e.currentTarget.style.color = C.text; e.currentTarget.style.background = C.glass2; } }}
-                onMouseLeave={e => { if (!active) { e.currentTarget.style.color = C.muted; e.currentTarget.style.background = 'transparent'; } }}
               >
                 {tab.label}
                 {active && <div style={{ position: 'absolute', bottom: -2, left: '50%', transform: 'translateX(-50%)', width: 18, height: 2, borderRadius: 1, background: GRAD }} />}
@@ -1045,19 +173,14 @@ export default function AppShell({ user, onLogout }) {
           })}
         </div>
 
-        {/* Right — Theme quick toggle + Avatar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
-          {/* Quick theme toggle button */}
           <button
             onClick={() => { toggleTheme(); setToast({ message: `${theme === 'dark' ? 'Light' : 'Dark'} Mode`, type: 'success' }); }}
             title="Toggle theme"
             style={{ width: 34, height: 34, borderRadius: 8, background: C.glass2, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '15px', transition: 'all 0.2s' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = `${VIOLET}50`; e.currentTarget.style.color = C.text; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.muted; }}
           >
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
-          {/* Profile avatar with Pro Badge */}
           <button
             onClick={() => handleTabChange('profile')}
             style={{ width: 36, height: 36, borderRadius: '50%', background: activeTab === 'profile' ? GRAD : C.glass2, border: `1px solid ${activeTab === 'profile' ? 'transparent' : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s', boxShadow: activeTab === 'profile' ? C.btnShadow : 'none', fontSize: '14px', fontWeight: 700, color: activeTab === 'profile' ? 'white' : C.text, fontFamily: PJS, position: 'relative' }}
@@ -1083,9 +206,7 @@ export default function AppShell({ user, onLogout }) {
             {activeTab === 'home' && (
               <motion.div 
                 key="home" 
-                initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
-                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+                initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
                 transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
               >
                 <HomeSection C={C} user={user} lastAnalysis={lastAnalysis} onAnalyze={() => handleTabChange('analyze')} onTabChange={handleTabChange} />
@@ -1093,226 +214,71 @@ export default function AppShell({ user, onLogout }) {
             )}
 
             {activeTab === 'lookbook' && (
-              <motion.div 
-                key="lookbook" 
-                initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
-                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
-                transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-              >
+              <motion.div key="lookbook" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
                 <LookbookPanel C={C} />
               </motion.div>
             )}
 
-          {activeTab === 'analyze' && (
-            <motion.div 
-              key="analyze" 
-              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
-              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            >
-              <SectionHeader C={C}
-                label="AI Analysis"
-                title={results ? 'Your Style Profile' : adSkipped ? 'Analysis Cancelled' : 'Upload a Photo'}
-                subtitle={!results && !adSkipped ? 'Get personalized color palette & outfit recommendations' : undefined}
-                action={
-                  results ? (
-                    // ── Result exists → show Refresh ──
-                    <button
-                      onClick={handleReset}
-                      style={{ background: C.glass, backdropFilter: 'blur(12px)', border: `1px solid ${C.border}`, color: C.muted, borderRadius: 10, padding: '10px 18px', fontSize: '12px', cursor: 'pointer', transition: 'all 0.2s', fontFamily: PJS }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = VIOLET; e.currentTarget.style.color = C.text; }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.muted; }}
-                    >
-                      🔄 Refresh
-                    </button>
-                  ) : adSkipped ? (
-                    // ── Ad skipped → show New Analysis ──
-                    <button
-                      onClick={() => { setAdSkipped(false); handleReset(); }}
-                      style={{ background: 'linear-gradient(135deg,#8B5CF6,#6366F1)', border: 'none', color: 'white', borderRadius: 10, padding: '10px 18px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s', fontFamily: PJS, boxShadow: '0 4px 16px rgba(139,92,246,0.35)' }}
-                      onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
-                      onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
-                    >
-                      🆕 New Analysis
-                    </button>
-                  ) : null
-                }
-              />
+            {activeTab === 'analyze' && (
+              <motion.div key="analyze" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
+                <SectionHeader C={C} label="AI Analysis" title={results ? 'Your Style Profile' : 'Upload a Photo'} />
+                {results ? <ResultsDisplay data={results} uploadedImage={uploadedImage} onReset={handleReset} /> : <UploadSection onLoadingStart={() => setLoading(true)} onAnalysisComplete={handleAnalysisComplete} currentGender={currentGender} setCurrentGender={setCurrentGender} isPro={isPro} usage={usage} coins={coins} />}
+              </motion.div>
+            )}
 
-              {/* ── Ad-skipped state — no result, show helper message ── */}
-              {adSkipped && !results && !loading && (
-                <div style={{ textAlign: 'center', padding: '40px 24px', background: C.glass, backdropFilter: 'blur(16px)', border: `1px solid ${C.border}`, borderRadius: 20, marginBottom: 24 }}>
-                  <p style={{ fontSize: '40px', marginBottom: 12 }}>🎬</p>
-                  <p style={{ fontFamily: PJS, fontSize: '16px', fontWeight: 700, color: C.text, marginBottom: 8 }}>No result generated</p>
-                  <p style={{ fontFamily: PJS, fontSize: '13px', color: C.muted, lineHeight: '1.7', marginBottom: 24 }}>
-                    Analysis cancelled. Start a new analysis to continue.
-                  </p>
-                  <button
-                    onClick={() => { setAdSkipped(false); handleReset(); }}
-                    style={{ background: 'linear-gradient(135deg,#8B5CF6,#6366F1)', border: 'none', color: 'white', borderRadius: 12, padding: '14px 32px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: PJS, boxShadow: '0 6px 20px rgba(139,92,246,0.4)' }}
-                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(139,92,246,0.5)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(139,92,246,0.4)'; }}
-                  >
-                    🆕 New Analysis
-                  </button>
-                </div>
-              )}
+            {activeTab === 'history' && (
+              <motion.div key="history" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
+                <SectionHeader C={C} label="Your Archive" title="Analysis History" />
+                <HistoryPanel onShowResult={data => { setResults(data); handleTabChange('analyze'); }} />
+              </motion.div>
+            )}
 
-              {/* ── Normal upload screen ── */}
-              {!results && !loading && !error && !adSkipped && (
-                <UploadSection
-                  onLoadingStart={() => setLoading(true)}
-                  onAnalysisComplete={handleAnalysisComplete}
-                  onError={(err) => {
-                    // If 'skipped' signal arrives here (edge case), handle gracefully
-                    if (err === '__ad_skipped__') {
-                      setLoading(false);
-                      setAdSkipped(true);
-                    } else {
-                      setLoading(false);
-                      setError(err);
-                    }
-                  }}
-                  onImageSelected={setUploadedImage}
-                  setUploadProgress={setUploadProgress}
-                  currentGender={currentGender}
-                  setCurrentGender={setCurrentGender}
-                  isPro={isPro}
-                  usage={usage}
-                  coins={coins}
-                  onAdSkipped={() => { setLoading(false); setAdSkipped(true); }}
-                  onCoinEmpty={() => { }}
-                />
-              )}
-              {loading && <LoadingScreenWithProgress progress={uploadProgress} />}
-              {error && !loading && (
-                <div style={{ padding: 32, textAlign: 'center', background: C.dangerBg, backdropFilter: 'blur(12px)', border: `1px solid ${C.dangerBorder}`, borderRadius: 16 }}>
-                  <p style={{ fontSize: '36px', marginBottom: 12 }}>😕</p>
-                  <p style={{ color: C.dangerText, fontSize: '14px', marginBottom: 24, lineHeight: '1.6', fontFamily: PJS }}>{error}</p>
-                  <button onClick={handleReset} style={{ background: C.dangerBg, border: `1px solid ${C.dangerBorder}`, color: C.dangerText, borderRadius: 10, padding: '12px 28px', cursor: 'pointer', fontSize: '13px', fontFamily: PJS }}>Try Again</button>
-                </div>
-              )}
-              {results && results.type === 'couple'
-                ? <CoupleResults data={results} uploadedImages={uploadedImage} onReset={handleReset} />
-                : results ? <ResultsDisplay data={results} uploadedImage={uploadedImage} onReset={handleReset} /> : null
-              }
-            </motion.div>
-          )}
+            {activeTab === 'wardrobe' && (
+              <motion.div key="wardrobe" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
+                <SectionHeader C={C} label="Style Vault" title="Your Wardrobe" />
+                <WardrobePanel onShowResult={data => { setResults(data); handleTabChange('analyze'); }} gender={currentGender} />
+              </motion.div>
+            )}
 
-          {activeTab === 'history' && (
-            <motion.div 
-              key="history"
-              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
-              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            >
-              <SectionHeader C={C} label="Your Archive" title="Analysis History" subtitle="All your previous skin tone analyses" />
-              <HistoryPanel onShowResult={data => { setResults(data); handleTabChange('analyze'); }} />
-            </motion.div>
-          )}
+            {activeTab === 'navigator' && (
+              <motion.div key="navigator" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
+                <SectionHeader C={C} label="AI Insights" title="Style Compass" />
+                <StyleNavigator user={user} onAnalyze={() => handleTabChange('analyze')} />
+              </motion.div>
+            )}
 
-          {activeTab === 'wardrobe' && (
-            <motion.div 
-              key="wardrobe"
-              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
-              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            >
-              <SectionHeader C={C} label="Style Vault" title="Your Wardrobe" subtitle="Manage and organize your saved outfits" />
-              <WardrobePanel onShowResult={data => { setResults(data); handleTabChange('analyze'); }} gender={currentGender} />
-            </motion.div>
-          )}
+            {activeTab === 'tools' && (
+              <motion.div key="tools" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
+                <SectionHeader C={C} label="Power Tools" title="Style Tools" />
+                <ToolsTab analysisData={results} onShowResult={data => { setResults(data); handleTabChange('analyze'); }} onOpenScanner={() => handleTabChange('scanner')} />
+              </motion.div>
+            )}
 
-          {activeTab === 'navigator' && (
-            <motion.div 
-              key="navigator"
-              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
-              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            >
-              <SectionHeader C={C} label="AI Style Intelligence" title="Style Compass" subtitle="Personalized outfit guidance based on your skin tone & style DNA" />
-              <StyleNavigator user={user} onAnalyze={() => handleTabChange('analyze')} />
-            </motion.div>
-          )}
+            {activeTab === 'scanner' && (
+              <motion.div key="scanner" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.05 }}>
+                <ColorScanner onClose={() => handleTabChange('home')} />
+              </motion.div>
+            )}
 
-          {activeTab === 'tools' && (
-            <motion.div 
-              key="tools"
-              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
-              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            >
-              <SectionHeader C={C} label="Power Tools" title="Style Tools" subtitle="Advanced tools to elevate your fashion game" />
-              <ToolsTab analysisData={results} onShowResult={data => { setResults(data); handleTabChange('analyze'); }} onOpenScanner={() => handleTabChange('scanner')} />
-            </motion.div>
-          )}
+            {activeTab === 'profile' && (
+              <motion.div key="profile" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
+                <ProfileSection C={C} theme={theme} toggleTheme={toggleTheme} user={user} onLogout={handleLogout} onTabChange={handleTabChange} onToast={setToast} isPro={isPro} usage={usage} />
+              </motion.div>
+            )}
 
-          {activeTab === 'scanner' && (
-            <motion.div 
-              key="scanner"
-              initial={{ opacity: 0, scale: 0.95, filter: 'blur(8px)' }}
-              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, scale: 1.05, filter: 'blur(8px)' }}
-              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            >
-              <ColorScanner key="scanner"
-                savedPalette={(() => { try { const l = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); return l?.fullData?.recommendations?.best_shirt_colors || l?.fullData?.recommendations?.best_dress_colors || []; } catch { return []; } })()}
-                skinTone={lastAnalysis?.skinTone || ''}
-                onClose={() => handleTabChange('home')}
-              />
-            </motion.div>
-          )}
-
-          {activeTab === 'profile' && (
-            <motion.div 
-              key="profile"
-              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
-              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-            >
-              <ProfileSection
-                key="profile"
-                C={C}
-                theme={theme}
-                toggleTheme={toggleTheme}
-                user={user}
-                onLogout={handleLogout}
-                onTabChange={handleTabChange}
-                onToast={setToast}
-                isPro={isPro}
-                usage={usage}
-              />
-            </motion.div>
-          )}
-
-        </Suspense>
-      </AnimatePresence>
-    </main>
+          </Suspense>
+        </AnimatePresence>
+      </main>
 
       {/* ═══════════ MOBILE BOTTOM NAV ═══════════ */}
-      <nav
-        className="mobile-bottom-nav md:hidden"
-        style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200, background: C.bottomNav, backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', borderTop: `1px solid ${C.border}`, paddingBottom: 'env(safe-area-inset-bottom,4px)' }}
-      >
+      <nav className="mobile-bottom-nav md:hidden" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200, background: C.bottomNav, backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', borderTop: `1px solid ${C.border}`, paddingBottom: 'env(safe-area-inset-bottom,4px)' }}>
         {mobileTabs.map(item => {
           const active = activeTab === item.id;
           return (
-            <button
-              key={item.id} onClick={() => handleTabChange(item.id)}
-              style={{ flex: 1, padding: '10px 2px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', position: 'relative' }}
-            >
+            <button key={item.id} onClick={() => handleTabChange(item.id)} style={{ flex: 1, padding: '10px 2px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', position: 'relative' }}>
               {active && <div style={{ position: 'absolute', top: 0, left: '25%', right: '25%', height: 2, background: GRAD, borderRadius: 1 }} />}
               <span style={{ fontSize: '19px', lineHeight: 1, opacity: active ? 1 : 0.4, transition: 'opacity 0.2s' }}>{item.icon}</span>
-              <span style={{ fontSize: '8px', letterSpacing: '0.05em', textTransform: 'uppercase', color: active ? C.text : C.muted, fontWeight: active ? 600 : 400, fontFamily: PJS, transition: 'color 0.2s' }}>
-                {item.label}
-              </span>
+              <span style={{ fontSize: '8px', letterSpacing: '0.05em', textTransform: 'uppercase', color: active ? C.text : C.muted, fontWeight: active ? 600 : 400, fontFamily: PJS, transition: 'color 0.2s' }}>{item.label}</span>
             </button>
           );
         })}
