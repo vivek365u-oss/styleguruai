@@ -402,13 +402,26 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
                       <div className={`p-4 rounded-2xl border border-dashed ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'}`}>
                            <p className="text-[8px] font-black opacity-30 uppercase mb-3">Finishing Touches</p>
                            <div className="space-y-3">
-                                <div className="flex gap-2 items-center">
+                                <div 
+                                   className="flex gap-2 items-center cursor-pointer hover:bg-white/5 p-1 rounded-lg transition-all"
+                                   onClick={() => {
+                                       const gender = dayInfo.gender || 'male';
+                                       const type = (dayInfo.accessories.jewelry || '').toLowerCase().includes('necklace') ? 'kurti' : 'top';
+                                       window.open(buildMyntraSearchUrl(dayInfo.accessories.jewelry, gender, type), '_blank');
+                                   }}
+                                >
                                      <span className="text-lg">💎</span>
-                                     <p className="text-[10px] font-bold leading-tight">{dayInfo.accessories.jewelry}</p>
+                                     <p className="text-[10px] font-bold leading-tight underline decoration-purple-500/30">{dayInfo.accessories.jewelry}</p>
                                 </div>
-                                <div className="flex gap-2 items-center">
+                                <div 
+                                   className="flex gap-2 items-center cursor-pointer hover:bg-white/5 p-1 rounded-lg transition-all"
+                                   onClick={() => {
+                                       const gender = dayInfo.gender || 'male';
+                                       window.open(buildMyntraSearchUrl(dayInfo.accessories.shoes, gender, 'shoe'), '_blank');
+                                   }}
+                                >
                                      <span className="text-lg">👟</span>
-                                     <p className="text-[10px] font-bold leading-tight">{dayInfo.accessories.shoes}</p>
+                                     <p className="text-[10px] font-bold leading-tight underline decoration-purple-500/30">{dayInfo.accessories.shoes}</p>
                                 </div>
                            </div>
                       </div>

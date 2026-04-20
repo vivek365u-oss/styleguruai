@@ -1152,16 +1152,19 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }
   const accentColors = recommendations.accent_colors || [];
 
   const getAccCat = (typeLC, isFem) => {
-    if (typeLC.includes('jewel') || typeLC.includes('earring') || typeLC.includes('necklace') || typeLC.includes('bangle') || typeLC.includes('ring') || typeLC.includes('bracelet')) return 'jewellery';
-    if (typeLC.includes('bag') || typeLC.includes('purse') || typeLC.includes('clutch')) return isFem ? 'handbag' : 'bag';
-    if (typeLC.includes('footwear') || typeLC.includes('shoe') || typeLC.includes('heel') || typeLC.includes('sandal')) return 'footwear';
+    if (typeLC.includes('earring')) return 'earrings';
+    if (typeLC.includes('necklace')) return 'necklace';
+    if (typeLC.includes('bangle')) return 'bangles';
+    if (typeLC.includes('bag') || typeLC.includes('purse') || typeLC.includes('clutch')) return isFem ? 'handbag' : 'backpack';
+    if (typeLC.includes('footwear') || typeLC.includes('shoe') || typeLC.includes('sandal')) return 'sneakers';
+    if (typeLC.includes('heel')) return 'heels';
     if (typeLC.includes('watch')) return 'watch';
     if (typeLC.includes('dupatta') || typeLC.includes('scarf') || typeLC.includes('stole')) return 'dupatta';
-    if (typeLC.includes('belt')) return 'belt';
+    if (typeLC.includes('belt')) return isFem ? 'belt_f' : 'belt';
     if (typeLC.includes('wallet')) return 'wallet';
-    if (typeLC.includes('sunglass')) return 'sunglasses';
-    if (typeLC.includes('backpack')) return 'bag';
-    return 'accessories';
+    if (typeLC.includes('sunglass')) return isFem ? 'sunglasses_f' : 'sunglasses';
+    if (typeLC.includes('backpack')) return 'backpack';
+    return 'accessory';
   };
 
   const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';

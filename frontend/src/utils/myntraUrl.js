@@ -54,6 +54,7 @@ const MYNTRA_PATHS = {
   // ── MALE ACCESSORIES ────────────────────────────────────────────────
   cat_watch:          { path: 'watches',                kw: 'men watch' },
   cat_wallet:         { path: 'wallets',                kw: 'men wallet' },
+  cat_belt:           { path: 'belts',                  kw: 'leather belt men' },
   cat_sunglasses:     { path: 'men-sunglasses',         kw: 'men sunglasses' },
   cat_backpack:       { path: 'backpacks',              kw: 'men backpack' },
 
@@ -116,6 +117,7 @@ const MYNTRA_PATHS = {
   cat_necklace:       { path: 'necklaces',              kw: 'necklace women' },
   cat_bangles:        { path: 'bangles',                kw: 'bangles women' },
   cat_handbag:        { path: 'handbags',               kw: 'handbag clutch women' },
+  cat_belt_f:         { path: 'belts',                  kw: 'waist belt women' },
   cat_sunglasses_f:   { path: 'sunglasses',             kw: 'sunglasses women' },
   cat_dupatta:        { path: 'stoles-dupattas',        kw: 'dupatta stole women' },
 
@@ -143,6 +145,7 @@ const DEFAULT_PATHS = {
     kurti: { path: 'kurtas-kurtis', kw: 'women kurti' },
     top:   { path: 'tops',          kw: 'women top' },
     shoe:  { path: 'heels',         kw: 'women heels' },
+    accessory: { path: 'accessories', kw: 'women accessory' },
   },
 };
 
@@ -171,7 +174,14 @@ export function buildMyntraUrl({ color = '', catId = '', gender = 'male', itemTy
   const { path, kw } = catEntry || fallback;
 
   // Build rawQuery: color + item keyword
-  const rawQ = colorSlug ? `${colorSlug}+${kw.replace(/\s+/g, '+')}` : kw.replace(/\s+/g, '+');
+  // FIX: If color already contains the keyword (e.g. "Silver Watch"), don't append "men watch"
+  const kwWords = kw.toLowerCase().split(/\s+/);
+  const colorLower = color.toLowerCase();
+  const containsKeyword = kwWords.some(w => w !== 'men' && w !== 'women' && colorLower.includes(w));
+  
+  const rawQ = containsKeyword 
+    ? colorSlug 
+    : (colorSlug ? `${colorSlug}+${kw.replace(/\s+/g, '+')}` : kw.replace(/\s+/g, '+'));
 
   return `https://www.myntra.com/${path}?rawQuery=${rawQ}`;
 }
