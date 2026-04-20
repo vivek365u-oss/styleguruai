@@ -1,12 +1,39 @@
 /**
  * ToneFit Unified AI Personal Styling Engine (AIPSE)
- * 
- * This engine calculates compatibility scores for wardrobe items based on:
- * 1. Physical Profile (Skin Tone, Body Type)
- * 2. Environmental Context (Weather, Time of Day)
- * 3. Occasion Relevance
- * 4. Behavioral Data (Freshness, Preferences)
  */
+
+export const MISSIONS = {
+    WEDDING_ELITE: { 
+        id: 'wedding', label: 'Wedding Elite', emoji: '🏛️', 
+        boost: ['cat_saree_silk', 'cat_lehenga', 'cat_kurta_set', 'cat_sherwani', 'cat_nehru_jacket'],
+        colors: ['gold', 'maroon', 'emerald', 'royal_blue', 'red'],
+        fabric: ['silk', 'velvet']
+    },
+    CORPORATE_POWER: { 
+        id: 'office', label: 'Corporate Power', emoji: '💼', 
+        boost: ['cat_formal_shirt', 'cat_blazer', 'cat_formal_trouser', 'cat_loafers', 'cat_oxfords'],
+        colors: ['navy', 'charcoal', 'white', 'grey', 'black'],
+        fabric: ['cotton', 'linen']
+    },
+    MONSOON_MINIMAL: { 
+        id: 'monsoon', label: 'Monsoon Minimal', emoji: '🌧️', 
+        boost: ['cat_shorts', 'cat_track_pants', 'cat_sandals', 'cat_sneakers', 'cat_hoodie'],
+        colors: ['dark_grey', 'olive', 'black', 'navy'],
+        fabric: ['synthetic', 'nylon', 'denim']
+    },
+    MORNING_POOJA: { 
+        id: 'pooja', label: 'Morning Pooja', emoji: '🪔', 
+        boost: ['cat_kurta_set', 'cat_kurti', 'cat_saree_cotton', 'cat_flats'],
+        colors: ['yellow', 'white', 'ivory', 'saffron', 'light_pink'],
+        fabric: ['cotton', 'linen']
+    },
+    DATE_NIGHT: { 
+        id: 'date', label: 'Dapper / Diva Date', emoji: '🍷', 
+        boost: ['cat_dress_midi', 'cat_bodycon', 'cat_casual_shirt', 'cat_perfume', 'cat_heels', 'cat_boots'],
+        colors: ['black', 'wine', 'crimson', 'midnight_blue', 'champagne'],
+        fabric: ['satin', 'silk', 'leather']
+    }
+};
 
 export const scoreWardrobeItem = (item, context, profile, history = [], preferences = {}, lockedInsights = null) => {
     // 0. Gender Filter (Strict Wall)
@@ -103,9 +130,26 @@ export const scoreWardrobeItem = (item, context, profile, history = [], preferen
 
     score += (colorScore / 100) * weights.color;
 
-    // 2. Context Relevance (Weather & Event)
+    // 2. Context Relevance (Weather, Event, MISSION)
     let contextScore = 50;
     
+    // Mission Overrides (Phase 2 Upgrade)
+    const activeMission = context.mission ? Object.values(MISSIONS).find(m => m.id === context.mission) : null;
+    if (activeMission) {
+        // Category Boost
+        if (activeMission.boost.includes(item.category)) contextScore += 40;
+        
+        // Color Synergy Boost
+        const colorMatch = activeMission.colors.some(c => 
+            item.color_name?.toLowerCase().includes(c.replace('_', ' ')) ||
+            item.name?.toLowerCase().includes(c.replace('_', ' '))
+        );
+        if (colorMatch) contextScore += 20;
+
+        // Fabric Synergy
+        if (item.fabric && activeMission.fabric.some(f => item.fabric.includes(f))) contextScore += 10;
+    }
+
     // Weather Logic
     const w = context.weather?.toLowerCase() || 'sunny';
     if (w === 'hot' || w === 'sunny') {

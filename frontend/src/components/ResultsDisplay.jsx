@@ -8,7 +8,8 @@ import { publishToCommunityFeed, auth, saveSavedColor, getSavedColors, saveHisto
 import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';
 import ColorRecommendationsShop from './ColorRecommendationsShop';
-import { buildMyntraUrl } from '../utils/myntraUrl';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MISSIONS, scoreWardrobeItem } from '../utils/stylingEngine';
 import AffiliateLink from './AffiliateLink';
 import AdSense from '../AdSense';
 
@@ -501,6 +502,50 @@ const CELEBRITY_MAP = {
   },
 };
 
+// ── Mission Selector (Event Wizard) ──────────────────────────
+function MissionSelector({ activeMissionId, onMissionSelect, isDark }) {
+  const missionsList = Object.values(MISSIONS);
+  
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-xl">🎯</span>
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-purple-500">Stylist Protocol</p>
+          <h3 className={`text-sm font-black ${isDark ? 'text-white' : 'text-gray-800'}`}>Select Your Style Mission</h3>
+        </div>
+      </div>
+
+      <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 mask-fade-edges">
+        {missionsList.map((m) => {
+          const isActive = activeMissionId === m.id;
+          return (
+            <motion.button
+              key={m.id}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => onMissionSelect(m.id)}
+              className={`flex-shrink-0 flex items-center gap-2 px-4 py-3 rounded-2xl border-2 transition-all ${
+                isActive 
+                  ? 'bg-purple-600/20 border-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]' 
+                  : isDark ? 'bg-white/5 border-white/5 text-white/40' : 'bg-gray-100 border-gray-100 text-gray-500'
+              }`}
+            >
+              <span className="text-lg">{m.emoji}</span>
+              <span className="text-xs font-bold whitespace-nowrap">{m.label}</span>
+              {isActive && (
+                <motion.div 
+                  layoutId="active-pill" 
+                  className="w-1.5 h-1.5 rounded-full bg-purple-400"
+                />
+              )}
+            </motion.button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── DNA Breakdown (Explainable AI) ──────────────────────────
 function DNABreakdown({ analysis, isDark }) {
   const ita = analysis.skin_tone.ita || 45;
@@ -905,7 +950,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 }
 
 // ── Outfits Tab ──────────────────────────────────────────────
-function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, styleTips, occasionAdvice, ethnicWear, sareeSuggestions, isDark, bodyTypeTips = [], bodyType = null, userOccasion = 'casual' }) {
+function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, styleTips, occasionAdvice, ethnicWear, sareeSuggestions, isDark, bodyTypeTips = [], bodyType = null, userOccasion = 'casual', activeMission = 'casual' }) {
   const { t } = useLanguage();
   let outfits = [];
   if (isSeasonal) outfits = seasonalGender === 'female' ? (recommendations.female_outfits || []) : (recommendations.male_outfits || []);
@@ -915,8 +960,36 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
   const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
   const cardBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
   const bodyTextCls = isDark ? 'text-white/60' : 'text-gray-500';
-  const mutedCls = isDark ? 'text-white/40' : 'text-gray-400';
-  const tipTextCls = isDark ? 'text-white/70' : 'text-gray-600';
+  
+  // Phase 2: Mission-based Re-ranking Logic
+  const scoredOutfits = useMemo(() => {
+    const mission = Object.values(MISSIONS).find(m => m.id === activeMission);
+    if (!mission) return outfits.map(o => ({ ...o, missionScore: 0 }));
+
+    return outfits.map(o => {
+      let score = 0;
+      const text = `${o.upper || ''} ${o.lower || ''} ${o.description || ''} ${o.name || ''}`.toLowerCase();
+      
+      // Keywords boost
+      mission.boost.forEach(b => {
+        const catName = b.replace('cat_', '').replace('_', ' ');
+        if (text.includes(catName)) score += 30;
+      });
+
+      // Colors boost
+      mission.colors.forEach(c => {
+        const colName = c.replace('_', ' ');
+        if (text.includes(colName)) score += 20;
+      });
+
+      // Fabric boost
+      mission.fabric.forEach(f => {
+        if (text.includes(f)) score += 10;
+      });
+
+      return { ...o, missionScore: score };
+    }).sort((a, b) => b.missionScore - a.missionScore);
+  }, [outfits, activeMission]);
 
   // Find occasion-specific advice
   const occasionKey = Object.keys(occasionAdvice).find(k => k.toLowerCase().includes(userOccasion)) || null;
@@ -934,11 +1007,20 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
         </div>
       )}
       {/* Outfit combos */}
-      {outfits.length > 0 && (
+      {scoredOutfits.length > 0 && (
         <div>
           <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🧥 {t('outfitCombos')}</p>
           <div className="space-y-2">
-            {outfits.map((combo, i) => <OutfitCard key={i} combo={combo} index={i} isDark={isDark} />)}
+            {scoredOutfits.map((combo, i) => (
+              <div key={i} className="relative">
+                {combo.missionScore > 20 && (
+                  <div className="absolute -top-1.5 -right-1.5 z-10 bg-gradient-to-r from-purple-600 to-pink-600 text-[9px] font-black text-white px-2 py-0.5 rounded-full shadow-lg border border-white/20 uppercase tracking-tighter">
+                    Mission Match
+                  </div>
+                )}
+                <OutfitCard combo={combo} index={i} isDark={isDark} />
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -1134,6 +1216,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [activeTab, setActiveTab] = useState('colors');
+  const [activeMission, setActiveMission] = useState(data?.analysis?.skin_tone?.color_season === 'Winter' ? 'office' : 'casual');
   const [showConfetti, setShowConfetti] = useState(() => {
     const isFirst = !localStorage.getItem('sg_analysis_count') || localStorage.getItem('sg_analysis_count') === '1';
     return isFirst;
@@ -1288,6 +1371,42 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         isDark={isDark}
         photoQuality={photo_quality}
       />
+
+      {/* NEW: Event Styling Wizard (Phase 2) */}
+      <section className="mt-8 pt-4 border-t border-purple-500/10">
+        <MissionSelector 
+          activeMissionId={activeMission} 
+          onMissionSelect={setActiveMission} 
+          isDark={isDark} 
+        />
+        
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeMission}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className={`p-4 rounded-2xl border ${isDark ? 'bg-purple-900/10 border-purple-500/20' : 'bg-purple-50 border-purple-200'} mb-6`}
+          >
+            <div className="flex gap-3">
+              <span className="text-2xl mt-1">💡</span>
+              <div>
+                <p className={`text-xs font-black uppercase tracking-widest ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>
+                  Expert Stylist Advice
+                </p>
+                <p className={`text-sm mt-1 leading-relaxed ${isDark ? 'text-white/70' : 'text-gray-700'}`}>
+                  {activeMission === 'wedding' && "For your Wedding Elite mission, we've prioritized high-contrast silk combinations. Aim for jewel tones that complement your deep premium luminosity."}
+                  {activeMission === 'office' && "Focusing on Corporate Power. We've filtered for crisp cottons and structured silhouettes in your core neutral palette for maximum authority."}
+                  {activeMission === 'monsoon' && "Monsoon Minimal mode active. Stick to darker saturated tones to maintain a sharp profile even in overcast lighting."}
+                  {activeMission === 'pooja' && "Traditional Morning Pooja DNA detected. Opt for saffron and ivory tones to reflect serenity while keeping your natural brightness front and center."}
+                  {activeMission === 'date' && "Entering Date Night mode. Soft satin finishes in deep wine or midnight blue will interact perfectly with evening ambient light."}
+                  {activeMission === 'casual' && "Relaxed daily mode. Focus on comfort within your seasonal spectrum — keeping it effortless yet curated."}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </section>
 
       {/* NEW: Explainability Section */}
       <DNABreakdown analysis={analysis} isDark={isDark} />
@@ -1503,6 +1622,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             bodyTypeTips={bodyTypeTips}
             bodyType={bodyType}
             userOccasion={userOccasion}
+            activeMission={activeMission}
           />
         )}
         {activeTab === 'accessories' && (
