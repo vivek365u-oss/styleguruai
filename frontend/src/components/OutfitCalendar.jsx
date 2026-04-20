@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
 import { scoreWardrobeItem, getAccessoryAdvice, generateStylerBrief } from '../utils/stylingEngine';
 import { useLanguage } from '../i18n/LanguageContext';
-import { auth, getDailyOutfitLogs, loadUserPreferences, loadStyleInsights } from '../api/styleApi';
+import { auth, getDailyOutfitLogs, loadUserPreferences, loadStyleInsights, logDailyOutfit } from '../api/styleApi';
 import { buildMyntraSearchUrl } from '../utils/myntraUrl';
+import { getWeeklyForecast } from '../utils/weatherService';
 
 // ── Occasion-Aware Fallback Outfits (when wardrobe is empty) ──────────────────
 // Each occasion gets a DIFFERENT outfit so calendar is never repetitive per day
@@ -29,6 +29,9 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
   const [loading, setLoading] = useState(true);
   const [mood, setMood] = useState('mood_comfort');
   const [lockedDNA, setLockedDNA] = useState(null);
+  const [forecast, setForecast] = useState({});
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [plannedOutfits, setPlannedOutfits] = useState({});
   
   // Custom Event Overrides for the week
   const [eventOverrides, setEventOverrides] = useState({});
@@ -39,14 +42,16 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
       if (!uid) { setLoading(false); return; }
       
       try {
-        const [userLogs, prefs, dna] = await Promise.all([
+        const [userLogs, prefs, dna, weather] = await Promise.all([
           getDailyOutfitLogs(uid, 14),
           loadUserPreferences(uid),
-          loadStyleInsights(uid)
+          loadStyleInsights(uid),
+          getWeeklyForecast()
         ]);
         setLogs(userLogs);
         if (prefs?.lifestyle) setLifestyle(prefs.lifestyle);
         if (dna) setLockedDNA(dna);
+        setForecast(weather);
       } catch (e) {
         console.error('Failed to load calendar context:', e);
       } finally {
@@ -82,12 +87,14 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
      return WEEKDAYS.map((day, i) => {
         const typeId = eventOverrides[i] || baseMapping[i];
         const type = EVENT_TYPES.find(e => e.id === typeId);
+        const dayForecast = forecast[day.key] || { condition: 'pleasant', temp: 25 };
         return {
             ...day,
             event: typeId,
             icon: type.icon,
             label: type.label,
-            weather: ['sunny', 'cloudy', 'rainy', 'warm', 'pleasant', 'chilly', 'sunny'][i]
+            weather: dayForecast.condition,
+            temp: dayForecast.temp
         };
      });
   };
@@ -106,22 +113,18 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
   };
 
   const getOutfitForDay = (index) => {
+    // Priority: 1. Execution Logs (History) -> 2. User Planned -> 3. AI Predictive
     const log = getLogForDay(index);
+    const planned = plannedOutfits[index];
     const occasion = OCCASIONS[index];
-    const context = { weather: occasion.weather, event: occasion.event, mood };
-
-    // ── Gender Resolution (Priority chain) ──────────────────────────────────
-    // 1. Locked DNA (most trusted) → 2. Profile gender → 3. Passed genderProp → 4. 'male' safe default
+    
+    // ── Context Setup ───────────────────────────────────────────────────────
     const rawGender = lockedDNA?.gender || profile?.gender || profile?.gender_mode || genderProp || 'male';
     const activeGender = (rawGender.toLowerCase().includes('female') || rawGender === 'women') ? 'female' : 'male';
-
-    // ── Season Resolution (profile can have different shapes from different API versions) ──
-    const activeSeason = profile?.season
-      || profile?.skin_tone?.color_season
-      || profile?.analysis?.skin_tone?.color_season
-      || 'Spring';
-
+    const activeSeason = profile?.season || profile?.skin_tone?.color_season || 'Spring';
     const userProfile = { ...profile, gender: activeGender, season: activeSeason };
+    const context = { weather: occasion.weather, event: occasion.event, mood };
+    const historyItems = logs.map(l => ({ itemId: l.id, date: l.date }));
 
     if (log) {
         return {
@@ -134,17 +137,17 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
         };
     }
 
-    // ── Use Scoring Engine on Wardrobe items (if any) ────────────────────────
-    const historyItems = logs.map(l => ({ itemId: l.id, date: l.date }));
+    if (planned) return { ...planned, isPlanned: true };
+
+    // ── AI Predictive Engine ───────────────────────────────────────────────
     const rankedWardrobe = wardrobe
         ?.map(item => ({
             ...item,
-            engineScore: scoreWardrobeItem(item, context, userProfile, historyItems, lockedDNA)
+            engineScore: scoreWardrobeItem(item, context, userProfile, historyItems, profile?.preferences, lockedDNA)
         }))
-        .filter(i => i.engineScore > 0) // Gender wall applied inside engine
+        .filter(i => i.engineScore > 0)
         .sort((a, b) => b.engineScore - a.engineScore) || [];
 
-    // ── Gender-Strict Categories for wardrobe search ─────────────────────────
     const topCats = activeGender === 'male'
         ? ['shirts', 'tshirts', 'cat_formal_shirt', 'cat_kurta_set', 'cat_sherwani', 'cat_party_shirt', 'cat_polo', 'cat_tshirt']
         : ['tops', 'kurti', 'cat_kurti', 'cat_saree_silk', 'cat_dress_mini', 'cat_dress_maxi', 'cat_top', 'cat_blazer'];
@@ -153,33 +156,35 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
         ? ['pants', 'cat_formal_trouser', 'cat_jeans', 'cat_cargo', 'cat_chinos']
         : ['pants', 'bottoms', 'cat_palazzo', 'cat_mom_jeans', 'cat_skirt'];
 
-    // ── Occasion-Aware Fallbacks (used ONLY when wardrobe is empty) ───────────
-    // Each occasion → different outfit, gender-correct, never repeats
     const fallbackMap = activeGender === 'male' ? FALLBACK_MALE : FALLBACK_FEMALE;
     const fallback = fallbackMap[occasion.event] || fallbackMap['WEEKEND'];
 
     const matchingTops = rankedWardrobe.filter(i => topCats.includes(i.category));
     const matchingBottoms = rankedWardrobe.filter(i => bottomCats.includes(i.category));
 
+    const isWardrobeEmpty = matchingTops.length === 0;
+
     const bestTopObj = bestColors.length > 0 ? bestColors[index % bestColors.length] : null;
     const bestPantObj = pantColors.length > 0 ? pantColors[(index + 1) % pantColors.length] : null;
 
     const bestTop = matchingTops.length > 0 
-                    ? matchingTops[index % matchingTops.length] 
+                    ? matchingTops[0] 
                     : {
                         name: bestTopObj ? `${bestTopObj.name || 'Signature'} ${fallback.topName}` : fallback.topName,
                         hex: bestTopObj ? bestTopObj.hex : '#7C3AED',
                         engineScore: 85,
-                        category: fallback.topCat
+                        category: fallback.topCat,
+                        isMissing: true
                     };
 
     const bestBottom = matchingBottoms.length > 0 
-                       ? matchingBottoms[(index + 1) % matchingBottoms.length] 
+                       ? matchingBottoms[0] 
                        : {
                            name: bestPantObj ? `${bestPantObj.name || 'Classic'} ${fallback.botName}` : fallback.botName,
                            hex: bestPantObj ? bestPantObj.hex : '#1e3a8a',
                            engineScore: 80,
-                           category: fallback.botCat
+                           category: fallback.botCat,
+                           isMissing: true
                        };
 
     const accessorizing = getAccessoryAdvice(activeGender, activeSeason, occasion.event);
@@ -193,8 +198,39 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
       isFromWardrobe: !!(bestTop.id || bestBottom.id),
       isExecuted: false,
       accessories: accessorizing,
-      brief: stylingBrief
+      brief: stylingBrief,
+      isMissing: bestTop.isMissing || bestBottom.isMissing
     };
+  };
+
+  const handleSmartGenerate = async () => {
+     setIsGenerating(true);
+     const newPlan = {};
+     // Run logic for each day
+     for(let i=0; i<7; i++) {
+        newPlan[i] = getOutfitForDay(i);
+     }
+     setPlannedOutfits(newPlan);
+     setTimeout(() => setIsGenerating(false), 800);
+  };
+
+  const handleLogOutfit = async () => {
+    const uid = auth.currentUser?.uid;
+    if (!uid || dayInfo.isExecuted) return;
+    
+    const success = await logDailyOutfit(uid, {
+        top: dayInfo.top.name,
+        bottom: dayInfo.bottom.name,
+        topId: dayInfo.top.id || null,
+        bottomId: dayInfo.bottom.id || null,
+        event: dayInfo.occasion.event,
+        score: dayInfo.engineScore
+    });
+    
+    if (success) {
+        setLogs(prev => [{ date: new Date().toISOString(), ...dayInfo }, ...prev]);
+        window.alert("Outfit Logged & Items Sent to Laundry! 🧺");
+    }
   };
 
   const dayInfo = getOutfitForDay(selectedDay);
@@ -212,11 +248,25 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
         <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-lg hover:scale-110 transition-all">←</button>
         <div className="text-right">
           <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
-             <span className="text-purple-500">AI</span> COMMAND CENTER
+             <span className="text-purple-500">AI</span> PREDICTOR
           </h2>
-          <p className="text-[9px] opacity-40 uppercase font-black tracking-widest leading-none">Style Ecosystem v2.0</p>
+          <p className="text-[9px] opacity-40 uppercase font-black tracking-widest leading-none">Style Ecosystem v4.0</p>
         </div>
       </div>
+
+      {/* SMART GENERATE BUTTON (Phase 4) */}
+      <button 
+        onClick={handleSmartGenerate}
+        disabled={isGenerating}
+        className={`w-full mb-6 py-4 rounded-2xl border-2 border-dashed transition-all flex items-center justify-center gap-3 ${
+            isGenerating ? 'opacity-50' : 'hover:bg-purple-500/10 border-purple-500/30 text-purple-500 hover:border-purple-500'
+        }`}
+      >
+          {isGenerating ? (
+              <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+          ) : <span>🧠</span>}
+          <span className="text-[10px] font-black uppercase tracking-[0.2em]">{isGenerating ? 'Thinking...' : 'AI Smart Plan Week'}</span>
+      </button>
 
       {/* WEEKLY TIMELINE */}
       <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-4 mb-6 pt-1">
@@ -246,9 +296,14 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
       <div className="mb-8 space-y-4">
           <div className="flex items-center justify-between">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Command Context</p>
-              <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${isDark ? 'bg-white/10 text-white/60' : 'bg-slate-100 text-slate-500'}`}>
-                  {OCCASIONS[selectedDay].weather.toUpperCase()} WEATHER 🛰️
-              </span>
+              <div className="flex gap-2">
+                <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${isDark ? 'bg-white/10 text-white/60' : 'bg-slate-100 text-slate-500'}`}>
+                    {OCCASIONS[selectedDay].temp}°C 🌡️
+                </span>
+                <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${isDark ? 'bg-white/10 text-white/60' : 'bg-slate-100 text-slate-500'}`}>
+                    {OCCASIONS[selectedDay].weather?.toUpperCase()} WEATHER 🛰️
+                </span>
+              </div>
           </div>
           <div className="flex gap-2 overflow-x-auto scrollbar-hide">
               {EVENT_TYPES.map(type => (
@@ -330,27 +385,46 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
                  </div>
             </div>
 
+            {dayInfo.isMissing && (
+                <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-3">
+                   <div className="text-lg">🕵️</div>
+                   <div>
+                      <p className="text-[9px] font-black text-amber-500 uppercase tracking-tight">The Missing Piece</p>
+                      <p className="text-[8px] opacity-60">This mission-match is missing from your closet. AI recommends acquiring this look.</p>
+                   </div>
+                </div>
+            )}
+
             {!dayInfo.isExecuted ? (
-                <button 
-                  onClick={() => {
-                    const itemName = dayInfo.top.name || 'shirt';
-                    // Detect item type for correct Myntra category path
-                    const lower = itemName.toLowerCase();
-                    let itemType = 'shirt';
-                    if (lower.includes('trouser') || lower.includes('pant') || lower.includes('jean')) itemType = 'pant';
-                    else if (lower.includes('dress') || lower.includes('coord')) itemType = 'dress';
-                    else if (lower.includes('kurti') || lower.includes('saree') || lower.includes('lehenga')) itemType = 'kurti';
-                    else if (lower.includes('top') || lower.includes('blouse')) itemType = 'top';
-                    const gender = dayInfo.top.gender || 'male';
-                    window.open(buildMyntraSearchUrl(itemName, gender, itemType), '_blank');
-                  }}
-                  className="mt-8 w-full py-5 bg-black text-white rounded-3xl text-[10px] font-black uppercase tracking-widest shadow-2xl hover:scale-[1.02] active:scale-95 transition-all"
-                >
-                    🛒 Unlock via Myntra
-                </button>
+                <div className="flex gap-2 mt-auto pt-6">
+                    <button 
+                        onClick={() => {
+                            const itemName = dayInfo.top.name || 'shirt';
+                            const lower = itemName.toLowerCase();
+                            let itemType = 'shirt';
+                            if (lower.includes('trouser') || lower.includes('pant') || lower.includes('jean')) itemType = 'pant';
+                            else if (lower.includes('dress') || lower.includes('coord')) itemType = 'dress';
+                            else if (lower.includes('kurti') || lower.includes('saree') || lower.includes('lehenga')) itemType = 'kurti';
+                            else if (lower.includes('top') || lower.includes('blouse')) itemType = 'top';
+                            const gender = dayInfo.top.gender || 'male';
+                            window.open(buildMyntraSearchUrl(itemName, gender, itemType), '_blank');
+                        }}
+                        className="flex-1 py-4 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl hover:scale-[1.02] active:scale-95 transition-all"
+                    >
+                        {dayInfo.isMissing ? '🛍️ Shop Look' : '🛒 Shop Similar'}
+                    </button>
+                    {!dayInfo.isMissing && (
+                        <button 
+                            onClick={handleLogOutfit}
+                            className="flex-1 py-4 bg-purple-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl hover:scale-[1.02] active:scale-95 transition-all"
+                        >
+                            ✅ Mark as Worn
+                        </button>
+                    )}
+                </div>
             ) : (
-                <div className="mt-8 w-full py-5 bg-green-500/20 text-green-400 border border-green-500/30 rounded-3xl text-[10px] font-black uppercase text-center tracking-widest">
-                    🏆 OUTFIT MISSION COMPLETE
+                <div className="mt-auto pt-6 w-full py-4 bg-green-500/20 text-green-400 border border-green-500/30 rounded-2xl text-[10px] font-black uppercase text-center tracking-widest">
+                    🏆 MISSION COMPLETE
                 </div>
             )}
         </div>

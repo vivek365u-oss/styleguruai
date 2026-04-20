@@ -98,6 +98,22 @@ export const scoreWardrobeItem = (item, context, profile, history = [], preferen
     if (activeGender === 'female' && maleKeywords.some(k => item.category?.toLowerCase().includes(k)))   return 0;
 
 
+    // ── LAUNDRY & FRESHNESS ENGINE (Phase 4) ──────────────────────────────
+    const safePrefs = preferences || {};
+    const laundryCycleDays = safePrefs.laundry_cycle || 3;
+    
+    if (item.status === 'laundry' || item.status === 'dirty') {
+        const lastWorn = item.last_worn_date ? new Date(item.last_worn_date) : null;
+        if (lastWorn) {
+            const daysSinceWorn = (new Date() - lastWorn) / (1000 * 60 * 60 * 24);
+            // If still in the "Dry/Wash" cycle, the item is completely unavailable
+            if (daysSinceWorn < laundryCycleDays) return 0;
+        } else {
+            // No date but marked as laundry? Assume unavailable
+            return 0;
+        }
+    }
+
     let score = 0;
     const weights = {
         color: 35,
@@ -151,11 +167,11 @@ export const scoreWardrobeItem = (item, context, profile, history = [], preferen
     }
 
     // Weather Logic
-    const w = context.weather?.toLowerCase() || 'sunny';
+    const w = context.weather?.condition?.toLowerCase() || context.weather?.toLowerCase() || 'sunny';
     if (w === 'hot' || w === 'sunny') {
         if (item.fabric === 'fabric_linen' || item.fabric === 'fabric_cotton') contextScore += 25;
         if (item.fabric === 'fabric_wool' || item.fabric === 'fabric_silk') contextScore -= 30;
-    } else if (w === 'cold' || w === 'rainy') {
+    } else if (w === 'cold' || w === 'rainy' || w === 'chilly') {
         if (item.fabric === 'fabric_wool' || item.fabric === 'fabric_denim') contextScore += 25;
     }
 
@@ -169,9 +185,11 @@ export const scoreWardrobeItem = (item, context, profile, history = [], preferen
 
     // 3. Freshness (Repetition Control)
     let freshnessScore = 100;
-    const lastWorn = history.find(h => h.itemId === item.id);
-    if (lastWorn) {
-        const daysSince = (new Date() - new Date(lastWorn.date)) / (1000 * 60 * 60 * 24);
+    const historyItem = history.find(h => h.itemId === item.id);
+    const lastDate = historyItem ? historyItem.date : item.last_worn_date;
+    
+    if (lastDate) {
+        const daysSince = (new Date() - new Date(lastDate)) / (1000 * 60 * 60 * 24);
         if (daysSince < 2) freshnessScore = 0; 
         else if (daysSince < 7) freshnessScore = 50;
     }

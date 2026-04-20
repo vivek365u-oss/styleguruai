@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { getWardrobe, deleteWardrobeItem } from '../api/styleApi';
+import { getWardrobe, deleteWardrobeItem, updateWardrobeItemStatus, loadUserPreferences, saveUserPreferences } from '../api/styleApi';
 import { auth } from '../api/styleApi';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -59,27 +59,29 @@ function SkeletonCard({ isDark }) {
 }
 
 // ── WardrobeItem: single item card ───────────────────────────
-function WardrobeItem({ item, expandedId, setExpandedId, deletingId, handleDelete, t, formatDate, isDark }) {
+function WardrobeItem({ item, expandedId, setExpandedId, deletingId, handleDelete, handleToggleLaundry, t, formatDate, isDark }) {
+  const isLaundry = item.status === 'laundry' || item.status === 'dirty';
+  
   return (
-    <div className="rounded-[2rem] border border-[var(--border-primary)] bg-[var(--card-bg)] overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-purple-500/30">
+    <div className={`rounded-[2rem] border transition-all duration-300 hover:shadow-lg ${
+      isLaundry ? 'opacity-50 grayscale-[0.5] border-red-500/20 bg-red-500/5' : 'border-[var(--border-primary)] bg-[var(--card-bg)] hover:border-purple-500/30'
+    }`}>
       <div className="flex items-center gap-4 p-5 cursor-pointer" onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}>
         <div className="relative">
           <WardrobeImage imageId={item.imageId} fallbackColor={item.hex || item.skin_hex} />
           {item.hex && <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-[var(--bg-primary)] shadow-sm" style={{ backgroundColor: item.hex }} />}
+          {isLaundry && <div className="absolute -top-1 -right-1 bg-red-500 text-white p-1 rounded-full shadow-lg scale-75 animate-pulse">🧼</div>}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className="font-black text-sm capitalize tracking-tight">
+            <span className="font-black text-sm capitalize tracking-tight flex items-center gap-2">
               {item.category?.startsWith('cat_') ? getCategoryLabel(item.category) : (item.category ? (t(`cat_${item.category}`) || item.category.replace(/^cat_/, '').replace(/_/g, ' ')) : (item.outfit_data?.shirt || item.outfit_data?.top || 'Style Item'))}
-            </span>
-            <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border border-dashed ${item.source === 'outfit_checker' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-purple-500/10 text-purple-500 border-purple-500/20'}`}>
-              {item.source === 'outfit_checker' ? 'CHECK' : 'SCAN'}
+              {isLaundry && <span className="text-[8px] px-1.5 py-0.5 rounded-md bg-red-500/20 text-red-500 font-black uppercase">Laundry</span>}
             </span>
           </div>
           {item.tags?.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-1">
               {item.tags.slice(0, 2).map((tag, idx) => <span key={idx} className="text-[8px] font-black uppercase opacity-40">#{t(tag)}</span>)}
-              {item.tags.length > 2 && <span className="text-[8px] font-black opacity-40">+{item.tags.length - 2}</span>}
             </div>
           )}
         </div>
@@ -92,12 +94,29 @@ function WardrobeItem({ item, expandedId, setExpandedId, deletingId, handleDelet
       {expandedId === item.id && (
         <div className="px-5 pb-5 border-t border-[var(--border-primary)] animate-fade-in">
           <div className="space-y-4 pt-4">
+             {/* Laundry Toggle (Phase 4) */}
+            <div className={`p-3 rounded-2xl border flex items-center justify-between ${isLaundry ? 'bg-red-500/10 border-red-500/20' : 'bg-green-500/10 border-green-500/20'}`}>
+               <div className="flex items-center gap-3">
+                  <span className="text-lg">{isLaundry ? '🧺' : '✨'}</span>
+                  <div>
+                    <p className={`text-[10px] font-black uppercase tracking-tight ${isLaundry ? 'text-red-500' : 'text-green-600'}`}>{isLaundry ? 'Currently in Laundry' : 'Fresh & Available'}</p>
+                    {item.last_worn_date && <p className="text-[8px] opacity-40 italic">Last worn: {item.last_worn_date}</p>}
+                  </div>
+               </div>
+               <button 
+                  onClick={(e) => { e.stopPropagation(); handleToggleLaundry(item); }}
+                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all active:scale-95 ${
+                    isLaundry ? 'bg-green-500 text-white shadow-lg' : 'bg-red-500 text-white shadow-lg'
+                  }`}
+               >
+                  {isLaundry ? 'Mark as Clean' : 'Send to Laundry'}
+               </button>
+            </div>
+
             <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Smart Attributes</p>
             <div className="flex flex-wrap gap-2">
               {item.fit && <span className="px-2 py-1 rounded-lg text-[9px] font-black border border-purple-500/20 bg-purple-500/5 text-purple-600 dark:text-purple-400">{t(item.fit)}</span>}
               {item.fabric && <span className="px-2 py-1 rounded-lg text-[9px] font-black border border-blue-500/20 bg-blue-500/5 text-blue-600 dark:text-blue-400">{t(item.fabric)}</span>}
-              {item.pattern && <span className="px-2 py-1 rounded-lg text-[9px] font-black border border-pink-500/20 bg-pink-500/5 text-pink-600 dark:text-pink-400">{t(item.pattern)}</span>}
-              {item.mood && <span className="px-2 py-1 rounded-lg text-[9px] font-black border border-indigo-500/20 bg-indigo-500/5 text-indigo-600 dark:text-indigo-400">{t(item.mood)}</span>}
             </div>
             <div className="flex items-center justify-between pt-2 border-t border-[var(--border-primary)]">
               <div className="flex items-center gap-2">
@@ -110,7 +129,7 @@ function WardrobeItem({ item, expandedId, setExpandedId, deletingId, handleDelet
                 </p>
               )}
             </div>
-            <button onClick={() => handleDelete(item)} disabled={deletingId === item.id} className="mt-4 w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-red-500/20 bg-red-500/5 text-red-500 hover:bg-red-500/10 disabled:opacity-50 active:scale-95 transition-all">
+            <button onClick={() => handleDelete(item)} disabled={deletingId === item.id} className="mt-2 w-full py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-red-500/20 bg-red-500/5 text-red-500 hover:bg-red-500/10 disabled:opacity-50 active:scale-95 transition-all">
               {deletingId === item.id ? t('deleting') : (
                 <span className="flex items-center justify-center gap-2">
                   <IconRenderer icon={FashionIcons.Wardrobe} className="w-3 h-3" /> {t('removeFromWardrobe')}
@@ -140,6 +159,7 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
   const [deletingId, setDeletingId] = useState(null);
   const [toast, setToast] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [laundryCycle, setLaundryCycle] = useState(3);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -156,8 +176,12 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
 
   const fetchWardrobe = async () => {
     try {
-      const data = await getWardrobe(auth.currentUser.uid);
+      const [data, prefs] = await Promise.all([
+         getWardrobe(auth.currentUser.uid),
+         loadUserPreferences(auth.currentUser.uid)
+      ]);
       setItems(data);
+      if (prefs?.laundry_cycle) setLaundryCycle(prefs.laundry_cycle);
       // Use data.length directly — avoids a second full Firestore read
       if (data.length >= wardrobeLimit) setCapWarning(true);
     } catch {
@@ -199,6 +223,34 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
     } catch { return ''; }
   };
 
+  const handleToggleLaundry = async (item) => {
+    const isCurrentlyLaundry = item.status === 'laundry' || item.status === 'dirty';
+    const newStatus = isCurrentlyLaundry ? 'available' : 'laundry';
+    const today = new Date().toLocaleDateString('en-CA');
+    
+    // Optimistic Update
+    setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: newStatus, last_worn_date: isCurrentlyLaundry ? i.last_worn_date : today } : i));
+    
+    try {
+      await updateWardrobeItemStatus(auth.currentUser.uid, item.id, { 
+        status: newStatus,
+        last_worn_date: isCurrentlyLaundry ? item.last_worn_date || '' : today
+      });
+      showToast(isCurrentlyLaundry ? 'Item is now clean!' : 'Item sent to laundry');
+    } catch {
+      showToast('Status update failed');
+      fetchWardrobe();
+    }
+  };
+
+  const handleUpdateCycle = async (days) => {
+      setLaundryCycle(days);
+      try {
+          await saveUserPreferences(auth.currentUser.uid, { laundry_cycle: days });
+          showToast(`Laundry cycle set to ${days} days`);
+      } catch { showToast('Failed to save cycle preference'); }
+  };
+
   if (!auth.currentUser) {
     return (
       <div className="mt-8 text-center pt-10">
@@ -224,15 +276,37 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
 
   return (
     <div className="mt-4 pb-4">
+      {/* Wardrobe Header with Laundry Settings (Phase 4) */}
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-        <div>
+        <div className="flex-1">
           <h2 className="font-black text-2xl flex items-center gap-2">
              <span className="w-6 h-6"><IconRenderer icon={FashionIcons.Wardrobe} /></span> {t('myWardrobe')}
           </h2>
-          <p className="text-sm mt-1 opacity-50">{items.length} {t('outfits')}</p>
+          <div className="flex items-center gap-3 mt-1">
+             <p className="text-sm opacity-50">{items.length} {t('outfits')}</p>
+             <div className="w-1 h-1 rounded-full bg-[var(--border-primary)]" />
+             <div className="flex items-center gap-1.5 opacity-60 hover:opacity-100 transition-opacity">
+                <span className="text-[10px] font-black uppercase tracking-tighter">Cycle:</span>
+                <select 
+                  value={laundryCycle}
+                  onChange={(e) => handleUpdateCycle(parseInt(e.target.value))}
+                  className="bg-transparent border-none text-[10px] font-black text-purple-500 cursor-pointer focus:ring-0 p-0"
+                >
+                   <option value={1}>1 Day</option>
+                   <option value={3}>3 Days</option>
+                   <option value={5}>5 Days</option>
+                   <option value={7}>7 Days</option>
+                </select>
+             </div>
+          </div>
         </div>
-        <div className="rounded-xl px-3 py-2 border border-purple-500/30 bg-purple-500/10 shadow-sm shadow-purple-500/5">
-          <span className="text-sm font-black text-purple-600 dark:text-purple-400">{items.length}/{wardrobeLimit}</span>
+        <div className="flex items-center gap-2">
+           <div className={`p-2 rounded-xl text-[10px] font-black flex items-center gap-2 ${items.filter(i => i.status === 'laundry').length > 0 ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-500 opacity-40'}`}>
+              <span>🧺</span> {items.filter(i => i.status === 'laundry').length}
+           </div>
+           <div className="rounded-xl px-3 py-2 border border-purple-500/30 bg-purple-500/10 shadow-sm shadow-purple-500/5">
+            <span className="text-sm font-black text-purple-600 dark:text-purple-400">{items.length}/{wardrobeLimit}</span>
+           </div>
         </div>
       </div>
 
@@ -400,6 +474,7 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
                       setExpandedId={setExpandedId}
                       deletingId={deletingId}
                       handleDelete={handleDelete}
+                      handleToggleLaundry={handleToggleLaundry}
                       t={t}
                       formatDate={formatDate}
                       isDark={isDark}
