@@ -24,19 +24,39 @@ export default function AboutPage() {
       <div style={{ height: 1, background: C.border, width: 64, marginBottom: 40 }} />
 
       {/* Intro */}
-      <p style={{ fontSize: '16px', color: C.muted, lineHeight: '1.8', marginBottom: 16, fontFamily: "'Inter',sans-serif" }}>
-        StyleGuruAI is an AI-powered fashion advisor that helps you choose the best outfits based on your unique skin tone.
+      <p style={{ fontSize: '18px', color: C.text, lineHeight: '1.7', marginBottom: 20, fontFamily: "'Inter',sans-serif", fontWeight: 400 }}>
+        StyleGuruAI is an AI-powered fashion intelligence engine designed to eliminate the guesswork from your wardrobe.
       </p>
       <p style={{ fontSize: '16px', color: C.muted, lineHeight: '1.8', marginBottom: 40, fontFamily: "'Inter',sans-serif" }}>
-        Upload your photo and receive personalized recommendations for colors, outfits, and styling tips — all powered by advanced color science and AI.
+        We combine advanced color science with deep learning to help you discover the exact palettes and styles that celebrate your unique skin tone.
       </p>
+
+      {/* The Problem & Solution Section */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 40, marginBottom: 56 }}>
+        <div>
+          <h3 style={{ fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', color: C.gold, marginBottom: 16, fontFamily: "'Inter',sans-serif" }}>
+            The Shopping Maze
+          </h3>
+          <p style={{ fontSize: '14px', color: C.muted, lineHeight: '1.8', fontFamily: "'Inter',sans-serif" }}>
+            Today's fashion landscape is a game of chance. Millions of shoppers browse platforms like Myntra, Flipkart, and Meesho, buying items randomly without knowing if a color truly suits them. This lead to a frustrating cycle of "buy-and-return," wasting your most precious resource: <strong>Time</strong>.
+          </p>
+        </div>
+        <div>
+          <h3 style={{ fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', color: C.gold, marginBottom: 16, fontFamily: "'Inter',sans-serif" }}>
+            The Precision Solution
+          </h3>
+          <p style={{ fontSize: '14px', color: C.muted, lineHeight: '1.8', fontFamily: "'Inter',sans-serif" }}>
+            StyleGuruAI replaces guesswork with scientific certainty. Our AI maps your skin's unique parameters to provide a personalized roadmap for your style journey. No more disappointment, no more wasted money—just confident, high-quality fashion choices delivered with curated shopping links.
+          </p>
+        </div>
+      </div>
 
       {/* Feature cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1, background: C.border, marginBottom: 48 }}>
         {[
           { icon: '🎨', title: 'Skin Tone Analysis', desc: 'Advanced AI color science using ITA angle calculation' },
-          { icon: '👔', title: 'Outfit Recommendations', desc: 'Personalized color palettes for every occasion' },
-          { icon: '✨', title: 'Style Intelligence', desc: 'Seasonal fashion tips based on your complexion' },
+          { icon: '👔', title: 'Outfit Recommendations', desc: 'Personalized color palettes and shopping links' },
+          { icon: '✨', title: 'Style Confidence', desc: 'Expert tips to ensure you never look dull again' },
         ].map(item => (
           <div key={item.title} style={{ background: C.surface, padding: '28px 24px' }}>
             <div style={{ fontSize: '28px', marginBottom: 14 }}>{item.icon}</div>
@@ -47,13 +67,12 @@ export default function AboutPage() {
       </div>
 
       {/* Mission */}
-      <div style={{ padding: '28px 32px', background: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.gold}` }}>
+      <div style={{ padding: '32px', background: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.gold}` }}>
         <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: C.gold, marginBottom: 12, fontFamily: "'Inter',sans-serif" }}>
           Our Mission
         </p>
         <p style={{ fontSize: '15px', color: C.text, lineHeight: '1.8', fontFamily: "'Inter',sans-serif" }}>
-          Our goal is to democratize fashion intelligence for every skin tone, especially the rich spectrum of Indian complexions
-          that global fashion brands have historically underrepresented.
+          Our mission is to democratize high-end fashion intelligence for everyone. We believe that everyone deserves to shop with confidence and build a wardrobe that reflects their true self, without the frustration of the modern retail maze.
         </p>
       </div>
     </div>
