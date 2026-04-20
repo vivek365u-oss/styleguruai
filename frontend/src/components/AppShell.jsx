@@ -1293,7 +1293,8 @@ export default function AppShell({ user, onLogout }) {
           )}
 
         </Suspense>
-      </main>
+      </AnimatePresence>
+    </main>
 
       {/* ═══════════ MOBILE BOTTOM NAV ═══════════ */}
       <nav
