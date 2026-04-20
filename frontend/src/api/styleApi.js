@@ -673,6 +673,7 @@ export const updateWardrobeItemStatus = async (uid, itemId, statusData) => {
     handleFirestoreError('updateWardrobeItemStatus', e);
     return false;
   }
+};
 
 export const deleteWardrobeItem = async (uid, itemId) => {
   if (!auth.currentUser) return;
