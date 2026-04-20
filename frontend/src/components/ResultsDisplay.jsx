@@ -99,7 +99,7 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
     skirt:          { male: 'trousers', female: 'skirt' },
     palazzo_f:      { male: 'trousers', female: 'palazzo pants' },
     shorts_female:  { male: 'shorts', female: 'shorts' },
-    track_f:        { male: 'track pants', female: 'track pants' },
+    track_f:        { male: 'track pants joggers', female: 'track pants joggers' },
     // accessories
     dupatta:        { male: 'stole scarf', female: 'dupatta stole' },
     watch:           { male: 'premium minimalist watch', female: 'stylish minimalist watch' },
@@ -113,8 +113,8 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
     accessory:       { male: 'minimalist accessory', female: 'premium fashion accessory' },
     // fallback
     top:            { male: 'premium casual shirt', female: 'aesthetic minimal top' },
-    pant:           { male: 'relaxed fit trousers', female: 'high waist trousers' },
-    bottom:         { male: 'clean trousers', female: 'palazzo pants' },
+    pant:           { male: 'pants cargo joggers', female: 'pants cargo joggers' },
+    bottom:         { male: 'trousers pants cargo', female: 'palazzo pants cargo' },
     dress:          { male: 'premium shirt', female: 'stylish midi dress' },
   };
 

@@ -160,31 +160,28 @@ const DEFAULT_PATHS = {
  * @param {string} [opts.priceMax] - Max price e.g. '1000' (optional, not widely supported)
  * @returns {string} Full Myntra URL
  */
-export function buildMyntraUrl({ color = '', catId = '', gender = 'male', itemType = 'shirt', priceMax = null }) {
-  const colorSlug = color.trim().toLowerCase().replace(/\s+/g, '+');
-
-  // 1. Try exact category mapping (most accurate)
-  const catEntry = catId ? MYNTRA_PATHS[catId] : null;
-
-  // 2. Fallback: use gender + itemType default
-  const genderKey   = gender === 'female' ? 'female' : 'male';
-  const typeKey     = itemType || 'shirt';
-  const fallback    = DEFAULT_PATHS[genderKey]?.[typeKey] || DEFAULT_PATHS[genderKey]?.shirt;
-
-  const { path, kw } = catEntry || fallback;
-
-  // Build rawQuery: color + item keyword
-  // FIX: If color already contains the keyword (e.g. "Silver Watch"), don't append "men watch"
-  const kwWords = kw.toLowerCase().split(/\s+/);
-  const colorLower = color.toLowerCase();
-  const containsKeyword = kwWords.some(w => w !== 'men' && w !== 'women' && colorLower.includes(w));
+export const buildMyntraUrl = ({ color, catId, gender, itemType }) => {
+  const isFemale = gender.toLowerCase().includes('female') || gender === 'women';
+  const genderKey = isFemale ? 'female' : 'male';
+  const gSlug = isFemale ? 'women' : 'men';
   
-  const rawQ = containsKeyword 
-    ? colorSlug 
-    : (colorSlug ? `${colorSlug}+${kw.replace(/\s+/g, '+')}` : kw.replace(/\s+/g, '+'));
-
-  return `https://www.myntra.com/${path}?rawQuery=${rawQ}`;
-}
+  const catKey = (catId || itemType || 'shirt').replace(/^cat_/, '');
+  const catEntry = MYNTRA_PATHS[catKey] || MYNTRA_PATHS[`cat_${catKey}`] || DEFAULT_PATHS[genderKey][itemType || 'shirt'];
+  
+  // 1. Build a clean, slugified query
+  const colorClean = (color || '').toLowerCase().trim();
+  const kwClean = (catEntry?.kw || 'shirt').toLowerCase().replace(/\s+/g, '-');
+  const colorSlug = colorClean.replace(/\s+/g, '-');
+  
+  // 2. Myntra's most stable URL format: myntra.com/[gender]-[color]-[keyword]
+  // e.g. myntra.com/men-silver-watch
+  const slug = `${gSlug}-${colorSlug}-${kwClean}`.replace(/-+/g, '-');
+  
+  // 3. Fallback to rawQuery only as a secondary parameter for Myntra's internal tracker
+  const rawQ = encodeURIComponent(`${colorClean} ${catEntry?.kw || 'shirt'}`);
+  
+  return `https://www.myntra.com/${slug}?rawQuery=${rawQ}`;
+};
 
 /**
  * Convenience: build Myntra URL from a free-text search term + optional gender.
