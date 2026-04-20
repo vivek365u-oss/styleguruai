@@ -991,6 +991,8 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
   const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
   const cardBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
   const bodyTextCls = isDark ? 'text-white/60' : 'text-gray-500';
+  const mutedCls = isDark ? 'text-white/30' : 'text-gray-400';
+  const tipTextCls = isDark ? 'text-white/70' : 'text-gray-700';
   
   // Phase 2: Mission-based Re-ranking Logic
   const scoredOutfits = useMemo(() => {
@@ -1246,6 +1248,14 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const { language, t } = useLanguage();
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
+
+  // UI Class constants
+  const tipTextCls = isDark ? 'text-white/70' : 'text-gray-700';
+  const mutedCls = isDark ? 'text-white/40' : 'text-gray-400';
+  const labelCls = isDark ? 'text-white/50' : 'text-gray-500';
+  const bodyTextCls = isDark ? 'text-white/60' : 'text-gray-600';
+  const cardBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
+
   const [activeTab, setActiveTab] = useState('colors');
   const [activeMission, setActiveMission] = useState(data?.analysis?.skin_tone?.color_season === 'Winter' ? 'office' : 'casual');
   const [showConfetti, setShowConfetti] = useState(() => {

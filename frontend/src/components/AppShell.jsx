@@ -149,7 +149,8 @@ function ThemeToggle({ theme, onToggle, C }) {
 }
 
 // ── Home Section ──────────────────────────────────────
-function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
+function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, onAnalysisComplete, C }) {
+
   const { language } = useLanguage();
   const personalityData = useMemo(() => readUserPersonalityData(), []);
   const personality = useMemo(() => derivePersonality(personalityData), [personalityData]);
@@ -202,6 +203,20 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
           <span style={{ fontSize: '8px', color: level.color, fontFamily: PJS, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{level.label}</span>
         </div>
       </div>
+
+      {lastAnalysis && (
+        <GlassCard C={C} style={{ padding: '16px 18px', marginBottom: 16, borderLeft: `4px solid ${VIOLET}` }} onClick={() => { onAnalysisComplete(lastAnalysis); onTabChange('analyze'); }}>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+             <span style={{ fontSize: '20px' }}>🕒</span>
+             <div style={{ flex: 1 }}>
+                <p style={{ fontSize: '10px', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, margin: 0 }}>Resume Last Result</p>
+                <p style={{ fontSize: '13px', color: C.text, margin: '2px 0 0', fontWeight: 600 }}>{lastAnalysis.skin_tone?.category || 'Previous Scan'} DNA Profile</p>
+             </div>
+             <span style={{ fontSize: '16px', opacity: 0.5 }}>→</span>
+          </div>
+        </GlassCard>
+      )}
 
       {analysisCount > 0 && (
         <GlassCard C={C} style={{ padding: '20px 22px', marginBottom: 16, position: 'relative', overflow: 'hidden' }} onClick={() => onTabChange('profile')}>
@@ -451,7 +466,8 @@ export default function AppShell({ user, onLogout }) {
           <Suspense fallback={<SectionLoader C={C} />}>
             {activeTab === 'home' && (
               <motion.div key="home" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
-                <HomeSection C={C} user={user} lastAnalysis={lastAnalysis} onAnalyze={() => handleTabChange('analyze')} onTabChange={handleTabChange} />
+                <HomeSection C={C} user={user} lastAnalysis={lastAnalysis} onAnalyze={() => handleTabChange('analyze')} onTabChange={handleTabChange} onAnalysisComplete={handleAnalysisComplete} />
+
               </motion.div>
             )}
             {activeTab === 'analyze' && (
@@ -465,7 +481,42 @@ export default function AppShell({ user, onLogout }) {
                 <ProfileSection user={user} onLogout={onLogout} onTabChange={handleTabChange} onToast={setToast} C={C} theme={theme} toggleTheme={toggleTheme} isPro={isPro} usage={usage} />
               </motion.div>
             )}
-            {/* Other tabs follow the same pattern... */}
+            {activeTab === 'history' && (
+              <motion.div key="history" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
+                <SectionHeader C={C} label="Activity Log" title="Analysis History" />
+                <HistoryPanel C={C} onSelect={(item) => { handleAnalysisComplete(item); handleTabChange('analyze'); }} />
+              </motion.div>
+            )}
+            {activeTab === 'lookbook' && (
+              <motion.div key="lookbook" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
+                <SectionHeader C={C} label="Curation" title="My Lookbook" />
+                <LookbookPanel C={C} onSelect={(item) => { setResults(item); handleTabChange('analyze'); }} />
+              </motion.div>
+            )}
+            {activeTab === 'wardrobe' && (
+              <motion.div key="wardrobe" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
+                <SectionHeader C={C} label="Inventory" title="Digital Wardrobe" />
+                <WardrobePanel C={C} />
+              </motion.div>
+            )}
+            {activeTab === 'tools' && (
+              <motion.div key="tools" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
+                <SectionHeader C={C} label="Utilities" title="Style Tools" />
+                <ToolsTab C={C} onTabChange={handleTabChange} />
+              </motion.div>
+            )}
+            {activeTab === 'navigator' && (
+              <motion.div key="navigator" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
+                <SectionHeader C={C} label="DNA Map" title="Style Compass" />
+                <StyleNavigator C={C} />
+              </motion.div>
+            )}
+            {activeTab === 'colorScanner' && (
+              <motion.div key="colorScanner" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
+                <SectionHeader C={C} label="Lens" title="Precision Color Scanner" />
+                <ColorScanner C={C} onToast={setToast} />
+              </motion.div>
+            )}
           </Suspense>
         </AnimatePresence>
       </main>
