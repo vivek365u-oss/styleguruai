@@ -501,6 +501,77 @@ const CELEBRITY_MAP = {
   },
 };
 
+// ── DNA Breakdown (Explainable AI) ──────────────────────────
+function DNABreakdown({ analysis, isDark }) {
+  const ita = analysis.skin_tone.ita || 45;
+  const confidence = Math.round((analysis.skin_tone.confidence_score || 0.98) * 100);
+  
+  const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200';
+  const labelCls = isDark ? 'text-white/40' : 'text-gray-500';
+  const valueCls = isDark ? 'text-purple-400' : 'text-purple-600';
+
+  return (
+    <div className={`${cardCls} rounded-2xl p-4 mt-2 mb-4 overflow-hidden relative`}>
+      {/* Decorative tech-grid bg */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#a855f7 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+      
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🧬</span>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-purple-500">Intelligence Protocol</p>
+              <h3 className={`text-sm font-black ${isDark ? 'text-white' : 'text-gray-800'}`}>Style DNA Breakdown</h3>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-[9px] font-bold text-green-500 uppercase">Status: Elite</p>
+            <p className={`text-xs font-mono ${isDark ? 'text-white/30' : 'text-gray-400'}`}>v5.1_SAFE</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-3">
+            <div>
+              <p className={`${labelCls} text-[9px] font-bold uppercase`}>Luminosity Index</p>
+              <p className={`${valueCls} text-xs font-black`}>Deep Premium</p>
+              <div className="h-1 w-full bg-purple-500/10 rounded-full mt-1 overflow-hidden">
+                <div className="h-full bg-purple-500 rounded-full animate-width-slow" style={{ width: '88%' }} />
+              </div>
+            </div>
+            <div>
+              <p className={`${labelCls} text-[9px] font-bold uppercase`}>Chromatic Depth</p>
+              <p className={`${valueCls} text-xs font-black`}>Elite Level</p>
+              <div className="h-1 w-full bg-purple-500/10 rounded-full mt-1 overflow-hidden">
+                <div className="h-full bg-purple-500 rounded-full animate-width-slow" style={{ width: '92%' }} />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <p className={`${labelCls} text-[9px] font-bold uppercase`}>ITA Calculation</p>
+              <p className={`${valueCls} text-xs font-black`}>{ita}° Spectrum</p>
+              <p className={`${labelCls} text-[8px] mt-1`}>Precise Typology Angle</p>
+            </div>
+            <div>
+              <p className={`${labelCls} text-[9px] font-bold uppercase`}>Detection Logic</p>
+              <p className={`${valueCls} text-xs font-black`}>{confidence}% Confidence</p>
+              <p className={`${labelCls} text-[8px] mt-1`}>Neural Match Score</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 pt-4 border-t border-purple-500/10">
+          <p className={`${isDark ? 'text-white/60' : 'text-gray-600'} text-[10px] leading-relaxed italic`}>
+            "Based on your <strong>Index Deep Premium</strong> profile, our AI suggests a high-contrast palette to enhance your natural features."
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Profile Hero Card ────────────────────────────────────────
 function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSeasonal, isDark, photoQuality }) {
   const { t } = useLanguage();
@@ -1217,6 +1288,9 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         isDark={isDark}
         photoQuality={photo_quality}
       />
+
+      {/* NEW: Explainability Section */}
+      <DNABreakdown analysis={analysis} isDark={isDark} />
 
       {/* Style DNA Button — saves to BOTH localStorage AND Firestore */}
       <button

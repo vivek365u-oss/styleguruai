@@ -12,6 +12,7 @@
  */
 
 import { useState, useEffect, useContext, lazy, Suspense, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { logout, saveHistory, getHistory, auth, destroyUserAccount } from '../api/styleApi';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -270,16 +271,16 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
         <span style={{ fontSize: '18px', opacity: 0.8 }}>→</span>
       </button>
 
-      {/* Stats */}
+      {/* Stats Dashboard */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 16 }}>
         {[
-          { value: analysisCount || '0', label: 'Analyses' },
-          { value: streak > 0 ? `${streak}🔥` : '—', label: 'Streak' },
-          { value: personalityData.skinTone ? personalityData.skinTone.split(' ')[0] : '—', label: 'Skin Tone' },
+          { value: analysisCount || '0', label: 'DNA Protocols', icon: '🧬' },
+          { value: streak > 0 ? `${streak}🔥` : '0', label: 'Vibe Streak', icon: '⚡' },
+          { value: personalityData.skinTone ? personalityData.skinTone.split(' ')[0] : '—', label: 'Depth Class', icon: '🎨' },
         ].map((s, i) => (
-          <GlassCard key={i} C={C} style={{ padding: '16px 10px', textAlign: 'center' }}>
+          <GlassCard key={i} C={C} style={{ padding: '16px 10px', textAlign: 'center', border: s.value !== '0' && s.value !== '—' ? `1px solid ${VIOLET}40` : `1px solid ${C.border}` }}>
             <p style={{ fontFamily: PDI, fontSize: s.value?.toString().length > 5 ? '13px' : '22px', color: C.text, margin: '0 0 4px', lineHeight: 1 }}>{s.value}</p>
-            <p style={{ fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, margin: 0 }}>{s.label}</p>
+            <p style={{ fontSize: '7.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, margin: 0, fontWeight: 700 }}>{s.label}</p>
           </GlassCard>
         ))}
       </div>
@@ -1073,14 +1074,29 @@ export default function AppShell({ user, onLogout }) {
 
       {/* ═══════════ MAIN CONTENT ═══════════ */}
       <main style={{ maxWidth: 760, margin: '0 auto', padding: '76px 16px 100px', position: 'relative', zIndex: 1 }}>
-        <Suspense fallback={<SectionLoader C={C} />}>
+        <AnimatePresence mode="wait">
+          <Suspense fallback={<SectionLoader C={C} />}>
 
-          {activeTab === 'home' && (
-            <HomeSection key="home" C={C} user={user} lastAnalysis={lastAnalysis} onAnalyze={() => handleTabChange('analyze')} onTabChange={handleTabChange} />
-          )}
+            {activeTab === 'home' && (
+              <motion.div 
+                key="home" 
+                initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+                transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+              >
+                <HomeSection C={C} user={user} lastAnalysis={lastAnalysis} onAnalyze={() => handleTabChange('analyze')} onTabChange={handleTabChange} />
+              </motion.div>
+            )}
 
           {activeTab === 'analyze' && (
-            <div key="analyze" style={{ animation: 'fadeSlideIn 0.3s ease' }}>
+            <motion.div 
+              key="analyze" 
+              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            >
               <SectionHeader C={C}
                 label="AI Analysis"
                 title={results ? 'Your Style Profile' : adSkipped ? 'Analysis Cancelled' : 'Upload a Photo'}
@@ -1167,58 +1183,98 @@ export default function AppShell({ user, onLogout }) {
                 ? <CoupleResults data={results} uploadedImages={uploadedImage} onReset={handleReset} />
                 : results ? <ResultsDisplay data={results} uploadedImage={uploadedImage} onReset={handleReset} /> : null
               }
-            </div>
+            </motion.div>
           )}
 
           {activeTab === 'history' && (
-            <div key="history" style={{ animation: 'fadeSlideIn 0.3s ease' }}>
+            <motion.div 
+              key="history"
+              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            >
               <SectionHeader C={C} label="Your Archive" title="Analysis History" subtitle="All your previous skin tone analyses" />
               <HistoryPanel onShowResult={data => { setResults(data); handleTabChange('analyze'); }} />
-            </div>
+            </motion.div>
           )}
 
           {activeTab === 'wardrobe' && (
-            <div key="wardrobe" style={{ animation: 'fadeSlideIn 0.3s ease' }}>
+            <motion.div 
+              key="wardrobe"
+              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            >
               <SectionHeader C={C} label="Style Vault" title="Your Wardrobe" subtitle="Manage and organize your saved outfits" />
               <WardrobePanel onShowResult={data => { setResults(data); handleTabChange('analyze'); }} gender={currentGender} />
-            </div>
+            </motion.div>
           )}
 
           {activeTab === 'navigator' && (
-            <div key="navigator" style={{ animation: 'fadeSlideIn 0.3s ease' }}>
+            <motion.div 
+              key="navigator"
+              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            >
               <SectionHeader C={C} label="AI Style Intelligence" title="Style Compass" subtitle="Personalized outfit guidance based on your skin tone & style DNA" />
               <StyleNavigator user={user} onAnalyze={() => handleTabChange('analyze')} />
-            </div>
+            </motion.div>
           )}
 
           {activeTab === 'tools' && (
-            <div key="tools" style={{ animation: 'fadeSlideIn 0.3s ease' }}>
+            <motion.div 
+              key="tools"
+              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            >
               <SectionHeader C={C} label="Power Tools" title="Style Tools" subtitle="Advanced tools to elevate your fashion game" />
               <ToolsTab analysisData={results} onShowResult={data => { setResults(data); handleTabChange('analyze'); }} onOpenScanner={() => handleTabChange('scanner')} />
-            </div>
+            </motion.div>
           )}
 
           {activeTab === 'scanner' && (
-            <ColorScanner key="scanner"
-              savedPalette={(() => { try { const l = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); return l?.fullData?.recommendations?.best_shirt_colors || l?.fullData?.recommendations?.best_dress_colors || []; } catch { return []; } })()}
-              skinTone={lastAnalysis?.skinTone || ''}
-              onClose={() => handleTabChange('home')}
-            />
+            <motion.div 
+              key="scanner"
+              initial={{ opacity: 0, scale: 0.95, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, scale: 1.05, filter: 'blur(8px)' }}
+              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            >
+              <ColorScanner key="scanner"
+                savedPalette={(() => { try { const l = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); return l?.fullData?.recommendations?.best_shirt_colors || l?.fullData?.recommendations?.best_dress_colors || []; } catch { return []; } })()}
+                skinTone={lastAnalysis?.skinTone || ''}
+                onClose={() => handleTabChange('home')}
+              />
+            </motion.div>
           )}
 
           {activeTab === 'profile' && (
-            <ProfileSection
+            <motion.div 
               key="profile"
-              C={C}
-              theme={theme}
-              toggleTheme={toggleTheme}
-              user={user}
-              onLogout={handleLogout}
-              onTabChange={handleTabChange}
-              onToast={setToast}
-              isPro={isPro}
-              usage={usage}
-            />
+              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            >
+              <ProfileSection
+                key="profile"
+                C={C}
+                theme={theme}
+                toggleTheme={toggleTheme}
+                user={user}
+                onLogout={handleLogout}
+                onTabChange={handleTabChange}
+                onToast={setToast}
+                isPro={isPro}
+                usage={usage}
+              />
+            </motion.div>
           )}
 
         </Suspense>
