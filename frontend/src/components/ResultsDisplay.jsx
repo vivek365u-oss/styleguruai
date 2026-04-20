@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MISSIONS, scoreWardrobeItem } from '../utils/stylingEngine';
 import AffiliateLink from './AffiliateLink';
 import AdSense from '../AdSense';
+import { buildMyntraUrl } from '../utils/myntraUrl';
 
 // ── Shopping Links ───────────────────────────────────────────
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {

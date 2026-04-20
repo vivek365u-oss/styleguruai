@@ -14,7 +14,7 @@ import {
 } from '../constants/fashionCategories';
 import { FashionIcons, IconRenderer } from './Icons';
 import { trackWardrobeInteraction } from '../utils/analytics';
-import { buildMyntraSearchUrl } from '../utils/myntraUrl';
+import { buildMyntraUrl } from '../utils/myntraUrl';
 
 // getCategoryGroup is now imported from fashionCategories — 100% accurate lookup
 // No keyword matching needed here anymore.
