@@ -163,29 +163,26 @@ const DEFAULT_PATHS = {
 export const buildMyntraUrl = ({ color, catId, gender, itemType }) => {
   const isFemale = gender.toLowerCase().includes('female') || gender === 'women';
   const genderKey = isFemale ? 'female' : 'male';
-  const gSlug = isFemale ? 'women' : 'men';
   
   const catKey = (catId || itemType || 'shirt').replace(/^cat_/, '');
   const catEntry = MYNTRA_PATHS[catKey] || MYNTRA_PATHS[`cat_${catKey}`] || DEFAULT_PATHS[genderKey][itemType || 'shirt'];
   
-  // 1. Build a clean, slugified query
+  const { path, kw } = catEntry;
   const colorClean = (color || '').toLowerCase().trim();
-  const kwClean = (catEntry?.kw || 'shirt').toLowerCase().replace(/\s+/g, '-');
-  const colorSlug = colorClean.replace(/\s+/g, '-');
   
-  // 2. Myntra's most stable URL format: myntra.com/[gender]-[color]-[keyword]
-  const slug = `${gSlug}-${colorSlug}-${kwClean}`.replace(/-+/g, '-');
-  
-  // 3. STRICT ADULT FILTER: f=Gender:men,men women OR f=Gender:women,men women
-  // This removes "Bachcha" (kids) results entirely.
+  // 1. ORIGINAL SYSTEM: TARGET CATEGORY PATH
+  // e.g. /watches, /formal-shirts, /kurtas
+  const baseUrl = `https://www.myntra.com/${path}`;
+
+  // 2. STRICT ADULT FILTER
   const genderFilter = isFemale 
-    ? 'f=Gender:men%20women,women' 
-    : 'f=Gender:men,men%20women';
+    ? 'Gender:men%20women,women' 
+    : 'Gender:men,men%20women';
   
-  // 4. Fallback to rawQuery for search accuracy
-  const rawQ = encodeURIComponent(`${colorClean} ${catEntry?.kw || 'shirt'}`);
+  // 3. BUILD QUERY
+  const rawQ = encodeURIComponent(`${colorClean} ${kw}`);
   
-  return `https://www.myntra.com/${slug}?${genderFilter}&rawQuery=${rawQ}`;
+  return `${baseUrl}?f=${genderFilter}&rawQuery=${rawQ}`;
 };
 
 /**
