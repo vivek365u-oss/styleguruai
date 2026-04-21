@@ -1,20 +1,17 @@
 /**
- * buildMyntraUrl.js — Centralized Myntra deep-link generator
+ * myntraUrl.js — Centralized Myntra deep-link generator
  * ─────────────────────────────────────────────────────────────
  * Uses Myntra's CATEGORY-PATH + rawQuery format for maximum accuracy.
  * Format: https://www.myntra.com/{category-path}?rawQuery={color}+{keyword}
- *
- * Why NOT search?q=  → Generic search shows mixed results, same top products
- * Why category path → Myntra's category pages filter correctly by gender + type
  */
 
 // ── Myntra category path map — cat_id → Myntra URL path ──────────────
 const MYNTRA_PATHS = {
   // ── MALE ETHNIC ─────────────────────────────────────────────────────
-  cat_sherwani:       { path: 'sherwanis',              kw: 'sherwani' },
-  cat_kurta_set:      { path: 'kurtas',                 kw: 'kurta set' },
-  cat_nehru_jacket:   { path: 'nehru-jackets',          kw: 'nehru jacket' },
-  cat_dhoti_kurta:    { path: 'kurtas',                 kw: 'dhoti kurta' },
+  cat_sherwani:       { path: 'sherwanis',              kw: 'sherwani men' },
+  cat_kurta_set:      { path: 'kurtas',                 kw: 'kurta set men' },
+  cat_nehru_jacket:   { path: 'nehru-jackets',          kw: 'nehru jacket men' },
+  cat_dhoti_kurta:    { path: 'kurtas',                 kw: 'dhoti kurta men' },
   cat_ethnic_coord:   { path: 'co-ords',                kw: 'ethnic coord set men' },
 
   // ── MALE FORMAL ─────────────────────────────────────────────────────
@@ -24,22 +21,22 @@ const MYNTRA_PATHS = {
   cat_waistcoat:      { path: 'waistcoats',             kw: 'waistcoat men' },
 
   // ── MALE CASUAL ─────────────────────────────────────────────────────
-  cat_shirt:          { path: 'men-casual-shirts',      kw: 'premium casual cotton shirt men' },
-  cat_formal_shirt:   { path: 'men-formal-shirts',      kw: 'luxury formal dress shirt men' },
-  cat_tshirt:         { path: 'men-t-shirts',           kw: 'oversized drop shoulder t-shirt men' },
-  cat_polo:           { path: 'men-t-shirts',           kw: 'premium knit polo shirt men' },
-  cat_blazer:         { path: 'men-blazers',            kw: 'slim fit premium blazer men' },
+  cat_shirt:          { path: 'men-casual-shirts',      kw: 'premium casual shirt men' },
+  cat_tshirt:         { path: 'men-t-shirts',           kw: 'oversized drop shoulder t-shirt' },
+  cat_polo:           { path: 'men-t-shirts',           kw: 'premium polo shirt' },
+  cat_blazer:         { path: 'men-blazers',            kw: 'slim fit blazer men' },
   cat_coord_set_male: { path: 'co-ords',                kw: 'men coord set' },
 
   // ── MALE BOTTOMS ────────────────────────────────────────────────────
-  cat_jeans:          { path: 'men-jeans',              kw: 'relaxed fit straight leg jeans men' },
-  cat_cargo:          { path: 'men-cargo-pants',        kw: 'premium utility cargo pants men' },
-  cat_chinos:         { path: 'men-chinos',             kw: 'slim fit stretch chinos men' },
+  cat_jeans:          { path: 'men-jeans',              kw: 'relaxed fit jeans men' },
+  cat_cargo:          { path: 'men-cargo-pants',        kw: 'premium cargo pants men' },
+  cat_chinos:         { path: 'men-chinos',             kw: 'slim fit chinos men' },
   cat_shorts:         { path: 'men-shorts',             kw: 'men shorts' },
   cat_track_pants:    { path: 'track-pants-joggers',    kw: 'men track pants' },
+  cat_pant:           { path: 'men-trousers',           kw: 'men trousers' },
 
   // ── MALE OUTERWEAR ──────────────────────────────────────────────────
-  cat_hoodie:         { path: 'men-sweatshirts',        kw: 'heavyweight oversized hoodie men' },
+  cat_hoodie:         { path: 'men-sweatshirts',        kw: 'hoodie men' },
   cat_jacket:         { path: 'jackets',                kw: 'men jacket' },
   cat_bomber:         { path: 'bomber-jackets',         kw: 'men bomber jacket' },
   cat_sweatshirt:     { path: 'sweatshirts',            kw: 'men sweatshirt' },
@@ -50,153 +47,131 @@ const MYNTRA_PATHS = {
   cat_boots:          { path: 'men-boots',              kw: 'men boots' },
   cat_formal_shoe:    { path: 'men-formal-shoes',       kw: 'men formal shoes' },
   cat_sports_shoe:    { path: 'men-sports-shoes',       kw: 'men sports shoes' },
+  cat_shoes:          { path: 'men-footwear',           kw: 'men shoes' },
 
   // ── MALE ACCESSORIES ────────────────────────────────────────────────
-  cat_watch:          { path: 'watches',                kw: 'premium minimalist analog watch men' },
-  cat_wallet:         { path: 'wallets',                kw: 'genuine leather slim wallet men' },
-  cat_belt:           { path: 'belts',                  kw: 'premium leather dress belt men' },
-  cat_sunglasses:     { path: 'men-sunglasses',         kw: 'retro square sunglasses men' },
-  cat_backpack:       { path: 'backpacks',              kw: 'men backpack' },
+  cat_watch:          { path: 'watches',                kw: 'analog watch men' },
+  cat_wallet:         { path: 'wallets',                kw: 'leather wallet men' },
+  cat_belt:           { path: 'belts',                  kw: 'leather belt men' },
+  cat_sunglasses:     { path: 'men-sunglasses',         kw: 'sunglasses men' },
+  cat_backpack:       { path: 'backpacks',              kw: 'laptop backpack men' },
+  cat_accessory:      { path: 'accessories',            kw: 'men accessory' },
 
   // ── FEMALE ETHNIC ───────────────────────────────────────────────────
-  cat_saree_silk:     { path: 'sarees',                 kw: 'silk saree women' },
-  cat_saree_chiffon:  { path: 'sarees',                 kw: 'chiffon saree women' },
-  cat_saree_cotton:   { path: 'sarees',                 kw: 'cotton saree women' },
-  cat_lehenga:        { path: 'lehenga-cholis',         kw: 'lehenga choli women' },
-  cat_anarkali:       { path: 'anarkali-suits',         kw: 'anarkali suit women' },
+  cat_saree_silk:     { path: 'sarees',                 kw: 'silk saree' },
+  cat_lehenga:        { path: 'lehenga-cholis',         kw: 'lehenga choli' },
+  cat_anarkali:       { path: 'anarkali-suits',         kw: 'anarkali suit' },
   cat_kurti:          { path: 'kurtas-kurtis',          kw: 'kurti women' },
-  cat_kurti_set:      { path: 'kurtas-kurtis',          kw: 'kurti set women' },
-  cat_sharara:        { path: 'sharara-suits',          kw: 'sharara set women' },
-  cat_palazzo_suit:   { path: 'palazzo-suits',          kw: 'palazzo suit women' },
-  cat_dhoti_pants:    { path: 'churidar-suits',         kw: 'dhoti pants women' },
-
-  // ── FEMALE FUSION ───────────────────────────────────────────────────
-  cat_indo_western:   { path: 'indo-western',           kw: 'indo western dress women' },
-  cat_coord_set_f:    { path: 'co-ords',                kw: 'coord set women' },
-  cat_cape_set:       { path: 'jackets',                kw: 'cape set women' },
+  cat_kurti_set:      { path: 'kurtas-kurtis',          kw: 'kurti set' },
+  cat_sharara:        { path: 'sharara-suits',          kw: 'sharara set' },
+  cat_palazzo_suit:   { path: 'palazzo-suits',          kw: 'palazzo suit' },
+  cat_saree:          { path: 'sarees',                 kw: 'saree women' },
 
   // ── FEMALE TOPS ─────────────────────────────────────────────────────
   cat_crop_top:       { path: 'crop-tops',              kw: 'crop top women' },
   cat_blouse:         { path: 'blouses',                kw: 'blouse women' },
-  cat_corset:         { path: 'corsets',                kw: 'corset top women' },
-  cat_puff_top:       { path: 'tops',                   kw: 'puff sleeve top women' },
-  cat_shirt_female:   { path: 'tops',                   kw: 'shirt tunic women' },
-  cat_tank_top:       { path: 'tank-tops',              kw: 'tank top women' },
+  cat_shirt_female:   { path: 'tops',                   kw: 'shirt women' },
+  cat_top:            { path: 'tops',                   kw: 'women top' },
   cat_sweater:        { path: 'sweaters',               kw: 'sweater women' },
 
   // ── FEMALE DRESSES ──────────────────────────────────────────────────
-  cat_dress_maxi:     { path: 'maxi-dresses',           kw: 'maxi dress women' },
-  cat_dress_mini:     { path: 'mini-dresses',           kw: 'mini dress women' },
-  cat_dress_midi:     { path: 'midi-dresses',           kw: 'midi dress women' },
-  cat_bodycon:        { path: 'bodycon-dresses',        kw: 'bodycon dress women' },
-  cat_shirt_dress:    { path: 'shirt-dresses',          kw: 'shirt dress women' },
+  cat_dress:          { path: 'mini-dresses',           kw: 'dress women' },
+  cat_dress_maxi:     { path: 'maxi-dresses',           kw: 'maxi dress' },
+  cat_shirt_dress:    { path: 'shirt-dresses',          kw: 'shirt dress' },
 
   // ── FEMALE BOTTOMS ──────────────────────────────────────────────────
   cat_jeans_female:   { path: 'women-jeans',            kw: 'women jeans' },
-  cat_mom_jeans:      { path: 'women-jeans',            kw: 'mom jeans women' },
   cat_skirt:          { path: 'skirts',                 kw: 'skirt women' },
-  cat_palazzo_f:      { path: 'palazzos',               kw: 'palazzo pants women' },
-  cat_shorts_female:  { path: 'women-shorts',           kw: 'women shorts' },
-  cat_track_f:        { path: 'track-pants-joggers',    kw: 'track pants women' },
-
-  // ── FEMALE OUTERWEAR ────────────────────────────────────────────────
-  cat_hoodie_f:       { path: 'women-hoodies-sweatshirts', kw: 'women hoodie' },
-  cat_blazer_f:       { path: 'women-blazers',          kw: 'blazer women' },
-  cat_shrug:          { path: 'shrugs',                 kw: 'shrug cardigan women' },
-  cat_sweatshirt_f:   { path: 'women-hoodies-sweatshirts', kw: 'sweatshirt women' },
+  cat_palazzo_f:      { path: 'palazzos',               kw: 'palazzo pants' },
+  cat_bottom:         { path: 'palazzos',               kw: 'women bottom' },
 
   // ── FEMALE FOOTWEAR ─────────────────────────────────────────────────
   cat_heels:          { path: 'heels',                  kw: 'heels women' },
-  cat_flats:          { path: 'flats',                  kw: 'flats juttis women' },
+  cat_flats:          { path: 'flats',                  kw: 'flats women' },
   cat_sneakers_f:     { path: 'women-sneakers',         kw: 'women sneakers' },
-  cat_sandals:        { path: 'sandals',                kw: 'sandals women' },
-  cat_boots_f:        { path: 'women-boots',            kw: 'ankle boots women' },
 
   // ── FEMALE ACCESSORIES ──────────────────────────────────────────────
   cat_earrings:       { path: 'earrings',               kw: 'earrings women' },
   cat_necklace:       { path: 'necklaces',              kw: 'necklace women' },
   cat_bangles:        { path: 'bangles',                kw: 'bangles women' },
-  cat_handbag:        { path: 'handbags',               kw: 'handbag clutch women' },
+  cat_handbag:        { path: 'handbags',               kw: 'handbag women' },
   cat_belt_f:         { path: 'belts',                  kw: 'waist belt women' },
   cat_sunglasses_f:   { path: 'sunglasses',             kw: 'sunglasses women' },
-  cat_dupatta:        { path: 'stoles-dupattas',        kw: 'dupatta stole women' },
-
-  // ── UNISEX ──────────────────────────────────────────────────────────
-  cat_unisex_hoodie:  { path: 'hoodies',                kw: 'hoodie unisex' },
-  cat_graphic_tee:    { path: 'tshirts',                kw: 'graphic tee' },
-  cat_sneakers_u:     { path: 'sneakers',               kw: 'sneakers' },
-  cat_bomber_u:       { path: 'bomber-jackets',         kw: 'bomber jacket' },
-  cat_loungewear:     { path: 'co-ords',                kw: 'loungewear set' },
+  cat_dupatta:        { path: 'stoles-dupattas',        kw: 'dupatta women' },
 };
 
 // ── Gender → default path when no category is known ──────────────────
 const DEFAULT_PATHS = {
   male: {
-    shirt: { path: 'men-shirts',           kw: 'premium slim fit shirt men' },
-    pant:  { path: 'men-trousers',         kw: 'slim fit tailored trousers men' },
-    dress: { path: 'tshirts',       kw: 'men tshirt' },
-    shoe:  { path: 'men-sneakers',  kw: 'men sneakers' },
-    top:   { path: 'tshirts',       kw: 'men tshirt' },
+    shirt:    { path: 'men-shirts',      kw: 'shirt men' },
+    pant:     { path: 'men-trousers',    kw: 'trousers men' },
+    dress:    { path: 'tshirts',         kw: 'men tshirt' },
+    shoe:     { path: 'men-sneakers',    kw: 'men sneakers' },
+    top:      { path: 'tshirts',         kw: 'men tshirt' },
+    accessory: { path: 'accessories',    kw: 'men accessory' },
+    watch:    { path: 'watches',         kw: 'men watch' },
   },
   female: {
-    shirt: { path: 'tops',          kw: 'women top' },
-    pant:  { path: 'women-jeans',   kw: 'women jeans' },
-    dress: { path: 'co-ords',       kw: 'women coord set' },
-    kurti: { path: 'kurtas-kurtis',         kw: 'premium ethnic kurti women' },
-    top:   { path: 'tops',                  kw: 'korean minimal top women' },
-    shoe:  { path: 'heels',                 kw: 'premium block heel sandals women' },
-    accessory: { path: 'accessories',       kw: 'minimalist jewelry women' },
+    shirt:    { path: 'tops',            kw: 'women top' },
+    pant:     { path: 'women-jeans',     kw: 'women jeans' },
+    dress:    { path: 'co-ords',         kw: 'women coord set' },
+    kurti:    { path: 'kurtas-kurtis',   kw: 'kurti women' },
+    top:      { path: 'tops',            kw: 'women top' },
+    shoe:     { path: 'heels',           kw: 'women heels' },
+    accessory: { path: 'accessories',    kw: 'women accessory' },
   },
 };
 
 /**
  * Build a Myntra deep-link URL with correct category path.
- *
- * @param {object} opts
- * @param {string} opts.color      - Color name (e.g. "Royal Blue")
- * @param {string} [opts.catId]   - Category id like 'cat_crop_top' (optional)
- * @param {string} [opts.gender]  - 'male' | 'female' (optional)
- * @param {string} [opts.itemType] - Fallback type hint: 'shirt'|'pant'|'dress'|'kurti'|'top'|'shoe'
- * @param {string} [opts.priceMax] - Max price e.g. '1000' (optional, not widely supported)
- * @returns {string} Full Myntra URL
  */
 export const buildMyntraUrl = ({ color, catId, gender, itemType }) => {
-  const isFemale = gender.toLowerCase().includes('female') || gender === 'women';
-  const genderKey = isFemale ? 'female' : 'male';
-  
-  const catKey = (catId || itemType || 'shirt').replace(/^cat_/, '');
-  const catEntry = MYNTRA_PATHS[catKey] || MYNTRA_PATHS[`cat_${catKey}`] || DEFAULT_PATHS[genderKey][itemType || 'shirt'];
-  
-  const { path, kw } = catEntry;
-  const colorClean = (color || '').toLowerCase().trim();
-  
-  // 1. ORIGINAL SYSTEM: TARGET CATEGORY PATH
-  // e.g. /watches, /formal-shirts, /kurtas
-  const baseUrl = `https://www.myntra.com/${path}`;
+  try {
+    const isFemale = gender?.toLowerCase().includes('female') || gender === 'women';
+    const genderKey = isFemale ? 'female' : 'male';
+    
+    // Normalize catId (remove cat_ prefix for lookup)
+    const rawKey = (catId || itemType || 'shirt').toLowerCase();
+    const catKey = rawKey.startsWith('cat_') ? rawKey.replace('cat_', '') : rawKey;
 
-  // 2. STRICT ADULT FILTER
-  const genderFilter = isFemale 
-    ? 'Gender:men%20women,women' 
-    : 'Gender:men,men%20women';
-  
-  // 3. BUILD QUERY
-  const rawQ = encodeURIComponent(`${colorClean} ${kw}`);
-  
-  return `${baseUrl}?f=${genderFilter}&rawQuery=${rawQ}`;
+    // Deep Search for entry
+    const catEntry = MYNTRA_PATHS[rawKey] || 
+                     MYNTRA_PATHS[catKey] || 
+                     MYNTRA_PATHS[`cat_${catKey}`] || 
+                     DEFAULT_PATHS[genderKey]?.[catKey] || 
+                     DEFAULT_PATHS[genderKey]?.[itemType] || 
+                     DEFAULT_PATHS[genderKey]?.shirt;
+
+    // Crash-proof extraction
+    const { path = isFemale ? 'tops' : 'men-shirts', kw = 'clothing' } = catEntry || {};
+    
+    const colorClean = (color || '').toLowerCase().trim();
+    const baseUrl = `https://www.myntra.com/${path}`;
+
+    // STRICT ADULT FILTER
+    const genderFilter = isFemale 
+      ? 'Gender:men%20women,women' 
+      : 'Gender:men,men%20women';
+    
+    const rawQ = encodeURIComponent(`${colorClean} ${kw}`);
+    
+    return `${baseUrl}?f=${genderFilter}&rawQuery=${rawQ}`;
+  } catch (err) {
+    console.error('[MyntraUrl] Critical Guard Triggered:', err);
+    return `https://www.myntra.com/search?q=${encodeURIComponent(color + ' ' + (itemType || 'clothing'))}`;
+  }
 };
 
 /**
- * Convenience: build Myntra URL from a free-text search term + optional gender.
- * Used for StyleNavigator and WeatherTip which don't have category IDs.
- *
- * @param {string} searchTerm   - e.g. "navy blue oversized tshirt"
- * @param {string} [gender]     - 'male' | 'female'
- * @param {string} [itemType]   - 'shirt' | 'pant' | 'dress' | 'kurti' | 'top' | 'shoe'
+ * buildMyntraSearchUrl — Simple search fallback
  */
 export function buildMyntraSearchUrl(searchTerm, gender = 'male', itemType = 'shirt') {
-  const genderKey = gender === 'female' ? 'female' : 'male';
+  const isFemale = gender === 'female' || gender === 'women';
+  const genderKey = isFemale ? 'female' : 'male';
   const typeKey   = itemType || 'shirt';
-  const fallback  = DEFAULT_PATHS[genderKey]?.[typeKey] || DEFAULT_PATHS[genderKey]?.shirt;
+  
+  const fallback = DEFAULT_PATHS[genderKey]?.[typeKey] || DEFAULT_PATHS[genderKey]?.shirt;
   const rawQ = encodeURIComponent(searchTerm).replace(/%20/g, '+');
+  
   return `https://www.myntra.com/${fallback.path}?rawQuery=${rawQ}`;
 }
