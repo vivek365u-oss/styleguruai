@@ -4,11 +4,50 @@ import { ThemeContext } from '../context/ThemeContext';
 import { auth, getLookbook, removeFromLookbook } from '../api/styleApi';
 import { MISSIONS } from '../utils/stylingEngine';
 
+const ShopLinks = ({ itemName, isDark, className = "" }) => {
+  const q = encodeURIComponent(itemName);
+  const links = [
+    { name: 'Myntra', url: `https://www.myntra.com/${q}`, emoji: '👗', cls: 'bg-pink-500/10 text-pink-600 border-pink-500/20 hover:bg-pink-500/20' },
+    { name: 'Amazon', url: `https://www.amazon.in/s?k=${q}`, emoji: '🛒', cls: 'bg-orange-500/10 text-orange-600 border-orange-500/20 hover:bg-orange-500/20' },
+    { name: 'Flipkart', url: `https://www.flipkart.com/search?q=${q}`, emoji: '🏪', cls: 'bg-blue-500/10 text-blue-600 border-blue-500/20 hover:bg-blue-500/20' },
+    { name: 'Meesho', url: `https://meesho.com/search?q=${q}`, emoji: '🛍️', cls: 'bg-purple-500/10 text-purple-600 border-purple-500/20 hover:bg-purple-500/20' },
+  ];
+  
+  return (
+    <motion.div 
+      initial={{ opacity: 0, height: 0 }} 
+      animate={{ opacity: 1, height: 'auto' }} 
+      className={`flex flex-wrap gap-2 overflow-hidden ${className}`}
+    >
+      {links.map(l => (
+        <a 
+          key={l.name} 
+          href={l.url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-[10px] font-bold transition-all hover:scale-105 ${l.cls}`}
+        >
+          <span>{l.emoji}</span> {l.name}
+        </a>
+      ))}
+    </motion.div>
+  );
+};
+
 function LookbookPanel() {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeShop, setActiveShop] = useState({});
+
+  const handleShopClick = (lookId, itemName) => {
+    setActiveShop(prev => ({
+      ...prev,
+      [lookId]: prev[lookId] === itemName ? null : itemName
+    }));
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -92,7 +131,7 @@ function LookbookPanel() {
                       </button>
                     </div>
 
-                    {/* Premium Outfit Display */}
+                    {/* Premium Outfit Display with Shopping Links */}
                     {item.outfit && (
                       <div className="mb-6 mt-2">
                         {item.outfit.occasion && (
@@ -100,29 +139,50 @@ function LookbookPanel() {
                             {item.outfit.occasion}
                           </div>
                         )}
-                        <h2 className={`text-xl sm:text-2xl font-black leading-tight mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                          {item.outfit.top}
-                        </h2>
                         
-                        <div className="flex flex-wrap gap-2">
-                          {item.outfit.bottom && (
-                            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-                              <span className="text-sm">👖</span>
-                              <span className={`text-xs font-semibold ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{item.outfit.bottom}</span>
+                        <div className="flex flex-col gap-3">
+                          {/* TOP ITEM */}
+                          <div>
+                            <div 
+                              onClick={() => handleShopClick(item.id, item.outfit.top)}
+                              className={`group cursor-pointer flex items-start justify-between gap-2 mb-2 transition-colors ${isDark ? 'hover:text-purple-400' : 'hover:text-purple-600'}`}
+                            >
+                              <h2 className={`text-xl sm:text-2xl font-black leading-tight ${isDark ? 'text-white group-hover:text-purple-300' : 'text-gray-900 group-hover:text-purple-700'}`}>
+                                {item.outfit.top}
+                              </h2>
+                              <span className={`text-[10px] flex-shrink-0 mt-1 px-2 py-1 rounded-md font-bold uppercase tracking-wide transition-colors ${isDark ? 'bg-purple-500/20 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
+                                🛒 Shop
+                              </span>
                             </div>
-                          )}
-                          {item.outfit.shoes && (
-                            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-                              <span className="text-sm">👟</span>
-                              <span className={`text-xs font-semibold ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{item.outfit.shoes}</span>
-                            </div>
-                          )}
-                          {item.outfit.dupatta && item.outfit.dupatta !== "-" && (
-                            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-                              <span className="text-sm">🧣</span>
-                              <span className={`text-xs font-semibold ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{item.outfit.dupatta}</span>
-                            </div>
-                          )}
+                            {activeShop[item.id] === item.outfit.top && <ShopLinks itemName={item.outfit.top} isDark={isDark} className="mb-4" />}
+                          </div>
+
+                          {/* BOTTOM, SHOES, DUPATTA */}
+                          <div className="flex flex-col gap-2">
+                            {['bottom', 'shoes', 'dupatta'].map(key => {
+                              if (!item.outfit[key] || item.outfit[key] === "-") return null;
+                              const name = item.outfit[key];
+                              const emoji = key === 'bottom' ? '👖' : key === 'shoes' ? '👟' : '🧣';
+                              
+                              return (
+                                <div key={key}>
+                                  <div 
+                                    onClick={() => handleShopClick(item.id, name)}
+                                    className={`flex items-center justify-between px-3 py-2.5 rounded-xl border cursor-pointer transition-all ${isDark ? 'bg-white/5 border-white/10 hover:border-purple-500/50 hover:bg-white/10' : 'bg-white border-gray-200 shadow-sm hover:border-purple-300 hover:bg-purple-50/50'}`}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <span className="text-base">{emoji}</span>
+                                      <span className={`text-sm font-bold ${isDark ? 'text-white/90' : 'text-gray-800'}`}>{name}</span>
+                                    </div>
+                                    <span className={`text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wide ${isDark ? 'bg-white/10 text-white/70' : 'bg-gray-100 text-gray-600'}`}>
+                                      Buy
+                                    </span>
+                                  </div>
+                                  {activeShop[item.id] === name && <ShopLinks itemName={name} isDark={isDark} className="mt-2 ml-1" />}
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
                     )}
