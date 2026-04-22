@@ -227,6 +227,7 @@ function MakeupShoppingLinks({ product, shade, isDark }) {
   const links = [
     { name: 'Nykaa', url: `https://www.nykaa.com/search/result/?q=${query}`, icon: '🌸', bg: isDark ? 'bg-pink-500/10 border-pink-500/20 text-pink-300' : 'bg-pink-50 border-pink-200 text-pink-700' },
     { name: 'Myntra', url: myntraUrl, icon: '🛍️', bg: isDark ? 'bg-rose-500/10 border-rose-500/20 text-rose-300' : 'bg-rose-50 border-rose-200 text-rose-700' },
+    { name: 'Flipkart', url: `https://www.flipkart.com/search?q=${query}`, icon: '🛒', bg: isDark ? 'bg-blue-500/10 border-blue-500/20 text-blue-300' : 'bg-blue-50 border-blue-200 text-blue-700' },
     { name: 'Amazon', url: `https://www.amazon.in/s?k=${query}&rh=p_72%3A1318476031`, icon: '📦', bg: isDark ? 'bg-amber-500/10 border-amber-500/20 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-700' },
   ];
 
