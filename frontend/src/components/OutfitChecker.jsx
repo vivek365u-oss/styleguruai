@@ -80,6 +80,8 @@ function OutfitChecker() {
   const [error, setError] = useState(null);
   const [wardrobeSaved, setWardrobeSaved] = useState(false);
   const [wardrobeSaving, setWardrobeSaving] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [shopItem, setShopItem] = useState(null);
   const [shopBudget, setShopBudget] = useState(null);
   const { progress, startProgress, completeProgress, reset: resetProgress } = useAnalysisProgress();
