@@ -101,12 +101,12 @@ const MYNTRA_PATHS = {
 
   // ── MAKEUP (FEMALE) ─────────────────────────────────────────────────
   cat_foundation: { path: 'foundation', kw: 'face foundation' },
-  cat_lipstick:   { path: 'lipstick',   kw: 'lipstick' },
-  cat_eyeshadow:  { path: 'eyeshadow',  kw: 'eyeshadow palette' },
-  cat_kajal:      { path: 'kajal-and-kohl', kw: 'kajal kohl' },
-  cat_eyeliner:   { path: 'eyeliner',   kw: 'eyeliner' },
-  cat_blush:      { path: 'blush',      kw: 'face blush' },
-  cat_mascara:    { path: 'mascara',    kw: 'mascara' },
+  cat_lipstick: { path: 'lipstick', kw: 'lipstick' },
+  cat_eyeshadow: { path: 'eyeshadow', kw: 'eyeshadow palette' },
+  cat_kajal: { path: 'kajal-and-kohl', kw: 'kajal kohl' },
+  cat_eyeliner: { path: 'eyeliner', kw: 'eyeliner' },
+  cat_blush: { path: 'blush', kw: 'face blush' },
+  cat_mascara: { path: 'mascara', kw: 'mascara' },
 };
 
 // ── Gender → default path when no category is known ──────────────────
@@ -176,13 +176,11 @@ export const buildMyntraUrl = ({ color, catId, gender, itemType }) => {
  */
 export function buildMyntraSearchUrl(searchTerm, gender = 'male', itemType = 'shirt') {
   const isFemale = gender === 'female' || gender === 'women';
-  
-  // Clean search term
-  const cleanQ = searchTerm.replace(/[^a-zA-Z0-9 ]/g, ' ').trim();
-  const rawQ = encodeURIComponent(cleanQ);
+  const genderKey = isFemale ? 'female' : 'male';
+  const typeKey = itemType || 'shirt';
 
-  // STRICT ADULT FILTER + SEARCH
-  const genderFilter = isFemale ? 'f=Gender:women,men%20women' : 'f=Gender:men,men%20women';
+  const fallback = DEFAULT_PATHS[genderKey]?.[typeKey] || DEFAULT_PATHS[genderKey]?.shirt;
+  const rawQ = encodeURIComponent(searchTerm).replace(/%20/g, '+');
 
-  return `https://www.myntra.com/search?q=${rawQ}&${genderFilter}`;
+  return `https://www.myntra.com/${fallback.path}?rawQuery=${rawQ}`;
 }

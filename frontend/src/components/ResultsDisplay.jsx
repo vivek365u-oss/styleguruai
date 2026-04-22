@@ -21,10 +21,10 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male", onShop 
   const [budget, setBudget] = useState(null);
 
   const budgets = [
-    { label: '₹500',  max: 500 },
+    { label: '₹500', max: 500 },
     { label: '₹1000', max: 1000 },
     { label: '₹2000', max: 2000 },
-    { label: 'Any',   max: null },
+    { label: 'Any', max: null },
   ];
 
   const PRODUCT_MAP = {
@@ -45,27 +45,18 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male", onShop 
           <button
             key={b.label}
             onClick={(e) => { e.stopPropagation(); setBudget(b.label === 'Any' ? null : b); }}
-            className={`px-2 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
-              (b.label === 'Any' && !budget) || budget?.label === b.label
+            className={`px-2 py-0.5 rounded-full text-[10px] font-bold border transition-all ${(b.label === 'Any' && !budget) || budget?.label === b.label
                 ? isDark ? 'bg-purple-500/40 border-purple-400 text-purple-200' : 'bg-purple-600 border-purple-600 text-white shadow-sm'
                 : isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70' : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200'
-            }`}
+              }`}
           >
             {b.label}
           </button>
         ))}
       </div>
-      
-      <button 
-        onClick={(e) => { 
-          e.stopPropagation(); 
-          onShop({
-            query: `${colorName} ${productLabel}`,
-            color: colorName,
-            catId: category,
-            budget: budget?.max
-          }); 
-        }}
+
+      <button
+        onClick={(e) => { e.stopPropagation(); onShop(`${colorName} ${productLabel}`, budget?.max); }}
         className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-4 border border-violet-400/30 hover:bg-violet-500"
       >
         Shop Direct →
@@ -80,9 +71,9 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male", onShop 
 function MakeupShoppingLinks({ product, shade, onShop }) {
   return (
     <div className="mt-2">
-      <button 
-        onClick={(e) => { 
-          e.stopPropagation(); 
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
           onShop(`${shade || ''} ${product} makeup`);
         }}
         className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-4 border border-violet-400/30 hover:bg-violet-500"
@@ -197,11 +188,7 @@ function ColorCard({ color, category, gender, isDark, onShop, className = '' }) 
         <div className={`px-3 pb-3 border-t ${dividerCls} pt-2 scale-in`} onClick={e => e.stopPropagation()}>
           {color.reason && <p className={`${reasonCls} text-xs leading-relaxed mb-3`}>{color.reason}</p>}
           <button
-            onClick={() => onShop({
-              query: `${color.name} ${gender === 'female' ? 'top' : 'shirt'}`,
-              color: color.name,
-              catId: category
-            })}
+            onClick={() => onShop(`${color.name} ${gender === 'female' ? 'top' : 'shirt'}`)}
             className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-3 border border-violet-400/30 hover:bg-violet-500"
           >
             Shop Direct →
@@ -247,7 +234,7 @@ function OutfitCard({ combo, index, isDark, onShop }) {
           {combo.vibe && <p className={`${vibeCls} text-xs mt-1 italic`}>{combo.vibe}</p>}
         </div>
       </div>
-      <button 
+      <button
         onClick={() => onShop(topItem)}
         className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/10 active:scale-95 transition-all mt-4 border border-violet-400/20 hover:bg-violet-500"
       >
@@ -377,7 +364,7 @@ const CELEBRITY_MAP = {
 // ── Mission Selector (Event Wizard) ──────────────────────────
 function MissionSelector({ activeMissionId, onMissionSelect, isDark }) {
   const missionsList = Object.values(MISSIONS);
-  
+
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
@@ -396,17 +383,16 @@ function MissionSelector({ activeMissionId, onMissionSelect, isDark }) {
               key={m.id}
               whileTap={{ scale: 0.95 }}
               onClick={() => onMissionSelect(m.id)}
-              className={`flex-shrink-0 flex items-center gap-2 px-4 py-3 rounded-2xl border-2 transition-all ${
-                isActive 
-                  ? 'bg-purple-600/20 border-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]' 
+              className={`flex-shrink-0 flex items-center gap-2 px-4 py-3 rounded-2xl border-2 transition-all ${isActive
+                  ? 'bg-purple-600/20 border-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]'
                   : isDark ? 'bg-white/5 border-white/5 text-white/40' : 'bg-gray-100 border-gray-100 text-gray-500'
-              }`}
+                }`}
             >
               <span className="text-lg">{m.emoji}</span>
               <span className="text-xs font-bold whitespace-nowrap">{m.label}</span>
               {isActive && (
-                <motion.div 
-                  layoutId="active-pill" 
+                <motion.div
+                  layoutId="active-pill"
                   className="w-1.5 h-1.5 rounded-full bg-purple-400"
                 />
               )}
@@ -422,7 +408,7 @@ function MissionSelector({ activeMissionId, onMissionSelect, isDark }) {
 function DNABreakdown({ analysis, isDark }) {
   const ita = analysis.skin_tone.ita || 45;
   const confidence = Math.round((analysis.skin_tone.confidence_score || 0.98) * 100);
-  
+
   const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200';
   const labelCls = isDark ? 'text-white/40' : 'text-gray-500';
   const valueCls = isDark ? 'text-purple-400' : 'text-purple-600';
@@ -431,7 +417,7 @@ function DNABreakdown({ analysis, isDark }) {
     <div className={`${cardCls} rounded-2xl p-4 mt-2 mb-4 overflow-hidden relative`}>
       {/* Decorative tech-grid bg */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#a855f7 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
-      
+
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -545,8 +531,8 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
             <span className={`text-xs px-2 py-0.5 rounded-full border capitalize ${isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-200' : 'bg-purple-100 border-purple-400 text-purple-800 font-semibold'}`}>{analysis.skin_tone.undertone}</span>
             <span className={`text-xs px-2 py-0.5 rounded-full border ${isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-200' : 'bg-pink-100 border-pink-400 text-pink-800 font-semibold'}`}>🍂 {analysis.skin_tone.color_season}</span>
             <span className={`text-xs px-2 py-0.5 rounded-full border ${analysis.skin_tone.confidence === "high"
-                ? isDark ? "bg-green-500/20 border-green-500/30 text-green-300" : "bg-green-100 border-green-500 text-green-800 font-semibold"
-                : isDark ? "bg-yellow-500/20 border-yellow-500/30 text-yellow-300" : "bg-yellow-100 border-yellow-500 text-yellow-800 font-semibold"
+              ? isDark ? "bg-green-500/20 border-green-500/30 text-green-300" : "bg-green-100 border-green-500 text-green-800 font-semibold"
+              : isDark ? "bg-yellow-500/20 border-yellow-500/30 text-yellow-300" : "bg-yellow-100 border-yellow-500 text-yellow-800 font-semibold"
               }`}>
               {analysis.skin_tone.confidence === "high" ? "✓ High" : "~ Medium"}
             </span>
@@ -611,13 +597,13 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
 
             // 2. Mission Texture (Subtle)
             ctx.globalAlpha = 0.05; ctx.fillStyle = '#ffffff';
-            for(let i=0; i<W; i+=40) { ctx.fillRect(i, 0, 1, H); ctx.fillRect(0, i, W, 1); }
+            for (let i = 0; i < W; i += 40) { ctx.fillRect(i, 0, 1, H); ctx.fillRect(0, i, W, 1); }
             ctx.globalAlpha = 1.0;
 
             // 3. Header
             ctx.fillStyle = '#a855f7'; ctx.font = 'bold 24px Arial'; ctx.letterSpacing = '4px';
             ctx.fillText('STYLEGURU AI PROTOCOL', 80, 100);
-            
+
             // 4. Mission Badge
             ctx.fillStyle = 'rgba(168,85,247,0.2)';
             ctx.beginPath(); ctx.roundRect(80, 140, 300, 60, 30); ctx.fill();
@@ -642,20 +628,20 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
             ].slice(0, 5);
 
             cardColors.forEach((c, i) => {
-               // Circle shadow
-               ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 20;
-               ctx.beginPath(); ctx.arc(160 + i * 180, 800, 75, 0, Math.PI * 2);
-               ctx.fillStyle = c.hex; ctx.fill();
-               ctx.shadowBlur = 0; // reset
-               ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 4; ctx.stroke();
+              // Circle shadow
+              ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 20;
+              ctx.beginPath(); ctx.arc(160 + i * 180, 800, 75, 0, Math.PI * 2);
+              ctx.fillStyle = c.hex; ctx.fill();
+              ctx.shadowBlur = 0; // reset
+              ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 4; ctx.stroke();
             });
 
             // 8. Footer / Branding
             ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.font = 'bold 20px Arial';
-            ctx.fillText('WWW.STYLEGURUAI.IN', W/2 - 120, H - 100);
-            
+            ctx.fillText('WWW.STYLEGURUAI.IN', W / 2 - 120, H - 100);
+
             // Watermark
-            ctx.save(); ctx.translate(W-100, H/2); ctx.rotate(-Math.PI/2);
+            ctx.save(); ctx.translate(W - 100, H / 2); ctx.rotate(-Math.PI / 2);
             ctx.fillStyle = 'rgba(168,85,247,0.1)'; ctx.font = 'bold 120px Arial';
             ctx.fillText('STYLEGURU DNA', 0, 0); ctx.restore();
 
@@ -706,7 +692,7 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender, onShop }) {
         ))}
       </div>
       {/* Shop the full look */}
-      <button 
+      <button
         onClick={() => onShop(`${shirtColor.name} ${isFemale ? 'women coord set' : 'men outfit'}`)}
         className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-3 border border-violet-400/30 hover:bg-violet-500"
       >
@@ -742,14 +728,14 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 
   if (isFemale) {
     const femaleSections = [
-      { label: '👗 Dress Colors',           colors: recommendations.best_dress_colors   || [], cat: 'dress'   },
-      { label: '👚 Top / Blouse Colors',    colors: recommendations.best_top_colors     || [], cat: 'top'     },
-      { label: '🥻 Kurti Colors',           colors: recommendations.best_kurti_colors   || [], cat: 'kurti'   },
-      { label: '🎀 Lehenga Colors',         colors: recommendations.best_lehenga_colors || [], cat: 'lehenga' },
-      { label: '🪭 Saree Colors',           colors: recommendations.best_saree_colors   || [], cat: 'saree'   },
-      { label: '✨ Sharara / Suit Colors',  colors: recommendations.best_sharara_colors || recommendations.best_suit_colors || [], cat: 'sharara' },
-      { label: '🌸 Dupatta / Stole',       colors: recommendations.best_dupatta_colors  || [], cat: 'dupatta' },
-      { label: '👖 Bottom Colors',          colors: recommendations.best_bottom_colors  || recommendations.best_pant_colors || [], cat: 'bottom'  },
+      { label: '👗 Dress Colors', colors: recommendations.best_dress_colors || [], cat: 'dress' },
+      { label: '👚 Top / Blouse Colors', colors: recommendations.best_top_colors || [], cat: 'top' },
+      { label: '🥻 Kurti Colors', colors: recommendations.best_kurti_colors || [], cat: 'kurti' },
+      { label: '🎀 Lehenga Colors', colors: recommendations.best_lehenga_colors || [], cat: 'lehenga' },
+      { label: '🪭 Saree Colors', colors: recommendations.best_saree_colors || [], cat: 'saree' },
+      { label: '✨ Sharara / Suit Colors', colors: recommendations.best_sharara_colors || recommendations.best_suit_colors || [], cat: 'sharara' },
+      { label: '🌸 Dupatta / Stole', colors: recommendations.best_dupatta_colors || [], cat: 'dupatta' },
+      { label: '👖 Bottom Colors', colors: recommendations.best_bottom_colors || recommendations.best_pant_colors || [], cat: 'bottom' },
     ].filter(s => s.colors.length > 0);
 
     return (
@@ -789,18 +775,18 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 
 
   // Male
-  const shirtColors   = recommendations.best_shirt_colors   || [];
-  const pantColors    = recommendations.best_pant_colors    || recommendations.base_pant_colors || [];
-  const kurataColors  = recommendations.best_kurta_colors   || [];
-  const hoodieColors  = recommendations.best_hoodie_colors  || [];
-  const blazerColors  = recommendations.best_blazer_colors  || [];
+  const shirtColors = recommendations.best_shirt_colors || [];
+  const pantColors = recommendations.best_pant_colors || recommendations.base_pant_colors || [];
+  const kurataColors = recommendations.best_kurta_colors || [];
+  const hoodieColors = recommendations.best_hoodie_colors || [];
+  const blazerColors = recommendations.best_blazer_colors || [];
 
   const maleSections = [
-    { label: '👕 T-Shirt / Top Colors',   colors: shirtColors,  cat: 'shirt' },
-    { label: '👖 Pants / Cargo Colors',   colors: pantColors,   cat: 'pant'  },
-    { label: '🥷 Kurta Colors',           colors: kurataColors, cat: 'kurta' },
-    { label: '🧥 Hoodie / Sweatshirt',    colors: hoodieColors, cat: 'hoodie'},
-    { label: '🕴️ Blazer / Formal Shirt',  colors: blazerColors, cat: 'blazer'},
+    { label: '👕 T-Shirt / Top Colors', colors: shirtColors, cat: 'shirt' },
+    { label: '👖 Pants / Cargo Colors', colors: pantColors, cat: 'pant' },
+    { label: '🥷 Kurta Colors', colors: kurataColors, cat: 'kurta' },
+    { label: '🧥 Hoodie / Sweatshirt', colors: hoodieColors, cat: 'hoodie' },
+    { label: '🕴️ Blazer / Formal Shirt', colors: blazerColors, cat: 'blazer' },
   ].filter(s => s.colors.length > 0);
 
   return (
@@ -850,7 +836,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
   const mutedCls = isDark ? 'text-white/30' : 'text-gray-400';
   const tipTextCls = isDark ? 'text-white/70' : 'text-gray-700';
 
-  
+
   // Phase 2: Mission-based Re-ranking Logic
   const scoredOutfits = useMemo(() => {
     const mission = Object.values(MISSIONS).find(m => m.id === activeMission);
@@ -859,7 +845,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
     return outfits.map(o => {
       let score = 0;
       const text = `${o.upper || ''} ${o.lower || ''} ${o.description || ''} ${o.name || ''}`.toLowerCase();
-      
+
       // Keywords boost
       mission.boost.forEach(b => {
         const catName = b.replace('cat_', '').replace('_', ' ');
@@ -1278,12 +1264,12 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
 
       {/* NEW: Event Styling Wizard (Phase 2) */}
       <section className="mt-8 pt-4 border-t border-purple-500/10">
-        <MissionSelector 
-          activeMissionId={activeMission} 
-          onMissionSelect={setActiveMission} 
-          isDark={isDark} 
+        <MissionSelector
+          activeMissionId={activeMission}
+          onMissionSelect={setActiveMission}
+          isDark={isDark}
         />
-        
+
         <AnimatePresence mode="wait">
           <motion.div
             key={activeMission}
@@ -1324,7 +1310,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
 
             const btn = document.getElementById('save-lookbook-btn');
             if (btn) { btn.textContent = '⏳ Saving...'; btn.disabled = true; }
-            
+
             const mission = Object.values(MISSIONS).find(m => m.id === activeMission);
             const hexMap = {
               gold: '#FFD700', maroon: '#800000', emerald: '#50C878', royal_blue: '#4169E1', red: '#FF0000',
@@ -1333,7 +1319,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
               yellow: '#FFFF00', ivory: '#FFFFF0', saffron: '#F4C430', light_pink: '#FFB6C1',
               wine: '#722F37', crimson: '#DC143C', midnight_blue: '#191970', champagne: '#F7E7CE'
             };
-            
+
             const missionColors = mission ? mission.colors.map(c => ({
               name: c.replace('_', ' '),
               hex: hexMap[c] || '#888888'
@@ -1360,11 +1346,11 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
               const scored = outfits.map(o => {
                 let s = 0;
                 const txt = `${o.upper || ''} ${o.lower || ''} ${o.description || ''} ${o.name || ''} ${o.shirt || o.top || ''} ${o.pant || o.bottom || ''}`.toLowerCase();
-                mission.boost.forEach(b => { if(txt.includes(b.replace('cat_', '').replace('_', ' '))) s += 30; });
-                mission.colors.forEach(c => { if(txt.includes(c.replace('_', ' '))) s += 20; });
-                mission.fabric.forEach(f => { if(txt.includes(f)) s += 10; });
+                mission.boost.forEach(b => { if (txt.includes(b.replace('cat_', '').replace('_', ' '))) s += 30; });
+                mission.colors.forEach(c => { if (txt.includes(c.replace('_', ' '))) s += 20; });
+                mission.fabric.forEach(f => { if (txt.includes(f)) s += 10; });
                 return { ...o, s };
-              }).sort((a,b) => b.s - a.s);
+              }).sort((a, b) => b.s - a.s);
               bestOutfit = scored[0];
             }
 
@@ -1401,9 +1387,8 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             }
           }}
           id="save-lookbook-btn"
-          className={`flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-bold transition-all hover:scale-[1.02] ${
-            isDark ? 'bg-white/5 border-white/10 text-white/70' : 'bg-gray-50 border-gray-200 text-gray-700'
-          }`}
+          className={`flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-bold transition-all hover:scale-[1.02] ${isDark ? 'bg-white/5 border-white/10 text-white/70' : 'bg-gray-50 border-gray-200 text-gray-700'
+            }`}
         >
           <span>📖</span> Save to Lookbook
         </button>
@@ -1438,9 +1423,8 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             }
           }}
           id="post-community-btn"
-          className={`flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-bold transition-all hover:scale-[1.02] ${
-            isDark ? 'bg-purple-500/10 border-purple-500/20 text-purple-300' : 'bg-purple-50 border-purple-200 text-purple-700'
-          }`}
+          className={`flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-bold transition-all hover:scale-[1.02] ${isDark ? 'bg-purple-500/10 border-purple-500/20 text-purple-300' : 'bg-purple-50 border-purple-200 text-purple-700'
+            }`}
         >
           <span>🌍</span> Post to Community
         </button>
@@ -1497,11 +1481,10 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           }
         }}
         id="set-dna-btn"
-        className={`w-full py-3 rounded-2xl border text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${
-          isDark
+        className={`w-full py-3 rounded-2xl border text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${isDark
             ? 'bg-purple-500/10 border-purple-500/30 text-purple-300 hover:bg-purple-500/20'
             : 'bg-purple-50 border-purple-300 text-purple-700 hover:bg-purple-100'
-        }`}
+          }`}
       >
         🧬 Set as My Style DNA
       </button>
@@ -1553,12 +1536,12 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           }}
           disabled={shareStatus === 'loading' || shareStatus === 'success'}
           className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all hover:scale-[1.02] shadow-sm ${shareStatus === 'success'
-              ? 'bg-green-500 text-white border-green-500'
-              : shareStatus === 'error'
-                ? 'bg-red-500 text-white border-red-500'
-                : isDark
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-transparent hover:from-purple-500 hover:to-pink-500'
-                  : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-transparent hover:from-purple-600 hover:to-pink-600'
+            ? 'bg-green-500 text-white border-green-500'
+            : shareStatus === 'error'
+              ? 'bg-red-500 text-white border-red-500'
+              : isDark
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-transparent hover:from-purple-500 hover:to-pink-500'
+                : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-transparent hover:from-purple-600 hover:to-pink-600'
             }`}
         >
           {shareStatus === 'loading' ? (
@@ -1583,8 +1566,8 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 rounded-xl text-[10px] font-bold transition-all min-w-0 ${activeTab === tab.id
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
-                : inactiveTabCls
+              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+              : inactiveTabCls
               }`}
           >
             <span className="text-sm">{tab.emoji}</span>
@@ -1633,14 +1616,15 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         }}
       >
         {activeTab === 'colors' && (
-          <ColorRecommendationsShop
+          <ColorsTab
             recommendations={recommendations}
             isFemale={isFemale}
-            onShop={(data) => {
-              const shopData = typeof data === 'string' ? { query: data } : data;
-              setShopItem(shopData);
-              setShopBudget(shopData.budget || null);
-            }}
+            isSeasonal={isSeasonal}
+            effectiveGender={effectiveGender}
+            shirtCategory={shirtCategory}
+            pantCategory={pantCategory}
+            isDark={isDark}
+            onShop={(query, budget) => { setShopItem(query); setShopBudget(budget); }}
           />
         )}
         {activeTab === 'outfits' && (
@@ -1654,11 +1638,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             ethnicWear={ethnicWear}
             sareeSuggestions={sareeSuggestions}
             isDark={isDark}
-            onShop={(data) => {
-              const shopData = typeof data === 'string' ? { query: data } : data;
-              setShopItem(shopData);
-              setShopBudget(shopData.budget || null);
-            }}
+            onShop={(query, budget) => { setShopItem(query); setShopBudget(budget); }}
             bodyTypeTips={bodyTypeTips}
             bodyType={bodyType}
             userOccasion={userOccasion}
@@ -1671,11 +1651,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             isFemale={isFemale}
             makeupSuggestions={makeupSuggestions}
             isDark={isDark}
-            onShop={(data) => {
-              const shopData = typeof data === 'string' ? { query: data } : data;
-              setShopItem(shopData);
-              setShopBudget(shopData.budget || null);
-            }}
+            onShop={(query, budget) => { setShopItem(query); setShopBudget(budget); }}
           />
         )}
         {/* Shop tab removed — shopping links removed from analysis */}
@@ -1726,7 +1702,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
       >
         📸 {t('analyzeNewPhoto')}
       </button>
-      <ShopActionSheet 
+      <ShopActionSheet
         isOpen={!!shopItem}
         onClose={() => { setShopItem(null); setShopBudget(null); }}
         item={shopItem}
