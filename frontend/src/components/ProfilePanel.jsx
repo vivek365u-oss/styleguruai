@@ -442,7 +442,13 @@ export default function ProfilePanel() {
                <section className="space-y-4">
                   <p className="px-6 text-[10px] font-black uppercase tracking-[0.2em] text-red-500/50">{t('dangerZone')}</p>
                   <div className="bg-red-500/5 border border-red-500/10 rounded-[2.5rem] p-2">
-                     <button onClick={() => logout().then(() => navigate('/'))} className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all text-red-500 group">
+                     <button onClick={async () => {
+                       // Clear cache immediately so route guard fires at once
+                       localStorage.removeItem('tonefit_user');
+                       localStorage.removeItem('sg_last_analysis');
+                       navigate('/', { replace: true });
+                       await logout();
+                     }} className="w-full flex items-center justify-between p-5 rounded-2xl hover:bg-white/5 transition-all text-red-500 group">
                         <div className="flex items-center gap-4">
                            <span className="w-5 h-5"><IconRenderer icon={FashionIcons.Wardrobe} /></span>
                            <span className="text-sm font-bold">Sign Out</span>

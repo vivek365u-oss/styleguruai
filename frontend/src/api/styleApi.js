@@ -115,6 +115,7 @@ export const getUser = () => {
 export const logout = async () => {
   await signOut(auth);
   localStorage.removeItem('tonefit_user');
+  localStorage.removeItem('tonefit_user_status');
 };
 
 export const isLoggedIn = () => !!auth.currentUser;

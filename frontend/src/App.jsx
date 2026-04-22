@@ -57,10 +57,10 @@ function PrivateRoute({ user, children }) {
 function AppRoutes({ user, setUser }) {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    // 1. Immediately clear local state so route guard redirects to '/' at once
     setUser(null);
-    // Clear fashion data on logout to prevent persistence for the next user/guest
+    // 2. Clear all cached fashion data
     const keysToClear = [
       'sg_last_analysis',
       'sg_analysis_count',
@@ -73,7 +73,10 @@ function AppRoutes({ user, setUser }) {
     ];
     keysToClear.forEach(key => localStorage.removeItem(key));
     localStorage.removeItem('tonefit_user_status');
-    navigate('/');
+    localStorage.removeItem('tonefit_user');
+    // 3. Navigate first, THEN sign out from Firebase (avoids auth listener racing)
+    navigate('/', { replace: true });
+    await logout();
   };
 
 
@@ -82,7 +85,7 @@ function AppRoutes({ user, setUser }) {
       <Routes>
         <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage user={user} onLoginClick={() => navigate('/login')} onGetStarted={() => navigate('/login')} />} />
         <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} />} />
-        <Route path="/dashboard" element={<Dashboard user={user} onLogout={handleLogout} />} />
+        <Route path="/dashboard" element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />} />
         {/* OrderSuccess route removed */}
         <Route path="/profile" element={
           <PrivateRoute user={user}>
@@ -123,10 +126,11 @@ function App() {
     { name: authState.user.name, email: authState.user.email }
     : null;
 
-  const setUser = (newUser) => {
-    if (newUser === null) {
-      logout();
-    }
+  // NOTE: setUser is only used by AppRoutes internally.
+  // handleLogout in AppRoutes handles the actual signOut — do NOT call logout() here again.
+  const setUser = (_newUser) => {
+    // Auth state is driven by onAuthStateChanged in useAuthState.
+    // This function exists for compatibility; actual logout is handled in handleLogout.
   };
 
   const handleSplashComplete = () => {
