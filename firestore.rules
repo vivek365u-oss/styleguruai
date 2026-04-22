@@ -2,27 +2,65 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Subscription — read only from client, write only from backend Admin SDK
-    match /users/{uid}/subscription/{doc} {
-      allow read: if request.auth != null && request.auth.uid == uid;
-      allow write: if false; // backend Admin SDK only
+    // Helper functions for readability
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
     }
 
-    // Usage — read/write own data, enforce monthly limits
-    match /users/{uid}/usage/{month} {
-      allow read: if request.auth != null && request.auth.uid == uid;
-      allow write: if request.auth != null && request.auth.uid == uid
-        && (!request.resource.data.keys().hasAny(['analyses_count']) || request.resource.data.analyses_count <= 6)
-        && (!request.resource.data.keys().hasAny(['outfit_checks_count']) || request.resource.data.outfit_checks_count <= 10);
-    }
-
-    // All other user data — read/write own data
+    // ─── USER DATA RULES ──────────────────────────────────────────
+    // All data under /users/{uid} is private to that user.
     match /users/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
-      match /{document=**} {
-        allow read, write: if request.auth != null && request.auth.uid == uid;
+      // 1. Root user document (contains counts and basic info)
+      allow read, write: if isOwner(uid);
+
+      // 2. Profile sub-collection (data, preferences, primary, insights)
+      match /profile/{docId} {
+        allow read, write: if isOwner(uid);
       }
+
+      // 3. Main feature collections
+      match /wardrobe/{docId} { allow read, write: if isOwner(uid); }
+      match /history/{docId} { allow read, write: if isOwner(uid); }
+      match /saved_colors/{docId} { allow read, write: if isOwner(uid); }
+      match /outfit_logs/{docId} { allow read, write: if isOwner(uid); }
+      match /lookbook/{docId} { allow read, write: if isOwner(uid); }
+      match /selfie_style_history/{docId} { allow read, write: if isOwner(uid); }
+      
+      // 4. Utility & System collections
+      match /events/{docId} { allow read, write: if isOwner(uid); }
+      match /push_subscriptions/{docId} { allow read, write: if isOwner(uid); }
+
+      // 5. RESTRICTED: Subscription (Backend Admin SDK only for writes)
+      match /subscription/{docId} {
+        allow read: if isOwner(uid);
+        allow write: if false; 
+      }
+      
+      // 6. RESTRICTED: Usage (Owner can update but within safety limits)
+      match /usage/{month} {
+        allow read: if isOwner(uid);
+        allow write: if isOwner(uid)
+          && (!request.resource.data.keys().hasAny(['analyses_count']) || request.resource.data.analyses_count <= 25)
+          && (!request.resource.data.keys().hasAny(['outfit_checks_count']) || request.resource.data.outfit_checks_count <= 50);
+      }
+    }
+
+    // ─── GLOBAL COLLECTIONS ───────────────────────────────────────
+    
+    // Community Feed: Public read, authenticated write
+    match /community_feed/{postId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // Fallback: Deny everything else
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
-
