@@ -1,11 +1,13 @@
 import React, { useContext, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeContext } from '../context/ThemeContext';
 import { buildShopUrl, COMMON_STORES, MALE_STORES, FEMALE_STORES } from '../utils/shoppingUrls';
 import { getThemeColors } from '../utils/themeColors';
 
 /**
- * ShopActionSheet - Simplified, high-end shopping portal.
+ * ShopActionSheet - A high-end, DNA-styled shopping portal.
+ * Uses React Portals for perfect window-level centering and focus.
  */
 const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null }) => {
   const { theme } = useContext(ThemeContext);
@@ -21,44 +23,58 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
     } else {
       document.body.style.overflow = 'auto';
+      document.body.style.touchAction = 'auto';
     }
-    return () => { document.body.style.overflow = 'auto'; };
+    return () => {
+      document.body.style.overflow = 'auto';
+      document.body.style.touchAction = 'auto';
+    };
   }, [isOpen]);
 
   const PJS = "'Plus Jakarta Sans', 'Inter', sans-serif";
   const PDI = "'Playfair Display', 'Georgia', serif";
   const VIOLET = "#8B5CF6";
 
-  // FIX: Handle both string and object formats for the label
   const displayLabel = item ? (typeof item === 'object' ? item.query : item) : 'Loading style...';
 
-  return (
+  const modalContent = (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 md:p-8" style={{ pointerEvents: 'auto' }}>
           {/* Backdrop */}
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            className="absolute inset-0 bg-black/85 backdrop-blur-xl"
           />
 
           {/* Modal Content */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.9, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-[420px] overflow-hidden rounded-[2.5rem] border shadow-2xl"
+            exit={{ opacity: 0, scale: 0.9, y: 30 }}
+            transition={{ type: "spring", damping: 28, stiffness: 350 }}
+            className="relative w-full max-w-[440px] overflow-hidden rounded-[2.5rem] border shadow-[0_0_100px_rgba(139,92,246,0.2)]"
             style={{
               background: isDark ? '#0A0C10' : '#FFFFFF',
-              borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+              borderColor: isDark ? 'rgba(139,92,246,0.3)' : 'rgba(139,92,246,0.1)',
             }}
             onClick={e => e.stopPropagation()}
           >
+            {/* Tech Grid Background (DNA Style) */}
+            <div 
+              className="absolute inset-0 opacity-[0.04] pointer-events-none"
+              style={{ 
+                backgroundImage: `radial-gradient(${VIOLET} 1px, transparent 1px)`, 
+                backgroundSize: '24px 24px' 
+              }} 
+            />
+
             {/* Close Button (X) */}
             <button
               onClick={onClose}
@@ -76,11 +92,11 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
             <div className="relative z-10 p-8 sm:p-10">
               {/* Header Segment */}
               <div className="mb-8 text-center">
-                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 via-purple-500 to-pink-500 shadow-xl shadow-violet-500/20">
-                  <span className="text-2xl">🛍️</span>
+                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-[1.25rem] bg-gradient-to-br from-violet-500 via-purple-500 to-pink-500 shadow-2xl shadow-violet-500/40">
+                  <span className="text-3xl animate-pulse">🛍️</span>
                 </div>
                 
-                <p className="mb-1 text-[10px] font-black uppercase tracking-[0.3em] text-violet-500" style={{ fontFamily: PJS }}>
+                <p className="mb-1 text-[10px] font-black uppercase tracking-[0.4em] text-violet-500" style={{ fontFamily: PJS }}>
                   Style Search Protocol
                 </p>
                 <h3 className="text-3xl font-black tracking-tight" style={{ fontFamily: PDI, color: C.text }}>
@@ -94,11 +110,11 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
               </div>
 
               {/* Stores Grid - Compact & Scrollable */}
-              <div className="grid grid-cols-2 gap-3 mb-8 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="grid grid-cols-2 gap-3 mb-8 max-h-[320px] overflow-y-auto pr-2 custom-scrollbar">
                 {allStores.map((store, idx) => (
                   <motion.button
                     key={store.id}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.03 }}
                     onClick={() => {
@@ -143,15 +159,15 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
               </div>
 
               {/* Verified Badge */}
-              <div className="flex items-center justify-center gap-2.5 mb-8 py-2.5 px-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[10px] shadow-lg shadow-emerald-500/30">🛡️</div>
+              <div className="flex items-center justify-center gap-2.5 mb-8 py-3 px-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-[10px] shadow-lg shadow-emerald-500/30">🛡️</div>
                 <p className="text-[10px] font-black uppercase tracking-wider text-emerald-500/80" style={{ fontFamily: PJS }}>
                   Verified Official Store Links
                 </p>
               </div>
 
               {/* Footer Info */}
-              <p className="text-center text-[8px] font-bold uppercase tracking-[0.2em] opacity-30" style={{ fontFamily: PJS, color: C.text }}>
+              <p className="text-center text-[9px] font-bold uppercase tracking-[0.2em] opacity-30" style={{ fontFamily: PJS, color: C.text }}>
                 Powered by StyleGuru AI Engine
               </p>
             </div>
@@ -167,6 +183,8 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
       )}
     </AnimatePresence>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default ShopActionSheet;

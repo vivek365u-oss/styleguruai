@@ -1624,7 +1624,11 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             shirtCategory={shirtCategory}
             pantCategory={pantCategory}
             isDark={isDark}
-            onShop={(query, budget) => { setShopItem(query); setShopBudget(budget); }}
+            onShop={(data, budget) => {
+              const shopData = typeof data === 'string' ? { query: data } : data;
+              setShopItem(shopData);
+              setShopBudget(shopData.budget || budget || null);
+            }}
           />
         )}
         {activeTab === 'outfits' && (
@@ -1638,7 +1642,11 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             ethnicWear={ethnicWear}
             sareeSuggestions={sareeSuggestions}
             isDark={isDark}
-            onShop={(query, budget) => { setShopItem(query); setShopBudget(budget); }}
+            onShop={(data, budget) => {
+              const shopData = typeof data === 'string' ? { query: data } : data;
+              setShopItem(shopData);
+              setShopBudget(shopData.budget || budget || null);
+            }}
             bodyTypeTips={bodyTypeTips}
             bodyType={bodyType}
             userOccasion={userOccasion}
@@ -1651,7 +1659,11 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             isFemale={isFemale}
             makeupSuggestions={makeupSuggestions}
             isDark={isDark}
-            onShop={(query, budget) => { setShopItem(query); setShopBudget(budget); }}
+            onShop={(data, budget) => {
+              const shopData = typeof data === 'string' ? { query: data } : data;
+              setShopItem(shopData);
+              setShopBudget(shopData.budget || budget || null);
+            }}
           />
         )}
         {/* Shop tab removed — shopping links removed from analysis */}
