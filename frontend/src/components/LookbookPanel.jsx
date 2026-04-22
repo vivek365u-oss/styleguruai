@@ -92,60 +92,48 @@ function LookbookPanel() {
                       </button>
                     </div>
 
-                    {/* Outfit Details */}
+                    {/* Premium Outfit Display */}
                     {item.outfit && (
-                      <div className={`p-4 rounded-2xl mb-4 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'}`}>
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>
-                            {item.outfit.top}
-                          </p>
-                          {item.outfit.occasion && (
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap ${isDark ? 'bg-white/10 text-white/80' : 'bg-gray-200 text-gray-700'}`}>
-                              {item.outfit.occasion}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex flex-col gap-1.5 text-xs">
+                      <div className="mb-6 mt-2">
+                        {item.outfit.occasion && (
+                          <div className={`inline-block px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest mb-3 ${isDark ? 'bg-white/10 text-white/90' : 'bg-black/5 text-gray-800'}`}>
+                            {item.outfit.occasion}
+                          </div>
+                        )}
+                        <h2 className={`text-xl sm:text-2xl font-black leading-tight mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          {item.outfit.top}
+                        </h2>
+                        
+                        <div className="flex flex-wrap gap-2">
                           {item.outfit.bottom && (
-                            <div className="flex items-center gap-2">
-                              <span>👖</span>
-                              <span className={isDark ? 'text-white/70' : 'text-gray-600'}>{item.outfit.bottom}</span>
+                            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+                              <span className="text-sm">👖</span>
+                              <span className={`text-xs font-semibold ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{item.outfit.bottom}</span>
                             </div>
                           )}
                           {item.outfit.shoes && (
-                            <div className="flex items-center gap-2">
-                              <span>👟</span>
-                              <span className={isDark ? 'text-white/70' : 'text-gray-600'}>{item.outfit.shoes}</span>
+                            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+                              <span className="text-sm">👟</span>
+                              <span className={`text-xs font-semibold ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{item.outfit.shoes}</span>
                             </div>
                           )}
                           {item.outfit.dupatta && item.outfit.dupatta !== "-" && (
-                            <div className="flex items-center gap-2">
-                              <span>🧣</span>
-                              <span className={isDark ? 'text-white/70' : 'text-gray-600'}>{item.outfit.dupatta}</span>
+                            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+                              <span className="text-sm">🧣</span>
+                              <span className={`text-xs font-semibold ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{item.outfit.dupatta}</span>
                             </div>
                           )}
                         </div>
                       </div>
                     )}
 
-                    {/* Color Palette Header */}
-                    <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Mission Palette</p>
-                    <div className="flex gap-2 mb-5">
-                      {item.colors?.map((c, i) => (
-                        <div 
-                          key={i} 
-                          className="w-10 h-10 rounded-xl border border-white/20 shadow-sm"
-                          style={{ backgroundColor: c.hex }}
-                        />
-                      ))}
-                    </div>
-
                     {/* Expert Advice */}
                     {item.expertAdvice && (
-                      <div className={`p-3 rounded-2xl mb-4 ${isDark ? 'bg-purple-900/20 border border-purple-500/20' : 'bg-purple-50 border border-purple-100'}`}>
+                      <div className={`relative p-4 rounded-2xl mb-4 border-l-4 ${isDark ? 'bg-purple-900/10 border-purple-500' : 'bg-purple-50 border-purple-400'}`}>
+                        <div className="absolute top-2 right-4 text-purple-500/20 text-4xl font-serif">"</div>
                         <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>Stylist Note</p>
-                        <p className={`text-xs italic leading-relaxed ${isDark ? 'text-white/70' : 'text-gray-700'}`}>
-                          "{item.expertAdvice}"
+                        <p className={`text-xs italic leading-relaxed pr-6 ${isDark ? 'text-white/80' : 'text-gray-800'}`}>
+                          {item.expertAdvice}
                         </p>
                       </div>
                     )}
