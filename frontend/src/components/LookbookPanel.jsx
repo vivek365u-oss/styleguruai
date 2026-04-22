@@ -103,6 +103,16 @@ function LookbookPanel() {
                       ))}
                     </div>
 
+                    {/* Expert Advice */}
+                    {item.expertAdvice && (
+                      <div className={`p-3 rounded-2xl mb-4 ${isDark ? 'bg-purple-900/20 border border-purple-500/20' : 'bg-purple-50 border border-purple-100'}`}>
+                        <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>Stylist Note</p>
+                        <p className={`text-xs italic leading-relaxed ${isDark ? 'text-white/70' : 'text-gray-700'}`}>
+                          "{item.expertAdvice}"
+                        </p>
+                      </div>
+                    )}
+
                     {/* Meta */}
                     <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
                       <div className="flex items-center gap-2">

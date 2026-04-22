@@ -1471,12 +1471,35 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             const btn = document.getElementById('save-lookbook-btn');
             if (btn) { btn.textContent = '⏳ Saving...'; btn.disabled = true; }
             
+            const mission = Object.values(MISSIONS).find(m => m.id === activeMission);
+            const hexMap = {
+              gold: '#FFD700', maroon: '#800000', emerald: '#50C878', royal_blue: '#4169E1', red: '#FF0000',
+              navy: '#000080', charcoal: '#36454F', white: '#f8fafc', grey: '#808080', black: '#0f172a',
+              dark_grey: '#A9A9A9', olive: '#808000',
+              yellow: '#FFFF00', ivory: '#FFFFF0', saffron: '#F4C430', light_pink: '#FFB6C1',
+              wine: '#722F37', crimson: '#DC143C', midnight_blue: '#191970', champagne: '#F7E7CE'
+            };
+            
+            const missionColors = mission ? mission.colors.map(c => ({
+              name: c.replace('_', ' '),
+              hex: hexMap[c] || '#888888'
+            })) : [
+              ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || []),
+            ].map(c => typeof c === 'string' ? { name: c, hex: '#888888' } : c).slice(0, 5);
+
+            let expertAdvice = "";
+            if (activeMission === 'wedding') expertAdvice = "For your Wedding Elite mission, we've prioritized high-contrast silk combinations. Aim for jewel tones that complement your deep premium luminosity.";
+            else if (activeMission === 'office') expertAdvice = "Focusing on Corporate Power. We've filtered for crisp cottons and structured silhouettes in your core neutral palette for maximum authority.";
+            else if (activeMission === 'monsoon') expertAdvice = "Monsoon Minimal mode active. Stick to darker saturated tones to maintain a sharp profile even in overcast lighting.";
+            else if (activeMission === 'pooja') expertAdvice = "Traditional Morning Pooja DNA detected. Opt for saffron and ivory tones to reflect serenity while keeping your natural brightness front and center.";
+            else if (activeMission === 'date') expertAdvice = "Entering Date Night mode. Soft satin finishes in deep wine or midnight blue will interact perfectly with evening ambient light.";
+            else expertAdvice = "Relaxed daily mode. Focus on comfort within your seasonal spectrum — keeping it effortless yet curated.";
+
             const lookData = {
               missionId: activeMission,
+              expertAdvice: expertAdvice,
               analysis: { skin_tone: analysis.skin_tone },
-              colors: [
-                ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || []),
-              ].slice(0, 5),
+              colors: missionColors.slice(0, 5),
               score: Math.min(98, Math.max(55, Math.round((photo_quality?.score || 85) * 0.7 + (analysis.skin_tone.confidence === 'high' ? 10 : 5)))),
               timestamp: new Date().toISOString()
             };
