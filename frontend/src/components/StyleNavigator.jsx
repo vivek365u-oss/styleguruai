@@ -25,7 +25,7 @@ import {
 } from '../utils/analytics';
 import { scoreWardrobeItem, getActionableAdvice, getAccessoryAdvice } from '../utils/stylingEngine';
 import { getThemeColors } from '../utils/themeColors';
-import { buildMyntraSearchUrl } from '../utils/myntraUrl';
+import ShopActionSheet from './ShopActionSheet';
 
 // ── Skin tone → hex ─────────────────────────────────
 const TONE_HEX = {
@@ -93,13 +93,6 @@ const MOODS = [
   { id:'gym',      emoji:'🏋️', label:'Active' },
 ];
 
-// ── Store deeplinks ─────────────────────────────────
-const STORES = [
-  { id:'myntra',   name:'Myntra',   emoji:'🎀', color:'#f13ab1', bg:'linear-gradient(135deg,#f13ab1,#f87171)' },
-  { id:'amazon',   name:'Amazon',   emoji:'📦', color:'#ff9900', bg:'linear-gradient(135deg,#ff9900,#232f3e)' },
-  { id:'flipkart', name:'Flipkart', emoji:'🛒', color:'#2874f0', bg:'linear-gradient(135deg,#2874f0,#0052cc)' },
-  { id:'meesho',   name:'Meesho',   emoji:'💸', color:'#ff44af', bg:'linear-gradient(135deg,#ff44af,#ff8c00)' },
-];
 
 const PJS = "'Plus Jakarta Sans', 'Inter', sans-serif";
 const PDI = "'Playfair Display', 'Georgia', serif";
@@ -217,27 +210,6 @@ const TREND_CATS = {
   female: ['All','Casual','Formal','Ethnic','Party','Streetwear','Shoes','Accessories'],
 };
 
-// ── Shop URL builder ────────────────────────────────
-const buildShopUrl = (item, store, gender) => {
-  const gKey = gender.toLowerCase().includes('female') ? 'female' : 'male';
-  const gStr = gKey === 'female' ? 'women' : 'men';
-  const q = `${gStr} ${item} India`;
-
-  // Smart item type detection for Myntra path
-  const lower = item.toLowerCase();
-  let itemType = 'shirt';
-  if (lower.includes('pant') || lower.includes('trouser') || lower.includes('jean') || lower.includes('cargo') || lower.includes('palazzo') || lower.includes('bottom')) itemType = 'pant';
-  else if (lower.includes('dress') || lower.includes('gown') || lower.includes('coord') || lower.includes('co-ord')) itemType = 'dress';
-  else if (lower.includes('kurti') || lower.includes('saree') || lower.includes('lehenga') || lower.includes('sharara') || lower.includes('anarkali')) itemType = 'kurti';
-  else if (lower.includes('shoe') || lower.includes('boot') || lower.includes('heel') || lower.includes('sneaker') || lower.includes('sandal')) itemType = 'shoe';
-  else if (lower.includes('top') || lower.includes('blouse') || lower.includes('crop')) itemType = 'top';
-
-  if (store === 'myntra')   return buildMyntraSearchUrl(item, gKey, itemType);
-  if (store === 'amazon')   return `https://www.amazon.in/s?k=${encodeURIComponent(q)}`;
-  if (store === 'flipkart') return `https://www.flipkart.com/search?q=${encodeURIComponent(q)}`;
-  if (store === 'meesho')   return `https://www.meesho.com/search?q=${encodeURIComponent(q)}`;
-  return `https://www.google.com/search?q=${encodeURIComponent(q)}`;
-};
 
 // ══════════════════════════════════════════════════════
 // COMPONENT: Style Compass
@@ -1026,39 +998,19 @@ export default function StyleNavigator({ user, onAnalyze }) {
                       🔥 {product.why}
                     </p>
 
-                    {/* Shop buttons */}
-                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:4 }}>
-                      {[STORES[0], STORES[1]].map(store => (
-                        <button key={store.id}
-                          onClick={() => window.open(
-                            store.id === 'myntra'
-                              ? `https://www.myntra.com/${activeTG === 'female' ? 'women' : 'men'}-${product.name.toLowerCase().replace(/ /g,'-')}?rawQuery=${encodeURIComponent(product.name)}`
-                              : `https://www.amazon.in/s?k=${encodeURIComponent(product.search)}`,
-                            '_blank'
-                          )}
-                          style={{ padding:'6px 4px', borderRadius:8, border:`1px solid ${C.border}`, background:C.glass2, cursor:'pointer', fontSize:'9px', color:C.muted, fontFamily:PJS, fontWeight:600, display:'flex', alignItems:'center', justifyContent:'center', gap:4, transition:'all 0.15s' }}
-                          onMouseEnter={e => { e.currentTarget.style.borderColor=store.color; e.currentTarget.style.color=store.color; }}
-                          onMouseLeave={e => { e.currentTarget.style.borderColor=C.border; e.currentTarget.style.color=C.muted; }}
-                        >
-                          {store.emoji} {store.name}
-                        </button>
-                      ))}
-                      {[STORES[2], STORES[3]].map(store => (
-                        <button key={store.id}
-                          onClick={() => window.open(
-                            store.id === 'flipkart'
-                              ? `https://www.flipkart.com/search?q=${encodeURIComponent(`${activeTG === 'female' ? 'women' : 'men'} ${product.name}`)}`
-                              : `https://www.meesho.com/search?q=${encodeURIComponent(product.search)}`,
-                            '_blank'
-                          )}
-                          style={{ padding:'6px 4px', borderRadius:8, border:`1px solid ${C.border}`, background:C.glass2, cursor:'pointer', fontSize:'9px', color:C.muted, fontFamily:PJS, fontWeight:600, display:'flex', alignItems:'center', justifyContent:'center', gap:4, transition:'all 0.15s' }}
-                          onMouseEnter={e => { e.currentTarget.style.borderColor=store.color; e.currentTarget.style.color=store.color; }}
-                          onMouseLeave={e => { e.currentTarget.style.borderColor=C.border; e.currentTarget.style.color=C.muted; }}
-                        >
-                          {store.emoji} {store.name}
-                        </button>
-                      ))}
-                    </div>
+                    {/* Shop button */}
+                    <button
+                      onClick={() => setShopItem(product.name)}
+                      style={{ 
+                        width:'100%', padding:'10px', borderRadius:12, 
+                        background: GRAD, border:'none', color:'white', 
+                        cursor:'pointer', fontSize:'11px', fontFamily:PJS, fontWeight:700, 
+                        display:'flex', alignItems:'center', justifyContent:'center', gap:6, 
+                        boxShadow: '0 4px 12px rgba(139,92,246,0.3)' 
+                      }}
+                    >
+                      🛒 Shop Direct →
+                    </button>
                   </div>
                 </div>
               ))}
@@ -1074,45 +1026,12 @@ export default function StyleNavigator({ user, onAnalyze }) {
         );
       })()}
 
-      {/* ── SHOP SELECTOR MODAL ── */}
-      {shopItem && (
-        <div
-          onClick={() => setShopItem(null)}
-          style={{ position:'fixed', inset:0, zIndex:300, background:'rgba(0,0,0,0.7)', backdropFilter:'blur(12px)', display:'flex', alignItems:'flex-end', justifyContent:'center', padding:'0 0 0 0' }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{ width:'100%', maxWidth:480, background:C.isDark?'#0B0F1A':'#FFFFFF', borderRadius:'24px 24px 0 0', padding:'24px 20px 48px', boxShadow:'0 -20px 60px rgba(0,0,0,0.3)' }}
-          >
-            <div style={{ width:40, height:4, borderRadius:2, background:'rgba(139,92,246,0.3)', margin:'0 auto 20px' }} />
-            <p style={{ fontFamily:PDI, fontSize:'18px', color:C.text, textAlign:'center', margin:'0 0 4px' }}>Shop This Look</p>
-            <p style={{ fontSize:'11px', color:C.muted, fontFamily:PJS, textAlign:'center', margin:'0 0 20px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-              {shopItem}
-            </p>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-              {STORES.map(store => (
-                <button key={store.id}
-                  onClick={() => { window.open(buildShopUrl(shopItem, store.id, gender), '_blank'); setShopItem(null); }}
-                  style={{ display:'flex', alignItems:'center', gap:12, padding:'14px 16px', borderRadius:14, border:`1px solid ${C.border}`, background:C.glass2, cursor:'pointer', transition:'all 0.2s', textAlign:'left', color:'inherit' }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor=store.color; e.currentTarget.style.background=`${store.color}10`; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor=C.border; e.currentTarget.style.background=C.glass2; }}
-                >
-                  <div style={{ width:36, height:36, borderRadius:10, background:store.bg, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px', flexShrink:0 }}>
-                    {store.emoji}
-                  </div>
-                  <p style={{ fontSize:'13px', fontWeight:700, color:C.text, fontFamily:PJS, margin:0 }}>{store.name}</p>
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={() => setShopItem(null)}
-              style={{ width:'100%', marginTop:16, padding:'12px', background:'none', border:'none', color:C.muted, fontSize:'12px', cursor:'pointer', fontFamily:PJS }}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
+      <ShopActionSheet 
+        isOpen={!!shopItem} 
+        onClose={() => setShopItem(null)} 
+        item={shopItem} 
+        gender={gender} 
+      />
     </div>
   );
 }

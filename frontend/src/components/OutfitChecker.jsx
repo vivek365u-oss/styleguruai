@@ -8,58 +8,19 @@ import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import { compressImage, saveLocalWardrobeImage } from '../utils/indexedDB';
 import { getCategoriesByGender, getCategoryIcon, ALL_CATEGORIES, getCategoryGroup, getCategorySectionMeta } from '../constants/fashionCategories';
 import { buildMyntraUrl } from '../utils/myntraUrl';
+import ShopActionSheet from './ShopActionSheet';
 // PaywallModal import removed
 
 // ── Outfit Shop Card — same style as analyze results ─────────
 function OutfitShopCard({ color, isDark, gender = 'male' }) {
   const [budget, setBudget] = useState(null);
-  const AMAZON_TAG = 'StyleGuruAI-21';
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const budgets = [
     { label: '₹500', max: 500 },
     { label: '₹1000', max: 1000 },
     { label: '₹2000', max: 2000 },
     { label: 'Any', max: null },
-  ];
-
-  // Generate shopping links with budget filtering
-  const generateShoppingLinks = () => {
-    const isFemale = gender === 'female';
-    const colorDisplay = color.name.toLowerCase().replace(/\s+/g, ' ');
-    const genderStr = isFemale ? 'women' : 'men';
-    const product = isFemale ? 'top' : 'shirt';
-    const itemType = isFemale ? 'top' : 'shirt';
-
-    const baseKw = `${genderStr} ${colorDisplay} ${product}`;
-    const amzKw  = `${baseKw} trending 2025`;
-
-    const budgetMax = budget?.max;
-    const amzPrice  = budgetMax ? `%2Cp_36%3A-${budgetMax * 100}` : '';
-    const fkPrice   = budgetMax ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budgetMax}` : '';
-
-    // ── Myntra: use category-path URL (most accurate) ───────────────────────
-    const myntraLink = buildMyntraUrl({ color: color.name, gender, itemType });
-
-    return {
-      amazon:  `https://www.amazon.in/s?k=${encodeURIComponent(amzKw)}&rh=${isFemale ? 'n%3A7534543031' : 'n%3A1968024031'}${amzPrice}&sort=review-rank&tag=${AMAZON_TAG}`,
-      flipkart:`https://www.flipkart.com/search?q=${encodeURIComponent(baseKw)}&sort=review-rank${fkPrice}`,
-      myntra:  myntraLink,
-      meesho:  `https://meesho.com/search?q=${encodeURIComponent(baseKw)}`,
-    };
-  };
-
-
-  const shopLinks = generateShoppingLinks();
-
-  const links = [
-    { name: 'Amazon', icon: '🛒', platform: 'amazon',
-      bg: isDark ? 'bg-orange-500/20 hover:bg-orange-500/40 border-orange-500/30 text-orange-300' : 'bg-orange-50 hover:bg-orange-100 border-orange-300 text-orange-700 font-bold' },
-    { name: 'Flipkart', icon: '🏪', platform: 'flipkart',
-      bg: isDark ? 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700 font-bold' },
-    { name: 'Myntra', icon: '👗', platform: 'myntra',
-      bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold' },
-    { name: 'Meesho', icon: '🛍️', platform: 'meesho',
-      bg: isDark ? 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' : 'bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700 font-bold' },
   ];
 
   const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-md';
@@ -78,7 +39,7 @@ function OutfitShopCard({ color, isDark, gender = 'male' }) {
       </div>
 
       {/* Budget filter */}
-      <div className="flex gap-1.5 flex-wrap mb-2">
+      <div className="flex gap-1.5 flex-wrap mb-3">
         {budgets.map((b) => (
           <button
             key={b.label}
@@ -94,15 +55,21 @@ function OutfitShopCard({ color, isDark, gender = 'male' }) {
         ))}
       </div>
 
-      {/* Shop links */}
-      <div className="flex gap-1.5 flex-wrap">
-        {links.map((link) => (
-          <a key={link.name} href={shopLinks[link.platform]} target="_blank" rel="noopener noreferrer"
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}>
-            <span>{link.icon}</span><span>{link.name}</span>
-          </a>
-        ))}
-      </div>
+      {/* Shop Action */}
+      <button 
+        onClick={() => setIsSheetOpen(true)}
+        className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-black shadow-lg shadow-purple-500/20 active:scale-95 transition-all"
+      >
+        🛒 Shop Direct →
+      </button>
+
+      <ShopActionSheet 
+        isOpen={isSheetOpen}
+        onClose={() => setIsSheetOpen(false)}
+        item={`${color.name} ${gender === 'female' ? 'top' : 'shirt'}`}
+        gender={gender}
+        budget={budget?.max}
+      />
     </div>
   );
 }

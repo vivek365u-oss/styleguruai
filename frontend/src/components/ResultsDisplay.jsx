@@ -13,14 +13,13 @@ import { MISSIONS, scoreWardrobeItem } from '../utils/stylingEngine';
 import AffiliateLink from './AffiliateLink';
 import AdSense from '../AdSense';
 import { buildMyntraUrl } from '../utils/myntraUrl';
+import ShopActionSheet from './ShopActionSheet';
 
-// ── Shopping Links ───────────────────────────────────────────
 function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
-  const isFemale = gender === "female";
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
-  const AMAZON_TAG = 'styleguruai-21';
   const [budget, setBudget] = useState(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const budgets = [
     { label: '₹500',  max: 500 },
@@ -29,145 +28,19 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
     { label: 'Any',   max: null },
   ];
 
-  // ── Gender-aware product keyword map ──────────────────────
-  // Maps internal category id/slug → actual search term used on stores
   const PRODUCT_MAP = {
-    // male
-    shirt:          { male: 'shirt', female: 'top' },
-    formal_shirt:   { male: 'formal shirt', female: 'formal top' },
-    tshirt:         { male: 't-shirt', female: 't-shirt' },
-    oversized_tee:  { male: 'oversized t-shirt', female: 'oversized t-shirt' },
-    polo:           { male: 'polo shirt', female: 'polo top' },
-    casual_shirt:   { male: 'casual shirt', female: 'casual top' },
-    hoodie:         { male: 'hoodie', female: 'hoodie' },
-    sweatshirt:     { male: 'sweatshirt', female: 'sweatshirt' },
-    jacket:         { male: 'jacket', female: 'jacket' },
-    blazer:         { male: 'blazer', female: 'blazer' },
-    tuxedo:         { male: 'suit', female: 'formal dress' },
-    waistcoat:      { male: 'waistcoat', female: 'vest top' },
-    bomber:         { male: 'bomber jacket', female: 'bomber jacket' },
-    jeans:          { male: 'jeans', female: 'jeans' },
-    cargo:          { male: 'cargo pants', female: 'cargo pants' },
-    chinos:         { male: 'chinos', female: 'trousers' },
-    shorts:         { male: 'shorts', female: 'shorts' },
-    track_pants:    { male: 'track pants', female: 'track pants' },
-    formal_trouser: { male: 'formal trouser', female: 'formal trouser' },
-    sneakers:       { male: 'sneakers', female: 'sneakers' },
-    loafers:        { male: 'loafers', female: 'loafers' },
-    boots:          { male: 'boots', female: 'boots' },
-    formal_shoe:    { male: 'formal shoes', female: 'heels' },
-    sports_shoe:    { male: 'sports shoes', female: 'sports shoes' },
-    // ethnic male
-    sherwani:       { male: 'sherwani', female: 'lehenga' },
-    kurta_set:      { male: 'kurta set', female: 'kurti set' },
-    nehru_jacket:   { male: 'nehru jacket', female: 'nehru jacket' },
-    dhoti_kurta:    { male: 'dhoti kurta', female: 'dhoti pants' },
-    ethnic_coord:   { male: 'ethnic coord set', female: 'ethnic coord set' },
-    // ethnic female
-    saree_silk:     { male: 'kurta', female: 'silk saree' },
-    saree_chiffon:  { male: 'kurta', female: 'chiffon saree' },
-    saree_cotton:   { male: 'kurta', female: 'cotton saree' },
-    saree:          { male: 'kurta', female: 'saree' },
-    lehenga:        { male: 'sherwani', female: 'lehenga choli' },
-    anarkali:       { male: 'kurta', female: 'anarkali suit' },
-    kurti:          { male: 'kurta', female: 'kurti' },
-    kurti_set:      { male: 'kurta set', female: 'kurti set' },
-    sharara:        { male: 'kurta', female: 'sharara set' },
-    palazzo_suit:   { male: 'kurta', female: 'palazzo suit' },
-    dhoti_pants:    { male: 'dhoti kurta', female: 'dhoti pants' },
-    // fusion female
-    indo_western:   { male: 'kurta', female: 'indo western dress' },
-    coord_set_f:    { male: 'coord set', female: 'coord set' },
-    cape_set:       { male: 'kurta', female: 'cape set' },
-    // tops female
-    crop_top:       { male: 't-shirt', female: 'crop top' },
-    blouse:         { male: 'shirt', female: 'blouse' },
-    corset:         { male: 'shirt', female: 'corset top' },
-    puff_top:       { male: 'shirt', female: 'puff sleeve top' },
-    shirt_female:   { male: 'shirt', female: 'shirt' },
-    tank_top:       { male: 'vest', female: 'tank top' },
-    sweater:        { male: 'sweater', female: 'knit sweater' },
-    // dresses female
-    dress_maxi:     { male: 'shirt', female: 'maxi dress' },
-    dress_mini:     { male: 'shirt', female: 'mini dress' },
-    dress_midi:     { male: 'shirt', female: 'midi dress' },
-    bodycon:        { male: 'shirt', female: 'bodycon dress' },
-    shirt_dress:    { male: 'shirt', female: 'shirt dress' },
-    // bottoms female
-    jeans_female:   { male: 'jeans', female: 'jeans' },
-    mom_jeans:      { male: 'jeans', female: 'mom jeans' },
-    skirt:          { male: 'trousers', female: 'skirt' },
-    palazzo_f:      { male: 'trousers', female: 'palazzo pants' },
-    shorts_female:  { male: 'shorts', female: 'shorts' },
-    track_f:        { male: 'track pants joggers', female: 'track pants joggers' },
-    // accessories
-    dupatta:        { male: 'stole scarf', female: 'dupatta stole' },
-    watch:           { male: 'premium minimalist watch', female: 'stylish minimalist watch' },
-    belt:            { male: 'premium leather belt', female: 'waist belt' },
-    wallet:          { male: 'genuine leather wallet', female: 'mini wallet clutch' },
-    sunglasses:      { male: 'retro square sunglasses', female: 'vintage cat eye sunglasses' },
-    backpack:        { male: 'premium laptop backpack', female: 'chic quilted backpack' },
-    earrings:        { male: 'minimal stud earrings', female: 'premium statement earrings' },
-    necklace:        { male: 'minimal chain necklace', female: 'premium layered necklace' },
-    bangles:         { male: 'minimal bracelet', female: 'premium ethnic bangles' },
-    accessory:       { male: 'minimalist accessory', female: 'premium fashion accessory' },
-    // fallback
-    top:            { male: 'premium casual shirt', female: 'aesthetic minimal top' },
-    pant:           { male: 'pants cargo joggers', female: 'pants cargo joggers' },
-    bottom:         { male: 'trousers pants cargo', female: 'palazzo pants cargo' },
-    dress:          { male: 'premium shirt', female: 'stylish midi dress' },
+    shirt: { male: 'shirt', female: 'top' },
+    pant: { male: 'trouser', female: 'trouser' },
+    kurta: { male: 'kurta', female: 'kurti' },
+    accessory: { male: 'accessory', female: 'accessory' },
+    makeup: { male: 'makeup', female: 'makeup' },
   };
 
-  // Clean category key: strip 'cat_' prefix, find in map
   const catKey = (category || 'shirt').toLowerCase().replace(/^cat_/, '');
-  const productEntry = PRODUCT_MAP[catKey];
-  
-  // ── Build accurate Myntra category-path URL ─────────────────────
-  // Uses buildMyntraUrl: maps cat_id → Myntra category path (NOT search?q=)
-  // e.g. cat_crop_top → /crop-tops?rawQuery=blue+crop+top+women
-  const catIdFull = category?.startsWith('cat_') ? category : `cat_${catKey}`;
-  const myntraUrl  = buildMyntraUrl({ color: colorName, catId: catIdFull, gender, itemType: catKey });
-
-  const genderStr = isFemale ? 'women' : 'men';
-  const colorClean = colorName.trim().toLowerCase();
-  const product = productEntry ? productEntry[isFemale ? 'female' : 'male'] : (isFemale ? 'top' : 'shirt');
-
-  // ── Build accurate search query for each store ──────────
-  const amazonQ   = encodeURIComponent(`${genderStr} ${colorClean} ${product} trending`);
-  const flipkartQ = encodeURIComponent(`${genderStr} ${colorClean} ${product}`);
-  const meeshoQ   = encodeURIComponent(`${colorClean} ${product} ${genderStr}`);
-
-  // Amazon category node (women clothing / men clothing)
-  const amzNode = isFemale ? 'n%3A7534543031' : 'n%3A1968024031';
-  const amzPrice = budget?.max ? `%2Cp_36%3A-${budget.max * 100}` : '';
-  const fkPrice  = budget?.max ? `&p%5B%5D=facets.price_range.from%3D0&p%5B%5D=facets.price_range.to%3D${budget.max}` : '';
-
-  const links = [
-    {
-      name: 'Myntra', icon: '🛍️',
-      url: myntraUrl,
-      bg: isDark ? 'bg-pink-500/20 hover:bg-pink-500/40 border-pink-500/30 text-pink-300' : 'bg-pink-50 hover:bg-pink-100 border-pink-300 text-pink-700 font-bold'
-    },
-    {
-      name: 'Amazon', icon: '📦',
-      url: `https://www.amazon.in/s?k=${amazonQ}&rh=${amzNode}${amzPrice}&sort=featured&tag=${AMAZON_TAG}`,
-      bg: isDark ? 'bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20 text-amber-300' : 'bg-amber-50 hover:bg-amber-100 border-amber-200 text-amber-700 font-bold'
-    },
-    {
-      name: 'Flipkart', icon: '🏪',
-      url: `https://www.flipkart.com/search?q=${flipkartQ}&sort=popularity_desc${fkPrice}`,
-      bg: isDark ? 'bg-blue-500/20 hover:bg-blue-500/40 border-blue-500/30 text-blue-300' : 'bg-blue-50 hover:bg-blue-100 border-blue-300 text-blue-700 font-bold'
-    },
-    {
-      name: 'Meesho', icon: '🛍️',
-      url: `https://meesho.com/search?q=${meeshoQ}`,
-      bg: isDark ? 'bg-purple-500/20 hover:bg-purple-500/40 border-purple-500/30 text-purple-300' : 'bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700 font-bold'
-    },
-  ];
+  const productLabel = PRODUCT_MAP[catKey]?.[gender === 'female' ? 'female' : 'male'] || (gender === 'female' ? 'top' : 'shirt');
 
   return (
-    <div className="mt-2 space-y-2">
-      {/* Budget filter pills */}
+    <div className="mt-2 space-y-2" onClick={e => e.stopPropagation()}>
       <div className="flex gap-1.5 flex-wrap">
         {budgets.map((b) => (
           <button
@@ -183,64 +56,46 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
           </button>
         ))}
       </div>
-      {/* Shop links */}
-      <div className="flex gap-1.5 flex-wrap">
-        {links.map((link) => (
-          <a
-            key={link.name}
-            href={link.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={e => e.stopPropagation()}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}
-          >
-            <span>{link.icon}</span><span>{link.name}</span>
-          </a>
-        ))}
-      </div>
+      
+      <button 
+        onClick={(e) => { e.stopPropagation(); setIsSheetOpen(true); }}
+        className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-black shadow-lg shadow-purple-500/20 active:scale-95 transition-all"
+      >
+        🛒 Shop Direct →
+      </button>
+
+      <ShopActionSheet 
+        isOpen={isSheetOpen}
+        onClose={() => setIsSheetOpen(false)}
+        item={`${colorName} ${productLabel}`}
+        gender={gender}
+        budget={budget?.max}
+      />
     </div>
   );
 }
 
 
+
 // ── Makeup Shopping Links ──────────────────────────────────────
 function MakeupShoppingLinks({ product, shade, isDark }) {
-  const query = encodeURIComponent(`${shade || ''} ${product} makeup`).replace(/%20/g, '+');
-  
-  const myntraCatMap = {
-    'Foundation': 'cat_foundation',
-    'Lipstick': 'cat_lipstick',
-    'Eyeshadow': 'cat_eyeshadow',
-    'Kajal': 'cat_kajal',
-    'Eyeliner': 'cat_eyeliner',
-    'Blush': 'cat_blush',
-    'Mascara': 'cat_mascara'
-  };
-  
-  const myntraUrl = buildMyntraUrl({ 
-    color: shade || '', 
-    catId: myntraCatMap[product] || 'cat_accessory', 
-    gender: 'female', 
-    itemType: (product || 'makeup').toLowerCase() 
-  });
-
-  const links = [
-    { name: 'Nykaa', url: `https://www.nykaa.com/search/result/?q=${query}`, icon: '🌸', bg: isDark ? 'bg-pink-500/10 border-pink-500/20 text-pink-300' : 'bg-pink-50 border-pink-200 text-pink-700' },
-    { name: 'Myntra', url: myntraUrl, icon: '🛍️', bg: isDark ? 'bg-rose-500/10 border-rose-500/20 text-rose-300' : 'bg-rose-50 border-rose-200 text-rose-700' },
-    { name: 'Flipkart', url: `https://www.flipkart.com/search?q=${query}`, icon: '🛒', bg: isDark ? 'bg-blue-500/10 border-blue-500/20 text-blue-300' : 'bg-blue-50 border-blue-200 text-blue-700' },
-    { name: 'Amazon', url: `https://www.amazon.in/s?k=${query}&rh=p_72%3A1318476031`, icon: '📦', bg: isDark ? 'bg-amber-500/10 border-amber-500/20 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-700' },
-  ];
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   return (
-    <div className="flex gap-1.5 mt-2 flex-wrap">
-      {links.map(l => (
-        <a 
-          key={l.name} href={l.url} target="_blank" rel="noopener noreferrer" 
-          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-[10px] font-bold transition-all hover:scale-105 ${l.bg}`}
-        >
-          <span>{l.icon}</span> {l.name}
-        </a>
-      ))}
+    <div className="mt-2">
+      <button 
+        onClick={(e) => { e.stopPropagation(); setIsSheetOpen(true); }}
+        className="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-black shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
+      >
+        💄 Shop Direct →
+      </button>
+
+      <ShopActionSheet 
+        isOpen={isSheetOpen}
+        onClose={() => setIsSheetOpen(false)}
+        item={`${shade || ''} ${product} makeup`}
+        gender="female"
+      />
     </div>
   );
 }
@@ -253,6 +108,7 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
   const [savingColor, setSavingColor] = useState(false);
   const [savedColorId, setSavedColorId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const isLoggedIn = !!auth.currentUser;
 
   // Load saved status when component mounts
@@ -348,58 +204,19 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
       {expanded && (
         <div className={`px-3 pb-3 border-t ${dividerCls} pt-2 scale-in`} onClick={e => e.stopPropagation()}>
           {color.reason && <p className={`${reasonCls} text-xs leading-relaxed mb-3`}>{color.reason}</p>}
-          {/* Inline shop buttons — correct URLs with gender-aware category */}
-          <p className={`text-[10px] font-bold uppercase tracking-wider mb-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>🛍 Shop This Color</p>
-          <div className="grid grid-cols-2 gap-1.5">
-            {(() => {
-              // Map internal category key → human search term
-              const CAT_MAP = {
-                shirt: { male: 'shirt', female: 'top' },
-                pant:  { male: 'trouser', female: 'trouser' },
-                kurti: { male: 'kurta', female: 'kurti' },
-                kurta: { male: 'kurta', female: 'kurti' },
-                dress: { male: 'shirt', female: 'dress' },
-                top:   { male: 'shirt', female: 'top' },
-                lehenga: { male: 'sherwani', female: 'lehenga' },
-                saree:   { male: 'kurta', female: 'saree' },
-                sharara: { male: 'kurta', female: 'sharara set' },
-                dupatta: { male: 'scarf', female: 'dupatta' },
-                hoodie:  { male: 'hoodie', female: 'hoodie' },
-                blazer:  { male: 'blazer', female: 'blazer' },
-                bottom:  { male: 'trouser', female: 'palazzo' },
-              };
-              const genderStr = gender === 'female' ? 'women' : 'men';
-              const catKey = (category || 'shirt').toLowerCase().replace(/^cat_/, '');
-              const catLabel = CAT_MAP[catKey]?.[gender === 'female' ? 'female' : 'male'] || (gender === 'female' ? 'top' : 'shirt');
-              const q = encodeURIComponent(`${genderStr} ${color.name} ${catLabel}`);
-              const myntraUrl = buildMyntraUrl({ 
-                color: color.name, 
-                catId: category?.startsWith('cat_') ? category : `cat_${category}`, 
-                gender: gender, 
-                itemType: catKey 
-              });
-              const stores = [
-                { name: 'Myntra',   dot: '#f13ab1', url: myntraUrl },
-                { name: 'Amazon',   dot: '#ff9900', url: `https://www.amazon.in/s?k=${q}` },
-                { name: 'Flipkart', dot: '#2874f0', url: `https://www.flipkart.com/search?q=${q}` },
-                { name: 'Meesho',   dot: '#ff44af', url: `https://www.meesho.com/search?q=${q}` },
-              ];
-              return stores.map(store => (
-                <a
-                  key={store.name}
-                  href={store.url}
-                  target="_blank" rel="noopener noreferrer"
-                  onClick={e => e.stopPropagation()}
-                  className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-bold border transition-all hover:scale-[1.02] active:scale-95 ${
-                    isDark ? 'bg-white/5 border-white/10 text-white/60 hover:border-purple-500/40 hover:text-white' : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-purple-50 hover:border-purple-300'
-                  }`}
-                >
-                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: store.dot, display: 'inline-block', flexShrink: 0 }} />
-                  {store.name}
-                </a>
-              ));
-            })()}
-          </div>
+          <button
+            onClick={() => setIsSheetOpen(true)}
+            className={`w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-black shadow-lg shadow-purple-500/20 active:scale-95 transition-all mt-3`}
+          >
+            🛒 Shop Direct →
+          </button>
+          
+          <ShopActionSheet 
+            isOpen={isSheetOpen}
+            onClose={() => setIsSheetOpen(false)}
+            item={`${color.name} ${gender === 'female' ? 'top' : 'shirt'}`}
+            gender={gender}
+          />
         </div>
       )}
     </div>
@@ -869,8 +686,8 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
   const { t } = useLanguage();
   const AMAZON_TAG = 'styleguruai-21';
   const isFemale = gender === 'female';
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const pant = pantColors?.[0];
-  if (!shirtColor) return null;
 
   const items = [
     { label: isFemale ? '👚 Top' : '👕 T-Shirt', color: shirtColor, cat: isFemale ? 'top' : 'shirt' },
@@ -895,36 +712,19 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
         ))}
       </div>
       {/* Shop the full look */}
-      <div className="flex gap-1.5 flex-wrap">
-        {[
-          { name: '🛒 Amazon', url: `https://www.amazon.in/s?k=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit set'))}&rh=n%3A1968024031&sort=review-rank&tag=${AMAZON_TAG}`, bg: isDark ? 'bg-orange-500/20 border-orange-500/30 text-orange-300' : 'bg-orange-50 border-orange-300 text-orange-700 font-bold' },
-          { name: '🏪 Flipkart', url: `https://www.flipkart.com/search?q=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit'))}&sort=popularity_desc`, bg: isDark ? 'bg-blue-500/20 border-blue-500/30 text-blue-300' : 'bg-blue-50 border-blue-300 text-blue-700 font-bold' },
-          { 
-            name: '👗 Myntra', 
-            url: buildMyntraUrl({ 
-              color: shirtColor.name, 
-              catId: isFemale ? 'cat_ethnic_coord' : 'cat_shirt', 
-              gender: gender, 
-              itemType: isFemale ? 'ethnic_coord' : 'shirt' 
-            }), 
-            bg: isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300' : 'bg-pink-50 border-pink-300 text-pink-700 font-bold' 
-          },
-          { name: '🛍️ Meesho', url: `https://meesho.com/search?q=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit'))}`, bg: isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-300' : 'bg-purple-50 border-purple-300 text-purple-700 font-bold' },
-        ].map(link => (
-          <AffiliateLink
-            key={link.name}
-            href={link.url}
-            color={shirtColor.name}
-            category={isFemale ? 'coord set' : 'outfit set'}
-            brand={link.name.replace(/[^A-Za-z]/g, '')}
-            platform={link.name.toLowerCase().replace(/[^a-z]/g, '')}
-            isDark={isDark}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all hover:scale-105 ${link.bg}`}
-          >
-            {link.name}
-          </AffiliateLink>
-        ))}
-      </div>
+      <button 
+        onClick={() => setIsSheetOpen(true)}
+        className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-black shadow-lg shadow-purple-500/20 active:scale-95 transition-all mt-2"
+      >
+        🛒 Shop Full Outfit →
+      </button>
+
+      <ShopActionSheet 
+        isOpen={isSheetOpen}
+        onClose={() => setIsSheetOpen(false)}
+        item={`${shirtColor.name} ${isFemale ? 'women coord set' : 'men outfit'}`}
+        gender={gender}
+      />
     </div>
   );
 }

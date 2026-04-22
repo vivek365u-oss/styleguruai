@@ -17,6 +17,7 @@ import { ThemeContext } from '../context/ThemeContext';
 import { getThemeColors, GRAD, VIOLET, PJS } from '../utils/themeColors';
 import { analyzeSelfieStyle, saveSelfieStyleHistory, auth } from '../api/styleApi';
 import { usePlan } from '../context/PlanContext';
+import ShopActionSheet from './ShopActionSheet';
 
 // ────────────────────────────────────────────────────
 // Micro-components
@@ -686,6 +687,8 @@ function FaceDNABreakdown({ faceShape, C }) {
 // ────────────────────────────────────────────────────
 function StyleResults({ data, previewUrl, gender, onReset, C }) {
   const [expandedIdx, setExpandedIdx] = useState(0);
+  const [isShopSheetOpen, setIsShopSheetOpen] = useState(false);
+  const [shopItem, setShopItem] = useState('');
   const {
     face_shape,
     skin_analysis,
@@ -833,55 +836,30 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
       )}
 
       {/* ── Shop Grooming Essentials ── */}
-      {hairstyle_recommendations.length > 0 && (() => {
-        const topStyle = hairstyle_recommendations[0]?.name || 'Your Style';
-        const isMale = gender === 'male';
-        
-        // Highly optimized search queries to ensure users see premium/buyable products
-        const amazonQuery = encodeURIComponent(isMale ? `${topStyle} hair styling wax pomade men` : `${topStyle} hair styling serum tools women`);
-        const nykaaQuery = encodeURIComponent(isMale ? 'men hair styling wax' : 'hair styling spray serum');
-        const myntraQuery = encodeURIComponent(isMale ? 'men hair styling grooming' : 'women hair care styling');
-        const flipkartQuery = encodeURIComponent(isMale ? 'men trimmer hair styling' : 'women hair straightener styling');
-
-        const shops = [
-          // Amazon with 4-star+ filter for premium quality
-          { name: 'Amazon',        url: `https://www.amazon.in/s?k=${amazonQuery}&rh=p_72%3A1318476031`, color: '#FF9900', icon: '📦' },
-          { name: 'Nykaa',         url: `https://www.nykaa.com/search/result/?q=${nykaaQuery}`,       color: '#FC2779', icon: '🌸' },
-          { name: 'Myntra',        url: `https://www.myntra.com/search?q=${myntraQuery}`,                      color: '#FF3F6C', icon: '🛍️' },
-          { name: 'Flipkart',      url: `https://www.flipkart.com/search?q=${flipkartQuery}`,         color: '#2874F0', icon: '🛒' },
-        ];
-        return (
-          <GlassCard C={C} style={{ padding: '18px 20px' }}>
-            <p style={{ margin: '0 0 12px', fontSize: 11, fontWeight: 700, color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.07em', fontFamily: PJS }}>
-              🛒 Grooming Essentials for: {topStyle}
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              {shops.map(shop => (
-                <a
-                  key={shop.name}
-                  href={shop.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    padding: '10px 14px', borderRadius: 12,
-                    background: `${shop.color}12`, border: `1px solid ${shop.color}30`,
-                    color: shop.color, textDecoration: 'none',
-                    fontSize: 12, fontWeight: 700, fontFamily: PJS,
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.background = `${shop.color}22`; e.currentTarget.style.transform = 'scale(1.02)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = `${shop.color}12`; e.currentTarget.style.transform = 'scale(1)'; }}
-                >
-                  <span style={{ fontSize: 18 }}>{shop.icon}</span>
-                  <span>{shop.name}</span>
-                  <span style={{ marginLeft: 'auto', fontSize: 11, opacity: 0.7 }}>↗</span>
-                </a>
-              ))}
-            </div>
-          </GlassCard>
-        );
-      })()}
+      {hairstyle_recommendations.length > 0 && (
+        <GlassCard C={C} style={{ padding: '18px 20px' }}>
+          <p style={{ margin: '0 0 12px', fontSize: 11, fontWeight: 700, color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.07em', fontFamily: PJS }}>
+            🛒 Grooming Essentials for: {hairstyle_recommendations[0]?.name || 'Your Style'}
+          </p>
+          <button
+            onClick={() => {
+              const topStyle = hairstyle_recommendations[0]?.name || 'Your Style';
+              setShopItem(gender === 'male' ? `${topStyle} styling wax` : `${topStyle} serum`);
+              setIsShopSheetOpen(true);
+            }}
+            style={{
+              width: '100%', padding: '14px', borderRadius: 16,
+              background: `linear-gradient(135deg, ${VIOLET}, #ec4899)`,
+              border: 'none', color: 'white', fontSize: 14, fontWeight: 800, fontFamily: PJS,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              boxShadow: '0 8px 20px rgba(139,92,246,0.3)', transition: 'all 0.3s'
+            }}
+            className="hover:scale-[1.02] active:scale-95 transition-all"
+          >
+            Shop Direct Essentials →
+          </button>
+        </GlassCard>
+      )}
 
       {/* ── Reset CTA ── */}
       <button
@@ -899,6 +877,13 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
       >
         📸 Scan Another Selfie
       </button>
+
+      <ShopActionSheet 
+        isOpen={isShopSheetOpen}
+        onClose={() => setIsShopSheetOpen(false)}
+        item={shopItem}
+        gender={gender}
+      />
     </div>
   );
 }
