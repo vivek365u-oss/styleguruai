@@ -75,7 +75,11 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
             {/* Close Button (X) */}
             <button
               onClick={onClose}
-              className="absolute top-6 right-6 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/5 border border-white/10 text-white/50 hover:bg-white/10 hover:text-white transition-all active:scale-90"
+              className={`absolute top-6 right-6 z-20 flex h-10 w-10 items-center justify-center rounded-full border transition-all active:scale-90 ${
+                isDark 
+                  ? 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white' 
+                  : 'bg-black/5 border-black/10 text-black/50 hover:bg-black/10 hover:text-black'
+              }`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
@@ -122,10 +126,14 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
                     }}
                   >
                     <div 
-                      className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl shadow-xl transition-transform group-hover:scale-110 group-hover:rotate-6"
+                      className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl shadow-xl transition-transform group-hover:scale-110 group-hover:rotate-6 overflow-hidden"
                       style={{ background: store.bg }}
                     >
-                      <span className="text-xl">{store.emoji}</span>
+                      {store.logo ? (
+                        <img src={store.logo} alt={store.name} className="w-8 h-8 object-contain" />
+                      ) : (
+                        <span className="text-xl">{store.emoji}</span>
+                      )}
                     </div>
                     <span className="text-[11px] font-black uppercase tracking-widest opacity-80" style={{ fontFamily: PJS, color: C.text }}>
                       {store.name}
