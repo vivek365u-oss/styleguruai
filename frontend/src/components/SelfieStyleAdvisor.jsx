@@ -832,20 +832,28 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
         </GlassCard>
       )}
 
-      {/* ── Shop This Style ── */}
+      {/* ── Shop Grooming Essentials ── */}
       {hairstyle_recommendations.length > 0 && (() => {
-        const topStyle = hairstyle_recommendations[0]?.name || 'hairstyle';
-        const query = encodeURIComponent(topStyle + (gender === 'female' ? ' women' : ' men'));
+        const topStyle = hairstyle_recommendations[0]?.name || 'Your Style';
+        const isMale = gender === 'male';
+        
+        // Highly optimized search queries to ensure users see premium/buyable products
+        const amazonQuery = encodeURIComponent(isMale ? `${topStyle} hair styling wax pomade men` : `${topStyle} hair styling serum tools women`);
+        const nykaaQuery = encodeURIComponent(isMale ? 'men hair styling wax' : 'hair styling spray serum');
+        const myntraQuery = encodeURIComponent(isMale ? 'men hair styling grooming' : 'women hair care styling');
+        const flipkartQuery = encodeURIComponent(isMale ? 'men trimmer hair styling' : 'women hair straightener styling');
+
         const shops = [
-          { name: 'Myntra',        url: `https://www.myntra.com/${query}`,                       color: '#FF3F6C', icon: '🛍️' },
-          { name: 'Ajio',          url: `https://www.ajio.com/search/?text=${query}`,            color: '#E03A3A', icon: '✨'  },
-          { name: 'Amazon',        url: `https://www.amazon.in/s?k=${query}+hair+products`,     color: '#FF9900', icon: '📦'  },
-          { name: 'Nykaa Fashion', url: `https://www.nykaafashion.com/search?q=${query}`,       color: '#FC2779', icon: '🌸'  },
+          // Amazon with 4-star+ filter for premium quality
+          { name: 'Amazon',        url: `https://www.amazon.in/s?k=${amazonQuery}&rh=p_72%3A1318476031`, color: '#FF9900', icon: '📦' },
+          { name: 'Nykaa',         url: `https://www.nykaa.com/search/result/?q=${nykaaQuery}`,       color: '#FC2779', icon: '🌸' },
+          { name: 'Myntra',        url: `https://www.myntra.com/${myntraQuery}`,                      color: '#FF3F6C', icon: '🛍️' },
+          { name: 'Flipkart',      url: `https://www.flipkart.com/search?q=${flipkartQuery}`,         color: '#2874F0', icon: '🛒' },
         ];
         return (
           <GlassCard C={C} style={{ padding: '18px 20px' }}>
             <p style={{ margin: '0 0 12px', fontSize: 11, fontWeight: 700, color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.07em', fontFamily: PJS }}>
-              🛒 Shop This Style: {topStyle}
+              🛒 Grooming Essentials for: {topStyle}
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               {shops.map(shop => (
