@@ -134,11 +134,11 @@ function ToolsTab({ onOpenScanner, analysisData, onShowResult }) {
   };
 
   const primaryTools = [
+    { id: 'outfit',   icon: FashionIcons.Shirt,     title: t('outfitChecker'),    desc: t('outfitCheckerDesc'),           grad: ['#1e3a8a40','#164e6340'], border: '#3b82f630', color: '#3b82f6' },
+    { id: 'wardrobe', icon: FashionIcons.Wardrobe,  title: t('navWardrobe'),      desc: t('wardrobeDesc'),                grad: ['#88133740','#88133740'], border: '#ec489930', color: '#ec4899' },
+    { id: 'calendar', icon: FashionIcons.Watch,     title: t('aiCalendar'),       desc: t('calendarDesc'),                grad: ['#78350f40','#7c2d1240'], border: '#f59e0b30', color: '#f59e0b' },
     { id: 'stylist',  icon: FashionIcons.Star,      title: 'AI Stylist',          desc: 'Face shape & hairstyle recs',    grad: ['#7c3aed40','#5b21b640'], border: '#8b5cf630', color: '#8b5cf6' },
     { id: 'stylebot', icon: FashionIcons.AI,        title: t('aiStyleBot'),       desc: t('styleBotDesc'),                grad: ['#581c8740','#312e8140'], border: '#a855f730', color: '#a855f7' },
-    { id: 'outfit',   icon: FashionIcons.Shirt,     title: t('outfitChecker'),    desc: t('outfitCheckerDesc'),           grad: ['#1e3a8a40','#164e6340'], border: '#3b82f630', color: '#3b82f6' },
-    { id: 'calendar', icon: FashionIcons.Watch,     title: t('aiCalendar'),       desc: t('calendarDesc'),                grad: ['#78350f40','#7c2d1240'], border: '#f59e0b30', color: '#f59e0b' },
-    { id: 'wardrobe', icon: FashionIcons.Wardrobe,  title: t('navWardrobe'),      desc: t('wardrobeDesc'),                grad: ['#88133740','#88133740'], border: '#ec489930', color: '#ec4899' },
     { id: 'scanner',  icon: FashionIcons.Camera,    title: t('colorScanner'),     desc: t('scannerDesc'),                 grad: ['#064e3b40','#134e4a40'], border: '#10b98130', color: '#10b981' },
     { id: 'contrast', icon: FashionIcons.Analysis,  title: t('contrastChecker'),  desc: t('contrastDesc'),                grad: ['#0f172a40','#1e293b40'], border: '#64748b30', color: '#64748b' },
   ];
