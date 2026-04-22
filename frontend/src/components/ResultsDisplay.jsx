@@ -1468,6 +1468,9 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
         <button
           onClick={async () => {
+            const subjectName = window.prompt("Who is this Lookbook for? (e.g., Myself, Rahul, Sister)", "Myself");
+            if (subjectName === null) return; // User cancelled saving
+
             const btn = document.getElementById('save-lookbook-btn');
             if (btn) { btn.textContent = '⏳ Saving...'; btn.disabled = true; }
             
@@ -1525,6 +1528,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
 
             const lookData = {
               missionId: activeMission,
+              subjectName: subjectName || "Myself",
               expertAdvice: expertAdvice,
               analysis: { skin_tone: analysis.skin_tone },
               colors: missionColors.slice(0, 5),

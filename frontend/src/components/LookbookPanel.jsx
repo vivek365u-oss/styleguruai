@@ -154,6 +154,11 @@ function LookbookPanel() {
                                 🛒 Shop
                               </span>
                             </div>
+                            {item.subjectName && (
+                              <div className={`mb-3 text-[10px] font-bold uppercase tracking-widest ${item.subjectName.toLowerCase() === 'myself' ? 'text-purple-500' : 'text-blue-500'}`}>
+                                👤 For: {item.subjectName}
+                              </div>
+                            )}
                             {activeShop[item.id] === item.outfit.top && <ShopLinks itemName={item.outfit.top} isDark={isDark} className="mb-4" />}
                           </div>
 
