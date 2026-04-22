@@ -25,6 +25,8 @@ import { useCart } from '../context/CartContext';
 import ShoppingCart from './ShoppingCart';
 import { derivePersonality, deriveStyleScore, deriveLevel, readUserPersonalityData } from '../utils/stylePersonality';
 import { DARK, LIGHT, GRAD, VIOLET, INDIGO, PJS, PDI, getThemeColors } from '../utils/themeColors';
+import { usePWA } from '../hooks/usePWA';
+import InstallPromptModal from './InstallPromptModal';
 
 // ── Lazy loaded feature sections ──────────────────
 const UploadSection = lazy(() => import('./UploadSection'));
@@ -875,6 +877,7 @@ export default function AppShell({ user, onLogout }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { isPro, usage, coins } = usePlan();
   const { cartOpen, setCartOpen } = useCart();
+  const { isInstallable, promptInstall, dismissInstall } = usePWA();
 
   // Get theme-aware colors
   const C = useMemo(() => getThemeColors(theme), [theme]);
@@ -1322,6 +1325,7 @@ export default function AppShell({ user, onLogout }) {
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} C={C} />}
       <ShoppingCart isOpen={cartOpen} onClose={() => setCartOpen(false)} isDark={C.isDark} />
       <Suspense fallback={null}><SubscriptionModal /></Suspense>
+      {isInstallable && <InstallPromptModal onInstall={promptInstall} onDismiss={dismissInstall} />}
     </div>
   );
 }
