@@ -42,7 +42,7 @@ export const buildShopUrl = (item, storeId, gender = 'male', budget = null) => {
 
     // Women Specific
     case 'nykaafashion':
-      return `https://www.nykaafashion.com/search?q=${encodedQ}`;
+      return `https://www.nykaafashion.com/catalogsearch/result/?q=${encodedQ}`;
     case 'urbanic':
       return `https://www.urbanic.com/search/${encodedQ}`;
     case 'berrylush':

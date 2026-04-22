@@ -15,11 +15,10 @@ import AdSense from '../AdSense';
 import { buildMyntraUrl } from '../utils/myntraUrl';
 import ShopActionSheet from './ShopActionSheet';
 
-function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
+function ShoppingLinks({ colorName, category = "shirt", gender = "male", onShop }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
   const [budget, setBudget] = useState(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const budgets = [
     { label: '₹500',  max: 500 },
@@ -46,7 +45,7 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
           <button
             key={b.label}
             onClick={(e) => { e.stopPropagation(); setBudget(b.label === 'Any' ? null : b); }}
-            className={`px-2 py-0.5 rounded-full text-xs font-bold border transition-all ${
+            className={`px-2 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
               (b.label === 'Any' && !budget) || budget?.label === b.label
                 ? isDark ? 'bg-purple-500/40 border-purple-400 text-purple-200' : 'bg-purple-600 border-purple-600 text-white shadow-sm'
                 : isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70' : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200'
@@ -58,19 +57,11 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
       </div>
       
       <button 
-        onClick={(e) => { e.stopPropagation(); setIsSheetOpen(true); }}
+        onClick={(e) => { e.stopPropagation(); onShop(`${colorName} ${productLabel}`, budget?.max); }}
         className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-4 border border-violet-400/30 hover:bg-violet-500"
       >
         Shop Direct →
       </button>
-
-      <ShopActionSheet 
-        isOpen={isSheetOpen}
-        onClose={() => setIsSheetOpen(false)}
-        item={`${colorName} ${productLabel}`}
-        gender={gender}
-        budget={budget?.max}
-      />
     </div>
   );
 }
@@ -78,37 +69,30 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
 
 
 // ── Makeup Shopping Links ──────────────────────────────────────
-function MakeupShoppingLinks({ product, shade, isDark }) {
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-
+function MakeupShoppingLinks({ product, shade, onShop }) {
   return (
     <div className="mt-2">
       <button 
-        onClick={(e) => { e.stopPropagation(); setIsSheetOpen(true); }}
-        className="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-black shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
+        onClick={(e) => { 
+          e.stopPropagation(); 
+          onShop(`${shade || ''} ${product} makeup`);
+        }}
+        className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-4 border border-violet-400/30 hover:bg-violet-500"
       >
-        💄 Shop Direct →
+        Shop Direct →
       </button>
-
-      <ShopActionSheet 
-        isOpen={isSheetOpen}
-        onClose={() => setIsSheetOpen(false)}
-        item={`${shade || ''} ${product} makeup`}
-        gender="female"
-      />
     </div>
   );
 }
 
 // ── Color Card (compact, tap to expand) ─────────────────────
 
-function ColorCard({ color, category, gender, isDark, className = '' }) {
+function ColorCard({ color, category, gender, isDark, onShop, className = '' }) {
   const [expanded, setExpanded] = useState(false);
   const [saved, setSaved] = useState(false);
   const [savingColor, setSavingColor] = useState(false);
   const [savedColorId, setSavedColorId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const isLoggedIn = !!auth.currentUser;
 
   // Load saved status when component mounts
@@ -205,18 +189,11 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
         <div className={`px-3 pb-3 border-t ${dividerCls} pt-2 scale-in`} onClick={e => e.stopPropagation()}>
           {color.reason && <p className={`${reasonCls} text-xs leading-relaxed mb-3`}>{color.reason}</p>}
           <button
-            onClick={() => setIsSheetOpen(true)}
+            onClick={() => onShop(`${color.name} ${gender === 'female' ? 'top' : 'shirt'}`)}
             className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-3 border border-violet-400/30 hover:bg-violet-500"
           >
             Shop Direct →
           </button>
-          
-          <ShopActionSheet 
-            isOpen={isSheetOpen}
-            onClose={() => setIsSheetOpen(false)}
-            item={`${color.name} ${gender === 'female' ? 'top' : 'shirt'}`}
-            gender={gender}
-          />
         </div>
       )}
     </div>
@@ -225,7 +202,7 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
 
 
 // ── Outfit Card ──────────────────────────────────────────────
-function OutfitCard({ combo, index, isDark }) {
+function OutfitCard({ combo, index, isDark, onShop }) {
   const colors = ["purple", "pink", "blue", "emerald", "amber"];
   const color = colors[index % colors.length];
   const colorMap = {
@@ -258,6 +235,12 @@ function OutfitCard({ combo, index, isDark }) {
           {combo.vibe && <p className={`${vibeCls} text-xs mt-1 italic`}>{combo.vibe}</p>}
         </div>
       </div>
+      <button 
+        onClick={() => onShop(topItem)}
+        className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/10 active:scale-95 transition-all mt-4 border border-violet-400/20 hover:bg-violet-500"
+      >
+        Shop Direct →
+      </button>
     </div>
   );
 }
@@ -730,7 +713,7 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
 }
 
 // ── Colors Tab ───────────────────────────────────────────────
-function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shirtCategory, isDark }) {
+function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shirtCategory, isDark, onShop }) {
   const { t } = useLanguage();
   const avoidColors = recommendations.colors_to_avoid || [];
   const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
@@ -747,7 +730,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
           </div>
         </div>
         <div className="grid grid-cols-1 gap-2">
-          {seasonalColors.map((color, i) => <ColorCard key={i} color={color} category={shirtCategory} gender={effectiveGender} isDark={isDark} />)}
+          {seasonalColors.map((color, i) => <ColorCard key={i} color={color} category={shirtCategory} gender={effectiveGender} isDark={isDark} onShop={onShop} />)}
         </div>
       </div>
     );
@@ -771,7 +754,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
           <div key={sec.label}>
             <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>{sec.label}</p>
             <div className="grid grid-cols-1 gap-2">
-              {sec.colors.map((color, i) => <ColorCard key={i} color={color} category={sec.cat} gender="female" isDark={isDark} />)}
+              {sec.colors.map((color, i) => <ColorCard key={i} color={color} category={sec.cat} gender="female" isDark={isDark} onShop={onShop} />)}
             </div>
           </div>
         ))}
@@ -785,7 +768,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
           <div>
             <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2">🚫 {t('avoidThese')}</p>
             <div className="grid grid-cols-1 gap-2">
-              {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="dress" gender="female" isDark={isDark} />)}
+              {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="dress" gender="female" isDark={isDark} onShop={onShop} />)}
             </div>
           </div>
         )}
@@ -822,7 +805,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
         <div key={sec.label}>
           <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>{sec.label}</p>
           <div className="grid grid-cols-1 gap-2">
-            {sec.colors.map((color, i) => <ColorCard key={i} color={color} category={sec.cat} gender="male" isDark={isDark} className={`stagger-${Math.min(i + 1, 6)}`} />)}
+            {sec.colors.map((color, i) => <ColorCard key={i} color={color} category={sec.cat} gender="male" isDark={isDark} onShop={onShop} className={`stagger-${Math.min(i + 1, 6)}`} />)}
           </div>
         </div>
       ))}
@@ -836,7 +819,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
         <div>
           <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2">🚫 Avoid These</p>
           <div className="grid grid-cols-1 gap-2">
-            {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} />)}
+            {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} onShop={onShop} />)}
           </div>
         </div>
       )}
@@ -850,7 +833,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 }
 
 // ── Outfits Tab ──────────────────────────────────────────────
-function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, styleTips, occasionAdvice, ethnicWear, sareeSuggestions, isDark, bodyTypeTips = [], bodyType = null, userOccasion = 'casual', activeMission = 'casual' }) {
+function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, styleTips, occasionAdvice, ethnicWear, sareeSuggestions, isDark, onShop, bodyTypeTips = [], bodyType = null, userOccasion = 'casual', activeMission = 'casual' }) {
   const { t } = useLanguage();
   let outfits = [];
   if (isSeasonal) outfits = seasonalGender === 'female' ? (recommendations.female_outfits || []) : (recommendations.male_outfits || []);
@@ -921,7 +904,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
                     Mission Match
                   </div>
                 )}
-                <OutfitCard combo={combo} index={i} isDark={isDark} />
+                <OutfitCard combo={combo} index={i} isDark={isDark} onShop={onShop} />
               </div>
             ))}
           </div>
@@ -1015,7 +998,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
 }
 
 // ── Accessories Tab ──────────────────────────────────────────
-function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }) {
+function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark, onShop }) {
   const accessories = recommendations.accessories || [];
   const accentColors = recommendations.accent_colors || [];
 
@@ -1098,7 +1081,7 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }
                 <p className="text-rose-200 font-bold text-sm">{item.product}</p>
                 <p className={`${subCls} text-xs mt-0.5`}>{item.shade || item.shades}</p>
                 {item.brands && <p className={`${mutedCls} text-xs`}>Brands: {item.brands}</p>}
-                <MakeupShoppingLinks product={item.product} shade={item.shade || item.shades} isDark={isDark} />
+                <MakeupShoppingLinks product={item.product} shade={item.shade || item.shades} onShop={onShop} />
                 {item.tip && <p className={`${isDark ? 'text-white/40' : 'text-gray-400'} text-xs mt-2 italic`}>💡 {item.tip}</p>}
               </div>
             ))}
@@ -1207,7 +1190,9 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const pantCategory = effectiveGender === 'female' ? "bottom" : "pant";
   const styleTips = isSeasonal ? (recommendations.outfit_tips || []) : (recommendations.style_tips || []);
   const occasionAdvice = recommendations.occasion_advice || {};
-  const sareeSuggestions = recommendations.saree_suggestions || [];
+  const sareeSuggestions = recommendations.saree_suggestions || [];  const [shopItem, setShopItem] = useState(null);
+  const [shopBudget, setShopBudget] = useState(null);
+
   const makeupSuggestions = recommendations.makeup_suggestions || [];
   const ethnicWear = recommendations.ethnic_wear || sareeSuggestions;
 
@@ -1650,6 +1635,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             shirtCategory={shirtCategory}
             pantCategory={pantCategory}
             isDark={isDark}
+            onShop={(query, budget) => { setShopItem(query); setShopBudget(budget); }}
           />
         )}
         {activeTab === 'outfits' && (
@@ -1663,6 +1649,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             ethnicWear={ethnicWear}
             sareeSuggestions={sareeSuggestions}
             isDark={isDark}
+            onShop={(query, budget) => { setShopItem(query); setShopBudget(budget); }}
             bodyTypeTips={bodyTypeTips}
             bodyType={bodyType}
             userOccasion={userOccasion}
@@ -1675,6 +1662,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             isFemale={isFemale}
             makeupSuggestions={makeupSuggestions}
             isDark={isDark}
+            onShop={(query, budget) => { setShopItem(query); setShopBudget(budget); }}
           />
         )}
         {/* Shop tab removed — shopping links removed from analysis */}
@@ -1725,6 +1713,13 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
       >
         📸 {t('analyzeNewPhoto')}
       </button>
+      <ShopActionSheet 
+        isOpen={!!shopItem}
+        onClose={() => { setShopItem(null); setShopBudget(null); }}
+        item={shopItem}
+        gender={isFemale ? 'female' : 'male'}
+        budget={shopBudget}
+      />
     </div>
   );
 }

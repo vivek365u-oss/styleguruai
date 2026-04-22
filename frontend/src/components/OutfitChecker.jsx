@@ -12,9 +12,8 @@ import ShopActionSheet from './ShopActionSheet';
 // PaywallModal import removed
 
 // ── Outfit Shop Card — same style as analyze results ─────────
-function OutfitShopCard({ color, isDark, gender = 'male' }) {
+function OutfitShopCard({ color, isDark, gender = 'male', onShop }) {
   const [budget, setBudget] = useState(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const budgets = [
     { label: '₹500', max: 500 },
@@ -44,10 +43,10 @@ function OutfitShopCard({ color, isDark, gender = 'male' }) {
           <button
             key={b.label}
             onClick={() => setBudget(b.label === 'Any' ? null : b)}
-            className={`px-2 py-0.5 rounded-full text-xs font-bold border transition-all ${
+            className={`px-2 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
               (b.label === 'Any' && !budget) || budget?.label === b.label
                 ? isDark ? 'bg-purple-500/40 border-purple-400 text-purple-200' : 'bg-purple-600 border-purple-600 text-white shadow-sm'
-                : isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70' : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200 hover:text-gray-800'
+                : isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white/70' : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200'
             }`}
           >
             {b.label}
@@ -57,19 +56,11 @@ function OutfitShopCard({ color, isDark, gender = 'male' }) {
 
       {/* Shop Action */}
       <button 
-        onClick={() => setIsSheetOpen(true)}
+        onClick={() => onShop(`${color.name} ${gender === 'female' ? 'top' : 'shirt'}`, budget?.max)}
         className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all border border-violet-400/30 hover:bg-violet-500"
       >
         Shop Direct →
       </button>
-
-      <ShopActionSheet 
-        isOpen={isSheetOpen}
-        onClose={() => setIsSheetOpen(false)}
-        item={`${color.name} ${gender === 'female' ? 'top' : 'shirt'}`}
-        gender={gender}
-        budget={budget?.max}
-      />
     </div>
   );
 }
@@ -89,8 +80,8 @@ function OutfitChecker() {
   const [error, setError] = useState(null);
   const [wardrobeSaved, setWardrobeSaved] = useState(false);
   const [wardrobeSaving, setWardrobeSaving] = useState(false);
-  const [showProgress, setShowProgress] = useState(false);
-  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [shopItem, setShopItem] = useState(null);
+  const [shopBudget, setShopBudget] = useState(null);
   const { progress, startProgress, completeProgress, reset: resetProgress } = useAnalysisProgress();
 
   const isMobile = window.matchMedia('(pointer: coarse)').matches;
@@ -708,7 +699,13 @@ function OutfitChecker() {
 
               <div className="space-y-4">
                 {compatibility.better_alternatives.slice(0, 3).map((color, i) => (
-                  <OutfitShopCard key={i} color={color} isDark={isDark} gender={gender} />
+                  <OutfitShopCard 
+                    key={i} 
+                    color={color} 
+                    isDark={isDark} 
+                    gender={gender} 
+                    onShop={(q, b) => { setShopItem(q); setShopBudget(b); }}
+                  />
                 ))}
               </div>
             </div>
@@ -725,6 +722,13 @@ function OutfitChecker() {
         </>
       )}
       {/* PaywallModal removed */}
+      <ShopActionSheet 
+        isOpen={!!shopItem}
+        onClose={() => { setShopItem(null); setShopBudget(null); }}
+        item={shopItem}
+        gender={gender}
+        budget={shopBudget}
+      />
     </div>
   );
 }

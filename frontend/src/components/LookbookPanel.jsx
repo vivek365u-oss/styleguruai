@@ -119,8 +119,8 @@ function LookbookPanel() {
                               <h2 className={`text-xl sm:text-2xl font-black leading-tight ${isDark ? 'text-white group-hover:text-purple-300' : 'text-gray-900 group-hover:text-purple-700'}`}>
                                 {item.outfit.top}
                               </h2>
-                              <span className={`text-[10px] flex-shrink-0 mt-1 px-2 py-1 rounded-md font-bold uppercase tracking-wide transition-colors ${isDark ? 'bg-purple-500/20 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
-                                🛒 Shop
+                              <span className={`text-[10px] flex-shrink-0 mt-1 px-3 py-1 rounded-full font-black uppercase tracking-widest transition-all bg-violet-600 text-white shadow-lg shadow-violet-500/20`}>
+                                Shop Direct →
                               </span>
                             </div>
                             {item.subjectName && (
@@ -147,7 +147,7 @@ function LookbookPanel() {
                                       <span className="text-base">{emoji}</span>
                                       <span className={`text-sm font-bold ${isDark ? 'text-white/90' : 'text-gray-800'}`}>{name}</span>
                                     </div>
-                                    <span className={`text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wide ${isDark ? 'bg-white/10 text-white/70' : 'bg-gray-100 text-gray-600'}`}>
+                                    <span className={`text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest bg-violet-600 text-white shadow-lg shadow-violet-500/10`}>
                                       Buy
                                     </span>
                                   </div>
@@ -194,6 +194,7 @@ function LookbookPanel() {
         isOpen={isSheetOpen}
         onClose={() => setIsSheetOpen(false)}
         item={selectedItem}
+        gender={items.find(it => it.outfit?.top === selectedItem || it.outfit?.bottom === selectedItem || it.outfit?.shoes === selectedItem)?.analysis?.skin_tone?.gender || 'female'}
       />
     </div>
   );
