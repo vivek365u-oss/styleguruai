@@ -138,9 +138,7 @@ function App() {
     sessionStorage.setItem('sg_splash_shown', 'true');
   };
 
-  // Skip splash if no user is found in storage (Guest experience)
   const isLikelyGuest = !localStorage.getItem('tonefit_user');
-  const showSplash = !splashDone && (authState.loading ? !isLikelyGuest : !!user);
 
   // Handle auth errors with retry
   if (authState.authError && !authState.loading) {
@@ -152,7 +150,22 @@ function App() {
     );
   }
 
-  if (showSplash) {
+  // CRITICAL FIX: If Firebase is still resolving auth state, DO NOT render AppRoutes.
+  // This prevents the Landing Page from flashing for 2 seconds.
+  if (authState.loading) {
+    if (!splashDone && !isLikelyGuest) {
+      return <SplashScreen onComplete={handleSplashComplete} />;
+    }
+    const bgClass = theme === 'dark' ? 'bg-[#050816]' : 'bg-gray-50';
+    return (
+      <div className={`min-h-screen ${bgClass} flex items-center justify-center`}>
+        <div className="w-8 h-8 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // If auth is resolved but splash animation is still needed
+  if (!splashDone && !!user) {
     return <SplashScreen onComplete={handleSplashComplete} />;
   }
 
