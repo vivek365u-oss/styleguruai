@@ -202,7 +202,50 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
   );
 }
 
+
+// ── Makeup Shopping Links ──────────────────────────────────────
+function MakeupShoppingLinks({ product, shade, isDark }) {
+  const query = encodeURIComponent(`${shade || ''} ${product} makeup`).replace(/%20/g, '+');
+  
+  const myntraCatMap = {
+    'Foundation': 'cat_foundation',
+    'Lipstick': 'cat_lipstick',
+    'Eyeshadow': 'cat_eyeshadow',
+    'Kajal': 'cat_kajal',
+    'Eyeliner': 'cat_eyeliner',
+    'Blush': 'cat_blush',
+    'Mascara': 'cat_mascara'
+  };
+  
+  const myntraUrl = buildMyntraUrl({ 
+    color: shade || '', 
+    catId: myntraCatMap[product] || 'cat_accessory', 
+    gender: 'female', 
+    itemType: (product || 'makeup').toLowerCase() 
+  });
+
+  const links = [
+    { name: 'Nykaa', url: `https://www.nykaa.com/search/result/?q=${query}`, icon: '🌸', bg: isDark ? 'bg-pink-500/10 border-pink-500/20 text-pink-300' : 'bg-pink-50 border-pink-200 text-pink-700' },
+    { name: 'Myntra', url: myntraUrl, icon: '🛍️', bg: isDark ? 'bg-rose-500/10 border-rose-500/20 text-rose-300' : 'bg-rose-50 border-rose-200 text-rose-700' },
+    { name: 'Amazon', url: `https://www.amazon.in/s?k=${query}&rh=p_72%3A1318476031`, icon: '📦', bg: isDark ? 'bg-amber-500/10 border-amber-500/20 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-700' },
+  ];
+
+  return (
+    <div className="flex gap-1.5 mt-2 flex-wrap">
+      {links.map(l => (
+        <a 
+          key={l.name} href={l.url} target="_blank" rel="noopener noreferrer" 
+          className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-[10px] font-bold transition-all hover:scale-105 ${l.bg}`}
+        >
+          <span>{l.icon}</span> {l.name}
+        </a>
+      ))}
+    </div>
+  );
+}
+
 // ── Color Card (compact, tap to expand) ─────────────────────
+
 function ColorCard({ color, category, gender, isDark, className = '' }) {
   const [expanded, setExpanded] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -1254,7 +1297,8 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }
                 <p className="text-rose-200 font-bold text-sm">{item.product}</p>
                 <p className={`${subCls} text-xs mt-0.5`}>{item.shade || item.shades}</p>
                 {item.brands && <p className={`${mutedCls} text-xs`}>Brands: {item.brands}</p>}
-                {item.tip && <p className={`${isDark ? 'text-white/40' : 'text-gray-400'} text-xs mt-1 italic`}>💡 {item.tip}</p>}
+                <MakeupShoppingLinks product={item.product} shade={item.shade || item.shades} isDark={isDark} />
+                {item.tip && <p className={`${isDark ? 'text-white/40' : 'text-gray-400'} text-xs mt-2 italic`}>💡 {item.tip}</p>}
               </div>
             ))}
           </div>

@@ -98,6 +98,15 @@ const MYNTRA_PATHS = {
   cat_belt_f: { path: 'belts', kw: 'waist belt women' },
   cat_sunglasses_f: { path: 'sunglasses', kw: 'sunglasses women' },
   cat_dupatta: { path: 'stoles-dupattas', kw: 'dupatta women' },
+
+  // ── MAKEUP (FEMALE) ─────────────────────────────────────────────────
+  cat_foundation: { path: 'foundation', kw: 'face foundation' },
+  cat_lipstick:   { path: 'lipstick',   kw: 'lipstick' },
+  cat_eyeshadow:  { path: 'eyeshadow',  kw: 'eyeshadow palette' },
+  cat_kajal:      { path: 'kajal-and-kohl', kw: 'kajal kohl' },
+  cat_eyeliner:   { path: 'eyeliner',   kw: 'eyeliner' },
+  cat_blush:      { path: 'blush',      kw: 'face blush' },
+  cat_mascara:    { path: 'mascara',    kw: 'mascara' },
 };
 
 // ── Gender → default path when no category is known ──────────────────
