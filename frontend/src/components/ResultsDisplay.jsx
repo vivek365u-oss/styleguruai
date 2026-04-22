@@ -665,11 +665,10 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
 // ── Complete the Look ────────────────────────────────────────
 
 // ── Complete the Look ────────────────────────────────────────
-function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
+function CompleteTheLook({ shirtColor, pantColors, isDark, gender, onShop }) {
   const { t } = useLanguage();
   const AMAZON_TAG = 'styleguruai-21';
   const isFemale = gender === 'female';
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const pant = pantColors?.[0];
 
   const items = [
@@ -696,18 +695,11 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
       </div>
       {/* Shop the full look */}
       <button 
-        onClick={() => setIsSheetOpen(true)}
-        className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-black shadow-lg shadow-purple-500/20 active:scale-95 transition-all mt-2"
+        onClick={() => onShop(`${shirtColor.name} ${isFemale ? 'women coord set' : 'men outfit'}`)}
+        className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-3 border border-violet-400/30 hover:bg-violet-500"
       >
         🛒 Shop Full Outfit →
       </button>
-
-      <ShopActionSheet 
-        isOpen={isSheetOpen}
-        onClose={() => setIsSheetOpen(false)}
-        item={`${shirtColor.name} ${isFemale ? 'women coord set' : 'men outfit'}`}
-        gender={gender}
-      />
     </div>
   );
 }
@@ -777,7 +769,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
         {(() => {
           const topColor = (recommendations.best_dress_colors || recommendations.best_top_colors || [])[0];
           const bottomColor = (recommendations.best_bottom_colors || recommendations.best_pant_colors || [])[0];
-          return topColor ? <CompleteTheLook shirtColor={topColor} pantColors={bottomColor ? [bottomColor] : []} isDark={isDark} gender="female" /> : null;
+          return topColor ? <CompleteTheLook shirtColor={topColor} pantColors={bottomColor ? [bottomColor] : []} isDark={isDark} gender="female" onShop={onShop} /> : null;
         })()}
       </div>
     );
@@ -826,7 +818,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 
       {/* Complete the Look */}
       {shirtColors.length > 0 && (
-        <CompleteTheLook shirtColor={shirtColors[0]} pantColors={pantColors} isDark={isDark} gender="male" />
+        <CompleteTheLook shirtColor={shirtColors[0]} pantColors={pantColors} isDark={isDark} gender="male" onShop={onShop} />
       )}
     </div>
   );
