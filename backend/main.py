@@ -60,7 +60,7 @@ if not firebase_admin._apps:
             cred = credentials.Certificate(json.loads(firebase_creds_json))
             firebase_admin.initialize_app(cred)
             FIREBASE_INITIALIZED = True
-            print("✅ Firebase initialized from environment variable")
+            print("[FIREBASE] Initialized from environment variable")
         else:
             # Try local file if env var not set
             cred_path = Path("firebase-credentials.json")
@@ -68,13 +68,13 @@ if not firebase_admin._apps:
                 cred = credentials.Certificate(str(cred_path))
                 firebase_admin.initialize_app(cred)
                 FIREBASE_INITIALIZED = True
-                print("✅ Firebase initialized from local file")
+                print("[FIREBASE] Initialized from local file")
             else:
-                print("⚠️  FIREBASE NOT INITIALIZED - Set FIREBASE_CREDENTIALS_JSON env var or add firebase-credentials.json")
-                print("⚠️  App will start but Firebase auth features will be disabled")
+                print("[FIREBASE] NOT INITIALIZED - Set FIREBASE_CREDENTIALS_JSON env var or add firebase-credentials.json")
+                print("[FIREBASE] App will start but Firebase auth features will be disabled")
     except Exception as e:
-        print(f"❌ Firebase initialization failed: {str(e)}")
-        print("⚠️  Continuing without Firebase - some features may not work")
+        print(f"[FIREBASE] Initialization failed: {str(e)}")
+        print("[FIREBASE] Continuing without Firebase - some features may not work")
 
 # ============================================
 # SECURITY & MONITORING INIT
@@ -174,7 +174,7 @@ def perform_db_startup_checks():
             has_gender_field = "gender" in first_product
             
             if not has_gender_field:
-                print("[STARTUP] ⚠️  Found products WITHOUT gender field - queueing cleanup and reseed...")
+                print("[STARTUP] WARNING: Found products WITHOUT gender field - queueing cleanup and reseed...")
                 # Delete all products synchronously
                 docs = db.collection("products").stream()
                 batch = db.batch()
@@ -187,28 +187,28 @@ def perform_db_startup_checks():
                     total_deleted += 1
                     if batch_count >= 500:
                         batch.commit()
-                        print(f"[STARTUP] ✅ Deleted batch of {batch_count}")
+                        print(f"[STARTUP] OK: Deleted batch of {batch_count}")
                         batch = db.batch()
                         batch_count = 0
                 
                 if batch_count > 0:
                     batch.commit()
                 
-                print(f"[STARTUP] ✅ Cleaned {total_deleted} old products")
+                print(f"[STARTUP] OK: Cleaned {total_deleted} old products")
             else:
                 product_count = db.collection("products").count().get()[0][0].value
-                print(f"[STARTUP] ✅ {product_count} products with gender field found - OK")
+                print(f"[STARTUP] OK: {product_count} products with gender field found")
         else:
-            print("[STARTUP] ℹ️  No products found - seeding will start on first request")
+            print("[STARTUP] INFO: No products found - seeding will start on first request")
     except Exception as e:
-        print(f"[STARTUP] ⚠️  Error during startup check: {str(e)}")
+        print(f"[STARTUP] WARNING: Error during startup check: {str(e)}")
 
 @app.on_event("startup")
 async def startup_event():
     """Check products on startup and clear old ones without gender field"""
     # Skip if Firebase not initialized - the startup check can run on first request instead
     if not FIREBASE_INITIALIZED:
-        print("[STARTUP] ℹ️  Firebase not initialized - skipping product check (will run on first request)")
+        print("[STARTUP] INFO: Firebase not initialized - skipping product check (will run on first request)")
         return
     
     # CRITICAL RENDER FIX: We push this to a background thread so Uvicorn's event loop is not blocked.
@@ -856,7 +856,7 @@ async def process_image_core(file: UploadFile):
         if face is None:
             raise HTTPException(status_code=422, detail={
                 "error": "no_face_detected",
-                "message": "⚠️ No face detected in your photo.\n\n✅ Fix: Look directly at the camera with good lighting.",
+                "message": "WARNING: No face detected in your photo.\n\nFix: Look directly at the camera with good lighting.",
                 "can_retry": True
             })
         face_validation = image_processor.validate_face_for_skin_analysis(image, face)
@@ -1092,7 +1092,7 @@ async def check_outfit_compatibility(
         if face is None:
             raise HTTPException(status_code=422, detail={
                 "error": "no_face_detected",
-                "message": "⚠️ No face detected in your selfie.\n\n✅ Fix: Please upload a clear selfie.",
+                "message": "WARNING: No face detected in your selfie.\n\nFix: Please upload a clear selfie.",
                 "can_retry": True
             })
         skin_color = image_processor.extract_skin_color(selfie_image, face)
