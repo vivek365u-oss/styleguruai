@@ -1,141 +1,166 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeContext } from '../context/ThemeContext';
 import { buildShopUrl, COMMON_STORES, MALE_STORES, FEMALE_STORES } from '../utils/shoppingUrls';
 import { getThemeColors } from '../utils/themeColors';
 
 /**
- * ShopActionSheet - A premium bottom sheet for store selection.
+ * ShopActionSheet - A high-end, DNA-styled shopping portal.
  */
 const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null }) => {
   const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const C = getThemeColors(theme);
-  const [isClosing, setIsClosing] = useState(false);
 
   // Combine stores based on gender
   const isFemale = gender.toLowerCase().includes('female');
   const genderStores = isFemale ? FEMALE_STORES : MALE_STORES;
   const allStores = [...COMMON_STORES, ...genderStores];
 
+  // Stop background scrolling when open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      setIsClosing(false);
+      document.body.style.touchAction = 'none';
     } else {
       document.body.style.overflow = 'auto';
+      document.body.style.touchAction = 'auto';
     }
+    return () => {
+      document.body.style.overflow = 'auto';
+      document.body.style.touchAction = 'auto';
+    };
   }, [isOpen]);
-
-  const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(onClose, 300);
-  };
-
-  if (!isOpen && !isClosing) return null;
 
   const PJS = "'Plus Jakarta Sans', 'Inter', sans-serif";
   const PDI = "'Playfair Display', 'Georgia', serif";
+  const VIOLET = "#8B5CF6";
 
   return (
-    <div 
-      className={`fixed inset-0 z-[1000] flex items-end justify-center sm:items-center p-0 sm:p-4 transition-all duration-300 ${
-        isOpen && !isClosing ? 'bg-black/60 backdrop-blur-sm opacity-100' : 'bg-black/0 backdrop-blur-0 opacity-0 pointer-events-none'
-      }`}
-      onClick={handleClose}
-    >
-      <div 
-        className={`w-full max-w-md sm:rounded-[2rem] overflow-hidden transition-all duration-500 ease-out transform ${
-          isOpen && !isClosing 
-            ? 'translate-y-0 opacity-100 scale-100' 
-            : 'translate-y-full sm:translate-y-10 opacity-0 sm:scale-95'
-        }`}
-        style={{
-          background: C.isDark ? '#0F1219' : '#FFFFFF',
-          boxShadow: '0 -20px 60px rgba(0,0,0,0.4)',
-          border: `1px solid ${C.border}`,
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Pull Indicator for Mobile */}
-        <div className="sm:hidden w-12 h-1.5 rounded-full bg-white/10 mx-auto mt-3 mb-1" />
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
+          {/* Backdrop */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+          />
 
-        <div className="p-6 sm:p-8">
-          {/* Header */}
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-500 to-pink-500 text-white text-2xl mb-4 shadow-lg shadow-purple-500/20 animate-bounce-subtle">
-              🛍️
-            </div>
-            <h3 style={{ fontFamily: PDI, color: C.text }} className="text-2xl font-bold mb-1">Select Your Store</h3>
-            <p style={{ fontFamily: PJS, color: C.muted }} className="text-sm px-4">
-              Best deals for "<span className="text-purple-500 font-semibold">{item}</span>"
-            </p>
-          </div>
+          {/* Modal Content */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="relative w-full max-w-[480px] overflow-hidden rounded-[2.5rem] border shadow-2xl"
+            style={{
+              background: isDark ? '#0A0C10' : '#FFFFFF',
+              borderColor: isDark ? 'rgba(139,92,246,0.3)' : 'rgba(139,92,246,0.1)',
+              boxShadow: isDark ? '0 0 50px rgba(139,92,246,0.15)' : '0 20px 60px rgba(0,0,0,0.1)',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Tech Grid Background (DNA Style) */}
+            <div 
+              className="absolute inset-0 opacity-[0.03] pointer-events-none"
+              style={{ 
+                backgroundImage: `radial-gradient(${VIOLET} 1px, transparent 1px)`, 
+                backgroundSize: '20px 20px' 
+              }} 
+            />
 
-          {/* Stores Grid */}
-          <div className="grid grid-cols-2 gap-3 mb-6 max-h-[40vh] overflow-y-auto pr-1 custom-scrollbar">
-            {allStores.map((store) => (
+            <div className="relative z-10 p-6 sm:p-10">
+              {/* Header Segment */}
+              <div className="mb-8 text-center">
+                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 via-purple-500 to-pink-500 shadow-xl shadow-violet-500/30">
+                  <span className="text-3xl animate-pulse">🛍️</span>
+                </div>
+                
+                <p className="mb-1 text-[10px] font-black uppercase tracking-[0.3em] text-violet-500" style={{ fontFamily: PJS }}>
+                  Style Search Protocol
+                </p>
+                <h3 className="text-3xl font-black tracking-tight" style={{ fontFamily: PDI, color: C.text }}>
+                  Smart Shop
+                </h3>
+                <div className="mt-3 inline-block px-4 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20">
+                  <p className="text-[11px] font-bold italic" style={{ fontFamily: PJS, color: isDark ? '#DDD' : '#444' }}>
+                    "{item.length > 40 ? item.substring(0, 37) + '...' : item}"
+                  </p>
+                </div>
+              </div>
+
+              {/* Stores Grid - Compact & Responsive */}
+              <div className="grid grid-cols-2 gap-3 mb-8 max-h-[360px] overflow-y-auto pr-2 custom-scrollbar">
+                {allStores.map((store, idx) => (
+                  <motion.button
+                    key={store.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.03 }}
+                    onClick={() => {
+                      window.open(buildShopUrl(item, store.id, gender, budget), '_blank');
+                      onClose();
+                    }}
+                    className="group relative flex flex-col items-center justify-center rounded-3xl border p-4 transition-all hover:bg-white/[0.02]"
+                    style={{
+                      background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+                      borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                    }}
+                  >
+                    <div 
+                      className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl shadow-lg transition-transform group-hover:scale-110 group-hover:rotate-6"
+                      style={{ background: store.bg }}
+                    >
+                      <span className="text-xl">{store.emoji}</span>
+                    </div>
+                    <span className="text-[11px] font-black uppercase tracking-wider opacity-80" style={{ fontFamily: PJS, color: C.text }}>
+                      {store.name}
+                    </span>
+
+                    {/* Subtle Hover Border */}
+                    <div 
+                      className="absolute inset-0 rounded-3xl opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none"
+                      style={{ border: `2px solid ${store.color}` }}
+                    />
+                  </motion.button>
+                ))}
+              </div>
+
+              {/* Verified Badge */}
+              <div className="flex items-center justify-center gap-3 mb-8 py-3 px-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-[10px]">🛡️</div>
+                <p className="text-[10px] font-bold leading-tight uppercase tracking-tight text-emerald-500/80" style={{ fontFamily: PJS }}>
+                  Direct Official Store Links • Safe Verification Active
+                </p>
+              </div>
+
+              {/* Close Action */}
               <button
-                key={store.id}
-                onClick={() => {
-                  window.open(buildShopUrl(item, store.id, gender, budget), '_blank');
-                  handleClose();
-                }}
-                className="group relative flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-300 hover:scale-[1.03] active:scale-95"
-                style={{
-                  background: C.glass2,
-                  borderColor: C.border,
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = store.color;
-                  e.currentTarget.style.background = `${store.color}10`;
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = C.border;
-                  e.currentTarget.style.background = C.glass2;
+                onClick={onClose}
+                className="w-full rounded-2xl border py-4 text-xs font-black uppercase tracking-[0.2em] transition-all hover:bg-violet-500 hover:text-white hover:border-violet-500"
+                style={{ 
+                  fontFamily: PJS, 
+                  color: isDark ? '#888' : '#666',
+                  borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
                 }}
               >
-                <div 
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-2 shadow-inner transition-transform group-hover:rotate-12"
-                  style={{ background: store.bg }}
-                >
-                  {store.emoji}
-                </div>
-                <span className="text-xs font-bold text-center" style={{ fontFamily: PJS, color: C.text }}>{store.name}</span>
-                
-                {/* Visual hover effect line */}
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 rounded-full transition-all duration-300 group-hover:w-1/2" style={{ background: store.color }} />
+                Close Portal
               </button>
-            ))}
-          </div>
+            </div>
+          </motion.div>
 
-          {/* Footer Info */}
-          <div className={`p-4 rounded-xl border mb-6 flex items-start gap-3 ${C.isDark ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-100'}`}>
-            <span className="text-lg">🛡️</span>
-            <p className="text-[10px] leading-relaxed" style={{ color: C.muted, fontFamily: PJS }}>
-              StyleGuruAI provides direct links to official stores. We ensure you get the most accurate results based on your style analysis.
-            </p>
-          </div>
-
-          {/* Close Button */}
-          <button
-            onClick={handleClose}
-            className="w-full py-4 rounded-2xl font-bold text-sm transition-all hover:bg-white/5"
-            style={{ color: C.muted, fontFamily: PJS, border: `1px solid ${C.border}` }}
-          >
-            Go Back
-          </button>
+          <style>{`
+            .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+            .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+            .custom-scrollbar::-webkit-scrollbar-thumb { background: ${VIOLET}40; border-radius: 10px; }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: ${VIOLET}80; }
+          `}</style>
         </div>
-      </div>
-
-      <style>{`
-        @keyframes bounce-subtle {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-5px); }
-        }
-        .animate-bounce-subtle {
-          animation: bounce-subtle 2s ease-in-out infinite;
-        }
-      `}</style>
-    </div>
+      )}
+    </AnimatePresence>
   );
 };
 

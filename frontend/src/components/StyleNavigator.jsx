@@ -595,11 +595,17 @@ export default function StyleNavigator({ user, onAnalyze }) {
                           setShopItem(piece.value);
                           trackShoppingItemClick(piece.value, 0, 'compass_recommendation');
                         }}
-                        style={{ marginTop:8, width:'100%', padding:'6px', borderRadius:8, background:C.glass, border:`1px solid ${C.border}`, color:C.muted, fontSize:'9px', cursor:'pointer', fontFamily:PJS, transition:'all 0.2s' }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor=VIOLET; e.currentTarget.style.color=VIOLET; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor=C.border; e.currentTarget.style.color=C.muted; }}
+                        style={{ 
+                          marginTop:10, width:'100%', padding:'10px', borderRadius:10, 
+                          background:VIOLET, border:'none', color:'white', 
+                          fontSize:'9px', fontWeight:900, textTransform:'uppercase', letterSpacing:'0.1em',
+                          cursor:'pointer', fontFamily:PJS, transition:'all 0.3s',
+                          boxShadow: '0 4px 12px rgba(139,92,246,0.2)'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = '#7C3AED'; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = VIOLET; }}
                       >
-                        🛍 Shop This
+                        Shop This
                       </button>
                     </div>
                   )
@@ -713,9 +719,15 @@ export default function StyleNavigator({ user, onAnalyze }) {
                         <div style={{ height:64, background:color.hex, position:'relative' }}>
                           <button
                             onClick={() => setShopItem(searchFormat(color.name))}
-                            style={{ position:'absolute', bottom:6, right:6, background:'rgba(0,0,0,0.5)', border:'none', color:'white', borderRadius:6, padding:'3px 7px', fontSize:'8px', cursor:'pointer', fontFamily:PJS }}
+                            style={{ 
+                              position:'absolute', bottom:6, right:6, 
+                              background:VIOLET, border:'none', color:'white', 
+                              borderRadius:6, padding:'4px 8px', fontSize:'8px', fontWeight:900,
+                              textTransform:'uppercase', letterSpacing:'0.05em',
+                              cursor:'pointer', fontFamily:PJS, boxShadow:'0 2px 8px rgba(0,0,0,0.2)'
+                            }}
                           >
-                            🛍 Shop
+                            Shop
                           </button>
                         </div>
                         <div style={{ padding:'10px 10px 12px' }}>
@@ -806,8 +818,14 @@ export default function StyleNavigator({ user, onAnalyze }) {
                     </p>
                   </div>
                   <button
-                    onClick={() => { if(!isLocked) setShopItem(`${color.name} ${gender==='female'?'kurti top dress':'shirt kurta polo'}`) }}
-                    style={{ fontSize:'10px', color:VIOLET, background:`rgba(139,92,246,0.08)`, border:`1px solid rgba(139,92,246,0.2)`, borderRadius:8, padding:'5px 10px', cursor:'pointer', fontFamily:PJS, fontWeight:600 }}>
+                    onClick={(e) => { e.stopPropagation(); if(!isLocked) setShopItem(`${color.name} ${gender==='female'?'kurti top dress':'shirt kurta polo'}`); }}
+                    style={{ 
+                      padding:'8px 14px', borderRadius:10, 
+                      background:VIOLET, border:'none', color:'white', 
+                      fontSize:'9px', fontWeight:900, textTransform:'uppercase', letterSpacing:'0.1em',
+                      cursor:'pointer', fontFamily:PJS, transition:'all 0.3s'
+                    }}
+                  >
                     {isLocked ? '🔒' : 'Shop'}
                   </button>
                 </div>
@@ -1002,14 +1020,18 @@ export default function StyleNavigator({ user, onAnalyze }) {
                     <button
                       onClick={() => setShopItem(product.name)}
                       style={{ 
-                        width:'100%', padding:'10px', borderRadius:12, 
-                        background: GRAD, border:'none', color:'white', 
-                        cursor:'pointer', fontSize:'11px', fontFamily:PJS, fontWeight:700, 
+                        width:'100%', padding:'10px', borderRadius:14, 
+                        background: '#8B5CF6', border:'none', color:'white', 
+                        cursor:'pointer', fontSize:'10px', fontFamily:PJS, fontWeight:800, 
+                        textTransform: 'uppercase', letterSpacing: '0.1em',
                         display:'flex', alignItems:'center', justifyContent:'center', gap:6, 
-                        boxShadow: '0 4px 12px rgba(139,92,246,0.3)' 
+                        boxShadow: '0 8px 20px rgba(139,92,246,0.2)',
+                        transition: 'all 0.3s'
                       }}
+                      onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                      onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
                     >
-                      🛒 Shop Direct →
+                      Shop Direct →
                     </button>
                   </div>
                 </div>

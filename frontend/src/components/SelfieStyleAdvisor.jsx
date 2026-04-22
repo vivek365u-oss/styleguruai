@@ -849,12 +849,14 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
             }}
             style={{
               width: '100%', padding: '14px', borderRadius: 16,
-              background: `linear-gradient(135deg, ${VIOLET}, #ec4899)`,
-              border: 'none', color: 'white', fontSize: 14, fontWeight: 800, fontFamily: PJS,
+              background: VIOLET,
+              border: 'none', color: 'white', fontSize: 11, fontWeight: 900, fontFamily: PJS,
+              textTransform: 'uppercase', letterSpacing: '0.15em',
               cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-              boxShadow: '0 8px 20px rgba(139,92,246,0.3)', transition: 'all 0.3s'
+              boxShadow: '0 8px 24px rgba(139,92,246,0.25)', transition: 'all 0.3s'
             }}
-            className="hover:scale-[1.02] active:scale-95 transition-all"
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = '#7C3AED'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = VIOLET; }}
           >
             Shop Direct Essentials →
           </button>

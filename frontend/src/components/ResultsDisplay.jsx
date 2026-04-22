@@ -59,9 +59,9 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male" }) {
       
       <button 
         onClick={(e) => { e.stopPropagation(); setIsSheetOpen(true); }}
-        className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-black shadow-lg shadow-purple-500/20 active:scale-95 transition-all"
+        className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-4 border border-violet-400/30 hover:bg-violet-500"
       >
-        🛒 Shop Direct →
+        Shop Direct →
       </button>
 
       <ShopActionSheet 
@@ -206,9 +206,9 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
           {color.reason && <p className={`${reasonCls} text-xs leading-relaxed mb-3`}>{color.reason}</p>}
           <button
             onClick={() => setIsSheetOpen(true)}
-            className={`w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-black shadow-lg shadow-purple-500/20 active:scale-95 transition-all mt-3`}
+            className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-3 border border-violet-400/30 hover:bg-violet-500"
           >
-            🛒 Shop Direct →
+            Shop Direct →
           </button>
           
           <ShopActionSheet 
