@@ -847,7 +847,7 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
           // Amazon with 4-star+ filter for premium quality
           { name: 'Amazon',        url: `https://www.amazon.in/s?k=${amazonQuery}&rh=p_72%3A1318476031`, color: '#FF9900', icon: '📦' },
           { name: 'Nykaa',         url: `https://www.nykaa.com/search/result/?q=${nykaaQuery}`,       color: '#FC2779', icon: '🌸' },
-          { name: 'Myntra',        url: `https://www.myntra.com/${myntraQuery}`,                      color: '#FF3F6C', icon: '🛍️' },
+          { name: 'Myntra',        url: `https://www.myntra.com/search?q=${myntraQuery}`,                      color: '#FF3F6C', icon: '🛍️' },
           { name: 'Flipkart',      url: `https://www.flipkart.com/search?q=${flipkartQuery}`,         color: '#2874F0', icon: '🛒' },
         ];
         return (

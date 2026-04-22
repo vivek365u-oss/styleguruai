@@ -328,8 +328,14 @@ function ColorCard({ color, category, gender, isDark, className = '' }) {
               const catKey = (category || 'shirt').toLowerCase().replace(/^cat_/, '');
               const catLabel = CAT_MAP[catKey]?.[gender === 'female' ? 'female' : 'male'] || (gender === 'female' ? 'top' : 'shirt');
               const q = encodeURIComponent(`${genderStr} ${color.name} ${catLabel}`);
+              const myntraUrl = buildMyntraUrl({ 
+                color: color.name, 
+                catId: category?.startsWith('cat_') ? category : `cat_${category}`, 
+                gender: gender, 
+                itemType: catKey 
+              });
               const stores = [
-                { name: 'Myntra',   dot: '#f13ab1', url: `https://www.myntra.com/search?q=${q}` },
+                { name: 'Myntra',   dot: '#f13ab1', url: myntraUrl },
                 { name: 'Amazon',   dot: '#ff9900', url: `https://www.amazon.in/s?k=${q}` },
                 { name: 'Flipkart', dot: '#2874f0', url: `https://www.flipkart.com/search?q=${q}` },
                 { name: 'Meesho',   dot: '#ff44af', url: `https://www.meesho.com/search?q=${q}` },
@@ -849,7 +855,16 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender }) {
         {[
           { name: '🛒 Amazon', url: `https://www.amazon.in/s?k=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit set'))}&rh=n%3A1968024031&sort=review-rank&tag=${AMAZON_TAG}`, bg: isDark ? 'bg-orange-500/20 border-orange-500/30 text-orange-300' : 'bg-orange-50 border-orange-300 text-orange-700 font-bold' },
           { name: '🏪 Flipkart', url: `https://www.flipkart.com/search?q=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit'))}&sort=popularity_desc`, bg: isDark ? 'bg-blue-500/20 border-blue-500/30 text-blue-300' : 'bg-blue-50 border-blue-300 text-blue-700 font-bold' },
-          { name: '👗 Myntra', url: `https://www.myntra.com/${isFemale ? 'co-ords' : 'tshirts'}?rawQuery=${shirtColor.name.toLowerCase().replace(/\s+/g, '%20')}%20${isFemale ? 'women%20coord%20set' : 'men%20oversized'}`, bg: isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300' : 'bg-pink-50 border-pink-300 text-pink-700 font-bold' },
+          { 
+            name: '👗 Myntra', 
+            url: buildMyntraUrl({ 
+              color: shirtColor.name, 
+              catId: isFemale ? 'cat_ethnic_coord' : 'cat_shirt', 
+              gender: gender, 
+              itemType: isFemale ? 'ethnic_coord' : 'shirt' 
+            }), 
+            bg: isDark ? 'bg-pink-500/20 border-pink-500/30 text-pink-300' : 'bg-pink-50 border-pink-300 text-pink-700 font-bold' 
+          },
           { name: '🛍️ Meesho', url: `https://meesho.com/search?q=${encodeURIComponent(shirtColor.name + (isFemale ? ' women coord set' : ' men outfit'))}`, bg: isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-300' : 'bg-purple-50 border-purple-300 text-purple-700 font-bold' },
         ].map(link => (
           <AffiliateLink
@@ -1193,7 +1208,7 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }
             {accessories.map((item, i) => {
               const typeLC = (item.type || '').toLowerCase();
               const cat = getAccCat(typeLC, true);
-              const searchTerm = item.suggestion || item.colors || item.type;
+              const searchTerm = item.colors || item.suggestion || item.type;
               return (
                 <div key={i} className={`${cardBgCls} rounded-xl p-3`}>
                   <p className="text-purple-300 font-bold text-sm">{item.type}</p>
@@ -1215,7 +1230,7 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark }
             {accentColors.map((item, i) => {
               const typeLC = (item.type || '').toLowerCase();
               const cat = getAccCat(typeLC, false);
-              const searchTerm = item.suggestion || item.name || item.type;
+              const searchTerm = item.colors || item.name || item.suggestion || item.type;
               return (
                 <div key={i} className={`${cardBgCls} rounded-xl p-3`}>
                   <p className="text-purple-300 font-bold text-sm">{item.type}</p>
