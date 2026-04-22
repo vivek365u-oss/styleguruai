@@ -97,7 +97,7 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
                 </h3>
                 <div className="mt-2 inline-block px-3 py-1 rounded-full bg-violet-500/5 border border-violet-500/10">
                   <p className="text-[10px] font-bold italic" style={{ fontFamily: PJS, color: isDark ? '#AAA' : '#666' }}>
-                    "{item.length > 35 ? item.substring(0, 32) + '...' : item}"
+                    "{item ? (item.length > 35 ? item.substring(0, 32) + '...' : item) : 'Loading...'}"
                   </p>
                 </div>
               </div>
@@ -111,6 +111,7 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.02 }}
                     onClick={() => {
+                      if (!item) return;
                       window.open(buildShopUrl(item, store.id, gender, budget), '_blank');
                       onClose();
                     }}

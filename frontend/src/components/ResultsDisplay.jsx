@@ -988,6 +988,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
                   </div>
                   <span className={`text-xs px-2 py-0.5 rounded-full border ${isDark ? 'bg-pink-500/20 text-pink-300 border-pink-500/20' : 'bg-pink-100 text-pink-700 border-pink-300 font-semibold'}`}>{item.occasion}</span>
                 </div>
+                <ShoppingLinks colorName={`${item.colors} ${item.type}`} category="kurta" gender="female" onShop={onShop} />
               </div>
             ))}
           </div>
@@ -1041,7 +1042,7 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark, 
                   <p className="text-purple-300 font-bold text-sm">{item.type}</p>
                   <p className={`${subCls} text-xs mt-0.5`}>{item.suggestion || item.colors}</p>
                   {item.reason && <p className={`${mutedCls} text-xs`}>{item.reason}</p>}
-                  <ShoppingLinks colorName={searchTerm} category={cat} gender="female" />
+                  <ShoppingLinks colorName={searchTerm} category={cat} gender="female" onShop={onShop} />
                 </div>
               );
             })}
@@ -1063,7 +1064,7 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark, 
                   <p className="text-purple-300 font-bold text-sm">{item.type}</p>
                   <p className={`${subCls} text-xs mt-0.5`}>{item.name}</p>
                   {item.reason && <p className={`${mutedCls} text-xs`}>{item.reason}</p>}
-                  <ShoppingLinks colorName={searchTerm} category={cat} gender="male" />
+                  <ShoppingLinks colorName={searchTerm} category={cat} gender="male" onShop={onShop} />
                 </div>
               );
             })}
@@ -1190,7 +1191,8 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const pantCategory = effectiveGender === 'female' ? "bottom" : "pant";
   const styleTips = isSeasonal ? (recommendations.outfit_tips || []) : (recommendations.style_tips || []);
   const occasionAdvice = recommendations.occasion_advice || {};
-  const sareeSuggestions = recommendations.saree_suggestions || [];  const [shopItem, setShopItem] = useState(null);
+  const sareeSuggestions = recommendations.saree_suggestions || [];
+  const [shopItem, setShopItem] = useState(null);
   const [shopBudget, setShopBudget] = useState(null);
 
   const makeupSuggestions = recommendations.makeup_suggestions || [];
