@@ -3,6 +3,12 @@
  */
 
 export const MISSIONS = {
+    CASUAL_VIBES: {
+        id: 'casual', label: 'Casual Vibes', emoji: '😎',
+        boost: ['cat_tshirt', 'cat_jeans', 'cat_sneakers', 'cat_kurti', 'cat_crop_top'],
+        colors: ['navy', 'white', 'olive', 'black'],
+        fabric: ['cotton', 'denim']
+    },
     WEDDING_ELITE: { 
         id: 'wedding', label: 'Wedding Elite', emoji: '🏛️', 
         boost: ['cat_saree_silk', 'cat_lehenga', 'cat_kurta_set', 'cat_sherwani', 'cat_nehru_jacket'],

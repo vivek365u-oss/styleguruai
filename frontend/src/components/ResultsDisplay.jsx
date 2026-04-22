@@ -1495,11 +1495,40 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             else if (activeMission === 'date') expertAdvice = "Entering Date Night mode. Soft satin finishes in deep wine or midnight blue will interact perfectly with evening ambient light.";
             else expertAdvice = "Relaxed daily mode. Focus on comfort within your seasonal spectrum — keeping it effortless yet curated.";
 
+            // --- BUILD THE OUTFIT ---
+            let outfits = [];
+            if (isSeasonal) outfits = seasonalGender === 'female' ? (recommendations.female_outfits || []) : (recommendations.male_outfits || []);
+            else if (isFemale) outfits = recommendations.outfit_combos || [];
+            else outfits = recommendations.outfit_combinations || recommendations.outfit_combos || [];
+
+            let bestOutfit = outfits[0] || null;
+            if (mission && outfits.length > 0) {
+              const scored = outfits.map(o => {
+                let s = 0;
+                const txt = `${o.upper || ''} ${o.lower || ''} ${o.description || ''} ${o.name || ''} ${o.shirt || o.top || ''} ${o.pant || o.bottom || ''}`.toLowerCase();
+                mission.boost.forEach(b => { if(txt.includes(b.replace('cat_', '').replace('_', ' '))) s += 30; });
+                mission.colors.forEach(c => { if(txt.includes(c.replace('_', ' '))) s += 20; });
+                mission.fabric.forEach(f => { if(txt.includes(f)) s += 10; });
+                return { ...o, s };
+              }).sort((a,b) => b.s - a.s);
+              bestOutfit = scored[0];
+            }
+
+            const outfitToSave = bestOutfit ? {
+              top: bestOutfit.shirt || bestOutfit.top || bestOutfit.dress || "Stylist Recommended Top",
+              bottom: bestOutfit.pant || bestOutfit.bottom || "",
+              shoes: bestOutfit.shoes || "",
+              dupatta: bestOutfit.dupatta || "",
+              occasion: bestOutfit.occasion || activeMission,
+              vibe: bestOutfit.vibe || ""
+            } : null;
+
             const lookData = {
               missionId: activeMission,
               expertAdvice: expertAdvice,
               analysis: { skin_tone: analysis.skin_tone },
               colors: missionColors.slice(0, 5),
+              outfit: outfitToSave,
               score: Math.min(98, Math.max(55, Math.round((photo_quality?.score || 85) * 0.7 + (analysis.skin_tone.confidence === 'high' ? 10 : 5)))),
               timestamp: new Date().toISOString()
             };

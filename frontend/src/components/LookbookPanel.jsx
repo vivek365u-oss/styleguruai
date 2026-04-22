@@ -92,8 +92,45 @@ function LookbookPanel() {
                       </button>
                     </div>
 
-                    {/* Color Palette */}
-                    <div className="flex gap-2 mb-4">
+                    {/* Outfit Details */}
+                    {item.outfit && (
+                      <div className={`p-4 rounded-2xl mb-4 ${isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200'}`}>
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <p className={`font-bold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                            {item.outfit.top}
+                          </p>
+                          {item.outfit.occasion && (
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap ${isDark ? 'bg-white/10 text-white/80' : 'bg-gray-200 text-gray-700'}`}>
+                              {item.outfit.occasion}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-1.5 text-xs">
+                          {item.outfit.bottom && (
+                            <div className="flex items-center gap-2">
+                              <span>👖</span>
+                              <span className={isDark ? 'text-white/70' : 'text-gray-600'}>{item.outfit.bottom}</span>
+                            </div>
+                          )}
+                          {item.outfit.shoes && (
+                            <div className="flex items-center gap-2">
+                              <span>👟</span>
+                              <span className={isDark ? 'text-white/70' : 'text-gray-600'}>{item.outfit.shoes}</span>
+                            </div>
+                          )}
+                          {item.outfit.dupatta && item.outfit.dupatta !== "-" && (
+                            <div className="flex items-center gap-2">
+                              <span>🧣</span>
+                              <span className={isDark ? 'text-white/70' : 'text-gray-600'}>{item.outfit.dupatta}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Color Palette Header */}
+                    <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 ${isDark ? 'text-white/30' : 'text-gray-400'}`}>Mission Palette</p>
+                    <div className="flex gap-2 mb-5">
                       {item.colors?.map((c, i) => (
                         <div 
                           key={i} 
