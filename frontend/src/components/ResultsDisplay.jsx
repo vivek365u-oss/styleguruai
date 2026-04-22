@@ -57,7 +57,15 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male", onShop 
       </div>
       
       <button 
-        onClick={(e) => { e.stopPropagation(); onShop(`${colorName} ${productLabel}`, budget?.max); }}
+        onClick={(e) => { 
+          e.stopPropagation(); 
+          onShop({
+            query: `${colorName} ${productLabel}`,
+            color: colorName,
+            catId: category,
+            budget: budget?.max
+          }); 
+        }}
         className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-4 border border-violet-400/30 hover:bg-violet-500"
       >
         Shop Direct →
@@ -189,7 +197,11 @@ function ColorCard({ color, category, gender, isDark, onShop, className = '' }) 
         <div className={`px-3 pb-3 border-t ${dividerCls} pt-2 scale-in`} onClick={e => e.stopPropagation()}>
           {color.reason && <p className={`${reasonCls} text-xs leading-relaxed mb-3`}>{color.reason}</p>}
           <button
-            onClick={() => onShop(`${color.name} ${gender === 'female' ? 'top' : 'shirt'}`)}
+            onClick={() => onShop({
+              query: `${color.name} ${gender === 'female' ? 'top' : 'shirt'}`,
+              color: color.name,
+              catId: category
+            })}
             className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-3 border border-violet-400/30 hover:bg-violet-500"
           >
             Shop Direct →
@@ -1621,15 +1633,14 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         }}
       >
         {activeTab === 'colors' && (
-          <ColorsTab
+          <ColorRecommendationsShop
             recommendations={recommendations}
             isFemale={isFemale}
-            isSeasonal={isSeasonal}
-            effectiveGender={effectiveGender}
-            shirtCategory={shirtCategory}
-            pantCategory={pantCategory}
-            isDark={isDark}
-            onShop={(query, budget) => { setShopItem(query); setShopBudget(budget); }}
+            onShop={(data) => {
+              const shopData = typeof data === 'string' ? { query: data } : data;
+              setShopItem(shopData);
+              setShopBudget(shopData.budget || null);
+            }}
           />
         )}
         {activeTab === 'outfits' && (
@@ -1643,7 +1654,11 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             ethnicWear={ethnicWear}
             sareeSuggestions={sareeSuggestions}
             isDark={isDark}
-            onShop={(query, budget) => { setShopItem(query); setShopBudget(budget); }}
+            onShop={(data) => {
+              const shopData = typeof data === 'string' ? { query: data } : data;
+              setShopItem(shopData);
+              setShopBudget(shopData.budget || null);
+            }}
             bodyTypeTips={bodyTypeTips}
             bodyType={bodyType}
             userOccasion={userOccasion}
@@ -1656,7 +1671,11 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             isFemale={isFemale}
             makeupSuggestions={makeupSuggestions}
             isDark={isDark}
-            onShop={(query, budget) => { setShopItem(query); setShopBudget(budget); }}
+            onShop={(data) => {
+              const shopData = typeof data === 'string' ? { query: data } : data;
+              setShopItem(shopData);
+              setShopBudget(shopData.budget || null);
+            }}
           />
         )}
         {/* Shop tab removed — shopping links removed from analysis */}

@@ -6,9 +6,14 @@ const AMAZON_TAG = 'StyleGuruAI-21';
  * Builds a search URL for different e-commerce platforms.
  */
 export const buildShopUrl = (item, storeId, gender = 'male', budget = null) => {
+  const isObj = typeof item === 'object' && item !== null;
+  const queryStr = isObj ? (item.query || '') : item;
+  const color = isObj ? (item.color || '') : '';
+  const catId = isObj ? (item.catId || '') : '';
+  
   const gKey = gender.toLowerCase().includes('female') ? 'female' : 'male';
   const gStr = gKey === 'female' ? 'women' : 'men';
-  const cleanItem = item.trim();
+  const cleanItem = queryStr.trim();
   const encodedQ = encodeURIComponent(cleanItem);
   const qWithGender = encodeURIComponent(`${cleanItem} ${gStr}`);
 
@@ -18,6 +23,10 @@ export const buildShopUrl = (item, storeId, gender = 'male', budget = null) => {
 
   switch (storeId) {
     case 'myntra':
+      // If we have rich data, use the DEEP builder. Otherwise use Search fallback.
+      if (isObj && (catId || color)) {
+        return buildMyntraUrl({ color, catId, gender: gKey, itemType: catId });
+      }
       return buildMyntraSearchUrl(cleanItem, gKey);
     case 'amazon':
       return `https://www.amazon.in/s?k=${qWithGender}${amzPrice}&tag=${AMAZON_TAG}`;
@@ -58,25 +67,25 @@ export const buildShopUrl = (item, storeId, gender = 'male', budget = null) => {
 };
 
 export const COMMON_STORES = [
-  { id: 'myntra', name: 'Myntra', emoji: '🎀', logo: 'https://logo.clearbit.com/myntra.com', color: '#f13ab1', bg: 'linear-gradient(135deg, #f13ab1, #f87171)' },
-  { id: 'meesho', name: 'Meesho', emoji: '💸', logo: 'https://logo.clearbit.com/meesho.com', color: '#ff44af', bg: 'linear-gradient(135deg, #ff44af, #ff8c00)' },
-  { id: 'ajio', name: 'Ajio', emoji: '🏢', logo: 'https://logo.clearbit.com/ajio.com', color: '#2c3e50', bg: 'linear-gradient(135deg, #2c3e50, #bdc3c7)' },
-  { id: 'flipkart', name: 'Flipkart', emoji: '🛒', logo: 'https://logo.clearbit.com/flipkart.com', color: '#2874f0', bg: 'linear-gradient(135deg, #2874f0, #0052cc)' },
-  { id: 'amazon', name: 'Amazon', emoji: '📦', logo: 'https://logo.clearbit.com/amazon.in', color: '#ff9900', bg: 'linear-gradient(135deg, #ff9900, #232f3e)' },
+  { id: 'myntra', name: 'Myntra', emoji: '🎀', domain: 'myntra.com', color: '#f13ab1', bg: 'linear-gradient(135deg, #f13ab1, #f87171)' },
+  { id: 'meesho', name: 'Meesho', emoji: '💸', domain: 'meesho.com', color: '#ff44af', bg: 'linear-gradient(135deg, #ff44af, #ff8c00)' },
+  { id: 'ajio', name: 'Ajio', emoji: '🏢', domain: 'ajio.com', color: '#2c3e50', bg: 'linear-gradient(135deg, #2c3e50, #bdc3c7)' },
+  { id: 'flipkart', name: 'Flipkart', emoji: '🛒', domain: 'flipkart.com', color: '#2874f0', bg: 'linear-gradient(135deg, #2874f0, #0052cc)' },
+  { id: 'amazon', name: 'Amazon', emoji: '📦', domain: 'amazon.in', color: '#ff9900', bg: 'linear-gradient(135deg, #ff9900, #232f3e)' },
 ];
 
 export const MALE_STORES = [
-  { id: 'tatacliq', name: 'Tata CLiQ', emoji: '👔', logo: 'https://logo.clearbit.com/tatacliq.com', color: '#da1c5c', bg: 'linear-gradient(135deg, #da1c5c, #000)' },
-  { id: 'snitch', name: 'Snitch', emoji: '⚡', logo: 'https://logo.clearbit.com/snitch.co.in', color: '#000000', bg: 'linear-gradient(135deg, #333, #000)' },
-  { id: 'powerlook', name: 'Powerlook', emoji: '😎', logo: 'https://logo.clearbit.com/powerlook.in', color: '#ffcc00', bg: 'linear-gradient(135deg, #ffcc00, #333)' },
-  { id: 'souledstore', name: 'Souled Store', emoji: '🎈', logo: 'https://logo.clearbit.com/thesouledstore.com', color: '#e11b22', bg: 'linear-gradient(135deg, #e11b22, #000)' },
-  { id: 'beyoung', name: 'Beyoung', emoji: '🛹', logo: 'https://logo.clearbit.com/beyoung.in', color: '#42a2a2', bg: 'linear-gradient(135deg, #42a2a2, #2c3e50)' },
+  { id: 'tatacliq', name: 'Tata CLiQ', emoji: '👔', domain: 'tatacliq.com', color: '#da1c5c', bg: 'linear-gradient(135deg, #da1c5c, #000)' },
+  { id: 'snitch', name: 'Snitch', emoji: '⚡', domain: 'snitch.co.in', color: '#000000', bg: 'linear-gradient(135deg, #333, #000)' },
+  { id: 'powerlook', name: 'Powerlook', emoji: '😎', domain: 'powerlook.in', color: '#ffcc00', bg: 'linear-gradient(135deg, #ffcc00, #333)' },
+  { id: 'souledstore', name: 'Souled Store', emoji: '🎈', domain: 'thesouledstore.com', color: '#e11b22', bg: 'linear-gradient(135deg, #e11b22, #000)' },
+  { id: 'beyoung', name: 'Beyoung', emoji: '🛹', domain: 'beyoung.in', color: '#42a2a2', bg: 'linear-gradient(135deg, #42a2a2, #2c3e50)' },
 ];
 
 export const FEMALE_STORES = [
-  { id: 'nykaafashion', name: 'Nykaa Fashion', emoji: '💄', logo: 'https://logo.clearbit.com/nykaa.com', color: '#fc2779', bg: 'linear-gradient(135deg, #fc2779, #ff5e9a)' },
-  { id: 'urbanic', name: 'Urbanic', emoji: '✨', logo: 'https://logo.clearbit.com/urbanic.com', color: '#ff3b30', bg: 'linear-gradient(135deg, #ff3b30, #000)' },
-  { id: 'berrylush', name: 'Berrylush', emoji: '🍃', logo: 'https://logo.clearbit.com/berrylush.com', color: '#2ecc71', bg: 'linear-gradient(135deg, #2ecc71, #27ae60)' },
-  { id: 'libas', name: 'Libas', emoji: '🥻', logo: 'https://logo.clearbit.com/libas.in', color: '#8e44ad', bg: 'linear-gradient(135deg, #8e44ad, #2c3e50)' },
-  { id: 'sassafras', name: 'Sassafras', emoji: '👗', logo: 'https://logo.clearbit.com/sassafras.in', color: '#f39c12', bg: 'linear-gradient(135deg, #f39c12, #e67e22)' },
+  { id: 'nykaafashion', name: 'Nykaa Fashion', emoji: '💄', domain: 'nykaa.com', color: '#fc2779', bg: 'linear-gradient(135deg, #fc2779, #ff5e9a)' },
+  { id: 'urbanic', name: 'Urbanic', emoji: '✨', domain: 'urbanic.com', color: '#ff3b30', bg: 'linear-gradient(135deg, #ff3b30, #000)' },
+  { id: 'berrylush', name: 'Berrylush', emoji: '🍃', domain: 'berrylush.com', color: '#2ecc71', bg: 'linear-gradient(135deg, #2ecc71, #27ae60)' },
+  { id: 'libas', name: 'Libas', emoji: '🥻', domain: 'libas.in', color: '#8e44ad', bg: 'linear-gradient(135deg, #8e44ad, #2c3e50)' },
+  { id: 'sassafras', name: 'Sassafras', emoji: '👗', domain: 'sassafras.in', color: '#f39c12', bg: 'linear-gradient(135deg, #f39c12, #e67e22)' },
 ];

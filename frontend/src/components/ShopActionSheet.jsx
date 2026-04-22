@@ -101,7 +101,7 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
                 </h3>
                 <div className="mt-3 inline-block px-4 py-1.5 rounded-full bg-violet-500/5 border border-violet-500/10">
                   <p className="text-[11px] font-bold italic" style={{ fontFamily: PJS, color: isDark ? '#CCC' : '#555' }}>
-                    "{item ? (item.length > 35 ? item.substring(0, 32) + '...' : item) : 'Loading style...'}"
+                    "{item ? (typeof item === 'object' ? (item.query || 'Loading style...') : (item.length > 35 ? item.substring(0, 32) + '...' : item)) : 'Loading style...'}"
                   </p>
                 </div>
               </div>
@@ -126,11 +126,18 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
                     }}
                   >
                     <div 
-                      className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl shadow-xl transition-transform group-hover:scale-110 group-hover:rotate-6 overflow-hidden"
-                      style={{ background: store.bg }}
+                      className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl shadow-xl transition-transform group-hover:scale-110 group-hover:rotate-6 overflow-hidden bg-white p-2"
                     >
-                      {store.logo ? (
-                        <img src={store.logo} alt={store.name} className="w-8 h-8 object-contain" />
+                      {store.domain ? (
+                        <img 
+                          src={`https://www.google.com/s2/favicons?domain=${store.domain}&sz=128`} 
+                          alt={store.name} 
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = `https://ui-avatars.com/api/?name=${store.name}&background=${store.color.replace('#','')}&color=fff`;
+                          }}
+                        />
                       ) : (
                         <span className="text-xl">{store.emoji}</span>
                       )}
