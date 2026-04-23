@@ -44,6 +44,18 @@ const WELCOME_BACK_COPIES = [
     () => `Been a while! Your Style DNA has evolved. Come see what's new for you. 🎨`,
 ];
 
+const LAUNDRY_COPIES = [
+    () => `Aapki favourite clothes laundry mein hai 🧺. Aaj wash kar lo, Saturday party ke liye ready ho jayengi!`,
+    () => `Your essentials are taking a nap in the laundry bin 🧺. Time for a wash cycle to unlock your best looks!`,
+    () => `Running low on fresh fits? 🧺 Give your wardrobe a refresh today for a sharp tomorrow.`,
+];
+
+const TREND_COPIES = [
+    (archetype) => `Trend Alert: Earthy Tones are in! 🌿 Humne aapke skin tone ke liye 3 perfect matches dhoonde hain. Check them out. 🛍️`,
+    (archetype) => `New drops spotted! 🔥 We found new arrivals that perfectly match your ${archetype} DNA. Take a peek. 👀`,
+    (archetype) => `Your style compass just updated 🧭. New trends matching your color palette are now live!`,
+];
+
 // ── Helper: ms until next HH:MM today (or tomorrow if passed) ─────────
 function msUntilTime(hour, minute = 0) {
     const now = new Date();
@@ -176,7 +188,53 @@ export function useNotifications({ user, streak = 0, archetype = 'The Minimalist
             console.log(`[Notifications] Streak guard scheduled in ${Math.round(eveningDelay / 3600000 * 10) / 10}h`);
         }
 
-        // 3. Welcome Back — if last_active_date > 3 days ago ──────
+        // 3. Laundry Guard — 10:00 AM ────────────────────────────────────
+        // Check local storage for wardrobe to see if anything is in laundry
+        try {
+            const wardrobe = JSON.parse(localStorage.getItem('sg_wardrobe') || '[]');
+            const inLaundry = wardrobe.filter(item => item.status === 'laundry' || item.status === 'dirty').length > 0;
+            
+            // Only schedule if there's actually something in the laundry
+            // Or, if wardrobe is empty locally, we schedule it anyway as a general reminder
+            if (inLaundry || wardrobe.length === 0) {
+                const laundryDelay = msUntilTime(10, 0);
+                const laundryCopy = pick(LAUNDRY_COPIES);
+                await sendToSW({
+                    type: 'SCHEDULE_NOTIFICATION',
+                    payload: {
+                        id: 'laundry_guard',
+                        delayMs: laundryDelay,
+                        title: '🧺 Laundry Reminder',
+                        body: laundryCopy(),
+                        url: '/?tab=wardrobe',
+                        tag: 'laundry_guard',
+                        requireInteraction: false,
+                    },
+                });
+                console.log(`[Notifications] Laundry guard scheduled in ${Math.round(laundryDelay / 3600000 * 10) / 10}h`);
+            }
+        } catch (e) {
+            console.warn('[Notifications] Failed to schedule laundry guard', e);
+        }
+
+        // 4. DNA Trend Spotter — 4:00 PM (16:00) ─────────────────────────
+        const trendDelay = msUntilTime(16, 0);
+        const trendCopy = pick(TREND_COPIES);
+        await sendToSW({
+            type: 'SCHEDULE_NOTIFICATION',
+            payload: {
+                id: 'trend_spotter',
+                delayMs: trendDelay,
+                title: '🔥 Style Compass Update',
+                body: trendCopy(archetype),
+                url: '/?tab=tools',
+                tag: 'trend_spotter',
+                requireInteraction: false,
+            },
+        });
+        console.log(`[Notifications] Trend spotter scheduled in ${Math.round(trendDelay / 3600000 * 10) / 10}h`);
+
+        // 5. Welcome Back — if last_active_date > 3 days ago ──────
         const lastActive = localStorage.getItem('sg_last_checkin');
         if (lastActive) {
             const diffDays = Math.round((Date.now() - new Date(lastActive)) / 86400000);
