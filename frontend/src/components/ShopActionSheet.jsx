@@ -38,7 +38,7 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
   const PDI = "'Playfair Display', 'Georgia', serif";
   const VIOLET = "#8B5CF6";
 
-  const displayLabel = item ? (typeof item === 'object' ? item.query : item) : 'Loading style...';
+  const displayLabel = item ? (typeof item === 'object' ? (item.query || 'Loading style...') : (item.length > 35 ? item.substring(0, 32) + '...' : item)) : 'Loading style...';
 
   const modalContent = (
     <AnimatePresence>
@@ -119,7 +119,8 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
                     transition={{ delay: idx * 0.03 }}
                     onClick={() => {
                       if (!item) return;
-                      window.open(buildShopUrl(item, store.id, gender, budget), '_blank');
+                      const url = buildShopUrl(item, store.id, gender, budget);
+                      if (url) window.open(url, '_blank');
                       onClose();
                     }}
                     className="group relative flex flex-col items-center justify-center rounded-[1.75rem] border p-4 transition-all hover:bg-white/[0.03] active:scale-95"
