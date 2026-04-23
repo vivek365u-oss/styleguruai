@@ -528,7 +528,7 @@ function OutfitChecker() {
                             const groupsMap = {};
                             
                             // Iterate all categories in the app
-                            ALL_CATEGORIES.forEach(cat => {
+                            getCategoriesByGender(result?.gender || gender || 'male').forEach(cat => {
                               const sectionKey = getCategoryGroup(cat.id);
                               if (sectionKey === 'UNISEX' || sectionKey === 'OTHER') return;
                               
