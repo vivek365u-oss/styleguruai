@@ -15,6 +15,34 @@ import AdSense from '../AdSense';
 import { buildMyntraUrl } from '../utils/myntraUrl';
 import ShopActionSheet from './ShopActionSheet';
 
+// ── Product Category Mapping for Shopping ─────────────────────
+const PRODUCT_LABEL_MAP = {
+  shirt: { male: 'shirt', female: 'top' },
+  top: { male: 't-shirt', female: 'top' },
+  pant: { male: 'trouser', female: 'trouser' },
+  bottom: { male: 'trouser', female: 'trouser' },
+  kurta: { male: 'kurta', female: 'kurti' },
+  kurti: { male: 'kurta', female: 'kurti' },
+  dress: { male: 'shirt', female: 'dress' },
+  lehenga: { male: 'kurta', female: 'lehenga' },
+  saree: { male: 'kurta', female: 'saree' },
+  sharara: { male: 'kurta', female: 'sharara suit' },
+  suit: { male: 'suit', female: 'suit' },
+  dupatta: { male: 'scarf', female: 'dupatta' },
+  hoodie: { male: 'hoodie', female: 'hoodie' },
+  blazer: { male: 'blazer', female: 'blazer' },
+  accessory: { male: 'accessory', female: 'accessory' },
+  makeup: { male: 'makeup', female: 'makeup' },
+  shoes: { male: 'sneakers', female: 'heels' },
+  sneakers: { male: 'sneakers', female: 'sneakers' },
+  heels: { male: 'formal shoes', female: 'heels' },
+  watch: { male: 'watch', female: 'watch' },
+  handbag: { male: 'backpack', female: 'handbag' },
+  necklace: { male: 'chain', female: 'necklace' },
+  earrings: { male: 'studs', female: 'earrings' },
+  bangles: { male: 'bracelet', female: 'bangles' },
+};
+
 function ShoppingLinks({ colorName, category = "shirt", gender = "male", onShop }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
@@ -27,16 +55,9 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male", onShop 
     { label: 'Any', max: null },
   ];
 
-  const PRODUCT_MAP = {
-    shirt: { male: 'shirt', female: 'top' },
-    pant: { male: 'trouser', female: 'trouser' },
-    kurta: { male: 'kurta', female: 'kurti' },
-    accessory: { male: 'accessory', female: 'accessory' },
-    makeup: { male: 'makeup', female: 'makeup' },
-  };
-
   const catKey = (category || 'shirt').toLowerCase().replace(/^cat_/, '');
-  const productLabel = PRODUCT_MAP[catKey]?.[gender === 'female' ? 'female' : 'male'] || (gender === 'female' ? 'top' : 'shirt');
+  const productLabel = PRODUCT_LABEL_MAP[catKey]?.[gender === 'female' ? 'female' : 'male'] || (gender === 'female' ? 'top' : 'shirt');
+
 
   return (
     <div className="mt-2 space-y-2" onClick={e => e.stopPropagation()}>
@@ -56,7 +77,14 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male", onShop 
       </div>
 
       <button
-        onClick={(e) => { e.stopPropagation(); onShop(`${colorName} ${productLabel}`, budget?.max); }}
+        onClick={(e) => { 
+          e.stopPropagation(); 
+          onShop({ 
+            query: `${colorName} ${productLabel}`, 
+            color: colorName, 
+            catId: catKey 
+          }, budget?.max); 
+        }}
         className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-4 border border-violet-400/30 hover:bg-violet-500"
       >
         Shop Direct →
@@ -74,7 +102,10 @@ function MakeupShoppingLinks({ product, shade, onShop }) {
       <button
         onClick={(e) => {
           e.stopPropagation();
-          onShop(`${shade || ''} ${product} makeup`);
+          onShop({
+            query: `${shade || ''} ${product} makeup`,
+            catId: 'makeup'
+          });
         }}
         className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-4 border border-violet-400/30 hover:bg-violet-500"
       >
@@ -188,7 +219,14 @@ function ColorCard({ color, category, gender, isDark, onShop, className = '' }) 
         <div className={`px-3 pb-3 border-t ${dividerCls} pt-2 scale-in`} onClick={e => e.stopPropagation()}>
           {color.reason && <p className={`${reasonCls} text-xs leading-relaxed mb-3`}>{color.reason}</p>}
           <button
-            onClick={() => onShop(`${color.name} ${gender === 'female' ? 'top' : 'shirt'}`)}
+            onClick={() => {
+              const productLabel = PRODUCT_LABEL_MAP[category]?.[gender === 'female' ? 'female' : 'male'] || category;
+              onShop({ 
+                query: `${color.name} ${productLabel}`, 
+                color: color.name, 
+                catId: category 
+              });
+            }}
             className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-3 border border-violet-400/30 hover:bg-violet-500"
           >
             Shop Direct →
@@ -978,7 +1016,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
                   </div>
                   <span className={`text-xs px-2 py-0.5 rounded-full border ${isDark ? 'bg-pink-500/20 text-pink-300 border-pink-500/20' : 'bg-pink-100 text-pink-700 border-pink-300 font-semibold'}`}>{item.occasion}</span>
                 </div>
-                <ShoppingLinks colorName={`${item.colors} ${item.type}`} category="kurta" gender="female" onShop={onShop} />
+                <ShoppingLinks colorName={`${item.colors} ${item.type}`} category="saree" gender="female" onShop={onShop} />
               </div>
             ))}
           </div>
