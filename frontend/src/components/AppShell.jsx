@@ -945,17 +945,6 @@ export default function AppShell({ user, onLogout }) {
     }).catch(() => {});
   }, [user?.uid]);
 
-  // ── Deep-link from notification tap ──────────────────────────
-  useEffect(() => {
-    const handler = (e) => {
-      const tab = e.detail?.tab;
-      if (tab) {
-        handleTabChange(tab);
-      }
-    };
-    window.addEventListener('sg_navigate', handler);
-    return () => window.removeEventListener('sg_navigate', handler);
-  }, [handleTabChange]);
 
   // ── Daily Streak Sync ──────────────────────
   useEffect(() => {
@@ -1025,6 +1014,18 @@ export default function AppShell({ user, onLogout }) {
     window.history.pushState({ tab }, '');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeTab]);
+
+  // ── Deep-link from notification tap ──────────────────────────
+  useEffect(() => {
+    const handler = (e) => {
+      const tab = e.detail?.tab;
+      if (tab) {
+        handleTabChange(tab);
+      }
+    };
+    window.addEventListener('sg_navigate', handler);
+    return () => window.removeEventListener('sg_navigate', handler);
+  }, [handleTabChange]);
 
   const handleAnalysisComplete = useCallback(async (data) => {
     setLoading(false); setResults(data); setActiveTab('analyze');
