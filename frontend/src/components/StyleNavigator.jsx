@@ -25,6 +25,7 @@ import {
 } from '../utils/analytics';
 import { scoreWardrobeItem, getActionableAdvice, getAccessoryAdvice } from '../utils/stylingEngine';
 import { getThemeColors } from '../utils/themeColors';
+import { PRODUCT_LABEL_MAP, getShopData } from '../utils/shoppingUrls';
 import ShopActionSheet from './ShopActionSheet';
 
 // ── Skin tone → hex ─────────────────────────────────
@@ -45,18 +46,18 @@ const TONE_PALETTE = {
 
 // ── Male outfit templates by occasion ───────────────
 const MALE_OUTFITS = {
-  office:   (color1, color2) => ({ top:`${color1} formal shirt`,      bottom:`${color2} tailored trousers`,    shoes:'Dark brown Oxford shoes', accent:'Silver watch + leather belt matching shoes' }),
-  casual:   (color1, color2) => ({ top:`${color1} slim-fit polo`,     bottom:`${color2} clean chinos`,         shoes:'White minimal sneakers',  accent:'Minimal bracelet + clean watch' }),
-  party:    (color1, color2) => ({ top:`${color1} printed shirt`,     bottom:`${color2} slim dark jeans`,      shoes:'Dark Chelsea boots',      accent:'Bold statement watch or ring' }),
-  ethnic:   (color1, color2) => ({ top:`${color1} kurta set`,         bottom:`${color2} churidar`,             shoes:'Tan mojari / juttis',     accent:'Pocket square + minimal bracelet' }),
-  gym:      (color1, color2) => ({ top:`${color1} dry-fit tee`,       bottom:`${color2} track pants`,          shoes:'Cushioned athletic shoes', accent:'Sports band / cap' }),
+  office:   (color1, color2) => ({ top:`${color1} formal shirt`,      bottom:`${color2} tailored trousers`,    shoes:'Dark brown Oxford shoes', accent:'Silver watch + leather belt matching shoes', topCat:'formal_shirt', bottomCat:'formal_trouser' }),
+  casual:   (color1, color2) => ({ top:`${color1} slim-fit polo`,     bottom:`${color2} clean chinos`,         shoes:'White minimal sneakers',  accent:'Minimal bracelet + clean watch', topCat:'polo', bottomCat:'chinos' }),
+  party:    (color1, color2) => ({ top:`${color1} printed shirt`,     bottom:`${color2} slim dark jeans`,      shoes:'Dark Chelsea boots',      accent:'Bold statement watch or ring', topCat:'shirt', bottomCat:'jeans' }),
+  ethnic:   (color1, color2) => ({ top:`${color1} kurta set`,         bottom:`${color2} churidar`,             shoes:'Tan mojari / juttis',     accent:'Pocket square + minimal bracelet', topCat:'kurta_set', bottomCat:'kurta_set' }),
+  gym:      (color1, color2) => ({ top:`${color1} dry-fit tee`,       bottom:`${color2} track pants`,          shoes:'Cushioned athletic shoes', accent:'Sports band / cap', topCat:'tshirt', bottomCat:'track_pants' }),
 };
 const FEMALE_OUTFITS = {
-  office:   (color1, color2) => ({ top:`${color1} structured blazer`, bottom:`${color2} cigarette trousers`,   shoes:'Nude pointed pumps',      accent:'Pearl earrings + structured handbag' }),
-  casual:   (color1, color2) => ({ top:`${color1} crop top`,         bottom:`${color2} high-waist jeans`,     shoes:'White slip-on sneakers',  accent:'Layered necklace + tote bag' }),
-  party:    (color1, color2) => ({ top:`${color1} co-ord set top`,   bottom:`${color2} wide-leg pants`,       shoes:'Block heel sandals',      accent:'Statement earrings + clutch' }),
-  ethnic:   (color1, color2) => ({ top:`${color1} silk kurti`,       bottom:`${color2} palazzo / salwar`,    shoes:'Kolhapuri / embellished flats', accent:'Jhumka earrings + bangles' }),
-  party_gown: (color1)       => ({ top:`${color1} midi dress`,       bottom:'—',                              shoes:'Strappy heeled sandals',  accent:'Ear cuff + chain bag' }),
+  office:   (color1, color2) => ({ top:`${color1} structured blazer`, bottom:`${color2} cigarette trousers`,   shoes:'Nude pointed pumps',      accent:'Pearl earrings + structured handbag', topCat:'blazer', bottomCat:'pant' }),
+  casual:   (color1, color2) => ({ top:`${color1} crop top`,         bottom:`${color2} high-waist jeans`,     shoes:'White slip-on sneakers',  accent:'Layered necklace + tote bag', topCat:'crop_top', bottomCat:'jeans_female' }),
+  party:    (color1, color2) => ({ top:`${color1} co-ord set top`,   bottom:`${color2} wide-leg pants`,       shoes:'Block heel sandals',      accent:'Statement earrings + clutch', topCat:'top', bottomCat:'pant' }),
+  ethnic:   (color1, color2) => ({ top:`${color1} silk kurti`,       bottom:`${color2} palazzo / salwar`,    shoes:'Kolhapuri / embellished flats', accent:'Jhumka earrings + bangles', topCat:'kurti', bottomCat:'palazzo_f' }),
+  party_gown: (color1)       => ({ top:`${color1} midi dress`,       bottom:'—',                              shoes:'Strappy heeled sandals',  accent:'Ear cuff + chain bag', topCat:'dress' }),
 };
 
 // ── Why text (color theory backed) ─────────────────
@@ -103,105 +104,105 @@ const VIOLET = '#8B5CF6';
 const TRENDING_PRODUCTS = {
   male: [
     // Streetwear
-    { id:'m1', emoji:'👕', name:'Oversized T-Shirts (plain/graphic)', category:'Streetwear', why:'Comfort + simplicity & Streetwear influence', search:'men oversized t-shirt plain graphic India 2025' },
-    { id:'m2', emoji:'👖', name:'Cargo Pants / Utility Pants',      category:'Streetwear', why:'Streetwear influence & highly functional',    search:'men cargo utility pants India 2025' },
-    { id:'m7', emoji:'🧥', name:'Hoodies + Streetwear combo',        category:'Streetwear',  why:'Comfort + streetwear influence',          search:'men hoodies streetwear combo India' },
-    { id:'msw1',emoji:'🧥', name:'Graphic Varsity Jackets',          category:'Streetwear',  why:'Campus and streetwear must-have',         search:'men graphic varsity jacket India 2025' },
-    { id:'msw2',emoji:'🩳', name:'Parachute Track Pants',            category:'Streetwear',  why:'Loose, breathable and hyper-trendy y2k',  search:'men parachute track pants streetwear India' },
+    { id:'m1', emoji:'👕', name:'Oversized T-Shirts (plain/graphic)', category:'Streetwear', why:'Comfort + simplicity & Streetwear influence', search:'men oversized t-shirt plain graphic India 2025', catId: 'tshirt' },
+    { id:'m2', emoji:'👖', name:'Cargo Pants / Utility Pants',      category:'Streetwear', why:'Streetwear influence & highly functional',    search:'men cargo utility pants India 2025', catId: 'cargo' },
+    { id:'m7', emoji:'🧥', name:'Hoodies + Streetwear combo',        category:'Streetwear',  why:'Comfort + streetwear influence',          search:'men hoodies streetwear combo India', catId: 'hoodie' },
+    { id:'msw1',emoji:'🧥', name:'Graphic Varsity Jackets',          category:'Streetwear',  why:'Campus and streetwear must-have',         search:'men graphic varsity jacket India 2025', catId: 'jacket' },
+    { id:'msw2',emoji:'🩳', name:'Parachute Track Pants',            category:'Streetwear',  why:'Loose, breathable and hyper-trendy y2k',  search:'men parachute track pants streetwear India', catId: 'track_pants' },
 
     // Casual
-    { id:'m3', emoji:'👖', name:'Baggy Jeans / Relaxed Fit Denim',  category:'Casual',     why:'Comfort + simplicity, replacing skinny fits', search:'men baggy jeans relaxed fit India' },
-    { id:'m4', emoji:'👔', name:'Printed Shirts (half sleeve)',      category:'Casual',     why:'Vibrant, easy aesthetic for casual outings',search:'men printed half sleeve shirt casual India' },
-    { id:'m6', emoji:'✨', name:'Korean Style Outfits (fitted)',     category:'Casual',     why:'Simple + fitted, highly trending aesthetics',search:'men korean style outfits simple fitted India' },
-    { id:'m8', emoji:'🧥', name:'Layering (T-shirt + overshirt)',    category:'Casual',     why:'Neutral colors + aesthetic layering',     search:'men layering t-shirt shirt jacket outfit India' },
-    { id:'m10',emoji:'🏃', name:'Athleisure (joggers + tees)',        category:'Casual',     why:'Comfort + functional activewear vibe',    search:'men athleisure joggers tee outfit India' },
-    { id:'mc1',emoji:'👕', name:'Textured Knit Polos',               category:'Casual',     why:'Vintage look, extremely popular in 2025', search:'men textured knit polo shirt India' },
+    { id:'m3', emoji:'👖', name:'Baggy Jeans / Relaxed Fit Denim',  category:'Casual',     why:'Comfort + simplicity, replacing skinny fits', search:'men baggy jeans relaxed fit India', catId: 'jeans' },
+    { id:'m4', emoji:'👔', name:'Printed Shirts (half sleeve)',      category:'Casual',     why:'Vibrant, easy aesthetic for casual outings',search:'men printed half sleeve shirt casual India', catId: 'shirt' },
+    { id:'m6', emoji:'✨', name:'Korean Style Outfits (fitted)',     category:'Casual',     why:'Simple + fitted, highly trending aesthetics',search:'men korean style outfits simple fitted India', catId: 'shirt' },
+    { id:'m8', emoji:'🧥', name:'Layering (T-shirt + overshirt)',    category:'Casual',     why:'Neutral colors + aesthetic layering',     search:'men layering t-shirt shirt jacket outfit India', catId: 'shirt' },
+    { id:'m10',emoji:'🏃', name:'Athleisure (joggers + tees)',        category:'Casual',     why:'Comfort + functional activewear vibe',    search:'men athleisure joggers tee outfit India', catId: 'track_pants' },
+    { id:'mc1',emoji:'👕', name:'Textured Knit Polos',               category:'Casual',     why:'Vintage look, extremely popular in 2025', search:'men textured knit polo shirt India', catId: 'polo' },
 
     // Formal
-    { id:'m5', emoji:'👔', name:'Minimal Solid Shirts (clean look)', category:'Formal',      why:'Clean look + neutral colors',             search:'men minimal solid shirt formal casual India' },
-    { id:'mf1',emoji:'👖', name:'Tailored Linen Trousers',           category:'Formal',      why:'Breathable, premium office wear',         search:'men tailored linen formal trousers India' },
-    { id:'mf2',emoji:'🧥', name:'Unstructured Cotton Blazers',       category:'Formal',      why:'Soft formal aesthetic without stiffness', search:'men unstructured cotton blazer formal India' },
-    { id:'mf3',emoji:'👔', name:'Slim Fit Oxford Shirts',            category:'Formal',      why:'Classic professional wardrobe staple',    search:'men slim fit oxford shirt formal India' },
-    { id:'mf4',emoji:'👖', name:'Checkered Formal Trousers',         category:'Formal',      why:'Adds subtle texture to office outfits',   search:'men checkered formal trousers slim fit India' },
+    { id:'m5', emoji:'👔', name:'Minimal Solid Shirts (clean look)', category:'Formal',      why:'Clean look + neutral colors',             search:'men minimal solid shirt formal casual India', catId: 'formal_shirt' },
+    { id:'mf1',emoji:'👖', name:'Tailored Linen Trousers',           category:'Formal',      why:'Breathable, premium office wear',         search:'men tailored linen formal trousers India', catId: 'formal_trouser' },
+    { id:'mf2',emoji:'🧥', name:'Unstructured Cotton Blazers',       category:'Formal',      why:'Soft formal aesthetic without stiffness', search:'men unstructured cotton blazer formal India', catId: 'blazer' },
+    { id:'mf3',emoji:'👔', name:'Slim Fit Oxford Shirts',            category:'Formal',      why:'Classic professional wardrobe staple',    search:'men slim fit oxford shirt formal India', catId: 'formal_shirt' },
+    { id:'mf4',emoji:'👖', name:'Checkered Formal Trousers',         category:'Formal',      why:'Adds subtle texture to office outfits',   search:'men checkered formal trousers slim fit India', catId: 'formal_trouser' },
 
     // Ethnic
-    { id:'m9', emoji:'👔', name:'Modern Kurta (casual ethnic)',       category:'Ethnic',     why:'Casual ethnic fusion, highly versatile',  search:'men modern kurta casual ethnic India' },
-    { id:'me1',emoji:'🧥', name:'Silk Blend Nehru Jackets',          category:'Ethnic',     why:'Perfect layering for weddings and pujas', search:'men silk blend nehru jacket ethnic India' },
-    { id:'me2',emoji:'👔', name:'Chikankari Short Kurtas',           category:'Ethnic',     why:'Elegant, summer-ready ethnic wear',       search:'men chikankari short kurta ethnic India' },
-    { id:'me3',emoji:'🧥', name:'Threadwork Bandhgala Suits',        category:'Ethnic',     why:'The ultimate premium wedding guest look', search:'men threadwork bandhgala suit ethnic India' },
-    { id:'me4',emoji:'👔', name:'Pastel Festive Kurtas',             category:'Ethnic',     why:'Modern color palette for traditional wear',search:'men pastel festive kurta for men India' },
+    { id:'m9', emoji:'👔', name:'Modern Kurta (casual ethnic)',       category:'Ethnic',     why:'Casual ethnic fusion, highly versatile',  search:'men modern kurta casual ethnic India', catId: 'kurta' },
+    { id:'me1',emoji:'🧥', name:'Silk Blend Nehru Jackets',          category:'Ethnic',     why:'Perfect layering for weddings and pujas', search:'men silk blend nehru jacket ethnic India', catId: 'nehru_jacket' },
+    { id:'me2',emoji:'👔', name:'Chikankari Short Kurtas',           category:'Ethnic',     why:'Elegant, summer-ready ethnic wear',       search:'men chikankari short kurta ethnic India', catId: 'kurta' },
+    { id:'me3',emoji:'🧥', name:'Threadwork Bandhgala Suits',        category:'Ethnic',     why:'The ultimate premium wedding guest look', search:'men threadwork bandhgala suit ethnic India', catId: 'sherwani' },
+    { id:'me4',emoji:'👔', name:'Pastel Festive Kurtas',             category:'Ethnic',     why:'Modern color palette for traditional wear',search:'men pastel festive kurta for men India', catId: 'kurta' },
 
     // Party
-    { id:'mp1',emoji:'🧥', name:'Textured Party Blazer',             category:'Party',      why:'Statement piece for night events',        search:'men textured party blazer shiny India' },
-    { id:'mp2',emoji:'👔', name:'Silk/Satin Party Shirts',           category:'Party',      why:'Luxurious feel, great under lights',      search:'men satin silk party shirt India' },
-    { id:'mp3',emoji:'🧥', name:'Sequin Detailed Jackets',           category:'Party',      why:'Bold clubwear & high-end party styling',  search:'men sequin detailed jacket party India' },
-    { id:'mp4',emoji:'👔', name:'Bold Printed Party Shirts',         category:'Party',      why:'Conversation starters for casual parties',search:'men bold printed shirt party wear India' },
-    { id:'mp5',emoji:'🧥', name:'Velvet Dinner Jackets',             category:'Party',      why:'Premium aesthetic for formal night parties',search:'men velvet dinner jacket party India' },
+    { id:'mp1',emoji:'🧥', name:'Textured Party Blazer',             category:'Party',      why:'Statement piece for night events',        search:'men textured party blazer shiny India', catId: 'blazer' },
+    { id:'mp2',emoji:'👔', name:'Silk/Satin Party Shirts',           category:'Party',      why:'Luxurious feel, great under lights',      search:'men satin silk party shirt India', catId: 'shirt' },
+    { id:'mp3',emoji:'🧥', name:'Sequin Detailed Jackets',           category:'Party',      why:'Bold clubwear & high-end party styling',  search:'men sequin detailed jacket party India', catId: 'jacket' },
+    { id:'mp4',emoji:'👔', name:'Bold Printed Party Shirts',         category:'Party',      why:'Conversation starters for casual parties',search:'men bold printed shirt party wear India', catId: 'shirt' },
+    { id:'mp5',emoji:'🧥', name:'Velvet Dinner Jackets',             category:'Party',      why:'Premium aesthetic for formal night parties',search:'men velvet dinner jacket party India', catId: 'blazer' },
 
     // Shoes
-    { id:'ms1',emoji:'👟', name:'Chunky Sneakers',                   category:'Shoes',      why:'Streetwear + baggy outfits, bold look',   search:'men chunky sneakers streetwear India 2025' },
-    { id:'ms2',emoji:'👟', name:'White Sneakers (Low-top)',          category:'Shoes',      why:'सबसे versatile, हर outfit के साथ',         search:'men white sneakers low top casual India' },
-    { id:'ms3',emoji:'👞', name:'Loafers (Casual / Smart)',          category:'Shoes',      why:'Clean + mature look (shirt + pant/kurta)',search:'men loafers casual smart India' },
-    { id:'ms4',emoji:'👞', name:'Formal Leather Oxfords',            category:'Shoes',      why:'Essential for boardrooms and weddings',   search:'men genuine formal leather oxfords India' },
-    { id:'ms5',emoji:'🥾', name:'Premium Suede Chelsea Boots',       category:'Shoes',      why:'Transforms casual jeans into party wear', search:'men premium suede chelsea boots India' },
+    { id:'ms1',emoji:'👟', name:'Chunky Sneakers',                   category:'Shoes',      why:'Streetwear + baggy outfits, bold look',   search:'men chunky sneakers streetwear India 2025', catId: 'sneakers' },
+    { id:'ms2',emoji:'👟', name:'White Sneakers (Low-top)',          category:'Shoes',      why:'सबसे versatile, हर outfit के साथ',         search:'men white sneakers low top casual India', catId: 'sneakers' },
+    { id:'ms3',emoji:'👞', name:'Loafers (Casual / Smart)',          category:'Shoes',      why:'Clean + mature look (shirt + pant/kurta)',search:'men loafers casual smart India', catId: 'loafers' },
+    { id:'ms4',emoji:'👞', name:'Formal Leather Oxfords',            category:'Shoes',      why:'Essential for boardrooms and weddings',   search:'men genuine formal leather oxfords India', catId: 'formal_shoe' },
+    { id:'ms5',emoji:'🥾', name:'Premium Suede Chelsea Boots',       category:'Shoes',      why:'Transforms casual jeans into party wear', search:'men premium suede chelsea boots India', catId: 'boots' },
 
     // Accessories
-    { id:'ma1',emoji:'⌚', name:'Minimalist Analog Watch',           category:'Accessories',why:'Timeless and versatile investment',       search:'men minimalist analog watch India' },
-    { id:'ma2',emoji:'🎒', name:'Crossbody Sling Bags',              category:'Accessories',why:'Streetwear utility staple',             search:'men crossbody sling bag streetwear India' },
-    { id:'ma3',emoji:'🧤', name:'Genuine Leather Belts',             category:'Accessories',why:'Matches formal and smart casual looks',   search:'men genuine leather belt formal India' },
-    { id:'ma4',emoji:'🕶️', name:'Retro Square Sunglasses',           category:'Accessories',why:'Summer necessity, very vintage aesthetic',search:'men retro square sunglasses India' },
-    { id:'ma5',emoji:'⛓️', name:'Layered Chain Necklaces',           category:'Accessories',why:'Gen Z essential for streetwear/party',    search:'men layered chain necklace accessory India' },
+    { id:'ma1',emoji:'⌚', name:'Minimalist Analog Watch',           category:'Accessories',why:'Timeless and versatile investment',       search:'men minimalist analog watch India', catId: 'watch' },
+    { id:'ma2',emoji:'🎒', name:'Crossbody Sling Bags',              category:'Accessories',why:'Streetwear utility staple',             search:'men crossbody sling bag streetwear India', catId: 'backpack' },
+    { id:'ma3',emoji:'🧤', name:'Genuine Leather Belts',             category:'Accessories',why:'Matches formal and smart casual looks',   search:'men genuine leather belt formal India', catId: 'belt' },
+    { id:'ma4',emoji:'🕶️', name:'Retro Square Sunglasses',           category:'Accessories',why:'Summer necessity, very vintage aesthetic',search:'men retro square sunglasses India', catId: 'sunglasses' },
+    { id:'ma5',emoji:'⛓️', name:'Layered Chain Necklaces',           category:'Accessories',why:'Gen Z essential for streetwear/party',    search:'men layered chain necklace accessory India', catId: 'accessory' },
   ],
   female: [
     // Casual
-    { id:'f1', emoji:'👕', name:'Oversized T-Shirts (graphic/printed)',category:'Casual',   why:'Comfort + aesthetic, loose fit',          search:'women oversized graphic printed t-shirt India' },
-    { id:'f3', emoji:'👗', name:'Co-ord Sets (matching top + bottom)', category:'Casual',   why:'Instagram-friendly outfits, effortless',  search:'women co-ord sets matching top bottom India' },
-    { id:'f6', emoji:'✨', name:'Korean Style Minimal Outfits',         category:'Casual',   why:'Minimal styling + aesthetic appeal',      search:'women korean style minimal outfits India' },
-    { id:'f8', emoji:'✂️', name:'Denim Skirts (mid/long length)',        category:'Casual',   why:'Y2K aesthetic comeback, very trendy',     search:'women long mid length denim skirt India' },
-    { id:'f9', emoji:'🧥', name:'Shrugs + Layering outfits',            category:'Casual',   why:'Comfort + aesthetic layering',            search:'women shrugs layering outfits India' },
-    { id:'fc1',emoji:'👖', name:'High Waist Mom Jeans',                category:'Casual',   why:'The ultimate comfort denim replacement',  search:'women high waist mom jeans casual India' },
+    { id:'f1', emoji:'👕', name:'Oversized T-Shirts (graphic/printed)',category:'Casual',   why:'Comfort + aesthetic, loose fit',          search:'women oversized graphic printed t-shirt India', catId: 'top' },
+    { id:'f3', emoji:'👗', name:'Co-ord Sets (matching top + bottom)', category:'Casual',   why:'Instagram-friendly outfits, effortless',  search:'women co-ord sets matching top bottom India', catId: 'dress' },
+    { id:'f6', emoji:'✨', name:'Korean Style Minimal Outfits',         category:'Casual',   why:'Minimal styling + aesthetic appeal',      search:'women korean style minimal outfits India', catId: 'top' },
+    { id:'f8', emoji:'✂️', name:'Denim Skirts (mid/long length)',        category:'Casual',   why:'Y2K aesthetic comeback, very trendy',     search:'women long mid length denim skirt India', catId: 'skirt' },
+    { id:'f9', emoji:'🧥', name:'Shrugs + Layering outfits',            category:'Casual',   why:'Comfort + aesthetic layering',            search:'women shrugs layering outfits India', catId: 'top' },
+    { id:'fc1',emoji:'👖', name:'High Waist Mom Jeans',                category:'Casual',   why:'The ultimate comfort denim replacement',  search:'women high waist mom jeans casual India', catId: 'jeans_female' },
 
     // Streetwear
-    { id:'f2', emoji:'👖', name:'Cargo Pants (loose fit)',             category:'Streetwear',why:'Loose fit + minimal styling',             search:'women cargo pants loose fit India 2025' },
-    { id:'f10',emoji:'🧘', name:'Athleisure (leggings + crop + jacket)', category:'Streetwear',why:'Activewear as daywear, extremely comfy',search:'women athleisure leggings crop jacket India' },
-    { id:'fsw1',emoji:'👚', name:'Graphic Y2K Baby Tees',               category:'Streetwear',why:'Highly trending nostalgia aesthetic',     search:'women graphic y2k baby tee streetwear India' },
-    { id:'fsw2',emoji:'👖', name:'Loose Parachute Pants',               category:'Streetwear',why:'Breathable, voluminous, street-ready',    search:'women loose parachute pants streetwear India' },
-    { id:'fsw3',emoji:'🧥', name:'Oversized Zip-up Hoodies',            category:'Streetwear',why:'The effortless airport-look staple',      search:'women oversized zip up hoodie streetwear India' },
+    { id:'f2', emoji:'👖', name:'Cargo Pants (loose fit)',             category:'Streetwear',why:'Loose fit + minimal styling',             search:'women cargo pants loose fit India 2025', catId: 'bottom' },
+    { id:'f10',emoji:'🧘', name:'Athleisure (leggings + crop + jacket)', category:'Streetwear',why:'Activewear as daywear, extremely comfy',search:'women athleisure leggings crop jacket India', catId: 'bottom' },
+    { id:'fsw1',emoji:'👚', name:'Graphic Y2K Baby Tees',               category:'Streetwear',why:'Highly trending nostalgia aesthetic',     search:'women graphic y2k baby tee streetwear India', catId: 'crop_top' },
+    { id:'fsw2',emoji:'👖', name:'Loose Parachute Pants',               category:'Streetwear',why:'Breathable, voluminous, street-ready',    search:'women loose parachute pants streetwear India', catId: 'bottom' },
+    { id:'fsw3',emoji:'🧥', name:'Oversized Zip-up Hoodies',            category:'Streetwear',why:'The effortless airport-look staple',      search:'women oversized zip up hoodie streetwear India', catId: 'top' },
 
     // Formal
-    { id:'ff1',emoji:'🧥', name:'Oversized Power Blazers',             category:'Formal',    why:'Modern power dressing essential',         search:'women oversized power blazer formal India' },
-    { id:'ff2',emoji:'👖', name:'Wide Leg Formal Trousers',            category:'Formal',    why:'Comfortable office-to-party versatile',   search:'women wide leg formal trousers India' },
-    { id:'ff3',emoji:'👚', name:'Satin Button-Down Shirts',            category:'Formal',    why:'Luxurious drape for office wear',         search:'women satin button down shirt formal India' },
-    { id:'ff4',emoji:'👗', name:'Tailored Pencil Skirts',              category:'Formal',    why:'Classic, sharp corporate aesthetic',      search:'women tailored pencil skirt formal India' },
-    { id:'ff5',emoji:'👚', name:'Peplum Formal Tops',                  category:'Formal',    why:'Flattering fits for professional settings', search:'women peplum formal tops office India' },
+    { id:'ff1',emoji:'🧥', name:'Oversized Power Blazers',             category:'Formal',    why:'Modern power dressing essential',         search:'women oversized power blazer formal India', catId: 'blazer' },
+    { id:'ff2',emoji:'👖', name:'Wide Leg Formal Trousers',            category:'Formal',    why:'Comfortable office-to-party versatile',   search:'women wide leg formal trousers India', catId: 'pant' },
+    { id:'ff3',emoji:'👚', name:'Satin Button-Down Shirts',            category:'Formal',    why:'Luxurious drape for office wear',         search:'women satin button down shirt formal India', catId: 'shirt_female' },
+    { id:'ff4',emoji:'👗', name:'Tailored Pencil Skirts',              category:'Formal',    why:'Classic, sharp corporate aesthetic',      search:'women tailored pencil skirt formal India', catId: 'skirt' },
+    { id:'ff5',emoji:'👚', name:'Peplum Formal Tops',                  category:'Formal',    why:'Flattering fits for professional settings', search:'women peplum formal tops office India', catId: 'top' },
 
     // Ethnic
-    { id:'f4', emoji:'👘', name:'Fusion Kurtis (modern + ethnic mix)', category:'Ethnic',   why:'Comfort + aesthetic, easy to style',      search:'women fusion kurtis modern ethnic mix India' },
-    { id:'fe1',emoji:'👘', name:'Chiffon Printed Sarees',              category:'Ethnic',   why:'Lightweight, elegant, Bollywood-inspired',search:'women chiffon printed saree floral India' },
-    { id:'fe2',emoji:'👗', name:'Sharara Sets (Wedding/Festive)',      category:'Ethnic',   why:'Top pick for sangeets and festivals',     search:'women sharara set wedding festive India' },
-    { id:'fe3',emoji:'👘', name:'Chikankari Anarkali Suits',           category:'Ethnic',   why:'Timeless grace with incredible details',  search:'women chikankari anarkali suit ethnic India' },
-    { id:'fe4',emoji:'👗', name:'Pre-draped Ruffle Sarees',            category:'Ethnic',   why:'No-fuss modern ethnic party wear',        search:'women pre draped ruffle saree ethnic India' },
+    { id:'f4', emoji:'👘', name:'Fusion Kurtis (modern + ethnic mix)', category:'Ethnic',   why:'Comfort + aesthetic, easy to style',      search:'women fusion kurtis modern ethnic mix India', catId: 'kurti' },
+    { id:'fe1',emoji:'👘', name:'Chiffon Printed Sarees',              category:'Ethnic',   why:'Lightweight, elegant, Bollywood-inspired',search:'women chiffon printed saree floral India', catId: 'saree' },
+    { id:'fe2',emoji:'👗', name:'Sharara Sets (Wedding/Festive)',      category:'Ethnic',   why:'Top pick for sangeets and festivals',     search:'women sharara set wedding festive India', catId: 'sharara' },
+    { id:'fe3',emoji:'👘', name:'Chikankari Anarkali Suits',           category:'Ethnic',   why:'Timeless grace with incredible details',  search:'women chikankari anarkali suit ethnic India', catId: 'anarkali' },
+    { id:'fe4',emoji:'👗', name:'Pre-draped Ruffle Sarees',            category:'Ethnic',   why:'No-fuss modern ethnic party wear',        search:'women pre draped ruffle saree ethnic India', catId: 'saree' },
 
     // Party
-    { id:'f5', emoji:'👚', name:'Crop Tops + High Waist Jeans',         category:'Party',    why:'Classic flattering silhouette',           search:'women crop top high waist jeans outfit India' },
-    { id:'f7', emoji:'👗', name:'Satin / Slip Dresses (simple + classy)',category:'Party',   why:'Simple + classy, Instagram-friendly',     search:'women satin slip dress simple classy India' },
-    { id:'fp1',emoji:'👚', name:'Corset Style Tops',                   category:'Party',    why:'Viral fashion pick for nights out',       search:'women corset style tops party India' },
-    { id:'fp2',emoji:'👗', name:'Sequined Party Dresses',              category:'Party',    why:'High impact glamour for clubbing',        search:'women sequined party dress clubwear India' },
-    { id:'fp3',emoji:'👚', name:'Velvet Halter Neck Tops',             category:'Party',    why:'Premium texture for winter parties',      search:'women velvet halter neck top party India' },
+    { id:'f5', emoji:'👚', name:'Crop Tops + High Waist Jeans',         category:'Party',    why:'Classic flattering silhouette',           search:'women crop top high waist jeans outfit India', catId: 'crop_top' },
+    { id:'f7', emoji:'👗', name:'Satin / Slip Dresses (simple + classy)',category:'Party',   why:'Simple + classy, Instagram-friendly',     search:'women satin slip dress simple classy India', catId: 'dress' },
+    { id:'fp1',emoji:'👚', name:'Corset Style Tops',                   category:'Party',    why:'Viral fashion pick for nights out',       search:'women corset style tops party India', catId: 'top' },
+    { id:'fp2',emoji:'👗', name:'Sequined Party Dresses',              category:'Party',    why:'High impact glamour for clubbing',        search:'women sequined party dress clubwear India', catId: 'dress' },
+    { id:'fp3',emoji:'👚', name:'Velvet Halter Neck Tops',             category:'Party',    why:'Premium texture for winter parties',      search:'women velvet halter neck top party India', catId: 'top' },
 
     // Shoes
-    { id:'fs1',emoji:'👟', name:'Chunky Sneakers (Bulky shoes)',        category:'Shoes',    why:'Gen Z trend, pairs with streetwear & cargo',search:'women chunky sneakers bulky shoes India' },
-    { id:'fs2',emoji:'👟', name:'White Minimal Sneakers',                category:'Shoes',    why:'Clean + classy look, हर outfit के साथ',    search:'women white minimal sneakers India' },
-    { id:'fs3',emoji:'👡', name:'Platform Heels / Sandals',              category:'Shoes',    why:'Height + stylish look, great with dresses',search:'women platform heels sandals ethnic fusion' },
-    { id:'fs4',emoji:'👡', name:'Transparent Block Heels',               category:'Shoes',    why:'Creates illusion of longer legs instantly', search:'women transparent block heels sandals India' },
-    { id:'fs5',emoji:'🥿', name:'Flat Mules / Casual Loafers',           category:'Shoes',    why:'Comfy slip-ons perfectly pairing formal & casual',search:'women flat mules loafers casual India' },
+    { id:'fs1',emoji:'👟', name:'Chunky Sneakers (Bulky shoes)',        category:'Shoes',    why:'Gen Z trend, pairs with streetwear & cargo',search:'women chunky sneakers bulky shoes India', catId: 'sneakers_f' },
+    { id:'fs2',emoji:'👟', name:'White Minimal Sneakers',                category:'Shoes',    why:'Clean + classy look, हर outfit के साथ',    search:'women white minimal sneakers India', catId: 'sneakers_f' },
+    { id:'fs3',emoji:'👡', name:'Platform Heels / Sandals',              category:'Shoes',    why:'Height + stylish look, great with dresses',search:'women platform heels sandals ethnic fusion', catId: 'heels' },
+    { id:'fs4',emoji:'👡', name:'Transparent Block Heels',               category:'Shoes',    why:'Creates illusion of longer legs instantly', search:'women transparent block heels sandals India', catId: 'heels' },
+    { id:'fs5',emoji:'🥿', name:'Flat Mules / Casual Loafers',           category:'Shoes',    why:'Comfy slip-ons perfectly pairing formal & casual',search:'women flat mules loafers casual India', catId: 'flats' },
 
     // Accessories
-    { id:'fa1',emoji:'👜', name:'Quilted Mini Bags',                   category:'Accessories',why:'The ultimate "It" bag of 2025',           search:'women quilted mini bag accessory India' },
-    { id:'fa2',emoji:'💍', name:'Layered Necklace Sets',               category:'Accessories',why:'Elevates simple tops instantly',          search:'women layered necklace set jewelry India' },
-    { id:'fa3',emoji:'🥿', name:'Chunky Silver Jhumkas',               category:'Accessories',why:'Boho-chic fusion must-have',            search:'women chunky silver jhumkas jewelry India' },
-    { id:'fa4',emoji:'🕶️', name:'Vintage Cat Eye Sunglasses',          category:'Accessories',why:'Face-lifting aesthetic retro vibes',      search:'women vintage cat eye sunglasses India' },
-    { id:'fa5',emoji:'👜', name:'Minimalist Structured Totes',         category:'Accessories',why:'Spacious office & casual premium look',   search:'women minimalist structured tote bag India' },
+    { id:'fa1',emoji:'👜', name:'Quilted Mini Bags',                   category:'Accessories',why:'The ultimate "It" bag of 2025',           search:'women quilted mini bag accessory India', catId: 'handbag' },
+    { id:'fa2',emoji:'💍', name:'Layered Necklace Sets',               category:'Accessories',why:'Elevates simple tops instantly',          search:'women layered necklace set jewelry India', catId: 'necklace' },
+    { id:'fa3',emoji:'🥿', name:'Chunky Silver Jhumkas',               category:'Accessories',why:'Boho-chic fusion must-have',            search:'women chunky silver jhumkas jewelry India', catId: 'earrings' },
+    { id:'fa4',emoji:'🕶️', name:'Vintage Cat Eye Sunglasses',          category:'Accessories',why:'Face-lifting aesthetic retro vibes',      search:'women vintage cat eye sunglasses India', catId: 'sunglasses_f' },
+    { id:'fa5',emoji:'👜', name:'Minimalist Structured Totes',         category:'Accessories',why:'Spacious office & casual premium look',   search:'women minimalist structured tote bag India', catId: 'handbag' },
   ],
 };
 
@@ -592,7 +593,8 @@ export default function StyleNavigator({ user, onAnalyze }) {
                       </div>
                       <button
                         onClick={() => {
-                          setShopItem(piece.value);
+                          const shopData = getShopData({ query: piece.value, catId: piece.colorIdx === 0 ? outfit.topCat : outfit.bottomCat, gender });
+                          setShopItem(shopData);
                           trackShoppingItemClick(piece.value, 0, 'compass_recommendation');
                         }}
                         style={{ 
@@ -718,7 +720,10 @@ export default function StyleNavigator({ user, onAnalyze }) {
                       <div key={i} style={{ ...card({ padding:0, overflow:'hidden' }) }}>
                         <div style={{ height:64, background:color.hex, position:'relative' }}>
                           <button
-                            onClick={() => setShopItem(searchFormat(color.name))}
+                            onClick={() => {
+                               const shopData = getShopData({ query: searchFormat(color.name), color: color.name, catId: title.includes('Dress') ? 'dress' : title.includes('Ethnic') ? 'kurta' : title.includes('Blazer') ? 'blazer' : 'shirt', gender });
+                               setShopItem(shopData);
+                            }}
                             style={{ 
                               position:'absolute', bottom:6, right:6, 
                               background:VIOLET, border:'none', color:'white', 
@@ -818,7 +823,19 @@ export default function StyleNavigator({ user, onAnalyze }) {
                     </p>
                   </div>
                   <button
-                    onClick={(e) => { e.stopPropagation(); if(!isLocked) setShopItem(`${color.name} ${gender==='female'?'kurti top dress':'shirt kurta polo'}`); }}
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      if(!isLocked) {
+                        const baseCat = gender === 'female' ? (i === 0 ? 'top' : i === 1 ? 'kurti' : 'dress') : (i === 0 ? 'formal_shirt' : i === 1 ? 'polo' : 'kurta');
+                        const shopData = getShopData({ 
+                           query: `${color.name} ${gender==='female'?'kurti top dress':'shirt kurta polo'}`, 
+                           color: color.name, 
+                           catId: baseCat, 
+                           gender 
+                        });
+                        setShopItem(shopData);
+                      }
+                    }}
                     style={{ 
                       padding:'8px 14px', borderRadius:10, 
                       background:VIOLET, border:'none', color:'white', 
@@ -888,7 +905,12 @@ export default function StyleNavigator({ user, onAnalyze }) {
                 </div>
                 {!gap.inWardrobe && (
                   <button
-                    onClick={() => { if(!isLocked) setShopItem(gap.search || gap.item) }}
+                    onClick={() => { 
+                      if(!isLocked) {
+                        const shopData = getShopData({ query: gap.search || gap.item, color: gap.color || '', catId: gap.category || 'shirt', gender });
+                        setShopItem(shopData);
+                      }
+                    }}
                     style={{ fontSize:'11px', color:'white', background: isLocked ? C.glass2 : GRAD, border:'none', borderRadius:10, padding:'8px 14px', cursor:'pointer', fontFamily:PJS, fontWeight:600, flexShrink:0, boxShadow: isLocked ? 'none': '0 3px 10px rgba(139,92,246,0.3)' }}
                   >
                     {isLocked ? '🔒 Pro' : 'Shop →'}
@@ -1018,7 +1040,10 @@ export default function StyleNavigator({ user, onAnalyze }) {
 
                     {/* Shop button */}
                     <button
-                      onClick={() => setShopItem(product.name)}
+                      onClick={() => {
+                        const shopData = getShopData({ query: product.name, catId: product.catId, gender: activeTG });
+                        setShopItem(shopData);
+                      }}
                       style={{ 
                         width:'100%', padding:'10px', borderRadius:14, 
                         background: '#8B5CF6', border:'none', color:'white', 
@@ -1052,7 +1077,7 @@ export default function StyleNavigator({ user, onAnalyze }) {
         isOpen={!!shopItem} 
         onClose={() => setShopItem(null)} 
         item={shopItem} 
-        gender={gender} 
+        gender={shopItem?.gender || gender} 
       />
     </div>
   );

@@ -13,39 +13,10 @@ import { MISSIONS, scoreWardrobeItem } from '../utils/stylingEngine';
 import AffiliateLink from './AffiliateLink';
 import AdSense from '../AdSense';
 import { buildMyntraUrl } from '../utils/myntraUrl';
+import { PRODUCT_LABEL_MAP } from '../utils/shoppingUrls';
 import ShopActionSheet from './ShopActionSheet';
 
-// ── Product Category Mapping for Shopping ─────────────────────
-const PRODUCT_LABEL_MAP = {
-  shirt: { male: 'casual shirt', female: 'top' },
-  tshirt: { male: 't-shirt', female: 't-shirt' },
-  top: { male: 't-shirt', female: 'top' },
-  pant: { male: 'trouser', female: 'trouser' },
-  cargo: { male: 'cargo pants', female: 'cargo pants' },
-  bottom: { male: 'trouser', female: 'trouser' },
-  kurta: { male: 'kurta', female: 'kurti' },
-  kurti: { male: 'kurta', female: 'kurti' },
-  dress: { male: 'shirt', female: 'dress' },
-  lehenga: { male: 'kurta', female: 'lehenga' },
-  saree: { male: 'kurta', female: 'saree' },
-  sharara: { male: 'kurta', female: 'sharara suit' },
-  suit: { male: 'suit', female: 'suit' },
-  dupatta: { male: 'scarf', female: 'dupatta' },
-  hoodie: { male: 'hoodie', female: 'hoodie' },
-  sweatshirt: { male: 'sweatshirt', female: 'sweatshirt' },
-  blazer: { male: 'blazer', female: 'blazer' },
-  formal_shirt: { male: 'formal shirt', female: 'formal shirt' },
-  accessory: { male: 'accessory', female: 'accessory' },
-  makeup: { male: 'makeup', female: 'makeup' },
-  shoes: { male: 'sneakers', female: 'heels' },
-  sneakers: { male: 'sneakers', female: 'sneakers' },
-  heels: { male: 'formal shoes', female: 'heels' },
-  watch: { male: 'watch', female: 'watch' },
-  handbag: { male: 'backpack', female: 'handbag' },
-  necklace: { male: 'chain', female: 'necklace' },
-  earrings: { male: 'studs', female: 'earrings' },
-  bangles: { male: 'bracelet', female: 'bangles' },
-};
+
 
 function ShoppingLinks({ colorName, category = "shirt", gender = "male", onShop }) {
   const { theme } = useContext(ThemeContext);
@@ -1781,7 +1752,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         isOpen={!!shopItem}
         onClose={() => { setShopItem(null); setShopBudget(null); }}
         item={shopItem}
-        gender={isFemale ? 'female' : 'male'}
+        gender={shopItem?.gender || effectiveGender}
         budget={shopBudget}
       />
     </div>

@@ -5,6 +5,55 @@ const AMAZON_TAG = 'StyleGuruAI-21';
 /**
  * Builds a search URL for different e-commerce platforms.
  */
+export const PRODUCT_LABEL_MAP = {
+  shirt: { male: 'casual shirt', female: 'top' },
+  tshirt: { male: 't-shirt', female: 't-shirt' },
+  top: { male: 't-shirt', female: 'top' },
+  pant: { male: 'trouser', female: 'trouser' },
+  cargo: { male: 'cargo pants', female: 'cargo pants' },
+  bottom: { male: 'trouser', female: 'trouser' },
+  kurta: { male: 'kurta', female: 'kurti' },
+  kurti: { male: 'kurta', female: 'kurti' },
+  dress: { male: 'shirt', female: 'dress' },
+  lehenga: { male: 'kurta', female: 'lehenga' },
+  saree: { male: 'kurta', female: 'saree' },
+  sharara: { male: 'kurta', female: 'sharara suit' },
+  suit: { male: 'suit', female: 'suit' },
+  dupatta: { male: 'scarf', female: 'dupatta' },
+  hoodie: { male: 'hoodie', female: 'hoodie' },
+  sweatshirt: { male: 'sweatshirt', female: 'sweatshirt' },
+  blazer: { male: 'blazer', female: 'blazer' },
+  formal_shirt: { male: 'formal shirt', female: 'formal shirt' },
+  accessory: { male: 'accessory', female: 'accessory' },
+  makeup: { male: 'makeup', female: 'makeup' },
+  shoes: { male: 'sneakers', female: 'heels' },
+  sneakers: { male: 'sneakers', female: 'sneakers' },
+  heels: { male: 'formal shoes', female: 'heels' },
+  watch: { male: 'watch', female: 'watch' },
+  handbag: { male: 'backpack', female: 'handbag' },
+  necklace: { male: 'chain', female: 'necklace' },
+  earrings: { male: 'studs', female: 'earrings' },
+  bangles: { male: 'bracelet', female: 'bangles' },
+};
+
+/**
+ * Standardizes shopping metadata for rich deep-linking.
+ */
+export const getShopData = ({ query, catId, color, gender }) => {
+  const isFemale = gender?.toLowerCase().includes('female') || gender === 'women';
+  const gKey = isFemale ? 'female' : 'male';
+  
+  const finalCatId = (catId || 'shirt').toLowerCase().replace(/^cat_/, '');
+  const productLabel = PRODUCT_LABEL_MAP[finalCatId]?.[gKey] || finalCatId;
+  
+  return {
+    query: query || (color ? `${color} ${productLabel}` : productLabel),
+    catId: finalCatId,
+    color: color || '',
+    gender: gKey,
+  };
+};
+
 export const buildShopUrl = (item, storeId, gender = 'male', budget = null) => {
   const isObj = typeof item === 'object' && item !== null;
   const queryStr = isObj ? (item.query || '') : item;
