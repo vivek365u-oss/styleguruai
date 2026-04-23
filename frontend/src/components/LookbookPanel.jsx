@@ -11,6 +11,8 @@ function LookbookPanel() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
   const handleShopClick = (itemName, catId, lookItem) => {
     setSelectedItem({
       query: itemName,
