@@ -1241,3 +1241,42 @@ export const updateDailyStreak = async (uid) => {
     return null;
   }
 };
+
+// ============================================
+// NOTIFICATION PREFERENCES — FIRESTORE
+// ============================================
+
+/**
+ * Save user's notification preference to Firestore root user document.
+ * Called when user enables/disables notifications in Profile settings.
+ */
+export const saveNotificationPreference = async (uid, enabled) => {
+  if (!uid) return;
+  try {
+    await updateDoc(doc(db, 'users', uid), {
+      notifications_enabled: enabled,
+      notifications_updated_at: new Date().toISOString(),
+    });
+  } catch (e) {
+    console.warn('[Notifications] Could not save preference:', e);
+  }
+};
+
+/**
+ * Load user's notification preference from Firestore.
+ * Falls back to localStorage if Firestore unavailable.
+ */
+export const loadNotificationPreference = async (uid) => {
+  if (!uid) return localStorage.getItem('sg_notif_on') === 'true';
+  try {
+    const snap = await getDoc(doc(db, 'users', uid));
+    if (snap.exists() && snap.data().notifications_enabled !== undefined) {
+      const enabled = snap.data().notifications_enabled;
+      localStorage.setItem('sg_notif_on', enabled ? 'true' : 'false');
+      return enabled;
+    }
+  } catch (e) {
+    console.warn('[Notifications] Could not load preference:', e);
+  }
+  return localStorage.getItem('sg_notif_on') === 'true';
+};

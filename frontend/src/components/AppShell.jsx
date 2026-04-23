@@ -13,7 +13,8 @@
 
 import { useState, useEffect, useContext, lazy, Suspense, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { logout, saveHistory, getHistory, auth, destroyUserAccount, updateDailyStreak } from '../api/styleApi';
+import { logout, saveHistory, getHistory, auth, destroyUserAccount, updateDailyStreak, saveNotificationPreference } from '../api/styleApi';
+import { useNotifications } from '../hooks/useNotifications';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
@@ -379,12 +380,13 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C, usage }) {
 // ══════════════════════════════════════════════════════
 // PROFILE SECTION
 // ══════════════════════════════════════════════════════
-function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggleTheme, isPro, usage }) {
+function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggleTheme, isPro, usage, notif }) {
   const { language, changeLanguage } = useLanguage();
   const [editingName, setEditingName] = useState(false);
   const [displayName, setDisplayName] = useState(() => localStorage.getItem('sg_display_name') || user?.name || '');
   const [copied, setCopied] = useState(false);
-  const [notifOn, setNotifOn] = useState(() => localStorage.getItem('sg_notif_on') === 'true');
+  // notif state driven by the hook passed from AppShell
+  const notifOn = notif?.isEnabled ?? false;
   const [destroying, setDestroying] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -402,23 +404,21 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
   };
 
   const handleNotifToggle = async () => {
-    if (notifOn) {
-      localStorage.setItem('sg_notif_on', 'false');
-      setNotifOn(false);
-      onToast({ message: 'Notifications disabled', type: 'default' });
-      return;
-    }
-    if (!('Notification' in window)) {
+    if (!notif?.isSupported) {
       onToast({ message: 'Notifications not supported in this browser', type: 'error' }); return;
     }
-    const perm = await Notification.requestPermission();
-    if (perm === 'granted') {
-      localStorage.setItem('sg_notif_on', 'true');
-      setNotifOn(true);
-      onToast({ message: 'Notifications enabled 🔔', type: 'success' });
-      new Notification('StyleGuruAI', { body: 'Daily style tips & updates enabled! 🎨', icon: '/favicon.ico' });
-    } else if (perm === 'denied') {
-      onToast({ message: 'Allow notifications in browser settings', type: 'error' });
+    if (notifOn) {
+      await notif.disableNotifications();
+      await saveNotificationPreference(auth.currentUser?.uid, false);
+      onToast({ message: 'Notifications disabled 🔕', type: 'default' });
+      return;
+    }
+    const result = await notif.requestPermission();
+    if (result === 'granted') {
+      await saveNotificationPreference(auth.currentUser?.uid, true);
+      onToast({ message: '🔔 Notifications enabled! Morning style briefs scheduled.', type: 'success' });
+    } else if (result === 'denied') {
+      onToast({ message: 'Allow notifications in your browser settings to enable.', type: 'error' });
     }
   };
 
@@ -591,13 +591,19 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
                 onClick={handleNotifToggle}
                 style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 24px', cursor: 'pointer' }}
               >
-                <span style={{ fontSize: '18px' }}>🔔</span>
+                <span style={{ fontSize: '18px' }}>{notifOn ? '🔔' : '🔕'}</span>
                 <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 500 }}>Notifications</p>
-                  <p style={{ fontSize: '10px', color: C.muted, margin: 0 }}>{notifOn ? 'Enabled' : 'Disabled'}</p>
+                  <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 500 }}>Daily Style Notifications</p>
+                  <p style={{ fontSize: '10px', color: C.muted, margin: '2px 0 0', fontFamily: PJS, lineHeight: '1.4' }}>
+                    {notifOn 
+                      ? '🌅 Morning brief + 🔥 Streak guard active'
+                      : notif?.permission === 'denied' 
+                        ? '⚠️ Blocked — Allow in browser settings'
+                        : 'Tap to enable daily outfit briefs'}
+                  </p>
                 </div>
-                <div style={{ width: 36, height: 20, borderRadius: 10, background: notifOn ? GRAD : C.border, position: 'relative', flexShrink: 0 }}>
-                  <div style={{ position: 'absolute', top: 2, left: notifOn ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+                <div style={{ width: 36, height: 20, borderRadius: 10, background: notifOn ? 'linear-gradient(135deg,#8B5CF6,#6366F1)' : C.border, position: 'relative', flexShrink: 0, transition: 'background 0.3s' }}>
+                  <div style={{ position: 'absolute', top: 2, left: notifOn ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: 'white', transition: 'left 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
                 </div>
               </div>
 
@@ -883,8 +889,21 @@ export default function AppShell({ user, onLogout }) {
   const { cartOpen, setCartOpen } = useCart();
   const { isInstallable, promptInstall, dismissInstall, platform, nativePromptAvailable } = usePWA();
 
-  // Get theme-aware colors
+  // ── Get theme-aware colors ────────────────────────────────────
   const C = useMemo(() => getThemeColors(theme), [theme]);
+
+  // ── Notification hook (DNA + streak + weather aware) ─────────
+  const currentStreak = usage?.streak ?? parseInt(localStorage.getItem('sg_streak_count') || '0');
+  const personalityForNotif = useMemo(() => {
+    const data = readUserPersonalityData(usage);
+    const p = derivePersonality(data);
+    return p.primary?.name || 'The Minimalist';
+  }, [usage]);
+  const notif = useNotifications({
+    user,
+    streak: currentStreak,
+    archetype: personalityForNotif,
+  });
 
   const [activeTab, setActiveTab] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -910,8 +929,33 @@ export default function AppShell({ user, onLogout }) {
     return () => window.removeEventListener('scroll', handler);
   }, []);
 
-    }).catch(() => { });
+  // ── Firestore sync on login ───────────────────────────────────
+  useEffect(() => {
+    if (!auth.currentUser) return;
+    getHistory(isPro ? 100 : 10).then(res => {
+      const firestoreCount = res?.data?.history?.length || 0;
+      const localCount = parseInt(localStorage.getItem('sg_analysis_count') || '0');
+      if (firestoreCount > localCount) localStorage.setItem('sg_analysis_count', firestoreCount.toString());
+      const localLast = localStorage.getItem('sg_last_analysis');
+      if (!localLast && res?.data?.history?.length > 0) {
+        const lastEntry = res.data.history[0];
+        localStorage.setItem('sg_last_analysis', JSON.stringify(lastEntry));
+        setLastAnalysis(lastEntry);
+      }
+    }).catch(() => {});
   }, [user?.uid]);
+
+  // ── Deep-link from notification tap ──────────────────────────
+  useEffect(() => {
+    const handler = (e) => {
+      const tab = e.detail?.tab;
+      if (tab) {
+        handleTabChange(tab);
+      }
+    };
+    window.addEventListener('sg_navigate', handler);
+    return () => window.removeEventListener('sg_navigate', handler);
+  }, [handleTabChange]);
 
   // ── Daily Streak Sync ──────────────────────
   useEffect(() => {
@@ -1304,6 +1348,7 @@ export default function AppShell({ user, onLogout }) {
                 onToast={setToast}
                 isPro={isPro}
                 usage={usage}
+                notif={notif}
               />
             </motion.div>
           )}
