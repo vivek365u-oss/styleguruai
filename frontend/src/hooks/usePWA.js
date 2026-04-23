@@ -1,34 +1,41 @@
 import { useState, useEffect } from 'react';
-import { logEvent } from '../api/styleApi'; // Ensure logEvent is imported correctly
+import { logEvent } from '../api/styleApi';
 
 export function usePWA() {
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [platform, setPlatform] = useState('unknown');
 
   useEffect(() => {
-    // Check if the app is already running in standalone mode (installed)
+    // 1. Detect Platform
+    const ua = window.navigator.userAgent.toLowerCase();
+    if (/iphone|ipad|ipod/.test(ua)) setPlatform('ios');
+    else if (/android/.test(ua)) setPlatform('android');
+
+    // 2. Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
         setIsInstalled(true);
+    } else {
+        // Aggressive: If not installed, wait 3 seconds and show the prompt modal
+        // even if beforeinstallprompt hasn't fired (for manual instruction support)
+        const timer = setTimeout(() => {
+          setIsInstallable(true);
+        }, 3000);
+        return () => clearTimeout(timer);
     }
 
     const handleBeforeInstallPrompt = (e) => {
-      // Prevent Chrome 67 and earlier from automatically showing the prompt
       e.preventDefault();
-      // Stash the event so it can be triggered later.
       setInstallPromptEvent(e);
-      // Always show custom modal if the event is fired
       setIsInstallable(true);
     };
 
     const handleAppInstalled = () => {
-      // Clear the deferredPrompt so it can be garbage collected
       setInstallPromptEvent(null);
       setIsInstallable(false);
       setIsInstalled(true);
-      // Log installation for analytics
       logEvent('pwa_app_installed');
-      console.log('PWA was installed successfully');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -41,24 +48,22 @@ export function usePWA() {
   }, []);
 
   const promptInstall = async () => {
-    if (!installPromptEvent) return false;
+    if (!installPromptEvent) {
+        // If no native event, we let the UI handle manual instructions
+        return 'manual';
+    }
     
-    // Show the install modal to the user natively
     installPromptEvent.prompt();
-    
-    // Wait for the user to respond to the prompt
     const { outcome } = await installPromptEvent.userChoice;
     
-    // We no longer need the prompt. Clear it up
     setInstallPromptEvent(null);
-    setIsInstallable(false);
-    
     if (outcome === 'accepted') {
+        setIsInstallable(false);
         logEvent('pwa_install_accepted');
-        return true;
+        return 'accepted';
     } else {
         logEvent('pwa_install_rejected');
-        return false;
+        return 'rejected';
     }
   };
 
@@ -66,5 +71,12 @@ export function usePWA() {
       setIsInstallable(false);
   };
 
-  return { isInstallable, isInstalled, promptInstall, dismissInstall };
+  return { 
+    isInstallable, 
+    isInstalled, 
+    platform, 
+    promptInstall, 
+    dismissInstall, 
+    nativePromptAvailable: !!installPromptEvent 
+  };
 }

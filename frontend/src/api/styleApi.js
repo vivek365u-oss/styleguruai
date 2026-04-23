@@ -439,6 +439,7 @@ export const loadProfile = async (uid) => {
       profileData.wardrobeCount = userData.wardrobeCount || 0;
       profileData.analysisHistoryCount = userData.analysisHistoryCount || 0;
       profileData.savedColorsCount = userData.savedColorsCount || 0;
+      profileData.streak = userData.current_streak || 0;
     }
 
     return profileData;
@@ -1182,5 +1183,61 @@ export const removeFromLookbook = async (uid, lookId) => {
   } catch (e) {
     handleFirestoreError('removeFromLookbook', e);
     return false;
+  }
+};
+// ============================================
+// STREAK SYSTEM — FIRESTORE
+// ============================================
+
+/**
+ * Daily Streak System (Cloud-Synced)
+ * ─────────────────────────────────────────────────────────────
+ * Tracks consecutive days of usage. Resets if a day is missed.
+ */
+export const updateDailyStreak = async (uid) => {
+  if (!uid) return null;
+  const userRef = doc(db, 'users', uid);
+  const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+  
+  try {
+    const snap = await getDoc(userRef);
+    if (!snap.exists()) return null;
+    
+    const data = snap.data();
+    const lastActive = data.last_active_date;
+    let currentStreak = data.current_streak || 0;
+    let highestStreak = data.highest_streak || 0;
+    
+    // If already updated today, skip
+    if (lastActive === today) {
+      return { current: currentStreak, highest: highestStreak, updated: false };
+    }
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toLocaleDateString('en-CA');
+    
+    if (lastActive === yesterdayStr) {
+      // Streak maintained!
+      currentStreak += 1;
+    } else {
+      // Streak broken or new streak
+      currentStreak = 1;
+    }
+    
+    if (currentStreak > highestStreak) {
+      highestStreak = currentStreak;
+    }
+    
+    await updateDoc(userRef, {
+      last_active_date: today,
+      current_streak: currentStreak,
+      highest_streak: highestStreak
+    });
+    
+    return { current: currentStreak, highest: highestStreak, updated: true };
+  } catch (e) {
+    console.error('[Streak] Failed to update streak:', e);
+    return null;
   }
 };

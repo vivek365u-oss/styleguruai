@@ -248,7 +248,7 @@ export function deriveLevel(analysisCount = 0) {
 }
 
 // ── Read all user data for personality ─────────────────────────
-export function readUserPersonalityData() {
+export function readUserPersonalityData(cloudData = null) {
   try {
     const lastAnalysis = JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
     const primaryProfile = JSON.parse(localStorage.getItem('sg_primary_profile') || 'null');
@@ -258,8 +258,11 @@ export function readUserPersonalityData() {
     const wardrobe = wardrobeRaw ? JSON.parse(wardrobeRaw) : [];
 
     const activeProfile = primaryProfile || lastAnalysis;
-    const analysisCount = parseInt(localStorage.getItem('sg_analysis_count') || '0');
-    const streak = parseInt(localStorage.getItem('sg_streak_count') || '0');
+    
+    // Merge cloudData with local fallback
+    const analysisCount = cloudData?.analysisHistoryCount ?? parseInt(localStorage.getItem('sg_analysis_count') || '0');
+    const streak = cloudData?.streak ?? parseInt(localStorage.getItem('sg_streak_count') || '0');
+    const wardrobeCount = cloudData?.wardrobeCount ?? (Array.isArray(wardrobe) ? wardrobe.length : 0);
     const gender = localStorage.getItem('sg_gender') || 'male';
 
     const skinTone = activeProfile?.skinTone || activeProfile?.skin_tone?.category || '';
@@ -276,7 +279,7 @@ export function readUserPersonalityData() {
       analysisCount,
       streak,
       gender,
-      wardrobeCount: Array.isArray(wardrobe) ? wardrobe.length : 0,
+      wardrobeCount,
       historyTones,
       hasSkinTone: !!skinTone,
       lastAnalysis,

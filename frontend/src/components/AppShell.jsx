@@ -13,7 +13,7 @@
 
 import { useState, useEffect, useContext, lazy, Suspense, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { logout, saveHistory, getHistory, auth, destroyUserAccount } from '../api/styleApi';
+import { logout, saveHistory, getHistory, auth, destroyUserAccount, updateDailyStreak } from '../api/styleApi';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
@@ -157,10 +157,10 @@ function ThemeToggle({ theme, onToggle, C }) {
 // ══════════════════════════════════════════════════════
 // HOME SECTION
 // ══════════════════════════════════════════════════════
-function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
+function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C, usage }) {
   const { language } = useLanguage();
 
-  const personalityData = useMemo(() => readUserPersonalityData(), []);
+  const personalityData = useMemo(() => readUserPersonalityData(usage), [usage]);
   const personality = useMemo(() => derivePersonality(personalityData), [personalityData]);
   const styleScore = useMemo(() => deriveStyleScore(personalityData), [personalityData]);
   const level = useMemo(() => deriveLevel(personalityData.analysisCount), [personalityData.analysisCount]);
@@ -169,6 +169,10 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
   const firstName = user?.name?.split(' ')[0] || 'there';
 
   const streak = useMemo(() => {
+    // Priority 1: Cloud streak from usage object
+    if (personalityData.streak !== undefined) return personalityData.streak;
+    
+    // Priority 2: Local fallback (Legacy)
     const today = new Date().toLocaleDateString('en-CA');
     const lastCheckin = localStorage.getItem('sg_last_checkin');
     let count = parseInt(localStorage.getItem('sg_streak_count') || '0');
@@ -181,7 +185,7 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C }) {
       localStorage.setItem('sg_last_checkin', today);
     }
     return count;
-  }, []);
+  }, [personalityData.streak]);
 
   const genderPref = localStorage.getItem('sg_gender') || 'male';
   const tone = (personalityData.skinTone || 'medium').toLowerCase();
@@ -450,7 +454,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
     }
   };
 
-  const personalityData = useMemo(() => readUserPersonalityData(), []);
+  const personalityData = useMemo(() => readUserPersonalityData(usage), [usage]);
   const personality = useMemo(() => derivePersonality(personalityData), [personalityData]);
   const styleScore = useMemo(() => deriveStyleScore(personalityData), [personalityData]);
   const level = useMemo(() => deriveLevel(personalityData.analysisCount), [personalityData.analysisCount]);
@@ -459,7 +463,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
 
   const avatarLetter = (displayName?.[0] || user?.email?.[0] || 'U').toUpperCase();
   const analysisCount = usage?.analysisHistoryCount || personalityData.analysisCount; // Fallback to personalityData
-  const streak = parseInt(localStorage.getItem('sg_streak_count') || '0');
+  const streak = usage?.streak ?? personalityData.streak ?? parseInt(localStorage.getItem('sg_streak_count') || '0');
   const wardrobeCount = usage?.wardrobeCount ?? personalityData.wardrobeCount;
   const savedColorsCount = usage?.savedColorsCount ?? 0;
 
@@ -877,7 +881,7 @@ export default function AppShell({ user, onLogout }) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { isPro, usage, coins } = usePlan();
   const { cartOpen, setCartOpen } = useCart();
-  const { isInstallable, promptInstall, dismissInstall } = usePWA();
+  const { isInstallable, promptInstall, dismissInstall, platform, nativePromptAvailable } = usePWA();
 
   // Get theme-aware colors
   const C = useMemo(() => getThemeColors(theme), [theme]);
@@ -906,20 +910,29 @@ export default function AppShell({ user, onLogout }) {
     return () => window.removeEventListener('scroll', handler);
   }, []);
 
-  // Firestore sync on login
+    }).catch(() => { });
+  }, [user?.uid]);
+
+  // ── Daily Streak Sync ──────────────────────
   useEffect(() => {
     if (!auth.currentUser) return;
-    getHistory(isPro ? 100 : 10).then(res => {
-      const firestoreCount = res?.data?.history?.length || 0;
-      const localCount = parseInt(localStorage.getItem('sg_analysis_count') || '0');
-      if (firestoreCount > localCount) localStorage.setItem('sg_analysis_count', firestoreCount.toString());
-      const localLast = localStorage.getItem('sg_last_analysis');
-      if (!localLast && res?.data?.history?.length > 0) {
-        const lastEntry = res.data.history[0];
-        localStorage.setItem('sg_last_analysis', JSON.stringify(lastEntry));
-        setLastAnalysis(lastEntry);
+    const syncStreak = async () => {
+      try {
+        const res = await updateDailyStreak(auth.currentUser.uid);
+        if (res?.updated) {
+          setToast({ 
+            message: `🔥 ${res.current} Day Style Streak!`, 
+            type: 'success' 
+          });
+          logEvent('streak_updated', { count: res.current });
+        }
+      } catch (e) {
+        console.error('[Streak] Sync failed', e);
       }
-    }).catch(() => { });
+    };
+    // Sync streak after a short delay to allow profile load
+    const timer = setTimeout(syncStreak, 2000);
+    return () => clearTimeout(timer);
   }, [user?.uid]);
 
   // ── Back-stack navigation via popstate ──────────────────────
@@ -1091,7 +1104,7 @@ export default function AppShell({ user, onLogout }) {
                 exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
                 transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
               >
-                <HomeSection C={C} user={user} lastAnalysis={lastAnalysis} onAnalyze={() => handleTabChange('analyze')} onTabChange={handleTabChange} />
+                <HomeSection C={C} user={user} lastAnalysis={lastAnalysis} onAnalyze={() => handleTabChange('analyze')} onTabChange={handleTabChange} usage={usage} />
               </motion.div>
             )}
 
@@ -1325,7 +1338,15 @@ export default function AppShell({ user, onLogout }) {
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} C={C} />}
       <ShoppingCart isOpen={cartOpen} onClose={() => setCartOpen(false)} isDark={C.isDark} />
       <Suspense fallback={null}><SubscriptionModal /></Suspense>
-      {isInstallable && <InstallPromptModal onInstall={promptInstall} onDismiss={dismissInstall} />}
+      {isInstallable && (
+        <InstallPromptModal 
+          onInstall={promptInstall} 
+          onDismiss={dismissInstall} 
+          platform={platform}
+          nativePromptAvailable={nativePromptAvailable}
+          C={C}
+        />
+      )}
     </div>
   );
 }
