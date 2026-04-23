@@ -107,14 +107,42 @@ function OutfitChecker() {
     setLoadingWardrobe(false);
   };
 
+  const generateSolidColorFile = (hex) => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 400;
+      canvas.height = 400;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = hex || '#888888';
+      ctx.fillRect(0, 0, 400, 400);
+      canvas.toBlob((blob) => {
+        resolve(new File([blob], "wardrobe_color.jpg", { type: "image/jpeg" }));
+      }, 'image/jpeg');
+    });
+  };
+
   const selectWardrobeItem = async (item) => {
-    if (!item.imageId) { setError("This item doesn't have a saved image."); return; }
-    const base64 = await getLocalWardrobeImage(item.imageId);
-    if (!base64) { setError("Could not load image from local storage."); return; }
-    const file = dataURLtoFile(base64, 'wardrobe_item.jpg');
+    let file;
+    let preview;
+    
+    if (item.imageId) {
+      const base64 = await getLocalWardrobeImage(item.imageId);
+      if (!base64) { setError("Could not load image from local storage."); return; }
+      file = dataURLtoFile(base64, 'wardrobe_item.jpg');
+      preview = base64;
+    } else if (item.hex) {
+      // Support items without images (wishlist/scanned)
+      file = await generateSolidColorFile(item.hex);
+      preview = item.hex;
+    } else {
+      setError("This item has no image or color data.");
+      return;
+    }
+
     setOutfitFile(file);
-    setOutfitPreview(base64);
+    setOutfitPreview(preview);
     setShowWardrobePicker(false);
+    setError(null);
   };
 
   const isMobile = window.matchMedia('(pointer: coarse)').matches;
@@ -211,6 +239,29 @@ function OutfitChecker() {
   const toggleTag = (tag) => {
     setSelectedTags(prev => 
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  }
+
+  // Helper component for thumbnails
+  function WardrobeThumbnail({ imageId }) {
+    const [src, setSrc] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      import('../utils/indexedDB').then(({ getLocalWardrobeImage }) => {
+        getLocalWardrobeImage(imageId).then(data => {
+          setSrc(data);
+          setLoading(false);
+        });
+      });
+    }, [imageId]);
+    
+    if (loading) return <div className="w-full h-24 bg-purple-500/10 animate-pulse rounded-lg mb-2" />;
+    
+    return src ? (
+      <img src={src} className="w-full h-24 object-cover rounded-lg mb-2 shadow-sm border border-white/10" alt="item" />
+    ) : (
+      <div className="w-full h-24 bg-gray-200 rounded-lg mb-2 flex items-center justify-center text-[8px] opacity-30">ERR</div>
     );
   };
 
@@ -392,7 +443,13 @@ function OutfitChecker() {
             >
               {outfitPreview ? (
                 <div className="flex flex-col items-center">
-                  <img src={outfitPreview} alt="Outfit" className="w-32 h-32 object-cover rounded-2xl border-2 border-pink-400 shadow-lg mb-3" />
+                  {typeof outfitPreview === 'string' && outfitPreview.startsWith('#') ? (
+                    <div className="w-32 h-32 rounded-2xl border-2 border-pink-400 shadow-lg mb-3 flex items-center justify-center text-white font-black text-[10px] uppercase" style={{ backgroundColor: outfitPreview }}>
+                      Color Mode
+                    </div>
+                  ) : (
+                    <img src={outfitPreview} alt="Outfit" className="w-32 h-32 object-cover rounded-2xl border-2 border-pink-400 shadow-lg mb-3" />
+                  )}
                   <p className="text-pink-600 text-sm font-bold">✅ Outfit ready!</p>
                   <p className={`text-xs mt-1 ${isDark ? 'text-white/30' : 'text-gray-500'}`}>Click to change</p>
                 </div>
@@ -783,19 +840,30 @@ function OutfitChecker() {
                   <p className={`font-bold ${isDark ? 'text-white/70' : 'text-gray-600'}`}>Your closet is empty</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  {wardrobeItems.map(item => (
-                    <button
-                      key={item.id}
-                      onClick={() => selectWardrobeItem(item)}
-                      className={`text-left rounded-xl p-3 border transition-all ${isDark ? 'bg-white/5 border-white/10 hover:border-purple-400/50' : 'bg-gray-50 border-gray-200 hover:border-purple-400'}`}
-                    >
-                      <div className="w-full h-24 rounded-lg mb-2 shadow-sm" style={{ backgroundColor: item.hex }} />
-                      <p className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-gray-800'}`}>{item.color_name || 'Clothing Item'}</p>
-                      <p className={`text-[10px] ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{item.category || 'Unknown'}</p>
-                    </button>
-                  ))}
-                </div>
+                  <div className="grid grid-cols-2 gap-3 pb-4">
+                    {wardrobeItems.map(item => (
+                      <button
+                        key={item.id}
+                        onClick={() => selectWardrobeItem(item)}
+                        className={`text-left rounded-xl p-3 border transition-all hover:scale-[1.02] active:scale-95 ${isDark ? 'bg-white/5 border-white/10 hover:border-purple-400/50' : 'bg-gray-50 border-gray-200 hover:border-purple-400'}`}
+                      >
+                        {item.imageId ? (
+                          <WardrobeThumbnail imageId={item.imageId} />
+                        ) : (
+                          <div className="w-full h-24 rounded-lg mb-2 shadow-inner border border-white/10 flex items-center justify-center" style={{ backgroundColor: item.hex }}>
+                             <span className="text-white text-[8px] font-black opacity-30 uppercase tracking-tighter">Color Mode</span>
+                          </div>
+                        )}
+                        <p className={`text-xs font-black truncate mb-0.5 ${isDark ? 'text-white' : 'text-gray-800'}`}>{item.color_name || 'Clothing Item'}</p>
+                        <div className="flex items-center justify-between">
+                          <p className={`text-[9px] font-bold uppercase tracking-widest ${isDark ? 'text-white/30' : 'text-gray-500'}`}>{item.category || 'Item'}</p>
+                          <span className="text-[9px]">
+                            {item.source === 'smart_shop' ? '🛒' : item.source === 'color_scanner' ? '🎨' : '👗'}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
               )}
             </div>
           </div>
