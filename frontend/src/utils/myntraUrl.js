@@ -13,6 +13,7 @@ const MYNTRA_PATHS = {
   cat_nehru_jacket: { path: 'nehru-jackets', kw: 'nehru jacket men' },
   cat_dhoti_kurta: { path: 'kurtas', kw: 'dhoti kurta men' },
   cat_ethnic_coord: { path: 'co-ords', kw: 'ethnic coord set men' },
+  cat_kurta: { path: 'men-kurtas', kw: 'kurta men' },
 
   // ── MALE FORMAL ─────────────────────────────────────────────────────
   cat_formal_shirt: { path: 'formal-shirts', kw: 'formal shirt men' },

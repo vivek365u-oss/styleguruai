@@ -17,9 +17,11 @@ import ShopActionSheet from './ShopActionSheet';
 
 // ── Product Category Mapping for Shopping ─────────────────────
 const PRODUCT_LABEL_MAP = {
-  shirt: { male: 'shirt', female: 'top' },
+  shirt: { male: 'casual shirt', female: 'top' },
+  tshirt: { male: 't-shirt', female: 't-shirt' },
   top: { male: 't-shirt', female: 'top' },
   pant: { male: 'trouser', female: 'trouser' },
+  cargo: { male: 'cargo pants', female: 'cargo pants' },
   bottom: { male: 'trouser', female: 'trouser' },
   kurta: { male: 'kurta', female: 'kurti' },
   kurti: { male: 'kurta', female: 'kurti' },
@@ -30,7 +32,9 @@ const PRODUCT_LABEL_MAP = {
   suit: { male: 'suit', female: 'suit' },
   dupatta: { male: 'scarf', female: 'dupatta' },
   hoodie: { male: 'hoodie', female: 'hoodie' },
+  sweatshirt: { male: 'sweatshirt', female: 'sweatshirt' },
   blazer: { male: 'blazer', female: 'blazer' },
+  formal_shirt: { male: 'formal shirt', female: 'formal shirt' },
   accessory: { male: 'accessory', female: 'accessory' },
   makeup: { male: 'makeup', female: 'makeup' },
   shoes: { male: 'sneakers', female: 'heels' },
@@ -56,8 +60,16 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male", onShop 
   ];
 
   const catKey = (category || 'shirt').toLowerCase().replace(/^cat_/, '');
-  const productLabel = PRODUCT_LABEL_MAP[catKey]?.[gender === 'female' ? 'female' : 'male'] || (gender === 'female' ? 'top' : 'shirt');
+  
+  // Define sub-categories for combined sections
+  const subCats = {
+    tshirt: ['tshirt', 'shirt'],
+    cargo: ['cargo', 'pant'],
+    hoodie: ['hoodie', 'sweatshirt'],
+    blazer: ['blazer', 'formal_shirt'],
+  };
 
+  const currentSubCats = subCats[catKey] || [catKey];
 
   return (
     <div className="mt-2 space-y-2" onClick={e => e.stopPropagation()}>
@@ -76,19 +88,27 @@ function ShoppingLinks({ colorName, category = "shirt", gender = "male", onShop 
         ))}
       </div>
 
-      <button
-        onClick={(e) => { 
-          e.stopPropagation(); 
-          onShop({ 
-            query: `${colorName} ${productLabel}`, 
-            color: colorName, 
-            catId: catKey 
-          }, budget?.max); 
-        }}
-        className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-4 border border-violet-400/30 hover:bg-violet-500"
-      >
-        Shop Direct →
-      </button>
+      <div className="flex gap-2">
+        {currentSubCats.map(sub => {
+          const productLabel = PRODUCT_LABEL_MAP[sub]?.[gender === 'female' ? 'female' : 'male'] || sub;
+          return (
+            <button
+              key={sub}
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                onShop({ 
+                  query: `${colorName} ${productLabel}`, 
+                  color: colorName, 
+                  catId: sub 
+                }, budget?.max); 
+              }}
+              className="flex-1 py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-4 border border-violet-400/30 hover:bg-violet-500"
+            >
+              Shop {productLabel} →
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -218,19 +238,7 @@ function ColorCard({ color, category, gender, isDark, onShop, className = '' }) 
       {expanded && (
         <div className={`px-3 pb-3 border-t ${dividerCls} pt-2 scale-in`} onClick={e => e.stopPropagation()}>
           {color.reason && <p className={`${reasonCls} text-xs leading-relaxed mb-3`}>{color.reason}</p>}
-          <button
-            onClick={() => {
-              const productLabel = PRODUCT_LABEL_MAP[category]?.[gender === 'female' ? 'female' : 'male'] || category;
-              onShop({ 
-                query: `${color.name} ${productLabel}`, 
-                color: color.name, 
-                catId: category 
-              });
-            }}
-            className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/20 active:scale-95 transition-all mt-3 border border-violet-400/30 hover:bg-violet-500"
-          >
-            Shop Direct →
-          </button>
+          <ShoppingLinks colorName={color.name} category={category} gender={gender} onShop={onShop} />
         </div>
       )}
     </div>
@@ -820,8 +828,8 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
   const blazerColors = recommendations.best_blazer_colors || [];
 
   const maleSections = [
-    { label: '👕 T-Shirt / Top Colors', colors: shirtColors, cat: 'shirt' },
-    { label: '👖 Pants / Cargo Colors', colors: pantColors, cat: 'pant' },
+    { label: '👕 T-Shirt / Top Colors', colors: shirtColors, cat: 'tshirt' },
+    { label: '👖 Pants / Cargo Colors', colors: pantColors, cat: 'cargo' },
     { label: '🥷 Kurta Colors', colors: kurataColors, cat: 'kurta' },
     { label: '🧥 Hoodie / Sweatshirt', colors: hoodieColors, cat: 'hoodie' },
     { label: '🕴️ Blazer / Formal Shirt', colors: blazerColors, cat: 'blazer' },
