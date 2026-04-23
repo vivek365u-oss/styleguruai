@@ -1375,16 +1375,32 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
               timestamp: new Date().toISOString()
             };
 
-            const ok = await saveToLookbook(auth.currentUser.uid, lookData);
-            if (ok && btn) {
-              btn.textContent = '✅ Saved to Lookbook';
-              btn.style.background = 'rgba(168,85,247,0.15)';
-              btn.style.borderColor = 'rgba(168,85,247,0.4)';
-              btn.disabled = false;
-              setTimeout(() => {
+            try {
+              const ok = await saveToLookbook(auth.currentUser.uid, lookData);
+              if (ok && btn) {
+                btn.textContent = '✅ Saved to Lookbook';
+                btn.style.background = 'rgba(168,85,247,0.15)';
+                btn.style.borderColor = 'rgba(168,85,247,0.4)';
+                btn.disabled = false;
+                setTimeout(() => {
+                  btn.textContent = '📖 Save to Lookbook';
+                  btn.style.background = ''; btn.style.borderColor = '';
+                }, 3000);
+              } else if (btn) {
+                btn.disabled = false;
+              }
+            } catch (err) {
+              if (err.code === 'usage-limit-reached') {
+                window.dispatchEvent(new CustomEvent('open_subscription_modal', { 
+                  detail: { source: 'lookbook_limit' } 
+                }));
+              } else {
+                console.error("Lookbook error:", err);
+              }
+              if (btn) {
                 btn.textContent = '📖 Save to Lookbook';
-                btn.style.background = ''; btn.style.borderColor = '';
-              }, 3000);
+                btn.disabled = false;
+              }
             }
           }}
           id="save-lookbook-btn"

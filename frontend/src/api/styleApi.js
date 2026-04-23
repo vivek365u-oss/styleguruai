@@ -1104,15 +1104,54 @@ export const saveSelfieStyleHistory = async (uid, data) => {
 export const saveToLookbook = async (uid, lookData) => {
   if (!auth.currentUser) return null;
   try {
+    const userRef = doc(db, 'users', uid);
+    const userSnap = await getDoc(userRef);
+    
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      const isPro = userData.is_pro || false;
+      const createdAt = userData.created_at ? new Date(userData.created_at) : new Date();
+      
+      // 1. Month-long free trial check
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+      const isWithinFirstMonth = createdAt > oneMonthAgo;
+
+      if (!isPro && !isWithinFirstMonth) {
+        // 2. Monthly usage check
+        const currentMonth = new Date().toISOString().substring(0, 7); // "YYYY-MM"
+        const usageData = userData.lookbook_usage || {};
+        const monthUsage = usageData[currentMonth] || 0;
+        const MONTHLY_LIMIT = 3;
+
+        if (monthUsage >= MONTHLY_LIMIT) {
+          console.warn(`[Lookbook] Monthly limit reached for user ${uid}`);
+          throw { 
+            code: 'usage-limit-reached', 
+            message: `You've used your ${MONTHLY_LIMIT} free lookbook adds for ${currentMonth}. Upgrade to Pro for unlimited access!`,
+            limit: MONTHLY_LIMIT
+          };
+        }
+
+        // Increment usage
+        await updateDoc(userRef, {
+          [`lookbook_usage.${currentMonth}`]: increment(1),
+          lookbookCount: increment(1)
+        });
+      } else {
+        // Pro or New User - just increment total count
+        await updateDoc(userRef, { lookbookCount: increment(1) });
+      }
+    }
+
     const docRef = await addDoc(collection(db, 'users', uid, 'lookbook'), {
       ...lookData,
       saved_at: new Date().toISOString(),
     });
-    // Increment lookbook count in profile metadata
-    const userRef = doc(db, 'users', uid);
-    await updateDoc(userRef, { lookbookCount: increment(1) });
+    
     return docRef.id;
   } catch (e) {
+    if (e.code === 'usage-limit-reached') throw e;
     handleFirestoreError('saveToLookbook', e);
     return null;
   }
