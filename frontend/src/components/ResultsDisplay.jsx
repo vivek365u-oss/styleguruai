@@ -1368,6 +1368,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
               subjectName: subjectName || "Myself",
               expertAdvice: expertAdvice,
               analysis: { skin_tone: analysis.skin_tone },
+              gender: finalData.gender || (isFemale ? 'female' : 'male'),
               colors: missionColors.slice(0, 5),
               outfit: outfitToSave,
               score: Math.min(98, Math.max(55, Math.round((photo_quality?.score || 85) * 0.7 + (analysis.skin_tone.confidence === 'high' ? 10 : 5)))),

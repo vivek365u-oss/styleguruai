@@ -11,10 +11,12 @@ function LookbookPanel() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState('');
-
-  const handleShopClick = (itemName) => {
-    setSelectedItem(itemName);
+  const handleShopClick = (itemName, catId, lookItem) => {
+    setSelectedItem({
+      query: itemName,
+      catId: catId,
+      gender: lookItem.gender || lookItem.analysis?.skin_tone?.gender || 'male'
+    });
     setIsSheetOpen(true);
   };
 
@@ -113,7 +115,7 @@ function LookbookPanel() {
                           {/* TOP ITEM */}
                           <div>
                             <div 
-                              onClick={() => handleShopClick(item.outfit.top)}
+                              onClick={() => handleShopClick(item.outfit.top, 'shirt', item)}
                               className={`group cursor-pointer flex items-start justify-between gap-2 mb-2 transition-colors ${isDark ? 'hover:text-purple-400' : 'hover:text-purple-600'}`}
                             >
                               <h2 className={`text-xl sm:text-2xl font-black leading-tight ${isDark ? 'text-white group-hover:text-purple-300' : 'text-gray-900 group-hover:text-purple-700'}`}>
@@ -136,11 +138,12 @@ function LookbookPanel() {
                               if (!item.outfit[key] || item.outfit[key] === "-") return null;
                               const name = item.outfit[key];
                               const emoji = key === 'bottom' ? '👖' : key === 'shoes' ? '👟' : '🧣';
+                              const cat = key === 'bottom' ? 'pant' : key === 'shoes' ? 'shoe' : 'accessory';
                               
                               return (
                                 <div key={key}>
                                   <div 
-                                    onClick={() => handleShopClick(name)}
+                                    onClick={() => handleShopClick(name, cat, item)}
                                     className={`flex items-center justify-between px-3 py-2.5 rounded-xl border cursor-pointer transition-all ${isDark ? 'bg-white/5 border-white/10 hover:border-purple-500/50 hover:bg-white/10' : 'bg-white border-gray-200 shadow-sm hover:border-purple-300 hover:bg-purple-50/50'}`}
                                   >
                                     <div className="flex items-center gap-3">
@@ -179,7 +182,7 @@ function LookbookPanel() {
                         <span className={`text-[10px] font-bold ${softTextCls}`}>Score: {item.score}/100</span>
                       </div>
                       <span className={`text-[10px] font-medium ${softTextCls}`}>
-                        {new Date(item.saved_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                        {new Date(item.saved_at || item.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                       </span>
                     </div>
                   </motion.div>
@@ -194,7 +197,7 @@ function LookbookPanel() {
         isOpen={isSheetOpen}
         onClose={() => setIsSheetOpen(false)}
         item={selectedItem}
-        gender={items.find(it => it.outfit?.top === selectedItem || it.outfit?.bottom === selectedItem || it.outfit?.shoes === selectedItem)?.analysis?.skin_tone?.gender || 'female'}
+        gender={selectedItem?.gender || 'male'}
       />
     </div>
   );
