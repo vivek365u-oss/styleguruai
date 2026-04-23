@@ -4,6 +4,7 @@
 // ============================================================
 import { useState, useRef, useEffect, useContext, useCallback } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { FashionIcons, IconRenderer } from './Icons';
 import { trackColorScannerUse } from '../utils/analytics';
 import { saveWardrobeItem, auth } from '../api/styleApi';
@@ -42,6 +43,7 @@ function getColorName(hex) {
 
 function ColorScanner({ savedPalette = [], onClose }) {
   const { theme } = useContext(ThemeContext);
+  const { t } = useLanguage();
   const isDark = theme === 'dark';
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
