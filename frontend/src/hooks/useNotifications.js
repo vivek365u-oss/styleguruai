@@ -217,8 +217,8 @@ export function useNotifications({ user, streak = 0, archetype = 'The Minimalist
             console.warn('[Notifications] Failed to schedule laundry guard', e);
         }
 
-        // 4. DNA Trend Spotter — 4:00 PM (16:00) ─────────────────────────
-        const trendDelay = msUntilTime(16, 0);
+        // 4. DNA Trend Spotter — 11:00 AM ─────────────────────────
+        const trendDelay = msUntilTime(11, 0);
         const trendCopy = pick(TREND_COPIES);
         await sendToSW({
             type: 'SCHEDULE_NOTIFICATION',
