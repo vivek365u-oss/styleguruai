@@ -5,6 +5,7 @@ import { ThemeContext } from '../context/ThemeContext';
 import { buildShopUrl, COMMON_STORES, MALE_STORES, FEMALE_STORES } from '../utils/shoppingUrls';
 import { getThemeColors } from '../utils/themeColors';
 import { saveWardrobeItem, auth } from '../api/styleApi';
+import WardrobeClassifierModal from './WardrobeClassifierModal';
 
 /**
  * ShopActionSheet - A high-end, DNA-styled shopping portal.
@@ -22,21 +23,18 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
 
   const [savingWishlist, setSavingWishlist] = useState(false);
   const [wishlistSaved, setWishlistSaved] = useState(false);
+  const [showClassifier, setShowClassifier] = useState(false);
 
-  const handleAddToWishlist = async () => {
+  const handleAddToWishlistClick = () => {
+    setShowClassifier(true);
+  };
+
+  const handleConfirmSave = async (organizedData) => {
     if (!auth.currentUser) return;
     setSavingWishlist(true);
+    setShowClassifier(false);
     try {
-      const colorName = typeof item === 'object' ? item.name : item;
-      const hex = typeof item === 'object' && item.hex ? item.hex : '#8B5CF6'; 
-      
-      await saveWardrobeItem(auth.currentUser.uid, {
-        source: 'smart_shop',
-        category: (colorName && (colorName.toLowerCase().includes('pant') || colorName.toLowerCase().includes('jeans'))) ? 'bottom' : 'top',
-        color_name: displayLabel,
-        hex: hex,
-        tags: ['wishlist'],
-      });
+      await saveWardrobeItem(auth.currentUser.uid, organizedData);
       setWishlistSaved(true);
       window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
       setTimeout(() => setWishlistSaved(false), 3000);
@@ -188,7 +186,7 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
 
               {/* Virtual Wishlist Button */}
               <button
-                onClick={handleAddToWishlist}
+                onClick={handleAddToWishlistClick}
                 disabled={savingWishlist || wishlistSaved}
                 className={`w-full mb-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${
                   wishlistSaved 
@@ -213,6 +211,21 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
               </p>
             </div>
           </motion.div>
+
+          {showClassifier && (
+            <WardrobeClassifierModal
+              isOpen={showClassifier}
+              onClose={() => setShowClassifier(false)}
+              onSave={handleConfirmSave}
+              initialData={{
+                source: 'smart_shop',
+                hex: typeof item === 'object' && item.hex ? item.hex : '#8B5CF6',
+                color_name: displayLabel,
+                tags: ['tag_wishlist'],
+                category: (displayLabel && (displayLabel.toLowerCase().includes('pant') || displayLabel.toLowerCase().includes('jeans'))) ? 'bottom' : 'top'
+              }}
+            />
+          )}
 
           <style>{`
             .custom-scrollbar::-webkit-scrollbar { width: 4px; }

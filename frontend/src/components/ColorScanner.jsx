@@ -8,6 +8,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { FashionIcons, IconRenderer } from './Icons';
 import { trackColorScannerUse } from '../utils/analytics';
 import { saveWardrobeItem, auth } from '../api/styleApi';
+import WardrobeClassifierModal from './WardrobeClassifierModal';
 
 function hexToRgb(hex) {
   if (!hex || hex.length < 7) return { r: 128, g: 128, b: 128 };
@@ -60,18 +61,18 @@ function ColorScanner({ savedPalette = [], onClose }) {
   const [savingColor, setSavingColor] = useState(false);
   const [colorSaved, setColorSaved] = useState(false);
 
-  const handleSaveToCloset = async () => {
+  const [showClassifier, setShowClassifier] = useState(false);
+
+  const handleSaveToClosetClick = () => {
+    setShowClassifier(true);
+  };
+
+  const handleConfirmSave = async (organizedData) => {
     if (!auth.currentUser) return;
     setSavingColor(true);
+    setShowClassifier(false);
     try {
-      await saveWardrobeItem(auth.currentUser.uid, {
-        source: 'color_scanner',
-        category: 'top', // Default
-        hex: detectedHex,
-        color_name: detectedName,
-        tags: ['scanned_in_store'],
-        compatibility_score: matchResult?.score || 0,
-      });
+      await saveWardrobeItem(auth.currentUser.uid, organizedData);
       setColorSaved(true);
       window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
       setTimeout(() => setColorSaved(false), 3000);
@@ -306,7 +307,7 @@ function ColorScanner({ savedPalette = [], onClose }) {
 
           {matchResult.match && (
             <button
-              onClick={handleSaveToCloset}
+              onClick={handleSaveToClosetClick}
               disabled={savingColor || colorSaved}
               className={`w-full mt-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                 colorSaved 
@@ -350,6 +351,21 @@ function ColorScanner({ savedPalette = [], onClose }) {
           Point the camera at any clothing item. The center square detects the color and checks if it matches your personal palette. Use 🔦 for dark stores and ⏸ to freeze the frame.
         </p>
       </div>
+
+      {showClassifier && (
+        <WardrobeClassifierModal
+          isOpen={showClassifier}
+          onClose={() => setShowClassifier(false)}
+          onSave={handleConfirmSave}
+          initialData={{
+            source: 'color_scanner',
+            hex: detectedHex,
+            color_name: detectedName,
+            compatibility_score: matchResult?.score || 0,
+            tags: ['tag_casual'], // default
+          }}
+        />
+      )}
     </div>
   );
 }
