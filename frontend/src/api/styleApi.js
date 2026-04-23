@@ -60,6 +60,28 @@ startKeepAlive(() => healthCheck(API));
 // FIREBASE AUTH
 // ============================================
 
+// Referral Helper
+const processReferral = async (newUserId) => {
+  try {
+    const refId = localStorage.getItem('sg_ref');
+    if (!refId || refId === newUserId) return false;
+    
+    // Give referrer PRO
+    const referrerRef = doc(db, 'users', refId);
+    await updateDoc(referrerRef, {
+      is_pro: true,
+      referred_count: increment(1)
+    });
+    
+    localStorage.removeItem('sg_ref');
+    console.log('[Referral] Success! Both users granted PRO.');
+    return true;
+  } catch (e) {
+    console.warn('[Referral] Failed to process referral', e);
+    return false;
+  }
+};
+
 // Google Login
 export const googleLogin = async () => {
   const result = await signInWithPopup(auth, googleProvider);
@@ -69,10 +91,12 @@ export const googleLogin = async () => {
   const userRef = doc(db, 'users', user.uid);
   const userSnap = await getDoc(userRef);
   if (!userSnap.exists()) {
+    const isReferred = await processReferral(user.uid);
     await setDoc(userRef, {
       email: user.email,
       full_name: user.displayName,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      is_pro: isReferred || false,
     });
   }
   return { name: user.displayName, email: user.email };
@@ -85,10 +109,12 @@ export const registerUser = async (data) => {
   await updateProfile(result.user, { displayName: data.full_name });
 
   // Firestore mein save karo
+  const isReferred = await processReferral(result.user.uid);
   await setDoc(doc(db, 'users', result.user.uid), {
     email: data.email,
     full_name: data.full_name,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    is_pro: isReferred || false,
   });
   return { data: { user_name: data.full_name, email: data.email } };
 };

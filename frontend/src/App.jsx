@@ -113,6 +113,14 @@ function AppRoutes({ user, setUser }) {
 function App() {
   const authState = useAuthState();
   
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref');
+    if (ref) {
+      localStorage.setItem('sg_ref', ref);
+    }
+  }, []);
+
   // Use sessionStorage to remember splash shown, AND check localStorage to see if we should even show it to guests
   const [splashDone, setSplashDone] = React.useState(() => {
     return sessionStorage.getItem('sg_splash_shown') === 'true';

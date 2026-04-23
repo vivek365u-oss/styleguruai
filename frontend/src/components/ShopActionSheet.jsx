@@ -1,9 +1,10 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeContext } from '../context/ThemeContext';
 import { buildShopUrl, COMMON_STORES, MALE_STORES, FEMALE_STORES } from '../utils/shoppingUrls';
 import { getThemeColors } from '../utils/themeColors';
+import { saveWardrobeItem, auth } from '../api/styleApi';
 
 /**
  * ShopActionSheet - A high-end, DNA-styled shopping portal.
@@ -18,6 +19,32 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
   const isFemale = gender.toLowerCase().includes('female');
   const genderStores = isFemale ? FEMALE_STORES : MALE_STORES;
   const allStores = [...COMMON_STORES, ...genderStores];
+
+  const [savingWishlist, setSavingWishlist] = useState(false);
+  const [wishlistSaved, setWishlistSaved] = useState(false);
+
+  const handleAddToWishlist = async () => {
+    if (!auth.currentUser) return;
+    setSavingWishlist(true);
+    try {
+      const colorName = typeof item === 'object' ? item.name : item;
+      const hex = typeof item === 'object' && item.hex ? item.hex : '#8B5CF6'; 
+      
+      await saveWardrobeItem(auth.currentUser.uid, {
+        source: 'smart_shop',
+        category: (colorName && (colorName.toLowerCase().includes('pant') || colorName.toLowerCase().includes('jeans'))) ? 'bottom' : 'top',
+        color_name: displayLabel,
+        hex: hex,
+        tags: ['wishlist'],
+      });
+      setWishlistSaved(true);
+      window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
+      setTimeout(() => setWishlistSaved(false), 3000);
+    } catch (e) {
+      console.warn('Failed to save to wishlist', e);
+    }
+    setSavingWishlist(false);
+  };
 
   // Stop background scrolling when open
   useEffect(() => {
@@ -158,6 +185,19 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
                   </motion.button>
                 ))}
               </div>
+
+              {/* Virtual Wishlist Button */}
+              <button
+                onClick={handleAddToWishlist}
+                disabled={savingWishlist || wishlistSaved}
+                className={`w-full mb-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${
+                  wishlistSaved 
+                    ? 'bg-violet-500/20 text-violet-500 border border-violet-500/30' 
+                    : isDark ? 'bg-white/5 hover:bg-white/10 text-white/70 border border-white/10' : 'bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200'
+                }`}
+              >
+                {savingWishlist ? 'Saving...' : wishlistSaved ? '✅ Saved to Wishlist' : '👗 Add to Virtual Wishlist'}
+              </button>
 
               {/* Verified Badge */}
               <div className="flex items-center justify-center gap-2.5 mb-8 py-3 px-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">

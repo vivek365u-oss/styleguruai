@@ -1,11 +1,11 @@
 import { useState, useRef, useContext } from 'react';
-import { checkOutfitCompatibility, saveWardrobeItem, auth, consumeUserLimit } from '../api/styleApi';
+import { checkOutfitCompatibility, saveWardrobeItem, auth, consumeUserLimit, getWardrobe } from '../api/styleApi';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
 import { useAnalysisProgress } from '../hooks/useAnalysisProgress';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
-import { compressImage, saveLocalWardrobeImage } from '../utils/indexedDB';
+import { compressImage, saveLocalWardrobeImage, getLocalWardrobeImage } from '../utils/indexedDB';
 import { getCategoriesByGender, getCategoryIcon, ALL_CATEGORIES, getCategoryGroup, getCategorySectionMeta } from '../constants/fashionCategories';
 import { buildMyntraUrl } from '../utils/myntraUrl';
 import ShopActionSheet from './ShopActionSheet';
@@ -82,9 +82,40 @@ function OutfitChecker() {
   const [wardrobeSaving, setWardrobeSaving] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [showWardrobePicker, setShowWardrobePicker] = useState(false);
+  const [wardrobeItems, setWardrobeItems] = useState([]);
+  const [loadingWardrobe, setLoadingWardrobe] = useState(false);
   const [shopItem, setShopItem] = useState(null);
   const [shopBudget, setShopBudget] = useState(null);
   const { progress, startProgress, completeProgress, reset: resetProgress } = useAnalysisProgress();
+
+  const dataURLtoFile = (dataurl, filename) => {
+    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while(n--){ u8arr[n] = bstr.charCodeAt(n); }
+    return new File([u8arr], filename, {type:mime});
+  };
+
+  const openWardrobePicker = async () => {
+    if (!auth.currentUser) { setError('Login to access your Smart Closet.'); return; }
+    setShowWardrobePicker(true);
+    setLoadingWardrobe(true);
+    try {
+      const items = await getWardrobe(auth.currentUser.uid);
+      setWardrobeItems(items);
+    } catch (err) { console.error(err); }
+    setLoadingWardrobe(false);
+  };
+
+  const selectWardrobeItem = async (item) => {
+    if (!item.imageId) { setError("This item doesn't have a saved image."); return; }
+    const base64 = await getLocalWardrobeImage(item.imageId);
+    if (!base64) { setError("Could not load image from local storage."); return; }
+    const file = dataURLtoFile(base64, 'wardrobe_item.jpg');
+    setOutfitFile(file);
+    setOutfitPreview(base64);
+    setShowWardrobePicker(false);
+  };
 
   const isMobile = window.matchMedia('(pointer: coarse)').matches;
   const selfieRef = useRef(null);
@@ -391,7 +422,15 @@ function OutfitChecker() {
                       </button>
                     )}
                   </div>
-                  <p className={`text-xs mt-2 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>JPG, PNG, WebP</p>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); openWardrobePicker(); }}
+                    className={`w-3/4 mx-auto mt-3 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all h-9 ${
+                      isDark ? 'bg-pink-500/10 border-pink-500/20 text-pink-300 hover:bg-pink-500/20' : 'bg-pink-50 border-pink-200 text-pink-600 hover:bg-pink-100'
+                    }`}
+                  >
+                    🚪 Choose from Closet
+                  </button>
+                  <p className={`text-[10px] mt-2 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>JPG, PNG, WebP</p>
                 </>
               )}
             </div>
@@ -723,6 +762,46 @@ function OutfitChecker() {
       )}
         </>
       )}
+
+      {/* Wardrobe Picker Overlay */}
+      {showWardrobePicker && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className={`w-full max-w-md rounded-3xl overflow-hidden flex flex-col max-h-[85vh] ${isDark ? 'bg-gray-900 border border-white/10' : 'bg-white shadow-2xl'}`}>
+            <div className={`p-4 border-b flex justify-between items-center ${isDark ? 'border-white/10' : 'border-gray-100'}`}>
+              <div>
+                <h3 className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>Smart Closet</h3>
+                <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Select an item to check</p>
+              </div>
+              <button onClick={() => setShowWardrobePicker(false)} className={`w-8 h-8 flex items-center justify-center rounded-full ${isDark ? 'bg-white/10 text-white' : 'bg-gray-100 text-gray-600'}`}>✕</button>
+            </div>
+            <div className="p-4 overflow-y-auto flex-1">
+              {loadingWardrobe ? (
+                <div className="flex justify-center py-10"><div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div></div>
+              ) : wardrobeItems.length === 0 ? (
+                <div className="text-center py-10">
+                  <span className="text-4xl mb-2 block">👗</span>
+                  <p className={`font-bold ${isDark ? 'text-white/70' : 'text-gray-600'}`}>Your closet is empty</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  {wardrobeItems.map(item => (
+                    <button
+                      key={item.id}
+                      onClick={() => selectWardrobeItem(item)}
+                      className={`text-left rounded-xl p-3 border transition-all ${isDark ? 'bg-white/5 border-white/10 hover:border-purple-400/50' : 'bg-gray-50 border-gray-200 hover:border-purple-400'}`}
+                    >
+                      <div className="w-full h-24 rounded-lg mb-2 shadow-sm" style={{ backgroundColor: item.hex }} />
+                      <p className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-gray-800'}`}>{item.color_name || 'Clothing Item'}</p>
+                      <p className={`text-[10px] ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{item.category || 'Unknown'}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* PaywallModal removed */}
       <ShopActionSheet 
         isOpen={!!shopItem}

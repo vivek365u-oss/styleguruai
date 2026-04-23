@@ -160,6 +160,12 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
   const [toast, setToast] = useState(null);
   const [filter, setFilter] = useState('all');
   const [laundryCycle, setLaundryCycle] = useState(3);
+  const [weatherFilterEnabled, setWeatherFilterEnabled] = useState(false);
+  const [weatherData, setWeatherData] = useState(null);
+
+  useEffect(() => {
+    import('../utils/weatherService').then(m => m.getLocalWeather()).then(data => setWeatherData(data));
+  }, []);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -191,11 +197,25 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
     }
   };
 
+  // ── Smart Weather Filter ──
+  let displayItems = items;
+  if (weatherFilterEnabled && weatherData) {
+    displayItems = items.filter(item => {
+      if (weatherData.temp > 28) {
+        if (item.fabric === 'fabric_wool' || item.tags?.includes('tag_winter')) return false;
+      }
+      if (weatherData.temp < 15) {
+        if (item.fabric === 'fabric_linen' || item.tags?.includes('tag_summer')) return false;
+      }
+      return true;
+    });
+  }
+
   // ── Exact filter using centralized CATEGORY_GROUP_MAP (no keyword guessing) ──
   // getCategoryGroup('cat_crop_top') → 'TOPS', getCategoryGroup('cat_lehenga') → 'ETHNIC', etc.
   const filteredItems = filter === 'all'
-    ? items
-    : items.filter(item => getCategoryGroup(item.category) === filter);
+    ? displayItems
+    : displayItems.filter(item => getCategoryGroup(item.category) === filter);
 
 
 
@@ -298,6 +318,17 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
                    <option value={7}>7 Days</option>
                 </select>
              </div>
+             <div className="w-1 h-1 rounded-full bg-[var(--border-primary)]" />
+             <button
+                onClick={() => setWeatherFilterEnabled(!weatherFilterEnabled)}
+                className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-black uppercase transition-all ${
+                   weatherFilterEnabled 
+                     ? (weatherData?.temp > 28 ? 'bg-orange-500/20 text-orange-500' : weatherData?.temp < 15 ? 'bg-blue-500/20 text-blue-500' : 'bg-green-500/20 text-green-500')
+                     : 'bg-gray-500/10 text-gray-500 opacity-60 hover:opacity-100'
+                }`}
+             >
+                {weatherFilterEnabled ? `🌤️ ${Math.round(weatherData?.temp || 0)}°C FILTER ON` : '🌦️ SMART WEATHER OFF'}
+             </button>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -331,7 +362,7 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
           .filter(([key]) => key !== 'OTHER')
           .sort(([, a], [, b]) => a.order - b.order)
           .map(([sectionKey, section]) => {
-            const count = items.filter(i => getCategoryGroup(i.category) === sectionKey).length;
+            const count = displayItems.filter(i => getCategoryGroup(i.category) === sectionKey).length;
             return (
               <button
                 key={sectionKey}
@@ -374,7 +405,7 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
         // ── SINGLE SECTION FILTER VIEW ─────────────────────────
         (() => {
           // Use getCategoryGroup for exact matching — no keyword guessing
-          const sectionItems = items.filter(i => getCategoryGroup(i.category) === filter);
+          const sectionItems = displayItems.filter(i => getCategoryGroup(i.category) === filter);
           const sectionMeta = WARDROBE_SECTIONS[filter] || { label: filter, emoji: '👗' };
           return sectionItems.length === 0 ? (
             // ── EMPTY SECTION — Show shop CTA to fill this category ──
@@ -431,7 +462,7 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
           {(() => {
             // Build section → items map
             const grouped = {};
-            items.forEach(item => {
+            displayItems.forEach(item => {
               const grp = getCategoryGroup(item.category);
               if (!grouped[grp]) grouped[grp] = [];
               grouped[grp].push(item);

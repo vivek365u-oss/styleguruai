@@ -469,13 +469,14 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
 
 
   const handleShareProfile = async () => {
-    const text = `My StyleGuruAI Profile 🎨\n\nStyle Archetype: ${archetype.name} ${archetype.emoji}\nStyle Score: ${styleScore}/100\nLevel: ${level.label}\nAnalyses Done: ${analysisCount}\n\nCheck yours at StyleGuruAI.in`;
+    const refLink = `${window.location.origin}/?ref=${auth.currentUser?.uid}`;
+    const text = `My StyleGuruAI Profile 🎨\n\nStyle Archetype: ${archetype.name} ${archetype.emoji}\nStyle Score: ${styleScore}/100\nLevel: ${level.label}\nAnalyses Done: ${analysisCount}\n\nCheck yours and unlock 3 Days PRO free: ${refLink}`;
     if (navigator.share) {
       try { await navigator.share({ title: 'My Style DNA', text }); } catch { }
     } else {
       try { await navigator.clipboard.writeText(text); } catch { }
       setCopied(true); setTimeout(() => setCopied(false), 2000);
-      onToast({ message: 'Profile copied to clipboard!', type: 'success' });
+      onToast({ message: 'Profile & Referral link copied!', type: 'success' });
     }
   };
 

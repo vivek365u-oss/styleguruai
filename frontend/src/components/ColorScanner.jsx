@@ -6,6 +6,7 @@ import { useState, useRef, useEffect, useContext, useCallback } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { FashionIcons, IconRenderer } from './Icons';
 import { trackColorScannerUse } from '../utils/analytics';
+import { saveWardrobeItem, auth } from '../api/styleApi';
 
 function hexToRgb(hex) {
   if (!hex || hex.length < 7) return { r: 128, g: 128, b: 128 };
@@ -54,6 +55,29 @@ function ColorScanner({ savedPalette = [], onClose }) {
   const [error, setError] = useState(null);
   const [torchOn, setTorchOn] = useState(false);
   const [frozen, setFrozen] = useState(false);
+  const [savingColor, setSavingColor] = useState(false);
+  const [colorSaved, setColorSaved] = useState(false);
+
+  const handleSaveToCloset = async () => {
+    if (!auth.currentUser) return;
+    setSavingColor(true);
+    try {
+      await saveWardrobeItem(auth.currentUser.uid, {
+        source: 'color_scanner',
+        category: 'top', // Default
+        hex: detectedHex,
+        color_name: detectedName,
+        tags: ['scanned_in_store'],
+        compatibility_score: matchResult?.score || 0,
+      });
+      setColorSaved(true);
+      window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
+      setTimeout(() => setColorSaved(false), 3000);
+    } catch (e) {
+      console.warn('Failed to save scanned color', e);
+    }
+    setSavingColor(false);
+  };
 
   // Start camera
   useEffect(() => {
@@ -276,6 +300,26 @@ function ColorScanner({ savedPalette = [], onClose }) {
                 Closest in your palette: <strong>{matchResult.closest.name}</strong>
               </p>
             </div>
+          )}
+
+          {matchResult.match && (
+            <button
+              onClick={handleSaveToCloset}
+              disabled={savingColor || colorSaved}
+              className={`w-full mt-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                colorSaved 
+                  ? 'bg-green-500/20 text-green-500 border border-green-500/30' 
+                  : isDark ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20' : 'bg-gray-900 hover:bg-gray-800 text-white shadow-md'
+              }`}
+            >
+              {savingColor ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : colorSaved ? (
+                '✅ Saved to Closet'
+              ) : (
+                '👗 Save to Smart Closet'
+              )}
+            </button>
           )}
         </div>
       )}
