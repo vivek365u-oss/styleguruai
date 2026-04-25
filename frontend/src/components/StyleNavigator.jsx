@@ -225,7 +225,7 @@ export default function StyleNavigator({ user, onAnalyze }) {
   const [profile,   setProfile]   = useState(null);
   const [wardrobe,  setWardrobe]  = useState([]);
   const [prefs,     setPrefs]     = useState(null);
-  const [isWorn,    setIsWorn]    = useState(false);
+  const [wornMoods,  setWornMoods] = useState(new Set());
   const [logging,   setLogging]   = useState(false);
   const [mood,      setMood]      = useState('casual');
   const [tab,        setTab]       = useState('look');   // 'look' | 'colors' | 'closet' | 'trending'
@@ -233,6 +233,8 @@ export default function StyleNavigator({ user, onAnalyze }) {
   const [insights,   setInsights]  = useState(null);
   const [trendGender,setTrendGender] = useState(null);  // auto-set from profile
   const [trendCat,   setTrendCat]  = useState('All');
+  const [weather,    setWeather]   = useState({ condition: 'pleasant', temp: 25 });
+  const [history,    setHistory]   = useState([]); // Store logs for rotation logic
 
   const handleTabChange = (newTab) => {
     setTab(newTab);
@@ -251,17 +253,23 @@ export default function StyleNavigator({ user, onAnalyze }) {
 
     (async () => {
       try {
-        const [primary, userPrefs, userWardrobe, logs, locked] = await Promise.all([
+        const [primary, userPrefs, userWardrobe, logs, locked, weatherData] = await Promise.all([
           loadPrimaryProfile(uid),
           loadUserPreferences(uid),
           getWardrobe(uid),
-          getDailyOutfitLogs(uid, 1),
+          getDailyOutfitLogs(uid, 31), // Fetch month history for better rotation
           loadStyleInsights(uid),
+          getWeeklyForecast(),
         ]);
-        const activeProfile = primary || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
-        setProfile(activeProfile);
+        setProfile(primary || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'));
         setPrefs(userPrefs);
         setWardrobe(userWardrobe || []);
+        setHistory(logs || []);
+        
+        if (weatherData) {
+          const dayName = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+          setWeather(weatherData[dayName] || { condition: 'pleasant', temp: 25 });
+        }
         
         // Track current DNA variables
         const currentTone = (activeProfile?.skinTone || activeProfile?.skin_tone?.category || 'medium').toLowerCase();
@@ -286,7 +294,8 @@ export default function StyleNavigator({ user, onAnalyze }) {
         setTrendGender(currentGender);
 
         const today = new Date().toLocaleDateString('en-CA');
-        if (logs?.length > 0 && logs[0].date === today) setIsWorn(true);
+        const moodsToday = logs?.filter(l => l.date === today).map(l => l.vibe || 'casual');
+        setWornMoods(new Set(moodsToday));
 
         // Bug #13 fix: only call API if no valid insights exist for current DNA
         if (activeProfile && !validInsights) {
@@ -354,25 +363,36 @@ export default function StyleNavigator({ user, onAnalyze }) {
     }));
   }, [insights, toneKey, undertone, gender]);
 
-  // Outfit for current mood — UPDATED with Variety & Wardrobe Synergy
+  // Outfit for current mood — ELITE ROTATION & WEATHER ADAPTIVE
   const outfit = useMemo(() => {
     if (!bestColors.length) return null;
     
-    // VARIETY LOGIC: Use date as a seed to rotate through combinations
-    // We want a different combo every day.
     const now = new Date();
     const daySeed = now.getDate() + now.getMonth(); 
-    
-    // Create available pairs from bestColors (6 colors total)
+    const moodIdx = MOODS.findIndex(m => m.id === mood);
+
+    // 1. Create potential pairs
     const pairs = [];
     for (let i = 0; i < bestColors.length; i++) {
       pairs.push([bestColors[i], bestColors[(i + 2) % bestColors.length]]);
       pairs.push([bestColors[i], bestColors[(i + 3) % bestColors.length]]);
     }
     
-    // Select pair based on day seed + mood index
-    const moodIdx = MOODS.findIndex(m => m.id === mood);
-    const selectedPair = pairs[(daySeed + moodIdx) % pairs.length];
+    // 2. Filter out combinations used in the last 7 days (ELITE ROTATION)
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const recentLogs = history.filter(l => new Date(l.date) >= sevenDaysAgo);
+    const usedCombos = new Set(recentLogs.map(l => `${l.top}|${l.bottom}`));
+    
+    const availablePairs = pairs.filter(p => {
+      const templates = gender === 'female' ? FEMALE_OUTFITS : MALE_OUTFITS;
+      const fn = templates[mood] || templates.casual;
+      const res = fn(p[0].name, p[1].name);
+      return !usedCombos.has(`${res.top}|${res.bottom}`);
+    });
+
+    const selectedPair = (availablePairs.length > 0) 
+                         ? availablePairs[(daySeed + moodIdx) % availablePairs.length]
+                         : pairs[(daySeed + moodIdx) % pairs.length];
     
     const c1 = selectedPair[0]?.name || 'Navy';
     const c2 = selectedPair[1]?.name || 'White';
@@ -380,7 +400,13 @@ export default function StyleNavigator({ user, onAnalyze }) {
     const fn = templates[mood] || templates.casual;
     const base = fn(c1, c2);
 
-    // WARDROBE AWARENESS: Check if user owns matching items
+    // 3. Weather Adaptive Layering
+    const isCold = weather.temp < 22;
+    const layer = isCold 
+                  ? (gender === 'female' ? 'Cropped Tweed Jacket' : 'Structured Bomber Jacket')
+                  : null;
+
+    // 4. Wardrobe Awareness
     const matchingTops = wardrobe.filter(w => 
       (w.main_category === 'Topwear' || w.category?.toLowerCase().includes('top') || w.category?.toLowerCase().includes('shirt')) &&
       (w.color_name?.toLowerCase().includes(c1.toLowerCase()) || w.primary_color_hex === selectedPair[0]?.hex)
@@ -396,10 +422,12 @@ export default function StyleNavigator({ user, onAnalyze }) {
       bottomColorHex: selectedPair[1]?.hex,
       hasTop: matchingTops.length > 0,
       hasBottom: matchingBottoms.length > 0,
-      topItem: matchingTops[0], // Reference the first matching item found
-      bottomItem: matchingBottoms[0]
+      topItem: matchingTops[0],
+      bottomItem: matchingBottoms[0],
+      layer,
+      weatherTag: isCold ? 'Adaptive: Cold' : 'Adaptive: Normal'
     };
-  }, [bestColors, gender, mood, wardrobe]);
+  }, [bestColors, gender, mood, wardrobe, history, weather]);
 
   // Wardrobe harmony score
   const harmonyScore = useMemo(() => {
@@ -429,19 +457,22 @@ export default function StyleNavigator({ user, onAnalyze }) {
     getAccessoryAdvice(gender, season, mood.toUpperCase()), [gender, season, mood]);
 
   const handleWearToday = useCallback(async () => {
-    if (!auth.currentUser || isWorn || logging || !outfit) return;
+    if (!auth.currentUser || wornMoods.has(mood) || logging || !outfit) return;
+    
     setLogging(true);
     try {
       await logDailyOutfit(auth.currentUser.uid, {
         title: `${mood.charAt(0).toUpperCase() + mood.slice(1)} Look`,
         top: outfit.top, bottom: outfit.bottom, vibe: mood,
       });
-      setIsWorn(true);
-      trackWardrobeInteraction('check_outfit', wardrobe.length);
-    } catch (e) { console.error(e); } finally { setLogging(false); }
-  // Bug #11 fix: auth.currentUser is a mutable Firebase object, NOT React state.
-  // Removed from deps — it changes silently outside React's tracking.
-  }, [isWorn, logging, outfit, mood]);
+      setWornMoods(prev => new Set([...prev, mood]));
+      window.alert(t('wornSuccess'));
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLogging(false);
+    }
+  }, [auth.currentUser, wornMoods, mood, outfit, logging, t]);
 
   // ── Render helpers ─────────────────────────────────
   const card = (style) => ({
@@ -608,7 +639,7 @@ export default function StyleNavigator({ user, onAnalyze }) {
                     Calibrated to your {toneKey} {undertone} skin tone
                   </p>
                 </div>
-                {isWorn && (
+                {wornMoods.has(mood) && (
                   <span style={{ marginLeft:'auto', fontSize:'9px', background:'rgba(16,185,129,0.12)', color:'#10B981', border:'1px solid rgba(16,185,129,0.25)', borderRadius:10, padding:'3px 8px', fontFamily:PJS, fontWeight:700 }}>
                     ✓ Worn Today
                   </span>
@@ -616,10 +647,24 @@ export default function StyleNavigator({ user, onAnalyze }) {
               </div>
 
               {/* Outfit items grid */}
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14 }}>
+              <div style={{ display:'grid', gridTemplateColumns: outfit.bottom === '—' ? '1fr' : '1fr 1fr', gap:10, marginBottom:14 }}>
                 {[
-                  { label:'👕 Top / Upper',    value:outfit.top,    colorIdx:0, hasItem: outfit.hasTop, itemObj: outfit.topItem, hex: outfit.topColorHex },
-                  { label:'👖 Bottom / Lower',  value:outfit.bottom === '—' ? null : outfit.bottom, colorIdx:1, hasItem: outfit.hasBottom, itemObj: outfit.bottomItem, hex: outfit.bottomColorHex },
+                  { 
+                    label: gender === 'female' ? (outfit.bottom === '—' ? '👗 Dress / Outfit' : '👚 Topwear') : '👕 Top / Upper', 
+                    value: outfit.top,    
+                    colorIdx: 0, 
+                    hasItem: outfit.hasTop, 
+                    itemObj: outfit.topItem, 
+                    hex: outfit.topColorHex 
+                  },
+                  { 
+                    label: gender === 'female' ? '👖 Bottomwear' : '👖 Bottom / Lower',  
+                    value: outfit.bottom === '—' ? null : outfit.bottom, 
+                    colorIdx: 1, 
+                    hasItem: outfit.hasBottom, 
+                    itemObj: outfit.bottomItem, 
+                    hex: outfit.bottomColorHex 
+                  },
                 ].map((piece, i) => (
                   piece.value && (
                     <div key={i} style={{ background:C.glass2, border: piece.hasItem ? `1.5px solid ${VIOLET}40` : `1px solid ${C.border}`, borderRadius:14, padding:'14px 13px', position:'relative' }}>
@@ -635,13 +680,10 @@ export default function StyleNavigator({ user, onAnalyze }) {
                       </div>
                       <button
                         onClick={() => {
-                          if (piece.hasItem) {
-                             // Switch to closet tab
-                             setTab('closet');
-                          } else {
+                          if (piece.hasItem) setTab('closet');
+                          else {
                             const shopData = getShopData({ query: piece.value, catId: piece.colorIdx === 0 ? outfit.topCat : outfit.bottomCat, gender });
                             setShopItem(shopData);
-                            trackShoppingItemClick(piece.value, 0, 'compass_recommendation');
                           }
                         }}
                         style={{ 
@@ -650,11 +692,8 @@ export default function StyleNavigator({ user, onAnalyze }) {
                           border: piece.hasItem ? `1px solid ${VIOLET}40` : 'none', 
                           color: piece.hasItem ? VIOLET : 'white', 
                           fontSize:'9px', fontWeight:900, textTransform:'uppercase', letterSpacing:'0.1em',
-                          cursor:'pointer', fontFamily:PJS, transition:'all 0.3s',
-                          boxShadow: piece.hasItem ? 'none' : '0 4px 12px rgba(139,92,246,0.2)'
+                          cursor:'pointer', fontFamily:PJS, transition:'all 0.3s'
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; if(!piece.hasItem) e.currentTarget.style.background = '#7C3AED'; }}
-                        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; if(!piece.hasItem) e.currentTarget.style.background = VIOLET; }}
                       >
                         {piece.hasItem ? 'View In Closet' : 'Shop This'}
                       </button>
@@ -662,6 +701,23 @@ export default function StyleNavigator({ user, onAnalyze }) {
                   )
                 ))}
               </div>
+
+              {/* Weather-Adaptive Layering Card */}
+              {outfit.layer && (
+                <div style={{ background: `${VIOLET}08`, border: `1.5px dashed ${VIOLET}30`, borderRadius: 16, padding: '14px 16px', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 12, background: VIOLET, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🧥</div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: 0, fontSize: '9px', fontWeight: 900, color: VIOLET, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Weather Layer ({weather.temp}°C)</p>
+                    <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: C.text, fontFamily: PJS }}>{outfit.layer}</p>
+                  </div>
+                  <button 
+                    onClick={() => setShopItem(getShopData({ query: outfit.layer, catId: 'jacket', gender }))}
+                    style={{ background: VIOLET, color: 'white', border: 'none', borderRadius: 8, padding: '6px 12px', fontSize: '9px', fontWeight: 900, cursor: 'pointer' }}
+                  >
+                    SHOP
+                  </button>
+                </div>
+              )}
 
               {/* Shoes + Accent */}
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14 }}>
