@@ -262,22 +262,25 @@ export const getTopRecommendations = (wardrobe, context, profile, history, prefe
  */
 export const getAccessoryAdvice = (gender, season, event = 'casual') => {
     const isSpecial = event === 'PARTY' || event === 'OFFICE';
+    const normalizedGender = (gender?.toLowerCase().includes('female') || gender === 'women') ? 'female' : 'male';
     
-    if (gender === 'female') {
+    if (normalizedGender === 'female') {
         return {
-            label: 'Jewelry Advice',
-            jewelry: isSpecial 
-                ? (season === 'Spring' || season === 'Summer' ? 'Emerald or Pearl Choker' : 'Gold Kundan / Heavy Silks')
-                : (season === 'Spring' || season === 'Summer' ? 'Rose Gold Hoops' : 'Minimal Silver Studs'),
-            shoes: event === 'PARTY' ? 'Stilettos or Embellished Juttis' : 'Nude Block Heels or Mules',
-            tip: isSpecial ? 'Pair with a clutch matching your shoe color.' : 'Keep it light with a cross-body bag.'
+            label: 'Jewelry & Finishing',
+            jewelry: event === 'PARTY' 
+                ? (season === 'Spring' || season === 'Summer' ? 'Emerald or Pearl Choker' : 'Gold Kundan / Statement Necklace')
+                : (event === 'OFFICE' ? 'Minimal Gold Chain or Pearl Studs' : 'Rose Gold Hoops'),
+            shoes: event === 'PARTY' ? 'Stilettos or Embellished Juttis' : (event === 'OFFICE' ? 'Nude Block Heels or Mules' : 'Clean White Sneakers'),
+            tip: isSpecial ? 'Pair with a structured clutch matching your shoes.' : 'Keep it light with a leather cross-body bag.'
         };
     }
+
+    // Male Advice
     return {
-        label: 'Watch & Leather Advice',
-        jewelry: event === 'OFFICE' ? 'Silver Mechanical Watch' : 'Leather Strap Watch or Band',
-        shoes: event === 'PARTY' ? 'Black Chelsea Boots' : (event === 'OFFICE' ? 'Dark Brown Oxfords' : 'White Minimal Sneakers'),
-        tip: event === 'OFFICE' ? 'Your belt MUST match your shoe leather.' : 'No socks visible with sneakers for an athletic look.'
+        label: 'Watch & Leather Details',
+        jewelry: event === 'OFFICE' ? 'Silver Mechanical Watch' : (event === 'PARTY' ? 'Bold Leather Strap Watch' : 'Minimal Fitness Tracker or Band'),
+        shoes: event === 'PARTY' ? 'Black Chelsea Boots or Loafers' : (event === 'OFFICE' ? 'Dark Brown Oxfords or Brogues' : 'White Minimal Sneakers'),
+        tip: event === 'OFFICE' ? 'CRITICAL: Your belt MUST match your shoe leather color.' : 'No-show socks are essential for this footwear choice.'
     };
 };
 

@@ -156,10 +156,11 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
 
     if (log) {
         return {
-            top: { name: log.top, type: 'executed' },
-            bottom: { name: log.bottom, type: 'executed' },
+            top: { name: log.top, type: 'executed', hex: log.topHex || '#4F46E5' },
+            bottom: { name: log.bottom, type: 'executed', hex: log.botHex || '#1E1B4B' },
             occasion,
             isExecuted: true,
+            engineScore: log.score || 85, // Bug Fix: fallback for missing score in logs
             brief: "You wore this look! History saved in the cloud.",
             accessories: getAccessoryAdvice(activeGender, activeSeason, occasion.event)
         };
@@ -205,7 +206,7 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
                     ? matchingTops[topIdx] 
                     : {
                         name: bestTopObj ? `${bestTopObj.name || 'Signature'} ${fallback.topName}` : fallback.topName,
-                        hex: bestTopObj ? bestTopObj.hex : '#7C3AED',
+                        hex: bestTopObj?.hex || (activeGender === 'female' ? '#DB2777' : '#4F46E5'), // Bug Fix: provide hard fallback hex
                         engineScore: 85,
                         category: fallback.topCat,
                         isMissing: true
@@ -215,7 +216,7 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
                        ? matchingBottoms[botIdx] 
                        : {
                            name: bestPantObj ? `${bestPantObj.name || 'Classic'} ${fallback.botName}` : fallback.botName,
-                           hex: bestPantObj ? bestPantObj.hex : '#1e3a8a',
+                           hex: bestPantObj?.hex || (activeGender === 'female' ? '#1E1B4B' : '#0F172A'), // Bug Fix: provide hard fallback hex
                            engineScore: 80,
                            category: fallback.botCat,
                            isMissing: true
@@ -260,6 +261,8 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
         bottom: dayInfo.bottom.name,
         topId: dayInfo.top.id || null,
         bottomId: dayInfo.bottom.id || null,
+        topHex: dayInfo.top.hex || null,   // Bug Fix: Save colors for history view
+        botHex: dayInfo.bottom.hex || null, // Bug Fix: Save colors for history view
         event: dayInfo.occasion.event,
         score: dayInfo.engineScore
     });
@@ -380,7 +383,9 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
                     isDark ? 'bg-white/5 border-white/10' : 'bg-slate-50 border-slate-200'
                 }`}>
                     <p className="text-[8px] font-black opacity-30 uppercase">DNA Synergy</p>
-                    <p className={`text-xl font-black ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>{dayInfo.engineScore}%</p>
+                    <p className={`text-xl font-black ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
+                        {dayInfo.engineScore || 0}%
+                    </p>
                 </div>
             </div>
 
