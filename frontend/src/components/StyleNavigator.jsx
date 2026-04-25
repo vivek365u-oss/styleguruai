@@ -46,19 +46,54 @@ const TONE_PALETTE = {
 };
 
 // ── Male outfit templates by occasion ───────────────
-const MALE_OUTFITS = {
-  office:   (color1, color2) => ({ top:`${color1} formal shirt`,      bottom:`${color2} tailored trousers`,    shoes:'Dark brown Oxford shoes', accent:'Silver watch + leather belt matching shoes', topCat:'formal_shirt', bottomCat:'formal_trouser' }),
-  casual:   (color1, color2) => ({ top:`${color1} slim-fit polo`,     bottom:`${color2} clean chinos`,         shoes:'White minimal sneakers',  accent:'Minimal bracelet + clean watch', topCat:'polo', bottomCat:'chinos' }),
-  party:    (color1, color2) => ({ top:`${color1} printed shirt`,     bottom:`${color2} slim dark jeans`,      shoes:'Dark Chelsea boots',      accent:'Bold statement watch or ring', topCat:'shirt', bottomCat:'jeans' }),
-  ethnic:   (color1, color2) => ({ top:`${color1} kurta set`,         bottom:`${color2} churidar`,             shoes:'Tan mojari / juttis',     accent:'Pocket square + minimal bracelet', topCat:'kurta_set', bottomCat:'kurta_set' }),
-  gym:      (color1, color2) => ({ top:`${color1} dry-fit tee`,       bottom:`${color2} track pants`,          shoes:'Cushioned athletic shoes', accent:'Sports band / cap', topCat:'tshirt', bottomCat:'track_pants' }),
-};
-const FEMALE_OUTFITS = {
-  office:   (color1, color2) => ({ top:`${color1} structured blazer`, bottom:`${color2} cigarette trousers`,   shoes:'Nude pointed pumps',      accent:'Pearl earrings + structured handbag', topCat:'blazer', bottomCat:'pant' }),
-  casual:   (color1, color2) => ({ top:`${color1} crop top`,         bottom:`${color2} high-waist jeans`,     shoes:'White slip-on sneakers',  accent:'Layered necklace + tote bag', topCat:'crop_top', bottomCat:'jeans_female' }),
-  party:    (color1, color2) => ({ top:`${color1} co-ord set top`,   bottom:`${color2} wide-leg pants`,       shoes:'Block heel sandals',      accent:'Statement earrings + clutch', topCat:'top', bottomCat:'pant' }),
-  ethnic:   (color1, color2) => ({ top:`${color1} silk kurti`,       bottom:`${color2} palazzo / salwar`,    shoes:'Kolhapuri / embellished flats', accent:'Jhumka earrings + bangles', topCat:'kurti', bottomCat:'palazzo_f' }),
-  party_gown: (color1)       => ({ top:`${color1} midi dress`,       bottom:'—',                              shoes:'Strappy heeled sandals',  accent:'Ear cuff + chain bag', topCat:'dress' }),
+// ── Dynamic Outfit Templates: High-Variety Engine ─────────────────
+const OUTFIT_TEMPLATES = {
+  male: {
+    office: [
+      (c1, c2) => ({ type:'Set', top:`${c1} formal shirt`, bottom:`${c2} tailored trousers`, shoes:'Black Oxford shoes', accent:'Leather belt + silver watch', topCat:'formal_shirt', bottomCat:'formal_trouser' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} lightweight blazer`, bottom:`${c2} navy chinos`, shoes:'Brown loafers', accent:'Pocket square + minimal watch', topCat:'blazer', bottomCat:'chinos' }),
+    ],
+    casual: [
+      (c1, c2) => ({ type:'Set', top:`${c1} slim-fit polo`, bottom:`${c2} clean chinos`, shoes:'White sneakers', accent:'Minimal bracelet', topCat:'polo', bottomCat:'chinos' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} oversized tee`, bottom:`${c2} baggy cargo pants`, shoes:'Chunky sneakers', accent:'Chain necklace + cap', topCat:'tshirt', bottomCat:'cargo' }),
+    ],
+    party: [
+      (c1, c2) => ({ type:'Set', top:`${c1} printed shirt`, bottom:`${c2} slim black jeans`, shoes:'Chelsea boots', accent:'Bold watch', topCat:'shirt', bottomCat:'jeans' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} leather jacket`, bottom:`${c2} charcoal trousers`, shoes:'Black boots', accent:'Rings + silver chain', topCat:'jacket', bottomCat:'formal_trouser' }),
+    ],
+    ethnic: [
+      (c1, c2) => ({ type:'Set', top:`${c1} kurta set`, bottom:`${c2} churidar`, shoes:'Tan mojaris', accent:'Dupatta + brooch', topCat:'kurta_set', bottomCat:'kurta_set' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} sherwani`, bottom:`${c2} dhoti pants`, shoes:'Gold juttis', accent:'Pearl mala + turban', topCat:'sherwani', bottomCat:'dhoti' }),
+    ],
+    gym: [
+      (c1, c2) => ({ type:'Set', top:`${c1} dry-fit tee`, bottom:`${c2} active shorts`, shoes:'Running shoes', accent:'Fitness tracker', topCat:'tshirt', bottomCat:'shorts' }),
+    ],
+  },
+  female: {
+    office: [
+      (c1, c2) => ({ type:'Set', top:`${c1} structured blazer`, bottom:`${c2} cigarette trousers`, shoes:'Nude pumps', accent:'Pearl studs + watch', topCat:'blazer', bottomCat:'pant' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} silk kurti`, bottom:`${c2} straight pants`, shoes:'Embellished flats', accent:'Minimal earrings', topCat:'kurti', bottomCat:'pant' }),
+      (c1, c2) => ({ type:'OnePiece', top:`${c1} pleated midi dress`, bottom:'—', shoes:'Block heels', accent:'Silk scarf + belt', topCat:'dress' }),
+    ],
+    casual: [
+      (c1, c2) => ({ type:'Set', top:`${c1} crop top`, bottom:`${c2} high-waist jeans`, shoes:'White slip-ons', accent:'Layered necklace', topCat:'crop_top', bottomCat:'jeans_female' }),
+      (c1, c2) => ({ type:'OnePiece', top:`${c1} floral sundress`, bottom:'—', shoes:'Strappy sandals', accent:'Sun hat + sunglasses', topCat:'dress' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} oversized shirt`, bottom:`${c2} biker shorts`, shoes:'Chunky sneakers', accent:'Hoop earrings', topCat:'shirt_female', bottomCat:'shorts_female' }),
+    ],
+    party: [
+      (c1, c2) => ({ type:'OnePiece', top:`${c1} satin slip dress`, bottom:'—', shoes:'Stiletto heels', accent:'Statement clutch', topCat:'dress' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} sequin top`, bottom:`${c2} leather mini skirt`, shoes:'Ankle boots', accent:'Bold lipstick', topCat:'top', bottomCat:'skirt' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} designer co-ord set`, bottom:`${c2} wide-leg pants`, shoes:'Transparent heels', accent:'Ear cuffs', topCat:'top', bottomCat:'pant' }),
+    ],
+    ethnic: [
+      (c1, c2) => ({ type:'OnePiece', top:`${c1} chiffon saree`, bottom:'—', shoes:'Embellished heels', accent:'Heavy Jhumkas', topCat:'saree' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} anarkali suit`, bottom:`${c2} leggings`, shoes:'Pointed juttis', accent:'Maang tikka', topCat:'kurti', bottomCat:'bottom' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} designer lehenga`, bottom:`${c2} matching skirt`, shoes:'Platform heels', accent:'Bangles + Choker', topCat:'top', bottomCat:'lehenga' }),
+    ],
+    gym: [
+      (c1, c2) => ({ type:'Set', top:`${c1} sports bra & tank`, bottom:`${c2} high-rise leggings`, shoes:'Trainers', accent:'Headband', topCat:'top', bottomCat:'bottom' }),
+    ],
+  }
 };
 
 // ── Why text (color theory backed) ─────────────────
@@ -398,8 +433,12 @@ export default function StyleNavigator({ user, onAnalyze }) {
     
     const c1 = selectedPair[0]?.name || 'Navy';
     const c2 = selectedPair[1]?.name || 'White';
-    const templates = gender === 'female' ? FEMALE_OUTFITS : MALE_OUTFITS;
-    const fn = templates[mood] || templates.casual;
+    
+    // VARIETY: Select different outfit type per day/mood from the template engine
+    const gKey = gender === 'female' ? 'female' : 'male';
+    const availableTemplates = OUTFIT_TEMPLATES[gKey][mood] || OUTFIT_TEMPLATES[gKey].casual;
+    const templateIdx = (daySeed + moodIdx) % availableTemplates.length;
+    const fn = availableTemplates[templateIdx];
     const base = fn(c1, c2);
 
     // 3. Weather Adaptive Layering
