@@ -421,10 +421,12 @@ export default function StyleNavigator({ user, onAnalyze }) {
     const usedCombos = new Set(recentLogs.map(l => `${l.top}|${l.bottom}`));
     
     const availablePairs = pairs.filter(p => {
-      const templates = gender === 'female' ? FEMALE_OUTFITS : MALE_OUTFITS;
-      const fn = templates[mood] || templates.casual;
-      const res = fn(p[0].name, p[1].name);
-      return !usedCombos.has(`${res.top}|${res.bottom}`);
+      const gKey = gender === 'female' ? 'female' : 'male';
+      const templates = OUTFIT_TEMPLATES[gKey][mood] || OUTFIT_TEMPLATES[gKey].casual;
+      return templates.every(fn => {
+        const res = fn(p[0].name, p[1].name);
+        return !usedCombos.has(`${res.top}|${res.bottom}`);
+      });
     });
 
     const selectedPair = (availablePairs.length > 0) 
