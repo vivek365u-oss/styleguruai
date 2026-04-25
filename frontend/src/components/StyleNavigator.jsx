@@ -354,15 +354,52 @@ export default function StyleNavigator({ user, onAnalyze }) {
     }));
   }, [insights, toneKey, undertone, gender]);
 
-  // Outfit for current mood
+  // Outfit for current mood — UPDATED with Variety & Wardrobe Synergy
   const outfit = useMemo(() => {
     if (!bestColors.length) return null;
-    const c1 = bestColors[0]?.name || 'Navy';
-    const c2 = bestColors[1]?.name || 'White';
+    
+    // VARIETY LOGIC: Use date as a seed to rotate through combinations
+    // We want a different combo every day.
+    const now = new Date();
+    const daySeed = now.getDate() + now.getMonth(); 
+    
+    // Create available pairs from bestColors (6 colors total)
+    const pairs = [];
+    for (let i = 0; i < bestColors.length; i++) {
+      pairs.push([bestColors[i], bestColors[(i + 2) % bestColors.length]]);
+      pairs.push([bestColors[i], bestColors[(i + 3) % bestColors.length]]);
+    }
+    
+    // Select pair based on day seed + mood index
+    const moodIdx = MOODS.findIndex(m => m.id === mood);
+    const selectedPair = pairs[(daySeed + moodIdx) % pairs.length];
+    
+    const c1 = selectedPair[0]?.name || 'Navy';
+    const c2 = selectedPair[1]?.name || 'White';
     const templates = gender === 'female' ? FEMALE_OUTFITS : MALE_OUTFITS;
     const fn = templates[mood] || templates.casual;
-    return fn(c1, c2);
-  }, [bestColors, gender, mood]);
+    const base = fn(c1, c2);
+
+    // WARDROBE AWARENESS: Check if user owns matching items
+    const matchingTops = wardrobe.filter(w => 
+      (w.main_category === 'Topwear' || w.category?.toLowerCase().includes('top') || w.category?.toLowerCase().includes('shirt')) &&
+      (w.color_name?.toLowerCase().includes(c1.toLowerCase()) || w.primary_color_hex === selectedPair[0]?.hex)
+    );
+    const matchingBottoms = wardrobe.filter(w => 
+      (w.main_category === 'Bottomwear' || w.category?.toLowerCase().includes('bottom') || w.category?.toLowerCase().includes('pant')) &&
+      (w.color_name?.toLowerCase().includes(c2.toLowerCase()) || w.primary_color_hex === selectedPair[1]?.hex)
+    );
+
+    return {
+      ...base,
+      topColorHex: selectedPair[0]?.hex,
+      bottomColorHex: selectedPair[1]?.hex,
+      hasTop: matchingTops.length > 0,
+      hasBottom: matchingBottoms.length > 0,
+      topItem: matchingTops[0], // Reference the first matching item found
+      bottomItem: matchingBottoms[0]
+    };
+  }, [bestColors, gender, mood, wardrobe]);
 
   // Wardrobe harmony score
   const harmonyScore = useMemo(() => {
@@ -581,33 +618,45 @@ export default function StyleNavigator({ user, onAnalyze }) {
               {/* Outfit items grid */}
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14 }}>
                 {[
-                  { label:'👕 Top / Upper',    value:outfit.top,    colorIdx:0 },
-                  { label:'👖 Bottom / Lower',  value:outfit.bottom === '—' ? null : outfit.bottom, colorIdx:1 },
+                  { label:'👕 Top / Upper',    value:outfit.top,    colorIdx:0, hasItem: outfit.hasTop, itemObj: outfit.topItem, hex: outfit.topColorHex },
+                  { label:'👖 Bottom / Lower',  value:outfit.bottom === '—' ? null : outfit.bottom, colorIdx:1, hasItem: outfit.hasBottom, itemObj: outfit.bottomItem, hex: outfit.bottomColorHex },
                 ].map((piece, i) => (
                   piece.value && (
-                    <div key={i} style={{ background:C.glass2, border:`1px solid ${C.border}`, borderRadius:14, padding:'14px 13px' }}>
+                    <div key={i} style={{ background:C.glass2, border: piece.hasItem ? `1.5px solid ${VIOLET}40` : `1px solid ${C.border}`, borderRadius:14, padding:'14px 13px', position:'relative' }}>
+                      {piece.hasItem && (
+                        <div style={{ position:'absolute', top:-8, right:8, background:VIOLET, color:'white', fontSize:'8px', fontWeight:900, padding:'3px 8px', borderRadius:20, boxShadow:'0 4px 10px rgba(139,92,246,0.3)', zIndex:1 }}>
+                          IN YOUR CLOSET
+                        </div>
+                      )}
                       <p style={{ fontSize:'9px', color:C.muted, fontFamily:PJS, margin:'0 0 6px', textTransform:'uppercase', letterSpacing:'0.1em' }}>{piece.label}</p>
                       <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                        <div style={{ width:28, height:28, borderRadius:8, background:bestColors[piece.colorIdx]?.hex || '#888', flexShrink:0, boxShadow:`0 2px 8px ${bestColors[piece.colorIdx]?.hex || '#888'}60` }} />
+                        <div style={{ width:28, height:28, borderRadius:8, background: piece.hex || '#888', flexShrink:0, boxShadow:`0 2px 8px ${piece.hex || '#888'}60` }} />
                         <p style={{ fontSize:'12px', color:C.text, fontFamily:PJS, fontWeight:600, lineHeight:'1.4', margin:0 }}>{piece.value}</p>
                       </div>
                       <button
                         onClick={() => {
-                          const shopData = getShopData({ query: piece.value, catId: piece.colorIdx === 0 ? outfit.topCat : outfit.bottomCat, gender });
-                          setShopItem(shopData);
-                          trackShoppingItemClick(piece.value, 0, 'compass_recommendation');
+                          if (piece.hasItem) {
+                             // Switch to closet tab
+                             setTab('closet');
+                          } else {
+                            const shopData = getShopData({ query: piece.value, catId: piece.colorIdx === 0 ? outfit.topCat : outfit.bottomCat, gender });
+                            setShopItem(shopData);
+                            trackShoppingItemClick(piece.value, 0, 'compass_recommendation');
+                          }
                         }}
                         style={{ 
                           marginTop:10, width:'100%', padding:'10px', borderRadius:10, 
-                          background:VIOLET, border:'none', color:'white', 
+                          background: piece.hasItem ? C.glass2 : VIOLET, 
+                          border: piece.hasItem ? `1px solid ${VIOLET}40` : 'none', 
+                          color: piece.hasItem ? VIOLET : 'white', 
                           fontSize:'9px', fontWeight:900, textTransform:'uppercase', letterSpacing:'0.1em',
                           cursor:'pointer', fontFamily:PJS, transition:'all 0.3s',
-                          boxShadow: '0 4px 12px rgba(139,92,246,0.2)'
+                          boxShadow: piece.hasItem ? 'none' : '0 4px 12px rgba(139,92,246,0.2)'
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = '#7C3AED'; }}
-                        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = VIOLET; }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; if(!piece.hasItem) e.currentTarget.style.background = '#7C3AED'; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; if(!piece.hasItem) e.currentTarget.style.background = VIOLET; }}
                       >
-                        Shop This
+                        {piece.hasItem ? 'View In Closet' : 'Shop This'}
                       </button>
                     </div>
                   )
