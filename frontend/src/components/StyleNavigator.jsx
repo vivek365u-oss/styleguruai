@@ -968,22 +968,32 @@ export default function StyleNavigator({ user, onAnalyze }) {
 
             const fallbackColors = bestColors;
             
+            // Variety Engine: If insights are missing, we rotate the fallbackColors so they aren't the same in every row
+            const getVarietyFallback = (offset) => {
+               if (!fallbackColors || !fallbackColors.length) return [];
+               const rotated = [...fallbackColors];
+               for(let i=0; i<offset; i++) {
+                  rotated.push(rotated.shift());
+               }
+               return rotated;
+            };
+
             if (gender === 'female') {
               return (
                 <>
-                  <ColorGrid title="👕 Tops & Tees" colors={insights?.best_top_colors || fallbackColors} catId="top" items={['Top', 'T-shirt']} searchFormat={(c) => `women ${c} top`} />
-                  <ColorGrid title="🥻 Ethnics & Sarees" colors={insights?.best_saree_colors || insights?.best_kurti_colors || fallbackColors} catId="kurti" items={['Saree', 'Kurti']} searchFormat={(c) => `women ${c} saree ethnic`} />
-                  <ColorGrid title="🧥 Blazers & Shrugs" colors={insights?.best_female_blazer_colors || fallbackColors} catId="blazer" items={['Blazer', 'Shrug']} searchFormat={(c) => `women ${c} power blazer`} />
-                  <ColorGrid title="👖 Pants & Palazzos" colors={insights?.best_bottom_colors || fallbackColors} catId="pant" items={['Trouser', 'Palazzo']} searchFormat={(c) => `women ${c} trousers palazzo`} />
+                  <ColorGrid title="👕 Tops & Tees" colors={insights?.best_top_colors || getVarietyFallback(0)} catId="top" items={['Top', 'T-shirt']} searchFormat={(c) => `women ${c} top`} />
+                  <ColorGrid title="🥻 Ethnics & Sarees" colors={insights?.best_saree_colors || insights?.best_kurti_colors || getVarietyFallback(2)} catId="kurti" items={['Saree', 'Kurti']} searchFormat={(c) => `women ${c} saree ethnic`} />
+                  <ColorGrid title="🧥 Blazers & Shrugs" colors={insights?.best_female_blazer_colors || getVarietyFallback(4)} catId="blazer" items={['Blazer', 'Shrug']} searchFormat={(c) => `women ${c} power blazer`} />
+                  <ColorGrid title="👖 Pants & Palazzos" colors={insights?.best_bottom_colors || getVarietyFallback(1)} catId="pant" items={['Trouser', 'Palazzo']} searchFormat={(c) => `women ${c} trousers palazzo`} />
                 </>
               );
             } else {
               return (
                 <>
-                  <ColorGrid title="👕 Tees & Polos" colors={insights?.best_tshirt_colors || fallbackColors} catId="tshirt" items={['T-shirt', 'Polo']} searchFormat={(c) => `men ${c} oversized t-shirt`} />
-                  <ColorGrid title="👔 Shirts & Blazers" colors={insights?.best_shirt_colors || insights?.best_blazer_colors || fallbackColors} catId="shirt" items={['Shirt', 'Blazer']} searchFormat={(c) => `men ${c} formal shirt blazer`} />
-                  <ColorGrid title="🪔 Kurtas & Ethnic" colors={insights?.best_kurta_colors || fallbackColors} catId="kurta" items={['Kurta', 'Pyjama']} searchFormat={(c) => `men ${c} kurta set`} />
-                  <ColorGrid title="👖 Pants & Cargos" colors={insights?.best_pant_colors || fallbackColors} catId="pant" items={['Pant', 'Cargo']} searchFormat={(c) => `men ${c} cargo pants chinos`} />
+                  <ColorGrid title="👕 Tees & Polos" colors={insights?.best_tshirt_colors || getVarietyFallback(0)} catId="tshirt" items={['T-shirt', 'Polo']} searchFormat={(c) => `men ${c} oversized t-shirt`} />
+                  <ColorGrid title="👔 Shirts & Blazers" colors={insights?.best_shirt_colors || insights?.best_blazer_colors || getVarietyFallback(3)} catId="shirt" items={['Shirt', 'Blazer']} searchFormat={(c) => `men ${c} formal shirt blazer`} />
+                  <ColorGrid title="🪔 Kurtas & Ethnic" colors={insights?.best_kurta_colors || getVarietyFallback(1)} catId="kurta" items={['Kurta', 'Pyjama']} searchFormat={(c) => `men ${c} kurta set`} />
+                  <ColorGrid title="👖 Pants & Cargos" colors={insights?.best_pant_colors || getVarietyFallback(5)} catId="pant" items={['Pant', 'Cargo']} searchFormat={(c) => `men ${c} cargo pants chinos`} />
                 </>
               );
             }
