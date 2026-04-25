@@ -553,7 +553,9 @@ def _grabcut_segment_clothing(image: np.ndarray) -> np.ndarray:
     rect = (margin_x, margin_y, w - 2*margin_x, h - 2*margin_y)
 
     try:
-        mask = np.zeros(image.shape[:2], np.uint8)
+        # CRITICAL FIX: mask must match small_image size (300px), NOT the original image size (800px)
+        # Using the wrong size causes an OpenCV Assertion failed (mask.size == img.size)
+        mask = np.zeros(small_image.shape[:2], np.uint8)
         bgd_model = np.zeros((1, 65), np.float64)
         fgd_model = np.zeros((1, 65), np.float64)
 
@@ -632,12 +634,22 @@ def _kmeans_on_masked_pixels(image_rgb: np.ndarray, mask: np.ndarray, bg_rgb: tu
         # Too few pixels after filtering — use mean of remaining or raw mean
         if len(pixels) > 0:
             mean = np.mean(pixels, axis=0)
-        else:
+        elif len(pixels_raw) > 0:
             mean = np.mean(pixels_raw.astype(np.float32), axis=0)
+        else:
+            # Absolute safety: If somehow we have NO pixels (mask was empty), return grey
+            return 128, 128, 128
+            
+        # Prevent NaN crashes (e.g. from mean of empty array)
+        if np.isnan(mean).any() or np.isinf(mean).any():
+            return 128, 128, 128
+            
         return int(mean[0]), int(mean[1]), int(mean[2])
 
     k = min(10, len(pixels) // 20)
     k = max(4, k)
+    if k > len(pixels):
+        k = len(pixels)
 
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 40, 0.1)
     try:

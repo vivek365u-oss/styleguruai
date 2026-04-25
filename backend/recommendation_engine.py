@@ -1091,13 +1091,19 @@ class RecommendationEngine:
 
     def check_outfit_compatibility(self, skin_tone: SkinToneResult, outfit_color: dict, gender: str = "male", clothing_type: str = "top", lang: str = "en") -> dict:
         self.lang = lang if lang in MESSAGES else "en"
-        category = skin_tone.category
-        undertone = skin_tone.subcategory
+        category = skin_tone.category.lower()
+        undertone = skin_tone.subcategory.lower()
+        
+        # Guard against unknown categories
+        if category not in ["ultra_fair", "fair", "light", "medium_light", "medium", "medium_dark", "olive", "brown", "dark"]:
+            category = "medium"
+        if undertone not in ["warm", "cool", "neutral"]:
+            undertone = "neutral"
 
-        outfit_r = outfit_color["r"]
-        outfit_g = outfit_color["g"]
-        outfit_b = outfit_color["b"]
-        outfit_hex = outfit_color["hex"]
+        outfit_r = outfit_color.get("r", 128)
+        outfit_g = outfit_color.get("g", 128)
+        outfit_b = outfit_color.get("b", 128)
+        outfit_hex = outfit_color.get("hex", "#808080")
         outfit_name = outfit_color.get("name", "This color")
 
         is_bottom = (clothing_type in ["bottom", "pant", "jeans", "trouser", "skirt"])
@@ -1158,8 +1164,13 @@ class RecommendationEngine:
             distances_to_best.append((dist, color))
         distances_to_best.sort(key=lambda x: x[0])
 
-        min_best_distance = distances_to_best[0][0]
-        closest_best = distances_to_best[0][1]
+        # Safety: If no best colors were found for this skin tone, use high distance
+        if not distances_to_best:
+            min_best_distance = 100
+            closest_best = {"name": "Recommended Color", "hex": "#808080"}
+        else:
+            min_best_distance = distances_to_best[0][0]
+            closest_best = distances_to_best[0][1]
 
         # ============================================
         # AVOID COLORS SE DISTANCE

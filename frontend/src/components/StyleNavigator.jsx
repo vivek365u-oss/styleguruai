@@ -52,46 +52,60 @@ const OUTFIT_TEMPLATES = {
     office: [
       (c1, c2) => ({ type:'Set', top:`${c1} formal shirt`, bottom:`${c2} tailored trousers`, shoes:'Black Oxford shoes', accent:'Leather belt + silver watch', topCat:'formal_shirt', bottomCat:'formal_trouser' }),
       (c1, c2) => ({ type:'Set', top:`${c1} lightweight blazer`, bottom:`${c2} navy chinos`, shoes:'Brown loafers', accent:'Pocket square + minimal watch', topCat:'blazer', bottomCat:'chinos' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} oxford shirt`, bottom:`${c2} charcoal grey pants`, shoes:'Tan brogues', accent:'Brown belt', topCat:'formal_shirt', bottomCat:'formal_trouser' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} polo shirt`, bottom:`${c2} beige chinos`, shoes:'Suede loafers', accent:'Metal strap watch', topCat:'polo', bottomCat:'chinos' }),
     ],
     casual: [
       (c1, c2) => ({ type:'Set', top:`${c1} slim-fit polo`, bottom:`${c2} clean chinos`, shoes:'White sneakers', accent:'Minimal bracelet', topCat:'polo', bottomCat:'chinos' }),
       (c1, c2) => ({ type:'Set', top:`${c1} oversized tee`, bottom:`${c2} baggy cargo pants`, shoes:'Chunky sneakers', accent:'Chain necklace + cap', topCat:'tshirt', bottomCat:'cargo' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} denim jacket over white tee`, bottom:`${c2} black jeans`, shoes:'High-top sneakers', accent:'Leather wristband', topCat:'jacket', bottomCat:'jeans' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} hoodie`, bottom:`${c2} joggers`, shoes:'Running shoes', accent:'Sport watch', topCat:'hoodie', bottomCat:'track_pants' }),
     ],
     party: [
       (c1, c2) => ({ type:'Set', top:`${c1} printed shirt`, bottom:`${c2} slim black jeans`, shoes:'Chelsea boots', accent:'Bold watch', topCat:'shirt', bottomCat:'jeans' }),
       (c1, c2) => ({ type:'Set', top:`${c1} leather jacket`, bottom:`${c2} charcoal trousers`, shoes:'Black boots', accent:'Rings + silver chain', topCat:'jacket', bottomCat:'formal_trouser' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} satin shirt`, bottom:`${c2} white trousers`, shoes:'Brown loafers', accent:'Gold watch', topCat:'shirt', bottomCat:'formal_trouser' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} bomber jacket`, bottom:`${c2} skinny jeans`, shoes:'Canvas sneakers', accent:'Cap', topCat:'jacket', bottomCat:'jeans' }),
     ],
     ethnic: [
       (c1, c2) => ({ type:'Set', top:`${c1} kurta set`, bottom:`${c2} churidar`, shoes:'Tan mojaris', accent:'Dupatta + brooch', topCat:'kurta_set', bottomCat:'kurta_set' }),
       (c1, c2) => ({ type:'Set', top:`${c1} sherwani`, bottom:`${c2} dhoti pants`, shoes:'Gold juttis', accent:'Pearl mala + turban', topCat:'sherwani', bottomCat:'dhoti' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} nehru jacket over kurta`, bottom:`${c2} pajama`, shoes:'Brown sandals', accent:'Pocket square', topCat:'nehru_jacket', bottomCat:'kurta' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} short kurta`, bottom:`${c2} denim jeans`, shoes:'Kolhapuri chappals', accent:'Hand-woven bracelet', topCat:'kurta', bottomCat:'jeans' }),
     ],
     gym: [
       (c1, c2) => ({ type:'Set', top:`${c1} dry-fit tee`, bottom:`${c2} active shorts`, shoes:'Running shoes', accent:'Fitness tracker', topCat:'tshirt', bottomCat:'shorts' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} compression top`, bottom:`${c2} gym leggings`, shoes:'Trainers', accent:'Gym bag', topCat:'top', bottomCat:'bottom' }),
     ],
   },
   female: {
     office: [
       (c1, c2) => ({ type:'Set', top:`${c1} structured blazer`, bottom:`${c2} cigarette trousers`, shoes:'Nude pumps', accent:'Pearl studs + watch', topCat:'blazer', bottomCat:'pant' }),
-      (c1, c2) => ({ type:'Set', top:`${c1} silk kurti`, bottom:`${c2} straight pants`, shoes:'Embellished flats', accent:'Minimal earrings', topCat:'kurti', bottomCat:'pant' }),
+      (c1, c2) => ({type:'Set', top:`${c1} silk kurti`, bottom:`${c2} straight pants`, shoes:'Embellished flats', accent:'Minimal earrings', topCat:'kurti', bottomCat:'pant' }),
       (c1, c2) => ({ type:'OnePiece', top:`${c1} pleated midi dress`, bottom:'—', shoes:'Block heels', accent:'Silk scarf + belt', topCat:'dress' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} crisp white shirt`, bottom:`${c2} pencil skirt`, shoes:'Pointed heels', accent:'Leather handbag', topCat:'shirt_female', bottomCat:'skirt' }),
     ],
     casual: [
       (c1, c2) => ({ type:'Set', top:`${c1} crop top`, bottom:`${c2} high-waist jeans`, shoes:'White slip-ons', accent:'Layered necklace', topCat:'crop_top', bottomCat:'jeans_female' }),
       (c1, c2) => ({ type:'OnePiece', top:`${c1} floral sundress`, bottom:'—', shoes:'Strappy sandals', accent:'Sun hat + sunglasses', topCat:'dress' }),
       (c1, c2) => ({ type:'Set', top:`${c1} oversized shirt`, bottom:`${c2} biker shorts`, shoes:'Chunky sneakers', accent:'Hoop earrings', topCat:'shirt_female', bottomCat:'shorts_female' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} denim jacket over slip dress`, bottom:'—', shoes:'Canvas shoes', accent:'Backpack', topCat:'jacket_female', bottomCat:'dress' }),
     ],
     party: [
       (c1, c2) => ({ type:'OnePiece', top:`${c1} satin slip dress`, bottom:'—', shoes:'Stiletto heels', accent:'Statement clutch', topCat:'dress' }),
       (c1, c2) => ({ type:'Set', top:`${c1} sequin top`, bottom:`${c2} leather mini skirt`, shoes:'Ankle boots', accent:'Bold lipstick', topCat:'top', bottomCat:'skirt' }),
       (c1, c2) => ({ type:'Set', top:`${c1} designer co-ord set`, bottom:`${c2} wide-leg pants`, shoes:'Transparent heels', accent:'Ear cuffs', topCat:'top', bottomCat:'pant' }),
+      (c1, c2) => ({ type:'OnePiece', top:`${c1} little black dress`, bottom:'—', shoes:'Red heels', accent:'Diamond necklace', topCat:'dress' }),
     ],
     ethnic: [
       (c1, c2) => ({ type:'OnePiece', top:`${c1} chiffon saree`, bottom:'—', shoes:'Embellished heels', accent:'Heavy Jhumkas', topCat:'saree' }),
       (c1, c2) => ({ type:'Set', top:`${c1} anarkali suit`, bottom:`${c2} leggings`, shoes:'Pointed juttis', accent:'Maang tikka', topCat:'kurti', bottomCat:'bottom' }),
       (c1, c2) => ({ type:'Set', top:`${c1} designer lehenga`, bottom:`${c2} matching skirt`, shoes:'Platform heels', accent:'Bangles + Choker', topCat:'top', bottomCat:'lehenga' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} heavy dupatta over plain suit`, bottom:`${c2} churidar`, shoes:'Mojaris', accent:'Nose ring', topCat:'kurti', bottomCat:'bottom' }),
     ],
     gym: [
       (c1, c2) => ({ type:'Set', top:`${c1} sports bra & tank`, bottom:`${c2} high-rise leggings`, shoes:'Trainers', accent:'Headband', topCat:'top', bottomCat:'bottom' }),
+      (c1, c2) => ({ type:'Set', top:`${c1} gym crop top`, bottom:`${c2} track pants`, shoes:'Cross-trainers', accent:'Water bottle', topCat:'top', bottomCat:'track_pants_female' }),
     ],
   }
 };
