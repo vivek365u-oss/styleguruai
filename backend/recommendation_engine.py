@@ -66,6 +66,12 @@ class RecommendationEngine:
         "neon_green": {"hex": "#39FF14", "name": "Neon Green"},
         "hot_pink": {"hex": "#FF69B4", "name": "Hot Pink"},
         "orange": {"hex": "#FFA500", "name": "Orange"},
+        "ivory": {"hex": "#FFFFF0", "name": "Ivory"},
+        "midnight_blue": {"hex": "#191970", "name": "Midnight Blue"},
+        "slate_gray": {"hex": "#708090", "name": "Slate Gray"},
+        "burgundy_deep": {"hex": "#630330", "name": "Deep Burgundy"},
+        "emerald_dark": {"hex": "#046307", "name": "Dark Emerald"},
+        "champagne": {"hex": "#F7E7CE", "name": "Champagne"},
     }
 
     def get_recommendations(self, skin_tone: SkinToneResult, lang: str = "en") -> OutfitRecommendation:
@@ -191,13 +197,10 @@ class RecommendationEngine:
                 {**self.COLORS["lavender"], "reason": self._localize("complements_undertone")},
             ],
             ("medium", "warm"): [
-                {**self.COLORS["navy_blue"], "reason": "Perfect contrast — the #1 choice for medium warm skin"},
-                {**self.COLORS["white"], "reason": "Bright white creates a fresh, clean contrast"},
-                {**self.COLORS["maroon"], "reason": "Deep red brings out golden undertones beautifully"},
-                {**self.COLORS["olive_green"], "reason": "Earth tone that was MADE for your skin tone"},
-                {**self.COLORS["rust"], "reason": "Trendy earth tone that makes medium skin glow"},
-                {**self.COLORS["sky_blue"], "reason": "Light blue provides a pleasant, airy contrast"},
-                {**self.COLORS["coral"], "reason": "Warm pop of color that energizes your look"},
+                {**self.COLORS["navy_blue"], "reason": "Perfect contrast for medium warm skin"},
+                {**self.COLORS["white"], "reason": "Crisp white creates a fresh look"},
+                {**self.COLORS["maroon"], "reason": "Deep red brings out golden undertones"},
+                {**self.COLORS["sky_blue"], "reason": "Light blue provides a pleasant contrast"},
             ],
             ("medium", "cool"): [
                 {**self.COLORS["cobalt_blue"], "reason": "Strong cool blue creates stunning contrast"},
@@ -894,38 +897,74 @@ class RecommendationEngine:
         return res.get(self.lang, res.get("en", ""))
 
     def _get_tshirt_colors(self, category, undertone):
-        base = self._get_shirt_colors(category, undertone)
-        accents = self._get_accent_colors(category, undertone)
-        mixed = accents[:2] + base[1:4]
-        return [{"name": c["name"], "hex": c["hex"], "reason": "A casual classic " + c["name"].lower() + " t-shirt looks perfect on your tone."} for c in mixed]
+        # Tees: Focus on Earthy/Vibrant tones to differentiate from formal shirts
+        palette = [
+            {**self.COLORS["rust"], "reason": "Trendy earthy tone for casual vibes"},
+            {**self.COLORS["olive_green"], "reason": "Classic utility color that glows on warm skin"},
+            {**self.COLORS["mustard"], "reason": "Bold mustard for a vibrant streetwear look"},
+            {**self.COLORS["charcoal"], "reason": "Sleek dark neutral for t-shirts"},
+            {**self.COLORS["tan"], "reason": "Minimalist tan for a clean casual look"},
+        ]
+        # For cool undertones, swap with cool earth tones
+        if undertone == 'cool':
+            palette = [
+                {**self.COLORS["teal"], "reason": "Cool blue-green pops on casual tees"},
+                {**self.COLORS["slate_gray"], "reason": "Professional cool-toned gray"},
+                {**self.COLORS["midnight_blue"], "reason": "Deep blue for a sharp casual look"},
+                {**self.COLORS["burgundy"], "reason": "Rich cool-red for a sophisticated tee"},
+                {**self.COLORS["forest_green"], "reason": "Deep green for a nature-inspired look"},
+            ]
+        return palette
 
     def _get_kurta_colors(self, category, undertone):
-        base = self._get_pant_colors(category, undertone) + self._get_shirt_colors(category, undertone)
-        return [{"name": c["name"], "hex": c["hex"], "reason": "Ethnic " + c["name"].lower() + " brings out your cultural charm."} for c in base[1:6]]
+        # Ethnic: Focus on Rich/Festive colors
+        return [
+            {**self.COLORS["maroon"], "reason": "Regal maroon for traditional celebrations"},
+            {**self.COLORS["royal_blue"], "reason": "Power blue that looks stunning on kurtas"},
+            {**self.COLORS["emerald"], "reason": "Emerald green adds a touch of royalty"},
+            {**self.COLORS["ivory"], "reason": "Ivory/Cream is a classic festive choice"},
+            {**self.COLORS["burgundy_deep"], "reason": "Deep burgundy for high-impact ethnic wear"},
+        ]
 
     def _get_blazer_colors(self, category, undertone):
-        base = self._get_pant_colors(category, undertone) + self._get_shirt_colors(category, undertone)
-        filtered = [c for c in base if c["name"] in ["Navy Blue", "Charcoal", "Black", "Burgundy", "Olive Green", "Dark Brown", "Rust", "Emerald Green"]]
-        if not filtered: filtered = base[:4] # fallback
-        return [{"name": c["name"], "hex": c["hex"], "reason": "A sharp " + c["name"].lower() + " blazer commands attention."} for c in filtered[:4]]
+        # Blazers: Focus on Structured/Neutral tones
+        return [
+            {**self.COLORS["navy_blue"], "reason": "The absolute standard for formal blazers"},
+            {**self.COLORS["charcoal"], "reason": "Professional charcoal for a sharp silhouette"},
+            {**self.COLORS["camel"], "reason": "Sophisticated camel for a modern blazer look"},
+            {**self.COLORS["black"], "reason": "Timeless black for evening formality"},
+            {**self.COLORS["tan"], "reason": "Tan/Beige for a summer-ready blazer"},
+        ]
 
     def _get_hoodie_colors(self, category, undertone):
-        base = self._get_shirt_colors(category, undertone) + self._get_pant_colors(category, undertone)
-        return [{"name": c["name"], "hex": c["hex"], "reason": "Streetwear in " + c["name"].lower() + " elevates your casual look."} for c in reversed(base[-4:])]
+        # Hoodies: Focus on Deep/Athletic colors
+        return [
+            {**self.COLORS["midnight_blue"], "reason": "Midnight blue for a sleek athletic look"},
+            {**self.COLORS["black"], "reason": "Essential black hoodie for any wardrobe"},
+            {**self.COLORS["maroon"], "reason": "Deep maroon for a warm, cozy vibe"},
+            {**self.COLORS["forest_green"], "reason": "Earthy green for a relaxed feel"},
+            {**self.COLORS["slate_gray"], "reason": "Modern gray for minimalist streetwear"},
+        ]
 
     def _get_female_blazer_colors(self, category, undertone):
-        try:
-            base = self._get_pant_colors(category, undertone) + self._get_dress_colors(category, undertone)
-        except AttributeError:
-            base = self._get_shirt_colors(category, undertone)
-        return [{"name": c["name"], "hex": c["hex"], "reason": "Power dressing in " + c["name"].lower() + " adds immediate elegance."} for c in base[::2][:4]]
+        # Female Blazers: Mix of power neutrals and soft professional tones
+        return [
+            {**self.COLORS["navy_blue"], "reason": "Classic navy for a professional power look"},
+            {**self.COLORS["ivory"], "reason": "Chic ivory for a modern, clean blazer"},
+            {**self.COLORS["dusty_rose"], "reason": "Soft pink for a sophisticated, feminine touch"},
+            {**self.COLORS["charcoal"], "reason": "Sharp charcoal for formal boardrooms"},
+            {**self.COLORS["beige"], "reason": "Neutral beige for a versatile light layer"},
+        ]
 
     def _get_saree_colors(self, category, undertone):
-        try:
-            base = self._get_lehenga_colors(category, undertone)
-        except AttributeError:
-            base = self._get_shirt_colors(category, undertone)
-        return [{"name": c["name"], "hex": c["hex"], "reason": "A graceful " + c["name"].lower() + " saree highlights your undertones."} for c in reversed(base)]
+        # Saree: High-contrast, vibrant, and festive
+        return [
+            {**self.COLORS["burgundy_deep"], "reason": "Rich deep burgundy for an elegant silk saree"},
+            {**self.COLORS["emerald_dark"], "reason": "Dark emerald green for a regal traditional look"},
+            {**self.COLORS["royal_blue"], "reason": "Vibrant royal blue for festive occasions"},
+            {**self.COLORS["maroon"], "reason": "Timeless maroon saree that glows on any tone"},
+            {**self.COLORS["champagne"], "reason": "Sophisticated champagne for high-end events"},
+        ]
 
 
     def get_seasonal_recommendations(self, skin_tone: SkinToneResult, season: str, lang: str = "en", gender: str = "male") -> dict:

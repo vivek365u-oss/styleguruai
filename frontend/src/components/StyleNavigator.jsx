@@ -285,6 +285,7 @@ export default function StyleNavigator({ user, onAnalyze }) {
   const [trendCat,   setTrendCat]  = useState('All');
   const [weather,    setWeather]   = useState({ condition: 'pleasant', temp: 25 });
   const [history,    setHistory]   = useState([]); // Store logs for rotation logic
+  const [pendingShop, setPendingShop] = useState(null); // Choice between Dress/Top, Saree/Kurti etc.
 
   const handleTabChange = (newTab) => {
     setTab(newTab);
@@ -900,7 +901,7 @@ export default function StyleNavigator({ user, onAnalyze }) {
 
           {/* Categorized Best Colors Render */}
           {(() => {
-            const ColorGrid = ({ title, colors, searchFormat, catId }) => {
+            const ColorGrid = ({ title, colors, searchFormat, catId, items }) => {
               if (!colors || !colors.length) return null;
               const displayColors = colors.slice(0, 3); 
 
@@ -927,8 +928,18 @@ export default function StyleNavigator({ user, onAnalyze }) {
                             )}
                             <button
                               onClick={() => {
-                                 const shopData = getShopData({ query: searchFormat(color.name), color: color.name, catId: catId, gender });
-                                 setShopItem(shopData);
+                                 // If category has multiple items, show choice modal
+                                 if (items && items.length > 1) {
+                                   setPendingShop({ color, items, searchFormat });
+                                 } else {
+                                   const shopData = getShopData({ 
+                                      query: searchFormat(color.name), 
+                                      color: color.name, 
+                                      catId: catId, 
+                                      gender 
+                                   });
+                                   setShopItem(shopData);
+                                 }
                               }}
                               style={{ 
                                 position:'absolute', bottom:6, right:6, 
@@ -960,19 +971,19 @@ export default function StyleNavigator({ user, onAnalyze }) {
             if (gender === 'female') {
               return (
                 <>
-                  <ColorGrid title="👕 Tops & Tees" colors={insights?.best_top_colors || fallbackColors} catId="top" searchFormat={(c) => `women ${c} top`} />
-                  <ColorGrid title="🥻 Ethnics & Sarees" colors={insights?.best_saree_colors || insights?.best_kurti_colors || fallbackColors} catId="kurti" searchFormat={(c) => `women ${c} saree ethnic`} />
-                  <ColorGrid title="🧥 Blazers & Shrugs" colors={insights?.best_female_blazer_colors || fallbackColors} catId="blazer" searchFormat={(c) => `women ${c} power blazer`} />
-                  <ColorGrid title="👖 Pants & Palazzos" colors={insights?.best_bottom_colors || fallbackColors} catId="pant" searchFormat={(c) => `women ${c} trousers palazzo`} />
+                  <ColorGrid title="👕 Tops & Tees" colors={insights?.best_top_colors || fallbackColors} catId="top" items={['Top', 'T-shirt']} searchFormat={(c) => `women ${c} top`} />
+                  <ColorGrid title="🥻 Ethnics & Sarees" colors={insights?.best_saree_colors || insights?.best_kurti_colors || fallbackColors} catId="kurti" items={['Saree', 'Kurti']} searchFormat={(c) => `women ${c} saree ethnic`} />
+                  <ColorGrid title="🧥 Blazers & Shrugs" colors={insights?.best_female_blazer_colors || fallbackColors} catId="blazer" items={['Blazer', 'Shrug']} searchFormat={(c) => `women ${c} power blazer`} />
+                  <ColorGrid title="👖 Pants & Palazzos" colors={insights?.best_bottom_colors || fallbackColors} catId="pant" items={['Trouser', 'Palazzo']} searchFormat={(c) => `women ${c} trousers palazzo`} />
                 </>
               );
             } else {
               return (
                 <>
-                  <ColorGrid title="👕 Tees & Polos" colors={insights?.best_tshirt_colors || fallbackColors} catId="tshirt" searchFormat={(c) => `men ${c} oversized t-shirt`} />
-                  <ColorGrid title="👔 Shirts & Blazers" colors={insights?.best_shirt_colors || insights?.best_blazer_colors || fallbackColors} catId="shirt" searchFormat={(c) => `men ${c} formal shirt blazer`} />
-                  <ColorGrid title="🪔 Kurtas & Ethnic" colors={insights?.best_kurta_colors || fallbackColors} catId="kurta" searchFormat={(c) => `men ${c} kurta set`} />
-                  <ColorGrid title="👖 Pants & Cargos" colors={insights?.best_pant_colors || fallbackColors} catId="pant" searchFormat={(c) => `men ${c} cargo pants chinos`} />
+                  <ColorGrid title="👕 Tees & Polos" colors={insights?.best_tshirt_colors || fallbackColors} catId="tshirt" items={['T-shirt', 'Polo']} searchFormat={(c) => `men ${c} oversized t-shirt`} />
+                  <ColorGrid title="👔 Shirts & Blazers" colors={insights?.best_shirt_colors || insights?.best_blazer_colors || fallbackColors} catId="shirt" items={['Shirt', 'Blazer']} searchFormat={(c) => `men ${c} formal shirt blazer`} />
+                  <ColorGrid title="🪔 Kurtas & Ethnic" colors={insights?.best_kurta_colors || fallbackColors} catId="kurta" items={['Kurta', 'Pyjama']} searchFormat={(c) => `men ${c} kurta set`} />
+                  <ColorGrid title="👖 Pants & Cargos" colors={insights?.best_pant_colors || fallbackColors} catId="pant" items={['Pant', 'Cargo']} searchFormat={(c) => `men ${c} cargo pants chinos`} />
                 </>
               );
             }
@@ -1290,6 +1301,47 @@ export default function StyleNavigator({ user, onAnalyze }) {
         item={shopItem} 
         gender={shopItem?.gender || gender} 
       />
+
+      {/* Choice Modal for multi-item categories */}
+      {pendingShop && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', backdropFilter:'blur(8px)', zIndex:2000, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
+          <div style={{ background:C.bg, border:`1px solid ${C.border}`, borderRadius:24, width:'100%', maxWidth:340, padding:'24px', boxShadow:'0 20px 50px rgba(0,0,0,0.5)', animation:'scaleUp 0.3s ease' }}>
+             <p style={{ fontSize:'10px', color:VIOLET, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.2em', textAlign:'center', marginBottom:8 }}>Which one to shop?</p>
+             <p style={{ fontSize:'16px', color:C.text, fontWeight:700, textAlign:'center', marginBottom:20 }}>Complete your {pendingShop.color.name} look</p>
+             <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                {pendingShop.items.map(item => (
+                  <button
+                     key={item}
+                     onClick={() => {
+                        const shopData = getShopData({ 
+                           query: `${item} in ${pendingShop.color.name} for ${gender} India`, 
+                           color: pendingShop.color.name, 
+                           catId: item.toLowerCase().includes('shirt') ? 'shirt' : item.toLowerCase().includes('pant') ? 'pant' : item.toLowerCase(), 
+                           gender 
+                        });
+                        setShopItem(shopData);
+                        setPendingShop(null);
+                     }}
+                     style={{ 
+                        width:'100%', padding:'16px', borderRadius:16, 
+                        background:C.glass, border:`1px solid ${C.border}`, color:C.text,
+                        fontSize:'13px', fontWeight:600, cursor:'pointer', textAlign:'center',
+                        transition:'all 0.2s', fontFamily:PJS
+                     }}
+                  >
+                     Shop {item}
+                  </button>
+                ))}
+                <button 
+                   onClick={() => setPendingShop(null)}
+                   style={{ marginTop:10, padding:'10px', color:C.muted, fontSize:'11px', border:'none', background:'none', cursor:'pointer', fontFamily:PJS }}
+                >
+                   Cancel
+                </button>
+             </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
