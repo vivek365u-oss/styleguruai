@@ -262,7 +262,8 @@ export default function StyleNavigator({ user, onAnalyze }) {
           loadStyleInsights(uid),
           getWeeklyForecast(),
         ]);
-        setProfile(primary || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'));
+        const activeProfile = primary || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
+        setProfile(activeProfile);
         setPrefs(userPrefs);
         setWardrobe(userWardrobe || []);
         setHistory(logs || []);
@@ -772,22 +773,22 @@ export default function StyleNavigator({ user, onAnalyze }) {
               {/* Mark as Worn button */}
               <button
                 onClick={handleWearToday}
-                disabled={isWorn || logging}
+                disabled={wornMoods.has(mood) || logging}
                 style={{
                   width:'100%', padding:'14px', borderRadius:14,
-                  background: isWorn ? 'rgba(16,185,129,0.1)' : GRAD,
-                  border: isWorn ? '1px solid rgba(16,185,129,0.3)' : 'none',
-                  color: isWorn ? '#10B981' : 'white',
+                  background: wornMoods.has(mood) ? 'rgba(16,185,129,0.1)' : GRAD,
+                  border: wornMoods.has(mood) ? '1px solid rgba(16,185,129,0.3)' : 'none',
+                  color: wornMoods.has(mood) ? '#10B981' : 'white',
                   fontSize:'13px', fontWeight:700,
-                  cursor: isWorn ? 'default' : 'pointer',
+                  cursor: wornMoods.has(mood) ? 'default' : 'pointer',
                   fontFamily:PJS, transition:'all 0.2s',
-                  boxShadow: isWorn ? 'none' : '0 6px 20px rgba(139,92,246,0.35)',
+                  boxShadow: wornMoods.has(mood) ? 'none' : '0 6px 20px rgba(139,92,246,0.35)',
                   display:'flex', alignItems:'center', justifyContent:'center', gap:8,
                 }}
-                onMouseEnter={e => { if (!isWorn) e.currentTarget.style.opacity='0.9'; }}
+                onMouseEnter={e => { if (!wornMoods.has(mood)) e.currentTarget.style.opacity='0.9'; }}
                 onMouseLeave={e => e.currentTarget.style.opacity='1'}
               >
-                {logging ? '⏳ Logging...' : isWorn ? '🏆 Style Logged for Today!' : '✅ Wear This Today'}
+                {logging ? '⏳ Logging...' : wornMoods.has(mood) ? '🏆 Style Logged for Today!' : '✅ Wear This Today'}
               </button>
             </div>
           )}
