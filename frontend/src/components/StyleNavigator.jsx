@@ -859,50 +859,97 @@ export default function StyleNavigator({ user, onAnalyze }) {
           {/* Color Science Banner */}
           <div style={{ ...card({ padding:'20px', marginBottom:14, background:`linear-gradient(135deg,rgba(139,92,246,${C.isDark?'0.12':'0.06'}),rgba(236,72,153,${C.isDark?'0.08':'0.04'}))` }) }}>
             <p style={{ fontSize:'9px', letterSpacing:'0.2em', textTransform:'uppercase', background:GRAD, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', fontWeight:700, fontFamily:PJS, margin:'0 0 6px' }}>
-              🎨 Color Theory Analysis
+              🎨 Color DNA Analysis
             </p>
             <p style={{ fontFamily:PDI, fontSize:'18px', color:C.text, margin:'0 0 8px' }}>
-              Your {toneKey.charAt(0).toUpperCase()+toneKey.slice(1)} Skin Palette
+              Your {toneKey.charAt(0).toUpperCase()+toneKey.slice(1)} Spectrum
             </p>
             <p style={{ fontSize:'12px', color:C.text2, fontFamily:PJS, lineHeight:'1.7', margin:0 }}>
-              {getColorWhy(toneKey, undertone)} Based on ITA color science and your {undertone} undertone, we've identified your ideal color spectrum.
+              {getColorWhy(toneKey, undertone)} Our AI identifies the exact shades that complement your {undertone} undertone across all clothing categories.
             </p>
           </div>
 
+          {/* DNA Match Statistics */}
+          {(() => {
+             const dnaColors = [
+                ...(insights?.best_tshirt_colors || []),
+                ...(insights?.best_shirt_colors || []),
+                ...(insights?.best_kurta_colors || []),
+                ...(insights?.best_top_colors || []),
+                ...(insights?.best_saree_colors || []),
+                ...(insights?.best_pant_colors || [])
+             ];
+             const uniqueDNA = dnaColors.filter((c, i, a) => a.findIndex(x => x.hex === c.hex) === i);
+             const ownedDNA = uniqueDNA.filter(c => 
+                wardrobe.some(w => w.hex?.toLowerCase() === c.hex?.toLowerCase() || w.color_name?.toLowerCase() === c.name?.toLowerCase())
+             );
+             const score = uniqueDNA.length > 0 ? Math.round((ownedDNA.length / uniqueDNA.length) * 100) : 0;
+
+             return (
+               <div style={{ ...card({ padding:'14px 16px', marginBottom:20, display:'flex', alignItems:'center', gap:16, border:`1px solid ${score > 70 ? 'rgba(16,185,129,0.3)' : 'rgba(139,92,246,0.3)'}` }) }}>
+                  <div style={{ width:48, height:48, borderRadius:'50%', border:`3px solid ${score > 70 ? '#10B981' : VIOLET}`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                     <span style={{ fontSize:'12px', fontWeight:900, color:C.text }}>{score}%</span>
+                  </div>
+                  <div>
+                     <p style={{ fontSize:'11px', fontWeight:800, color:C.text, margin:'0 0 2px' }}>Closet DNA Harmony</p>
+                     <p style={{ fontSize:'10px', color:C.muted, margin:0 }}>You own {ownedDNA.length} of your {uniqueDNA.length} ideal colors.</p>
+                  </div>
+               </div>
+             );
+          })()}
+
           {/* Categorized Best Colors Render */}
           {(() => {
-            const ColorGrid = ({ title, colors, searchFormat }) => {
+            const ColorGrid = ({ title, colors, searchFormat, catId }) => {
               if (!colors || !colors.length) return null;
-              const displayColors = colors.slice(0, 3); // 3 items per category row
+              const displayColors = colors.slice(0, 3); 
+
               return (
-                <div style={{ marginBottom: 16 }}>
-                  <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>{title}</p>
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'between', marginBottom:10 }}>
+                    <p style={{ flex:1, fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:0 }}>{title}</p>
+                    <span style={{ fontSize:'8px', opacity:0.4, fontWeight:700 }}>AI RECOMMENDATION</span>
+                  </div>
                   <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
-                    {displayColors.map((color, i) => (
-                      <div key={i} style={{ ...card({ padding:0, overflow:'hidden' }) }}>
-                        <div style={{ height:64, background:color.hex, position:'relative' }}>
-                          <button
-                            onClick={() => {
-                               const shopData = getShopData({ query: searchFormat(color.name), color: color.name, catId: title.includes('Dress') ? 'dress' : title.includes('Ethnic') ? 'kurta' : title.includes('Blazer') ? 'blazer' : 'shirt', gender });
-                               setShopItem(shopData);
-                            }}
-                            style={{ 
-                              position:'absolute', bottom:6, right:6, 
-                              background:VIOLET, border:'none', color:'white', 
-                              borderRadius:6, padding:'4px 8px', fontSize:'8px', fontWeight:900,
-                              textTransform:'uppercase', letterSpacing:'0.05em',
-                              cursor:'pointer', fontFamily:PJS, boxShadow:'0 2px 8px rgba(0,0,0,0.2)'
-                            }}
-                          >
-                            Shop
-                          </button>
+                    {displayColors.map((color, i) => {
+                      const isOwned = wardrobe.some(w => 
+                         w.hex?.toLowerCase() === color.hex?.toLowerCase() || 
+                         w.color_name?.toLowerCase() === color.name?.toLowerCase()
+                      );
+
+                      return (
+                        <div key={i} style={{ ...card({ padding:0, overflow:'hidden', border: isOwned ? '1px solid rgba(16,185,129,0.3)' : `1px solid ${C.border}` }) }}>
+                          <div style={{ height:64, background:color.hex, position:'relative' }}>
+                            {isOwned ? (
+                               <div style={{ position:'absolute', top:6, left:6, background:'rgba(16,185,129,0.9)', color:'white', borderRadius:4, padding:'2px 4px', fontSize:'7px', fontWeight:900 }}>✓ OWNED</div>
+                            ) : (
+                               <div style={{ position:'absolute', top:6, left:6, background:'rgba(245,158,11,0.9)', color:'white', borderRadius:4, padding:'2px 4px', fontSize:'7px', fontWeight:900 }}>🕵️ MISSING</div>
+                            )}
+                            <button
+                              onClick={() => {
+                                 const shopData = getShopData({ query: searchFormat(color.name), color: color.name, catId: catId, gender });
+                                 setShopItem(shopData);
+                              }}
+                              style={{ 
+                                position:'absolute', bottom:6, right:6, 
+                                background: isOwned ? 'rgba(255,255,255,0.2)' : VIOLET, 
+                                border: isOwned ? '1px solid rgba(255,255,255,0.3)' : 'none', 
+                                color: 'white', backdropFilter: isOwned ? 'blur(4px)' : 'none',
+                                borderRadius:6, padding:'4px 8px', fontSize:'8px', fontWeight:900,
+                                textTransform:'uppercase', letterSpacing:'0.05em',
+                                cursor:'pointer', fontFamily:PJS, boxShadow:'0 2px 8px rgba(0,0,0,0.2)'
+                              }}
+                            >
+                              {isOwned ? 'Shop More' : 'Shop Look'}
+                            </button>
+                          </div>
+                          <div style={{ padding:'10px 10px 12px' }}>
+                            <p style={{ fontSize:'10px', color:C.text, fontFamily:PJS, fontWeight:700, margin:'0 0 2px', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{color.name}</p>
+                            <p style={{ fontSize:'8px', color:C.muted, fontFamily:PJS, margin:0, opacity:0.6 }}>{color.hex}</p>
+                          </div>
                         </div>
-                        <div style={{ padding:'10px 10px 12px' }}>
-                          <p style={{ fontSize:'11px', color:C.text, fontFamily:PJS, fontWeight:600, margin:'0 0 2px' }}>{color.name}</p>
-                          <p style={{ fontSize:'9px', color:C.muted, fontFamily:PJS, margin:0 }}>{color.hex}</p>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               );
@@ -913,17 +960,19 @@ export default function StyleNavigator({ user, onAnalyze }) {
             if (gender === 'female') {
               return (
                 <>
-                  <ColorGrid title="👗 Dresses & Tops" colors={insights?.best_top_colors || fallbackColors} searchFormat={(c) => `women ${c} top dress`} />
-                  <ColorGrid title="🥻 Ethnics & Sarees" colors={insights?.best_saree_colors || insights?.best_kurti_colors || fallbackColors} searchFormat={(c) => `women ${c} saree ethnic`} />
-                  <ColorGrid title="🧥 Outerwear & Blazers" colors={insights?.best_female_blazer_colors || fallbackColors} searchFormat={(c) => `women ${c} blazer shrug`} />
+                  <ColorGrid title="👕 Tops & Tees" colors={insights?.best_top_colors || fallbackColors} catId="top" searchFormat={(c) => `women ${c} top`} />
+                  <ColorGrid title="🥻 Ethnics & Sarees" colors={insights?.best_saree_colors || insights?.best_kurti_colors || fallbackColors} catId="kurti" searchFormat={(c) => `women ${c} saree ethnic`} />
+                  <ColorGrid title="🧥 Blazers & Shrugs" colors={insights?.best_female_blazer_colors || fallbackColors} catId="blazer" searchFormat={(c) => `women ${c} power blazer`} />
+                  <ColorGrid title="👖 Pants & Palazzos" colors={insights?.best_bottom_colors || fallbackColors} catId="pant" searchFormat={(c) => `women ${c} trousers palazzo`} />
                 </>
               );
             } else {
               return (
                 <>
-                  <ColorGrid title="👕 Casual Tees & Polos" colors={insights?.best_tshirt_colors || fallbackColors} searchFormat={(c) => `men ${c} oversized t-shirt polo`} />
-                  <ColorGrid title="👔 Formal & Blazers" colors={insights?.best_blazer_colors || insights?.best_shirt_colors || fallbackColors} searchFormat={(c) => `men ${c} blazer formal shirt`} />
-                  <ColorGrid title="🪔 Kurtas & Ethnic" colors={insights?.best_kurta_colors || fallbackColors} searchFormat={(c) => `men ${c} kurta ethnic`} />
+                  <ColorGrid title="👕 Tees & Polos" colors={insights?.best_tshirt_colors || fallbackColors} catId="tshirt" searchFormat={(c) => `men ${c} oversized t-shirt`} />
+                  <ColorGrid title="👔 Shirts & Blazers" colors={insights?.best_shirt_colors || insights?.best_blazer_colors || fallbackColors} catId="shirt" searchFormat={(c) => `men ${c} formal shirt blazer`} />
+                  <ColorGrid title="🪔 Kurtas & Ethnic" colors={insights?.best_kurta_colors || fallbackColors} catId="kurta" searchFormat={(c) => `men ${c} kurta set`} />
+                  <ColorGrid title="👖 Pants & Cargos" colors={insights?.best_pant_colors || fallbackColors} catId="pant" searchFormat={(c) => `men ${c} cargo pants chinos`} />
                 </>
               );
             }

@@ -11,9 +11,13 @@ class OutfitRecommendation:
     best_shirt_colors: List[Dict[str, str]]
     best_tshirt_colors: List[Dict[str, str]]
     best_kurta_colors: List[Dict[str, str]]
+    best_saree_colors: List[Dict[str, str]] # NEW
+    best_kurti_colors: List[Dict[str, str]] # NEW
     best_blazer_colors: List[Dict[str, str]]
+    best_female_blazer_colors: List[Dict[str, str]] # NEW
     best_hoodie_colors: List[Dict[str, str]]
     best_pant_colors: List[Dict[str, str]]
+    best_bottom_colors: List[Dict[str, str]] # NEW
     accent_colors: List[Dict[str, str]]
     colors_to_avoid: List[Dict[str, str]]
     outfit_combos: List[Dict[str, str]]
@@ -75,9 +79,13 @@ class RecommendationEngine:
             best_shirt_colors=self._get_shirt_colors(category, undertone),
             best_tshirt_colors=self._get_tshirt_colors(category, undertone),
             best_kurta_colors=self._get_kurta_colors(category, undertone),
+            best_saree_colors=self._get_saree_colors(category, undertone),
+            best_kurti_colors=self._get_kurti_colors(category, undertone),
             best_blazer_colors=self._get_blazer_colors(category, undertone),
+            best_female_blazer_colors=self._get_female_blazer_colors(category, undertone),
             best_hoodie_colors=self._get_hoodie_colors(category, undertone),
             best_pant_colors=self._get_pant_colors(category, undertone),
+            best_bottom_colors=self._get_pant_colors(category, undertone), # Shared logic for now
             accent_colors=self._get_accent_colors(category, undertone),
             colors_to_avoid=self._get_avoid_colors(category, undertone),
             outfit_combos=self._get_outfit_combos(category, undertone),
