@@ -27,6 +27,7 @@ import { scoreWardrobeItem, getActionableAdvice, getAccessoryAdvice } from '../u
 import { getThemeColors } from '../utils/themeColors';
 import { PRODUCT_LABEL_MAP, getShopData } from '../utils/shoppingUrls';
 import ShopActionSheet from './ShopActionSheet';
+import { getWeeklyForecast } from '../utils/weatherService';
 
 // ── Skin tone → hex ─────────────────────────────────
 const TONE_HEX = {
