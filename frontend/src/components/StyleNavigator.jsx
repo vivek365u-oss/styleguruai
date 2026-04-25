@@ -397,20 +397,35 @@ export default function StyleNavigator({ user, onAnalyze }) {
   const skinHex   = useMemo(() => profile?.skinHex || TONE_HEX[toneKey] || '#C68642', [profile, toneKey]);
   const season    = useMemo(() => profile?.season || profile?.skin_tone?.color_season || 'Spring', [profile]);
 
+// ── Hex to Name Map for dynamic labels ────────────────
+const HEX_NAME_MAP = {
+  // Fair
+  '#8B3A3A': 'Deep Red', '#556B2F': 'Olive Green', '#4682B4': 'Steel Blue', '#483D8B': 'Dark Slate',
+  '#C71585': 'Deep Pink', '#2E8B57': 'Sea Green', '#4169E1': 'Royal Blue', '#6A0DAD': 'Indigo',
+  '#8B0000': 'Dark Maroon', '#228B22': 'Forest Green', '#2F4F8F': 'Deep Navy', '#8B4513': 'Saddle Brown',
+  // Dark / Brown
+  '#FF7F50': 'Coral', '#FFD700': 'Gold', '#00CED1': 'Turquoise', '#98FB98': 'Mint',
+  '#FF6B6B': 'Sunset Red', '#FFE66D': 'Pastel Yellow', '#4ECDC4': 'Teal', '#A8E6CF': 'Sage',
+  '#FF8C61': 'Salmon', '#FFDA77': 'Apricot', '#45B7D1': 'Sky Blue', '#96CEB4': 'Pale Green',
+  '#FFFFFF': 'Crisp White', '#0047AB': 'Cobalt Blue', '#FF4500': 'Orange Red',
+  '#F0F8FF': 'Alice Blue', '#FFDB58': 'Mustard', '#FF69B4': 'Hot Pink',
+  '#FFFAF0': 'Floral White', '#EFCB68': 'Goldenrod', '#E34234': 'Vermilion',
+};
+
+// ... existing code ...
+
   // Best colors from analysis or fallback color science
   const bestColors = useMemo(() => {
     let fromInsights = [];
     if (gender === 'female' && insights?.best_dress_colors?.length > 0) fromInsights = insights.best_dress_colors;
     else if (gender === 'male' && insights?.best_shirt_colors?.length > 0) fromInsights = insights.best_shirt_colors;
     else if (insights?.best_colors?.length > 0) fromInsights = insights.best_colors;
-    else if (insights?.best_shirt_colors?.length > 0) fromInsights = insights.best_shirt_colors; // fallback
-    else if (insights?.best_dress_colors?.length > 0) fromInsights = insights.best_dress_colors; // fallback
     
     if (fromInsights.length > 0) return fromInsights.slice(0, 6);
     
     const palette = TONE_PALETTE[toneKey]?.[undertone] || TONE_PALETTE.medium.neutral;
     return palette.map((hex, i) => ({
-      name: ['Primary Tone', 'Secondary Tone', 'Accent Color', 'Neutral Base', 'Power Color', 'Contrast'][i] || `Color ${i+1}`,
+      name: HEX_NAME_MAP[hex.toUpperCase()] || ['Primary Tone', 'Secondary Tone', 'Accent Color', 'Neutral Base', 'Power Color', 'Contrast'][i] || `Color ${i+1}`,
       hex,
     }));
   }, [insights, toneKey, undertone, gender]);
