@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { saveHistory, auth } from '../api/styleApi';
+import ShopActionSheet from './ShopActionSheet';
 
 function hexToRGB(hex) {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -22,6 +23,12 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
   const { partner1, partner2 } = data || {};
   const p1Img = uploadedImages?.[0] || '';
   const p2Img = uploadedImages?.[1] || '';
+
+  const [shopItem, setShopItem] = useState(null);
+
+  const handleShop = (query, gender) => {
+    setShopItem({ query, gender });
+  };
 
   // Guard against corrupted or stub history entries
   if (!partner1 || !partner2 || !partner1.recommendations || !partner2.recommendations) {
@@ -368,17 +375,31 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
               <div className="flex flex-col gap-2 relative z-10 w-full">
                 {/* Outfits block */}
                 <div className={`grid grid-cols-2 gap-2 p-2 rounded-xl mb-1 ${isDark ? 'bg-black/20' : 'bg-gray-50'}`}>
-                  <div className="pr-2 border-r border-gray-200 dark:border-white/10">
-                    <span className={`text-[10px] font-bold uppercase flex items-center gap-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
-                      <span className="whitespace-nowrap">{p1Label}</span> (OUTFIT)
-                    </span>
-                    <p className={`text-xs mt-1 leading-snug ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{outfit.p1}</p>
+                  <div className="pr-2 border-r border-gray-200 dark:border-white/10 flex flex-col justify-between">
+                    <div>
+                      <span className={`text-[10px] font-bold uppercase flex items-center gap-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
+                        <span className="whitespace-nowrap">{p1Label}</span> (OUTFIT)
+                      </span>
+                      <p className={`text-xs mt-1 leading-snug ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{outfit.p1}</p>
+                    </div>
+                    <button 
+                       onClick={() => handleShop(outfit.p1.split('+')[0].trim(), partner1.gender)}
+                       className={`mt-2 self-start text-[9px] font-bold px-2 py-1 rounded-full border flex items-center gap-1 transition-all ${isDark ? 'bg-rose-500/10 border-rose-500/20 text-rose-300 hover:bg-rose-500/20' : 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100'}`}>
+                       🛍️ Shop Item
+                    </button>
                   </div>
-                  <div className="pl-1">
-                    <span className={`text-[10px] font-bold uppercase flex items-center gap-1 ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>
-                      <span className="whitespace-nowrap">{p2Label}</span> (OUTFIT)
-                    </span>
-                    <p className={`text-xs mt-1 leading-snug ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{outfit.p2}</p>
+                  <div className="pl-1 flex flex-col justify-between">
+                    <div>
+                      <span className={`text-[10px] font-bold uppercase flex items-center gap-1 ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>
+                        <span className="whitespace-nowrap">{p2Label}</span> (OUTFIT)
+                      </span>
+                      <p className={`text-xs mt-1 leading-snug ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{outfit.p2}</p>
+                    </div>
+                    <button 
+                       onClick={() => handleShop(outfit.p2.split('+')[0].trim(), partner2.gender)}
+                       className={`mt-2 self-start text-[9px] font-bold px-2 py-1 rounded-full border flex items-center gap-1 transition-all ${isDark ? 'bg-rose-500/10 border-rose-500/20 text-rose-300 hover:bg-rose-500/20' : 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100'}`}>
+                       🛍️ Shop Item
+                    </button>
                   </div>
                 </div>
 
@@ -403,6 +424,14 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
       <button onClick={onReset} className="w-full mt-4 px-6 py-3 rounded-xl border border-rose-500/50 text-rose-500 font-bold hover:bg-rose-500/10 transition">
         Try Another Match
       </button>
+
+      {/* Shopping Modal Integration */}
+      <ShopActionSheet
+        isOpen={!!shopItem}
+        onClose={() => setShopItem(null)}
+        item={shopItem?.query}
+        gender={shopItem?.gender || 'male'}
+      />
 
     </div>
   );
