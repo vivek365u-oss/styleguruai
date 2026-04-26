@@ -174,7 +174,7 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
             ...item,
             engineScore: scoreWardrobeItem(item, context, userProfile, historyItems, profile?.preferences, lockedDNA)
         }))
-        .filter(i => i.engineScore > 0)
+        .filter(i => i.engineScore > 0 && i.status !== 'laundry' && i.status !== 'dirty')
         .sort((a, b) => b.engineScore - a.engineScore) || [];
 
     const topCats = activeGender === 'male'

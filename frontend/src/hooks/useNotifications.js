@@ -22,38 +22,35 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-// ── Notification copy (catchy, Zomato-style) ──────────────────────────
+// ── Notification copy (Catchy, High-CTR, Zomato/Myntra style) ────────
 const MORNING_COPIES = [
-    (name, temp, archetype) =>
-        `Good morning${name ? `, ${name}` : ''}! ☀️ It's ${temp}°C today. Your ${archetype} style is primed for a perfect look. 🚀`,
-    (name, temp) =>
-        `Rise & style! 🌅 ${temp}°C outside. Your DNA says: today is a power-look day. Don't waste it! ✨`,
-    (name, temp, archetype) =>
-        `${name || 'Hey'}! Your AI stylist says ${temp}°C = ${archetype} energy. See today's look! 🎨`,
+    (name, temp, archetype) => `Barish ka mausam hai ya garmi? 🌡️ Aaj ke ${temp}°C ke liye ek perfect ${archetype} look ready hai. Tap to see! 🚀`,
+    (name, temp, archetype) => `Rise & style${name ? `, ${name}` : ''}! 🌅 Aaj ${temp}°C hai. Apna favorite light-wash outfit check karein? ✨`,
+    (name, temp, archetype) => `Uff yeh mausam! ☔ AI ne aaj ke liye monsoon-safe look banaya hai. Check now! 🎨`,
 ];
 
 const STREAK_COPIES = [
-    (count) => `Don't let the fire go out! 🔥 You're on a ${count}-day Style Streak. Log today's look to stay a legend. 🏆`,
-    (count) => `${count} days strong! 💪 Quick — log today's outfit before midnight and keep your streak alive! 🔥`,
-    (count) => `Your ${count}-day streak is at risk! ⚠️ 2 minutes to log your look. Your future self will thank you. 🎯`,
+    (count) => `Don't let the vibe die! 🔥 ${count}-day Style Streak is active. Log your look before midnight. 🏆`,
+    (count) => `${count} days strong! 💪 Aaj kya pehna? Quickly log your outfit to keep the streak going! 🔥`,
+    (count) => `Your ${count}-day streak is at risk! ⚠️ 2 minutes lagega bas apna look log karne mein. 🎯`,
 ];
 
 const WELCOME_BACK_COPIES = [
-    () => `Your wardrobe missed you! 👔 New trends matching your DNA are waiting. Welcome back! ✨`,
-    () => `Style doesn't take breaks! 🌟 Check your AI outfit brief for today. Your look awaits. 🪞`,
-    () => `Been a while! Your Style DNA has evolved. Come see what's new for you. 🎨`,
+    () => `Aapki 'White Sneakers' aapko miss kar rahi hain! 👟 Aaj unko ek casual outfit ke saath pair karein?`,
+    () => `Style doesn't take breaks! 🌟 Naye trends aapke DNA ke hisaab se match kiye gaye hain. 🪞`,
+    () => `Been a while! Aapka Style DNA aur zyada smart ho gaya hai. Come see what's new. 🎨`,
 ];
 
 const LAUNDRY_COPIES = [
-    () => `Aapki favourite clothes laundry mein hai 🧺. Aaj wash kar lo, Saturday party ke liye ready ho jayengi!`,
-    () => `Your essentials are taking a nap in the laundry bin 🧺. Time for a wash cycle to unlock your best looks!`,
-    () => `Running low on fresh fits? 🧺 Give your wardrobe a refresh today for a sharp tomorrow.`,
+    () => `Aapke favorite kapde laundry mein hain 🧺. Aaj wash kar lo, weekend party ke liye ready ho jayenge!`,
+    () => `Running low on fresh fits? 🧺 Give your wardrobe a wash cycle today for a sharp tomorrow.`,
+    () => `Weekend vibe check! ✨ Laundry clear karo aur kal ke date-night look ke liye ready raho. 👗`,
 ];
 
 const TREND_COPIES = [
-    (archetype) => `Trend Alert: Earthy Tones are in! 🌿 Humne aapke skin tone ke liye 3 perfect matches dhoonde hain. Check them out. 🛍️`,
-    (archetype) => `New drops spotted! 🔥 We found new arrivals that perfectly match your ${archetype} DNA. Take a peek. 👀`,
-    (archetype) => `Your style compass just updated 🧭. New trends matching your color palette are now live!`,
+    (archetype) => `Going out with your partner? 👫 Naya 'Couple Vibe Check' try karein aur perfectly match karein! 🔥`,
+    (archetype) => `You have 1 Free AI Scan left today! 📸 Nayi shirt khareedne se pehle check kar lo wo aapke undertone pe kaisa lagega.`,
+    (archetype) => `Aapka '${archetype}' DNA sirf 15% logo mein milta hai! 🧬 Aaj ek perfect combo try karein aur compliments paayein.`,
 ];
 
 // ── Helper: ms until next HH:MM today (or tomorrow if passed) ─────────

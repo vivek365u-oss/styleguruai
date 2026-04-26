@@ -676,7 +676,42 @@ export const getWardrobe = async (uid) => {
       orderBy('saved_at', 'desc')
     );
     const snap = await getDocs(q);
-    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // Fetch user preferences for laundry cycle (default 3 days)
+    let laundryCycle = 3;
+    try {
+      const prefsSnap = await getDoc(doc(db, 'users', uid, 'preferences', 'settings'));
+      if (prefsSnap.exists() && prefsSnap.data().laundry_cycle) {
+        laundryCycle = prefsSnap.data().laundry_cycle;
+      }
+    } catch (e) {}
+
+    const today = new Date();
+    const updates = [];
+
+    const items = snap.docs.map(d => {
+      const data = d.data();
+      let status = data.status || 'available';
+
+      // Auto-wash logic
+      if ((status === 'laundry' || status === 'dirty') && data.last_worn_date) {
+        const wornDate = new Date(data.last_worn_date);
+        const diffDays = Math.floor((today - wornDate) / (1000 * 60 * 60 * 24));
+        if (diffDays >= laundryCycle) {
+          status = 'available';
+          // Queue background update to Firestore
+          updates.push(updateDoc(d.ref, { status: 'available' }));
+        }
+      }
+
+      return { id: d.id, ...data, status };
+    });
+
+    // Fire and forget background updates
+    if (updates.length > 0) {
+      Promise.all(updates).catch(e => console.error('[API] Auto-wash updates failed:', e));
+    }
+
     // Always update cache on successful fetch
     setCachedWardrobe(uid, items);
     return items;
