@@ -670,10 +670,10 @@ export const saveWardrobeItem = async (uid, item) => {
     };
 
     const ref = await addDoc(collection(db, 'users', uid, 'wardrobe'), enhancedItem);
-    // ── SYNC COUNTER (FIX) ──
-    await updateDoc(doc(db, 'users', uid), {
+    // ── SYNC COUNTER — use setDoc+merge so it works even if users/{uid} doc doesn't exist yet ──
+    await setDoc(doc(db, 'users', uid), {
       wardrobeCount: increment(1)
-    });
+    }, { merge: true });
     return ref.id;
   } catch (e) {
     handleFirestoreError('saveWardrobeItem', e);
@@ -768,10 +768,10 @@ export const deleteWardrobeItem = async (uid, itemId) => {
   if (!auth.currentUser) return;
   try {
     await deleteDoc(doc(db, 'users', uid, 'wardrobe', itemId));
-    // ── SYNC COUNTER (FIX) ──
-    await updateDoc(doc(db, 'users', uid), {
+    // ── SYNC COUNTER — use setDoc+merge so it works even if users/{uid} doc doesn't exist yet ──
+    await setDoc(doc(db, 'users', uid), {
       wardrobeCount: increment(-1)
-    });
+    }, { merge: true });
     // Update cache
     const cached = getCachedWardrobe(uid);
     setCachedWardrobe(uid, cached.filter(c => c.id !== itemId));
