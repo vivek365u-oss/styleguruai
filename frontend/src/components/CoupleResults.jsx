@@ -19,9 +19,23 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
   const { theme } = useContext(ThemeContext);
   const isDark = theme === 'dark';
 
-  const { partner1, partner2 } = data; // Occasion removed from props since wizard step is bypassed
-  const p1Img = uploadedImages[0];
-  const p2Img = uploadedImages[1];
+  const { partner1, partner2 } = data || {};
+  const p1Img = uploadedImages?.[0] || '';
+  const p2Img = uploadedImages?.[1] || '';
+
+  // Guard against corrupted or stub history entries
+  if (!partner1 || !partner2 || !partner1.recommendations || !partner2.recommendations) {
+    return (
+      <div className="flex flex-col items-center justify-center p-10 text-center animate-fade-in relative z-10">
+         <p className="text-4xl mb-4">💔</p>
+         <h2 className={`text-xl font-black mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>Incomplete Match Data</h2>
+         <p className={`text-sm mb-6 ${isDark ? 'text-white/60' : 'text-gray-500'}`}>This match was saved in an older version or is incomplete. Please run a new couple analysis.</p>
+         <button onClick={onReset} className="px-6 py-3 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold shadow-lg">
+           Run New Match
+         </button>
+      </div>
+    );
+  }
 
   // Bug C1 fix: auto-dismiss banner after 2.5 seconds
   const [showBanner, setShowBanner] = useState(true);
@@ -31,24 +45,7 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Bug C3 fix: save couple result to history on mount
-  useEffect(() => {
-    const saveCouple = async () => {
-      try {
-        if (auth.currentUser && partner1?.analysis?.skin_tone) {
-          // Save partner1's skin tone as the 'user' entry (logged-in user typically is partner1)
-          await saveHistory({
-            skinTone: partner1.analysis.skin_tone.category,
-            type: 'couple',
-            partnerTone: partner2?.analysis?.skin_tone?.category || ''
-          });
-        }
-      } catch (e) {
-        console.warn('[CoupleResults] History save failed (non-critical):', e);
-      }
-    };
-    saveCouple();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Removed duplicate saveHistory logic as AppShell already saves the full payload.
 
   // 1. Calculate the harmonized color palette
   const p1Colors = [
