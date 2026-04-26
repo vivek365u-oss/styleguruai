@@ -111,14 +111,18 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
           p1: `Deep jewel-tone ${hColor1} Lehenga / Anarkali / Gown`, 
           p2: `Matching ${hColor1} Sherwani or Kurta set`,
           accessories: 'P1: Heavy Kundan choker, Polki earrings. P2: Contrast pocket square, embellished Mojaris.',
-          vibe: 'Royal & Highly Coordinated'
+          vibe: 'Royal & Highly Coordinated',
+          shopP1: [`${hColor1} Lehenga`, `${hColor1} Anarkali`, `${hColor1} Gown`],
+          shopP2: [`${hColor1} Sherwani`, `${hColor1} Kurta set`]
         },
         { 
           title: 'Classic Contrast', 
           p1: `${hColor2} ethnic wear with fine gold embroidery`, 
           p2: `Rich ${hColor3} ethnic wear`,
           accessories: 'P1: Pearl drops, gold potli bag. P2: Classic metallic watch, sleek formal shoes.',
-          vibe: 'Elegant & Sophisticated'
+          vibe: 'Elegant & Sophisticated',
+          shopP1: [`${hColor2} embroidered suit`, `${hColor2} ethnic dress`],
+          shopP2: [`${hColor3} Kurta`, `${hColor3} Nehru jacket`]
         }
       ]
     },
@@ -130,14 +134,18 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
           p1: `${hColor1} fitted top + Light wash wide-leg denim`, 
           p2: `${hColor1} oversized tee + Light wash straight denim`,
           accessories: 'P1: Chunky white sneakers, silver hoops, mini backpack. P2: White sneakers, minimalist chain.',
-          vibe: 'Relaxed & Trendy'
+          vibe: 'Relaxed & Trendy',
+          shopP1: [`${hColor1} top`, `Wide-leg denim`],
+          shopP2: [`${hColor1} t-shirt`, `Straight denim`]
         },
         { 
           title: 'Color-Block Match', 
           p1: `${hColor2} crop top + Cargo pants`, 
           p2: `Matching ${hColor2} oversized graphic tee + Relaxed cargo pants`,
           accessories: 'P1: Crossbody bag, bucket hat, slim sunglasses. P2: Beanie, retro sneakers.',
-          vibe: 'Edgy & Modern'
+          vibe: 'Edgy & Modern',
+          shopP1: [`${hColor2} crop top`, `Cargo pants`],
+          shopP2: [`${hColor2} graphic tee`, `Men cargo pants`]
         }
       ]
     },
@@ -149,14 +157,18 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
           p1: `Sleek black outfit with a bright ${hColor1} accent`, 
           p2: `${hColor1} colored outfit (matching Partner 1's accent)`,
           accessories: 'P1: Metallic clutch, statement rings, stiletto boots. P2: Leather jacket, silver chain, Chelsea boots.',
-          vibe: 'Bold & Electrifying'
+          vibe: 'Bold & Electrifying',
+          shopP1: [`Black party dress`, `${hColor1} clutch`],
+          shopP2: [`${hColor1} party shirt`, `Black denim`]
         },
         { 
           title: 'Glam & Neutral', 
           p1: `${hColor2} element dress/top`, 
           p2: `Dark neutral base with subtle ${hColor2} texture`,
           accessories: 'P1: Dainty silver jewelry, sling bag. P2: Matte black watch, textured belt.',
-          vibe: 'Chic & Balanced'
+          vibe: 'Chic & Balanced',
+          shopP1: [`${hColor2} sequin dress`, `${hColor2} party top`],
+          shopP2: [`Dark blazer`, `${hColor2} printed shirt`]
         }
       ]
     },
@@ -168,14 +180,18 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
           p1: `${hColor3} slip dress / elegant top`, 
           p2: `Complementary ${hColor3} shirt + Chinos`,
           accessories: 'P1: Delicate pendant, strappy heels, mini clutch. P2: Brown leather watch, suede loafers.',
-          vibe: 'Sweet & Harmonious'
+          vibe: 'Sweet & Harmonious',
+          shopP1: [`${hColor3} slip dress`, `${hColor3} elegant top`],
+          shopP2: [`${hColor3} casual shirt`, `Chinos`]
         },
         { 
           title: 'Evening Elegance', 
           p1: `Deep saturated ${hColor2} midi/maxi dress`, 
           p2: `Dark neutral blazer over crisp shirt with subtle ${hColor2} pocket square`,
           accessories: 'P1: Diamond studs, stilettos. P2: Classic dress watch, Oxfords.',
-          vibe: 'Luxurious & Sensual'
+          vibe: 'Luxurious & Sensual',
+          shopP1: [`${hColor2} midi dress`, `${hColor2} maxi dress`],
+          shopP2: [`Dark neutral blazer`, `${hColor2} pocket square`]
         }
       ]
     },
@@ -187,14 +203,18 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
           p1: `Flowy ${hColor1} floral maxi dress`, 
           p2: `Linen shirt (in ${hColor1}) + Tailored shorts`,
           accessories: 'P1: Wide-brim straw hat, oversized sunglasses, woven tote. P2: Aviators, canvas espadrilles.',
-          vibe: 'Breezy & Refreshing'
+          vibe: 'Breezy & Refreshing',
+          shopP1: [`${hColor1} floral maxi dress`, `Straw hat`],
+          shopP2: [`${hColor1} linen shirt`, `Tailored shorts`]
         },
         { 
           title: 'Resort Whites', 
           p1: `All-white linen set with ${hColor2} accessories`, 
           p2: `White linen shirt + ${hColor2} shorts`,
           accessories: 'P1: Gold layered necklaces, slide sandals. P2: Leather slide sandals, beaded bracelet.',
-          vibe: 'Clean & Luxurious'
+          vibe: 'Clean & Luxurious',
+          shopP1: [`White linen set`, `${hColor2} sandals`],
+          shopP2: [`White linen shirt`, `${hColor2} shorts`]
         }
       ]
     }
@@ -412,18 +432,35 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
 
                 {/* WOW Shopping Links */}
                 <div className="grid grid-cols-2 gap-3 mt-1.5">
-                   <button 
-                     onClick={() => handleShop(outfit.p1.split('+')[0].trim(), partner1.gender)}
-                     className={`py-3 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-gray-900 text-white hover:bg-gray-800'} shadow-md`}
-                   >
-                     🛍️ Shop {p1Label.replace(/[^a-zA-Z]/g, '')}
-                   </button>
-                   <button 
-                     onClick={() => handleShop(outfit.p2.split('+')[0].trim(), partner2.gender)}
-                     className={`py-3 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md shadow-rose-500/30 hover:shadow-lg hover:shadow-rose-500/40`}
-                   >
-                     🛍️ Shop {p2Label.replace(/[^a-zA-Z]/g, '')}
-                   </button>
+                  <div className="flex flex-col gap-1.5">
+                    <span className={`text-[9px] font-black uppercase tracking-widest pl-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>🛍️ Shop {p1Label.replace(/[^a-zA-Z]/g, '')}</span>
+                    <div className="flex flex-col gap-1.5">
+                      {outfit.shopP1?.map((item, idx) => (
+                        <button 
+                          key={idx}
+                          onClick={() => handleShop(item, partner1.gender)}
+                          className={`w-full py-2 px-2 rounded-xl text-[10px] font-black tracking-wide flex items-center justify-center gap-1.5 transition-all active:scale-95 ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-gray-900 text-white hover:bg-gray-800'} shadow-sm`}
+                        >
+                          {item}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col gap-1.5">
+                    <span className={`text-[9px] font-black uppercase tracking-widest pl-1 ${isDark ? 'text-rose-400/70' : 'text-rose-400'}`}>🛍️ Shop {p2Label.replace(/[^a-zA-Z]/g, '')}</span>
+                    <div className="flex flex-col gap-1.5">
+                      {outfit.shopP2?.map((item, idx) => (
+                        <button 
+                          key={idx}
+                          onClick={() => handleShop(item, partner2.gender)}
+                          className={`w-full py-2 px-2 rounded-xl text-[10px] font-black tracking-wide flex items-center justify-center gap-1.5 transition-all active:scale-95 bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-sm hover:shadow-md`}
+                        >
+                          {item}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
