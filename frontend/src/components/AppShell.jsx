@@ -13,7 +13,7 @@
 
 import { useState, useEffect, useContext, lazy, Suspense, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { logout, saveHistory, getHistory, auth, destroyUserAccount, updateDailyStreak, saveNotificationPreference } from '../api/styleApi';
+import { logout, saveHistory, getHistory, auth, destroyUserAccount, updateDailyStreak, saveNotificationPreference, setupFCMToken } from '../api/styleApi';
 import confetti from 'canvas-confetti';
 import { useNotifications } from '../hooks/useNotifications';
 import { ThemeContext } from '../context/ThemeContext';
@@ -446,7 +446,12 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
     const result = await notif.requestPermission();
     if (result === 'granted') {
       await saveNotificationPreference(auth.currentUser?.uid, true);
-      onToast({ message: '🔔 Notifications enabled! Morning style briefs scheduled.', type: 'success' });
+      const token = await setupFCMToken(auth.currentUser?.uid);
+      if (token) {
+        onToast({ message: '🔔 Notifications enabled! FCM Token saved.', type: 'success' });
+      } else {
+        onToast({ message: '🔔 Enabled, but FCM background token failed. Missing VAPID Key?', type: 'error' });
+      }
     } else if (result === 'denied') {
       onToast({ message: 'Allow notifications in your browser settings to enable.', type: 'error' });
     }

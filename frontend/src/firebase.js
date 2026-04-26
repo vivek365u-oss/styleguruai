@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { initializeAnalytics } from "firebase/analytics";
+import { getMessaging, isSupported } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDDW9fSoKxoLlH3MJSRNAuD3c-Qnak7rSw",
@@ -21,5 +22,17 @@ export const analytics = typeof window !== 'undefined' ? initializeAnalytics(app
     allow_ad_personalization_signals: false
   }
 }) : null;
+
+// Initialize Firebase Cloud Messaging safely
+export let messaging = null;
+if (typeof window !== 'undefined') {
+  isSupported().then((supported) => {
+    if (supported) {
+      messaging = getMessaging(app);
+      console.log('[FCM] Firebase Messaging initialized.');
+    }
+  }).catch(console.error);
+}
+
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });

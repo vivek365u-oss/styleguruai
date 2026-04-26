@@ -2,8 +2,10 @@ import axios from 'axios';
 import { auth, googleProvider, db } from '../firebase';
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, addDoc, getDocs, query, orderBy, limit, deleteDoc, increment, updateDoc } from 'firebase/firestore';
+import { getToken } from 'firebase/messaging';
 import { compressImage, validateImageFile } from '../utils/imageCompression';
 import { retryRequest, startKeepAlive, healthCheck } from '../utils/apiRetry';
+import { messaging } from '../firebase';
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
@@ -253,6 +255,30 @@ export const saveHistory = async (rawDetails) => {
     console.error('[API] Failed to save history to Firestore:', err);
     throw err;
   }
+};
+
+export const setupFCMToken = async (uid) => {
+  if (!messaging) return null;
+  try {
+    const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+    if (!vapidKey) {
+      console.warn('[FCM] VITE_FIREBASE_VAPID_KEY is missing in environment variables.');
+      return null;
+    }
+    const token = await getToken(messaging, { vapidKey });
+    if (token) {
+      // Save FCM token to user document for the backend to use
+      await updateDoc(doc(db, 'users', uid), { 
+        fcm_token: token,
+        fcm_updated_at: new Date().toISOString()
+      });
+      console.log('[FCM] Token saved successfully.');
+      return token;
+    }
+  } catch (e) {
+    console.warn('[FCM] Failed to get token:', e);
+  }
+  return null;
 };
 
 export const getHistory = async (limitCount = 10) => {
