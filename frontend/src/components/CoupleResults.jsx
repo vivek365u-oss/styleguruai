@@ -366,58 +366,64 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
 
         <div className="space-y-4">
           {currentOccasion.outfits.map((outfit, i) => (
-            <div key={i} className={`rounded-3xl p-4 border relative overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-rose-500/10 to-transparent blur-2xl rounded-bl-[100px]" />
+            <div key={i} className={`rounded-3xl p-5 border relative overflow-hidden shadow-md transition-all hover:shadow-lg ${isDark ? 'bg-gradient-to-b from-white/5 to-black/40 border-white/10' : 'bg-gradient-to-b from-white to-rose-50/30 border-gray-200'}`}>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-rose-500/20 to-transparent blur-3xl rounded-bl-[100px] pointer-events-none" />
               
-              <div className="flex justify-between items-start mb-3">
-                <p className={`font-black text-sm ${isDark ? 'text-rose-300' : 'text-rose-600'}`}>{outfit.title}</p>
-                <span className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase ${isDark ? 'bg-purple-500/10 border-purple-500/20 text-purple-300' : 'bg-purple-50 border-purple-200 text-purple-600'}`}>
+              <div className="flex justify-between items-center mb-4 relative z-10">
+                <p className={`font-black text-[15px] ${isDark ? 'text-transparent bg-clip-text bg-gradient-to-r from-rose-300 to-pink-400' : 'text-rose-600'}`}>{outfit.title}</p>
+                <span className={`text-[9px] font-black px-2.5 py-1 rounded-full border uppercase tracking-widest shadow-sm ${isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-200' : 'bg-purple-50 border-purple-200 text-purple-700'}`}>
                   {outfit.vibe}
                 </span>
               </div>
               
-              <div className="flex flex-col gap-2 relative z-10 w-full">
+              <div className="flex flex-col gap-3 relative z-10 w-full">
                 {/* Outfits block */}
-                <div className={`grid grid-cols-2 gap-2 p-2 rounded-xl mb-1 ${isDark ? 'bg-black/20' : 'bg-gray-50'}`}>
-                  <div className="pr-2 border-r border-gray-200 dark:border-white/10 flex flex-col justify-between">
+                <div className={`grid grid-cols-2 gap-3 p-3.5 rounded-2xl border shadow-sm ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-100'}`}>
+                  <div className="pr-3 border-r border-gray-200 dark:border-white/10 flex flex-col justify-between">
                     <div>
-                      <span className={`text-[10px] font-bold uppercase flex items-center gap-1 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>
-                        <span className="whitespace-nowrap">{p1Label}</span> (OUTFIT)
+                      <span className={`text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 mb-1.5 ${isDark ? 'text-white/50' : 'text-gray-400'}`}>
+                        {p1Label} <span className="opacity-40">OUTFIT</span>
                       </span>
-                      <p className={`text-xs mt-1 leading-snug ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{outfit.p1}</p>
+                      <p className={`text-[13px] font-medium leading-relaxed ${isDark ? 'text-white/90' : 'text-gray-800'}`}>{outfit.p1}</p>
                     </div>
-                    <button 
-                       onClick={() => handleShop(outfit.p1.split('+')[0].trim(), partner1.gender)}
-                       className={`mt-2 self-start text-[9px] font-bold px-2 py-1 rounded-full border flex items-center gap-1 transition-all ${isDark ? 'bg-rose-500/10 border-rose-500/20 text-rose-300 hover:bg-rose-500/20' : 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100'}`}>
-                       🛍️ Shop Item
-                    </button>
                   </div>
                   <div className="pl-1 flex flex-col justify-between">
                     <div>
-                      <span className={`text-[10px] font-bold uppercase flex items-center gap-1 ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>
-                        <span className="whitespace-nowrap">{p2Label}</span> (OUTFIT)
+                      <span className={`text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 mb-1.5 ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>
+                        {p2Label} <span className="opacity-40">OUTFIT</span>
                       </span>
-                      <p className={`text-xs mt-1 leading-snug ${isDark ? 'text-white/80' : 'text-gray-700'}`}>{outfit.p2}</p>
+                      <p className={`text-[13px] font-medium leading-relaxed ${isDark ? 'text-white/90' : 'text-gray-800'}`}>{outfit.p2}</p>
                     </div>
-                    <button 
-                       onClick={() => handleShop(outfit.p2.split('+')[0].trim(), partner2.gender)}
-                       className={`mt-2 self-start text-[9px] font-bold px-2 py-1 rounded-full border flex items-center gap-1 transition-all ${isDark ? 'bg-rose-500/10 border-rose-500/20 text-rose-300 hover:bg-rose-500/20' : 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100'}`}>
-                       🛍️ Shop Item
-                    </button>
                   </div>
                 </div>
 
                 {/* Accessories Block */}
-                <div className={`p-3 rounded-xl border border-dashed ${isDark ? 'bg-amber-500/5 border-amber-500/20' : 'bg-amber-50 border-amber-200'}`}>
-                   <span className={`text-[10px] font-bold uppercase mb-1.5 flex items-center gap-1 ${isDark ? 'text-amber-300' : 'text-amber-600'}`}>
+                <div className={`p-3.5 rounded-2xl border ${isDark ? 'bg-amber-500/10 border-amber-500/20' : 'bg-amber-50 border-amber-200'}`}>
+                   <span className={`text-[10px] font-black uppercase tracking-widest mb-2 flex items-center gap-1.5 ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>
                      💎 Deep Accessory Analysis
                    </span>
-                   <p className={`text-xs leading-relaxed ${isDark ? 'text-amber-100/70' : 'text-amber-800/80'}`}>
+                   <p className={`text-[12px] leading-relaxed ${isDark ? 'text-amber-100/80' : 'text-amber-900/80'}`}>
                      {outfit.accessories.split('. P2:').map((part, idx) => {
-                       if (idx === 0) return <span key={idx}><strong className="opacity-90">Partner 1:</strong> {part.replace('P1:', '')}<br/></span>;
-                       return <span key={idx} className="block mt-1"><strong className="opacity-90">Partner 2:</strong> {part}</span>;
+                       if (idx === 0) return <span key={idx}><strong className={isDark ? 'text-amber-300' : 'text-amber-700'}>{p1Label}:</strong> {part.replace('P1:', '')}<br/></span>;
+                       return <span key={idx} className="block mt-1.5"><strong className={isDark ? 'text-amber-300' : 'text-amber-700'}>{p2Label}:</strong> {part}</span>;
                      })}
                    </p>
+                </div>
+
+                {/* WOW Shopping Links */}
+                <div className="grid grid-cols-2 gap-3 mt-1.5">
+                   <button 
+                     onClick={() => handleShop(outfit.p1.split('+')[0].trim(), partner1.gender)}
+                     className={`py-3 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 ${isDark ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-gray-900 text-white hover:bg-gray-800'} shadow-md`}
+                   >
+                     🛍️ Shop {p1Label.replace(/[^a-zA-Z]/g, '')}
+                   </button>
+                   <button 
+                     onClick={() => handleShop(outfit.p2.split('+')[0].trim(), partner2.gender)}
+                     className={`py-3 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md shadow-rose-500/30 hover:shadow-lg hover:shadow-rose-500/40`}
+                   >
+                     🛍️ Shop {p2Label.replace(/[^a-zA-Z]/g, '')}
+                   </button>
                 </div>
               </div>
             </div>
