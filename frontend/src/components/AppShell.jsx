@@ -308,13 +308,17 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C, usage }) {
       {/* Stats Dashboard */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 16 }}>
         {[
-          { value: analysisCount || '0', label: 'DNA Protocols', icon: '🧬' },
-          { value: streak > 0 ? `${streak} Days🔥` : '0 Days', label: 'Vibe Streak', icon: '⚡' },
-          { value: personalityData.skinTone ? personalityData.skinTone.split(' ')[0] : '—', label: 'Depth Class', icon: '🎨' },
+          { value: analysisCount || '0', label: 'DNA Protocols', icon: '🧬', sub: analysisCount === 1 ? 'Scan' : 'Scans' },
+          { value: streak > 0 ? streak : '0', label: 'Vibe Streak', icon: '🔥', sub: streak === 1 ? 'Day' : 'Days' },
+          { value: personalityData.skinTone ? personalityData.skinTone.split(' ')[0] : '—', label: 'Depth Class', icon: '🎨', sub: 'Tone' },
         ].map((s, i) => (
-          <GlassCard key={i} C={C} style={{ padding: '16px 10px', textAlign: 'center', border: s.value !== '0' && s.value !== '—' ? `1px solid ${VIOLET}40` : `1px solid ${C.border}` }}>
-            <p style={{ fontFamily: PDI, fontSize: s.value?.toString().length > 5 ? '13px' : '22px', color: C.text, margin: '0 0 4px', lineHeight: 1 }}>{s.value}</p>
-            <p style={{ fontSize: '7.5px', letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, margin: 0, fontWeight: 700 }}>{s.label}</p>
+          <GlassCard key={i} C={C} style={{ padding: '14px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: s.value !== '0' && s.value !== '—' ? `1px solid ${VIOLET}40` : `1px solid ${C.border}` }}>
+            <span style={{ fontSize: '18px', marginBottom: 6 }}>{s.icon}</span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 4 }}>
+              <span style={{ fontFamily: PDI, fontSize: '20px', color: C.text, lineHeight: 1 }}>{s.value}</span>
+              {s.value !== '—' && <span style={{ fontSize: '9px', color: C.muted, fontFamily: PJS, fontWeight: 600 }}>{s.sub}</span>}
+            </div>
+            <span style={{ fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', color: C.text, opacity: 0.7, fontFamily: PJS, fontWeight: 700, textAlign: 'center' }}>{s.label}</span>
           </GlassCard>
         ))}
       </div>
@@ -723,16 +727,19 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
       {/* Stats Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 16 }}>
         {[
-          { value: analysisCount, label: 'Scans' },
-          { value: styleScore, label: 'Score', gradient: true },
-          { value: streak > 0 ? `${streak}🔥` : '0', label: 'Streak' },
-          { value: wardrobeCount, label: 'Wardrobe' },
+          { value: analysisCount, label: 'Scans', icon: '📸' },
+          { value: styleScore, label: 'Score', icon: '⭐', gradient: true },
+          { value: streak > 0 ? streak : '0', label: 'Streak', icon: '🔥', sub: 'Days' },
+          { value: wardrobeCount, label: 'Items', icon: '👕' },
         ].map((s, i) => (
-          <GlassCard key={i} C={C} style={{ padding: '14px 8px', textAlign: 'center' }}>
-            <p style={{ fontFamily: PDI, fontSize: '22px', margin: '0 0 3px', lineHeight: 1, ...(s.gradient ? { background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' } : { color: C.text }) }}>
-              {s.value}
-            </p>
-            <p style={{ fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, margin: 0 }}>{s.label}</p>
+          <GlassCard key={i} C={C} style={{ padding: '12px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: '14px', marginBottom: 4 }}>{s.icon}</span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 2, marginBottom: 2 }}>
+              <span style={{ fontFamily: PDI, fontSize: '18px', lineHeight: 1, ...(s.gradient ? { background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' } : { color: C.text }) }}>
+                {s.value}
+              </span>
+            </div>
+            <span style={{ fontSize: '8px', letterSpacing: '0.05em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, fontWeight: 700, textAlign: 'center' }}>{s.label}</span>
           </GlassCard>
         ))}
       </div>
