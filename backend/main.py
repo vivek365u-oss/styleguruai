@@ -1371,17 +1371,19 @@ async def consume_limit(request: ConsumeActionRequest, current_user: dict = Depe
     raise HTTPException(status_code=400, detail="Invalid action")
 
 class CreateOrderRequest(BaseModel):
-    tier: str # 'monthly', 'yearly', 'coins'
+    tier: str # 'event_pass', 'monthly', 'couple', 'yearly'
 
 @app.post("/api/payment/create-order")
 async def create_order(request: CreateOrderRequest, current_user: dict = Depends(get_current_user)):
     amount_in_inr = 0
-    if request.tier == 'monthly':
-        amount_in_inr = 499
+    if request.tier == 'event_pass':
+        amount_in_inr = 49
+    elif request.tier == 'monthly':
+        amount_in_inr = 99
+    elif request.tier == 'couple':
+        amount_in_inr = 149
     elif request.tier == 'yearly':
-        amount_in_inr = 2499
-    elif request.tier == 'coins':
-        amount_in_inr = 199
+        amount_in_inr = 299
     else:
         raise HTTPException(status_code=400, detail="Invalid tier")
 
@@ -1422,17 +1424,57 @@ async def verify_payment(request: VerifyPaymentRequest, current_user: dict = Dep
         doc = doc_ref.get().to_dict() or {}
         
         updates = {}
-        if request.tier in ['monthly', 'yearly']:
+        if request.tier in ['event_pass', 'monthly', 'couple', 'yearly']:
             updates['is_pro'] = True
             updates['planName'] = request.tier
-        elif request.tier == 'coins':
-            updates['coins'] = doc.get('coins', 0) + 50
+            if request.tier == 'event_pass':
+                import time
+                updates['planExpiry'] = int(time.time() * 1000) + (24 * 60 * 60 * 1000) # 24 hours
+            elif request.tier in ['monthly', 'couple']:
+                import time
+                updates['planExpiry'] = int(time.time() * 1000) + (30 * 24 * 60 * 60 * 1000) # 30 days
+            elif request.tier == 'yearly':
+                import time
+                updates['planExpiry'] = int(time.time() * 1000) + (365 * 24 * 60 * 60 * 1000) # 365 days
             
         doc_ref.set(updates, merge=True)
         return {"success": True, "message": "Payment verified and tier upgraded successfully"}
     except Exception as e:
         print(f"Razorpay Verification Failed: {str(e)}")
         raise HTTPException(status_code=400, detail="Invalid Payment Signature")
+
+class VerifyAmazonOrderRequest(BaseModel):
+    order_id: str
+
+@app.post("/api/payment/verify-amazon-order")
+async def verify_amazon_order(request: VerifyAmazonOrderRequest, current_user: dict = Depends(get_current_user)):
+    # In a real production system, this would be queued for manual verification
+    # or checked via an automated scraper/email parser. 
+    # For now, we accept the ID, store it, and grant temporary PRO.
+    try:
+        uid = current_user["uid"]
+        db = get_firestore_db()
+        
+        # Store order ID for manual verification later
+        db.collection("amazon_verifications").add({
+            "uid": uid,
+            "order_id": request.order_id,
+            "status": "pending_verification",
+            "timestamp": firestore.SERVER_TIMESTAMP
+        })
+        
+        # Grant 1-Month PRO immediately for good UX
+        doc_ref = db.collection("users").document(uid)
+        import time
+        updates = {
+            'is_pro': True,
+            'planName': 'monthly_amazon',
+            'planExpiry': int(time.time() * 1000) + (30 * 24 * 60 * 60 * 1000) # 30 days
+        }
+        doc_ref.set(updates, merge=True)
+        return {"success": True, "message": "Amazon order submitted! Enjoy 1-Month PRO while we verify."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================
 # PRODUCTS — PHASE 1 REVENUE

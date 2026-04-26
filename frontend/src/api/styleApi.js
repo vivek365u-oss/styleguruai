@@ -938,6 +938,16 @@ export const verifyRazorpayPayment = async (verifyData) => {
   }
 };
 
+export const verifyAmazonOrder = async (orderId) => {
+  try {
+    const res = await API.post('/api/payment/verify-amazon-order', { order_id: orderId });
+    return res.data;
+  } catch (error) {
+    console.error('Failed to verify Amazon order:', error);
+    throw error;
+  }
+};
+
 // ============================================
 // COMMUNITY FEED
 // ============================================

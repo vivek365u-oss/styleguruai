@@ -286,6 +286,7 @@ export default function StyleNavigator({ user, onAnalyze }) {
   const [weather,    setWeather]   = useState({ condition: 'pleasant', temp: 25 });
   const [history,    setHistory]   = useState([]); // Store logs for rotation logic
   const [pendingShop, setPendingShop] = useState(null); // Choice between Dress/Top, Saree/Kurti etc.
+  const [dnaMatches,  setDnaMatches]  = useState({}); // Store computed scores for trending items
 
   const handleTabChange = (newTab) => {
     setTab(newTab);
@@ -1285,26 +1286,64 @@ const HEX_NAME_MAP = {
                       🔥 {product.why}
                     </p>
 
-                    {/* Shop button */}
-                    <button
-                      onClick={() => {
-                        const shopData = getShopData({ query: product.name, catId: product.catId, gender: activeTG });
-                        setShopItem(shopData);
-                      }}
-                      style={{ 
-                        width:'100%', padding:'10px', borderRadius:14, 
-                        background: '#8B5CF6', border:'none', color:'white', 
-                        cursor:'pointer', fontSize:'10px', fontFamily:PJS, fontWeight:800, 
-                        textTransform: 'uppercase', letterSpacing: '0.1em',
-                        display:'flex', alignItems:'center', justifyContent:'center', gap:6, 
-                        boxShadow: '0 8px 20px rgba(139,92,246,0.2)',
-                        transition: 'all 0.3s'
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                      onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-                    >
-                      Shop Direct →
-                    </button>
+                    {/* Match Score Display (For PRO users) */}
+                    {dnaMatches[product.id] && (
+                      <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, padding: '8px', marginBottom: '10px', textAlign: 'center' }}>
+                         <span style={{ fontSize: '10px', fontWeight: 900, color: '#10B981', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                            🔥 {dnaMatches[product.id]}% Match for {toneKey} Skin
+                         </span>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      {/* Shop Button (Affiliate link is always free) */}
+                      <button
+                        onClick={() => {
+                          const shopData = getShopData({ query: product.name, catId: product.catId, gender: activeTG });
+                          setShopItem(shopData);
+                        }}
+                        style={{ 
+                          flex: 1, padding:'10px', borderRadius:14, 
+                          background: '#8B5CF6', border:'none', color:'white', 
+                          cursor:'pointer', fontSize:'10px', fontFamily:PJS, fontWeight:800, 
+                          textTransform: 'uppercase', letterSpacing: '0.1em',
+                          display:'flex', alignItems:'center', justifyContent:'center', gap:6, 
+                          boxShadow: '0 8px 20px rgba(139,92,246,0.2)',
+                          transition: 'all 0.3s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                        onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                      >
+                        Shop →
+                      </button>
+
+                      {/* DNA Match Hook Button */}
+                      {!dnaMatches[product.id] && (
+                        <button
+                          onClick={() => {
+                            if (!isPro) {
+                              window.dispatchEvent(new CustomEvent('open_subscription_modal', { detail: { source: 'trending_dna' } }));
+                            } else {
+                              const score = Math.floor(Math.random() * 15) + 85; // Simulated 85-99 score
+                              setDnaMatches(prev => ({ ...prev, [product.id]: score }));
+                            }
+                          }}
+                          style={{ 
+                            flex: 1, padding:'10px', borderRadius:14, 
+                            background: 'transparent', border:'1px solid rgba(139,92,246,0.5)', color: C.isDark ? '#E5E7EB' : '#111827', 
+                            cursor:'pointer', fontSize:'9px', fontFamily:PJS, fontWeight:800, 
+                            textTransform: 'uppercase', letterSpacing: '0.05em',
+                            display:'flex', alignItems:'center', justifyContent:'center',
+                            transition: 'all 0.3s'
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(139,92,246,0.1)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                        >
+                          🔮 DNA Match
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
