@@ -14,6 +14,7 @@
 import { useState, useEffect, useContext, lazy, Suspense, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { logout, saveHistory, getHistory, auth, destroyUserAccount, updateDailyStreak, saveNotificationPreference } from '../api/styleApi';
+import confetti from 'canvas-confetti';
 import { useNotifications } from '../hooks/useNotifications';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -169,6 +170,8 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C, usage }) {
 
   const firstName = user?.name?.split(' ')[0] || 'there';
 
+  const [showConfetti, setShowConfetti] = useState(false);
+
   const streak = useMemo(() => {
     // Priority 1: Cloud streak from usage object
     if (personalityData.streak !== undefined) return personalityData.streak;
@@ -184,9 +187,32 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C, usage }) {
       } else { count = 1; }
       localStorage.setItem('sg_streak_count', count.toString());
       localStorage.setItem('sg_last_checkin', today);
+      
+      // Mark confetti to be shown
+      setShowConfetti(true);
     }
     return count;
   }, [personalityData.streak]);
+
+  useEffect(() => {
+    if (showConfetti) {
+      confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { y: 0.5 },
+        zIndex: 9999
+      });
+      // Also fire a second burst for extra "phool-jhari" feel
+      setTimeout(() => {
+        confetti({
+          particleCount: 100,
+          spread: 80,
+          origin: { y: 0.6 },
+          zIndex: 9999
+        });
+      }, 300);
+    }
+  }, [showConfetti]);
 
   const genderPref = localStorage.getItem('sg_gender') || 'male';
   const tone = (personalityData.skinTone || 'medium').toLowerCase();
@@ -283,7 +309,7 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C, usage }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 16 }}>
         {[
           { value: analysisCount || '0', label: 'DNA Protocols', icon: '🧬' },
-          { value: streak > 0 ? `${streak}🔥` : '0', label: 'Vibe Streak', icon: '⚡' },
+          { value: streak > 0 ? `${streak} Days🔥` : '0 Days', label: 'Vibe Streak', icon: '⚡' },
           { value: personalityData.skinTone ? personalityData.skinTone.split(' ')[0] : '—', label: 'Depth Class', icon: '🎨' },
         ].map((s, i) => (
           <GlassCard key={i} C={C} style={{ padding: '16px 10px', textAlign: 'center', border: s.value !== '0' && s.value !== '—' ? `1px solid ${VIOLET}40` : `1px solid ${C.border}` }}>
