@@ -191,6 +191,48 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
 
   const currentOccasion = occasionConfigs[activeOutfitTab] || occasionConfigs.casual;
 
+  const p1Tone = partner1.analysis.skin_tone.undertone || 'neutral';
+  const p2Tone = partner2.analysis.skin_tone.undertone || 'neutral';
+
+  let chemistryScore = 95;
+  let aestheticVibe = "Harmonious Classics";
+  let vibeDesc = "Your skin tones balance each other out perfectly.";
+
+  if (p1Tone === p2Tone) {
+     chemistryScore = 98;
+     if (p1Tone === 'warm') {
+        aestheticVibe = "Golden Hour Luxury";
+        vibeDesc = "Both of you have warm undertones. Earthy, rich, and golden palettes will make you both look incredibly radiant together.";
+     } else if (p1Tone === 'cool') {
+        aestheticVibe = "Icy Elegance";
+        vibeDesc = "You share a cool undertone. Jewel tones, crisp whites, and silver accents will make you look like a power couple.";
+     } else {
+        aestheticVibe = "Sleek Modernists";
+        vibeDesc = "With neutral undertones, you two can pull off almost any matching aesthetic with effortless style.";
+     }
+  } else if ((p1Tone === 'warm' && p2Tone === 'cool') || (p1Tone === 'cool' && p2Tone === 'warm')) {
+     chemistryScore = 92;
+     aestheticVibe = "Striking Fire & Ice";
+     vibeDesc = "Opposites attract! The contrast between warm and cool tones means you look best when color-blocking or choosing one unifying neutral color.";
+  } else {
+     chemistryScore = 96;
+     aestheticVibe = "Dynamic Duo";
+     vibeDesc = "One of you leans neutral, giving you incredible flexibility to mix and match both warm earth tones and cool jewel tones.";
+  }
+
+  const getLightingGuide = () => {
+     if (p1Tone === 'warm' || p2Tone === 'warm') {
+        return { time: "Golden Hour (4 PM - 6 PM)", tip: "Natural sunlight will beautifully highlight your warm, glowing undertones. Avoid harsh white flashes." };
+     } else if (p1Tone === 'cool' && p2Tone === 'cool') {
+        return { time: "Blue Hour & Studio Lighting", tip: "Crisp white studio lights or the soft, cool light just after sunset will make your features pop." };
+     }
+     return { time: "Soft Overcast Light", tip: "Diffused, cloudy natural light provides the best balance for your mixed undertones." };
+  };
+  const lighting = getLightingGuide();
+
+  const p1Avoid = partner1.recommendations.colors_to_avoid?.[0]?.name || 'Neon Colors';
+  const p2Avoid = partner2.recommendations.colors_to_avoid?.[0]?.name || 'Muddy Browns';
+
   return (
     <div className="space-y-6 pb-6 animate-fade-in relative z-10 bg-transparent">
       {/* Bug C1 fix: Banner auto-dismisses after 2.5s — was permanently visible */}
@@ -256,6 +298,39 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Premium Feature: Avoid Mixing */}
+      <div className={`rounded-3xl p-4 border flex items-center gap-4 shadow-sm ${isDark ? 'bg-red-500/10 border-red-500/20' : 'bg-red-50 border-red-200'}`}>
+          <div className="text-2xl">⚠️</div>
+          <div>
+             <h3 className={`text-[11px] font-black uppercase tracking-wider ${isDark ? 'text-red-400' : 'text-red-600'}`}>Clash Warning</h3>
+             <p className={`text-[11px] mt-1 leading-snug ${isDark ? 'text-red-100/70' : 'text-red-800/80'}`}>
+                To maintain harmony in photos, try avoiding <strong className={isDark ? 'text-white' : 'text-black'}>{p1Avoid}</strong> when your partner wears <strong className={isDark ? 'text-white' : 'text-black'}>{p2Avoid}</strong>.
+             </p>
+          </div>
+      </div>
+
+      {/* Premium Feature: Fabric & Texture Synergy */}
+      <div className={`rounded-3xl p-5 border shadow-sm ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'}`}>
+         <div className="flex items-center gap-2 mb-1">
+            <span className="text-lg">🧵</span>
+            <h3 className={`font-black text-sm ${isDark ? 'text-white' : 'text-gray-900'}`}>Texture Synergy</h3>
+         </div>
+         <p className={`text-[11px] mb-4 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>Elevate your matching outfits by pairing the right premium textures.</p>
+         
+         <div className="grid grid-cols-2 gap-3">
+            <div className={`p-3.5 rounded-2xl border ${isDark ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-emerald-50 border-emerald-200'}`}>
+               <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 block mb-1">Daytime / Casual</span>
+               <p className={`text-[12px] font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Linen + Cotton</p>
+               <p className={`text-[10px] leading-snug ${isDark ? 'text-emerald-100/60' : 'text-emerald-800/80'}`}>Breathable and relaxed. Perfect for brunch or tropical vacations.</p>
+            </div>
+            <div className={`p-3.5 rounded-2xl border ${isDark ? 'bg-purple-500/10 border-purple-500/20' : 'bg-purple-50 border-purple-200'}`}>
+               <span className="text-[9px] font-black uppercase tracking-widest text-purple-600 dark:text-purple-400 block mb-1">Evening / Formal</span>
+               <p className={`text-[12px] font-bold mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>Silk + Velvet</p>
+               <p className={`text-[10px] leading-snug ${isDark ? 'text-purple-100/60' : 'text-purple-800/80'}`}>Creates a rich, luxurious contrast that photographs beautifully.</p>
+            </div>
+         </div>
       </div>
 
       {/* Outfit Match Ideas */}
