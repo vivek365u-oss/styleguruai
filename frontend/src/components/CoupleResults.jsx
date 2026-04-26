@@ -98,21 +98,25 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
   const p1Label = partner1.gender === 'female' ? '👩 Hers' : '👨 His';
   const p2Label = partner2.gender === 'female' ? '👩 Hers' : '👨 His';
 
+  const hColor1 = harmonized[0]?.name || 'White';
+  const hColor2 = harmonized[1]?.name || 'Black';
+  const hColor3 = harmonized[2]?.name || 'Neutral';
+
   const occasionConfigs = {
     wedding: {
       title: '💍 Wedding / Festive',
       outfits: [
         { 
           title: 'Tonal Harmony', 
-          p1: 'Deep jewel-tone Lehenga / Anarkali / Gown', 
-          p2: 'Matching Sherwani or Kurta set in the exact same hue',
+          p1: `Deep jewel-tone ${hColor1} Lehenga / Anarkali / Gown`, 
+          p2: `Matching ${hColor1} Sherwani or Kurta set`,
           accessories: 'P1: Heavy Kundan choker, Polki earrings. P2: Contrast pocket square, embellished Mojaris.',
           vibe: 'Royal & Highly Coordinated'
         },
         { 
           title: 'Classic Contrast', 
-          p1: 'Ivory or Champagne Gold ethnic wear with fine embroidery', 
-          p2: 'Rich dark tone (Navy/Burgundy) ethnic wear',
+          p1: `${hColor2} ethnic wear with fine gold embroidery`, 
+          p2: `Rich ${hColor3} ethnic wear`,
           accessories: 'P1: Pearl drops, gold potli bag. P2: Classic metallic watch, sleek formal shoes.',
           vibe: 'Elegant & Sophisticated'
         }
@@ -123,15 +127,15 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
       outfits: [
         { 
           title: 'Urban Denim Duo', 
-          p1: 'White fitted top + Light wash wide-leg denim', 
-          p2: 'White oversized tee + Light wash straight denim',
+          p1: `${hColor1} fitted top + Light wash wide-leg denim`, 
+          p2: `${hColor1} oversized tee + Light wash straight denim`,
           accessories: 'P1: Chunky white sneakers, silver hoops, mini backpack. P2: White sneakers, minimalist chain.',
           vibe: 'Relaxed & Trendy'
         },
         { 
           title: 'Color-Block Match', 
-          p1: 'Color-coded crop top + Cargo pants', 
-          p2: 'Matching oversized graphic tee + Relaxed cargo pants',
+          p1: `${hColor2} crop top + Cargo pants`, 
+          p2: `Matching ${hColor2} oversized graphic tee + Relaxed cargo pants`,
           accessories: 'P1: Crossbody bag, bucket hat, slim sunglasses. P2: Beanie, retro sneakers.',
           vibe: 'Edgy & Modern'
         }
@@ -142,15 +146,15 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
       outfits: [
         { 
           title: 'Night Out Contrast', 
-          p1: 'Sleek black outfit with a bright neon/metallic accent', 
-          p2: 'Bright colored outfit (matching Partner 1\'s accent color)',
+          p1: `Sleek black outfit with a bright ${hColor1} accent`, 
+          p2: `${hColor1} colored outfit (matching Partner 1's accent)`,
           accessories: 'P1: Metallic clutch, statement rings, stiletto boots. P2: Leather jacket, silver chain, Chelsea boots.',
           vibe: 'Bold & Electrifying'
         },
         { 
           title: 'Glam & Neutral', 
-          p1: 'Sequin or metallic element dress/top', 
-          p2: 'Dark neutral base (Black/Navy) with subtle texture',
+          p1: `${hColor2} element dress/top`, 
+          p2: `Dark neutral base with subtle ${hColor2} texture`,
           accessories: 'P1: Dainty silver jewelry, sling bag. P2: Matte black watch, textured belt.',
           vibe: 'Chic & Balanced'
         }
@@ -161,15 +165,15 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
       outfits: [
         { 
           title: 'Soft Coordination', 
-          p1: 'Pastel or soft-toned slip dress / elegant top', 
-          p2: 'Complementary soft tone shirt (e.g., Sage + Rose) + Chinos',
+          p1: `${hColor3} slip dress / elegant top`, 
+          p2: `Complementary ${hColor3} shirt + Chinos`,
           accessories: 'P1: Delicate pendant, strappy heels, mini clutch. P2: Brown leather watch, suede loafers.',
           vibe: 'Sweet & Harmonious'
         },
         { 
           title: 'Evening Elegance', 
-          p1: 'Deep saturated color (Ruby/Emerald) midi/maxi dress', 
-          p2: 'Dark neutral (Black/Charcoal) blazer over crisp shirt with subtle matching pocket square',
+          p1: `Deep saturated ${hColor2} midi/maxi dress`, 
+          p2: `Dark neutral blazer over crisp shirt with subtle ${hColor2} pocket square`,
           accessories: 'P1: Diamond studs, stilettos. P2: Classic dress watch, Oxfords.',
           vibe: 'Luxurious & Sensual'
         }
@@ -180,15 +184,15 @@ export default function CoupleResults({ data, uploadedImages, onReset }) {
       outfits: [
         { 
           title: 'Tropical Contrast', 
-          p1: 'Flowy floral maxi dress', 
-          p2: 'Linen shirt (in one of the floral colors) + Tailored shorts',
+          p1: `Flowy ${hColor1} floral maxi dress`, 
+          p2: `Linen shirt (in ${hColor1}) + Tailored shorts`,
           accessories: 'P1: Wide-brim straw hat, oversized sunglasses, woven tote. P2: Aviators, canvas espadrilles.',
           vibe: 'Breezy & Refreshing'
         },
         { 
           title: 'Resort Whites', 
-          p1: 'All-white linen set or crochet dress', 
-          p2: 'White linen shirt + Khaki/Beige trousers',
+          p1: `All-white linen set with ${hColor2} accessories`, 
+          p2: `White linen shirt + ${hColor2} shorts`,
           accessories: 'P1: Gold layered necklaces, slide sandals. P2: Leather slide sandals, beaded bracelet.',
           vibe: 'Clean & Luxurious'
         }
