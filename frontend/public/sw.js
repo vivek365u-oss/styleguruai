@@ -1,3 +1,31 @@
+importScripts('https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging-compat.js');
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDDW9fSoKxoLlH3MJSRNAuD3c-Qnak7rSw",
+  authDomain: "tonefit-44fc2.firebaseapp.com",
+  projectId: "tonefit-44fc2",
+  storageBucket: "tonefit-44fc2.firebasestorage.app",
+  messagingSenderId: "382677564269",
+  appId: "1:382677564269:web:d8bf5abd28dd7f544db864"
+};
+
+firebase.initializeApp(firebaseConfig);
+const messaging = firebase.messaging();
+
+messaging.onBackgroundMessage((payload) => {
+  console.log('[FCM-SW] Received background message: ', payload);
+  const notificationTitle = payload.notification?.title || 'StyleGuru AI ✨';
+  const notificationOptions = {
+    body: payload.notification?.body || 'Aapke liye ek naya style update hai!',
+    icon: '/logo.png',
+    badge: '/icons/icon-192x192.png',
+    data: payload.data || { url: '/' }
+  };
+
+  self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
 // ══════════════════════════════════════════════════════════════════════
 // STYLEGURU AI — PWA SERVICE WORKER v3.0
 // Clean rewrite — 3rd party ad script removed

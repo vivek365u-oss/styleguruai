@@ -265,7 +265,11 @@ export const setupFCMToken = async (uid) => {
       console.warn('[FCM] VITE_FIREBASE_VAPID_KEY is missing in environment variables.');
       return null;
     }
-    const token = await getToken(messaging, { vapidKey });
+    const registration = await navigator.serviceWorker.ready.catch(() => null);
+    const token = await getToken(messaging, { 
+      vapidKey, 
+      ...(registration ? { serviceWorkerRegistration: registration } : {}) 
+    });
     if (token) {
       // Save FCM token to user document for the backend to use
       await updateDoc(doc(db, 'users', uid), { 
