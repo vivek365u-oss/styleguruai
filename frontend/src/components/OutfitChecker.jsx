@@ -165,24 +165,8 @@ function OutfitChecker() {
     reader.readAsDataURL(file);
   };
 
-  const handleCheck = async (skipLimit = false) => {
+  const handleCheck = async () => {
     if (!selfieFile || !outfitFile) { setError(t('uploadBoth')); return; }
-
-    // LIMIT CHECK
-    if (!skipLimit) {
-        const limitCheck = await consumeUserLimit('outfit_check');
-        if (!limitCheck.success && limitCheck.requires_ad) {
-            window.dispatchEvent(new CustomEvent('open_subscription_modal', {
-                detail: {
-                    onSuccess: (byAd = false) => {
-                        handleCheck(byAd);
-                    }
-                }
-            }));
-            setError("You've reached your free Ad-Free limits! Please Upgrade to Pro.");
-            return;
-        }
-    }
 
     console.log("[OutfitChecker] Starting outfit check with progress...");
     setLoading(true); setError(null); setResult(null);

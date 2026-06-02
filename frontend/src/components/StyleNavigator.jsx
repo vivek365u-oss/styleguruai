@@ -678,20 +678,14 @@ const HEX_NAME_MAP = {
             <p style={{ fontSize:'9px', letterSpacing:'0.2em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>Choose Occasion</p>
             <div style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:4 }}>
               {MOODS.map(m => {
-                const isLocked = !isPro && m.id !== 'casual';
                 return (
                 <button key={m.id} onClick={() => {
-                   if (isLocked) {
-                       window.dispatchEvent(new CustomEvent('open_subscription_modal'));
-                   } else {
-                       handleMoodChange(m.id);
-                   }
+                    handleMoodChange(m.id);
                 }} style={{
                   ...pill(mood === m.id),
-                  opacity: isLocked ? 0.6 : 1,
                   display:'flex', alignItems:'center', gap:6, flexShrink:0,
                 }}>
-                  <span>{m.emoji}</span> {m.label} {isLocked && '🔒'}
+                  <span>{m.emoji}</span> {m.label}
                 </button>
               )})}
             </div>
@@ -1018,8 +1012,8 @@ const HEX_NAME_MAP = {
           {/* Avoid Colors */}
           <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>❌ Colors to Avoid</p>
           {/* Bug #15 fix: position:relative needed for the absolute overlay to anchor correctly */}
-          <div style={{ position: 'relative' }}>
-            <div style={{ ...card({ padding:'16px 18px', marginBottom:14 }), filter: !isPro ? 'blur(4px)' : 'none', opacity: !isPro ? 0.6 : 1, userSelect: !isPro ? 'none' : 'auto' }}>
+          <div>
+            <div style={{ ...card({ padding:'16px 18px', marginBottom:14 }) }}>
               {(insights?.colors_to_avoid || (function() {
                 const avoidMap = {
                   fair:   ['Neon Yellow','Pastel Peach','Very Pale Pink — washes out fair skin with no contrast'],
@@ -1037,24 +1031,17 @@ const HEX_NAME_MAP = {
                 </div>
               ))}
             </div>
-            {!isPro && (
-               <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', zIndex:10 }}>
-                  <span style={{ fontSize:'24px', marginBottom:'4px' }}>🔒</span>
-                  <button onClick={() => window.dispatchEvent(new CustomEvent('open_subscription_modal'))} style={{ padding:'8px 16px', background:GRAD, color:'white', borderRadius:20, fontSize:'10px', fontWeight:'700', border:'none', cursor:'pointer' }}>Unlock Pro to See</button>
-               </div>
-            )}
           </div>
 
           {/* Outfit color combos by gender */}
           <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>
             {gender === 'female' ? '👗 Outfit Color Combinations' : '👔 Outfit Color Combinations'}
           </p>
-          <div style={{ display:'flex', flexDirection:'column', gap:10, marginBottom:16, position: 'relative' }}>
+          <div style={{ display:'flex', flexDirection:'column', gap:10, marginBottom:16 }}>
             {bestColors.slice(0,3).map((color, i) => {
               const pair = bestColors[(i+2) % bestColors.length];
-              const isLocked = !isPro && i > 0;
               return (
-                <div key={i} style={{ ...card({ padding:'14px 16px', display:'flex', alignItems:'center', gap:14 }), filter: isLocked ? 'blur(3px)' : 'none', opacity: isLocked ? 0.5 : 1 }}>
+                <div key={i} style={{ ...card({ padding:'14px 16px', display:'flex', alignItems:'center', gap:14 }) }}>
                   <div style={{ display:'flex', gap:-6 }}>
                     <div style={{ width:32, height:32, borderRadius:8, background:color.hex, border:`2px solid ${C.border}` }} />
                     <div style={{ width:32, height:32, borderRadius:8, background:pair?.hex || '#333', border:`2px solid ${C.border}`, marginLeft:-8 }} />
@@ -1073,16 +1060,14 @@ const HEX_NAME_MAP = {
                   <button
                     onClick={(e) => { 
                       e.stopPropagation(); 
-                      if(!isLocked) {
-                        const baseCat = gender === 'female' ? (i === 0 ? 'top' : i === 1 ? 'kurti' : 'dress') : (i === 0 ? 'formal_shirt' : i === 1 ? 'polo' : 'kurta');
-                        const shopData = getShopData({ 
-                           query: `${color.name} ${gender==='female'?'kurti top dress':'shirt kurta polo'}`, 
-                           color: color.name, 
-                           catId: baseCat, 
-                           gender 
-                        });
-                        setShopItem(shopData);
-                      }
+                      const baseCat = gender === 'female' ? (i === 0 ? 'top' : i === 1 ? 'kurti' : 'dress') : (i === 0 ? 'formal_shirt' : i === 1 ? 'polo' : 'kurta');
+                      const shopData = getShopData({ 
+                         query: `${color.name} ${gender==='female'?'kurti top dress':'shirt kurta polo'}`, 
+                         color: color.name, 
+                         catId: baseCat, 
+                         gender 
+                      });
+                      setShopItem(shopData);
                     }}
                     style={{ 
                       padding:'8px 14px', borderRadius:10, 
@@ -1091,16 +1076,11 @@ const HEX_NAME_MAP = {
                       cursor:'pointer', fontFamily:PJS, transition:'all 0.3s'
                     }}
                   >
-                    {isLocked ? '🔒' : 'Shop'}
+                    Shop
                   </button>
                 </div>
               );
             })}
-            {!isPro && (
-               <div style={{ position:'absolute', top:'40%', left:0, right:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', zIndex:10 }}>
-                  <button onClick={() => window.dispatchEvent(new CustomEvent('open_subscription_modal'))} style={{ padding:'8px 16px', background:GRAD, color:'white', borderRadius:20, fontSize:'10px', fontWeight:'700', border:'none', cursor:'pointer', boxShadow:'0 4px 12px rgba(0,0,0,0.2)' }}>Unlock More Combos</button>
-               </div>
-            )}
           </div>
         </div>
       )}
@@ -1132,15 +1112,10 @@ const HEX_NAME_MAP = {
             </div>
           </div>
 
-          {/* Items to Buy (Gaps) */}
-          <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>
-            🛍 {gapItems.filter(g => !g.inWardrobe).length > 0 ? 'Missing From Your Wardrobe' : 'Level Up Picks'}
-          </p>
-          <div style={{ display:'flex', flexDirection:'column', gap:10, marginBottom:16, position: 'relative' }}>
+          <div style={{ display:'flex', flexDirection:'column', gap:10, marginBottom:16 }}>
             {gapItems.map((gap, i) => {
-              const isLocked = !isPro && i > 0;
               return (
-              <div key={i} style={{ ...card({ padding:'14px 16px', display:'flex', alignItems:'center', gap:14 }), filter: isLocked ? 'blur(3px)' : 'none', opacity: isLocked ? 0.6 : 1 }}>
+              <div key={i} style={{ ...card({ padding:'14px 16px', display:'flex', alignItems:'center', gap:14 }) }}>
                 <div style={{ width:44, height:44, borderRadius:12, background:gap.hex || '#888', flexShrink:0, border:`3px solid ${C.border}`, boxShadow:`0 3px 10px ${gap.hex || '#888'}50` }} />
                 <div style={{ flex:1, minWidth:0 }}>
                   <p style={{ fontSize:'13px', color:C.text, fontFamily:PJS, fontWeight:600, margin:'0 0 2px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{gap.item}</p>
@@ -1154,23 +1129,16 @@ const HEX_NAME_MAP = {
                 {!gap.inWardrobe && (
                   <button
                     onClick={() => { 
-                      if(!isLocked) {
-                        const shopData = getShopData({ query: gap.search || gap.item, color: gap.color || '', catId: gap.category || 'shirt', gender });
-                        setShopItem(shopData);
-                      }
+                      const shopData = getShopData({ query: gap.search || gap.item, color: gap.color || '', catId: gap.category || 'shirt', gender });
+                      setShopItem(shopData);
                     }}
-                    style={{ fontSize:'11px', color:'white', background: isLocked ? C.glass2 : GRAD, border:'none', borderRadius:10, padding:'8px 14px', cursor:'pointer', fontFamily:PJS, fontWeight:600, flexShrink:0, boxShadow: isLocked ? 'none': '0 3px 10px rgba(139,92,246,0.3)' }}
+                    style={{ fontSize:'11px', color:'white', background: GRAD, border:'none', borderRadius:10, padding:'8px 14px', cursor:'pointer', fontFamily:PJS, fontWeight:600, flexShrink:0, boxShadow: '0 3px 10px rgba(139,92,246,0.3)' }}
                   >
-                    {isLocked ? '🔒 Pro' : 'Shop →'}
+                    Shop →
                   </button>
                 )}
               </div>
             )})}
-            {!isPro && gapItems.length > 1 && (
-               <div style={{ position:'absolute', top:'50%', left:0, right:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', zIndex:10 }}>
-                  <button onClick={() => window.dispatchEvent(new CustomEvent('open_subscription_modal'))} style={{ padding:'8px 16px', background:GRAD, color:'white', borderRadius:20, fontSize:'10px', fontWeight:'700', border:'none', cursor:'pointer', boxShadow:'0 4px 12px rgba(0,0,0,0.2)' }}>Unlock Full AI Gap Analysis</button>
-               </div>
-            )}
           </div>
 
           {/* Wardrobe items preview */}
@@ -1322,12 +1290,8 @@ const HEX_NAME_MAP = {
                       {!dnaMatches[product.id] && (
                         <button
                           onClick={() => {
-                            if (!isPro) {
-                              window.dispatchEvent(new CustomEvent('open_subscription_modal', { detail: { source: 'trending_dna' } }));
-                            } else {
-                              const score = Math.floor(Math.random() * 15) + 85; // Simulated 85-99 score
-                              setDnaMatches(prev => ({ ...prev, [product.id]: score }));
-                            }
+                            const score = Math.floor(Math.random() * 15) + 85; // Simulated 85-99 score
+                            setDnaMatches(prev => ({ ...prev, [product.id]: score }));
                           }}
                           style={{ 
                             flex: 1, padding:'10px', borderRadius:14, 

@@ -1010,23 +1010,6 @@ export default function SelfieStyleAdvisor() {
       clearInterval(progressInterval);
       setLoading(false);
       const detail = err?.response?.data?.detail;
-
-      // ── USAGE LIMIT GATE ──
-      if (err?.response?.status === 403 && detail?.error === 'usage_limit_reached') {
-        window.dispatchEvent(new CustomEvent('open_subscription_modal', {
-          detail: {
-            source: 'selfie_style_advisor',
-            onSuccess: (status) => {
-              if (status === true) {
-                // User watched ad or upgraded, retry with watched=true
-                runAnalysis(imageFile, genderValue, true);
-              }
-            }
-          }
-        }));
-        return; // Exit, modal handles it
-      }
-
       const msg = typeof detail === 'object'
         ? detail.message
         : detail || err.message || 'Unexpected error. Please try again.';

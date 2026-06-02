@@ -8,14 +8,11 @@ Key responsibilities:
   - JWT-based authentication via Firebase ID tokens
   - Image upload, analysis, and skin tone classification
   - Outfit color detection (GrabCut + K-Means + optional Clarifai/Google Vision)
-  - Razorpay payment order creation and server-side webhook verification
   - Firestore-backed user profile, wardrobe, and history management
   - Rate limiting (SlowAPI) and error monitoring (Sentry)
 
 Environment variables required:
   FIREBASE_CREDENTIALS_JSON : Firebase service account JSON string
-  RAZORPAY_KEY_ID           : Razorpay API key ID
-  RAZORPAY_KEY_SECRET       : Razorpay API key secret
   SENTRY_DSN (optional)     : Sentry DSN for error tracking
   OUTFIT_COLOR_ENGINE       : "local" | "clarifai" | "google" (default: local)
 """
@@ -31,7 +28,6 @@ from typing import Optional, List, Dict
 
 import firebase_admin
 from firebase_admin import credentials, auth as firebase_auth, firestore as firebase_firestore
-import razorpay
 
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks, Request, Depends, Form, HTTPException, status
 from fastapi.responses import JSONResponse
@@ -1283,202 +1279,30 @@ async def push_send_weekly(current_user: dict = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ============================================
-# PHASE 1.3: MONETIZATION & LIMITS (RAZORPAY)
-# ============================================
-RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "rzp_test_placeholder999x")
-RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "secret_placeholder999x")
-razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
-def init_user_limits_if_needed(uid: str, db):
-    doc_ref = db.collection("users").document(uid)
-    doc = doc_ref.get()
-    if not doc.exists:
-        doc_ref.set({
-            "is_pro": False,
-            "coins": 0,
-            "adFreeAnalysesLeft": 3,
-            "analysisHistoryCount": 0,
-            "wardrobeCount": 0,
-            "savedColorsCount": 0,
-            "adFreeOutfitChecks": 3,
-            "planName": "free",
-            "created_at": datetime.utcnow().isoformat()
-        })
-        return doc_ref.get().to_dict()
-    return doc.to_dict()
+# ============================================
+# USER PROFILE (stats only — no limits)
+# ============================================
 
 @app.get("/api/users/profile")
 async def get_user_profile(current_user: dict = Depends(get_current_user)):
-    """Fetch user's actual profile status and limits from Firebase."""
-    uid = current_user["uid"]
-    db = get_firestore_db()
-    data = init_user_limits_if_needed(uid, db)
-    return {"success": True, "data": data}
-
-class ConsumeActionRequest(BaseModel):
-    action: str  # e.g., 'analysis', 'outfit_check', 'history_save'
-
-@app.post("/api/users/consume-action")
-async def consume_limit(request: ConsumeActionRequest, current_user: dict = Depends(get_current_user)):
-    """Safely decrement user limits based on the action performed."""
+    """Fetch user's profile and stats from Firebase."""
     uid = current_user["uid"]
     db = get_firestore_db()
     doc_ref = db.collection("users").document(uid)
     doc = doc_ref.get()
-    
     if not doc.exists:
-        raise HTTPException(status_code=404, detail="User not found")
-        
-    data = doc.to_dict()
-    is_pro = data.get("is_pro", False)
-    
-    if is_pro:
-        return {"success": True, "message": "Pro user, unlimited access granted"}
-
-    # Implement limit tracking logic
-    if request.action == 'analysis':
-        current = data.get("adFreeAnalysesLeft", 0)
-        coins = data.get("coins", 0)
-        if current > 0:
-            doc_ref.update({"adFreeAnalysesLeft": current - 1})
-            return {"success": True, "adFreeAnalysesLeft": current - 1}
-        elif coins > 0:
-            # Consume 1 coin for Analysis
-            doc_ref.update({"coins": coins - 1})
-            return {"success": True, "coins": coins - 1, "message": "1 Coin consumed"}
-        return {"success": False, "requires_ad": True}
-        
-    elif request.action == 'outfit_check':
-        current = data.get("adFreeOutfitChecks", 0)
-        coins = data.get("coins", 0)
-        if current > 0:
-            doc_ref.update({"adFreeOutfitChecks": current - 1})
-            return {"success": True, "adFreeOutfitChecks": current - 1}
-        elif coins > 0:
-            # Consume 1 coin for Outfit Check
-            doc_ref.update({"coins": coins - 1})
-            return {"success": True, "coins": coins - 1, "message": "1 Coin consumed"}
-        return {"success": False, "requires_ad": True}
-        
-    elif request.action == 'history_save':
-        current = data.get("analysisHistoryCount", 0)
-        if current < 5:
-            doc_ref.update({"analysisHistoryCount": current + 1})
-            return {"success": True, "analysisHistoryCount": current + 1}
-        return {"success": False, "limit_reached": True}
-
-    raise HTTPException(status_code=400, detail="Invalid action")
-
-class CreateOrderRequest(BaseModel):
-    tier: str # 'event_pass', 'monthly', 'couple', 'yearly'
-
-@app.post("/api/payment/create-order")
-async def create_order(request: CreateOrderRequest, current_user: dict = Depends(get_current_user)):
-    amount_in_inr = 0
-    if request.tier == 'event_pass':
-        amount_in_inr = 49
-    elif request.tier == 'monthly':
-        amount_in_inr = 99
-    elif request.tier == 'couple':
-        amount_in_inr = 149
-    elif request.tier == 'yearly':
-        amount_in_inr = 299
-    else:
-        raise HTTPException(status_code=400, detail="Invalid tier")
-
-    data = {
-        "amount": amount_in_inr * 100,  # Razorpay expects paise
-        "currency": "INR",
-        "receipt": f"receipt_{current_user['uid'][:10]}",
-        "notes": {
-            "tier": request.tier,
-            "uid": current_user["uid"]
-        }
-    }
-    try:
-        order = razorpay_client.order.create(data=data)
-        return {"success": True, "order": order, "key": RAZORPAY_KEY_ID}
-    except Exception as e:
-        print(f"Razorpay Order Creation Failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-class VerifyPaymentRequest(BaseModel):
-    razorpay_order_id: str
-    razorpay_payment_id: str
-    razorpay_signature: str
-    tier: str
-
-@app.post("/api/payment/verify")
-async def verify_payment(request: VerifyPaymentRequest, current_user: dict = Depends(get_current_user)):
-    try:
-        result = razorpay_client.utility.verify_payment_signature({
-            'razorpay_order_id': request.razorpay_order_id,
-            'razorpay_payment_id': request.razorpay_payment_id,
-            'razorpay_signature': request.razorpay_signature
+        # First login — create bare profile
+        doc_ref.set({
+            "analysisHistoryCount": 0,
+            "wardrobeCount": 0,
+            "savedColorsCount": 0,
+            "planName": "free",
+            "created_at": datetime.utcnow().isoformat()
         })
-        # If signature is valid, result is None or True
-        uid = current_user["uid"]
-        db = get_firestore_db()
-        doc_ref = db.collection("users").document(uid)
-        doc = doc_ref.get().to_dict() or {}
-        
-        updates = {}
-        if request.tier in ['event_pass', 'monthly', 'couple', 'yearly']:
-            updates['is_pro'] = True
-            updates['planName'] = request.tier
-            if request.tier == 'event_pass':
-                import time
-                updates['planExpiry'] = int(time.time() * 1000) + (24 * 60 * 60 * 1000) # 24 hours
-            elif request.tier in ['monthly', 'couple']:
-                import time
-                updates['planExpiry'] = int(time.time() * 1000) + (30 * 24 * 60 * 60 * 1000) # 30 days
-            elif request.tier == 'yearly':
-                import time
-                updates['planExpiry'] = int(time.time() * 1000) + (365 * 24 * 60 * 60 * 1000) # 365 days
-            
-        doc_ref.set(updates, merge=True)
-        return {"success": True, "message": "Payment verified and tier upgraded successfully"}
-    except Exception as e:
-        print(f"Razorpay Verification Failed: {str(e)}")
-        raise HTTPException(status_code=400, detail="Invalid Payment Signature")
+        return {"success": True, "data": doc_ref.get().to_dict()}
+    return {"success": True, "data": doc.to_dict()}
 
-class VerifyAmazonOrderRequest(BaseModel):
-    order_id: str
-
-@app.post("/api/payment/verify-amazon-order")
-async def verify_amazon_order(request: VerifyAmazonOrderRequest, current_user: dict = Depends(get_current_user)):
-    # In a real production system, this would be queued for manual verification
-    # or checked via an automated scraper/email parser. 
-    # For now, we accept the ID, store it, and grant temporary PRO.
-    try:
-        uid = current_user["uid"]
-        db = get_firestore_db()
-        
-        # Store order ID for manual verification later
-        db.collection("amazon_verifications").add({
-            "uid": uid,
-            "order_id": request.order_id,
-            "status": "pending_verification",
-            "timestamp": firestore.SERVER_TIMESTAMP
-        })
-        
-        # Grant 1-Month PRO immediately for good UX
-        doc_ref = db.collection("users").document(uid)
-        import time
-        updates = {
-            'is_pro': True,
-            'planName': 'monthly_amazon',
-            'planExpiry': int(time.time() * 1000) + (30 * 24 * 60 * 60 * 1000) # 30 days
-        }
-        doc_ref.set(updates, merge=True)
-        return {"success": True, "message": "Amazon order submitted! Enjoy 1-Month PRO while we verify."}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ============================================
-# PRODUCTS — PHASE 1 REVENUE
-# ============================================
 
 class ProductSchema(BaseModel):
     name: str
@@ -2162,85 +1986,21 @@ async def analyze_selfie_style(
     file: UploadFile = File(...),
     gender: str = "male",
     texture: str = "straight",
-    watched: bool = False,
     lang: str = "en",
     current_user: dict = Depends(get_current_user)
 ):
     """
-    Full selfie analysis:
-      1. Usage limit check (2 free per month, or unlimited with ad watch)
-      2. Image quality gate (existing pipeline)
-      3. Face detection (existing MediaPipe)
-      4. Skin tone extraction (existing classifier)
-      5. Face shape detection (new geometric landmark analysis)
-      6. Hairstyle recommendations (new rule-based engine)
-      7. Beard recommendations (for male users)
-    Returns all data needed by the frontend SelfieStyleAdvisor component.
+    Full selfie analysis — unlimited for all users.
+    1. Image quality gate
+    2. Face detection
+    3. Skin tone extraction
+    4. Face shape detection
+    5. Hairstyle recommendations
+    6. Beard recommendations (for male users)
     """
     start_time = time.time()
     try:
-        # ── Step 0: Usage Limit Check ────────────────────
-        if FIREBASE_INITIALIZED:
-            try:
-                db = firebase_firestore.client()
-                user_ref = db.collection("users").document(current_user["uid"])
-                user_doc = user_ref.get()
-                
-                # Get current month key (e.g., "2026-04")
-                from datetime import datetime
-                current_month = datetime.now().strftime("%Y-%m")
-                
-                if user_doc.exists:
-                    user_data = user_doc.to_dict()
-                    usage_data = user_data.get("selfie_analysis_usage", {})
-                    month_usage = usage_data.get(current_month, 0)
-                    is_pro = user_data.get("is_pro", False)
-                    
-                    # Check if user has exceeded free limit (2 per month)
-                    FREE_MONTHLY_LIMIT = 2
-                    
-                    # Pro users are never blocked
-                    if is_pro:
-                        print(f"[USAGE] Pro user {current_user['uid']} - bypassing limit check.")
-                    elif month_usage >= FREE_MONTHLY_LIMIT and not watched:
-                        # User has exceeded limit and hasn't watched ad
-                        raise HTTPException(
-                            status_code=403,
-                            detail={
-                                "error": "usage_limit_reached",
-                                "message": f"You've used your {FREE_MONTHLY_LIMIT} free analyses this month. Watch a short ad to continue!",
-                                "current_usage": month_usage,
-                                "limit": FREE_MONTHLY_LIMIT,
-                                "month": current_month
-                            }
-                        )
-                    
-                    # Increment usage counter (only if not watched, or if watched after limit)
-                    # For Pro users, we still track usage for analytics, but it doesn't block them.
-                    if not watched or month_usage >= FREE_MONTHLY_LIMIT:
-                        user_ref.update({
-                            f"selfie_analysis_usage.{current_month}": month_usage + 1,
-                            "last_selfie_analysis": datetime.now().isoformat()
-                        })
-                        print(f"[USAGE] User {current_user['uid']} ({'PRO' if is_pro else 'FREE'}) - Analysis #{month_usage + 1} for {current_month}")
-                else:
-                    # First time user - create usage tracking
-                    user_ref.set({
-                        "uid": current_user["uid"],
-                        "email": current_user.get("email", ""),
-                        "selfie_analysis_usage": {current_month: 1},
-                        "last_selfie_analysis": datetime.now().isoformat(),
-                        "created_at": datetime.now().isoformat()
-                    }, merge=True)
-                    print(f"[USAGE] New user {current_user['uid']} - First analysis")
-                    
-            except HTTPException:
-                raise  # Re-raise usage limit errors
-            except Exception as e:
-                print(f"[USAGE] Tracking error (non-blocking): {e}")
-                # Continue with analysis even if tracking fails
-        
-        # ── Step 1-3: Existing Pipeline ──────────────────
+        # ── Step 1-3: Image Pipeline ──────────────────
         image, face, full_quality, skin_color, skin_tone, color_season = await process_image_core(file)
 
         # ── Step 4: Face Shape Detection ─────────────────

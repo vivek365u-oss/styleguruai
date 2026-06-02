@@ -1,5 +1,5 @@
 import { useState, useRef, useContext } from 'react';
-import { analyzeImage, analyzeImageFemale, analyzeImageSeasonal, consumeUserLimit, saveUserPreferences, auth } from '../api/styleApi';
+import { analyzeImage, analyzeImageFemale, analyzeImageSeasonal, saveUserPreferences, auth } from '../api/styleApi';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
@@ -370,22 +370,6 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
 
     const finalGender = mode === 'seasonal' ? 'seasonal' : gender;
     const finalPayload = { ...res.data, gender: finalGender, seasonalGender: mode === 'seasonal' ? gender : 'male', bodyType, occasion, budget, eyeColor };
-
-    // LIMIT CHECK (AFTER ANALYSIS IS SUCCESSFUL)
-    const limitCheck = await consumeUserLimit('analysis');
-    if (!limitCheck.success && limitCheck.requires_ad) {
-        setShowProgress(false);
-        window.dispatchEvent(new CustomEvent('open_subscription_modal', {
-            detail: {
-                onSuccess: (watchedOrSkipped) => {
-                    handleFile(file, watchedOrSkipped === true ? finalPayload : 'skipped');
-                }
-            }
-        }));
-        if (onAdSkipped) onAdSkipped();
-        return;
-    }
-
     console.log("[UploadSection] Analysis successful!");
     completeProgress();
     setTimeout(() => {
@@ -455,22 +439,6 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       partner2: { ...res2.data, gender: partner2Gender },
       occasion
     };
-
-    // LIMIT CHECK (AFTER ANALYSIS IS SUCCESSFUL)
-    const limitCheck = await consumeUserLimit('analysis');
-    if (!limitCheck.success && limitCheck.requires_ad) {
-        setShowProgress(false);
-        window.dispatchEvent(new CustomEvent('open_subscription_modal', {
-            detail: {
-                onSuccess: (watchedOrSkipped) => {
-                    handleCoupleAnalysis(watchedOrSkipped === true ? finalPayload : 'skipped');
-                }
-            }
-        }));
-        if (onAdSkipped) onAdSkipped();
-        return;
-    }
-
     completeProgress();
     setTimeout(() => {
       onImageSelected([partner1, partner2]);

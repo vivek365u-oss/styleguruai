@@ -37,8 +37,7 @@ function ImageModal({ src, onClose }) {
 function HistoryPanel({ onShowResult }) {
   const { theme } = useContext(ThemeContext);
   const { t, language } = useLanguage();
-  const { isPro } = usePlan();
-  const historyLimit = isPro ? 100 : 10;
+  const historyLimit = 100;
   const isDark = theme === 'dark';
   const { user } = useAuthState();
   const [history, setHistory] = useState([]);
@@ -65,7 +64,7 @@ function HistoryPanel({ onShowResult }) {
     } else {
       setLoading(false);
     }
-  }, [user?.uid, isPro]);
+  }, [user?.uid]);
 
   // Re-fetch when switching tabs to ensure freshness
   useEffect(() => {

@@ -11,7 +11,6 @@ import ColorRecommendationsShop from './ColorRecommendationsShop';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MISSIONS, scoreWardrobeItem } from '../utils/stylingEngine';
 import AffiliateLink from './AffiliateLink';
-import AdSense from '../AdSense';
 import { buildMyntraUrl } from '../utils/myntraUrl';
 import { PRODUCT_LABEL_MAP } from '../utils/shoppingUrls';
 import ShopActionSheet from './ShopActionSheet';
@@ -1407,13 +1406,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
                 btn.disabled = false;
               }
             } catch (err) {
-              if (err.code === 'usage-limit-reached') {
-                window.dispatchEvent(new CustomEvent('open_subscription_modal', { 
-                  detail: { source: 'lookbook_limit' } 
-                }));
-              } else {
-                console.error("Lookbook error:", err);
-              }
+              console.error("Lookbook error:", err);
               if (btn) {
                 btn.textContent = '📖 Save to Lookbook';
                 btn.disabled = false;
@@ -1735,11 +1728,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         );
       })()}
 
-      {/* Bottom Ad Card — Consolidated to prevent console 400 errors */}
-      <div className={`mt-8 rounded-3xl p-6 border overflow-hidden ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-200 shadow-sm'}`}>
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 text-center">StyleGuru AI Partner Content</p>
-        <AdSense />
-      </div>
+
 
       {/* New photo button */}
       <button

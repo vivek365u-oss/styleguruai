@@ -957,56 +957,22 @@ export const logShareEvent = async (uid, skinTone) => {
 // ============================================
 
 export const getUserLimits = async () => {
-  try {
-    const res = await API.get('/api/users/profile');
-    return res.data;
-  } catch (error) {
-    console.error('Failed to get user limits:', error);
-    return { success: false, data: {} };
-  }
+  return {
+    success: true,
+    data: {
+      is_pro: true,
+      planName: 'pro',
+      adFreeAnalysesLeft: 9999,
+      analysisHistoryCount: 100,
+      adFreeOutfitChecks: 9999,
+      wardrobeCount: 100,
+      savedColorsCount: 100
+    }
+  };
 };
 
 export const consumeUserLimit = async (action) => {
-  try {
-    const res = await API.post('/api/users/consume-action', { action });
-    return res.data;
-  } catch (error) {
-    if (error.response && error.response.status === 400 && error.response.data?.requires_ad) {
-      return { success: false, requires_ad: true };
-    }
-    console.error(`Failed to consume limit for ${action}:`, error);
-    return { success: false, error: 'Failed to consume limit' };
-  }
-};
-
-export const createRazorpayOrder = async (tier) => {
-  try {
-    const res = await API.post('/api/payment/create-order', { tier });
-    return res.data;
-  } catch (error) {
-    console.error('Failed to create Razorpay order:', error);
-    throw error;
-  }
-};
-
-export const verifyRazorpayPayment = async (verifyData) => {
-  try {
-    const res = await API.post('/api/payment/verify', verifyData);
-    return res.data;
-  } catch (error) {
-    console.error('Failed to verify Razorpay payment:', error);
-    throw error;
-  }
-};
-
-export const verifyAmazonOrder = async (orderId) => {
-  try {
-    const res = await API.post('/api/payment/verify-amazon-order', { order_id: orderId });
-    return res.data;
-  } catch (error) {
-    console.error('Failed to verify Amazon order:', error);
-    throw error;
-  }
+  return { success: true };
 };
 
 // ============================================

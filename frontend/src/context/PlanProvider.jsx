@@ -5,36 +5,20 @@ import { auth, db } from '../firebase';
 import { onSnapshot, doc } from 'firebase/firestore';
 
 export function PlanProvider({ children }) {
-  const [plan, setPlan] = useState('free');
+  const [plan, setPlan] = useState('pro');
   const [usage, setUsage] = useState({ 
-    adFreeAnalysesLeft: 3, 
+    adFreeAnalysesLeft: 9999, 
     analysisHistoryCount: 0, 
-    adFreeOutfitChecks: 3,
+    adFreeOutfitChecks: 9999,
     wardrobeCount: 0,
     savedColorsCount: 0
   });
-  const [isPro, setIsPro] = useState(false);
-  const [coins, setCoins] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [isPro] = useState(true);
+  const [coins] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const refreshPlan = useCallback(async () => {
-    // Keep this for manual refreshes if needed, but onSnapshot handles reactivity
-    if (!auth.currentUser) return;
-    try {
-      const res = await getUserLimits();
-      if (res.success && res.data) {
-        setIsPro(res.data.is_pro || false);
-        setPlan(res.data.planName || 'free');
-        setCoins(res.data.coins || 0);
-        setUsage({
-          adFreeAnalysesLeft: res.data.adFreeAnalysesLeft ?? 3,
-          analysisHistoryCount: res.data.analysisHistoryCount ?? 0,
-          adFreeOutfitChecks: res.data.adFreeOutfitChecks ?? 3,
-          wardrobeCount: res.data.wardrobeCount ?? 0,
-          savedColorsCount: res.data.savedColorsCount ?? 0,
-        });
-      }
-    } catch (err) { }
+    // Platform is now fully free, no need to query limits
   }, []);
 
   useEffect(() => {
@@ -42,35 +26,24 @@ export function PlanProvider({ children }) {
     
     const unsubscribeAuth = auth.onAuthStateChanged((user) => {
       if (user) {
-        // ── Real-time Listener ────────────────
         unsubscribeSnap = onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
-            setIsPro(data.is_pro || false);
-            setPlan(data.planName || 'free');
-            setCoins(data.coins || 0);
             setUsage({
-              adFreeAnalysesLeft: data.adFreeAnalysesLeft ?? 3,
+              adFreeAnalysesLeft: 9999,
               analysisHistoryCount: data.analysisHistoryCount ?? 0,
-              adFreeOutfitChecks: data.adFreeOutfitChecks ?? 3,
+              adFreeOutfitChecks: 9999,
               wardrobeCount: data.wardrobeCount ?? 0,
               savedColorsCount: data.savedColorsCount ?? 0,
             });
-            console.log("[PlanProvider] Real-time sync updated:", data.is_pro ? "PRO" : "FREE");
-          } else {
-            // Document doesn't exist, try refreshing via API once
-            refreshPlan();
           }
           setLoading(false);
         }, (err) => {
-          console.error("[PlanProvider] Snap error:", err);
-          refreshPlan(); // Fallback to API if snap fails
+          console.warn("[PlanProvider] Snap error:", err);
+          setLoading(false);
         });
       } else {
         if (unsubscribeSnap) unsubscribeSnap();
-        setIsPro(false);
-        setPlan('free');
-        setCoins(0);
         setLoading(false);
       }
     });
@@ -79,10 +52,10 @@ export function PlanProvider({ children }) {
       unsubscribeAuth();
       if (unsubscribeSnap) unsubscribeSnap();
     };
-  }, [refreshPlan]);
+  }, []);
 
   return (
-    <PlanContext.Provider value={{ plan, usage, isPro, loading, refreshPlan, coins, setUsage, setCoins }}>
+    <PlanContext.Provider value={{ plan, usage, isPro: true, loading, refreshPlan, coins, setUsage }}>
       {children}
     </PlanContext.Provider>
   );
