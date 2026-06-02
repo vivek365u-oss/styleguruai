@@ -1,16 +1,10 @@
-self.options = {
-    "domain": "3nbf4.com",
-    "zoneId": 10863697
-}
-self.lary = ""
-importScripts('https://3nbf4.com/act/files/service-worker.min.js?r=sw')
-
 // ══════════════════════════════════════════════════════════════════════
-// STYLEGURU AI — PWA SERVICE WORKER v2.0
+// STYLEGURU AI — PWA SERVICE WORKER v3.0
+// Clean rewrite — 3rd party ad script removed
 // Handles: Caching, Push Notifications, Deep Linking, Scheduled Alerts
 // ══════════════════════════════════════════════════════════════════════
 
-const CACHE_NAME = 'styleguru-pwa-cache-v2';
+const CACHE_NAME = 'styleguru-pwa-cache-v3';
 
 // ── Install ───────────────────────────────────────────────────────────
 self.addEventListener('install', () => {
@@ -53,7 +47,7 @@ self.addEventListener('push', (event) => {
         body: data.body || 'Your daily style brief is ready!',
         icon: '/logo.png',
         badge: '/icons/icon-192x192.png',
-        tag: data.tag || 'styleguru-general',        // Prevents duplicate notifications
+        tag: data.tag || 'styleguru-general',
         renotify: data.renotify || false,
         requireInteraction: data.requireInteraction || false,
         silent: data.silent || false,
@@ -75,7 +69,6 @@ self.addEventListener('notificationclick', (event) => {
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-            // If app already open, focus it and navigate
             for (const client of clientList) {
                 if ('focus' in client) {
                     client.focus();
@@ -83,7 +76,6 @@ self.addEventListener('notificationclick', (event) => {
                     return;
                 }
             }
-            // Otherwise open a new window
             if (clients.openWindow) {
                 return clients.openWindow(targetUrl);
             }
@@ -96,23 +88,15 @@ self.addEventListener('notificationclick', (event) => {
 // App sends messages to SW to schedule local notifications
 // ══════════════════════════════════════════════════════════════════════
 
-// Store for pending timers (keyed by type)
 const pendingTimers = {};
 
 self.addEventListener('message', (event) => {
     const { type, payload } = event.data || {};
 
-    // ── Schedule a notification at a specific time ─────────────────
     if (type === 'SCHEDULE_NOTIFICATION') {
         const { id, delayMs, title, body, url, tag, requireInteraction } = payload;
-
-        // Cancel any existing timer of this type
-        if (pendingTimers[id]) {
-            clearTimeout(pendingTimers[id]);
-        }
-
-        if (delayMs <= 0) return; // Don't schedule past events
-
+        if (pendingTimers[id]) clearTimeout(pendingTimers[id]);
+        if (delayMs <= 0) return;
         pendingTimers[id] = setTimeout(() => {
             self.registration.showNotification(title, {
                 body,
@@ -123,10 +107,9 @@ self.addEventListener('message', (event) => {
                 data: { url: url || '/' },
             });
             delete pendingTimers[id];
-        }, Math.min(delayMs, 2147483647)); // Max safe setTimeout value
+        }, Math.min(delayMs, 2147483647));
     }
 
-    // ── Cancel a scheduled notification ───────────────────────────
     if (type === 'CANCEL_NOTIFICATION') {
         const { id } = payload;
         if (pendingTimers[id]) {
@@ -135,7 +118,6 @@ self.addEventListener('message', (event) => {
         }
     }
 
-    // ── Cancel ALL scheduled notifications ────────────────────────
     if (type === 'CANCEL_ALL') {
         Object.keys(pendingTimers).forEach(id => clearTimeout(pendingTimers[id]));
         Object.keys(pendingTimers).forEach(id => delete pendingTimers[id]);
