@@ -1358,7 +1358,6 @@ export default function AppShell({ user, onLogout }) {
       <StyleBot />
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} C={C} />}
       <ShoppingCart isOpen={cartOpen} onClose={() => setCartOpen(false)} isDark={C.isDark} />
-      <Suspense fallback={null}><SubscriptionModal /></Suspense>
       {isInstallable && (
         <InstallPromptModal 
           onInstall={promptInstall} 
