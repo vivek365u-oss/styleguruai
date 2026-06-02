@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { registerUser, loginUser, saveAuth, googleLogin } from '../api/styleApi';
 import { useLanguage } from '../i18n/LanguageContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { trackSignUp, trackLogin } from '../utils/analytics';
 
 /* ══════════════════════════════════════════════
@@ -11,6 +11,7 @@ import { trackSignUp, trackLogin } from '../utils/analytics';
    ══════════════════════════════════════════════ */
 function AuthPage({ onLoginSuccess }) {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [mode, setMode] = useState('login');
   const [form, setForm] = useState({ email: '', password: '', full_name: '' });
   const [loading, setLoading] = useState(false);
@@ -32,6 +33,8 @@ function AuthPage({ onLoginSuccess }) {
       if (mode === 'login') trackLogin('email');
       else trackSignUp('email');
       onLoginSuccess({ name: res.data.user_name, email: res.data.email });
+      // Explicitly navigate to dashboard — onAuthStateChanged may be delayed on mobile
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       const msg =
         err.code === 'auth/user-not-found'      ? t('noAccount') :
@@ -53,8 +56,21 @@ function AuthPage({ onLoginSuccess }) {
       saveAuth({ user_name: user.name, email: user.email });
       trackLogin('google');
       onLoginSuccess({ name: user.name, email: user.email });
-    } catch {
-      setError(t('googleFailed'));
+      // MOBILE FIX: Explicitly navigate — signInWithPopup on Android/iOS Chrome/Safari
+      // completes the OAuth flow but onAuthStateChanged fires too late.
+      // Without this, users land back on the login page after Google auth succeeds.
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      // Specific error messages for common cases
+      if (err?.code === 'auth/popup-blocked') {
+        setError('Popup blocked by browser. Please allow popups for this site and try again.');
+      } else if (err?.code === 'auth/popup-closed-by-user') {
+        setError('Sign-in was cancelled. Please try again.');
+      } else if (err?.code === 'auth/cancelled-popup-request') {
+        // Ignore — happens when user clicks button twice
+      } else {
+        setError(t('googleFailed'));
+      }
     } finally {
       setGoogleLoading(false);
     }

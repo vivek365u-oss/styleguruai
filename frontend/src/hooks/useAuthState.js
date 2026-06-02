@@ -49,8 +49,13 @@ export function useAuthState() {
           error: null,
         }));
 
-        // Load profile from Firestore
-        const profile = await loadProfile(firebaseUser.uid);
+        // Load profile from Firestore — race against 5s timeout so a slow/offline
+        // Firestore never blocks the entire login flow indefinitely.
+        const profilePromise = loadProfile(firebaseUser.uid);
+        const timeoutPromise = new Promise((resolve) =>
+          setTimeout(() => resolve(null), 5000)
+        );
+        const profile = await Promise.race([profilePromise, timeoutPromise]);
 
         if (!isMounted) return;
 
@@ -115,6 +120,7 @@ export function useAuthState() {
             setState((prev) => ({
               ...prev,
               profile: retryProfile,
+              loading: false, // BUG #4 fix: clear loading so AuthErrorUI dismisses
               error: null,
               authError: false,
             }));

@@ -49,13 +49,28 @@ function AuthErrorUI({ error, onRetry }) {
   );
 }
 
-function PrivateRoute({ user, children }) {
+function PrivateRoute({ user, loading, children }) {
+  // While auth is resolving, show spinner — do NOT redirect yet
+  if (loading) return (
+    <div className="min-h-screen bg-[#050816] flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
+    </div>
+  );
   if (!user) return <Navigate to="/" replace />;
   return children;
 }
 
-function AppRoutes({ user, setUser }) {
+function AppRoutes({ user, setUser, authLoading }) {
   const navigate = useNavigate();
+
+  // BUG #2 fix: Safety-net navigation in case the onAuthStateChanged fires
+  // after a slight delay post email/password login (race condition guard).
+  // When `user` becomes non-null and we are still on /login, push to dashboard.
+  React.useEffect(() => {
+    if (user && (window.location.pathname === '/login' || window.location.pathname === '/')) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleLogout = async () => {
     // 1. Immediately clear local state so route guard redirects to '/' at once
@@ -85,10 +100,18 @@ function AppRoutes({ user, setUser }) {
       <Routes>
         <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage user={user} onLoginClick={() => navigate('/login')} onGetStarted={() => navigate('/login')} />} />
         <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} />} />
-        <Route path="/dashboard" element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />} />
+        {/* MOBILE LOGIN FIX: While auth is still loading (profile fetch in progress),
+            show a spinner on /dashboard instead of redirecting to "/".
+            Without this, navigate('/dashboard') right after Google login hits this route
+            with user=null (auth still loading) and bounces back to landing page → login loop. */}
+        <Route path="/dashboard" element={
+          authLoading
+            ? <div className="min-h-screen bg-[#050816] flex items-center justify-center"><div className="w-8 h-8 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" /></div>
+            : user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />
+        } />
         {/* OrderSuccess route removed */}
         <Route path="/profile" element={
-          <PrivateRoute user={user}>
+          <PrivateRoute user={user} loading={authLoading}>
             <ProfilePage />
           </PrivateRoute>
         } />
@@ -158,9 +181,15 @@ function App() {
     );
   }
 
-  // CRITICAL FIX: If Firebase is still resolving auth state, DO NOT render AppRoutes.
-  // This prevents the Landing Page from flashing for 2 seconds.
-  if (authState.loading) {
+  // CRITICAL FIX: If Firebase is still resolving auth state, DO NOT render AppRoutes
+  // UNLESS the user just logged in and is heading to /dashboard (mobile login fix).
+  // We detect this by checking if tonefit_user exists (set by saveAuth right after login)
+  // AND the user is navigating to /dashboard — in that case, let AppRoutes handle the spinner.
+  const isHeadingToDashboard = typeof window !== 'undefined' &&
+    window.location.pathname === '/dashboard' &&
+    !!localStorage.getItem('tonefit_user');
+
+  if (authState.loading && !isHeadingToDashboard) {
     if (!splashDone && !isLikelyGuest) {
       return <SplashScreen onComplete={handleSplashComplete} />;
     }
@@ -188,7 +217,7 @@ function App() {
           <PlanProvider>
             <CartProvider>
               <div className="min-h-screen">
-                <AppRoutes user={user} setUser={setUser} theme={theme} toggleTheme={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')} />
+                <AppRoutes user={user} setUser={setUser} authLoading={authState.loading} theme={theme} toggleTheme={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')} />
               </div>
             </CartProvider>
           </PlanProvider>
