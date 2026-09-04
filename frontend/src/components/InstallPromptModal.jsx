@@ -2,161 +2,311 @@ import React, { useState } from 'react';
 
 export default function InstallPromptModal({ onInstall, onDismiss, platform, nativePromptAvailable, C }) {
   const [installing, setInstalling] = useState(false);
-  const [showIOSGuide, setShowIOSGuide] = useState(false);
+  const [installedSuccess, setInstalledSuccess] = useState(false);
+  const [infoMessage, setInfoMessage] = useState('');
 
-  const bg = C?.navBg || 'rgba(11, 15, 26, 0.92)';
-  const border = C?.border || 'rgba(139,92,246,0.3)';
-  const text = C?.text || '#F9FAFB';
-  const muted = C?.muted || '#9CA3AF';
-  const grad = 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%)';
+  const bg = C?.isDark ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.98)';
+  const border = C?.isDark ? 'rgba(139, 92, 246, 0.3)' : 'rgba(226, 232, 240, 0.9)';
+  const text = C?.isDark ? '#F9FAFB' : '#0F172A';
+  const muted = C?.isDark ? '#9CA3AF' : '#64748B';
+  const grad = 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #EC4899 100%)';
 
   const handleInstall = async () => {
-    if (nativePromptAvailable) {
-      // Android / Chrome — native prompt triggers, app installs directly
-      setInstalling(true);
+    setInstalling(true);
+    setInfoMessage('');
+
+    try {
       const result = await onInstall();
-      setInstalling(false);
+      
       if (result === 'accepted') {
-        onDismiss();
+        setInstalledSuccess(true);
+        setInfoMessage('🎉 Installed successfully! Added to your device.');
+        setTimeout(() => {
+          onDismiss();
+        }, 1200);
+      } else if (result === 'rejected') {
+        setInstalling(false);
+      } else {
+        // Fallback for devices where browser doesn't expose programmatic prompt (e.g. iOS Safari)
+        setInstalling(false);
+        if (platform === 'ios') {
+          setInfoMessage('Tap Safari Share (⬆️) → "Add to Home Screen" to install.');
+        } else {
+          setInfoMessage('Please click the install icon (⊕) in your browser address bar.');
+        }
       }
-    } else {
-      // iOS Safari — show step-by-step guide
-      setShowIOSGuide(true);
+    } catch (err) {
+      console.warn('Install error:', err);
+      setInstalling(false);
     }
   };
 
-  // ── iOS Step-by-step guide ──
-  if (showIOSGuide) {
-    return (
-      <div style={{
-        position: 'fixed', bottom: 24, left: 16, right: 16, zIndex: 9999,
-        display: 'flex', justifyContent: 'center',
-        animation: 'fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
-      }}>
-        <div style={{
-          background: bg, backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
-          border: `1px solid ${border}`, borderRadius: 20,
-          boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-          padding: '20px', maxWidth: 420, width: '100%',
-        }}>
-          <button onClick={onDismiss} style={{
-            position: 'absolute', top: 14, right: 14, background: 'transparent',
-            border: 'none', color: muted, fontSize: '16px', cursor: 'pointer',
-          }}>✕</button>
-
-          <p style={{ fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#8B5CF6', marginBottom: 10, fontFamily: 'Inter, sans-serif' }}>
-            Install on iPhone
-          </p>
-          <h3 style={{ fontSize: '17px', fontWeight: 700, color: text, margin: '0 0 16px', fontFamily: 'Inter, sans-serif' }}>
-            3 simple steps to install
-          </h3>
-
-          {[
-            { step: '1', icon: '⬆️', text: 'Tap the Share button at the bottom of Safari (the box with an arrow)' },
-            { step: '2', icon: '📋', text: 'Scroll down and tap "Add to Home Screen"' },
-            { step: '3', icon: '✅', text: 'Tap "Add" — StyleGuru AI will appear on your home screen!' },
-          ].map(s => (
-            <div key={s.step} style={{ display: 'flex', gap: 14, marginBottom: 14, alignItems: 'flex-start' }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: '50%', background: grad,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '14px', flexShrink: 0, boxShadow: '0 4px 12px rgba(139,92,246,0.3)'
-              }}>
-                {s.icon}
-              </div>
-              <p style={{ fontSize: '13px', color: muted, lineHeight: '1.55', margin: '4px 0 0', fontFamily: 'Inter, sans-serif' }}>
-                {s.text}
-              </p>
-            </div>
-          ))}
-
-          <button onClick={onDismiss} style={{
-            width: '100%', marginTop: 4, padding: '13px',
-            background: grad, border: 'none', borderRadius: 12,
-            color: 'white', fontSize: '13px', fontWeight: 700,
-            cursor: 'pointer', fontFamily: 'Inter, sans-serif',
-            boxShadow: '0 4px 14px rgba(139,92,246,0.4)',
-          }}>
-            Got it! 👍
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Android / Chrome — direct one-click install ──
   return (
-    <div style={{
-      position: 'fixed', bottom: 24, left: 16, right: 16, zIndex: 9999,
-      display: 'flex', justifyContent: 'center',
-      animation: 'fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
-    }}>
-      <div style={{
-        background: bg, backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
-        border: `1px solid ${border}`, borderRadius: 20,
-        boxShadow: '0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
-        padding: '20px', maxWidth: 420, width: '100%',
-        display: 'flex', flexDirection: 'column', gap: 16, position: 'relative', overflow: 'hidden'
-      }}>
-        <button onClick={onDismiss} style={{
-          position: 'absolute', top: 12, right: 12, background: 'transparent', border: 'none',
-          color: muted, fontSize: '16px', cursor: 'pointer', zIndex: 10, padding: '4px',
-        }} aria-label="Close">✕</button>
+    <div 
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px',
+        backgroundColor: 'rgba(15, 23, 42, 0.6)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        animation: 'fadeIn 0.2s ease-out'
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onDismiss();
+      }}
+    >
+      <div 
+        style={{
+          background: bg,
+          border: `1px solid ${border}`,
+          borderRadius: 24,
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(124, 58, 237, 0.1)',
+          padding: '28px 24px 24px',
+          maxWidth: 420,
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+          animation: 'modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+        }}
+      >
+        {/* Close Button */}
+        <button 
+          onClick={onDismiss} 
+          style={{
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            background: 'transparent',
+            border: 'none',
+            color: muted,
+            fontSize: '18px',
+            cursor: 'pointer',
+            padding: '6px',
+            borderRadius: '50%',
+            lineHeight: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'color 0.15s'
+          }}
+          aria-label="Close"
+        >
+          ✕
+        </button>
 
-        {/* Soft glow */}
-        <div style={{
-          position: 'absolute', top: -50, right: -50, width: 100, height: 100,
-          background: 'radial-gradient(circle, rgba(139,92,246,0.3) 0%, transparent 70%)', pointerEvents: 'none'
-        }} />
+        {/* Ambient background glow */}
+        <div 
+          style={{
+            position: 'absolute',
+            top: -40,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 200,
+            height: 100,
+            background: 'radial-gradient(circle, rgba(124, 58, 237, 0.18) 0%, transparent 70%)',
+            pointerEvents: 'none'
+          }} 
+        />
 
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center', paddingRight: 20 }}>
-          <div style={{
-            width: 52, height: 52, borderRadius: 14, flexShrink: 0,
+        {/* App Logo */}
+        <div 
+          style={{
+            width: 68,
+            height: 68,
+            borderRadius: 20,
             background: grad,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 8px 16px rgba(139,92,246,0.3)'
-          }}>
-            <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-          </div>
-
-          <div style={{ flex: 1 }}>
-            <h3 style={{ margin: '0 0 4px', fontSize: '15px', fontWeight: 700, color: text, fontFamily: "'Inter', sans-serif" }}>
-              Install StyleGuruAI
-            </h3>
-            <p style={{ margin: 0, fontSize: '12px', color: muted, lineHeight: '1.4', fontFamily: "'Inter', sans-serif" }}>
-              {platform === 'ios'
-                ? 'Add to your Home Screen for fast access'
-                : 'One tap install — works offline too!'}
-            </p>
+            padding: 2.5,
+            boxShadow: '0 10px 25px -5px rgba(124, 58, 237, 0.35)',
+            marginBottom: 16
+          }}
+        >
+          <div 
+            style={{
+              width: '100%',
+              height: '100%',
+              borderRadius: 18,
+              background: '#FFFFFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden'
+            }}
+          >
+            <img 
+              src="/logo.png" 
+              alt="StyleGuru AI" 
+              style={{ width: '85%', height: '85%', objectFit: 'contain' }} 
+            />
           </div>
         </div>
 
+        {/* Title & Description */}
+        <h3 
+          style={{ 
+            margin: '0 0 8px', 
+            fontSize: '20px', 
+            fontWeight: 800, 
+            color: text, 
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            letterSpacing: '-0.02em'
+          }}
+        >
+          Install StyleGuru AI
+        </h3>
+        
+        <p 
+          style={{ 
+            margin: '0 0 18px', 
+            fontSize: '13.5px', 
+            color: muted, 
+            lineHeight: '1.5', 
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            maxWidth: 320
+          }}
+        >
+          Install the official app for instant 1-tap styling, offline access, and full-screen experience.
+        </p>
+
+        {/* Feature Pills */}
+        <div 
+          style={{ 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: 8, 
+            justifyContent: 'center', 
+            marginBottom: 22 
+          }}
+        >
+          {[
+            { label: '⚡ Instant Load' },
+            { label: '📱 Full Screen' },
+            { label: '🔒 100% Free' }
+          ].map((pill, i) => (
+            <span 
+              key={i}
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                padding: '4px 10px',
+                borderRadius: 999,
+                background: C?.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(124, 58, 237, 0.08)',
+                color: C?.isDark ? '#E2E8F0' : '#6D28D9',
+                fontFamily: "'Plus Jakarta Sans', sans-serif"
+              }}
+            >
+              {pill.label}
+            </span>
+          ))}
+        </div>
+
+        {/* Info Message if needed (e.g. success or 1-line guidance) */}
+        {infoMessage && (
+          <div 
+            style={{
+              width: '100%',
+              padding: '10px 14px',
+              borderRadius: 12,
+              marginBottom: 16,
+              background: installedSuccess ? 'rgba(34, 197, 94, 0.1)' : 'rgba(124, 58, 237, 0.08)',
+              border: `1px solid ${installedSuccess ? 'rgba(34, 197, 94, 0.3)' : 'rgba(124, 58, 237, 0.2)'}`,
+              color: installedSuccess ? '#16A34A' : (C?.isDark ? '#C4B5FD' : '#6D28D9'),
+              fontSize: '12.5px',
+              fontWeight: 600,
+              lineHeight: 1.4,
+              fontFamily: "'Plus Jakarta Sans', sans-serif"
+            }}
+          >
+            {infoMessage}
+          </div>
+        )}
+
+        {/* Main Install Button */}
         <button
           onClick={handleInstall}
-          disabled={installing}
+          disabled={installing || installedSuccess}
           style={{
-            width: '100%', background: installing ? 'rgba(139,92,246,0.5)' : grad,
-            border: 'none', borderRadius: 12, color: 'white',
-            fontSize: '14px', fontWeight: 700,
-            padding: '14px', cursor: installing ? 'not-allowed' : 'pointer',
-            fontFamily: "'Inter', sans-serif",
-            boxShadow: '0 4px 12px rgba(139,92,246,0.4)',
-            transition: 'all 0.2s',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            width: '100%',
+            background: installedSuccess ? '#16A34A' : (installing ? 'rgba(124, 58, 237, 0.7)' : grad),
+            border: 'none',
+            borderRadius: 14,
+            color: '#FFFFFF',
+            fontSize: '14.5px',
+            fontWeight: 700,
+            padding: '14px 20px',
+            cursor: (installing || installedSuccess) ? 'default' : 'pointer',
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            boxShadow: '0 8px 20px -4px rgba(124, 58, 237, 0.4)',
+            transition: 'all 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
           }}
         >
           {installing ? (
             <>
-              <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-              Installing...
+              <div 
+                style={{ 
+                  width: 16, 
+                  height: 16, 
+                  border: '2px solid rgba(255,255,255,0.3)', 
+                  borderTopColor: '#FFFFFF', 
+                  borderRadius: '50%', 
+                  animation: 'spin 0.7s linear infinite' 
+                }} 
+              />
+              Opening Installer...
             </>
-          ) : platform === 'ios' ? (
-            '📲 How to Install'
+          ) : installedSuccess ? (
+            '✅ App Installed'
           ) : (
-            '⚡ Install Now'
+            '⚡ Install StyleGuru AI'
           )}
         </button>
+
+        {/* Cancel / Not now link */}
+        {!installedSuccess && (
+          <button
+            onClick={onDismiss}
+            style={{
+              marginTop: 12,
+              background: 'transparent',
+              border: 'none',
+              color: muted,
+              fontSize: '12px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              padding: '6px'
+            }}
+          >
+            Maybe later
+          </button>
+        )}
       </div>
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes modalSlideUp {
+          from { opacity: 0; transform: translateY(16px) scale(0.97); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

@@ -3,9 +3,36 @@ import { logEvent } from '../api/styleApi';
 
 const INSTALLED_KEY = 'sg_pwa_installed';
 
+// Global shared reference so beforeinstallprompt is never lost across hook instances
+let globalDeferredPrompt = typeof window !== 'undefined' ? (window.__deferredPWAInstallPrompt || null) : null;
+const promptListeners = new Set();
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    globalDeferredPrompt = e;
+    window.__deferredPWAInstallPrompt = e;
+    promptListeners.forEach((fn) => {
+      try { fn(e); } catch (_) {}
+    });
+  });
+
+  window.addEventListener('appinstalled', () => {
+    globalDeferredPrompt = null;
+    window.__deferredPWAInstallPrompt = null;
+    localStorage.setItem(INSTALLED_KEY, 'true');
+    promptListeners.forEach((fn) => {
+      try { fn(null); } catch (_) {}
+    });
+    logEvent('pwa_app_installed');
+  });
+}
+
 export function usePWA() {
-  const [installPromptEvent, setInstallPromptEvent] = useState(null);
-  const [isInstallable, setIsInstallable] = useState(false);
+  const [installPromptEvent, setInstallPromptEvent] = useState(() => 
+    globalDeferredPrompt || (typeof window !== 'undefined' ? window.__deferredPWAInstallPrompt : null)
+  );
+  const [isInstallable, setIsInstallable] = useState(() => !!(globalDeferredPrompt || (typeof window !== 'undefined' && window.__deferredPWAInstallPrompt)));
   const [isInstalled, setIsInstalled] = useState(false);
   const [platform, setPlatform] = useState('unknown');
 
@@ -16,77 +43,76 @@ export function usePWA() {
 
     if (isIOS) setPlatform('ios');
     else if (isAndroid) setPlatform('android');
+    else setPlatform('desktop');
 
-    // Already installed — never show prompt again
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       window.navigator.standalone === true;
 
-    if (isStandalone || localStorage.getItem(INSTALLED_KEY) === 'true') {
+    if (isStandalone) {
       setIsInstalled(true);
-      return;
     }
 
-    // Not installed → show prompt every login session
+    const onPromptChange = (prompt) => {
+      setInstallPromptEvent(prompt);
+      setIsInstallable(!!prompt);
+    };
 
-    // Android / Chrome: native browser install event
-    const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault();
-      setInstallPromptEvent(e);
+    promptListeners.add(onPromptChange);
+
+    // If global or window event exists, sync it
+    const existing = globalDeferredPrompt || (typeof window !== 'undefined' ? window.__deferredPWAInstallPrompt : null);
+    if (existing) {
+      setInstallPromptEvent(existing);
       setIsInstallable(true);
-    };
-
-    const handleAppInstalled = () => {
-      setInstallPromptEvent(null);
-      setIsInstallable(false);
-      setIsInstalled(true);
-      localStorage.setItem(INSTALLED_KEY, 'true');
-      logEvent('pwa_app_installed');
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
-    // iOS Safari: show after 5 seconds every login (no native event on iOS)
-    let iosTimer = null;
-    if (isIOS) {
-      iosTimer = setTimeout(() => setIsInstallable(true), 5000);
     }
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
-      if (iosTimer) clearTimeout(iosTimer);
+      promptListeners.delete(onPromptChange);
     };
   }, []);
 
   const promptInstall = async () => {
-    if (!installPromptEvent) {
-      return 'manual'; // iOS — caller shows step-by-step guide
+    const promptEvent = installPromptEvent || globalDeferredPrompt || (typeof window !== 'undefined' ? window.__deferredPWAInstallPrompt : null);
+    if (!promptEvent) {
+      return 'unavailable';
     }
 
-    installPromptEvent.prompt();
-    const { outcome } = await installPromptEvent.userChoice;
-    setInstallPromptEvent(null);
+    try {
+      promptEvent.prompt();
+      const choiceResult = await promptEvent.userChoice;
+      globalDeferredPrompt = null;
+      if (typeof window !== 'undefined') {
+        window.__deferredPWAInstallPrompt = null;
+      }
+      setInstallPromptEvent(null);
 
-    if (outcome === 'accepted') {
-      setIsInstallable(false);
-      setIsInstalled(true);
-      localStorage.setItem(INSTALLED_KEY, 'true');
-      logEvent('pwa_install_accepted');
-      return 'accepted';
-    } else {
-      // User said "Not now" — will show again next login
-      logEvent('pwa_install_rejected');
-      return 'rejected';
+      if (choiceResult && choiceResult.outcome === 'accepted') {
+        setIsInstallable(false);
+        setIsInstalled(true);
+        localStorage.setItem(INSTALLED_KEY, 'true');
+        logEvent('pwa_install_accepted');
+        return 'accepted';
+      } else {
+        logEvent('pwa_install_rejected');
+        return 'rejected';
+      }
+    } catch (err) {
+      console.warn('PWA install prompt error:', err);
+      return 'error';
     }
   };
 
-  // Dismiss just hides modal for this session — shows again next login
   const dismissInstall = () => {
     setIsInstallable(false);
     logEvent('pwa_install_dismissed');
   };
+
+  const hasPrompt = !!(
+    installPromptEvent ||
+    globalDeferredPrompt ||
+    (typeof window !== 'undefined' && window.__deferredPWAInstallPrompt)
+  );
 
   return {
     isInstallable,
@@ -94,6 +120,6 @@ export function usePWA() {
     platform,
     promptInstall,
     dismissInstall,
-    nativePromptAvailable: !!installPromptEvent,
+    nativePromptAvailable: hasPrompt,
   };
 }

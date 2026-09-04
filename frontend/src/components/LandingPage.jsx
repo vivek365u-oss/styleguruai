@@ -284,13 +284,20 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
     }
   };
 
-  const handleDownloadAppClick = () => {
+  const handleDownloadAppClick = async () => {
     trackCTAClick('download_app', 'landing');
-    if (nativePromptAvailable) {
-      promptInstall();
-    } else {
-      setShowInstallModal(true);
+    const hasPrompt = nativePromptAvailable || (typeof window !== 'undefined' && window.__deferredPWAInstallPrompt);
+    if (hasPrompt) {
+      try {
+        const result = await promptInstall();
+        if (result === 'accepted') {
+          return;
+        }
+      } catch (err) {
+        console.warn('Direct prompt failed:', err);
+      }
     }
+    setShowInstallModal(true);
   };
 
   const navItems = [
