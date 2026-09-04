@@ -202,7 +202,7 @@ export default function AuthPage({ onLoginSuccess }) {
               </div>
               <div className="flex items-center gap-2.5 text-xs text-slate-700 font-semibold">
                 <span className="w-6 h-6 rounded-full bg-pink-100 text-pink-700 flex items-center justify-center font-bold text-xs flex-shrink-0">✓</span>
-                <span>Created by Vivek</span>
+                <span>Created by Vivek Kumar</span>
               </div>
             </div>
 
@@ -215,7 +215,7 @@ export default function AuthPage({ onLoginSuccess }) {
               </div>
               <p className="italic leading-snug text-slate-600">
                 “Built to give every Indian citizen access to world-class personal styling without spending thousands on stylists.”
-                <span className="block not-italic font-bold text-slate-800 pt-0.5">— Vivek, Founder</span>
+                <span className="block not-italic font-bold text-slate-800 pt-0.5">— Vivek Kumar, Founder & Creator</span>
               </p>
             </div>
           </div>

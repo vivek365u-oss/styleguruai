@@ -302,6 +302,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
 
   const navItems = [
     { id: 'features', label: 'Features', action: () => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }) },
+    { id: 'direct-shop', label: 'Direct Shop', action: () => document.getElementById('direct-shop')?.scrollIntoView({ behavior: 'smooth' }) },
     { id: 'how-it-works', label: 'How It Works', action: () => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }) },
     { id: 'founder', label: 'Founder Story', action: () => document.getElementById('founder')?.scrollIntoView({ behavior: 'smooth' }) },
     { id: 'app', label: 'Download App', action: () => handleDownloadAppClick() },
@@ -760,25 +761,28 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
             </button>
           </div>
 
-          {/* Card 5: Curated Lookbook & Missions */}
-          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-indigo-300 transition-all group flex flex-col justify-between">
+          {/* Card 5: Direct Smart Shop (Face & Body Match) */}
+          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-violet-400 transition-all group flex flex-col justify-between ring-1 ring-violet-500/10">
             <div>
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
-                📖
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-100 to-pink-100 text-violet-700 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform shadow-xs">
+                🛍️
               </div>
-              <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest block mb-1">Pillar 05</span>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-bold text-violet-600 uppercase tracking-widest block">Pillar 05</span>
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide bg-pink-100 text-pink-700">Killer Feature</span>
+              </div>
               <h3 className="text-xl font-bold text-slate-900 font-serif mb-2.5">
-                Digital Lookbook & Missions
+                Direct Smart Shop (Face & Body Fit)
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed mb-6">
-                Event-specific outfit guides for Indian weddings, corporate offices, monsoon dinners, poojas, and dates — with direct Myntra and Amazon query links.
+                Stop guessing online. Get 1-click direct shopping links for clothes that flatter your facial undertone and body silhouette across Myntra, Amazon, Ajio & Nykaa.
               </p>
             </div>
             <button
-              onClick={() => handleFeatureClick('Digital Lookbook', 'lookbook')}
-              className="text-xs font-bold text-indigo-600 group-hover:text-indigo-700 flex items-center gap-1 mt-auto cursor-pointer bg-transparent border-none p-0"
+              onClick={() => handleFeatureClick('Direct Smart Shop', 'shop')}
+              className="text-xs font-bold text-violet-600 group-hover:text-violet-700 flex items-center gap-1 mt-auto cursor-pointer bg-transparent border-none p-0"
             >
-              <span>Explore Lookbook</span> <span>→</span>
+              <span>Explore Direct Shopping</span> <span>→</span>
             </button>
           </div>
 
@@ -802,6 +806,196 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
             >
               <span>Chat with StyleBot</span> <span>→</span>
             </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          4B. THE CORE PROBLEM SOLVED: DIRECT SMART SHOPPING
+          (Clothes That Flatter Your Face & Body)
+          ════════════════════════════════════════ */}
+      <section id="direct-shop" className="py-24 bg-gradient-to-b from-white via-violet-50/40 to-white border-t border-slate-200/80 relative overflow-hidden">
+        {/* Decorative background blurs */}
+        <div className="absolute top-1/2 left-0 w-80 h-80 bg-violet-200/25 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-pink-200/20 rounded-full blur-[130px] pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-6 sm:px-10 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            {/* Left: Problem & Solution Story */}
+            <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-pink-500/10 to-violet-500/10 border border-pink-500/20 text-pink-700 font-bold text-xs uppercase tracking-wider shadow-xs">
+                <span>🛍️</span>
+                <span>The Big Problem StyleGuru AI Solves</span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 font-serif leading-tight">
+                Buy Clothes That Make Your <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-pink-500 bg-clip-text text-transparent italic">Face & Body</span> Glow.
+              </h2>
+
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                Ever bought a trending outfit online that looked amazing on the model, but when you wore it, your face looked dull or washed out?
+              </p>
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                <strong>That ends today.</strong> StyleGuru AI maps your facial undertone, contrast, and body proportions directly to curated clothes with <strong>1-Click Buy links on India's top fashion stores</strong> — so you only buy clothes guaranteed to suit your real complexion.
+              </p>
+
+              {/* 4 Feature Bullet Points */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-left">
+                <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-1 hover:border-violet-300 transition-colors">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
+                    <span className="text-base">🎯</span>
+                    <span>Face & Complexion Harmony</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Eliminates colors that cause dullness, accentuating your natural radiance.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-1 hover:border-pink-300 transition-colors">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
+                    <span className="text-base">👗</span>
+                    <span>Body Shape & Silhouette Fit</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Cuts, necklines, and fits tailored to flatter your exact physical proportions.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-1 hover:border-emerald-300 transition-colors">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
+                    <span className="text-base">⚡</span>
+                    <span>1-Click Integrated Stores</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Direct buy links on Myntra, Amazon India, Ajio, Nykaa, Flipkart & Tata CLiQ.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-1 hover:border-amber-300 transition-colors">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
+                    <span className="text-base">💰</span>
+                    <span>Filter by Your Budget</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Find high-flattery styles under ₹999, everyday casuals, or festive luxury.
+                  </p>
+                </div>
+              </div>
+
+              {/* CTA */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                <button
+                  onClick={() => handleGetStarted('direct_shop_section')}
+                  className="w-full sm:w-auto px-8 py-4 rounded-2xl text-white font-bold text-sm shadow-xl shadow-violet-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 cursor-pointer border-none"
+                  style={{ background: GRAD }}
+                >
+                  <span>🛍️</span>
+                  <span>Shop Outfits For My Face & Body</span>
+                  <span>→</span>
+                </button>
+                <span className="text-xs text-slate-500 font-medium">100% Free Forever</span>
+              </div>
+            </div>
+
+            {/* Right: Interactive / Visual Product Portal Mockup */}
+            <div className="lg:col-span-6 flex justify-center">
+              <div className="w-full max-w-md bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-2xl shadow-slate-300/50 space-y-5 relative">
+                
+                {/* Portal Header */}
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center text-sm font-bold">
+                      🛍️
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-slate-900 leading-tight">StyleGuru AI Shopping Portal</h4>
+                      <p className="text-[10px] text-slate-500">Live Face & Body Match</p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
+                    99% Match
+                  </span>
+                </div>
+
+                {/* Simulated Product Card */}
+                <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70 space-y-3">
+                  <div className="flex gap-3.5 items-center">
+                    <div className="w-16 h-20 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-800 flex-shrink-0 flex items-center justify-center text-white text-2xl shadow-sm">
+                      👔
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100/60 px-2 py-0.5 rounded-full inline-block mb-1">
+                        Best Complexion Fit
+                      </span>
+                      <h5 className="font-bold text-slate-900 text-sm truncate">
+                        Emerald Green Mandarin Kurta
+                      </h5>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Flattering for Wheatish & Warm Undertones
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Why it matches tags */}
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    <span className="text-[10px] font-semibold bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-700">
+                      ✓ Enhances Facial Radiance
+                    </span>
+                    <span className="text-[10px] font-semibold bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-700">
+                      ✓ Tailored V-Chest Fit
+                    </span>
+                    <span className="text-[10px] font-semibold bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-700">
+                      ✓ Zero Sallow Washout
+                    </span>
+                  </div>
+                </div>
+
+                {/* Store 1-Click Buy Buttons Showcase */}
+                <div className="space-y-2">
+                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Instant 1-Click Store Integrations:
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="p-2.5 rounded-xl border border-pink-200 bg-pink-50/60 hover:bg-pink-100/60 transition-colors flex items-center justify-between cursor-pointer">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-black text-pink-600">Myntra</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-pink-700">Shop →</span>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl border border-amber-200 bg-amber-50/60 hover:bg-amber-100/60 transition-colors flex items-center justify-between cursor-pointer">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-black text-amber-700">Amazon</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-amber-800">Shop →</span>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors flex items-center justify-between cursor-pointer">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-black text-slate-800">Ajio</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-700">Shop →</span>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl border border-fuchsia-200 bg-fuchsia-50/60 hover:bg-fuchsia-100/60 transition-colors flex items-center justify-between cursor-pointer">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-black text-fuchsia-600">Nykaa</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-fuchsia-700">Shop →</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Micro Trust Guarantee */}
+                <div className="pt-2 text-center text-[11px] text-slate-400 border-t border-slate-100">
+                  <span>⚡ Real-time store search • Pre-filtered to your exact best colors</span>
+                </div>
+
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
@@ -872,7 +1066,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
                   <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
                     <img
                       src="/logo.png"
-                      alt="Vivek - Founder of StyleGuru AI"
+                      alt="Vivek Kumar - Founder of StyleGuru AI"
                       className="w-24 h-24 object-contain"
                     />
                   </div>
@@ -883,10 +1077,10 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
               </div>
 
               <h3 className="text-xl font-bold text-slate-900 font-serif mt-5 mb-1">
-                Vivek
+                Vivek Kumar
               </h3>
               <p className="text-xs font-semibold text-violet-700">
-                Founder, StyleGuru AI
+                Founder & Creator, StyleGuru AI
               </p>
               <p className="text-[11px] text-slate-500 mt-1">
                 Engineered with pride in India
@@ -1170,7 +1364,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
                 </span>
               </div>
               <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
-                AI-powered fashion intelligence calibrated for Indian skin tones. Built with love in India by Vivek 🇮🇳
+                AI-powered fashion intelligence calibrated for Indian skin tones. Built with love in India by Vivek Kumar 🇮🇳
               </p>
               
               {/* Quick Social Badges */}
@@ -1190,27 +1384,32 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
               </div>
             </div>
 
-            {/* Product Links (From Voice Note: Analysis, History, Wardrobe, Tool, Blog) */}
+            {/* Product Links */}
             <div>
               <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest mb-4">Product</p>
-              <ul className="space-y-2.5 text-xs">
+              <ul className="space-y-2.5 text-xs list-none p-0 m-0">
                 <li>
-                  <button onClick={() => handleFeatureClick('Skin Analysis', 'analysis')} className="text-slate-600 hover:text-violet-600 transition-colors cursor-pointer bg-transparent border-none p-0">
+                  <button onClick={() => handleFeatureClick('Skin Analysis', 'analysis')} className="text-slate-600 hover:text-violet-600 transition-colors cursor-pointer bg-transparent border-none p-0 text-xs">
                     AI Skin Analysis
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleFeatureClick('History', 'history')} className="text-slate-600 hover:text-violet-600 transition-colors cursor-pointer bg-transparent border-none p-0">
+                  <a href="#direct-shop" className="text-violet-700 font-bold hover:underline transition-colors no-underline">
+                    🛍️ Direct Smart Shop
+                  </a>
+                </li>
+                <li>
+                  <button onClick={() => handleFeatureClick('History', 'history')} className="text-slate-600 hover:text-violet-600 transition-colors cursor-pointer bg-transparent border-none p-0 text-xs">
                     Analysis History
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleFeatureClick('Wardrobe', 'wardrobe')} className="text-slate-600 hover:text-violet-600 transition-colors cursor-pointer bg-transparent border-none p-0">
+                  <button onClick={() => handleFeatureClick('Wardrobe', 'wardrobe')} className="text-slate-600 hover:text-violet-600 transition-colors cursor-pointer bg-transparent border-none p-0 text-xs">
                     Smart Wardrobe
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => handleFeatureClick('Style Tools', 'tools')} className="text-slate-600 hover:text-violet-600 transition-colors cursor-pointer bg-transparent border-none p-0">
+                  <button onClick={() => handleFeatureClick('Style Tools', 'tools')} className="text-slate-600 hover:text-violet-600 transition-colors cursor-pointer bg-transparent border-none p-0 text-xs">
                     Style Tools
                   </button>
                 </li>
@@ -1222,10 +1421,10 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
               </ul>
             </div>
 
-            {/* Company Links (From Voice Note: About, Contact, Policy, Terms) */}
+            {/* Company Links */}
             <div>
               <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest mb-4">Company</p>
-              <ul className="space-y-2.5 text-xs">
+              <ul className="space-y-2.5 text-xs list-none p-0 m-0">
                 <li>
                   <Link to="/about" className="text-slate-600 hover:text-violet-600 transition-colors no-underline">
                     About Us
@@ -1247,7 +1446,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
                   </Link>
                 </li>
                 <li>
-                  <button onClick={handleDownloadAppClick} className="text-violet-700 font-bold hover:underline cursor-pointer bg-transparent border-none p-0">
+                  <button onClick={handleDownloadAppClick} className="text-violet-700 font-bold hover:underline cursor-pointer bg-transparent border-none p-0 text-xs">
                     📱 Download Mobile App
                   </button>
                 </li>
@@ -1257,11 +1456,11 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
           </div>
 
           <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-            <p>© 2026 StyleGuru AI. All rights reserved.</p>
-            <p className="flex items-center gap-1.5">
-              <span>Made with pride in India</span>
-              <span>🇮🇳</span>
-              <span>by Vivek (Founder)</span>
+            <p className="m-0">© 2026 StyleGuru AI. All rights reserved.</p>
+            <p className="flex items-center gap-1.5 m-0">
+              <span>Made with pride in India 🇮🇳</span>
+              <span>•</span>
+              <span>by Vivek Kumar (Founder)</span>
             </p>
           </div>
         </div>
