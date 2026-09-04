@@ -20,9 +20,21 @@ if (import.meta.env.VITE_SENTRY_DSN) {
 
 // SERVICE WORKER & PWA REGISTRATION
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  });
+  const registerSW = () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .then((reg) => {
+        if (reg.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+      })
+      .catch(() => {});
+  };
+
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    registerSW();
+  } else {
+    window.addEventListener('load', registerSW);
+  }
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(

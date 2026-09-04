@@ -15,7 +15,13 @@
       window.addEventListener('beforeinstallprompt', function (e) {
         e.preventDefault();
         window.__deferredPWAInstallPrompt = e;
+        console.log('[PWA] beforeinstallprompt captured globally');
       });
+
+      // Register Service Worker immediately without waiting for window.load
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function() {});
+      }
     </script>
 
     <!-- SEO -->

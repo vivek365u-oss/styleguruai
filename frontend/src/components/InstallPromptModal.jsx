@@ -24,15 +24,37 @@ export default function InstallPromptModal({ onInstall, onDismiss, platform, nat
         setTimeout(() => {
           onDismiss();
         }, 1200);
+        return;
       } else if (result === 'rejected') {
         setInstalling(false);
-      } else {
-        // Fallback for devices where browser doesn't expose programmatic prompt (e.g. iOS Safari)
+        return;
+      }
+
+      // If browser didn't provide a native prompt (e.g. desktop / browser restrictions):
+      if (platform === 'ios') {
         setInstalling(false);
-        if (platform === 'ios') {
-          setInfoMessage('Tap Safari Share (⬆️) → "Add to Home Screen" to install.');
-        } else {
-          setInfoMessage('Please click the install icon (⊕) in your browser address bar.');
+        setInfoMessage('Tap Safari Share (⬆️) → "Add to Home Screen" to install.');
+      } else {
+        // Automatically download desktop app launcher shortcut so user actually gets the app!
+        try {
+          const shortcutContent = `[InternetShortcut]\r\nURL=${window.location.origin}/\r\nIconIndex=0\r\nIconFile=${window.location.origin}/favicon.ico\r\n`;
+          const blob = new Blob([shortcutContent], { type: 'application/octet-stream' });
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = 'StyleGuru AI.url';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(link.href);
+
+          setInstalledSuccess(true);
+          setInfoMessage('🎉 App launcher downloaded! Open it to add StyleGuru AI to your desktop.');
+          setTimeout(() => {
+            onDismiss();
+          }, 2200);
+        } catch (downloadErr) {
+          setInstalling(false);
+          setInfoMessage('StyleGuru AI is ready! You can pin or bookmark this app.');
         }
       }
     } catch (err) {
