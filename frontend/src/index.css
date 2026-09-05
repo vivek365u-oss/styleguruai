@@ -10,11 +10,13 @@
    md:hidden sets display:none on desktop (768px+)
    This class sets display:flex on mobile but md:hidden wins on desktop
    ══════════════════════════════════════════════════════ */
-.mobile-bottom-nav {
+.mobile-bottom-nav,
+.mobile-only-btn {
   display: flex;
 }
 @media (min-width: 768px) {
-  .mobile-bottom-nav {
+  .mobile-bottom-nav,
+  .mobile-only-btn {
     display: none !important;
   }
 }

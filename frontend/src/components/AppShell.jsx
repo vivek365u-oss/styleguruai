@@ -1173,15 +1173,15 @@ export default function AppShell({ user, onLogout }) {
 
         {/* Right — Mobile Menu + Theme quick toggle + Avatar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
-          {/* Mobile Menu trigger */}
+          {/* Mobile Menu trigger (ONLY on phones, completely hidden on laptops/desktops) */}
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="md:hidden"
+            className="mobile-only-btn md:hidden"
             title="All Features & Tools"
             style={{
               height: 34, padding: '0 10px', borderRadius: 8,
               background: C.glass2, border: `1px solid ${C.border}`,
-              color: C.text, display: 'flex', alignItems: 'center', gap: 5,
+              color: C.text, alignItems: 'center', gap: 5,
               cursor: 'pointer', fontSize: '12px', fontWeight: 700, fontFamily: PJS
             }}
           >
