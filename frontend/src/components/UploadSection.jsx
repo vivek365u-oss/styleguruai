@@ -607,210 +607,103 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
             )}
           </div>
 
-          {/* Wizard Flow: Step 0 - Body Type */}
-          {mode !== 'couple' && currentStep === 0 && (
-            <div className={`rounded-3xl p-6 mb-5 border animate-fadeIn ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>1. {t('bodyTypeTitle') || 'Body Type'}</h3>
-                <span className="text-xs font-bold text-purple-500">Step 1/4</span>
+          {/* Quick Style Tuners (Optional - Instant 1-Tap) */}
+          {mode !== 'couple' && (
+            <div className={`rounded-2xl p-4 mb-5 border transition-all ${isDark ? 'bg-white/[0.03] border-white/10' : 'bg-white border-slate-200 shadow-sm'}`}>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
+                  🎯 Optional Style Tuners
+                </span>
+                <span className="text-[11px] font-medium opacity-60">
+                  Quick 1-Tap Fit & Vibe
+                </span>
               </div>
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                {[
-                  { value: 'slim', label: 'Slim', icon: FashionIcons.User, desc: 'Lean' },
-                  { value: 'athletic', label: 'Athletic', icon: FashionIcons.User, desc: 'Muscular' },
-                  { value: 'average', label: 'Average', icon: FashionIcons.User, desc: 'Regular' },
-                  { value: 'plus', label: 'Plus', icon: FashionIcons.User, desc: 'Curvy' },
-                ].map((bt) => (
-                  <button
-                    key={bt.value}
-                    onClick={() => { setBodyType(bt.value); setCurrentStep(1); }}
-                    className={`flex flex-col items-center p-4 rounded-2xl border-2 transition-all transform hover:scale-[1.02] ${bodyType === bt.value
-                        ? isDark
-                          ? 'bg-purple-600/30 border-purple-500 shadow-lg shadow-purple-500/20'
-                          : 'bg-purple-100 border-purple-500 shadow-lg shadow-purple-500/20'
-                        : isDark
-                          ? 'bg-white/5 border-white/10 hover:border-purple-500/30'
-                          : 'bg-white border-gray-200 hover:border-purple-300 shadow-sm'
-                      }`}
-                  >
-                    <span className="w-8 h-8 opacity-20 mb-2"><IconRenderer icon={bt.icon} /></span>
-                    <span className={`text-sm font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{bt.label}</span>
-                    <span className={`text-[10px] font-bold uppercase opacity-50 ${isDark ? 'text-white' : 'text-gray-900'}`}>{bt.desc}</span>
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={() => setCurrentStep(1)}
-                className={`w-full py-3 rounded-xl font-bold text-sm border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
-              >
-                ⏭️ Skip
-              </button>
-            </div>
-          )}
 
-          {/* Wizard Flow: Step 1 - Eye Color */}
-          {mode !== 'couple' && currentStep === 1 && (
-            <div className={`rounded-3xl p-6 mb-5 border animate-fadeIn ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>2. {t('eyeColorTitle') || 'Eye Color'}</h3>
-                <span className="text-xs font-bold text-purple-500">Step 2/4</span>
-              </div>
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                {[
-                  { value: 'brown', label: 'Brown', icon: FashionIcons.Accuracy, desc: 'Dark' },
-                  { value: 'black', label: 'Black', icon: FashionIcons.Accuracy, desc: 'Very Dark' },
-                  { value: 'hazel', label: 'Hazel', icon: FashionIcons.Accuracy, desc: 'Green' },
-                  { value: 'blue', label: 'Blue', icon: FashionIcons.Accuracy, desc: 'Grey' },
-                ].map((ec) => (
-                  <button
-                    key={ec.value}
-                    onClick={() => { setEyeColor(ec.value); setCurrentStep(2); }}
-                    className={`flex flex-col items-center p-4 rounded-2xl border-2 transition-all transform hover:scale-[1.02] ${eyeColor === ec.value
-                        ? isDark
-                          ? 'bg-purple-600/30 border-purple-500 shadow-lg shadow-purple-500/20'
-                          : 'bg-purple-100 border-purple-500 shadow-lg shadow-purple-500/20'
-                        : isDark
-                          ? 'bg-white/5 border-white/10 hover:border-purple-500/30'
-                          : 'bg-white border-gray-200 hover:border-purple-300 shadow-sm'
+              {/* Occasion Row */}
+              <div className="mb-3">
+                <p className={`text-[11px] font-semibold mb-1.5 ${isDark ? 'text-white/70' : 'text-slate-600'}`}>Occasion</p>
+                <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+                  {[
+                    { value: 'casual', label: '😎 Casual' },
+                    { value: 'office', label: '💼 Office' },
+                    { value: 'party', label: '🎉 Party' },
+                    { value: 'wedding', label: '🥻 Wedding' },
+                    { value: 'date', label: '🌹 Date' },
+                  ].map(occ => (
+                    <button
+                      key={occ.value}
+                      onClick={() => setOccasion(occ.value)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                        occasion === occ.value
+                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-sm'
+                          : isDark ? 'bg-white/5 text-white/70 hover:bg-white/10' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                       }`}
-                  >
-                    <span className="w-8 h-8 opacity-20 mb-2"><IconRenderer icon={ec.icon} /></span>
-                    <span className={`text-sm font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{ec.label}</span>
-                    <span className={`text-[10px] font-bold uppercase opacity-50 ${isDark ? 'text-white' : 'text-gray-900'}`}>{ec.desc}</span>
-                  </button>
-                ))}
+                    >
+                      {occ.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setCurrentStep(0)}
-                  className={`flex-1 py-3 rounded-xl font-bold text-sm border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
-                >
-                  ← Back
-                </button>
-                <button
-                  onClick={() => setCurrentStep(2)}
-                  className={`flex-1 py-3 rounded-xl font-bold text-sm border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
-                >
-                  ⏭️ Skip
-                </button>
-              </div>
-            </div>
-          )}
 
-          {/* Wizard Flow: Step 2 - Occasion */}
-          {mode !== 'couple' && currentStep === 2 && (
-            <div className={`rounded-3xl p-6 mb-5 border animate-fadeIn ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>3. {t('occasionTitle') || 'Occasion'}</h3>
-                <span className="text-xs font-bold text-purple-500">Step 3/4</span>
-              </div>
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                {[
-                  { value: 'casual', label: 'Casual', icon: FashionIcons.Formal, desc: 'Daily' },
-                  { value: 'office', label: 'Office', icon: FashionIcons.Formal, desc: 'Work' },
-                  { value: 'wedding', label: 'Wedding', icon: FashionIcons.Dress, desc: 'Festive' },
-                  { value: 'party', label: 'Party', icon: FashionIcons.Star, desc: 'Night out' },
-                  { value: 'date', label: 'Date', icon: FashionIcons.Sun, desc: 'Romantic' },
-                ].map((oc) => (
-                  <button
-                    key={oc.value}
-                    onClick={() => { setOccasion(oc.value); setCurrentStep(3); }}
-                    className={`flex flex-col items-center p-4 rounded-2xl border-2 transition-all transform hover:scale-[1.02] ${occasion === oc.value
-                        ? isDark
-                          ? 'bg-purple-600/30 border-purple-500 shadow-lg shadow-purple-500/20'
-                          : 'bg-purple-100 border-purple-500 shadow-lg shadow-purple-500/20'
-                        : isDark
-                          ? 'bg-white/5 border-white/10 hover:border-purple-500/30'
-                          : 'bg-white border-gray-200 hover:border-purple-300 shadow-sm'
+              {/* Body Type Row */}
+              <div className="mb-3">
+                <p className={`text-[11px] font-semibold mb-1.5 ${isDark ? 'text-white/70' : 'text-slate-600'}`}>Body Silhouette</p>
+                <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+                  {[
+                    { value: 'average', label: 'Regular / Avg' },
+                    { value: 'athletic', label: 'Athletic / Fit' },
+                    { value: 'slim', label: 'Slim / Lean' },
+                    { value: 'plus', label: 'Curvy / Plus' },
+                  ].map(bt => (
+                    <button
+                      key={bt.value}
+                      onClick={() => setBodyType(bt.value)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                        bodyType === bt.value
+                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-sm'
+                          : isDark ? 'bg-white/5 text-white/70 hover:bg-white/10' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                       }`}
-                  >
-                    <span className="w-8 h-8 opacity-20 mb-2"><IconRenderer icon={oc.icon} /></span>
-                    <span className={`text-sm font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{oc.label}</span>
-                    <span className={`text-[10px] font-bold uppercase opacity-50 ${isDark ? 'text-white' : 'text-gray-900'}`}>{oc.desc}</span>
-                  </button>
-                ))}
+                    >
+                      {bt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setCurrentStep(1)}
-                  className={`flex-1 py-3 rounded-xl font-bold text-sm border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
-                >
-                  ← Back
-                </button>
-                <button
-                  onClick={() => setCurrentStep(3)}
-                  className={`flex-1 py-3 rounded-xl font-bold text-sm border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
-                >
-                  ⏭️ Skip
-                </button>
+
+              {/* Budget Row */}
+              <div>
+                <p className={`text-[11px] font-semibold mb-1.5 ${isDark ? 'text-white/70' : 'text-slate-600'}`}>Shopping Budget</p>
+                <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+                  {[
+                    { value: 'any', label: 'Any Budget' },
+                    { value: '500', label: 'Under ₹500' },
+                    { value: '1000', label: 'Under ₹1000' },
+                    { value: '2000', label: '₹2000+' },
+                  ].map(b => (
+                    <button
+                      key={b.value}
+                      onClick={() => setBudget(b.value)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                        budget === b.value
+                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-sm'
+                          : isDark ? 'bg-white/5 text-white/70 hover:bg-white/10' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      {b.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
-          {/* Wizard Flow: Step 3 - Budget */}
-          {mode !== 'couple' && currentStep === 3 && (
-            <div className={`rounded-3xl p-6 mb-5 border animate-fadeIn ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-purple-100 shadow-sm'}`}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>4. {t('budgetTitle') || 'Budget'}</h3>
-                <span className="text-xs font-bold text-purple-500">Step 4/4</span>
-              </div>
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                {[
-                  { value: 'any', label: 'Any', desc: 'No limit' },
-                  { value: '500', label: '₹500', desc: 'Budget' },
-                  { value: '1000', label: '₹1000', desc: 'Mid' },
-                  { value: '2000', label: '₹2000', desc: 'Premium' },
-                ].map((b) => (
-                  <button
-                    key={b.value}
-                    onClick={() => { setBudget(b.value); setCurrentStep(4); }}
-                    className={`flex flex-col items-center p-4 rounded-2xl border-2 transition-all transform hover:scale-[1.02] ${budget === b.value
-                        ? isDark
-                          ? 'bg-purple-600/30 border-purple-500 shadow-lg shadow-purple-500/20'
-                          : 'bg-purple-100 border-purple-500 shadow-lg shadow-purple-500/20'
-                        : isDark
-                          ? 'bg-white/5 border-white/10 hover:border-purple-500/30'
-                          : 'bg-white border-gray-200 hover:border-purple-300 shadow-sm'
-                      }`}
-                  >
-                    <span className={`text-sm font-black mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{b.label}</span>
-                    <span className={`text-[10px] font-bold uppercase opacity-50 ${isDark ? 'text-white' : 'text-gray-900'}`}>{b.desc}</span>
-                  </button>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setCurrentStep(2)}
-                  className={`flex-1 py-3 rounded-xl font-bold text-sm border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
-                >
-                  ← Back
-                </button>
-                <button
-                  onClick={() => setCurrentStep(4)}
-                  className={`flex-1 py-3 rounded-xl font-bold text-sm border transition-all ${isDark ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100'}`}
-                >
-                  ⏭️ Skip
-                </button>
-              </div>
+          {/* Photo Upload Area — Always Directly Accessible */}
+          <div className="animate-fadeIn">
+            <div className="flex items-center justify-between mb-4 px-1">
+              <h3 className={`text-base md:text-lg font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                {mode === 'couple' ? 'Upload Couple Photos' : 'Instant AI Camera & Photo Scan'}
+              </h3>
             </div>
-          )}
-
-          {/* Wizard Flow: Step 4 - Upload Photo */}
-          {(mode === 'couple' || currentStep === 4) && (
-            <div className="animate-fadeIn">
-              <div className="flex items-center justify-between mb-4 px-2">
-                <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  {mode === 'couple' ? 'Upload Couple Photos' : `5. ${t('uploadTitle') || 'Upload Photo'}`}
-                </h3>
-                {mode !== 'couple' && (
-                  <button
-                    onClick={() => setCurrentStep(0)}
-                    className="text-xs font-bold text-purple-500 hover:text-purple-400 transition"
-                  >
-                    🔄 Change Settings
-                  </button>
-                )}
-              </div>
 
               {mode === 'couple' ? (
                 <div className="grid grid-cols-2 gap-4">
@@ -862,13 +755,11 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                 </div>
               ) : (
                 <div
-                  className={`relative border-2 border-dashed rounded-3xl p-6 md:p-12 text-center cursor-pointer transition-all duration-300 ${dragActive
-                      ? 'border-purple-400 bg-purple-500/10 scale-[1.01]'
-                      : mode === 'seasonal'
-                        ? isDark ? 'border-amber-500/30 bg-amber-500/5 hover:border-amber-400/50 hover:bg-amber-500/10' : 'border-amber-300 bg-amber-50 hover:border-amber-400 hover:bg-amber-100'
-                        : gender === 'female'
-                          ? isDark ? 'border-pink-500/30 bg-pink-500/5 hover:border-pink-400/50 hover:bg-pink-500/10' : 'border-pink-300 bg-pink-50 hover:border-pink-400 hover:bg-pink-100'
-                          : isDark ? 'border-white/20 bg-white/5 hover:border-purple-400/50 hover:bg-white/10' : 'border-purple-300 bg-slate-100 hover:border-purple-500 hover:bg-purple-50 shadow-sm'
+                  className={`relative border-2 border-dashed rounded-3xl p-6 md:p-10 text-center cursor-pointer transition-all duration-300 ${dragActive
+                      ? 'border-purple-500 bg-purple-500/10 scale-[1.01]'
+                      : isDark
+                        ? 'border-white/15 bg-white/[0.03] hover:border-purple-400/50 hover:bg-white/[0.05]'
+                        : 'border-slate-300 bg-white hover:border-purple-500 hover:bg-purple-50/30 shadow-sm'
                     }`}
                   onClick={() => fileInputRef.current?.click()}
                   onDrop={handleDrop}
@@ -892,81 +783,72 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                   />
 
                   {preview ? (
-                    <div className="flex flex-col items-center">
-                      <img src={preview} alt="Preview" className="w-40 h-40 object-cover rounded-2xl shadow-2xl mb-4 border-2 border-purple-500/30" />
-                      <p className={`animate-pulse ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{t('analyzingPhoto')}</p>
+                    <div className="flex flex-col items-center py-4">
+                      <img src={preview} alt="Preview" className="w-44 h-44 object-cover rounded-2xl shadow-xl mb-4 border-2 border-purple-500/40" />
+                      <p className={`font-semibold text-sm animate-pulse ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{t('analyzingPhoto')}</p>
                     </div>
                   ) : (
                     <>
-                      <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border ${mode === 'seasonal'
-                          ? isDark ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-white/10' : 'bg-amber-100 border-amber-200'
-                          : gender === 'female'
-                            ? isDark ? 'bg-gradient-to-br from-pink-500/20 to-rose-500/20 border-white/10' : 'bg-pink-100 border-pink-200'
-                            : isDark ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-white/10' : 'bg-purple-100 border-purple-200'
-                        }`}>
-                        <span className="text-4xl">
+                      <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 border ${
+                        isDark ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 'bg-purple-50 border-purple-100 text-purple-600 shadow-sm'
+                      }`}>
+                        <span className="text-3xl md:text-4xl">
                           <IconRenderer icon={mode === 'seasonal' ? (seasons.find(s => s.id === season)?.icon || FashionIcons.Sun) : (gender === 'female' ? FashionIcons.User : FashionIcons.Analysis)} />
                         </span>
                       </div>
-                      <p className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>{t('dropSelfie')}</p>
-                      <p className={`mb-6 ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{t('orBrowse')}</p>
-                      <span className={`inline-block px-8 py-3.5 text-white font-bold rounded-2xl shadow-lg transition-all hover:scale-105 ${mode === 'seasonal'
-                          ? 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-amber-500/30'
-                          : gender === 'female'
-                            ? 'bg-gradient-to-r from-pink-500 to-rose-500 shadow-pink-500/30'
-                            : 'bg-gradient-to-r from-purple-500 to-pink-500 shadow-purple-500/30'
-                        }`}>
-                        <IconRenderer icon={FashionIcons.Analysis} className="w-4 h-4" /> {t('choosePhoto')}
-                      </span>
-                      <div className="flex gap-3 justify-center mt-3">
+                      <p className={`text-lg md:text-xl font-bold mb-1.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>{t('dropSelfie')}</p>
+                      <p className={`text-xs md:text-sm mb-6 ${isDark ? 'text-white/50' : 'text-slate-500'}`}>{t('orBrowse')}</p>
+
+                      {/* Primary Camera & Gallery Buttons */}
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto" onClick={e => e.stopPropagation()}>
                         <button
-                          onClick={(e) => { e.stopPropagation(); cameraInputRef.current?.click(); }}
-                          className={`md:hidden flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition
-                        ${isDark
-                              ? 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/30'
-                              : 'bg-purple-600 border-purple-600 text-white shadow-sm hover:bg-purple-700'}`}
+                          onClick={() => cameraInputRef.current?.click()}
+                          className="flex-1 py-3.5 px-6 rounded-2xl text-sm font-bold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-lg shadow-purple-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                         >
-                          <IconRenderer icon={FashionIcons.Analysis} className="w-3 h-3" /> Camera
+                          <span className="text-base">📸</span>
+                          <span>Take Selfie (Camera)</span>
                         </button>
                         <button
-                          onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold border transition
-                        ${isDark
-                              ? 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'
-                              : 'bg-gray-100 border-gray-300 text-gray-700 shadow-sm hover:bg-gray-200'}`}
+                          onClick={() => fileInputRef.current?.click()}
+                          className={`flex-1 py-3.5 px-6 rounded-2xl text-sm font-bold border transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${
+                            isDark
+                              ? 'bg-white/5 border-white/15 text-white/90 hover:bg-white/10'
+                              : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 shadow-sm'
+                          }`}
                         >
-                          <IconRenderer icon={FashionIcons.Wardrobe} className="w-3 h-3" /> Gallery
+                          <span className="text-base">🖼️</span>
+                          <span>Browse Gallery</span>
                         </button>
                       </div>
-                      <p className={`text-xs mt-4 ${isDark ? 'text-white/25' : 'text-gray-400'}`}>{t('photoNote')}</p>
+
+                      <p className={`text-[11px] mt-4 ${isDark ? 'text-white/30' : 'text-slate-400'}`}>{t('photoNote')}</p>
                     </>
                   )}
                 </div>
               )}
             </div>
-          )}
 
-          {/* Tips */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          {/* Natural Lighting & Positioning Tips */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-6">
             {[
               { emoji: '☀️', title: t('naturalLight'), desc: t('naturalLightDesc') },
               { emoji: '🤳', title: t('faceForward'), desc: t('faceForwardDesc') },
               { emoji: '😊', title: t('clearFace'), desc: t('clearFaceDesc') },
             ].map((tip, i) => (
-              <div key={i} className={`rounded-2xl p-4 flex items-center gap-3 transition border ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-slate-100 border-purple-200 hover:border-purple-400 shadow-sm'}`}>
-                <span className="w-6 h-6"><IconRenderer icon={i === 0 ? FashionIcons.Sun : (i === 1 ? FashionIcons.Analysis : FashionIcons.AI)} /></span>
+              <div key={i} className={`rounded-2xl p-4 flex items-center gap-3 transition border ${isDark ? 'bg-white/[0.03] border-white/10' : 'bg-white border-slate-200 shadow-sm'}`}>
+                <span className="w-6 h-6 text-purple-600 dark:text-purple-400"><IconRenderer icon={i === 0 ? FashionIcons.Sun : (i === 1 ? FashionIcons.Analysis : FashionIcons.AI)} /></span>
                 <div>
-                  <p className={`font-semibold text-sm ${isDark ? 'text-white' : 'text-gray-800'}`}>{tip.title}</p>
-                  <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{tip.desc}</p>
+                  <p className={`font-bold text-xs md:text-sm ${isDark ? 'text-white' : 'text-slate-800'}`}>{tip.title}</p>
+                  <p className={`text-[11px] ${isDark ? 'text-white/45' : 'text-slate-500'}`}>{tip.desc}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Skin Tones */}
-          <div className={`mt-6 rounded-2xl p-5 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-slate-100 border-purple-200 shadow-sm'}`}>
-            <p className={`text-xs text-center mb-3 ${isDark ? 'text-white/50' : 'text-gray-500'}`}>{t('skinTones')}</p>
-            <div className="flex justify-center gap-3 flex-wrap">
+          {/* Skin Tones Reference */}
+          <div className={`mt-5 rounded-2xl p-4 md:p-5 border ${isDark ? 'bg-white/[0.03] border-white/10' : 'bg-white border-slate-200 shadow-sm'}`}>
+            <p className={`text-xs text-center mb-3 font-semibold ${isDark ? 'text-white/60' : 'text-slate-600'}`}>{t('skinTones')}</p>
+            <div className="flex justify-center gap-3 md:gap-4 flex-wrap">
               {[
                 { name: 'Fair', color: '#F5DEB3' },
                 { name: 'Light', color: '#D2A679' },
@@ -975,9 +857,9 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                 { name: 'Brown', color: '#7B4F2E' },
                 { name: 'Dark', color: '#4A2C0A' },
               ].map((tone) => (
-                <div key={tone.name} className="flex flex-col items-center gap-1">
-                  <div className="w-8 h-8 rounded-full border-2 border-white/20 shadow-lg" style={{ backgroundColor: tone.color }}></div>
-                  <span className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{tone.name}</span>
+                <div key={tone.name} className="flex flex-col items-center gap-1.5">
+                  <div className="w-8 h-8 md:w-9 md:h-9 rounded-full border-2 border-white/30 shadow-sm" style={{ backgroundColor: tone.color }}></div>
+                  <span className={`text-[11px] font-medium ${isDark ? 'text-white/50' : 'text-slate-600'}`}>{tone.name}</span>
                 </div>
               ))}
             </div>

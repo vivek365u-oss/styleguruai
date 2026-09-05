@@ -420,70 +420,237 @@ function MissionSelector({ activeMissionId, onMissionSelect, isDark }) {
   );
 }
 
+// ── Hero 1-Click Direct Shop Section ────────────────────────
+function DirectShopHeroCards({ recommendations, analysis, effectiveGender, userBudget, isDark, onShop }) {
+  const isFemale = effectiveGender === 'female';
+  
+  // Pick top 3 recommendations
+  const topColors = (recommendations.best_shirt_colors || recommendations.best_dress_colors || recommendations.seasonal_colors || []).slice(0, 2);
+  const bottomColors = (recommendations.best_pant_colors || []).slice(0, 1);
+
+  const primaryTop = topColors[0] || { name: 'Navy Blue', hex: '#1B2A4A', reason: 'High contrast match' };
+  const secondaryTop = topColors[1] || { name: 'Crisp White', hex: '#F8FAFC', reason: 'Brightness enhancer' };
+  const primaryBottom = bottomColors[0] || { name: 'Slate Charcoal', hex: '#334155', reason: 'Grounds your silhouette' };
+
+  const cards = [
+    {
+      id: 'top-1',
+      badge: 'TOP MATCH',
+      category: isFemale ? 'Kurti / Dress' : 'Shirt / Polo',
+      catId: isFemale ? 'dress' : 'shirt',
+      query: `${primaryTop.name} ${isFemale ? 'kurti top' : 'shirt'}`,
+      color: primaryTop.name,
+      hex: primaryTop.hex,
+      note: `Engineered for ${analysis?.skin_tone?.category || 'your'} skin tone`,
+      storeHint: 'Myntra • Amazon'
+    },
+    {
+      id: 'bottom-1',
+      badge: 'COMPLEMENTARY',
+      category: isFemale ? 'Trousers / Bottom' : 'Chino / Trouser',
+      catId: isFemale ? 'bottom' : 'pant',
+      query: `${primaryBottom.name} ${isFemale ? 'trousers palazzo' : 'chinos trousers'}`,
+      color: primaryBottom.name,
+      hex: primaryBottom.hex,
+      note: 'Balances natural contrast ratio',
+      storeHint: 'Myntra • Ajio'
+    },
+    {
+      id: 'top-2',
+      badge: 'SIGNATURE VIBE',
+      category: isFemale ? 'Layer / Dupatta' : 'Layer / Overshirt',
+      catId: isFemale ? 'dress' : 'tshirt',
+      query: `${secondaryTop.name} ${isFemale ? 'blazer jacket' : 'casual jacket overshirt'}`,
+      color: secondaryTop.name,
+      hex: secondaryTop.hex,
+      note: `Complements ${analysis?.skin_tone?.undertone || 'warm'} undertone`,
+      storeHint: 'Myntra • Amazon'
+    }
+  ];
+
+  return (
+    <div className="mt-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+          <h3 className={`text-sm font-black tracking-tight ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
+            Direct Shop 1-Click Matches
+          </h3>
+        </div>
+        <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
+          isDark 
+            ? 'bg-violet-950/40 border-violet-800/50 text-violet-300' 
+            : 'bg-violet-50 border-violet-200 text-violet-700'
+        }`}>
+          ⚡ Instant Store Link
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {cards.map(card => (
+          <div
+            key={card.id}
+            className={`rounded-2xl p-4 border transition-all duration-200 flex flex-col justify-between ${
+              isDark 
+                ? 'bg-[#111827] border-white/10 hover:border-violet-500/40 shadow-lg shadow-black/20' 
+                : 'bg-white border-slate-200 hover:border-violet-300 shadow-xs hover:shadow-md'
+            }`}
+          >
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-2.5">
+                <span className={`text-[11px] font-extrabold tracking-wider uppercase px-2 py-0.5 rounded-md ${
+                  isDark ? 'bg-white/10 text-slate-300' : 'bg-slate-100 text-slate-700'
+                }`}>
+                  {card.badge}
+                </span>
+                <span className="text-[11px] text-slate-400 font-medium">
+                  {card.storeHint}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3 mb-2.5">
+                <div 
+                  className="w-8 h-8 rounded-xl border border-white/20 shadow-xs flex-shrink-0"
+                  style={{ backgroundColor: card.hex }}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    {card.color}
+                  </p>
+                  <p className="text-[11px] text-slate-400 truncate">
+                    {card.category}
+                  </p>
+                </div>
+              </div>
+
+              <p className={`text-[11px] leading-snug mb-3.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                {card.note}
+              </p>
+            </div>
+
+            <button
+              onClick={() => onShop({ query: card.query, color: card.color, catId: card.catId }, userBudget === 'any' ? null : parseInt(userBudget, 10))}
+              className="w-full py-2.5 px-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-bold tracking-wide transition-all duration-150 active:scale-98 flex items-center justify-center gap-1.5 shadow-sm shadow-violet-600/20"
+            >
+              <span>Shop on Myntra / Amazon</span>
+              <span>→</span>
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Collapsible Science Breakdown Accordion ─────────────────
+function ScienceAccordion({ analysis, isDark }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const ita = analysis?.skin_tone?.ita || 45;
+  const confidence = Math.round((analysis?.skin_tone?.confidence_score || 0.98) * 100);
+
+  return (
+    <div className={`mt-3 rounded-2xl border transition-all duration-200 overflow-hidden ${
+      isDark ? 'bg-slate-900/50 border-white/10' : 'bg-slate-50/80 border-slate-200'
+    }`}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-4 py-3 flex items-center justify-between text-left transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+      >
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="text-base">🔬</span>
+          <div className="min-w-0">
+            <p className={`text-xs font-bold leading-tight ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
+              View Science & ITA Breakdown
+            </p>
+            <p className="text-[11px] text-slate-400 truncate">
+              ITA: {ita}° • {confidence}% Neural Confidence • Chromatic Depth
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+          <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
+            isOpen 
+              ? 'bg-violet-500/20 text-violet-400 border-violet-500/30' 
+              : isDark ? 'bg-white/5 text-slate-400 border-white/10' : 'bg-white text-slate-600 border-slate-200'
+          }`}>
+            {isOpen ? 'Hide Science ▲' : 'View Science ▼'}
+          </span>
+        </div>
+      </button>
+
+      {isOpen && (
+        <div className="px-3 pb-3 pt-1 border-t border-slate-200/60 dark:border-white/5">
+          <DNABreakdown analysis={analysis} isDark={isDark} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── DNA Breakdown (Explainable AI) ──────────────────────────
 function DNABreakdown({ analysis, isDark }) {
   const ita = analysis.skin_tone.ita || 45;
   const confidence = Math.round((analysis.skin_tone.confidence_score || 0.98) * 100);
 
-  const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200';
-  const labelCls = isDark ? 'text-white/40' : 'text-gray-500';
-  const valueCls = isDark ? 'text-purple-400' : 'text-purple-600';
+  const cardCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-slate-200 shadow-xs';
+  const labelCls = isDark ? 'text-slate-400' : 'text-slate-500';
+  const valueCls = isDark ? 'text-violet-400' : 'text-violet-600';
 
   return (
-    <div className={`${cardCls} rounded-2xl p-4 mt-2 mb-4 overflow-hidden relative`}>
+    <div className={`${cardCls} rounded-2xl p-4 mt-2 overflow-hidden relative`}>
       {/* Decorative tech-grid bg */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#a855f7 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#8b5cf6 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
 
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <span className="text-xl">🧬</span>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-purple-500">Intelligence Protocol</p>
-              <h3 className={`text-sm font-black ${isDark ? 'text-white' : 'text-gray-800'}`}>Style DNA Breakdown</h3>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-violet-500">Colorimetry Intelligence</p>
+              <h3 className={`text-sm font-black ${isDark ? 'text-white' : 'text-slate-900'}`}>Style DNA Scientific Spec</h3>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[9px] font-bold text-green-500 uppercase">Status: Elite</p>
-            <p className={`text-xs font-mono ${isDark ? 'text-white/30' : 'text-gray-400'}`}>v5.1_SAFE</p>
+            <p className="text-[11px] font-bold text-emerald-500 uppercase">Status: Verified</p>
+            <p className={`text-[11px] font-mono ${isDark ? 'text-white/40' : 'text-slate-400'}`}>ITA_v5.1</p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-3">
             <div>
-              <p className={`${labelCls} text-[9px] font-bold uppercase`}>Luminosity Index</p>
+              <p className={`${labelCls} text-[11px] font-bold uppercase tracking-wide`}>Luminosity Index</p>
               <p className={`${valueCls} text-xs font-black`}>Deep Premium</p>
-              <div className="h-1 w-full bg-purple-500/10 rounded-full mt-1 overflow-hidden">
-                <div className="h-full bg-purple-500 rounded-full animate-width-slow" style={{ width: '88%' }} />
+              <div className="h-1.5 w-full bg-violet-500/10 rounded-full mt-1.5 overflow-hidden">
+                <div className="h-full bg-violet-500 rounded-full animate-width-slow" style={{ width: '88%' }} />
               </div>
             </div>
             <div>
-              <p className={`${labelCls} text-[9px] font-bold uppercase`}>Chromatic Depth</p>
+              <p className={`${labelCls} text-[11px] font-bold uppercase tracking-wide`}>Chromatic Depth</p>
               <p className={`${valueCls} text-xs font-black`}>Elite Level</p>
-              <div className="h-1 w-full bg-purple-500/10 rounded-full mt-1 overflow-hidden">
-                <div className="h-full bg-purple-500 rounded-full animate-width-slow" style={{ width: '92%' }} />
+              <div className="h-1.5 w-full bg-violet-500/10 rounded-full mt-1.5 overflow-hidden">
+                <div className="h-full bg-violet-500 rounded-full animate-width-slow" style={{ width: '92%' }} />
               </div>
             </div>
           </div>
 
           <div className="space-y-3">
             <div>
-              <p className={`${labelCls} text-[9px] font-bold uppercase`}>ITA Calculation</p>
+              <p className={`${labelCls} text-[11px] font-bold uppercase tracking-wide`}>ITA Calculation</p>
               <p className={`${valueCls} text-xs font-black`}>{ita}° Spectrum</p>
-              <p className={`${labelCls} text-[8px] mt-1`}>Precise Typology Angle</p>
+              <p className={`${labelCls} text-[11px] mt-0.5`}>Individual Typology Angle</p>
             </div>
             <div>
-              <p className={`${labelCls} text-[9px] font-bold uppercase`}>Detection Logic</p>
+              <p className={`${labelCls} text-[11px] font-bold uppercase tracking-wide`}>Detection Logic</p>
               <p className={`${valueCls} text-xs font-black`}>{confidence}% Confidence</p>
-              <p className={`${labelCls} text-[8px] mt-1`}>Neural Match Score</p>
+              <p className={`${labelCls} text-[11px] mt-0.5`}>Neural Tone Verification</p>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-purple-500/10">
-          <p className={`${isDark ? 'text-white/60' : 'text-gray-600'} text-[10px] leading-relaxed italic`}>
-            "Based on your <strong>Index Deep Premium</strong> profile, our AI suggests a high-contrast palette to enhance your natural features."
+        <div className="mt-4 pt-3.5 border-t border-slate-200/80 dark:border-white/10">
+          <p className={`${isDark ? 'text-slate-300' : 'text-slate-600'} text-xs leading-relaxed`}>
+            Scientific recommendation: High-contrast saturation complements your melanin distribution and provides optimal visual radiance under sunlight and warm interior ambient light.
           </p>
         </div>
       </div>
@@ -496,14 +663,14 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
   const { t } = useLanguage();
   const toneColors = { fair: "#F5DEB3", light: "#D2A679", medium: "#C68642", olive: "#A0724A", brown: "#7B4F2E", dark: "#4A2C0A" };
   const wrapperCls = isDark
-    ? 'bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-white/10'
-    : 'bg-white border border-gray-200 shadow-sm';
-  const labelCls = isDark ? 'text-white/40' : 'text-gray-500';
-  const headingCls = isDark ? 'text-white' : 'text-gray-800';
-  const skinLabelCls = isDark ? 'text-white/40' : 'text-gray-400';
-  const imgBorderCls = isDark ? 'border-white/20' : 'border-gray-200';
-  const summaryBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-50 border border-gray-200';
-  const summaryCls = isDark ? 'text-white/60' : 'text-gray-500';
+    ? 'bg-gradient-to-br from-slate-900 to-[#0B0F19] border border-white/10 shadow-xl'
+    : 'bg-white border border-slate-200 shadow-sm';
+  const labelCls = isDark ? 'text-slate-400' : 'text-slate-500';
+  const headingCls = isDark ? 'text-white' : 'text-slate-900';
+  const skinLabelCls = isDark ? 'text-slate-400' : 'text-slate-500';
+  const imgBorderCls = isDark ? 'border-white/20' : 'border-slate-200';
+  const summaryBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-slate-50 border border-slate-200';
+  const summaryCls = isDark ? 'text-slate-300' : 'text-slate-600';
 
   const celebList = CELEBRITY_MAP[analysis.skin_tone.category]?.[isFemale ? 'female' : 'male'] || [];
   // Pick celebrity based on undertone to add variety
@@ -1278,8 +1445,25 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         photoQuality={photo_quality}
       />
 
-      {/* NEW: Event Styling Wizard (Phase 2) */}
-      <section className="mt-8 pt-4 border-t border-purple-500/10">
+      {/* Hero Direct Shop 1-Click Cards (Point 5) */}
+      <DirectShopHeroCards
+        recommendations={recommendations}
+        analysis={analysis}
+        effectiveGender={effectiveGender}
+        userBudget={userBudget}
+        isDark={isDark}
+        onShop={(data, budget) => {
+          const shopData = typeof data === 'string' ? { query: data } : data;
+          setShopItem(shopData);
+          setShopBudget(shopData.budget || budget || null);
+        }}
+      />
+
+      {/* Collapsible Science Breakdown Accordion (Point 5) */}
+      <ScienceAccordion analysis={analysis} isDark={isDark} />
+
+      {/* Event Styling Wizard (Mission Protocol) */}
+      <section className="mt-6 pt-4 border-t border-slate-200/80 dark:border-white/10">
         <MissionSelector
           activeMissionId={activeMission}
           onMissionSelect={setActiveMission}
@@ -1292,15 +1476,15 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className={`p-4 rounded-2xl border ${isDark ? 'bg-purple-900/10 border-purple-500/20' : 'bg-purple-50 border-purple-200'} mb-6`}
+            className={`p-4 rounded-2xl border ${isDark ? 'bg-violet-950/20 border-violet-800/30' : 'bg-violet-50/80 border-violet-200'} mb-4`}
           >
             <div className="flex gap-3">
-              <span className="text-2xl mt-1">💡</span>
+              <span className="text-xl mt-0.5">💡</span>
               <div>
-                <p className={`text-xs font-black uppercase tracking-widest ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>
+                <p className={`text-[11px] font-extrabold uppercase tracking-wider ${isDark ? 'text-violet-300' : 'text-violet-700'}`}>
                   Expert Stylist Advice
                 </p>
-                <p className={`text-sm mt-1 leading-relaxed ${isDark ? 'text-white/70' : 'text-gray-700'}`}>
+                <p className={`text-xs mt-1 leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   {activeMission === 'wedding' && "For your Wedding Elite mission, we've prioritized high-contrast silk combinations. Aim for jewel tones that complement your deep premium luminosity."}
                   {activeMission === 'office' && "Focusing on Corporate Power. We've filtered for crisp cottons and structured silhouettes in your core neutral palette for maximum authority."}
                   {activeMission === 'monsoon' && "Monsoon Minimal mode active. Stick to darker saturated tones to maintain a sharp profile even in overcast lighting."}
@@ -1313,9 +1497,6 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
           </motion.div>
         </AnimatePresence>
       </section>
-
-      {/* NEW: Explainability Section */}
-      <DNABreakdown analysis={analysis} isDark={isDark} />
 
       {/* NEW: Phase 3 Action Center */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">

@@ -245,7 +245,7 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C, usage }) {
         </h2>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8, background: `${level.color}18`, border: `1px solid ${level.color}30`, borderRadius: 20, padding: '4px 12px' }}>
           <div style={{ width: 6, height: 6, borderRadius: '50%', background: level.color }} />
-          <span style={{ fontSize: '8px', color: level.color, fontFamily: PJS, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <span style={{ fontSize: '11px', color: level.color, fontFamily: PJS, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
             {level.label}
           </span>
         </div>
@@ -260,19 +260,19 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C, usage }) {
               <span style={{ fontSize: '24px' }}>{archetype.emoji}</span>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ fontSize: '9px', fontFamily: PJS, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <span style={{ fontSize: '11px', fontFamily: PJS, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 Your Style DNA
               </span>
-              <p style={{ fontFamily: PDI, fontSize: '17px', color: C.text, margin: '2px 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <p style={{ fontFamily: PDI, fontSize: '18px', fontWeight: 600, color: C.text, margin: '2px 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {archetype.name}
               </p>
-              <p style={{ fontSize: '11px', color: C.muted, margin: 0, fontFamily: PJS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <p style={{ fontSize: '12px', color: C.muted, margin: 0, fontFamily: PJS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {archetype.headline}
               </p>
             </div>
             <div style={{ flexShrink: 0, textAlign: 'right' }}>
-              <p style={{ fontFamily: PDI, fontSize: '24px', background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '0 0 2px', lineHeight: 1 }}>{styleScore}</p>
-              <p style={{ fontSize: '8px', color: C.muted, fontFamily: PJS, letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0 }}>Style Score</p>
+              <p style={{ fontFamily: PDI, fontSize: '26px', fontWeight: 700, background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '0 0 2px', lineHeight: 1 }}>{styleScore}</p>
+              <p style={{ fontSize: '11px', color: C.muted, fontFamily: PJS, letterSpacing: '0.06em', textTransform: 'uppercase', margin: 0, fontWeight: 600 }}>Style Score</p>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 14, position: 'relative', zIndex: 1 }}>
@@ -311,13 +311,13 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C, usage }) {
           { value: streak > 0 ? streak : '0', label: 'Vibe Streak', icon: '🔥', sub: streak === 1 ? 'Day' : 'Days' },
           { value: personalityData.skinTone ? personalityData.skinTone.split(' ')[0] : '—', label: 'Depth Class', icon: '🎨', sub: 'Tone' },
         ].map((s, i) => (
-          <GlassCard key={i} C={C} style={{ padding: '14px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: s.value !== '0' && s.value !== '—' ? `1px solid ${VIOLET}40` : `1px solid ${C.border}` }}>
-            <span style={{ fontSize: '18px', marginBottom: 6 }}>{s.icon}</span>
+          <GlassCard key={i} C={C} style={{ padding: '16px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: s.value !== '0' && s.value !== '—' ? `1px solid ${VIOLET}40` : `1px solid ${C.border}` }}>
+            <span style={{ fontSize: '20px', marginBottom: 6 }}>{s.icon}</span>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 4 }}>
-              <span style={{ fontFamily: PDI, fontSize: '20px', color: C.text, lineHeight: 1 }}>{s.value}</span>
-              {s.value !== '—' && <span style={{ fontSize: '9px', color: C.muted, fontFamily: PJS, fontWeight: 600 }}>{s.sub}</span>}
+              <span style={{ fontFamily: PDI, fontSize: '22px', fontWeight: 700, color: C.text, lineHeight: 1 }}>{s.value}</span>
+              {s.value !== '—' && <span style={{ fontSize: '11px', color: C.muted, fontFamily: PJS, fontWeight: 600 }}>{s.sub}</span>}
             </div>
-            <span style={{ fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', color: C.text, opacity: 0.7, fontFamily: PJS, fontWeight: 700, textAlign: 'center' }}>{s.label}</span>
+            <span style={{ fontSize: '11px', letterSpacing: '0.06em', textTransform: 'uppercase', color: C.text, opacity: 0.8, fontFamily: PJS, fontWeight: 700, textAlign: 'center' }}>{s.label}</span>
           </GlassCard>
         ))}
       </div>
@@ -737,13 +737,13 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
           { value: wardrobeCount, label: 'Items', icon: '👕' },
         ].map((s, i) => (
           <GlassCard key={i} C={C} style={{ padding: '12px 6px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '14px', marginBottom: 4 }}>{s.icon}</span>
+            <span style={{ fontSize: '15px', marginBottom: 4 }}>{s.icon}</span>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 2, marginBottom: 2 }}>
               <span style={{ fontFamily: PDI, fontSize: '18px', lineHeight: 1, ...(s.gradient ? { background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' } : { color: C.text }) }}>
                 {s.value}
               </span>
             </div>
-            <span style={{ fontSize: '8px', letterSpacing: '0.05em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, fontWeight: 700, textAlign: 'center' }}>{s.label}</span>
+            <span style={{ fontSize: '11px', letterSpacing: '0.04em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, fontWeight: 700, textAlign: 'center' }}>{s.label}</span>
           </GlassCard>
         ))}
       </div>
@@ -756,7 +756,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
             <span style={{ fontSize: '22px' }}>{archetype.emoji}</span>
           </div>
           <div>
-            <p style={{ fontSize: '9px', fontFamily: PJS, letterSpacing: '0.2em', textTransform: 'uppercase', background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 700, margin: '0 0 3px' }}>Style DNA</p>
+            <p style={{ fontSize: '11px', fontFamily: PJS, letterSpacing: '0.15em', textTransform: 'uppercase', background: GRAD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 700, margin: '0 0 3px' }}>Style DNA</p>
             <p style={{ fontFamily: PDI, fontSize: '17px', color: C.text, margin: 0 }}>{archetype.name}</p>
           </div>
         </div>
@@ -772,12 +772,12 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
               <Tag text={`Secondary: ${secondary.name}`} color={INDIGO} C={C} />
             </div>
             <div style={{ position: 'relative', zIndex: 1 }}>
-              <p style={{ fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, margin: '0 0 8px' }}>Your Color Palette</p>
+              <p style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, margin: '0 0 8px', fontWeight: 600 }}>Your Color Palette</p>
               <div style={{ display: 'flex', gap: 8 }}>
                 {archetype.palette.map((color, i) => (
                   <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                     <div style={{ width: 28, height: 28, borderRadius: 8, background: color, border: `2px solid ${C.border}`, boxShadow: `0 2px 8px ${color}50` }} />
-                    <span style={{ fontSize: '7px', color: C.muted, fontFamily: PJS }}>{archetype.paletteNames[i]}</span>
+                    <span style={{ fontSize: '10px', color: C.muted, fontFamily: PJS, fontWeight: 500 }}>{archetype.paletteNames[i]}</span>
                   </div>
                 ))}
               </div>
@@ -806,7 +806,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
           <div style={{ width: '100%', height: 8, background: C.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)', borderRadius: 4, overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${Math.min((analysisCount / level.next) * 100, 100)}%`, background: `linear-gradient(90deg,${level.color},${VIOLET})`, borderRadius: 4, transition: 'width 1s ease' }} />
           </div>
-          <p style={{ fontSize: '10px', color: C.muted, fontFamily: PJS, margin: '6px 0 0' }}>{analysisCount}/{level.next} scans</p>
+          <p style={{ fontSize: '11px', color: C.muted, fontFamily: PJS, margin: '6px 0 0' }}>{analysisCount}/{level.next} scans</p>
         </GlassCard>
       )}
 
@@ -814,13 +814,13 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
       <GlassCard C={C} hoverable={false} style={{ padding: '20px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
             <div>
-               <p style={{ fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, marginBottom: 4 }}>Your Membership</p>
+               <p style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, marginBottom: 4, fontWeight: 600 }}>Your Membership</p>
                <h3 style={{ fontFamily: PDI, fontSize: '20px', color: C.text, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
                   Pro Member
                   <span style={{ fontSize: '14px' }}>✨</span>
                </h3>
             </div>
-            <div style={{ padding: '4px 10px', borderRadius: 8, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', color: '#F59E0B', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            <div style={{ padding: '4px 10px', borderRadius: 8, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', color: '#F59E0B', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                ACTIVE
             </div>
          </div>
@@ -828,24 +828,24 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
          {/* Stats Container */}
          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
-               <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 4 }}>Saved in Wardrobe</p>
+               <p style={{ fontSize: '11px', textTransform: 'uppercase', color: C.muted, marginBottom: 4, fontWeight: 600, letterSpacing: '0.03em' }}>Saved in Wardrobe</p>
                <p style={{ fontSize: '18px', fontWeight: 700, color: C.text, margin: 0 }}>{wardrobeCount || 0}</p>
-               <p style={{ fontSize: '8px', color: C.muted, marginTop: 4 }}>Unlimited Storage</p>
+               <p style={{ fontSize: '10px', color: C.muted, marginTop: 4 }}>Unlimited Storage</p>
             </div>
             <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
-               <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 4 }}>Saved History</p>
+               <p style={{ fontSize: '11px', textTransform: 'uppercase', color: C.muted, marginBottom: 4, fontWeight: 600, letterSpacing: '0.03em' }}>Saved History</p>
                <p style={{ fontSize: '18px', fontWeight: 700, color: C.text, margin: 0 }}>{usage?.analysisHistoryCount || 0}</p>
-               <p style={{ fontSize: '8px', color: C.muted, marginTop: 4 }}>Infinite Archives</p>
+               <p style={{ fontSize: '10px', color: C.muted, marginTop: 4 }}>Infinite Archives</p>
             </div>
             <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
-               <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 4 }}>Favorite Colors</p>
+               <p style={{ fontSize: '11px', textTransform: 'uppercase', color: C.muted, marginBottom: 4, fontWeight: 600, letterSpacing: '0.03em' }}>Favorite Colors</p>
                <p style={{ fontSize: '18px', fontWeight: 700, color: C.text, margin: 0 }}>{savedColorsCount || 0}</p>
-               <p style={{ fontSize: '8px', color: C.muted, marginTop: 4 }}>No Limits</p>
+               <p style={{ fontSize: '10px', color: C.muted, marginTop: 4 }}>No Limits</p>
             </div>
             <div style={{ padding: '12px', background: C.glass2, borderRadius: 12, border: `1px solid ${C.border}` }}>
-               <p style={{ fontSize: '8px', textTransform: 'uppercase', color: C.muted, marginBottom: 4 }}>Outfit Checks</p>
+               <p style={{ fontSize: '11px', textTransform: 'uppercase', color: C.muted, marginBottom: 4, fontWeight: 600, letterSpacing: '0.03em' }}>Outfit Checks</p>
                <p style={{ fontSize: '18px', fontWeight: 700, color: C.text, margin: 0 }}>∞</p>
-               <p style={{ fontSize: '8px', color: C.muted, marginTop: 4 }}>Premium AI Power</p>
+               <p style={{ fontSize: '10px', color: C.muted, marginTop: 4 }}>Premium AI Power</p>
             </div>
          </div>
       </GlassCard>
@@ -1031,20 +1031,20 @@ export default function AppShell({ user, onLogout }) {
   const desktopTabs = [
     { id: 'home', label: 'Home' },
     { id: 'analyze', label: 'Analyze' },
+    { id: 'navigator', label: 'Style Compass' },
+    { id: 'wardrobe', label: 'Wardrobe' },
     { id: 'lookbook', label: 'Lookbook' },
     { id: 'history', label: 'History' },
-    { id: 'navigator', label: 'Style Compass' },
     { id: 'tools', label: 'Tools' },
   ];
 
-  // Mobile: 6 clean tabs
+  // Mobile: 5 clean thumb-friendly tabs with elevated center action
   const mobileTabs = [
     { id: 'home', icon: '🏠', label: 'Home' },
-    { id: 'analyze', icon: '📷', label: 'Analyze' },
-    { id: 'lookbook', icon: '📖', label: 'Lookbook' },
-    { id: 'history', icon: '📋', label: 'History' },
-    { id: 'tools', icon: '🛠️', label: 'Tools' },
     { id: 'navigator', icon: '🧭', label: 'Compass' },
+    { id: 'analyze', icon: '📷', label: 'Scan', isPrimary: true },
+    { id: 'wardrobe', icon: '👗', label: 'Wardrobe' },
+    { id: 'profile', icon: '👤', label: 'Profile' },
   ];
 
   return (
@@ -1336,18 +1336,42 @@ export default function AppShell({ user, onLogout }) {
       {/* ═══════════ MOBILE BOTTOM NAV ═══════════ */}
       <nav
         className="mobile-bottom-nav md:hidden"
-        style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200, background: C.bottomNav, backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)', borderTop: `1px solid ${C.border}`, paddingBottom: 'env(safe-area-inset-bottom,4px)' }}
+        style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200,
+          background: C.bottomNav, backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)',
+          borderTop: `1px solid ${C.border}`, paddingBottom: 'env(safe-area-inset-bottom, 6px)',
+          height: 64, display: 'flex', alignItems: 'center'
+        }}
       >
         {mobileTabs.map(item => {
           const active = activeTab === item.id;
           return (
             <button
               key={item.id} onClick={() => handleTabChange(item.id)}
-              style={{ flex: 1, padding: '10px 2px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', position: 'relative' }}
+              style={{
+                flex: 1, padding: '4px 0', display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none',
+                cursor: 'pointer', position: 'relative', minHeight: 48
+              }}
             >
-              {active && <div style={{ position: 'absolute', top: 0, left: '25%', right: '25%', height: 2, background: GRAD, borderRadius: 1 }} />}
-              <span style={{ fontSize: '19px', lineHeight: 1, opacity: active ? 1 : 0.4, transition: 'opacity 0.2s' }}>{item.icon}</span>
-              <span style={{ fontSize: '8px', letterSpacing: '0.05em', textTransform: 'uppercase', color: active ? C.text : C.muted, fontWeight: active ? 600 : 400, fontFamily: PJS, transition: 'color 0.2s' }}>
+              {item.isPrimary ? (
+                <div style={{
+                  width: 44, height: 44, borderRadius: '50%',
+                  background: GRAD, display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', boxShadow: '0 4px 14px rgba(99,102,241,0.4)',
+                  marginTop: -18, border: `3px solid ${C.bg}`, transition: 'transform 0.2s'
+                }}>
+                  <span style={{ fontSize: '20px', color: 'white' }}>📷</span>
+                </div>
+              ) : (
+                <span style={{ fontSize: '20px', lineHeight: 1, opacity: active ? 1 : 0.45, transition: 'opacity 0.2s' }}>{item.icon}</span>
+              )}
+              <span style={{
+                fontSize: '11px', letterSpacing: '-0.2px',
+                color: active ? (C.isDark ? '#A5B4FC' : '#4F46E5') : C.muted,
+                fontWeight: active || item.isPrimary ? 700 : 500, fontFamily: PJS,
+                marginTop: item.isPrimary ? 2 : 3, transition: 'color 0.2s'
+              }}>
                 {item.label}
               </span>
             </button>

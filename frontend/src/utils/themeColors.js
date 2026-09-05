@@ -1,85 +1,85 @@
 /**
- * themeColors.js — StyleGuruAI v5.0
+ * themeColors.js — StyleGuruAI v5.2
  * ════════════════════════════════════════
- * Centralized Theme Color System
- * Two complete palettes: DARK + LIGHT
- * Used by AppShell and all glass components
+ * Centralized Human-Crafted Theme System
+ * Genuine, non-AI aesthetic with editorial clarity.
+ * High-contrast slate typography + restrained luxury accents.
  */
 
-// ── Dark Theme (Navy Glassmorphism) ───────────────
+// ── Dark Theme (Obsidian Slate Navy) ───────────────
 export const DARK = {
   isDark: true,
-  bg: '#0B0F1A',
-  bgSec: '#0F1628',
-  glass: 'rgba(255,255,255,0.05)',
-  glass2: 'rgba(255,255,255,0.08)',
-  glass3: 'rgba(255,255,255,0.12)',
-  border: 'rgba(255,255,255,0.08)',
-  border2: 'rgba(255,255,255,0.12)',
-  text: '#F9FAFB',
-  text2: '#E5E7EB',
-  muted: '#9CA3AF',
-  mutedLight: '#6B7280',
-  navBg: 'rgba(11,15,26,0.95)',
-  navBgScroll: 'rgba(11,15,26,0.75)',
-  bottomNav: 'rgba(11,15,26,0.97)',
-  cardShadow: '0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
-  cardHoverShadow: '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)',
-  btnShadow: '0 4px 20px rgba(139,92,246,0.35)',
-  inputBg: 'rgba(255,255,255,0.06)',
-  inputBorder: 'rgba(255,255,255,0.12)',
-  divider: 'rgba(255,255,255,0.06)',
-  glow1: 'rgba(99,102,241,0.08)',
-  glow2: 'rgba(236,72,153,0.06)',
-  dangerBg: 'rgba(239,68,68,0.08)',
-  dangerBorder: 'rgba(239,68,68,0.25)',
-  dangerText: '#EF4444',
-  successBg: 'rgba(16,185,129,0.12)',
-  successBorder: 'rgba(16,185,129,0.35)',
-  warnText: '#EF9090',
+  bg: '#0A0F1D',
+  bgSec: '#0F172A',
+  glass: '#111827',
+  glass2: '#161F33',
+  glass3: '#1E293B',
+  border: 'rgba(255, 255, 255, 0.08)',
+  border2: 'rgba(255, 255, 255, 0.14)',
+  text: '#F8FAFC',
+  text2: '#E2E8F0',
+  muted: '#94A3B8',
+  mutedLight: '#64748B',
+  navBg: 'rgba(10, 15, 29, 0.95)',
+  navBgScroll: 'rgba(10, 15, 29, 0.85)',
+  bottomNav: 'rgba(10, 15, 29, 0.97)',
+  cardShadow: '0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+  cardHoverShadow: '0 8px 32px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+  btnShadow: '0 4px 16px rgba(99, 102, 241, 0.35)',
+  inputBg: 'rgba(255, 255, 255, 0.05)',
+  inputBorder: 'rgba(255, 255, 255, 0.12)',
+  divider: 'rgba(255, 255, 255, 0.07)',
+  glow1: 'rgba(99, 102, 241, 0.08)',
+  glow2: 'rgba(236, 72, 153, 0.06)',
+  dangerBg: 'rgba(239, 68, 68, 0.1)',
+  dangerBorder: 'rgba(239, 68, 68, 0.3)',
+  dangerText: '#F87171',
+  successBg: 'rgba(16, 185, 129, 0.12)',
+  successBorder: 'rgba(16, 185, 129, 0.35)',
+  warnText: '#FCA5A5',
 };
 
-// ── Light Theme (Clean White) ──────────────────────
+// ── Light Theme (Crisp Editorial Off-White) ─────────
 export const LIGHT = {
   isDark: false,
-  bg: '#F0F2F8',
-  bgSec: '#E8EAF2',
-  glass: 'rgba(255,255,255,0.85)',
-  glass2: 'rgba(255,255,255,0.95)',
-  glass3: 'rgba(255,255,255,1)',
-  border: 'rgba(0,0,0,0.07)',
-  border2: 'rgba(0,0,0,0.12)',
-  text: '#111827',
-  text2: '#1F2937',
-  muted: '#6B7280',
-  mutedLight: '#9CA3AF',
-  navBg: 'rgba(255,255,255,0.97)',
-  navBgScroll: 'rgba(255,255,255,0.85)',
-  bottomNav: 'rgba(255,255,255,0.98)',
-  cardShadow: '0 2px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)',
-  cardHoverShadow: '0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(139,92,246,0.08)',
-  btnShadow: '0 4px 16px rgba(139,92,246,0.25)',
-  inputBg: 'rgba(0,0,0,0.04)',
-  inputBorder: 'rgba(0,0,0,0.12)',
-  divider: 'rgba(0,0,0,0.06)',
-  glow1: 'rgba(99,102,241,0.06)',
-  glow2: 'rgba(236,72,153,0.04)',
-  dangerBg: 'rgba(239,68,68,0.06)',
-  dangerBorder: 'rgba(239,68,68,0.2)',
+  bg: '#F8FAFC',
+  bgSec: '#F1F5F9',
+  glass: '#FFFFFF',
+  glass2: '#F8FAFC',
+  glass3: '#F1F5F9',
+  border: '#E2E8F0',
+  border2: '#CBD5E1',
+  text: '#0F172A',
+  text2: '#334155',
+  muted: '#64748B',
+  mutedLight: '#94A3B8',
+  navBg: 'rgba(255, 255, 255, 0.96)',
+  navBgScroll: 'rgba(255, 255, 255, 0.90)',
+  bottomNav: 'rgba(255, 255, 255, 0.98)',
+  cardShadow: '0 1px 3px rgba(0, 0, 0, 0.03), 0 6px 18px -3px rgba(0, 0, 0, 0.04)',
+  cardHoverShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 12px 24px -4px rgba(99, 102, 241, 0.07)',
+  btnShadow: '0 4px 14px rgba(99, 102, 241, 0.22)',
+  inputBg: '#FFFFFF',
+  inputBorder: '#CBD5E1',
+  divider: '#E2E8F0',
+  glow1: 'rgba(99, 102, 241, 0.04)',
+  glow2: 'rgba(236, 72, 153, 0.03)',
+  dangerBg: '#FEF2F2',
+  dangerBorder: '#FECACA',
   dangerText: '#DC2626',
-  successBg: 'rgba(16,185,129,0.08)',
-  successBorder: 'rgba(16,185,129,0.25)',
+  successBg: '#F0FDF4',
+  successBorder: '#BBF7D0',
   warnText: '#DC2626',
 };
 
 // ── Shared across both themes ──────────────────────
-export const GRAD = 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%)';
-export const GRAD_B = 'linear-gradient(135deg, #3B82F6 0%, #6366F1 100%)';
-export const VIOLET = '#8B5CF6';
-export const INDIGO = '#6366F1';
+export const GRAD = 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 55%, #EC4899 100%)';
+export const GRAD_B = 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)';
+export const VIOLET = '#7C3AED';
+export const INDIGO = '#4F46E5';
 export const PINK = '#EC4899';
-export const PJS = "'Plus Jakarta Sans','Inter',sans-serif";
-export const PDI = "'Playfair Display',Georgia,serif";
+export const PJS = "'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+export const PDI = "'Playfair Display', Georgia, serif";
 
 /** Returns the current color palette based on theme string */
 export function getThemeColors(theme) {

@@ -174,10 +174,17 @@ function StyleBot({ inline = false }) {
       {!inline && !open && (
         <button
           onClick={() => setOpen(true)}
-          className={`fixed bottom-24 right-4 z-50 w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 bg-gradient-to-br from-purple-600 to-pink-600 animate-pulse p-4 text-white`}
-          style={{ boxShadow: '0 0 25px rgba(168,85,247,0.4)' }}
+          aria-label="Open Style Guru Assistant"
+          className={`fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 ${
+            isDark 
+              ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white border border-white/10 shadow-violet-900/30' 
+              : 'bg-slate-900 text-white shadow-slate-900/20 border border-slate-800'
+          }`}
         >
-          <IconRenderer icon={FashionIcons.AI} />
+          <div className="w-5 h-5 flex items-center justify-center">
+            <IconRenderer icon={FashionIcons.AI} />
+          </div>
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900" />
         </button>
       )}
 
@@ -186,33 +193,44 @@ function StyleBot({ inline = false }) {
         <div className={
           inline
             ? `flex-1 flex flex-col w-full h-full ${isDark ? 'bg-transparent' : 'bg-transparent'}`
-            : `fixed bottom-4 sm:bottom-40 right-4 z-50 w-[calc(100%-2rem)] sm:w-[320px] max-h-[70vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden ${isDark ? 'bg-[#0f0a2e] border-purple-700/40' : 'bg-white border-gray-200'}`
+            : `fixed bottom-20 sm:bottom-20 right-3 sm:right-6 z-50 w-[calc(100%-1.5rem)] sm:w-[350px] max-h-[72vh] rounded-2xl border shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl ${
+                isDark 
+                  ? 'bg-[#111827]/95 border-white/10 text-slate-100 shadow-black/60' 
+                  : 'bg-white/95 border-slate-200 text-slate-900 shadow-slate-400/20'
+              }`
         }>
           {/* Header */}
-          <div className="px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-5 h-5 text-white/80"><IconRenderer icon={FashionIcons.AI} /></span>
+          <div className={`px-4 py-3 border-b flex items-center justify-between ${
+            isDark ? 'bg-slate-900/80 border-white/10' : 'bg-slate-50 border-slate-200'
+          }`}>
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center text-white shadow-sm">
+                <span className="w-4 h-4"><IconRenderer icon={FashionIcons.AI} /></span>
+              </div>
               <div>
-                <p className="text-white text-sm font-bold">{t('botTitle')}</p>
-                <p className="text-white/60 text-[10px]">{t('botSub')}</p>
+                <p className="text-xs font-bold leading-tight">{t('botTitle')}</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">{t('botSub')}</p>
               </div>
             </div>
             {!inline && (
               <button 
                 onClick={() => setOpen(false)} 
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all text-sm font-bold"
+                className="w-7 h-7 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-all text-xs font-bold"
               >✕</button>
             )}
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-3 max-h-[300px]">
+          <div className="flex-1 overflow-y-auto p-3 space-y-2.5 max-h-[300px]">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed whitespace-pre-line ${msg.role === 'user'
-                    ? 'bg-purple-600 text-white rounded-br-sm'
-                    : isDark ? 'bg-white/10 text-white/80 rounded-bl-sm' : 'bg-gray-100 text-gray-800 rounded-bl-sm'
-                  }`}>
+                <div className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed whitespace-pre-line ${
+                  msg.role === 'user'
+                    ? 'bg-violet-600 text-white rounded-br-xs font-medium'
+                    : isDark 
+                      ? 'bg-slate-800 text-slate-200 border border-white/5 rounded-bl-xs' 
+                      : 'bg-slate-100 text-slate-800 border border-slate-200/60 rounded-bl-xs'
+                }`}>
                   {msg.text}
                 </div>
               </div>
@@ -221,13 +239,16 @@ function StyleBot({ inline = false }) {
           </div>
 
           {/* Quick actions */}
-          <div className="px-3 pb-1 flex gap-1 overflow-x-auto scrollbar-hide">
+          <div className="px-3 pb-2 flex gap-1.5 overflow-x-auto scrollbar-hide">
             {quickActions.map(qa => (
               <button
                 key={qa.label}
                 onClick={() => { setInput(qa.label); setTimeout(sendMessage, 100); }}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold border transition-all flex items-center gap-1.5 ${isDark ? 'bg-white/5 border-white/10 text-white/50 hover:text-white' : 'bg-gray-50 border-gray-200 text-gray-500 hover:text-gray-800'
-                  }`}
+                className={`flex-shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all flex items-center gap-1.5 ${
+                  isDark 
+                    ? 'bg-slate-800/80 border-white/10 text-slate-300 hover:text-white hover:bg-slate-700' 
+                    : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                }`}
               >
                 <span className="w-3 h-3"><IconRenderer icon={qa.icon} /></span>
                 {qa.label}
@@ -236,18 +257,23 @@ function StyleBot({ inline = false }) {
           </div>
 
           {/* Input */}
-          <div className={`p-2 flex gap-2 border-t ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
+          <div className={`p-2.5 flex gap-2 border-t ${isDark ? 'border-white/10 bg-slate-900/60' : 'border-slate-200 bg-white'}`}>
             <input
               type="text"
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKey}
               placeholder={t('botPlaceholder')}
-              className={`flex-1 px-3 py-2 rounded-xl text-xs border ${isDark ? 'bg-white/5 border-white/10 text-white placeholder-white/30' : 'bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400'
-                }`}
+              className={`flex-1 px-3 py-2 rounded-xl text-xs border outline-hidden transition-all ${
+                isDark 
+                  ? 'bg-slate-800 border-white/10 text-white placeholder-slate-400 focus:border-violet-500' 
+                  : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-violet-500'
+              }`}
             />
-            <button onClick={sendMessage}
-              className="px-3 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold hover:bg-purple-500 transition-all">
+            <button 
+              onClick={sendMessage}
+              className="px-3.5 py-2 rounded-xl bg-violet-600 text-white text-xs font-bold hover:bg-violet-500 active:scale-95 transition-all shadow-xs"
+            >
               ↑
             </button>
           </div>
