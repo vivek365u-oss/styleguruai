@@ -384,6 +384,60 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C, usage }) {
         </GlassCard>
       )}
 
+      {/* ── Quick Access: Style Tools & Archives ── */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 14, height: 2, background: GRAD, borderRadius: 1 }} />
+            <span style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: C.muted, fontWeight: 700, fontFamily: PJS }}>
+              Tools & Archives
+            </span>
+          </div>
+          <span style={{ fontSize: '11px', color: VIOLET, fontWeight: 600, fontFamily: PJS }}>All Features</span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+          {/* Style Tools */}
+          <GlassCard 
+            C={C} 
+            onClick={() => onTabChange('tools')} 
+            style={{ padding: '16px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', cursor: 'pointer', border: `1px solid ${C.border}`, transition: 'all 0.2s' }}
+          >
+            <div style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(139,92,246,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: '20px' }}>🛠️</span>
+            </div>
+            <p style={{ fontSize: '12px', fontWeight: 700, color: C.text, margin: '0 0 2px', fontFamily: PJS }}>Style Tools</p>
+            <p style={{ fontSize: '10px', color: C.muted, margin: 0, fontFamily: PJS }}>6 AI Checkers</p>
+          </GlassCard>
+
+          {/* History */}
+          <GlassCard 
+            C={C} 
+            onClick={() => onTabChange('history')} 
+            style={{ padding: '16px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', cursor: 'pointer', border: `1px solid ${C.border}`, transition: 'all 0.2s' }}
+          >
+            <div style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(59,130,246,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: '20px' }}>📜</span>
+            </div>
+            <p style={{ fontSize: '12px', fontWeight: 700, color: C.text, margin: '0 0 2px', fontFamily: PJS }}>History</p>
+            <p style={{ fontSize: '10px', color: C.muted, margin: 0, fontFamily: PJS }}>Past Scans</p>
+          </GlassCard>
+
+          {/* Lookbook */}
+          <GlassCard 
+            C={C} 
+            onClick={() => onTabChange('lookbook')} 
+            style={{ padding: '16px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', cursor: 'pointer', border: `1px solid ${C.border}`, transition: 'all 0.2s' }}
+          >
+            <div style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(236,72,153,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: '20px' }}>📖</span>
+            </div>
+            <p style={{ fontSize: '12px', fontWeight: 700, color: C.text, margin: '0 0 2px', fontFamily: PJS }}>Lookbook</p>
+            <p style={{ fontSize: '10px', color: C.muted, margin: 0, fontFamily: PJS }}>Saved Looks</p>
+          </GlassCard>
+        </div>
+      </div>
+
       {/* First use prompt */}
       {analysisCount === 0 && (
         <GlassCard C={C} hoverable={false} style={{ padding: '24px 20px', marginBottom: 8, textAlign: 'center' }}>
@@ -849,6 +903,41 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
             </div>
          </div>
       </GlassCard>
+
+      {/* ── Quick Navigation to Tools & History in Profile ── */}
+      <GlassCard C={C} hoverable={false} style={{ padding: '20px', marginBottom: 16 }}>
+        <p style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, marginBottom: 12, fontWeight: 700 }}>
+          Quick Navigation
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+          <button
+            onClick={() => onTabChange('tools')}
+            style={{ padding: '14px 6px', background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
+          >
+            <span style={{ fontSize: '20px', marginBottom: 4 }}>🛠️</span>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: C.text, fontFamily: PJS }}>Tools</span>
+            <span style={{ fontSize: '10px', color: C.muted, fontFamily: PJS }}>6 Checkers</span>
+          </button>
+
+          <button
+            onClick={() => onTabChange('history')}
+            style={{ padding: '14px 6px', background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
+          >
+            <span style={{ fontSize: '20px', marginBottom: 4 }}>📜</span>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: C.text, fontFamily: PJS }}>History</span>
+            <span style={{ fontSize: '10px', color: C.muted, fontFamily: PJS }}>Past Scans</span>
+          </button>
+
+          <button
+            onClick={() => onTabChange('lookbook')}
+            style={{ padding: '14px 6px', background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
+          >
+            <span style={{ fontSize: '20px', marginBottom: 4 }}>📖</span>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: C.text, fontFamily: PJS }}>Lookbook</span>
+            <span style={{ fontSize: '10px', color: C.muted, fontFamily: PJS }}>Saved Looks</span>
+          </button>
+        </div>
+      </GlassCard>
       <div style={{ paddingBottom: 80 }} />
     </div>
 
@@ -897,6 +986,7 @@ export default function AppShell({ user, onLogout }) {
   });
   const [toast, setToast] = useState(null);
   const [navScrolled, setNavScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handler = () => setNavScrolled(window.scrollY > 30);
@@ -1081,8 +1171,24 @@ export default function AppShell({ user, onLogout }) {
           })}
         </div>
 
-        {/* Right — Theme quick toggle + Avatar */}
+        {/* Right — Mobile Menu + Theme quick toggle + Avatar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
+          {/* Mobile Menu trigger */}
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="md:hidden"
+            title="All Features & Tools"
+            style={{
+              height: 34, padding: '0 10px', borderRadius: 8,
+              background: C.glass2, border: `1px solid ${C.border}`,
+              color: C.text, display: 'flex', alignItems: 'center', gap: 5,
+              cursor: 'pointer', fontSize: '12px', fontWeight: 700, fontFamily: PJS
+            }}
+          >
+            <span style={{ fontSize: '14px' }}>🛠️</span>
+            <span>Menu</span>
+          </button>
+
           {/* Quick theme toggle button */}
           <button
             onClick={() => { toggleTheme(); setToast({ message: `${theme === 'dark' ? 'Light' : 'Dark'} Mode`, type: 'success' }); }}
@@ -1378,6 +1484,133 @@ export default function AppShell({ user, onLogout }) {
           );
         })}
       </nav>
+
+      {/* ═══════════ MOBILE ALL FEATURES & TOOLS DRAWER ═══════════ */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <div
+            onClick={() => setMobileMenuOpen(false)}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 9999,
+              background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)', display: 'flex',
+              alignItems: 'flex-end', justifyContent: 'center'
+            }}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 350 }}
+              onClick={e => e.stopPropagation()}
+              style={{
+                width: '100%', maxWidth: 500, maxHeight: '82vh',
+                background: C.isDark ? '#0F172A' : '#FFFFFF',
+                borderTopLeftRadius: 28, borderTopRightRadius: 28,
+                border: `1px solid ${C.border}`, borderBottom: 'none',
+                boxShadow: '0 -10px 40px rgba(0,0,0,0.4)',
+                display: 'flex', flexDirection: 'column', overflow: 'hidden'
+              }}
+            >
+              {/* Drawer Header */}
+              <div style={{ padding: '18px 20px 14px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: '18px' }}>✨</span>
+                  <p style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: C.text, fontFamily: PJS }}>
+                    All Features & Tools
+                  </p>
+                </div>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{ width: 30, height: 30, borderRadius: '50%', background: C.glass2, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Drawer Body */}
+              <div style={{ padding: '16px 18px 30px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {/* Highlighted Section: Power Tools & Archives */}
+                <div>
+                  <p style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: C.muted, fontWeight: 700, margin: '0 0 10px', fontFamily: PJS }}>
+                    Power Tools & Archives
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                    {/* Style Tools */}
+                    <div
+                      onClick={() => { handleTabChange('tools'); setMobileMenuOpen(false); }}
+                      style={{ padding: '14px', borderRadius: 16, background: C.glass2, border: `1px solid ${activeTab === 'tools' ? VIOLET : C.border}`, cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 4 }}
+                    >
+                      <span style={{ fontSize: '24px' }}>🛠️</span>
+                      <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: C.text }}>Style Tools</p>
+                      <p style={{ margin: 0, fontSize: '11px', color: C.muted }}>Outfit, Calendar, Contrast</p>
+                    </div>
+
+                    {/* History */}
+                    <div
+                      onClick={() => { handleTabChange('history'); setMobileMenuOpen(false); }}
+                      style={{ padding: '14px', borderRadius: 16, background: C.glass2, border: `1px solid ${activeTab === 'history' ? VIOLET : C.border}`, cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 4 }}
+                    >
+                      <span style={{ fontSize: '24px' }}>📜</span>
+                      <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: C.text }}>History</p>
+                      <p style={{ margin: 0, fontSize: '11px', color: C.muted }}>All Past Scans & Tones</p>
+                    </div>
+
+                    {/* Lookbook */}
+                    <div
+                      onClick={() => { handleTabChange('lookbook'); setMobileMenuOpen(false); }}
+                      style={{ padding: '14px', borderRadius: 16, background: C.glass2, border: `1px solid ${activeTab === 'lookbook' ? VIOLET : C.border}`, cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 4 }}
+                    >
+                      <span style={{ fontSize: '24px' }}>📖</span>
+                      <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: C.text }}>Lookbook</p>
+                      <p style={{ margin: 0, fontSize: '11px', color: C.muted }}>Saved Outfit Recipes</p>
+                    </div>
+
+                    {/* Camera Scanner */}
+                    <div
+                      onClick={() => { handleTabChange('scanner'); setMobileMenuOpen(false); }}
+                      style={{ padding: '14px', borderRadius: 16, background: C.glass2, border: `1px solid ${activeTab === 'scanner' ? VIOLET : C.border}`, cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 4 }}
+                    >
+                      <span style={{ fontSize: '24px' }}>📸</span>
+                      <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: C.text }}>Color Scanner</p>
+                      <p style={{ margin: 0, fontSize: '11px', color: C.muted }}>Point Camera at Clothes</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Primary Styling Destinations */}
+                <div>
+                  <p style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: C.muted, fontWeight: 700, margin: '10px 0 10px', fontFamily: PJS }}>
+                    Primary Navigation
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {[
+                      { id: 'home', icon: '🏠', label: 'Dashboard Home', sub: 'Today tip & streak overview' },
+                      { id: 'analyze', icon: '📷', label: 'Analyze & Scan', sub: 'Instant 1-tap skin analysis' },
+                      { id: 'navigator', icon: '🧭', label: 'Style Compass', sub: 'Daily occasion navigator' },
+                      { id: 'wardrobe', icon: '👗', label: 'Wardrobe Vault', sub: 'Synced closet items' },
+                      { id: 'profile', icon: '👤', label: 'Profile & Style DNA', sub: 'Membership, archetype & DNA' },
+                    ].map(item => (
+                      <div
+                        key={item.id}
+                        onClick={() => { handleTabChange(item.id); setMobileMenuOpen(false); }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 12, background: activeTab === item.id ? 'rgba(139,92,246,0.12)' : C.glass2, border: `1px solid ${activeTab === item.id ? VIOLET : C.border}`, cursor: 'pointer' }}
+                      >
+                        <span style={{ fontSize: '20px' }}>{item.icon}</span>
+                        <div style={{ flex: 1 }}>
+                          <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: C.text }}>{item.label}</p>
+                          <p style={{ margin: 0, fontSize: '11px', color: C.muted }}>{item.sub}</p>
+                        </div>
+                        <span style={{ fontSize: '14px', color: C.muted }}>→</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <StyleBot />
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} C={C} />}
