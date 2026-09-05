@@ -362,8 +362,13 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
         onError('Analysis is taking too long. Server is busy, please try again later.');
       } else {
         const detail = err.response?.data?.detail;
-        if (typeof detail === 'object') onError(detail.message || 'Analysis failed.');
-        else onError(detail || 'Could not connect to server. Is the backend running?');
+        if (typeof detail === 'object') {
+          const isHindi = language === 'hi' || language === 'hinglish';
+          const msg = (isHindi && detail.message_hi) ? detail.message_hi : (detail.message || 'Analysis failed.');
+          onError(msg);
+        } else {
+          onError(detail || 'Could not connect to server. Is the backend running?');
+        }
       }
       return; // Stop here! No limit consumed.
     }
@@ -428,8 +433,13 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       console.error("[UploadSection] Couple analysis error:", err);
       setShowProgress(false);
       const detail = err.response?.data?.detail;
-      if (typeof detail === 'object') onError(detail.message || 'Couple analysis failed. Ensure both photos have clear faces.');
-      else onError('Couple analysis failed. Ensure both photos have clear faces.');
+      if (typeof detail === 'object') {
+        const isHindi = language === 'hi' || language === 'hinglish';
+        const msg = (isHindi && detail.message_hi) ? detail.message_hi : (detail.message || 'Couple analysis failed. Ensure both photos have clear faces.');
+        onError(msg);
+      } else {
+        onError('Couple analysis failed. Ensure both photos have clear faces.');
+      }
       return; // Stop here!
     }
 

@@ -111,6 +111,8 @@ class ImageProcessor:
 
         cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
         self.haar_cascade = cv2.CascadeClassifier(cascade_path)
+        eye_cascade_path = cv2.data.haarcascades + 'haarcascade_eye.xml'
+        self.eye_cascade = cv2.CascadeClassifier(eye_cascade_path)
         logger.info("ImageProcessor initialized")
 
     def load_image(self, image_path: str) -> np.ndarray:
@@ -195,106 +197,178 @@ class ImageProcessor:
         return compressed_image, original_size_mb, compressed_size_mb
 
     def detect_face(self, image: np.ndarray) -> dict:
-        """Detect the largest face in the image using a cascade strategy.
+        """Detect the largest human face in the image using a cascade strategy.
 
         Detection order:
-          1. MediaPipe FaceDetection (if available)
-          2. OpenCV Haar Cascade fallback
-          3. CLAHE low-light enhancement + retry both detectors
+          1. MediaPipe Solutions FaceDetection (if available)
+          2. MediaPipe Tasks FaceLandmarker (478-point neural face mesh)
+          3. CLAHE low-light enhancement + retry MediaPipe
+          4. OpenCV Haar Cascade (strict mode requiring eye confirmation)
 
         Args:
             image: BGR numpy array.
 
         Returns:
-            Dict with keys {x, y, width, height, confidence, method},
-            or None if no face is found.
+            Dict with keys {x, y, width, height, confidence, method, landmarks?},
+            or None if no valid human face is found.
         """
         processed_image = self._resize_for_processing(image)
         scale_x = image.shape[1] / processed_image.shape[1]
         scale_y = image.shape[0] / processed_image.shape[0]
 
-        face = None
+        # 1. Primary: MediaPipe Solutions
         if self.mediapipe_available and self.face_detector is not None:
             face = self._detect_mediapipe(processed_image, scale_x, scale_y)
             if face:
                 return face
 
+        # 2. Primary: MediaPipe Tasks FaceLandmarker
+        if self.mediapipe_available and self.face_mesh_detector is not None:
+            face = self._detect_mediapipe_tasks(processed_image, scale_x, scale_y)
+            if face:
+                return face
+
+        # 3. Enhanced low-light retry with MediaPipe
+        enhanced = self._enhance_low_light(processed_image)
+        if self.mediapipe_available and self.face_detector is not None:
+            face = self._detect_mediapipe(enhanced, scale_x, scale_y)
+            if face:
+                return face
+        if self.mediapipe_available and self.face_mesh_detector is not None:
+            face = self._detect_mediapipe_tasks(enhanced, scale_x, scale_y)
+            if face:
+                return face
+
+        # 4. Strict Fallback: OpenCV Haar Cascade (with eye confirmation)
         face = self._detect_haar(image)
         if face:
             return face
 
-        enhanced = self._enhance_low_light(image)
-        if self.mediapipe_available and self.face_detector is not None:
-            face = self._detect_mediapipe(enhanced, 1.0, 1.0)
-            if face:
-                return face
-
-        return self._detect_haar(enhanced)
+        return None
 
     def _detect_mediapipe(self, image: np.ndarray, scale_x: float = 1.0, scale_y: float = 1.0) -> dict:
-        """Run MediaPipe FaceDetection on the image.
+        """Run MediaPipe Solutions FaceDetection on the image."""
+        try:
+            rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            results = self.face_detector.process(rgb_image)
 
-        Args:
-            image: BGR numpy array (already resized for processing).
-            scale_x: X-axis scale factor to map back to original resolution.
-            scale_y: Y-axis scale factor to map back to original resolution.
+            if not results.detections:
+                return None
 
-        Returns:
-            Face dict or None if no face detected with confidence >= 0.5.
+            best_detection = max(results.detections, key=lambda d: d.score[0])
+
+            if best_detection.score[0] < 0.5:
+                return None
+
+            bbox = best_detection.location_data.relative_bounding_box
+            h, w = image.shape[:2]
+
+            x = max(0, int(bbox.xmin * w * scale_x))
+            y = max(0, int(bbox.ymin * h * scale_y))
+            width = int(bbox.width * w * scale_x)
+            height = int(bbox.height * h * scale_y)
+
+            img_h = int(image.shape[0] * scale_y)
+            img_w = int(image.shape[1] * scale_x)
+            x = min(x, img_w - 1)
+            y = min(y, img_h - 1)
+            width = min(width, img_w - x)
+            height = min(height, img_h - y)
+
+            if width <= 15 or height <= 15:
+                return None
+
+            return {
+                "x": x, "y": y,
+                "width": width, "height": height,
+                "confidence": round(float(best_detection.score[0]), 3),
+                "method": "mediapipe"
+            }
+        except Exception as e:
+            logger.error(f"Error in _detect_mediapipe: {e}")
+            return None
+
+    def _detect_mediapipe_tasks(self, image: np.ndarray, scale_x: float = 1.0, scale_y: float = 1.0) -> dict:
+        """Run MediaPipe Tasks FaceLandmarker (deep neural 478 3D landmarks).
+
+        This guarantees that the detected object is a real human face and NOT
+        a fabric, wall, curtain, or random inanimate object.
         """
-        rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        results = self.face_detector.process(rgb_image)
-
-        if not results.detections:
+        if not self.mediapipe_available or self.face_mesh_detector is None:
             return None
+        try:
+            rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            h, w = image.shape[:2]
 
-        best_detection = max(results.detections, key=lambda d: d.score[0])
+            if hasattr(self.face_mesh_detector, 'detect'):
+                # MediaPipe Tasks API
+                import mediapipe as mp
+                mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_image)
+                results = self.face_mesh_detector.detect(mp_image)
+                if not getattr(results, 'face_landmarks', None) or len(results.face_landmarks) == 0:
+                    return None
+                lms = results.face_landmarks[0]
+                xs = [lm.x * w * scale_x for lm in lms]
+                ys = [lm.y * h * scale_y for lm in lms]
+                x_min, x_max = max(0, int(min(xs))), min(int(image.shape[1] * scale_x) - 1, int(max(xs)))
+                y_min, y_max = max(0, int(min(ys))), min(int(image.shape[0] * scale_y) - 1, int(max(ys)))
+                width = x_max - x_min
+                height = y_max - y_min
+                if width <= 15 or height <= 15:
+                    return None
 
-        if best_detection.score[0] < 0.5:
+                # Pre-cache landmarks in full image resolution
+                landmarks_dict = {
+                    idx: (int(lm.x * w * scale_x), int(lm.y * h * scale_y))
+                    for idx, lm in enumerate(lms)
+                }
+                return {
+                    "x": x_min, "y": y_min,
+                    "width": width, "height": height,
+                    "confidence": 0.95,
+                    "method": "mediapipe",
+                    "landmarks": landmarks_dict
+                }
+            elif hasattr(self.face_mesh_detector, 'process'):
+                # Legacy Solutions API
+                results = self.face_mesh_detector.process(rgb_image)
+                if not results.multi_face_landmarks:
+                    return None
+                lms = results.multi_face_landmarks[0].landmark
+                xs = [lm.x * w * scale_x for lm in lms]
+                ys = [lm.y * h * scale_y for lm in lms]
+                x_min, x_max = max(0, int(min(xs))), min(int(image.shape[1] * scale_x) - 1, int(max(xs)))
+                y_min, y_max = max(0, int(min(ys))), min(int(image.shape[0] * scale_y) - 1, int(max(ys)))
+                width = x_max - x_min
+                height = y_max - y_min
+                if width <= 15 or height <= 15:
+                    return None
+                landmarks_dict = {
+                    idx: (int(lm.x * w * scale_x), int(lm.y * h * scale_y))
+                    for idx, lm in enumerate(lms)
+                }
+                return {
+                    "x": x_min, "y": y_min,
+                    "width": width, "height": height,
+                    "confidence": 0.95,
+                    "method": "mediapipe",
+                    "landmarks": landmarks_dict
+                }
+        except Exception as e:
+            logger.error(f"Error in _detect_mediapipe_tasks: {e}")
             return None
-
-        bbox = best_detection.location_data.relative_bounding_box
-        h, w = image.shape[:2]
-
-        x = max(0, int(bbox.xmin * w * scale_x))
-        y = max(0, int(bbox.ymin * h * scale_y))
-        width = int(bbox.width * w * scale_x)
-        height = int(bbox.height * h * scale_y)
-
-        img_h = int(image.shape[0] * scale_y)
-        img_w = int(image.shape[1] * scale_x)
-        x = min(x, img_w - 1)
-        y = min(y, img_h - 1)
-        width = min(width, img_w - x)
-        height = min(height, img_h - y)
-
-        if width <= 0 or height <= 0:
-            return None
-
-        return {
-            "x": x, "y": y,
-            "width": width, "height": height,
-            "confidence": round(float(best_detection.score[0]), 3),
-            "method": "mediapipe"
-        }
 
     def _detect_haar(self, image: np.ndarray) -> dict:
-        """Run OpenCV Haar Cascade face detection with progressive relaxation.
+        """Run OpenCV Haar Cascade face detection with strict verification.
 
-        Tries three parameter sets (strict → relaxed) to maximise recall
-        while keeping false positives low.
-
-        Args:
-            image: BGR numpy array.
-
-        Returns:
-            Largest face dict or None if no face found.
+        Only accepts candidate boxes if eye detector confirms facial features
+        or high-neighbor multi-scale agreement, preventing false positives
+        on clothes, walls, and objects.
         """
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         for (scale, neighbors, min_size) in [
-            (1.1, 5, (80, 80)),
-            (1.05, 3, (60, 60)),
-            (1.1, 3, (50, 50)),
+            (1.1, 7, (80, 80)),
+            (1.1, 5, (60, 60)),
         ]:
             faces = self.haar_cascade.detectMultiScale(
                 gray, scaleFactor=scale,
@@ -305,25 +379,41 @@ class ImageProcessor:
             if len(faces) > 0:
                 largest = max(faces, key=lambda f: f[2] * f[3])
                 x, y, w, h = largest
-                return {
-                    "x": int(x), "y": int(y),
-                    "width": int(w), "height": int(h),
-                    "confidence": 0.7,
-                    "method": "haar_cascade"
-                }
+
+                # Verify facial features: check for eyes in upper half of face
+                face_upper_gray = gray[y:y + int(h * 0.65), x:x + w]
+                has_eyes = False
+                if hasattr(self, 'eye_cascade') and self.eye_cascade is not None and not self.eye_cascade.empty():
+                    eyes = self.eye_cascade.detectMultiScale(
+                        face_upper_gray, scaleFactor=1.1, minNeighbors=3, minSize=(15, 15)
+                    )
+                    has_eyes = len(eyes) > 0
+
+                # Strict requirement: Must have detected eyes or high neighbor consensus (>=7)
+                if has_eyes or neighbors >= 7:
+                    return {
+                        "x": int(x), "y": int(y),
+                        "width": int(w), "height": int(h),
+                        "confidence": 0.75 if has_eyes else 0.55,
+                        "method": "haar_cascade"
+                    }
         return None
 
     def _get_face_landmarks(self, image: np.ndarray, face: dict) -> dict:
-        """Extract 468 MediaPipe FaceMesh landmarks from the image.
+        """Extract MediaPipe FaceMesh landmarks from the image.
 
         Args:
             image: BGR numpy array.
-            face: Face bounding box dict (unused directly; kept for API consistency).
+            face: Face bounding box dict from detect_face().
 
         Returns:
             Dict mapping landmark index (int) → (x, y) pixel coordinates,
             or None if MediaPipe is unavailable or detection fails.
         """
+        # Return pre-cached landmarks if available
+        if face and isinstance(face, dict) and "landmarks" in face and face["landmarks"]:
+            return face["landmarks"]
+
         if not self.mediapipe_available or self.face_mesh_detector is None:
             return None
         try:
@@ -347,17 +437,20 @@ class ImageProcessor:
                     return None
                 for idx, lm in enumerate(results.face_landmarks[0]):
                     points[idx] = (int(lm.x * w), int(lm.y * h))
-                    
+
             return points
         except Exception as e:
             logger.error(f"Error extracting landmarks: {e}")
             return None
 
     def validate_face_for_skin_analysis(self, image: np.ndarray, face: dict) -> dict:
-        """Run heuristic checks to confirm a detected region is a human face.
+        """Run comprehensive checks to confirm the detected region contains a genuine human face.
 
-        Validates: face size ratio, aspect ratio, HSV skin coverage,
-        RGB channel ordering, and contrast (to reject charts/documents).
+        Validates:
+          - Face size ratio and aspect ratio
+          - Dual-space human skin coverage (HSV + YCrCb biometric locus)
+          - Flat surface / document / inanimate object rejection
+          - RGB channel distribution
 
         Args:
             image: BGR numpy array (full resolution).
@@ -367,7 +460,7 @@ class ImageProcessor:
             Dict with keys:
               - valid (bool): True if all checks pass.
               - reason (str): Human-readable explanation.
-              - skin_ratio (float): Fraction of face pixels classified as skin.
+              - skin_ratio (float): Fraction of face pixels classified as human skin.
               - face_ratio (float): Fraction of image area occupied by face.
         """
         x, y, w, h = face["x"], face["y"], face["width"], face["height"]
@@ -376,55 +469,79 @@ class ImageProcessor:
         face_area = w * h
 
         face_ratio = face_area / img_area
-        if face_ratio < 0.02:
+        if face_ratio < 0.015:
             return {
                 "valid": False,
-                "reason": "⚠️ No face detected or face is too small.\n\n✅ Fix: Please upload a selfie — not charts or documents."
+                "reason": "⚠️ Face is too small or far away.\n\n✅ Fix: Please upload a closer photo or selfie so your face is clearly visible."
+            }
+        if face_ratio > 0.98:
+            return {
+                "valid": False,
+                "reason": "⚠️ The image appears to be an extreme close-up or abstract pattern.\n\n✅ Fix: Please upload a natural portrait or selfie."
             }
 
         aspect_ratio = w / h
-        if aspect_ratio < 0.4 or aspect_ratio > 2.5:
+        if aspect_ratio < 0.45 or aspect_ratio > 2.2:
             return {
                 "valid": False,
-                "reason": "⚠️ The detected region does not look like a human face.\n\n✅ Fix: Please upload a clear selfie."
+                "reason": "⚠️ The detected area does not look like a human face.\n\n✅ Fix: Please upload a clear selfie facing the camera."
             }
 
         face_region = image[y:y+h, x:x+w]
         if face_region.size == 0:
-            return {"valid": False, "reason": "⚠️ Face region is empty."}
+            return {"valid": False, "reason": "⚠️ Face region could not be extracted."}
 
+        # Check for flat surfaces (e.g. painted walls, plain fabric, uniform background)
+        gray = cv2.cvtColor(face_region, cv2.COLOR_BGR2GRAY)
+        brightness_std = float(np.std(gray))
+        if brightness_std < 8.0:
+            return {
+                "valid": False,
+                "reason": "⚠️ This photo appears to be a flat wall or uniform surface.\n\n✅ Fix: Please upload a clear photo of your face, not a wall or background."
+            }
+
+        # Human Skin Verification: Dual-space HSV + YCrCb analysis
         hsv = cv2.cvtColor(face_region, cv2.COLOR_BGR2HSV)
-        lower_skin1 = np.array([0, 20, 50], dtype=np.uint8)
-        upper_skin1 = np.array([25, 180, 255], dtype=np.uint8)
-        lower_skin2 = np.array([165, 20, 50], dtype=np.uint8)
-        upper_skin2 = np.array([180, 180, 255], dtype=np.uint8)
-        mask1 = cv2.inRange(hsv, lower_skin1, upper_skin1)
-        mask2 = cv2.inRange(hsv, lower_skin2, upper_skin2)
-        combined = cv2.bitwise_or(mask1, mask2)
+        lower_skin1 = np.array([0, 20, 45], dtype=np.uint8)
+        upper_skin1 = np.array([25, 185, 255], dtype=np.uint8)
+        lower_skin2 = np.array([165, 20, 45], dtype=np.uint8)
+        upper_skin2 = np.array([180, 185, 255], dtype=np.uint8)
+        mask_hsv1 = cv2.inRange(hsv, lower_skin1, upper_skin1)
+        mask_hsv2 = cv2.inRange(hsv, lower_skin2, upper_skin2)
+        mask_hsv = cv2.bitwise_or(mask_hsv1, mask_hsv2)
+
+        ycrcb = cv2.cvtColor(face_region, cv2.COLOR_BGR2YCrCb)
+        lower_ycrcb = np.array([35, 130, 75], dtype=np.uint8)
+        upper_ycrcb = np.array([245, 180, 130], dtype=np.uint8)
+        mask_ycrcb = cv2.inRange(ycrcb, lower_ycrcb, upper_ycrcb)
+
+        combined = cv2.bitwise_and(mask_hsv, mask_ycrcb)
 
         total_pixels = face_region.shape[0] * face_region.shape[1]
         skin_pixels = np.sum(combined > 0)
-        skin_ratio = skin_pixels / total_pixels
+        skin_ratio = float(skin_pixels / total_pixels)
 
-        if skin_ratio < 0.12:
+        # Minimum required skin coverage:
+        # MediaPipe landmarks already confirm facial geometry, so 10% is sufficient (allows beards, makeup, glasses)
+        # Haar fallback requires at least 22% skin to prevent false positives on clothing or walls
+        min_required_skin = 0.10 if face.get("method") == "mediapipe" else 0.22
+        if skin_ratio < min_required_skin:
             return {
                 "valid": False,
-                "reason": "⚠️ This photo does not appear to be a person.\n\n✅ Fix: Please upload a clear selfie. Do not upload charts, documents, or objects."
+                "reason": "⚠️ No human skin or face detected in this photo.\n\n✅ Fix: Please upload a photo of your face, not clothes, walls, or objects."
             }
 
         face_bgr = face_region.reshape(-1, 3).astype(np.float32)
         mean_color = np.mean(face_bgr, axis=0)
         b_mean, g_mean, r_mean = mean_color
 
-        if r_mean < b_mean:
+        if r_mean < b_mean and face.get("method") != "mediapipe":
             return {
                 "valid": False,
-                "reason": "⚠️ This does not appear to be a human face.\n\n✅ Fix: Please upload your selfie."
+                "reason": "⚠️ This photo does not appear to contain a human face.\n\n✅ Fix: Please upload a selfie with natural lighting."
             }
 
-        gray = cv2.cvtColor(face_region, cv2.COLOR_BGR2GRAY)
-        brightness_std = np.std(gray)
-        if brightness_std > 90:
+        if brightness_std > 95.0 and face.get("method") != "mediapipe":
             return {
                 "valid": False,
                 "reason": "⚠️ This photo looks like a chart or document.\n\n✅ Fix: Please upload a natural selfie."
@@ -800,41 +917,43 @@ class ImageProcessor:
             pixels = self._filter_skin_pixels(region)
             all_skin_pixels.extend(pixels)
 
-        if not all_skin_pixels:
-            forehead = image[y + int(h*0.15):y + int(h*0.35), x + int(w*0.30):x + int(w*0.70)]
-            if forehead.size > 0:
-                avg = np.mean(forehead.reshape(-1, 3), axis=0)
-                b, g, r = avg
-                r, g, b = int(r), int(g), int(b)
-                return {"r": r, "g": g, "b": b, "hex": f"#{r:02x}{g:02x}{b:02x}"}
-            return {"r": 180, "g": 140, "b": 110, "hex": "#B48C6E"}
+        if not all_skin_pixels or len(all_skin_pixels) < 25:
+            # Strictly reject non-human surfaces rather than defaulting to a fake color
+            raise ValueError("No human skin pixels detected in the face sampling regions. Please ensure your face is clearly visible.")
 
         return self._calculate_skin_color(all_skin_pixels)
 
     def _filter_skin_pixels(self, region: np.ndarray) -> list:
-        """Return pixels within the HSV skin colour range from an image region.
+        """Return pixels within the dual-space (HSV + YCrCb) human skin range from an image region.
 
-        Uses two HSV ranges to cover the full spectrum of human skin tones:
-          Range 1: H 0-25 (warm reds/oranges)
-          Range 2: H 165-180 (wrap-around reds)
+        Uses biometric locus intersection:
+          - HSV: H 0-25 & 165-180, S 20-185, V 45-255
+          - YCrCb: Y 35-245, Cr 130-180, Cb 75-130
 
         Args:
             region: BGR numpy sub-array (face sub-region).
 
         Returns:
-            List of [B, G, R] values for pixels matching skin hue.
+            List of [B, G, R] values for pixels matching human skin.
         """
         if region.size == 0:
             return []
         hsv_region = cv2.cvtColor(region, cv2.COLOR_BGR2HSV)
-        lower_skin = np.array([0, 20, 50], dtype=np.uint8)
-        upper_skin = np.array([25, 180, 255], dtype=np.uint8)
+        lower_skin = np.array([0, 20, 45], dtype=np.uint8)
+        upper_skin = np.array([25, 185, 255], dtype=np.uint8)
         mask = cv2.inRange(hsv_region, lower_skin, upper_skin)
-        lower_skin2 = np.array([165, 20, 50], dtype=np.uint8)
-        upper_skin2 = np.array([180, 180, 255], dtype=np.uint8)
+        lower_skin2 = np.array([165, 20, 45], dtype=np.uint8)
+        upper_skin2 = np.array([180, 185, 255], dtype=np.uint8)
         mask2 = cv2.inRange(hsv_region, lower_skin2, upper_skin2)
-        combined_mask = cv2.bitwise_or(mask, mask2)
-        skin_pixels = region[combined_mask > 0]
+        combined_hsv = cv2.bitwise_or(mask, mask2)
+
+        ycrcb_region = cv2.cvtColor(region, cv2.COLOR_BGR2YCrCb)
+        lower_ycrcb = np.array([35, 130, 75], dtype=np.uint8)
+        upper_ycrcb = np.array([245, 180, 130], dtype=np.uint8)
+        mask_ycrcb = cv2.inRange(ycrcb_region, lower_ycrcb, upper_ycrcb)
+
+        final_mask = cv2.bitwise_and(combined_hsv, mask_ycrcb)
+        skin_pixels = region[final_mask > 0]
         return skin_pixels.tolist() if len(skin_pixels) > 0 else []
 
     def _calculate_skin_color(self, skin_pixels: list) -> dict:

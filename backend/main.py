@@ -864,7 +864,8 @@ async def process_image_core(file: UploadFile):
         if face is None:
             raise HTTPException(status_code=422, detail={
                 "error": "no_face_detected",
-                "message": "WARNING: No face detected in your photo.\n\nFix: Look directly at the camera with good lighting.",
+                "message": "No human face detected. Please upload a clear photo or selfie of your face (avoid uploading clothes, walls, or inanimate objects).",
+                "message_hi": "Koi chehra detect nahi hua. Kripya apna chehra saaf dikhne wali selfie ya photo upload karein (kapde, deewar ya kisi vastu ki photo na dalein).",
                 "can_retry": True
             })
         face_validation = image_processor.validate_face_for_skin_analysis(image, face)
@@ -872,10 +873,19 @@ async def process_image_core(file: UploadFile):
             raise HTTPException(status_code=422, detail={
                 "error": "invalid_face",
                 "message": face_validation["reason"],
+                "message_hi": "Chehra ya human skin verify nahi ho saki. Kripya kisi person ki saaf photo upload karein.",
                 "can_retry": True
             })
         full_quality = image_processor.analyze_photo_quality(image, face=face)
-        skin_color = image_processor.extract_skin_color(image, face)
+        try:
+            skin_color = image_processor.extract_skin_color(image, face)
+        except Exception as skin_err:
+            raise HTTPException(status_code=422, detail={
+                "error": "no_skin_detected",
+                "message": "No human skin could be detected on the face. Please upload a clear selfie in good lighting.",
+                "message_hi": "Chehre par human skin detect nahi ho saki. Kripya achhi roshni me saaf selfie upload karein.",
+                "can_retry": True
+            })
         skin_tone = skin_classifier.classify(skin_color["r"], skin_color["g"], skin_color["b"])
         color_season = skin_classifier.get_season(skin_tone)
         return image, face, full_quality, skin_color, skin_tone, color_season
@@ -1100,10 +1110,27 @@ async def check_outfit_compatibility(
         if face is None:
             raise HTTPException(status_code=422, detail={
                 "error": "no_face_detected",
-                "message": "WARNING: No face detected in your selfie.\n\nFix: Please upload a clear selfie.",
+                "message": "No face detected in your selfie. Please upload a clear photo of your face (avoid uploading clothes or walls as a selfie).",
+                "message_hi": "Selfie me koi chehra detect nahi hua. Kripya apna saaf chehra upload karein.",
                 "can_retry": True
             })
-        skin_color = image_processor.extract_skin_color(selfie_image, face)
+        face_validation = image_processor.validate_face_for_skin_analysis(selfie_image, face)
+        if not face_validation["valid"]:
+            raise HTTPException(status_code=422, detail={
+                "error": "invalid_face",
+                "message": face_validation["reason"],
+                "message_hi": "Chehra ya human skin verify nahi ho saki. Kripya kisi person ki saaf photo upload karein.",
+                "can_retry": True
+            })
+        try:
+            skin_color = image_processor.extract_skin_color(selfie_image, face)
+        except Exception:
+            raise HTTPException(status_code=422, detail={
+                "error": "no_skin_detected",
+                "message": "Could not detect human skin on the face. Please upload a clear selfie in good lighting.",
+                "message_hi": "Chehre par human skin detect nahi ho saki. Kripya achhi roshni me saaf selfie upload karein.",
+                "can_retry": True
+            })
         skin_tone = skin_classifier.classify(skin_color["r"], skin_color["g"], skin_color["b"])
 
         outfit_ext = Path(outfit.filename).suffix.lower()

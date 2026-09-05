@@ -1330,10 +1330,36 @@ export default function AppShell({ user, onLogout }) {
               )}
               {loading && <LoadingScreenWithProgress progress={uploadProgress} />}
               {error && !loading && (
-                <div style={{ padding: 32, textAlign: 'center', background: C.dangerBg, backdropFilter: 'blur(12px)', border: `1px solid ${C.dangerBorder}`, borderRadius: 16 }}>
-                  <p style={{ fontSize: '36px', marginBottom: 12 }}>😕</p>
-                  <p style={{ color: C.dangerText, fontSize: '14px', marginBottom: 24, lineHeight: '1.6', fontFamily: PJS }}>{error}</p>
-                  <button onClick={handleReset} style={{ background: C.dangerBg, border: `1px solid ${C.dangerBorder}`, color: C.dangerText, borderRadius: 10, padding: '12px 28px', cursor: 'pointer', fontSize: '13px', fontFamily: PJS }}>Try Again</button>
+                <div style={{ padding: '36px 24px', textAlign: 'center', background: C.dangerBg, backdropFilter: 'blur(16px)', border: `1px solid ${C.dangerBorder}`, borderRadius: 20, maxWidth: 520, margin: '0 auto 24px' }}>
+                  <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '28px' }}>
+                    👤❌
+                  </div>
+                  <h3 style={{ fontFamily: PJS, fontSize: '18px', fontWeight: 700, color: C.dangerText, marginBottom: 8 }}>
+                    Face or Human Skin Not Detected
+                  </h3>
+                  <p style={{ color: C.text, fontSize: '13px', marginBottom: 24, lineHeight: '1.65', fontFamily: PJS, opacity: 0.85, whiteSpace: 'pre-line' }}>
+                    {error}
+                  </p>
+                  <button 
+                    onClick={handleReset} 
+                    style={{ 
+                      background: 'linear-gradient(135deg, #EF4444, #DC2626)', 
+                      border: 'none', 
+                      color: 'white', 
+                      borderRadius: 12, 
+                      padding: '13px 32px', 
+                      cursor: 'pointer', 
+                      fontSize: '14px', 
+                      fontWeight: 600, 
+                      fontFamily: PJS,
+                      boxShadow: '0 4px 16px rgba(239, 68, 68, 0.35)',
+                      transition: 'transform 0.2s, box-shadow 0.2s'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(239, 68, 68, 0.45)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(239, 68, 68, 0.35)'; }}
+                  >
+                    📸 Upload Clear Face Photo
+                  </button>
                 </div>
               )}
               {results && results.type === 'couple'
