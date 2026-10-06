@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import SEOHead from '../components/SEOHead';
+import GoogleAd from '../components/GoogleAd';
 import { blogPosts } from '../data/blogPosts';
 import { trackBlogRead, trackBlogScroll, trackCTAClick } from '../utils/analytics';
 
@@ -321,7 +322,16 @@ export default function BlogPostPage() {
                   </div>
                 )}
 
-                {/* ── Hook 2: Direct Smart Shopping Spotlight (Inserted after Section 3) ── */}
+                {/* ── Mid-Article In-Feed / In-Article AdSense Unit (Inserted after Section 3) ── */}
+                {idx === 2 && (
+                  <GoogleAd
+                    layout="in-article"
+                    format="fluid"
+                    className="my-8"
+                  />
+                )}
+
+                {/* ── Hook 2: Direct Smart Shopping Spotlight (Inserted after Section 4) ── */}
                 {idx === 3 && (
                   <div className="my-10 p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/90 shadow-lg space-y-4">
                     <div className="flex items-center gap-3">
@@ -367,6 +377,9 @@ export default function BlogPostPage() {
             );
           })}
         </article>
+
+        {/* ─── End of Article Google AdSense Banner ─── */}
+        <GoogleAd className="my-12" />
 
         {/* ─── Author Profile Card ─── */}
         <div className="mt-16 p-6 sm:p-8 rounded-3xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">

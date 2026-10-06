@@ -26,6 +26,7 @@ backend/__pycache__/
 # IDE & OS
 .vscode/
 .idea/
+.kilo/
 .DS_Store
 Thumbs.db
 

@@ -172,10 +172,10 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C, usage }) {
   const [showConfetti, setShowConfetti] = useState(false);
 
   const streak = useMemo(() => {
-    // Priority 1: Cloud streak from usage object
-    if (personalityData.streak !== undefined) return personalityData.streak;
+    // Priority 1: Cloud streak if positive
+    if (personalityData.streak && personalityData.streak > 0) return personalityData.streak;
     
-    // Priority 2: Local fallback (Legacy)
+    // Priority 2: Local fallback
     const today = new Date().toLocaleDateString('en-CA');
     const lastCheckin = localStorage.getItem('sg_last_checkin');
     let count = parseInt(localStorage.getItem('sg_streak_count') || '0');
@@ -190,8 +190,17 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C, usage }) {
       // Mark confetti to be shown
       setShowConfetti(true);
     }
-    return count;
+    return count > 0 ? count : 1;
   }, [personalityData.streak]);
+
+  const formatTone = (t) => {
+    if (!t) return '—';
+    return t
+      .replace(/[_-]/g, ' ')
+      .split(' ')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ');
+  };
 
   useEffect(() => {
     if (showConfetti) {
@@ -305,21 +314,58 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C, usage }) {
       </button>
 
       {/* Stats Dashboard */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10, marginBottom: 16, width: '100%' }}>
         {[
-          { value: analysisCount || '0', label: 'DNA Protocols', icon: '🧬', sub: analysisCount === 1 ? 'Scan' : 'Scans' },
-          { value: streak > 0 ? streak : '0', label: 'Vibe Streak', icon: '🔥', sub: streak === 1 ? 'Day' : 'Days' },
-          { value: personalityData.skinTone ? personalityData.skinTone.split(' ')[0] : '—', label: 'Depth Class', icon: '🎨', sub: 'Tone' },
-        ].map((s, i) => (
-          <GlassCard key={i} C={C} style={{ padding: '16px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: s.value !== '0' && s.value !== '—' ? `1px solid ${VIOLET}40` : `1px solid ${C.border}` }}>
-            <span style={{ fontSize: '20px', marginBottom: 6 }}>{s.icon}</span>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 4 }}>
-              <span style={{ fontFamily: PDI, fontSize: '22px', fontWeight: 700, color: C.text, lineHeight: 1 }}>{s.value}</span>
-              {s.value !== '—' && <span style={{ fontSize: '11px', color: C.muted, fontFamily: PJS, fontWeight: 600 }}>{s.sub}</span>}
-            </div>
-            <span style={{ fontSize: '11px', letterSpacing: '0.06em', textTransform: 'uppercase', color: C.text, opacity: 0.8, fontFamily: PJS, fontWeight: 700, textAlign: 'center' }}>{s.label}</span>
-          </GlassCard>
-        ))}
+          { value: analysisCount || '0', label: 'Style Scans', icon: '🧬', sub: analysisCount === 1 ? 'Scan' : 'Scans' },
+          { value: streak > 0 ? streak : '1', label: 'Day Streak', icon: '🔥', sub: streak === 1 ? 'Day' : 'Days' },
+          { value: formatTone(personalityData.skinTone), label: 'Skin Tone', icon: '🎨', sub: '' },
+        ].map((s, i) => {
+          const isTextVal = typeof s.value === 'string' && isNaN(Number(s.value));
+          return (
+            <GlassCard 
+              key={i} 
+              C={C} 
+              style={{ 
+                padding: '14px 6px', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                minWidth: 0, 
+                overflow: 'hidden', 
+                border: s.value !== '0' && s.value !== '—' ? `1px solid ${VIOLET}40` : `1px solid ${C.border}` 
+              }}
+            >
+              <span style={{ fontSize: '18px', marginBottom: 6 }}>{s.icon}</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 2, marginBottom: 4, width: '100%', minWidth: 0, overflow: 'hidden' }}>
+                <span 
+                  title={s.value}
+                  style={{ 
+                    fontFamily: isTextVal ? PJS : PDI, 
+                    fontSize: isTextVal ? (s.value.length > 9 ? '11px' : '13px') : '22px', 
+                    fontWeight: 700, 
+                    color: C.text, 
+                    lineHeight: 1.15,
+                    textAlign: 'center',
+                    whiteSpace: 'nowrap',
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
+                    maxWidth: '100%',
+                    display: 'block'
+                  }}
+                >
+                  {s.value}
+                </span>
+                {!isTextVal && s.sub && s.value !== '—' && (
+                  <span style={{ fontSize: '10px', color: C.muted, fontFamily: PJS, fontWeight: 600, flexShrink: 0 }}>{s.sub}</span>
+                )}
+              </div>
+              <span style={{ fontSize: '10px', letterSpacing: '0.04em', textTransform: 'uppercase', color: C.text, opacity: 0.8, fontFamily: PJS, fontWeight: 700, textAlign: 'center', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', width: '100%' }}>
+                {s.label}
+              </span>
+            </GlassCard>
+          );
+        })}
       </div>
 
       {/* Style Score Bar */}
@@ -393,7 +439,12 @@ function HomeSection({ user, lastAnalysis, onAnalyze, onTabChange, C, usage }) {
               Tools & Archives
             </span>
           </div>
-          <span style={{ fontSize: '11px', color: VIOLET, fontWeight: 600, fontFamily: PJS }}>All Features</span>
+          <button
+            onClick={() => onTabChange('tools')}
+            style={{ background: 'none', border: 'none', padding: 0, fontSize: '11px', color: VIOLET, fontWeight: 600, fontFamily: PJS, cursor: 'pointer' }}
+          >
+            All Features →
+          </button>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
@@ -986,7 +1037,6 @@ export default function AppShell({ user, onLogout }) {
   });
   const [toast, setToast] = useState(null);
   const [navScrolled, setNavScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handler = () => setNavScrolled(window.scrollY > 30);
@@ -1017,12 +1067,15 @@ export default function AppShell({ user, onLogout }) {
     const syncStreak = async () => {
       try {
         const res = await updateDailyStreak(auth.currentUser.uid);
-        if (res?.updated) {
-          setToast({ 
-            message: `🔥 ${res.current} Day Style Streak!`, 
-            type: 'success' 
-          });
-          logEvent('streak_updated', { count: res.current });
+        if (res?.current) {
+          localStorage.setItem('sg_streak_count', res.current.toString());
+          if (res.updated) {
+            setToast({ 
+              message: `🔥 ${res.current} Day Style Streak!`, 
+              type: 'success' 
+            });
+            logEvent('streak_updated', { count: res.current });
+          }
         }
       } catch (e) {
         console.error('[Streak] Sync failed', e);
@@ -1138,13 +1191,13 @@ export default function AppShell({ user, onLogout }) {
   ];
 
   return (
-    <div style={{ background: C.bg, color: C.text, minHeight: '100vh', fontFamily: PJS, position: 'relative', transition: 'background 0.3s, color 0.3s' }}>
+    <div style={{ background: C.bg, color: C.text, minHeight: '100vh', fontFamily: PJS, position: 'relative', width: '100%', maxWidth: '100vw', overflowX: 'hidden', transition: 'background 0.3s, color 0.3s' }}>
       {/* Radial BG Glows */}
       <div style={{ position: 'fixed', top: '-20%', left: '-10%', width: '50vw', height: '50vh', background: `radial-gradient(circle,${C.glow1} 0%,transparent 70%)`, pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'fixed', bottom: '-20%', right: '-10%', width: '50vw', height: '50vh', background: `radial-gradient(circle,${C.glow2} 0%,transparent 70%)`, pointerEvents: 'none', zIndex: 0 }} />
 
       {/* ═══════════ TOP NAV ═══════════ */}
-      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: 60, background: navScrolled ? C.navBg : C.navBgScroll, backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderBottom: `1px solid ${navScrolled ? C.border : 'transparent'}`, display: 'flex', alignItems: 'center', padding: '0 20px', gap: 12, transition: 'all 0.3s' }}>
+      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: 60, width: '100%', maxWidth: '100vw', background: navScrolled ? C.navBg : C.navBgScroll, backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderBottom: `1px solid ${navScrolled ? C.border : 'transparent'}`, display: 'flex', alignItems: 'center', padding: '0 20px', gap: 12, transition: 'all 0.3s', boxSizing: 'border-box' }}>
         {/* Logo */}
         <button onClick={() => handleTabChange('home')} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
           <img src="/logo.png" alt="StyleGuru AI Logo" style={{ width: 34, height: 34, borderRadius: 10, objectFit: 'cover', boxShadow: '0 4px 12px rgba(139,92,246,0.2)' }} />
@@ -1171,24 +1224,8 @@ export default function AppShell({ user, onLogout }) {
           })}
         </div>
 
-        {/* Right — Mobile Menu + Theme quick toggle + Avatar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto' }}>
-          {/* Mobile Menu trigger (ONLY on phones, completely hidden on laptops/desktops) */}
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="mobile-only-btn md:hidden"
-            title="All Features & Tools"
-            style={{
-              height: 34, padding: '0 10px', borderRadius: 8,
-              background: C.glass2, border: `1px solid ${C.border}`,
-              color: C.text, alignItems: 'center', gap: 5,
-              cursor: 'pointer', fontSize: '12px', fontWeight: 700, fontFamily: PJS
-            }}
-          >
-            <span style={{ fontSize: '14px' }}>🛠️</span>
-            <span>Menu</span>
-          </button>
-
+        {/* Right — Theme quick toggle + Avatar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginLeft: 'auto' }}>
           {/* Quick theme toggle button */}
           <button
             onClick={() => { toggleTheme(); setToast({ message: `${theme === 'dark' ? 'Light' : 'Dark'} Mode`, type: 'success' }); }}
@@ -1218,7 +1255,7 @@ export default function AppShell({ user, onLogout }) {
       </nav>
 
       {/* ═══════════ MAIN CONTENT ═══════════ */}
-      <main style={{ maxWidth: 760, margin: '0 auto', padding: '76px 16px 100px', position: 'relative', zIndex: 1 }}>
+      <main style={{ maxWidth: 760, width: '100%', boxSizing: 'border-box', margin: '0 auto', padding: '76px 16px 100px', position: 'relative', zIndex: 1 }}>
         <AnimatePresence mode="wait">
           <Suspense fallback={<SectionLoader C={C} />}>
 
@@ -1511,132 +1548,7 @@ export default function AppShell({ user, onLogout }) {
         })}
       </nav>
 
-      {/* ═══════════ MOBILE ALL FEATURES & TOOLS DRAWER ═══════════ */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <div
-            onClick={() => setMobileMenuOpen(false)}
-            style={{
-              position: 'fixed', inset: 0, zIndex: 9999,
-              background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)', display: 'flex',
-              alignItems: 'flex-end', justifyContent: 'center'
-            }}
-          >
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 28, stiffness: 350 }}
-              onClick={e => e.stopPropagation()}
-              style={{
-                width: '100%', maxWidth: 500, maxHeight: '82vh',
-                background: C.isDark ? '#0F172A' : '#FFFFFF',
-                borderTopLeftRadius: 28, borderTopRightRadius: 28,
-                border: `1px solid ${C.border}`, borderBottom: 'none',
-                boxShadow: '0 -10px 40px rgba(0,0,0,0.4)',
-                display: 'flex', flexDirection: 'column', overflow: 'hidden'
-              }}
-            >
-              {/* Drawer Header */}
-              <div style={{ padding: '18px 20px 14px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: '18px' }}>✨</span>
-                  <p style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: C.text, fontFamily: PJS }}>
-                    All Features & Tools
-                  </p>
-                </div>
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  style={{ width: 30, height: 30, borderRadius: '50%', background: C.glass2, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}
-                >
-                  ✕
-                </button>
-              </div>
 
-              {/* Drawer Body */}
-              <div style={{ padding: '16px 18px 30px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {/* Highlighted Section: Power Tools & Archives */}
-                <div>
-                  <p style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: C.muted, fontWeight: 700, margin: '0 0 10px', fontFamily: PJS }}>
-                    Power Tools & Archives
-                  </p>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                    {/* Style Tools */}
-                    <div
-                      onClick={() => { handleTabChange('tools'); setMobileMenuOpen(false); }}
-                      style={{ padding: '14px', borderRadius: 16, background: C.glass2, border: `1px solid ${activeTab === 'tools' ? VIOLET : C.border}`, cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 4 }}
-                    >
-                      <span style={{ fontSize: '24px' }}>🛠️</span>
-                      <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: C.text }}>Style Tools</p>
-                      <p style={{ margin: 0, fontSize: '11px', color: C.muted }}>Outfit, Calendar, Contrast</p>
-                    </div>
-
-                    {/* History */}
-                    <div
-                      onClick={() => { handleTabChange('history'); setMobileMenuOpen(false); }}
-                      style={{ padding: '14px', borderRadius: 16, background: C.glass2, border: `1px solid ${activeTab === 'history' ? VIOLET : C.border}`, cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 4 }}
-                    >
-                      <span style={{ fontSize: '24px' }}>📜</span>
-                      <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: C.text }}>History</p>
-                      <p style={{ margin: 0, fontSize: '11px', color: C.muted }}>All Past Scans & Tones</p>
-                    </div>
-
-                    {/* Lookbook */}
-                    <div
-                      onClick={() => { handleTabChange('lookbook'); setMobileMenuOpen(false); }}
-                      style={{ padding: '14px', borderRadius: 16, background: C.glass2, border: `1px solid ${activeTab === 'lookbook' ? VIOLET : C.border}`, cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 4 }}
-                    >
-                      <span style={{ fontSize: '24px' }}>📖</span>
-                      <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: C.text }}>Lookbook</p>
-                      <p style={{ margin: 0, fontSize: '11px', color: C.muted }}>Saved Outfit Recipes</p>
-                    </div>
-
-                    {/* Camera Scanner */}
-                    <div
-                      onClick={() => { handleTabChange('scanner'); setMobileMenuOpen(false); }}
-                      style={{ padding: '14px', borderRadius: 16, background: C.glass2, border: `1px solid ${activeTab === 'scanner' ? VIOLET : C.border}`, cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 4 }}
-                    >
-                      <span style={{ fontSize: '24px' }}>📸</span>
-                      <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: C.text }}>Color Scanner</p>
-                      <p style={{ margin: 0, fontSize: '11px', color: C.muted }}>Point Camera at Clothes</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Primary Styling Destinations */}
-                <div>
-                  <p style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: C.muted, fontWeight: 700, margin: '10px 0 10px', fontFamily: PJS }}>
-                    Primary Navigation
-                  </p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {[
-                      { id: 'home', icon: '🏠', label: 'Dashboard Home', sub: 'Today tip & streak overview' },
-                      { id: 'analyze', icon: '📷', label: 'Analyze & Scan', sub: 'Instant 1-tap skin analysis' },
-                      { id: 'navigator', icon: '🧭', label: 'Style Compass', sub: 'Daily occasion navigator' },
-                      { id: 'wardrobe', icon: '👗', label: 'Wardrobe Vault', sub: 'Synced closet items' },
-                      { id: 'profile', icon: '👤', label: 'Profile & Style DNA', sub: 'Membership, archetype & DNA' },
-                    ].map(item => (
-                      <div
-                        key={item.id}
-                        onClick={() => { handleTabChange(item.id); setMobileMenuOpen(false); }}
-                        style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 12, background: activeTab === item.id ? 'rgba(139,92,246,0.12)' : C.glass2, border: `1px solid ${activeTab === item.id ? VIOLET : C.border}`, cursor: 'pointer' }}
-                      >
-                        <span style={{ fontSize: '20px' }}>{item.icon}</span>
-                        <div style={{ flex: 1 }}>
-                          <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: C.text }}>{item.label}</p>
-                          <p style={{ margin: 0, fontSize: '11px', color: C.muted }}>{item.sub}</p>
-                        </div>
-                        <span style={{ fontSize: '14px', color: C.muted }}>→</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
       <StyleBot />
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} C={C} />}

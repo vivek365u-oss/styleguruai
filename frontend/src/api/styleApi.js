@@ -1275,9 +1275,11 @@ export const updateDailyStreak = async (uid) => {
     let currentStreak = data.current_streak || 0;
     let highestStreak = data.highest_streak || 0;
     
-    // If already updated today, skip
+    // If already updated today, sync to localStorage and return
     if (lastActive === today) {
-      return { current: currentStreak, highest: highestStreak, updated: false };
+      const activeStreak = currentStreak || 1;
+      localStorage.setItem('sg_streak_count', activeStreak.toString());
+      return { current: activeStreak, highest: highestStreak, updated: false };
     }
     
     const yesterday = new Date();
@@ -1288,7 +1290,7 @@ export const updateDailyStreak = async (uid) => {
       // Streak maintained!
       currentStreak += 1;
     } else {
-      // Streak broken or new streak
+      // Streak broken or new streak - start at 1
       currentStreak = 1;
     }
     
@@ -1302,6 +1304,7 @@ export const updateDailyStreak = async (uid) => {
       highest_streak: highestStreak
     });
     
+    localStorage.setItem('sg_streak_count', currentStreak.toString());
     return { current: currentStreak, highest: highestStreak, updated: true };
   } catch (e) {
     console.error('[Streak] Failed to update streak:', e);

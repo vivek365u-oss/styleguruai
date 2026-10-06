@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import SEOHead from '../components/SEOHead';
+import GoogleAd from '../components/GoogleAd';
 import { blogPosts } from '../data/blogPosts';
 
 const CATEGORIES = [
@@ -203,6 +204,9 @@ export default function BlogListPage() {
 
       {/* ─── Articles Grid ─── */}
       <main className="max-w-7xl mx-auto px-6 sm:px-10 pb-24">
+        {/* Top Google AdSense Banner */}
+        <GoogleAd className="mb-10" />
+
         {filteredPosts.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-3xl border border-slate-200 p-10 max-w-lg mx-auto">
             <span className="text-4xl mb-3 block">🔍</span>
