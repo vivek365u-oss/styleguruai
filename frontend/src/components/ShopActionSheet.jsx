@@ -1,11 +1,9 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeContext } from '../context/ThemeContext';
 import { buildShopUrl, COMMON_STORES, MALE_STORES, FEMALE_STORES } from '../utils/shoppingUrls';
 import { getThemeColors } from '../utils/themeColors';
-import { saveWardrobeItem, auth } from '../api/styleApi';
-import WardrobeClassifierModal from './WardrobeClassifierModal';
 
 /**
  * ShopActionSheet - A high-end, DNA-styled shopping portal.
@@ -20,29 +18,6 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
   const isFemale = gender.toLowerCase().includes('female');
   const genderStores = isFemale ? FEMALE_STORES : MALE_STORES;
   const allStores = [...COMMON_STORES, ...genderStores];
-
-  const [savingWishlist, setSavingWishlist] = useState(false);
-  const [wishlistSaved, setWishlistSaved] = useState(false);
-  const [showClassifier, setShowClassifier] = useState(false);
-
-  const handleAddToWishlistClick = () => {
-    setShowClassifier(true);
-  };
-
-  const handleConfirmSave = async (organizedData) => {
-    if (!auth.currentUser) return;
-    setSavingWishlist(true);
-    setShowClassifier(false);
-    try {
-      await saveWardrobeItem(auth.currentUser.uid, organizedData);
-      setWishlistSaved(true);
-      window.dispatchEvent(new CustomEvent('sg_wardrobe_updated'));
-      setTimeout(() => setWishlistSaved(false), 3000);
-    } catch (e) {
-      console.warn('Failed to save to wishlist', e);
-    }
-    setSavingWishlist(false);
-  };
 
   // Stop background scrolling when open
   useEffect(() => {
@@ -63,12 +38,12 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
   const PDI = "'Playfair Display', 'Georgia', serif";
   const VIOLET = "#8B5CF6";
 
-  const displayLabel = item ? (typeof item === 'object' ? (item.query || 'Loading style...') : (item.length > 35 ? item.substring(0, 32) + '...' : item)) : 'Loading style...';
+  const displayLabel = item ? (typeof item === 'object' ? (item.query || 'Selected Style') : (item.length > 35 ? item.substring(0, 32) + '...' : item)) : 'Selected Style';
 
   const modalContent = (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 md:p-8" style={{ pointerEvents: 'auto' }}>
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-3 sm:p-6" style={{ pointerEvents: 'auto' }}>
           {/* Backdrop */}
           <motion.div 
             initial={{ opacity: 0 }}
@@ -80,82 +55,83 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
 
           {/* Modal Content */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 30 }}
+            initial={{ opacity: 0, scale: 0.92, y: 25 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 30 }}
+            exit={{ opacity: 0, scale: 0.92, y: 25 }}
             transition={{ type: "spring", damping: 28, stiffness: 350 }}
-            className="relative w-full max-w-[440px] overflow-hidden rounded-[2.5rem] border shadow-[0_0_100px_rgba(139,92,246,0.2)]"
+            className="relative w-full max-w-[460px] overflow-hidden rounded-[2.5rem] border shadow-[0_0_100px_rgba(139,92,246,0.25)] flex flex-col max-h-[90vh]"
             style={{
-              background: isDark ? '#0A0C10' : '#FFFFFF',
-              borderColor: isDark ? 'rgba(139,92,246,0.3)' : 'rgba(139,92,246,0.1)',
+              background: isDark ? '#0C0E14' : '#FFFFFF',
+              borderColor: isDark ? 'rgba(139,92,246,0.35)' : 'rgba(139,92,246,0.18)',
             }}
             onClick={e => e.stopPropagation()}
           >
-            {/* Tech Grid Background (DNA Style) */}
+            {/* Ambient Top Glow */}
             <div 
-              className="absolute inset-0 opacity-[0.04] pointer-events-none"
-              style={{ 
-                backgroundImage: `radial-gradient(${VIOLET} 1px, transparent 1px)`, 
-                backgroundSize: '24px 24px' 
-              }} 
+              className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-32 rounded-full pointer-events-none blur-3xl opacity-30"
+              style={{ background: 'linear-gradient(135deg, #8B5CF6, #EC4899)' }}
             />
 
             {/* Close Button (X) */}
             <button
               onClick={onClose}
-              className={`absolute top-6 right-6 z-20 flex h-10 w-10 items-center justify-center rounded-full border transition-all active:scale-90 ${
+              className={`absolute top-5 right-5 z-20 flex h-9 w-9 items-center justify-center rounded-full border transition-all active:scale-90 ${
                 isDark 
                   ? 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10 hover:text-white' 
                   : 'bg-black/5 border-black/10 text-black/50 hover:bg-black/10 hover:text-black'
               }`}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
-            <div className="relative z-10 p-8 sm:p-10">
+            <div className="relative z-10 p-6 sm:p-8 flex flex-col overflow-hidden">
               {/* Header Segment */}
-              <div className="mb-8 text-center">
-                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-[1.25rem] bg-gradient-to-br from-violet-500 via-purple-500 to-pink-500 shadow-2xl shadow-violet-500/40">
-                  <span className="text-3xl animate-pulse">🛍️</span>
+              <div className="mb-5 text-center">
+                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 shadow-xl shadow-violet-500/30">
+                  <span className="text-2xl animate-pulse">🛍️</span>
                 </div>
                 
-                <p className="mb-1 text-[10px] font-black uppercase tracking-[0.4em] text-violet-500" style={{ fontFamily: PJS }}>
-                  Style Search Protocol
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-violet-400 mb-1" style={{ fontFamily: PJS }}>
+                  Direct Store Purchase
                 </p>
-                <h3 className="text-3xl font-black tracking-tight" style={{ fontFamily: PDI, color: C.text }}>
+                <h3 className="text-2xl font-black tracking-tight" style={{ fontFamily: PDI, color: C.text }}>
                   Smart Shop
                 </h3>
-                <div className="mt-3 inline-block px-4 py-1.5 rounded-full bg-violet-500/5 border border-violet-500/10">
-                  <p className="text-[11px] font-bold italic" style={{ fontFamily: PJS, color: isDark ? '#CCC' : '#555' }}>
+
+                <div className="mt-2.5 inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 max-w-full">
+                  <span className="text-[11px] font-extrabold truncate" style={{ fontFamily: PJS, color: isDark ? '#E2E8F0' : '#1E293B' }}>
                     "{displayLabel}"
-                  </p>
+                  </span>
+                  <span className="text-[10px] opacity-60 font-semibold uppercase">
+                    • {isFemale ? 'Women' : 'Men'}
+                  </span>
                 </div>
               </div>
 
-              {/* Stores Grid - Compact & Scrollable */}
-              <div className="grid grid-cols-2 gap-3 mb-8 max-h-[320px] overflow-y-auto pr-2 custom-scrollbar">
+              {/* Stores Grid - Compact & Responsive 10 Stores */}
+              <div className="grid grid-cols-2 gap-2.5 mb-5 max-h-[340px] overflow-y-auto pr-1.5 custom-scrollbar">
                 {allStores.map((store, idx) => (
                   <motion.button
                     key={store.id}
-                    initial={{ opacity: 0, y: 15 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.03 }}
+                    transition={{ delay: idx * 0.02 }}
                     onClick={() => {
                       if (!item) return;
                       const url = buildShopUrl(item, store.id, gender, budget);
                       if (url) window.open(url, '_blank');
                       onClose();
                     }}
-                    className="group relative flex flex-col items-center justify-center rounded-[1.75rem] border p-4 transition-all hover:bg-white/[0.03] active:scale-95"
+                    className="group relative flex items-center gap-3 rounded-2xl border p-2.5 sm:p-3 transition-all hover:scale-[1.02] active:scale-95 text-left"
                     style={{
-                      background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
-                      borderColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)',
+                      background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                      borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
                     }}
                   >
                     <div 
-                      className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl shadow-xl transition-transform group-hover:scale-110 group-hover:rotate-6 overflow-hidden bg-white p-2"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-md transition-transform group-hover:scale-105 overflow-hidden bg-white p-1.5"
                     >
                       {store.domain ? (
                         <img 
@@ -168,71 +144,48 @@ const ShopActionSheet = ({ isOpen, onClose, item, gender = 'male', budget = null
                           }}
                         />
                       ) : (
-                        <span className="text-xl">{store.emoji}</span>
+                        <span className="text-lg">{store.emoji}</span>
                       )}
                     </div>
-                    <span className="text-[11px] font-black uppercase tracking-widest opacity-80" style={{ fontFamily: PJS, color: C.text }}>
-                      {store.name}
-                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] font-black uppercase tracking-wider truncate" style={{ fontFamily: PJS, color: C.text }}>
+                        {store.name}
+                      </p>
+                      <p className="text-[9px] text-violet-400 font-semibold group-hover:underline">
+                        Open Store ↗
+                      </p>
+                    </div>
 
                     {/* Subtle Hover Border */}
                     <div 
-                      className="absolute inset-0 rounded-[1.75rem] opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none"
-                      style={{ border: `2px solid ${store.color}60` }}
+                      className="absolute inset-0 rounded-2xl opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none"
+                      style={{ border: `1.5px solid ${store.color || '#8B5CF6'}` }}
                     />
                   </motion.button>
                 ))}
               </div>
 
-              {/* Virtual Wishlist Button */}
-              <button
-                onClick={handleAddToWishlistClick}
-                disabled={savingWishlist || wishlistSaved}
-                className={`w-full mb-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${
-                  wishlistSaved 
-                    ? 'bg-violet-500/20 text-violet-500 border border-violet-500/30' 
-                    : isDark ? 'bg-white/5 hover:bg-white/10 text-white/70 border border-white/10' : 'bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200'
-                }`}
-              >
-                {savingWishlist ? 'Saving...' : wishlistSaved ? '✅ Saved to Wishlist' : '👗 Add to Virtual Wishlist'}
-              </button>
-
               {/* Verified Badge */}
-              <div className="flex items-center justify-center gap-2.5 mb-8 py-3 px-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-[10px] shadow-lg shadow-emerald-500/30">🛡️</div>
-                <p className="text-[10px] font-black uppercase tracking-wider text-emerald-500/80" style={{ fontFamily: PJS }}>
-                  Verified Official Store Links
+              <div className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 mb-3">
+                <span className="text-xs">🛡️</span>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-400" style={{ fontFamily: PJS }}>
+                  100% Verified Official Store Links
                 </p>
               </div>
 
               {/* Footer Info */}
-              <p className="text-center text-[9px] font-bold uppercase tracking-[0.2em] opacity-30" style={{ fontFamily: PJS, color: C.text }}>
+              <p className="text-center text-[9px] font-bold uppercase tracking-[0.2em] opacity-40" style={{ fontFamily: PJS, color: C.text }}>
                 Powered by StyleGuru AI Engine
               </p>
+
+              <style>{`
+                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: ${VIOLET}40; border-radius: 10px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: ${VIOLET}70; }
+              `}</style>
             </div>
           </motion.div>
-
-          {showClassifier && (
-            <WardrobeClassifierModal
-              isOpen={showClassifier}
-              onClose={() => setShowClassifier(false)}
-              onSave={handleConfirmSave}
-              initialData={{
-                source: 'smart_shop',
-                hex: typeof item === 'object' && item.hex ? item.hex : '#8B5CF6',
-                color_name: displayLabel,
-                tags: ['tag_wishlist'],
-                category: (displayLabel && (displayLabel.toLowerCase().includes('pant') || displayLabel.toLowerCase().includes('jeans'))) ? 'bottom' : 'top'
-              }}
-            />
-          )}
-
-          <style>{`
-            .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-            .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-            .custom-scrollbar::-webkit-scrollbar-thumb { background: ${VIOLET}40; border-radius: 10px; }
-            .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: ${VIOLET}70; }
-          `}</style>
         </div>
       )}
     </AnimatePresence>

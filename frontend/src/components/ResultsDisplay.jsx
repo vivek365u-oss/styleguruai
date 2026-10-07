@@ -888,6 +888,7 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender, onShop }) {
 // ── Colors Tab ───────────────────────────────────────────────
 function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shirtCategory, isDark, onShop }) {
   const { t } = useLanguage();
+  const [selectedCat, setSelectedCat] = useState('all');
   const avoidColors = recommendations.colors_to_avoid || [];
   const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
 
@@ -911,35 +912,102 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 
   if (isFemale) {
     const femaleSections = [
-      { label: '👗 Dress Colors', colors: recommendations.best_dress_colors || [], cat: 'dress' },
-      { label: '👚 Top / Blouse Colors', colors: recommendations.best_top_colors || [], cat: 'top' },
-      { label: '🥻 Kurti Colors', colors: recommendations.best_kurti_colors || [], cat: 'kurti' },
-      { label: '🎀 Lehenga Colors', colors: recommendations.best_lehenga_colors || [], cat: 'lehenga' },
-      { label: '🪭 Saree Colors', colors: recommendations.best_saree_colors || [], cat: 'saree' },
-      { label: '✨ Sharara / Suit Colors', colors: recommendations.best_sharara_colors || recommendations.best_suit_colors || [], cat: 'sharara' },
-      { label: '🌸 Dupatta / Stole', colors: recommendations.best_dupatta_colors || [], cat: 'dupatta' },
-      { label: '👖 Bottom Colors', colors: recommendations.best_bottom_colors || recommendations.best_pant_colors || [], cat: 'bottom' },
+      { id: 'dress', label: '👗 Dress Colors', chipLabel: '👗 Dresses', colors: recommendations.best_dress_colors || [], cat: 'dress' },
+      { id: 'top', label: '👚 Top / Blouse Colors', chipLabel: '👚 Tops', colors: recommendations.best_top_colors || [], cat: 'top' },
+      { id: 'kurti', label: '🥻 Kurti Colors', chipLabel: '🥻 Kurtis', colors: recommendations.best_kurti_colors || [], cat: 'kurti' },
+      { id: 'lehenga', label: '🎀 Lehenga Colors', chipLabel: '🎀 Lehengas', colors: recommendations.best_lehenga_colors || [], cat: 'lehenga' },
+      { id: 'saree', label: '🪭 Saree Colors', chipLabel: '🪭 Sarees', colors: recommendations.best_saree_colors || [], cat: 'saree' },
+      { id: 'sharara', label: '✨ Sharara / Suit Colors', chipLabel: '✨ Shararas', colors: recommendations.best_sharara_colors || recommendations.best_suit_colors || [], cat: 'sharara' },
+      { id: 'dupatta', label: '🌸 Dupatta / Stole', chipLabel: '🌸 Dupattas', colors: recommendations.best_dupatta_colors || [], cat: 'dupatta' },
+      { id: 'bottom', label: '👖 Bottom Colors', chipLabel: '👖 Bottoms', colors: recommendations.best_bottom_colors || recommendations.best_pant_colors || [], cat: 'bottom' },
     ].filter(s => s.colors.length > 0);
 
+    const totalColorsCount = femaleSections.reduce((acc, s) => acc + s.colors.length, 0);
+
+    const visibleSections = selectedCat === 'all' 
+      ? femaleSections 
+      : femaleSections.filter(s => s.id === selectedCat);
+
     return (
-      <div className="space-y-5">
-        {femaleSections.map((sec) => (
-          <div key={sec.label}>
-            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>{sec.label}</p>
-            <div className="grid grid-cols-1 gap-2">
-              {sec.colors.map((color, i) => <ColorCard key={i} color={color} category={sec.cat} gender="female" isDark={isDark} onShop={onShop} />)}
-            </div>
+      <div className="space-y-4">
+        {/* Horizontal Category Chips Bar — eliminates long vertical scrolling */}
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-1 -mx-1 px-1">
+          <button
+            onClick={() => setSelectedCat('all')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
+              selectedCat === 'all'
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-transparent shadow-md shadow-purple-500/20'
+                : isDark
+                  ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:bg-white/10'
+                  : 'bg-gray-100 border-gray-200 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            ✨ All ({totalColorsCount})
+          </button>
+          {femaleSections.map(sec => (
+            <button
+              key={sec.id}
+              onClick={() => setSelectedCat(sec.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
+                selectedCat === sec.id
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-transparent shadow-md shadow-purple-500/20'
+                  : isDark
+                    ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:bg-white/10'
+                    : 'bg-gray-100 border-gray-200 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {sec.chipLabel} ({sec.colors.length})
+            </button>
+          ))}
+          {avoidColors.length > 0 && (
+            <button
+              onClick={() => setSelectedCat('avoid')}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
+                selectedCat === 'avoid'
+                  ? 'bg-red-500 text-white border-transparent shadow-md shadow-red-500/20'
+                  : isDark
+                    ? 'bg-red-500/10 border-red-500/20 text-red-300 hover:bg-red-500/20'
+                    : 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'
+              }`}
+            >
+              🚫 Avoid ({avoidColors.length})
+            </button>
+          )}
+        </div>
+
+        {/* Category Sections */}
+        {selectedCat !== 'avoid' && (
+          <div className="space-y-4">
+            {visibleSections.map((sec) => (
+              <div key={sec.label} className="fade-up">
+                <div className="flex items-center justify-between mb-2">
+                  <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>{sec.label}</p>
+                  <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+                    {sec.colors.length} shades
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  {sec.colors.map((color, i) => <ColorCard key={i} color={color} category={sec.cat} gender="female" isDark={isDark} onShop={onShop} />)}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
 
         {/* Fallback */}
-        {femaleSections.length === 0 && (
+        {femaleSections.length === 0 && selectedCat !== 'avoid' && (
           <p className={`${sectionLabelCls} text-xs text-center py-6`}>No color data available. Try analyzing again.</p>
         )}
 
-        {avoidColors.length > 0 && (
-          <div>
-            <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2">🚫 {t('avoidThese')}</p>
+        {/* Avoid Colors */}
+        {(selectedCat === 'avoid' || (selectedCat === 'all' && avoidColors.length > 0)) && (
+          <div className="fade-up pt-1">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-red-400/80 text-xs font-semibold uppercase tracking-wide">🚫 {t('avoidThese')}</p>
+              <span className="text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">
+                Mismatched undertones
+              </span>
+            </div>
             <div className="grid grid-cols-1 gap-2">
               {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="dress" gender="female" isDark={isDark} onShop={onShop} />)}
             </div>
@@ -947,7 +1015,7 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
         )}
 
         {/* Complete the Look — Female */}
-        {(() => {
+        {(selectedCat === 'all' || selectedCat === 'dress' || selectedCat === 'top') && (() => {
           const topColor = (recommendations.best_dress_colors || recommendations.best_top_colors || [])[0];
           const bottomColor = (recommendations.best_bottom_colors || recommendations.best_pant_colors || [])[0];
           return topColor ? <CompleteTheLook shirtColor={topColor} pantColors={bottomColor ? [bottomColor] : []} isDark={isDark} gender="female" onShop={onShop} /> : null;
@@ -955,7 +1023,6 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
       </div>
     );
   }
-
 
   // Male
   const shirtColors = recommendations.best_shirt_colors || [];
@@ -965,40 +1032,107 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
   const blazerColors = recommendations.best_blazer_colors || [];
 
   const maleSections = [
-    { label: '👕 T-Shirt / Top Colors', colors: shirtColors, cat: 'tshirt' },
-    { label: '👖 Pants / Cargo Colors', colors: pantColors, cat: 'cargo' },
-    { label: '🥷 Kurta Colors', colors: kurataColors, cat: 'kurta' },
-    { label: '🧥 Hoodie / Sweatshirt', colors: hoodieColors, cat: 'hoodie' },
-    { label: '🕴️ Blazer / Formal Shirt', colors: blazerColors, cat: 'blazer' },
+    { id: 'tshirt', label: '👕 T-Shirt / Top Colors', chipLabel: '👕 T-Shirts', colors: shirtColors, cat: 'tshirt' },
+    { id: 'cargo', label: '👖 Pants / Cargo Colors', chipLabel: '👖 Pants', colors: pantColors, cat: 'cargo' },
+    { id: 'kurta', label: '🥷 Kurta Colors', chipLabel: '🥷 Kurtas', colors: kurataColors, cat: 'kurta' },
+    { id: 'hoodie', label: '🧥 Hoodie / Sweatshirt', chipLabel: '🧥 Hoodies', colors: hoodieColors, cat: 'hoodie' },
+    { id: 'blazer', label: '🕴️ Blazer / Formal Shirt', chipLabel: '🕴️ Blazers', colors: blazerColors, cat: 'blazer' },
   ].filter(s => s.colors.length > 0);
 
-  return (
-    <div className="space-y-5">
-      {maleSections.map((sec) => (
-        <div key={sec.label}>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>{sec.label}</p>
-          <div className="grid grid-cols-1 gap-2">
-            {sec.colors.map((color, i) => <ColorCard key={i} color={color} category={sec.cat} gender="male" isDark={isDark} onShop={onShop} className={`stagger-${Math.min(i + 1, 6)}`} />)}
-          </div>
-        </div>
-      ))}
+  const totalMaleColorsCount = maleSections.reduce((acc, s) => acc + s.colors.length, 0);
 
-      {/* Fallback: if backend sends shirt colors but not categorized */}
-      {maleSections.length === 0 && shirtColors.length === 0 && (
+  const visibleMaleSections = selectedCat === 'all'
+    ? maleSections
+    : maleSections.filter(s => s.id === selectedCat);
+
+  return (
+    <div className="space-y-4">
+      {/* Horizontal Category Chips Bar for Men */}
+      <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-1 -mx-1 px-1">
+        <button
+          onClick={() => setSelectedCat('all')}
+          className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
+            selectedCat === 'all'
+              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-transparent shadow-md shadow-purple-500/20'
+              : isDark
+                ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:bg-white/10'
+                : 'bg-gray-100 border-gray-200 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          ✨ All ({totalMaleColorsCount})
+        </button>
+        {maleSections.map(sec => (
+          <button
+            key={sec.id}
+            onClick={() => setSelectedCat(sec.id)}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
+              selectedCat === sec.id
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-transparent shadow-md shadow-purple-500/20'
+                : isDark
+                  ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:bg-white/10'
+                  : 'bg-gray-100 border-gray-200 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            {sec.chipLabel} ({sec.colors.length})
+          </button>
+        ))}
+        {avoidColors.length > 0 && (
+          <button
+            onClick={() => setSelectedCat('avoid')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
+              selectedCat === 'avoid'
+                ? 'bg-red-500 text-white border-transparent shadow-md shadow-red-500/20'
+                : isDark
+                  ? 'bg-red-500/10 border-red-500/20 text-red-300 hover:bg-red-500/20'
+                  : 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'
+            }`}
+          >
+            🚫 Avoid ({avoidColors.length})
+          </button>
+        )}
+      </div>
+
+      {/* Male Visible Category Sections */}
+      {selectedCat !== 'avoid' && (
+        <div className="space-y-4">
+          {visibleMaleSections.map((sec) => (
+            <div key={sec.label} className="fade-up">
+              <div className="flex items-center justify-between mb-2">
+                <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>{sec.label}</p>
+                <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+                  {sec.colors.length} shades
+                </span>
+              </div>
+              <div className="grid grid-cols-1 gap-2">
+                {sec.colors.map((color, i) => <ColorCard key={i} color={color} category={sec.cat} gender="male" isDark={isDark} onShop={onShop} className={`stagger-${Math.min(i + 1, 6)}`} />)}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Fallback */}
+      {maleSections.length === 0 && shirtColors.length === 0 && selectedCat !== 'avoid' && (
         <p className={`${sectionLabelCls} text-xs text-center py-6`}>No color data available. Try analyzing again.</p>
       )}
 
-      {avoidColors.length > 0 && (
-        <div>
-          <p className="text-red-400/70 text-xs font-semibold uppercase tracking-wide mb-2">🚫 Avoid These</p>
+      {/* Avoid Colors for Men */}
+      {(selectedCat === 'avoid' || (selectedCat === 'all' && avoidColors.length > 0)) && (
+        <div className="fade-up pt-1">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-red-400/80 text-xs font-semibold uppercase tracking-wide">🚫 Avoid These</p>
+            <span className="text-[10px] font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">
+              Mismatched undertones
+            </span>
+          </div>
           <div className="grid grid-cols-1 gap-2">
             {avoidColors.map((color, i) => <ColorCard key={i} color={color} category="shirt" gender="male" isDark={isDark} onShop={onShop} />)}
           </div>
         </div>
       )}
 
-      {/* Complete the Look */}
-      {shirtColors.length > 0 && (
+      {/* Complete the Look for Men */}
+      {(selectedCat === 'all' || selectedCat === 'tshirt' || selectedCat === 'cargo') && shirtColors.length > 0 && (
         <CompleteTheLook shirtColor={shirtColors[0]} pantColors={pantColors} isDark={isDark} gender="male" onShop={onShop} />
       )}
     </div>
@@ -1008,6 +1142,8 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 // ── Outfits Tab ──────────────────────────────────────────────
 function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, styleTips, occasionAdvice, ethnicWear, sareeSuggestions, isDark, onShop, bodyTypeTips = [], bodyType = null, userOccasion = 'casual', activeMission = 'casual' }) {
   const { t } = useLanguage();
+  const [activeSection, setActiveSection] = useState('combos');
+
   let outfits = [];
   if (isSeasonal) outfits = seasonalGender === 'female' ? (recommendations.female_outfits || []) : (recommendations.male_outfits || []);
   else if (isFemale) outfits = recommendations.outfit_combos || [];
@@ -1019,8 +1155,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
   const mutedCls = isDark ? 'text-white/30' : 'text-gray-400';
   const tipTextCls = isDark ? 'text-white/70' : 'text-gray-700';
 
-
-  // Phase 2: Mission-based Re-ranking Logic
+  // Mission-based Re-ranking Logic
   const scoredOutfits = useMemo(() => {
     const mission = Object.values(MISSIONS).find(m => m.id === activeMission);
     if (!mission) return outfits.map(o => ({ ...o, missionScore: 0 }));
@@ -1054,117 +1189,230 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
   const occasionKey = Object.keys(occasionAdvice).find(k => k.toLowerCase().includes(userOccasion)) || null;
   const featuredAdvice = occasionKey ? occasionAdvice[occasionKey] : null;
 
+  // Sub-segments for Zero-Scroll navigation
+  const segments = isFemale ? [
+    { id: 'combos', label: '🧥 Combos' },
+    { id: 'sarees', label: '🥻 Sarees & Suits' },
+    { id: 'occasions', label: '📅 Occasions' },
+    { id: 'tips', label: '💡 Style Tips' },
+  ] : [
+    { id: 'combos', label: '🧥 Combos' },
+    { id: 'ethnic', label: '🪷 Ethnic Wear' },
+    { id: 'occasions', label: '📅 Occasions' },
+    { id: 'tips', label: '💡 Style Tips' },
+  ];
+
   return (
-    <div className="space-y-5">
-      {/* Featured occasion advice (highlighted) */}
-      {featuredAdvice && (
-        <div className={`rounded-2xl p-4 border-2 border-purple-500/40 ${isDark ? 'bg-purple-900/20' : 'bg-purple-50'}`}>
-          <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>
-            ✨ For Your {occasionKey} Look
-          </p>
-          <p className={`text-sm font-medium ${isDark ? 'text-white/80' : 'text-gray-800'}`}>{featuredAdvice}</p>
-        </div>
-      )}
-      {/* Outfit combos */}
-      {scoredOutfits.length > 0 && (
-        <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🧥 {t('outfitCombos')}</p>
-          <div className="space-y-2">
-            {scoredOutfits.map((combo, i) => (
-              <div key={i} className="relative">
-                {combo.missionScore > 20 && (
-                  <div className="absolute -top-1.5 -right-1.5 z-10 bg-gradient-to-r from-purple-600 to-pink-600 text-[9px] font-black text-white px-2 py-0.5 rounded-full shadow-lg border border-white/20 uppercase tracking-tighter">
-                    Mission Match
-                  </div>
-                )}
-                <OutfitCard combo={combo} index={i} isDark={isDark} onShop={onShop} />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+    <div className="space-y-4">
+      {/* Segmented switcher at the top — Zero-Scroll */}
+      <div className={`flex p-1 rounded-2xl border gap-1 overflow-x-auto scrollbar-hide ${
+        isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'
+      }`}>
+        {segments.map((seg) => (
+          <button
+            key={seg.id}
+            onClick={() => setActiveSection(seg.id)}
+            className={`flex-1 min-w-[85px] py-2 px-2.5 rounded-xl text-[11px] font-bold transition-all text-center whitespace-nowrap ${
+              activeSection === seg.id
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
+                : isDark ? 'text-white/50 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+            }`}
+          >
+            {seg.label}
+          </button>
+        ))}
+      </div>
 
-      {/* Occasion advice */}
-      {Object.keys(occasionAdvice).length > 0 && (
-        <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>📅 {t('whatToWear')}</p>
-          <div className="space-y-2">
-            {Object.entries(occasionAdvice).map(([occasion, advice], i) => (
-              <div key={i} className={`${cardBgCls} rounded-xl p-3`}>
-                <p className="text-purple-300 text-xs font-bold uppercase tracking-wide mb-1">{occasion}</p>
-                <p className={`${bodyTextCls} text-sm`}>{advice}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* COMBOS SUB-TAB */}
+      {activeSection === 'combos' && (
+        <div className="space-y-4 fade-up">
+          {featuredAdvice && (
+            <div className={`rounded-2xl p-4 border-2 border-purple-500/40 ${isDark ? 'bg-purple-900/20' : 'bg-purple-50'}`}>
+              <p className={`text-xs font-bold uppercase tracking-wide mb-1 ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>
+                ✨ For Your {occasionKey} Look
+              </p>
+              <p className={`text-sm font-medium ${isDark ? 'text-white/80' : 'text-gray-800'}`}>{featuredAdvice}</p>
+            </div>
+          )}
 
-      {/* Style tips */}
-      {styleTips.length > 0 && (
-        <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>💡 {t('styleTips')}</p>
-          <div className="space-y-2">
-            {styleTips.map((tip, i) => (
-              <div key={i} className={`flex items-start gap-2 ${cardBgCls} rounded-xl p-3`}>
-                <span className="text-purple-400 flex-shrink-0">✦</span>
-                <p className={`${tipTextCls} text-sm leading-relaxed`}>{tip}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Ethnic wear */}
-      {/* Body Type Tips */}
-      {bodyTypeTips.length > 0 && (
-        <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>
-            👤 {bodyType === 'slim' ? 'Slim Body' : bodyType === 'athletic' ? 'Athletic Body' : bodyType === 'plus' ? 'Plus Size' : 'Body Type'} Tips
-          </p>
-          <div className={`rounded-2xl p-4 space-y-2 border ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-200'}`}>
-            {bodyTypeTips.map((tip, i) => (
-              <div key={i} className="flex items-start gap-2">
-                <span className="text-blue-400 flex-shrink-0">✦</span>
-                <p className={`text-sm ${isDark ? 'text-blue-100/70' : 'text-blue-800'}`}>{tip}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {ethnicWear.length > 0 && (
-        <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🪷 {t('ethnicWear')}</p>
-          <div className={`rounded-2xl p-4 space-y-2 border ${isDark ? 'bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20' : 'bg-amber-50 border-amber-200'}`}>
-            {ethnicWear.map((s, i) => (
-              <div key={i} className="flex items-start gap-2">
-                <span className="text-amber-500 flex-shrink-0">★</span>
-                <p className={`text-sm ${isDark ? 'text-amber-100/70' : 'text-amber-800'}`}>{typeof s === "string" ? s : `${s.type}: ${s.colors} — ${s.occasion}`}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Saree suggestions (female) */}
-      {sareeSuggestions.length > 0 && (
-        <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>🥻 {t('sareeSuits')}</p>
-          <div className="space-y-2">
-            {sareeSuggestions.map((item, i) => (
-              <div key={i} className={`${isDark ? 'bg-white/5' : 'bg-white shadow-sm'} rounded-xl p-3 border border-pink-500/20`}>
-                <div className="flex items-start justify-between gap-2 flex-wrap">
-                  <div>
-                    <p className={`${isDark ? 'text-pink-200' : 'text-pink-700'} font-bold text-sm`}>{item.type}</p>
-                    <p className={`${isDark ? 'text-white/50' : 'text-gray-500'} text-xs mt-0.5`}>🎨 {item.colors}</p>
-                    <p className={`${mutedCls} text-xs`}>{item.reason}</p>
-                  </div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full border ${isDark ? 'bg-pink-500/20 text-pink-300 border-pink-500/20' : 'bg-pink-100 text-pink-700 border-pink-300 font-semibold'}`}>{item.occasion}</span>
+          {scoredOutfits.length > 0 ? (
+            <div className="space-y-2.5">
+              {scoredOutfits.map((combo, i) => (
+                <div key={i} className="relative">
+                  {combo.missionScore > 20 && (
+                    <div className="absolute -top-1.5 -right-1.5 z-10 bg-gradient-to-r from-purple-600 to-pink-600 text-[9px] font-black text-white px-2 py-0.5 rounded-full shadow-lg border border-white/20 uppercase tracking-tighter">
+                      Mission Match
+                    </div>
+                  )}
+                  <OutfitCard combo={combo} index={i} isDark={isDark} onShop={onShop} />
                 </div>
-                <ShoppingLinks colorName={`${item.colors} ${item.type}`} category="saree" gender="female" onShop={onShop} />
+              ))}
+            </div>
+          ) : (
+            <p className={`${sectionLabelCls} text-xs text-center py-6`}>No outfit combos generated. Try analyzing again.</p>
+          )}
+        </div>
+      )}
+
+      {/* SAREES & SUITS SUB-TAB (Female) */}
+      {isFemale && activeSection === 'sarees' && (
+        <div className="space-y-4 fade-up">
+          {sareeSuggestions.length > 0 ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>🥻 Saree & Suit Recommendations</p>
+                <span className="text-[10px] font-bold text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded-full">
+                  {sareeSuggestions.length} Curated Looks
+                </span>
               </div>
-            ))}
-          </div>
+              {sareeSuggestions.map((item, i) => (
+                <div key={i} className={`${isDark ? 'bg-white/5' : 'bg-white shadow-sm'} rounded-2xl p-4 border border-pink-500/20 transition-all hover:border-pink-500/40`}>
+                  <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                    <div>
+                      <p className={`${isDark ? 'text-pink-200' : 'text-pink-700'} font-black text-base`}>{item.type}</p>
+                      <p className={`${isDark ? 'text-white/70' : 'text-gray-600'} text-xs font-semibold mt-0.5`}>🎨 Best Shades: {item.colors}</p>
+                      <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>
+                    </div>
+                    <span className={`text-[10px] px-2.5 py-1 rounded-full border uppercase tracking-wider font-bold ${
+                      isDark ? 'bg-pink-500/20 text-pink-300 border-pink-500/30' : 'bg-pink-100 text-pink-700 border-pink-300'
+                    }`}>
+                      {item.occasion}
+                    </span>
+                  </div>
+                  <ShoppingLinks colorName={`${item.colors} ${item.type}`} category="saree" gender="female" onShop={onShop} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-3xl mb-2">🥻</p>
+              <p className={`${sectionLabelCls} text-xs`}>No saree recommendations available for this skin tone.</p>
+            </div>
+          )}
+
+          {ethnicWear.length > 0 && ethnicWear !== sareeSuggestions && (
+            <div className="space-y-2 pt-2">
+              <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>🪷 Traditional Styling Notes</p>
+              <div className={`rounded-2xl p-4 space-y-2 border ${isDark ? 'bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20' : 'bg-amber-50 border-amber-200'}`}>
+                {ethnicWear.map((s, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="text-amber-500 flex-shrink-0">★</span>
+                    <p className={`text-sm ${isDark ? 'text-amber-100/70' : 'text-amber-800'}`}>{typeof s === "string" ? s : `${s.type}: ${s.colors} — ${s.occasion}`}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ETHNIC WEAR SUB-TAB (Male) */}
+      {!isFemale && activeSection === 'ethnic' && (
+        <div className="space-y-4 fade-up">
+          {ethnicWear.length > 0 ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>🪷 Men's Ethnic & Festive Wear</p>
+                <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
+                  Festive Ready
+                </span>
+              </div>
+              <div className="space-y-2.5">
+                {ethnicWear.map((s, i) => {
+                  const title = typeof s === "string" ? s : (s.type || "Kurta");
+                  const colors = typeof s === "string" ? "" : (s.colors || "");
+                  const occasion = typeof s === "string" ? "Festive" : (s.occasion || "Festive");
+                  return (
+                    <div key={i} className={`rounded-2xl p-4 border transition-all ${
+                      isDark ? 'bg-white/5 border-amber-500/20' : 'bg-white border-amber-200 shadow-sm'
+                    }`}>
+                      <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                        <div>
+                          <p className={`font-black text-sm ${isDark ? 'text-amber-200' : 'text-amber-800'}`}>{title}</p>
+                          {colors && <p className={`text-xs ${isDark ? 'text-white/60' : 'text-gray-600'} mt-0.5`}>🎨 Recommended: {colors}</p>}
+                        </div>
+                        <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                          isDark ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-amber-100 text-amber-800'
+                        }`}>
+                          {occasion}
+                        </span>
+                      </div>
+                      <ShoppingLinks colorName={`${colors} ${title}`} category="kurta" gender="male" onShop={onShop} />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-3xl mb-2">🪷</p>
+              <p className={`${sectionLabelCls} text-xs`}>No ethnic wear items found for this profile.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* OCCASIONS SUB-TAB */}
+      {activeSection === 'occasions' && (
+        <div className="space-y-4 fade-up">
+          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>📅 {t('whatToWear')} by Occasion</p>
+          {Object.keys(occasionAdvice).length > 0 ? (
+            <div className="space-y-2.5">
+              {Object.entries(occasionAdvice).map(([occasion, advice], i) => {
+                const isSelected = occasionKey && occasion.toLowerCase().includes(userOccasion);
+                return (
+                  <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all ${
+                    isSelected ? 'border-2 border-purple-500/50 bg-purple-500/5' : ''
+                  }`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-purple-300 text-xs font-bold uppercase tracking-wide">{occasion}</p>
+                      {isSelected && <span className="text-[9px] font-black uppercase tracking-wider text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">Your Pick</span>}
+                    </div>
+                    <p className={`${bodyTextCls} text-sm leading-relaxed`}>{advice}</p>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className={`${sectionLabelCls} text-xs text-center py-6`}>No occasion advice available.</p>
+          )}
+        </div>
+      )}
+
+      {/* TIPS SUB-TAB */}
+      {activeSection === 'tips' && (
+        <div className="space-y-4 fade-up">
+          {/* Body Type Tips */}
+          {bodyTypeTips.length > 0 && (
+            <div>
+              <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>
+                👤 {bodyType === 'slim' ? 'Slim Body' : bodyType === 'athletic' ? 'Athletic Body' : bodyType === 'plus' ? 'Plus Size' : 'Body Silhouette'} Styling Tips
+              </p>
+              <div className={`rounded-2xl p-4 space-y-2.5 border ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-200'}`}>
+                {bodyTypeTips.map((tip, i) => (
+                  <div key={i} className="flex items-start gap-2.5">
+                    <span className="text-blue-400 font-bold flex-shrink-0 text-sm">✦</span>
+                    <p className={`text-sm leading-relaxed ${isDark ? 'text-blue-100/80' : 'text-blue-800'}`}>{tip}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Style Tips */}
+          {styleTips.length > 0 && (
+            <div>
+              <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>💡 {t('styleTips')}</p>
+              <div className="space-y-2">
+                {styleTips.map((tip, i) => (
+                  <div key={i} className={`flex items-start gap-2.5 ${cardBgCls} rounded-2xl p-3.5`}>
+                    <span className="text-purple-400 font-bold flex-shrink-0 text-sm">✦</span>
+                    <p className={`${tipTextCls} text-sm leading-relaxed`}>{tip}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -1175,6 +1423,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
 function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark, onShop }) {
   const accessories = recommendations.accessories || [];
   const accentColors = recommendations.accent_colors || [];
+  const [activeAccSection, setActiveAccSection] = useState(isFemale && accessories.length === 0 && makeupSuggestions.length > 0 ? 'makeup' : 'accessories');
 
   const getAccCat = (typeLC, isFem) => {
     if (typeLC.includes('earring')) return 'earrings';
@@ -1196,77 +1445,145 @@ function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark, 
   const cardBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
   const subCls = isDark ? 'text-white/50' : 'text-gray-500';
   const mutedCls = isDark ? 'text-white/30' : 'text-gray-400';
-
   const emptyTextCls = isDark ? 'text-white/40' : 'text-gray-400';
 
-  return (
-    <div className="space-y-5">
-      {/* Female accessories */}
-      {isFemale && accessories.length > 0 && (
-        <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>👜 Accessories & Jewellery</p>
-          <div className="space-y-2">
-            {accessories.map((item, i) => {
-              const typeLC = (item.type || '').toLowerCase();
-              const cat = getAccCat(typeLC, true);
-              const searchTerm = item.colors || item.suggestion || item.type;
-              return (
-                <div key={i} className={`${cardBgCls} rounded-xl p-3`}>
-                  <p className="text-purple-300 font-bold text-sm">{item.type}</p>
-                  <p className={`${subCls} text-xs mt-0.5`}>{item.suggestion || item.colors}</p>
-                  {item.reason && <p className={`${mutedCls} text-xs`}>{item.reason}</p>}
-                  <ShoppingLinks colorName={searchTerm} category={cat} gender="female" onShop={onShop} />
-                </div>
-              );
-            })}
-          </div>
+  if (isFemale) {
+    return (
+      <div className="space-y-4">
+        {/* Female Sub-segmenter: Jewellery & Accessories vs. Makeup Suite */}
+        <div className={`flex p-1 rounded-2xl border gap-1 ${
+          isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'
+        }`}>
+          <button
+            onClick={() => setActiveAccSection('accessories')}
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all text-center whitespace-nowrap ${
+              activeAccSection === 'accessories'
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
+                : isDark ? 'text-white/50 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+            }`}
+          >
+            👜 Jewellery & Bags ({accessories.length})
+          </button>
+          <button
+            onClick={() => setActiveAccSection('makeup')}
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all text-center whitespace-nowrap ${
+              activeAccSection === 'makeup'
+                ? 'bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-md'
+                : isDark ? 'text-white/50 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+            }`}
+          >
+            💄 Makeup Suite ({makeupSuggestions.length})
+          </button>
         </div>
-      )}
 
-      {/* Male accent colors / accessories */}
-      {!isFemale && accentColors.length > 0 && (
-        <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>⌚ Accessories For You</p>
-          <div className="space-y-2">
-            {accentColors.map((item, i) => {
-              const typeLC = (item.type || '').toLowerCase();
-              const cat = getAccCat(typeLC, false);
-              const searchTerm = item.colors || item.name || item.suggestion || item.type;
-              return (
-                <div key={i} className={`${cardBgCls} rounded-xl p-3`}>
-                  <p className="text-purple-300 font-bold text-sm">{item.type}</p>
-                  <p className={`${subCls} text-xs mt-0.5`}>{item.name}</p>
-                  {item.reason && <p className={`${mutedCls} text-xs`}>{item.reason}</p>}
-                  <ShoppingLinks colorName={searchTerm} category={cat} gender="male" onShop={onShop} />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Makeup (female) */}
-      {isFemale && makeupSuggestions.length > 0 && (
-        <div>
-          <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide mb-2`}>💄 Makeup Suggestions</p>
-          <div className="space-y-2">
-            {makeupSuggestions.map((item, i) => (
-              <div key={i} className={`${isDark ? 'bg-white/5' : 'bg-white shadow-sm'} rounded-xl p-3 border border-rose-500/20`}>
-                <p className="text-rose-200 font-bold text-sm">{item.product}</p>
-                <p className={`${subCls} text-xs mt-0.5`}>{item.shade || item.shades}</p>
-                {item.brands && <p className={`${mutedCls} text-xs`}>Brands: {item.brands}</p>}
-                <MakeupShoppingLinks product={item.product} shade={item.shade || item.shades} onShop={onShop} />
-                {item.tip && <p className={`${isDark ? 'text-white/40' : 'text-gray-400'} text-xs mt-2 italic`}>💡 {item.tip}</p>}
+        {/* FEMALE ACCESSORIES */}
+        {activeAccSection === 'accessories' && (
+          <div className="space-y-3 fade-up">
+            <div className="flex items-center justify-between">
+              <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>👜 Curated Jewellery & Accents</p>
+              <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+                {accessories.length} Items
+              </span>
+            </div>
+            {accessories.length > 0 ? (
+              <div className="space-y-2.5">
+                {accessories.map((item, i) => {
+                  const typeLC = (item.type || '').toLowerCase();
+                  const cat = getAccCat(typeLC, true);
+                  const searchTerm = item.colors || item.suggestion || item.type;
+                  return (
+                    <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <p className="text-purple-300 font-black text-sm">{item.type}</p>
+                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{cat}</span>
+                      </div>
+                      <p className={`${subCls} text-xs font-semibold`}>{item.suggestion || item.colors}</p>
+                      {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
+                      <ShoppingLinks colorName={searchTerm} category={cat} gender="female" onShop={onShop} />
+                    </div>
+                  );
+                })}
               </div>
-            ))}
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-3xl mb-2">👜</p>
+                <p className={`${emptyTextCls} text-xs`}>No accessories data available</p>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
 
-      {!isFemale && accentColors.length === 0 && (
+        {/* FEMALE MAKEUP SUITE */}
+        {activeAccSection === 'makeup' && (
+          <div className="space-y-3 fade-up">
+            <div className="flex items-center justify-between">
+              <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>💄 Skin-Tone Matched Cosmetics</p>
+              <span className="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full">
+                Personalized
+              </span>
+            </div>
+            {makeupSuggestions.length > 0 ? (
+              <div className="space-y-3">
+                {makeupSuggestions.map((item, i) => (
+                  <div key={i} className={`${isDark ? 'bg-white/5' : 'bg-white shadow-sm'} rounded-2xl p-4 border border-rose-500/20 transition-all hover:border-rose-500/40`}>
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <p className="text-rose-200 font-black text-sm">{item.product}</p>
+                      <span className="text-[10px] font-bold text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded-full">
+                        {item.shade || item.shades || 'Curated'}
+                      </span>
+                    </div>
+                    <p className={`${subCls} text-xs font-semibold`}>{item.shade || item.shades}</p>
+                    {item.brands && <p className={`${mutedCls} text-xs mt-0.5`}>Recommended Brands: <span className="text-white/60 font-medium">{item.brands}</span></p>}
+                    <MakeupShoppingLinks product={item.product} shade={item.shade || item.shades} onShop={onShop} />
+                    {item.tip && <p className={`${isDark ? 'text-white/50' : 'text-gray-500'} text-xs mt-2 italic border-t border-white/5 pt-2`}>💡 {item.tip}</p>}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-3xl mb-2">💄</p>
+                <p className={`${emptyTextCls} text-xs`}>No makeup suggestions available</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Male Accessories View (Masculine & Zero Makeup)
+  return (
+    <div className="space-y-4 fade-up">
+      <div className="flex items-center justify-between">
+        <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>⌚ Men's Essential Accessories</p>
+        <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+          {accentColors.length} Items
+        </span>
+      </div>
+
+      {accentColors.length > 0 ? (
+        <div className="space-y-2.5">
+          {accentColors.map((item, i) => {
+            const typeLC = (item.type || '').toLowerCase();
+            const cat = getAccCat(typeLC, false);
+            const searchTerm = item.colors || item.name || item.suggestion || item.type;
+            return (
+              <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <p className="text-purple-300 font-black text-sm">{item.type}</p>
+                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{cat}</span>
+                </div>
+                <p className={`${subCls} text-xs font-semibold`}>{item.name}</p>
+                {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
+                <ShoppingLinks colorName={searchTerm} category={cat} gender="male" onShop={onShop} />
+              </div>
+            );
+          })}
+        </div>
+      ) : (
         <div className="text-center py-8">
-          <p className="text-4xl mb-3">⌚</p>
-          <p className={`${emptyTextCls} text-sm`}>No accessories data available</p>
+          <p className="text-3xl mb-2">⌚</p>
+          <p className={`${emptyTextCls} text-sm`}>No accessories data available for this profile</p>
         </div>
       )}
     </div>
