@@ -13,6 +13,7 @@
 
 import { useState, useEffect, useContext, lazy, Suspense, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { logout, saveHistory, getHistory, auth, destroyUserAccount, updateDailyStreak, saveNotificationPreference, setupFCMToken } from '../api/styleApi';
 import confetti from 'canvas-confetti';
 import { useNotifications } from '../hooks/useNotifications';
@@ -524,6 +525,15 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
   const [destroying, setDestroying] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // Lock body scroll when settings sheet is open
+  useEffect(() => {
+    if (isMenuOpen && typeof document !== 'undefined') {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [isMenuOpen]);
+
   // Language pill options
   const LANGUAGES = [
     { code: 'en', label: 'EN', full: 'English' },
@@ -666,299 +676,304 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
         }
       />
 
-      {/* ── Settings & Preferences Slide-Up Sheet ── */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div 
-            key="settings-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={() => setIsMenuOpen(false)}
-            style={{ 
-              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-              zIndex: 1000, 
-              background: 'rgba(0, 0, 0, 0.55)', 
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-              display: 'flex',
-              alignItems: 'flex-end',
-              justifyContent: 'center'
-            }}
-          >
+      {/* ── Settings & Preferences Slide-Up Sheet via Portal to document.body ── */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {isMenuOpen && (
             <motion.div 
-              key="settings-sheet"
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              onClick={e => e.stopPropagation()}
+              key="settings-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setIsMenuOpen(false)}
               style={{ 
-                width: '100%', maxWidth: 480,
-                background: C.isDark ? '#0F172A' : '#FFFFFF',
-                borderTop: `1px solid ${C.border}`,
-                borderLeft: `1px solid ${C.border}`,
-                borderRight: `1px solid ${C.border}`,
-                borderRadius: '26px 26px 0 0',
-                boxShadow: '0 -10px 40px rgba(0,0,0,0.35)',
-                maxHeight: '90dvh',
-                display: 'flex', flexDirection: 'column', overflow: 'hidden'
+                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+                zIndex: 99999, 
+                background: 'rgba(0, 0, 0, 0.65)', 
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                display: 'flex',
+                alignItems: 'flex-end',
+                justifyContent: 'center',
+                padding: 0, margin: 0, boxSizing: 'border-box'
               }}
             >
-              {/* Handlebar */}
-              <div style={{ width: '100%', display: 'flex', justifyContent: 'center', paddingTop: 10, paddingBottom: 4 }}>
-                <div style={{ width: 40, height: 4, borderRadius: 2, background: C.isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' }} />
-              </div>
-
-              {/* Sheet Header */}
-              <div style={{ padding: '10px 20px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.divider}` }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(139,92,246,0.12)', border: `1px solid rgba(139,92,246,0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px' }}>
-                    ⚙️
-                  </div>
-                  <div>
-                    <h3 style={{ fontFamily: PDI, fontSize: '17px', fontWeight: 600, color: C.text, margin: 0 }}>Settings & Preferences</h3>
-                    <p style={{ fontFamily: PJS, fontSize: '11px', color: C.muted, margin: 0 }}>Configure your app & profile</p>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setIsMenuOpen(false)}
-                  title="Close"
-                  style={{ 
-                    width: 32, height: 32, borderRadius: '50%',
-                    background: C.glass2, border: `1px solid ${C.border}`,
-                    color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer', fontSize: '14px', transition: 'all 0.2s'
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.color = C.text; }}
-                  onMouseLeave={e => { e.currentTarget.style.color = C.muted; }}
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Scrollable Content */}
-              <div style={{ overflowY: 'auto', flex: 1, padding: '16px 20px 24px', WebkitOverflowScrolling: 'touch' }}>
-
-                {/* ── GROUP 1: PREFERENCES ── */}
-                <p style={{ fontSize: '10px', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.14em', fontWeight: 700, margin: '0 0 8px 4px', fontFamily: PJS }}>
-                  App Experience
-                </p>
-                <div style={{ background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 16, overflow: 'hidden', marginBottom: 18 }}>
-                  
-                  {/* Theme Row */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px' }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: theme === 'dark' ? 'rgba(99,102,241,0.15)' : 'rgba(245,158,11,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
-                      {theme === 'dark' ? '🌙' : '☀️'}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>App Theme</p>
-                      <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</p>
-                    </div>
-                    <ThemeToggle theme={theme} onToggle={() => { toggleTheme(); onToast({ message: `Switched mode`, type: 'success' }); }} C={C} />
-                  </div>
-
-                  <div style={{ height: 1, background: C.divider, margin: '0 16px' }} />
-
-                  {/* Language Row */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px' }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(59,130,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
-                      🌐
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Language</p>
-                      <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>Choose dialect</p>
-                    </div>
-                    <div style={{ display: 'flex', gap: 4, background: C.isDark ? 'rgba(0,0,0,0.25)' : 'rgba(0,0,0,0.06)', padding: 3, borderRadius: 20 }}>
-                      {LANGUAGES.map(lang => (
-                        <button key={lang.code}
-                          onClick={() => handleLangChange(lang.code)}
-                          style={{
-                            padding: '4px 10px', borderRadius: 14,
-                            background: language === lang.code ? GRAD : 'transparent',
-                            border: 'none',
-                            color: language === lang.code ? 'white' : C.muted,
-                            fontSize: '11px', fontWeight: language === lang.code ? 700 : 500,
-                            cursor: 'pointer', transition: 'all 0.2s', fontFamily: PJS,
-                            boxShadow: language === lang.code ? '0 2px 6px rgba(139,92,246,0.3)' : 'none'
-                          }}>
-                          {lang.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div style={{ height: 1, background: C.divider, margin: '0 16px' }} />
-
-                  {/* Notifications Row */}
-                  <div 
-                    onClick={handleNotifToggle}
-                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', cursor: 'pointer' }}
-                  >
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: notifOn ? 'rgba(16,185,129,0.15)' : 'rgba(148,163,184,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
-                      {notifOn ? '🔔' : '🔕'}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Daily Style Notifications</p>
-                      <p style={{ fontSize: '11px', color: C.muted, margin: '2px 0 0', fontFamily: PJS, lineHeight: '1.4' }}>
-                        {notifOn 
-                          ? '🌅 Morning brief + 🔥 Streak guard active'
-                          : notif?.permission === 'denied' 
-                            ? '⚠️ Blocked in browser settings'
-                            : 'Daily outfit briefs & reminders'}
-                      </p>
-                    </div>
-                    <div style={{ width: 38, height: 22, borderRadius: 11, background: notifOn ? 'linear-gradient(135deg,#8B5CF6,#6366F1)' : C.border, position: 'relative', flexShrink: 0, transition: 'background 0.3s' }}>
-                      <div style={{ position: 'absolute', top: 2, left: notifOn ? 18 : 2, width: 18, height: 18, borderRadius: '50%', background: 'white', transition: 'left 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
-                    </div>
-                  </div>
-
+              <motion.div 
+                key="settings-sheet"
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+                onClick={e => e.stopPropagation()}
+                style={{ 
+                  width: '100%', maxWidth: 480,
+                  background: C.isDark ? '#0F172A' : '#FFFFFF',
+                  borderTop: `1px solid ${C.border}`,
+                  borderLeft: `1px solid ${C.border}`,
+                  borderRight: `1px solid ${C.border}`,
+                  borderRadius: '26px 26px 0 0',
+                  boxShadow: '0 -10px 40px rgba(0,0,0,0.45)',
+                  maxHeight: '85dvh',
+                  display: 'flex', flexDirection: 'column', overflow: 'hidden',
+                  paddingBottom: 'env(safe-area-inset-bottom, 16px)'
+                }}
+              >
+                {/* Handlebar */}
+                <div style={{ width: '100%', display: 'flex', justifyContent: 'center', paddingTop: 10, paddingBottom: 4 }}>
+                  <div style={{ width: 40, height: 4, borderRadius: 2, background: C.isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' }} />
                 </div>
 
-                {/* ── GROUP 2: HELP & FEEDBACK ── */}
-                <p style={{ fontSize: '10px', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.14em', fontWeight: 700, margin: '0 0 8px 4px', fontFamily: PJS }}>
-                  Help & Feedback
-                </p>
-                <div style={{ background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 16, overflow: 'hidden', marginBottom: 18 }}>
-                  
-                  {/* Contact Support */}
-                  <button
-                    onClick={() => window.open('mailto:StyleGuruAI.in.gmail@gmail.com', '_blank')}
-                    style={{
-                      width: '100%', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14,
-                      background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s'
+                {/* Sheet Header */}
+                <div style={{ padding: '10px 20px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.divider}` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(139,92,246,0.12)', border: `1px solid rgba(139,92,246,0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px' }}>
+                      ⚙️
+                    </div>
+                    <div>
+                      <h3 style={{ fontFamily: PDI, fontSize: '17px', fontWeight: 600, color: C.text, margin: 0 }}>Settings & Preferences</h3>
+                      <p style={{ fontFamily: PJS, fontSize: '11px', color: C.muted, margin: 0 }}>Configure your app & profile</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setIsMenuOpen(false)}
+                    title="Close"
+                    style={{ 
+                      width: 32, height: 32, borderRadius: '50%',
+                      background: C.glass2, border: `1px solid ${C.border}`,
+                      color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: 'pointer', fontSize: '14px', transition: 'all 0.2s'
                     }}
-                    onMouseEnter={e => e.currentTarget.style.background = C.glass}
-                    onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                    onMouseEnter={e => { e.currentTarget.style.color = C.text; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = C.muted; }}
                   >
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
-                      💬
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Contact Support</p>
-                      <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>StyleGuruAI.in.gmail@gmail.com</p>
-                    </div>
-                    <span style={{ fontSize: '14px', color: C.muted }}>→</span>
-                  </button>
-
-                  <div style={{ height: 1, background: C.divider, margin: '0 16px' }} />
-
-                  {/* Rate App */}
-                  <button
-                    onClick={() => window.open('https://play.google.com/store/apps/details?id=com.StyleGuruAI', '_blank')}
-                    style={{
-                      width: '100%', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14,
-                      background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.background = C.glass}
-                    onMouseLeave={e => e.currentTarget.style.background = 'none'}
-                  >
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(245,158,11,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
-                      ⭐
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Rate StyleGuru AI</p>
-                      <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>Leave a review on Google Play</p>
-                    </div>
-                    <span style={{ fontSize: '13px', color: C.muted }}>↗</span>
-                  </button>
-
-                </div>
-
-                {/* ── GROUP 3: ACCOUNT & SESSION ── */}
-                <p style={{ fontSize: '10px', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.14em', fontWeight: 700, margin: '0 0 8px 4px', fontFamily: PJS }}>
-                  Account
-                </p>
-                <div style={{ background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 16, overflow: 'hidden', marginBottom: 18 }}>
-                  <button
-                    onClick={onLogout}
-                    style={{
-                      width: '100%', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14,
-                      background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.background = C.glass}
-                    onMouseLeave={e => e.currentTarget.style.background = 'none'}
-                  >
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(148,163,184,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
-                      🚪
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Sign Out</p>
-                      <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>{user?.email || 'Current session'}</p>
-                    </div>
-                    <span style={{ fontSize: '14px', color: C.muted }}>→</span>
+                    ✕
                   </button>
                 </div>
 
-                {/* ── GROUP 4: DANGER ZONE ── */}
-                <p style={{ fontSize: '10px', color: C.dangerText, textTransform: 'uppercase', letterSpacing: '0.14em', fontWeight: 700, margin: '0 0 8px 4px', fontFamily: PJS }}>
-                  Danger Zone
-                </p>
-                <div style={{ background: C.dangerBg, border: `1px solid ${C.dangerBorder}`, borderRadius: 16, overflow: 'hidden' }}>
-                  
-                  {/* Clear Local Data */}
-                  <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(239,68,68,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
-                      🗑️
+                {/* Scrollable Content */}
+                <div style={{ overflowY: 'auto', flex: 1, padding: '16px 20px 24px', WebkitOverflowScrolling: 'touch' }}>
+
+                  {/* ── GROUP 1: PREFERENCES ── */}
+                  <p style={{ fontSize: '10px', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.14em', fontWeight: 700, margin: '0 0 8px 4px', fontFamily: PJS }}>
+                    App Experience
+                  </p>
+                  <div style={{ background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 16, overflow: 'hidden', marginBottom: 18 }}>
+                    
+                    {/* Theme Row */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px' }}>
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: theme === 'dark' ? 'rgba(99,102,241,0.15)' : 'rgba(245,158,11,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                        {theme === 'dark' ? '🌙' : '☀️'}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>App Theme</p>
+                        <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</p>
+                      </div>
+                      <ThemeToggle theme={theme} onToggle={() => { toggleTheme(); onToast({ message: `Switched mode`, type: 'success' }); }} C={C} />
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: '13px', color: C.dangerText, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Clear Local Cache</p>
-                      <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>Resets offline saved cache</p>
+
+                    <div style={{ height: 1, background: C.divider, margin: '0 16px' }} />
+
+                    {/* Language Row */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px' }}>
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(59,130,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                        🌐
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Language</p>
+                        <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>Choose dialect</p>
+                      </div>
+                      <div style={{ display: 'flex', gap: 4, background: C.isDark ? 'rgba(0,0,0,0.25)' : 'rgba(0,0,0,0.06)', padding: 3, borderRadius: 20 }}>
+                        {LANGUAGES.map(lang => (
+                          <button key={lang.code}
+                            onClick={() => handleLangChange(lang.code)}
+                            style={{
+                              padding: '4px 10px', borderRadius: 14,
+                              background: language === lang.code ? GRAD : 'transparent',
+                              border: 'none',
+                              color: language === lang.code ? 'white' : C.muted,
+                              fontSize: '11px', fontWeight: language === lang.code ? 700 : 500,
+                              cursor: 'pointer', transition: 'all 0.2s', fontFamily: PJS,
+                              boxShadow: language === lang.code ? '0 2px 6px rgba(139,92,246,0.3)' : 'none'
+                            }}>
+                            {lang.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <button
-                      onClick={() => {
-                        if (window.confirm('Clear all local data?')) {
-                          localStorage.clear();
-                          onToast({ message: 'Local data cleared', type: 'success' });
-                        }
-                      }}
-                      style={{
-                        padding: '6px 12px', borderRadius: 8,
-                        background: 'rgba(239,68,68,0.12)', border: `1px solid ${C.dangerBorder}`,
-                        color: C.dangerText, fontSize: '11px', fontWeight: 600,
-                        cursor: 'pointer', fontFamily: PJS, transition: 'all 0.2s'
-                      }}
+
+                    <div style={{ height: 1, background: C.divider, margin: '0 16px' }} />
+
+                    {/* Notifications Row */}
+                    <div 
+                      onClick={handleNotifToggle}
+                      style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', cursor: 'pointer' }}
                     >
-                      Clear
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: notifOn ? 'rgba(16,185,129,0.15)' : 'rgba(148,163,184,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                        {notifOn ? '🔔' : '🔕'}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Daily Style Notifications</p>
+                        <p style={{ fontSize: '11px', color: C.muted, margin: '2px 0 0', fontFamily: PJS, lineHeight: '1.4' }}>
+                          {notifOn 
+                            ? '🌅 Morning brief + 🔥 Streak guard active'
+                            : notif?.permission === 'denied' 
+                              ? '⚠️ Blocked in browser settings'
+                              : 'Daily outfit briefs & reminders'}
+                        </p>
+                      </div>
+                      <div style={{ width: 38, height: 22, borderRadius: 11, background: notifOn ? 'linear-gradient(135deg,#8B5CF6,#6366F1)' : C.border, position: 'relative', flexShrink: 0, transition: 'background 0.3s' }}>
+                        <div style={{ position: 'absolute', top: 2, left: notifOn ? 18 : 2, width: 18, height: 18, borderRadius: '50%', background: 'white', transition: 'left 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* ── GROUP 2: HELP & FEEDBACK ── */}
+                  <p style={{ fontSize: '10px', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.14em', fontWeight: 700, margin: '0 0 8px 4px', fontFamily: PJS }}>
+                    Help & Feedback
+                  </p>
+                  <div style={{ background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 16, overflow: 'hidden', marginBottom: 18 }}>
+                    
+                    {/* Contact Support */}
+                    <button
+                      onClick={() => window.open('mailto:StyleGuruAI.in.gmail@gmail.com', '_blank')}
+                      style={{
+                        width: '100%', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14,
+                        background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = C.glass}
+                      onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                    >
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                        💬
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Contact Support</p>
+                        <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>StyleGuruAI.in.gmail@gmail.com</p>
+                      </div>
+                      <span style={{ fontSize: '14px', color: C.muted }}>→</span>
+                    </button>
+
+                    <div style={{ height: 1, background: C.divider, margin: '0 16px' }} />
+
+                    {/* Rate App */}
+                    <button
+                      onClick={() => window.open('https://play.google.com/store/apps/details?id=com.StyleGuruAI', '_blank')}
+                      style={{
+                        width: '100%', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14,
+                        background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = C.glass}
+                      onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                    >
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(245,158,11,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                        ⭐
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Rate StyleGuru AI</p>
+                        <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>Leave a review on Google Play</p>
+                      </div>
+                      <span style={{ fontSize: '13px', color: C.muted }}>↗</span>
+                    </button>
+
+                  </div>
+
+                  {/* ── GROUP 3: ACCOUNT & SESSION ── */}
+                  <p style={{ fontSize: '10px', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.14em', fontWeight: 700, margin: '0 0 8px 4px', fontFamily: PJS }}>
+                    Account
+                  </p>
+                  <div style={{ background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 16, overflow: 'hidden', marginBottom: 18 }}>
+                    <button
+                      onClick={onLogout}
+                      style={{
+                        width: '100%', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14,
+                        background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = C.glass}
+                      onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                    >
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(148,163,184,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                        🚪
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Sign Out</p>
+                        <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>{user?.email || 'Current session'}</p>
+                      </div>
+                      <span style={{ fontSize: '14px', color: C.muted }}>→</span>
                     </button>
                   </div>
 
-                  <div style={{ height: 1, background: C.dangerBorder, margin: '0 16px' }} />
+                  {/* ── GROUP 4: DANGER ZONE ── */}
+                  <p style={{ fontSize: '10px', color: C.dangerText, textTransform: 'uppercase', letterSpacing: '0.14em', fontWeight: 700, margin: '0 0 8px 4px', fontFamily: PJS }}>
+                    Danger Zone
+                  </p>
+                  <div style={{ background: C.dangerBg, border: `1px solid ${C.dangerBorder}`, borderRadius: 16, overflow: 'hidden' }}>
+                    
+                    {/* Clear Local Data */}
+                    <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(239,68,68,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                        🗑️
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: '13px', color: C.dangerText, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Clear Local Cache</p>
+                        <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>Resets offline saved cache</p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (window.confirm('Clear all local data?')) {
+                            localStorage.clear();
+                            onToast({ message: 'Local data cleared', type: 'success' });
+                          }
+                        }}
+                        style={{
+                          padding: '6px 12px', borderRadius: 8,
+                          background: 'rgba(239,68,68,0.12)', border: `1px solid ${C.dangerBorder}`,
+                          color: C.dangerText, fontSize: '11px', fontWeight: 600,
+                          cursor: 'pointer', fontFamily: PJS, transition: 'all 0.2s'
+                        }}
+                      >
+                        Clear
+                      </button>
+                    </div>
 
-                  {/* Delete Account Permanently */}
-                  <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
-                      ⚠️
+                    <div style={{ height: 1, background: C.dangerBorder, margin: '0 16px' }} />
+
+                    {/* Delete Account Permanently */}
+                    <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                        ⚠️
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: '13px', color: C.dangerText, margin: 0, fontFamily: PJS, fontWeight: 700 }}>Delete Account</p>
+                        <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>Irreversible action</p>
+                      </div>
+                      <button
+                        disabled={destroying}
+                        onClick={handleDestroyAccount}
+                        style={{
+                          padding: '6px 12px', borderRadius: 8,
+                          background: 'linear-gradient(135deg, #EF4444, #DC2626)', border: 'none',
+                          color: 'white', fontSize: '11px', fontWeight: 700,
+                          cursor: destroying ? 'wait' : 'pointer', fontFamily: PJS, transition: 'all 0.2s',
+                          boxShadow: '0 2px 8px rgba(239,68,68,0.3)',
+                          opacity: destroying ? 0.6 : 1
+                        }}
+                      >
+                        {destroying ? 'Deleting...' : 'Delete'}
+                      </button>
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: '13px', color: C.dangerText, margin: 0, fontFamily: PJS, fontWeight: 700 }}>Delete Account</p>
-                      <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>Irreversible action</p>
-                    </div>
-                    <button
-                      disabled={destroying}
-                      onClick={handleDestroyAccount}
-                      style={{
-                        padding: '6px 12px', borderRadius: 8,
-                        background: 'linear-gradient(135deg, #EF4444, #DC2626)', border: 'none',
-                        color: 'white', fontSize: '11px', fontWeight: 700,
-                        cursor: destroying ? 'wait' : 'pointer', fontFamily: PJS, transition: 'all 0.2s',
-                        boxShadow: '0 2px 8px rgba(239,68,68,0.3)',
-                        opacity: destroying ? 0.6 : 1
-                      }}
-                    >
-                      {destroying ? 'Deleting...' : 'Delete'}
-                    </button>
+
                   </div>
 
                 </div>
 
-              </div>
-
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
 
       {/* User Identity Card */}
@@ -1118,51 +1133,6 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
          </div>
       </GlassCard>
 
-      {/* ── Settings & Preferences Direct Card (Bottom of Profile) ── */}
-      <GlassCard 
-        C={C} 
-        onClick={() => setIsMenuOpen(true)}
-        style={{ 
-          padding: '16px 20px', 
-          marginBottom: 16, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between',
-          cursor: 'pointer',
-          background: C.glass2,
-          border: `1px solid ${C.border}`,
-          borderRadius: 16,
-          transition: 'all 0.2s'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ 
-            width: 42, height: 42, borderRadius: 12, 
-            background: 'linear-gradient(135deg, rgba(139,92,246,0.18), rgba(99,102,241,0.12))', 
-            border: `1px solid rgba(139,92,246,0.25)`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '20px'
-          }}>
-            ⚙️
-          </div>
-          <div>
-            <p style={{ fontFamily: PJS, fontSize: '14px', fontWeight: 700, color: C.text, margin: '0 0 2px' }}>
-              Settings & Preferences
-            </p>
-            <p style={{ fontFamily: PJS, fontSize: '11px', color: C.muted, margin: 0 }}>
-              Theme, language, alerts & account options
-            </p>
-          </div>
-        </div>
-        <div style={{ 
-          width: 30, height: 30, borderRadius: 8, 
-          background: C.glass, border: `1px solid ${C.border}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: C.muted, fontSize: '13px'
-        }}>
-          →
-        </div>
-      </GlassCard>
       <div style={{ paddingBottom: 80 }} />
     </div>
 
