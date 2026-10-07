@@ -6,6 +6,7 @@ import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import { useAnalysisProgress } from '../hooks/useAnalysisProgress';
 import { FashionIcons, IconRenderer } from './Icons';
 import { compressImage } from '../utils/imageCompressor';
+import CameraModal from './CameraModal';
 
 // ── Skin Tone Quiz ────────────────────────────────────────────
 function SkinToneQuiz({ isDark, onResult, gender }) {
@@ -271,13 +272,21 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   const [gender, setGender] = useState(() => localStorage.getItem('sg_gender') || 'male');
   const [mode, setMode] = useState('normal');
   const [season, setSeason] = useState('summer');
-  const [bodyType, setBodyType] = useState('average');
-  const [occasion, setOccasion] = useState('casual');
-  const [budget, setBudget] = useState('any');
+  const bodyType = 'average';
+  const occasion = 'casual';
+  const budget = 'any';
   const [eyeColor, setEyeColor] = useState('brown');
+  const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
-  const [currentStep, setCurrentStep] = useState(0); // 0: Body, 1: Eye, 2: Occasion, 3: Budget, 4: Upload
+
+  const handleOpenSelfieCamera = () => {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      setIsCameraModalOpen(true);
+    } else {
+      cameraInputRef.current?.click();
+    }
+  };
 
   // Couple Mode States
   const [partner1, setPartner1] = useState(null);
@@ -617,95 +626,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
             )}
           </div>
 
-          {/* Quick Style Tuners (Optional - Instant 1-Tap) */}
-          {mode !== 'couple' && (
-            <div className={`rounded-2xl p-4 mb-5 border transition-all ${isDark ? 'bg-white/[0.03] border-white/10' : 'bg-white border-slate-200 shadow-sm'}`}>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
-                  🎯 Optional Style Tuners
-                </span>
-                <span className="text-[11px] font-medium opacity-60">
-                  Quick 1-Tap Fit & Vibe
-                </span>
-              </div>
 
-              {/* Occasion Row */}
-              <div className="mb-3">
-                <p className={`text-[11px] font-semibold mb-1.5 ${isDark ? 'text-white/70' : 'text-slate-600'}`}>Occasion</p>
-                <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-                  {[
-                    { value: 'casual', label: '😎 Casual' },
-                    { value: 'office', label: '💼 Office' },
-                    { value: 'party', label: '🎉 Party' },
-                    { value: 'wedding', label: '🥻 Wedding' },
-                    { value: 'date', label: '🌹 Date' },
-                  ].map(occ => (
-                    <button
-                      key={occ.value}
-                      onClick={() => setOccasion(occ.value)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        occasion === occ.value
-                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-sm'
-                          : isDark ? 'bg-white/5 text-white/70 hover:bg-white/10' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
-                    >
-                      {occ.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Body Type Row */}
-              <div className="mb-3">
-                <p className={`text-[11px] font-semibold mb-1.5 ${isDark ? 'text-white/70' : 'text-slate-600'}`}>Body Silhouette</p>
-                <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-                  {[
-                    { value: 'average', label: 'Regular / Avg' },
-                    { value: 'athletic', label: 'Athletic / Fit' },
-                    { value: 'slim', label: 'Slim / Lean' },
-                    { value: 'plus', label: 'Curvy / Plus' },
-                  ].map(bt => (
-                    <button
-                      key={bt.value}
-                      onClick={() => setBodyType(bt.value)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        bodyType === bt.value
-                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-sm'
-                          : isDark ? 'bg-white/5 text-white/70 hover:bg-white/10' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
-                    >
-                      {bt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Budget Row */}
-              <div>
-                <p className={`text-[11px] font-semibold mb-1.5 ${isDark ? 'text-white/70' : 'text-slate-600'}`}>Shopping Budget</p>
-                <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-                  {[
-                    { value: 'any', label: 'Any Budget' },
-                    { value: '500', label: 'Under ₹500' },
-                    { value: '1000', label: 'Under ₹1000' },
-                    { value: '2000', label: '₹2000+' },
-                  ].map(b => (
-                    <button
-                      key={b.value}
-                      onClick={() => setBudget(b.value)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                        budget === b.value
-                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-sm'
-                          : isDark ? 'bg-white/5 text-white/70 hover:bg-white/10' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
-                    >
-                      {b.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Photo Upload Area — Always Directly Accessible */}
           <div className="animate-fadeIn">
@@ -812,7 +733,8 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                       {/* Primary Camera & Gallery Buttons */}
                       <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto" onClick={e => e.stopPropagation()}>
                         <button
-                          onClick={() => cameraInputRef.current?.click()}
+                          type="button"
+                          onClick={handleOpenSelfieCamera}
                           className="flex-1 py-3.5 px-6 rounded-2xl text-sm font-bold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-lg shadow-purple-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                         >
                           <span className="text-base">📸</span>
@@ -879,6 +801,16 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           <SkinToneQuiz isDark={isDark} onResult={onAnalysisComplete} gender={gender} />
         </>
       )}
+
+      {/* Live Selfie Camera Modal */}
+      <CameraModal
+        isOpen={isCameraModalOpen}
+        onClose={() => setIsCameraModalOpen(false)}
+        onCapture={(capturedFile) => handleFile(capturedFile)}
+        onFallbackNativeCamera={() => cameraInputRef.current?.click()}
+        onFallbackGallery={() => fileInputRef.current?.click()}
+        isDark={isDark}
+      />
     </div>
   );
 }
