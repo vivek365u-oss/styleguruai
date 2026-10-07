@@ -14,6 +14,12 @@ import AffiliateLink from './AffiliateLink';
 import { buildMyntraUrl } from '../utils/myntraUrl';
 import { PRODUCT_LABEL_MAP } from '../utils/shoppingUrls';
 import ShopActionSheet from './ShopActionSheet';
+import {
+  deriveCategoryColors,
+  deriveOutfitSuites,
+  deriveAccessoriesSuite,
+  normalizeSkinProfile
+} from '../utils/colorTheoryEngine';
 
 
 
@@ -227,34 +233,42 @@ function OutfitCard({ combo, index, isDark, onShop }) {
     emerald: "from-emerald-500/20 to-emerald-600/10 border-emerald-500/30",
     amber: "from-amber-500/20 to-amber-600/10 border-amber-500/30",
   };
-  const topItem = combo.shirt || combo.top || combo.dress || "";
-  const bottomItem = combo.pant || combo.bottom || "";
+  const title = combo.name || combo.title || combo.upper || combo.shirt || combo.top || combo.dress || "Curated Ensemble";
+  const upperItem = combo.upper || combo.shirt || combo.top || combo.dress || "";
+  const lowerItem = combo.lower || combo.pant || combo.bottom || "";
+  const footwearItem = combo.shoes || combo.footwear || "";
+  const accentItem = combo.accent || combo.dupatta || "";
+
   const headingCls = isDark ? 'text-white' : 'text-gray-800';
   const subCls = isDark ? 'text-white/60' : 'text-gray-500';
   const badgeCls = isDark ? 'bg-white/10 text-white/80' : 'bg-white/60 text-gray-700';
-  const vibeCls = isDark ? 'text-white/30' : 'text-gray-400';
+  const vibeCls = isDark ? 'text-white/40' : 'text-gray-400';
 
   return (
     <div className={`bg-gradient-to-br ${colorMap[color]} border rounded-2xl p-4`}>
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex-1">
-          <p className={`${headingCls} font-bold text-sm mb-1`}>{topItem}</p>
-          <div className="flex flex-wrap gap-2 text-xs">
-            {bottomItem && <span className={subCls}>👖 {bottomItem}</span>}
-            {combo.shoes && <span className={subCls}>👟 {combo.shoes}</span>}
-            {combo.dupatta && combo.dupatta !== "-" && <span className={subCls}>🧣 {combo.dupatta}</span>}
+          <p className={`${headingCls} font-bold text-sm mb-1.5`}>{title}</p>
+          <div className="flex flex-col gap-1 text-xs">
+            {upperItem && upperItem !== title && <span className={subCls}>👕 Top: <strong className="font-semibold text-white/80">{upperItem}</strong></span>}
+            {lowerItem && <span className={subCls}>👖 Bottom: <strong className="font-semibold text-white/80">{lowerItem}</strong></span>}
+            {footwearItem && <span className={subCls}>👟 Footwear: <strong className="font-semibold text-white/80">{footwearItem}</strong></span>}
+            {accentItem && accentItem !== "-" && <span className={subCls}>✨ Accent: <strong className="font-semibold text-white/80">{accentItem}</strong></span>}
           </div>
         </div>
         <div className="text-right flex-shrink-0">
-          <span className={`${badgeCls} text-xs px-2 py-1 rounded-full`}>{combo.occasion}</span>
-          {combo.vibe && <p className={`${vibeCls} text-xs mt-1 italic`}>{combo.vibe}</p>}
+          {combo.occasion && <span className={`${badgeCls} text-xs px-2.5 py-1 rounded-full font-bold`}>{combo.occasion}</span>}
+          {combo.vibe && <p className={`${vibeCls} text-[11px] mt-1.5 font-semibold`}>{combo.vibe}</p>}
         </div>
       </div>
       <button
-        onClick={() => onShop(topItem)}
+        onClick={() => onShop({
+          query: upperItem || title,
+          catId: combo.catId || (upperItem ? 'shirt' : 'coord')
+        })}
         className="w-full py-2.5 rounded-xl bg-violet-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-500/10 active:scale-95 transition-all mt-4 border border-violet-400/20 hover:bg-violet-500"
       >
-        Shop Direct →
+        Shop Look →
       </button>
     </div>
   );
@@ -887,7 +901,7 @@ function CompleteTheLook({ shirtColor, pantColors, isDark, gender, onShop }) {
 }
 
 // ── Colors Tab ───────────────────────────────────────────────
-function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shirtCategory, isDark, onShop }) {
+function ColorsTab({ recommendations, analysis, isFemale, isSeasonal, effectiveGender, shirtCategory, isDark, onShop }) {
   const { t } = useLanguage();
   const [selectedCat, setSelectedCat] = useState('all');
   const avoidColors = recommendations.colors_to_avoid || [];
@@ -913,15 +927,19 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 
   if (isFemale) {
     const femaleSections = [
-      { id: 'dress', label: '👗 Dress Colors', chipLabel: '👗 Dresses', colors: recommendations.best_dress_colors || [], cat: 'dress' },
-      { id: 'top', label: '👚 Top / Blouse Colors', chipLabel: '👚 Tops', colors: recommendations.best_top_colors || [], cat: 'top' },
-      { id: 'kurti', label: '🥻 Kurti Colors', chipLabel: '🥻 Kurtis', colors: recommendations.best_kurti_colors || [], cat: 'kurti' },
-      { id: 'lehenga', label: '🎀 Lehenga Colors', chipLabel: '🎀 Lehengas', colors: recommendations.best_lehenga_colors || [], cat: 'lehenga' },
-      { id: 'saree', label: '🪭 Saree Colors', chipLabel: '🪭 Sarees', colors: recommendations.best_saree_colors || [], cat: 'saree' },
-      { id: 'sharara', label: '✨ Sharara / Suit Colors', chipLabel: '✨ Shararas', colors: recommendations.best_sharara_colors || recommendations.best_suit_colors || [], cat: 'sharara' },
-      { id: 'dupatta', label: '🌸 Dupatta / Stole', chipLabel: '🌸 Dupattas', colors: recommendations.best_dupatta_colors || [], cat: 'dupatta' },
-      { id: 'bottom', label: '👖 Bottom Colors', chipLabel: '👖 Bottoms', colors: recommendations.best_bottom_colors || recommendations.best_pant_colors || [], cat: 'bottom' },
-    ].filter(s => s.colors.length > 0);
+      { id: 'dress', label: '👗 Western Dresses', chipLabel: '👗 Dresses', colors: recommendations.best_dress_colors || deriveCategoryColors('dress', 'female', analysis, recommendations), cat: 'dress' },
+      { id: 'top', label: '👚 Tops & Corsets', chipLabel: '👚 Tops', colors: recommendations.best_top_colors || deriveCategoryColors('top', 'female', analysis, recommendations), cat: 'top' },
+      { id: 'kurti', label: '🥻 Kurtis & Anarkalis', chipLabel: '🥻 Kurtis', colors: recommendations.best_kurti_colors || deriveCategoryColors('kurti', 'female', analysis, recommendations), cat: 'kurti' },
+      { id: 'saree', label: '🪭 Sarees (Silk & Chiffon)', chipLabel: '🪭 Sarees', colors: recommendations.best_saree_colors || deriveCategoryColors('saree', 'female', analysis, recommendations), cat: 'saree' },
+      { id: 'blouse', label: '👚 Designer Saree Blouses', chipLabel: '👚 Blouses', colors: deriveCategoryColors('blouse', 'female', analysis, recommendations), cat: 'blouse' },
+      { id: 'lehenga', label: '🎀 Lehengas & Festive', chipLabel: '🎀 Lehengas', colors: recommendations.best_lehenga_colors || deriveCategoryColors('lehenga', 'female', analysis, recommendations), cat: 'lehenga' },
+      { id: 'sharara', label: '✨ Shararas & Suit Sets', chipLabel: '✨ Shararas', colors: recommendations.best_sharara_colors || recommendations.best_suit_colors || deriveCategoryColors('sharara', 'female', analysis, recommendations), cat: 'sharara' },
+      { id: 'coord', label: '✨ Co-ords & Jumpsuits', chipLabel: '✨ Co-ords', colors: deriveCategoryColors('coord', 'female', analysis, recommendations), cat: 'coord' },
+      { id: 'dupatta', label: '🌸 Dupattas & Stoles', chipLabel: '🌸 Dupattas', colors: recommendations.best_dupatta_colors || deriveCategoryColors('dupatta', 'female', analysis, recommendations), cat: 'dupatta' },
+      { id: 'bottom', label: '👖 Bottoms, Jeans & Palazzos', chipLabel: '👖 Bottoms', colors: recommendations.best_bottom_colors || recommendations.best_pant_colors || deriveCategoryColors('bottom', 'female', analysis, recommendations), cat: 'bottom' },
+      { id: 'shapewear', label: '🩲 Basics & Saree Shapewear', chipLabel: '🩲 Shapewear', colors: deriveCategoryColors('shapewear', 'female', analysis, recommendations), cat: 'shapewear' },
+      { id: 'heels', label: '👠 Footwear, Heels & Juttis', chipLabel: '👠 Footwear', colors: deriveCategoryColors('heels', 'female', analysis, recommendations), cat: 'heels' },
+    ].filter(s => s.colors && s.colors.length > 0);
 
     const totalColorsCount = femaleSections.reduce((acc, s) => acc + s.colors.length, 0);
 
@@ -1026,19 +1044,23 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
   }
 
   // Male
-  const shirtColors = recommendations.best_shirt_colors || [];
-  const pantColors = recommendations.best_pant_colors || recommendations.base_pant_colors || [];
-  const kurataColors = recommendations.best_kurta_colors || [];
-  const hoodieColors = recommendations.best_hoodie_colors || [];
-  const blazerColors = recommendations.best_blazer_colors || [];
+  const shirtColors = recommendations.best_shirt_colors || deriveCategoryColors('shirt', 'male', analysis, recommendations);
+  const pantColors = recommendations.best_pant_colors || recommendations.base_pant_colors || deriveCategoryColors('cargo', 'male', analysis, recommendations);
+  const kurataColors = recommendations.best_kurta_colors || deriveCategoryColors('kurta', 'male', analysis, recommendations);
+  const hoodieColors = recommendations.best_hoodie_colors || deriveCategoryColors('hoodie', 'male', analysis, recommendations);
+  const blazerColors = recommendations.best_blazer_colors || deriveCategoryColors('blazer', 'male', analysis, recommendations);
 
   const maleSections = [
-    { id: 'tshirt', label: '👕 T-Shirt / Top Colors', chipLabel: '👕 T-Shirts', colors: shirtColors, cat: 'tshirt' },
-    { id: 'cargo', label: '👖 Pants / Cargo Colors', chipLabel: '👖 Pants', colors: pantColors, cat: 'cargo' },
-    { id: 'kurta', label: '🥷 Kurta Colors', chipLabel: '🥷 Kurtas', colors: kurataColors, cat: 'kurta' },
-    { id: 'hoodie', label: '🧥 Hoodie / Sweatshirt', chipLabel: '🧥 Hoodies', colors: hoodieColors, cat: 'hoodie' },
-    { id: 'blazer', label: '🕴️ Blazer / Formal Shirt', chipLabel: '🕴️ Blazers', colors: blazerColors, cat: 'blazer' },
-  ].filter(s => s.colors.length > 0);
+    { id: 'tshirt', label: '👕 T-Shirts, Polos & Oversized', chipLabel: '👕 T-Shirts', colors: recommendations.best_tshirt_colors?.length ? recommendations.best_tshirt_colors : shirtColors, cat: 'tshirt' },
+    { id: 'shirt', label: '👔 Casual & Formal Shirts', chipLabel: '👔 Shirts', colors: shirtColors, cat: 'shirt' },
+    { id: 'cargo', label: '👖 Pants, Chinos & Cargos', chipLabel: '👖 Pants', colors: pantColors, cat: 'cargo' },
+    { id: 'kurta', label: '🥷 Kurtas & Bundis', chipLabel: '🥷 Kurtas', colors: kurataColors, cat: 'kurta' },
+    { id: 'hoodie', label: '🧥 Hoodies & Sweatshirts', chipLabel: '🧥 Hoodies', colors: hoodieColors, cat: 'hoodie' },
+    { id: 'jacket', label: '🧥 Jackets & Bombers', chipLabel: '🧥 Jackets', colors: deriveCategoryColors('jacket', 'male', analysis, recommendations), cat: 'jacket' },
+    { id: 'blazer', label: '🕴️ Blazers & Suits', chipLabel: '🕴️ Blazers', colors: blazerColors, cat: 'blazer' },
+    { id: 'vest', label: '🩲 Basics, Ganjis & Boxers', chipLabel: '🩲 Basics', colors: deriveCategoryColors('vest', 'male', analysis, recommendations), cat: 'vest' },
+    { id: 'sneakers', label: '👟 Footwear, Loafers & Sneakers', chipLabel: '👟 Footwear', colors: deriveCategoryColors('sneakers', 'male', analysis, recommendations), cat: 'sneakers' },
+  ].filter(s => s.colors && s.colors.length > 0);
 
   const totalMaleColorsCount = maleSections.reduce((acc, s) => acc + s.colors.length, 0);
 
@@ -1141,14 +1163,31 @@ function ColorsTab({ recommendations, isFemale, isSeasonal, effectiveGender, shi
 }
 
 // ── Outfits Tab ──────────────────────────────────────────────
-function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, styleTips, occasionAdvice, ethnicWear, sareeSuggestions, isDark, onShop, bodyTypeTips = [], bodyType = null, userOccasion = 'casual', activeMission = 'casual' }) {
+function OutfitsTab({ recommendations, analysis, isFemale, isSeasonal, seasonalGender, styleTips, occasionAdvice, ethnicWear, sareeSuggestions, isDark, onShop, bodyTypeTips = [], bodyType = null, userOccasion = 'casual', activeMission = 'casual' }) {
   const { t } = useLanguage();
   const [activeSection, setActiveSection] = useState('combos');
 
-  let outfits = [];
-  if (isSeasonal) outfits = seasonalGender === 'female' ? (recommendations.female_outfits || []) : (recommendations.male_outfits || []);
-  else if (isFemale) outfits = recommendations.outfit_combos || [];
-  else outfits = recommendations.outfit_combinations || recommendations.outfit_combos || [];
+  const effectiveGender = isSeasonal ? seasonalGender : (isFemale ? 'female' : 'male');
+  const derivedSuites = useMemo(() => {
+    return deriveOutfitSuites(effectiveGender, analysis, recommendations, userOccasion);
+  }, [effectiveGender, analysis, recommendations, userOccasion]);
+
+  let backendOutfits = [];
+  if (isSeasonal) backendOutfits = seasonalGender === 'female' ? (recommendations.female_outfits || []) : (recommendations.male_outfits || []);
+  else if (isFemale) backendOutfits = recommendations.outfit_combos || [];
+  else backendOutfits = recommendations.outfit_combinations || recommendations.outfit_combos || [];
+
+  const allCombos = useMemo(() => {
+    const list = [...(derivedSuites.combos || []), ...backendOutfits];
+    // Deduplicate by name/upper
+    const seen = new Set();
+    return list.filter(item => {
+      const key = (item.name || item.upper || item.shirt || item.top || item.dress || '').toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [derivedSuites.combos, backendOutfits]);
 
   const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
   const cardBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
@@ -1159,9 +1198,9 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
   // Mission-based Re-ranking Logic
   const scoredOutfits = useMemo(() => {
     const mission = Object.values(MISSIONS).find(m => m.id === activeMission);
-    if (!mission) return outfits.map(o => ({ ...o, missionScore: 0 }));
+    if (!mission) return allCombos.map(o => ({ ...o, missionScore: 0 }));
 
-    return outfits.map(o => {
+    return allCombos.map(o => {
       let score = 0;
       const text = `${o.upper || ''} ${o.lower || ''} ${o.description || ''} ${o.name || ''}`.toLowerCase();
 
@@ -1184,7 +1223,7 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
 
       return { ...o, missionScore: score };
     }).sort((a, b) => b.missionScore - a.missionScore);
-  }, [outfits, activeMission]);
+  }, [allCombos, activeMission]);
 
   // Find occasion-specific advice
   const occasionKey = Object.keys(occasionAdvice).find(k => k.toLowerCase().includes(userOccasion)) || null;
@@ -1193,12 +1232,13 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
   // Sub-segments for Zero-Scroll navigation
   const segments = isFemale ? [
     { id: 'combos', label: '🧥 Combos' },
-    { id: 'sarees', label: '🥻 Sarees & Suits' },
+    { id: 'sarees', label: '🥻 Sarees & Blouses' },
+    { id: 'festive', label: '👑 Lehengas & Festive' },
     { id: 'occasions', label: '📅 Occasions' },
     { id: 'tips', label: '💡 Style Tips' },
   ] : [
     { id: 'combos', label: '🧥 Combos' },
-    { id: 'ethnic', label: '🪷 Ethnic Wear' },
+    { id: 'ethnic', label: '🪷 Ethnic, Kurtas & Bundis' },
     { id: 'occasions', label: '📅 Occasions' },
     { id: 'tips', label: '💡 Style Tips' },
   ];
@@ -1255,101 +1295,204 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
         </div>
       )}
 
-      {/* SAREES & SUITS SUB-TAB (Female) */}
+      {/* SAREES & BLOUSE COMBOS SUB-TAB (Female) */}
       {isFemale && activeSection === 'sarees' && (
         <div className="space-y-4 fade-up">
-          {sareeSuggestions.length > 0 ? (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>🥻 Saree & Suit Recommendations</p>
-                <span className="text-[10px] font-bold text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded-full">
-                  {sareeSuggestions.length} Curated Looks
-                </span>
-              </div>
-              {sareeSuggestions.map((item, i) => (
-                <div key={i} className={`${isDark ? 'bg-white/5' : 'bg-white shadow-sm'} rounded-2xl p-4 border border-pink-500/20 transition-all hover:border-pink-500/40`}>
-                  <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
-                    <div>
-                      <p className={`${isDark ? 'text-pink-200' : 'text-pink-700'} font-black text-base`}>{item.type}</p>
-                      <p className={`${isDark ? 'text-white/70' : 'text-gray-600'} text-xs font-semibold mt-0.5`}>🎨 Best Shades: {item.colors}</p>
-                      <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>
-                    </div>
-                    <span className={`text-[10px] px-2.5 py-1 rounded-full border uppercase tracking-wider font-bold ${
-                      isDark ? 'bg-pink-500/20 text-pink-300 border-pink-500/30' : 'bg-pink-100 text-pink-700 border-pink-300'
-                    }`}>
-                      {item.occasion}
-                    </span>
-                  </div>
-                  <ShoppingLinks colorName={`${item.colors} ${item.type}`} category="saree" gender="female" onShop={onShop} />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-3xl mb-2">🥻</p>
-              <p className={`${sectionLabelCls} text-xs`}>No saree recommendations available for this skin tone.</p>
-            </div>
-          )}
+          <div className="flex items-center justify-between">
+            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>🥻 Saree, Blouse & Shapewear Suites</p>
+            <span className="text-[10px] font-bold text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded-full">
+              Complete Drapes
+            </span>
+          </div>
 
-          {ethnicWear.length > 0 && ethnicWear !== sareeSuggestions && (
-            <div className="space-y-2 pt-2">
-              <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>🪷 Traditional Styling Notes</p>
-              <div className={`rounded-2xl p-4 space-y-2 border ${isDark ? 'bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20' : 'bg-amber-50 border-amber-200'}`}>
-                {ethnicWear.map((s, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <span className="text-amber-500 flex-shrink-0">★</span>
-                    <p className={`text-sm ${isDark ? 'text-amber-100/70' : 'text-amber-800'}`}>{typeof s === "string" ? s : `${s.type}: ${s.colors} — ${s.occasion}`}</p>
+          {/* Master Drapes */}
+          <div className="space-y-3">
+            {(derivedSuites.sarees || []).map((item, i) => (
+              <div key={i} className={`${isDark ? 'bg-white/5' : 'bg-white shadow-sm'} rounded-2xl p-4 border border-pink-500/20 transition-all hover:border-pink-500/40`}>
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                  <div>
+                    <p className={`${isDark ? 'text-pink-200' : 'text-pink-700'} font-black text-base`}>{item.type}</p>
+                    <p className={`text-xs mt-1 ${isDark ? 'text-white/90' : 'text-gray-800'}`}>🥻 <strong>Saree:</strong> {item.saree}</p>
+                    <p className={`text-xs mt-0.5 ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>👚 <strong>Blouse:</strong> {item.blouse}</p>
+                    <p className={`text-xs mt-0.5 ${isDark ? 'text-pink-300' : 'text-pink-600'}`}>🩲 <strong>ToneFit Shapewear:</strong> {item.shapewear}</p>
+                    <p className={`text-xs mt-0.5 ${isDark ? 'text-amber-300' : 'text-amber-700'}`}>✨ <strong>Accents:</strong> {item.accessories}</p>
+                    <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>
                   </div>
-                ))}
+                  <span className={`text-[10px] px-2.5 py-1 rounded-full border uppercase tracking-wider font-bold ${
+                    isDark ? 'bg-pink-500/20 text-pink-300 border-pink-500/30' : 'bg-pink-100 text-pink-700 border-pink-300'
+                  }`}>
+                    {item.occasion}
+                  </span>
+                </div>
+                <div className="flex gap-2 mt-3 flex-wrap">
+                  <button
+                    onClick={() => onShop({ query: item.saree, catId: 'saree' })}
+                    className="flex-1 min-w-[100px] py-2 rounded-xl bg-pink-600 text-white text-[10px] font-black uppercase tracking-wider hover:bg-pink-500 active:scale-95 transition-all"
+                  >
+                    Shop Saree →
+                  </button>
+                  <button
+                    onClick={() => onShop({ query: item.blouse, catId: 'blouse' })}
+                    className="flex-1 min-w-[100px] py-2 rounded-xl bg-purple-600 text-white text-[10px] font-black uppercase tracking-wider hover:bg-purple-500 active:scale-95 transition-all"
+                  >
+                    Shop Blouse →
+                  </button>
+                  <button
+                    onClick={() => onShop({ query: item.shapewear, catId: 'shapewear' })}
+                    className="flex-1 min-w-[100px] py-2 rounded-xl bg-slate-700 text-white text-[10px] font-black uppercase tracking-wider hover:bg-slate-600 active:scale-95 transition-all"
+                  >
+                    Shop Shapewear →
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            ))}
+
+            {/* Backend suggestions fallback if present */}
+            {sareeSuggestions.map((item, i) => (
+              <div key={`sug-${i}`} className={`${isDark ? 'bg-white/5' : 'bg-white shadow-sm'} rounded-2xl p-4 border border-pink-500/20 transition-all hover:border-pink-500/40`}>
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                  <div>
+                    <p className={`${isDark ? 'text-pink-200' : 'text-pink-700'} font-black text-sm`}>{item.type}</p>
+                    <p className={`${isDark ? 'text-white/70' : 'text-gray-600'} text-xs font-semibold mt-0.5`}>🎨 Best Shades: {item.colors}</p>
+                    <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>
+                  </div>
+                  <span className={`text-[10px] px-2.5 py-1 rounded-full border uppercase tracking-wider font-bold ${
+                    isDark ? 'bg-pink-500/20 text-pink-300 border-pink-500/30' : 'bg-pink-100 text-pink-700 border-pink-300'
+                  }`}>
+                    {item.occasion}
+                  </span>
+                </div>
+                <ShoppingLinks colorName={`${item.colors} ${item.type}`} category="saree" gender="female" onShop={onShop} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* LEHENGAS & FESTIVE SUB-TAB (Female) */}
+      {isFemale && activeSection === 'festive' && (
+        <div className="space-y-4 fade-up">
+          <div className="flex items-center justify-between">
+            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>👑 Grand Festive & Wedding Lehengas</p>
+            <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
+              Wedding Ready
+            </span>
+          </div>
+          <div className="space-y-3">
+            {(derivedSuites.festive || []).map((item, i) => (
+              <div key={i} className={`${isDark ? 'bg-white/5' : 'bg-white shadow-sm'} rounded-2xl p-4 border border-amber-500/20 transition-all hover:border-amber-500/40`}>
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                  <div>
+                    <p className={`${isDark ? 'text-amber-200' : 'text-amber-700'} font-black text-base`}>{item.title}</p>
+                    <p className={`text-xs mt-1 ${isDark ? 'text-white/90' : 'text-gray-800'}`}>🎀 <strong>Lehenga:</strong> {item.lehenga}</p>
+                    <p className={`text-xs mt-0.5 ${isDark ? 'text-white/80' : 'text-gray-700'}`}>👚 <strong>Choli:</strong> {item.choli}</p>
+                    <p className={`text-xs mt-0.5 ${isDark ? 'text-white/70' : 'text-gray-600'}`}>🌸 <strong>Dupatta:</strong> {item.dupatta}</p>
+                    <p className={`text-xs mt-0.5 ${isDark ? 'text-amber-300' : 'text-amber-600'}`}>👠 <strong>Footwear:</strong> {item.footwear}</p>
+                  </div>
+                  <span className={`text-[10px] px-2.5 py-1 rounded-full border uppercase tracking-wider font-bold ${
+                    isDark ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-amber-100 text-amber-800 border-amber-300'
+                  }`}>
+                    {item.occasion}
+                  </span>
+                </div>
+                <div className="flex gap-2 mt-3 flex-wrap">
+                  <button
+                    onClick={() => onShop({ query: item.lehenga, catId: 'lehenga' })}
+                    className="flex-1 min-w-[120px] py-2 rounded-xl bg-amber-600 text-white text-[10px] font-black uppercase tracking-wider hover:bg-amber-500 active:scale-95 transition-all"
+                  >
+                    Shop Lehenga →
+                  </button>
+                  <button
+                    onClick={() => onShop({ query: item.footwear, catId: 'juttis' })}
+                    className="flex-1 min-w-[120px] py-2 rounded-xl bg-purple-600 text-white text-[10px] font-black uppercase tracking-wider hover:bg-purple-500 active:scale-95 transition-all"
+                  >
+                    Shop Juttis →
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       {/* ETHNIC WEAR SUB-TAB (Male) */}
       {!isFemale && activeSection === 'ethnic' && (
         <div className="space-y-4 fade-up">
-          {ethnicWear.length > 0 ? (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>🪷 Men's Ethnic & Festive Wear</p>
-                <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
-                  Festive Ready
-                </span>
+          <div className="flex items-center justify-between">
+            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>🪷 Men's Kurtas, Bundis & Jodhpuris</p>
+            <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
+              Festive Ready
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            {/* Master Curated Ethnic Looks */}
+            {(derivedSuites.ethnic || []).map((item, i) => (
+              <div key={i} className={`rounded-2xl p-4 border transition-all ${
+                isDark ? 'bg-white/5 border-amber-500/20' : 'bg-white border-amber-200 shadow-sm'
+              }`}>
+                <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                  <div>
+                    <p className={`font-black text-base ${isDark ? 'text-amber-200' : 'text-amber-800'}`}>{item.title}</p>
+                    <p className={`text-xs mt-1 ${isDark ? 'text-white/90' : 'text-gray-800'}`}>🥷 <strong>Kurta:</strong> {item.kurta}</p>
+                    <p className={`text-xs mt-0.5 ${isDark ? 'text-amber-300' : 'text-amber-700'}`}>🧥 <strong>Bundi / Jacket:</strong> {item.bundi}</p>
+                    <p className={`text-xs mt-0.5 ${isDark ? 'text-white/80' : 'text-gray-700'}`}>👞 <strong>Footwear:</strong> {item.footwear}</p>
+                    <p className={`text-xs mt-0.5 ${isDark ? 'text-white/70' : 'text-gray-600'}`}>✨ <strong>Accents:</strong> {item.accessories}</p>
+                  </div>
+                  <span className={`text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider ${
+                    isDark ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-amber-100 text-amber-800'
+                  }`}>
+                    {item.occasion}
+                  </span>
+                </div>
+                <div className="flex gap-2 mt-3 flex-wrap">
+                  <button
+                    onClick={() => onShop({ query: item.kurta, catId: 'kurta' })}
+                    className="flex-1 min-w-[100px] py-2 rounded-xl bg-amber-600 text-white text-[10px] font-black uppercase tracking-wider hover:bg-amber-500 active:scale-95 transition-all"
+                  >
+                    Shop Kurta →
+                  </button>
+                  <button
+                    onClick={() => onShop({ query: item.bundi, catId: 'bundi' })}
+                    className="flex-1 min-w-[100px] py-2 rounded-xl bg-purple-600 text-white text-[10px] font-black uppercase tracking-wider hover:bg-purple-500 active:scale-95 transition-all"
+                  >
+                    Shop Bundi →
+                  </button>
+                  <button
+                    onClick={() => onShop({ query: item.footwear, catId: 'mojaris' })}
+                    className="flex-1 min-w-[100px] py-2 rounded-xl bg-slate-700 text-white text-[10px] font-black uppercase tracking-wider hover:bg-slate-600 active:scale-95 transition-all"
+                  >
+                    Shop Mojaris →
+                  </button>
+                </div>
               </div>
-              <div className="space-y-2.5">
-                {ethnicWear.map((s, i) => {
-                  const title = typeof s === "string" ? s : (s.type || "Kurta");
-                  const colors = typeof s === "string" ? "" : (s.colors || "");
-                  const occasion = typeof s === "string" ? "Festive" : (s.occasion || "Festive");
-                  return (
-                    <div key={i} className={`rounded-2xl p-4 border transition-all ${
-                      isDark ? 'bg-white/5 border-amber-500/20' : 'bg-white border-amber-200 shadow-sm'
-                    }`}>
-                      <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
-                        <div>
-                          <p className={`font-black text-sm ${isDark ? 'text-amber-200' : 'text-amber-800'}`}>{title}</p>
-                          {colors && <p className={`text-xs ${isDark ? 'text-white/60' : 'text-gray-600'} mt-0.5`}>🎨 Recommended: {colors}</p>}
-                        </div>
-                        <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                          isDark ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-amber-100 text-amber-800'
-                        }`}>
-                          {occasion}
-                        </span>
-                      </div>
-                      <ShoppingLinks colorName={`${colors} ${title}`} category="kurta" gender="male" onShop={onShop} />
+            ))}
+
+            {/* Legacy backend ethnic items if any */}
+            {ethnicWear.map((s, i) => {
+              const title = typeof s === "string" ? s : (s.type || "Kurta");
+              const colors = typeof s === "string" ? "" : (s.colors || "");
+              const occasion = typeof s === "string" ? "Festive" : (s.occasion || "Festive");
+              return (
+                <div key={`legacy-${i}`} className={`rounded-2xl p-4 border transition-all ${
+                  isDark ? 'bg-white/5 border-amber-500/20' : 'bg-white border-amber-200 shadow-sm'
+                }`}>
+                  <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                    <div>
+                      <p className={`font-black text-sm ${isDark ? 'text-amber-200' : 'text-amber-800'}`}>{title}</p>
+                      {colors && <p className={`text-xs ${isDark ? 'text-white/60' : 'text-gray-600'} mt-0.5`}>🎨 Recommended: {colors}</p>}
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-3xl mb-2">🪷</p>
-              <p className={`${sectionLabelCls} text-xs`}>No ethnic wear items found for this profile.</p>
-            </div>
-          )}
+                    <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                      isDark ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-amber-100 text-amber-800'
+                    }`}>
+                      {occasion}
+                    </span>
+                  </div>
+                  <ShoppingLinks colorName={`${colors} ${title}`} category="kurta" gender="male" onShop={onShop} />
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -1421,170 +1564,307 @@ function OutfitsTab({ recommendations, isFemale, isSeasonal, seasonalGender, sty
 }
 
 // ── Accessories Tab ──────────────────────────────────────────
-function AccessoriesTab({ recommendations, isFemale, makeupSuggestions, isDark, onShop }) {
-  const accessories = recommendations.accessories || [];
-  const accentColors = recommendations.accent_colors || [];
-  const [activeAccSection, setActiveAccSection] = useState(isFemale && accessories.length === 0 && makeupSuggestions.length > 0 ? 'makeup' : 'accessories');
+function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions, isDark, onShop }) {
+  const derivedAcc = useMemo(() => {
+    return deriveAccessoriesSuite(isFemale ? 'female' : 'male', analysis);
+  }, [isFemale, analysis]);
 
-  const getAccCat = (typeLC, isFem) => {
-    if (typeLC.includes('earring')) return 'earrings';
-    if (typeLC.includes('necklace')) return 'necklace';
-    if (typeLC.includes('bangle')) return 'bangles';
-    if (typeLC.includes('bag') || typeLC.includes('purse') || typeLC.includes('clutch')) return isFem ? 'handbag' : 'backpack';
-    if (typeLC.includes('footwear') || typeLC.includes('shoe') || typeLC.includes('sandal')) return 'sneakers';
-    if (typeLC.includes('heel')) return 'heels';
-    if (typeLC.includes('watch')) return 'watch';
-    if (typeLC.includes('dupatta') || typeLC.includes('scarf') || typeLC.includes('stole')) return 'dupatta';
-    if (typeLC.includes('belt')) return isFem ? 'belt_f' : 'belt';
-    if (typeLC.includes('wallet')) return 'wallet';
-    if (typeLC.includes('sunglass')) return isFem ? 'sunglasses_f' : 'sunglasses';
-    if (typeLC.includes('backpack')) return 'backpack';
-    return 'accessory';
-  };
+  const [activeAccSection, setActiveAccSection] = useState(isFemale ? 'jewellery' : 'watches');
 
   const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
   const cardBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
-  const subCls = isDark ? 'text-white/50' : 'text-gray-500';
-  const mutedCls = isDark ? 'text-white/30' : 'text-gray-400';
-  const emptyTextCls = isDark ? 'text-white/40' : 'text-gray-400';
+  const subCls = isDark ? 'text-white/60' : 'text-gray-600';
+  const mutedCls = isDark ? 'text-white/40' : 'text-gray-400';
 
+  // FEMALE ACCESSORIES SUITE
   if (isFemale) {
+    const femaleSegments = [
+      { id: 'jewellery', label: '💎 Jewellery' },
+      { id: 'bags_shoes', label: '👜 Bags & Shoes' },
+      { id: 'makeup', label: '💄 Makeup & EDP' },
+      { id: 'basics', label: '🩲 Basics & Shaper' },
+    ];
+
     return (
       <div className="space-y-4">
-        {/* Female Sub-segmenter: Jewellery & Accessories vs. Makeup Suite */}
-        <div className={`flex p-1 rounded-2xl border gap-1 ${
+        {/* Horizontal Sub-segmenter for Women */}
+        <div className={`flex p-1 rounded-2xl border gap-1 overflow-x-auto scrollbar-hide ${
           isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'
         }`}>
-          <button
-            onClick={() => setActiveAccSection('accessories')}
-            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all text-center whitespace-nowrap ${
-              activeAccSection === 'accessories'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
-                : isDark ? 'text-white/50 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
-            }`}
-          >
-            👜 Jewellery & Bags ({accessories.length})
-          </button>
-          <button
-            onClick={() => setActiveAccSection('makeup')}
-            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all text-center whitespace-nowrap ${
-              activeAccSection === 'makeup'
-                ? 'bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-md'
-                : isDark ? 'text-white/50 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
-            }`}
-          >
-            💄 Makeup Suite ({makeupSuggestions.length})
-          </button>
+          {femaleSegments.map((seg) => (
+            <button
+              key={seg.id}
+              onClick={() => setActiveAccSection(seg.id)}
+              className={`flex-1 min-w-[85px] py-2 px-2.5 rounded-xl text-[11px] font-bold transition-all text-center whitespace-nowrap ${
+                activeAccSection === seg.id
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
+                  : isDark ? 'text-white/50 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+              }`}
+            >
+              {seg.label}
+            </button>
+          ))}
         </div>
 
-        {/* FEMALE ACCESSORIES */}
-        {activeAccSection === 'accessories' && (
+        {/* 1. JEWELLERY */}
+        {activeAccSection === 'jewellery' && (
           <div className="space-y-3 fade-up">
             <div className="flex items-center justify-between">
-              <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>👜 Curated Jewellery & Accents</p>
+              <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>💎 Skin-Tone Matched Jewellery</p>
               <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
-                {accessories.length} Items
+                Curated Metals
               </span>
             </div>
-            {accessories.length > 0 ? (
-              <div className="space-y-2.5">
-                {accessories.map((item, i) => {
-                  const typeLC = (item.type || '').toLowerCase();
-                  const cat = getAccCat(typeLC, true);
-                  const searchTerm = item.colors || item.suggestion || item.type;
-                  return (
-                    <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <p className="text-purple-300 font-black text-sm">{item.type}</p>
-                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{cat}</span>
-                      </div>
-                      <p className={`${subCls} text-xs font-semibold`}>{item.suggestion || item.colors}</p>
-                      {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
-                      <ShoppingLinks colorName={searchTerm} category={cat} gender="female" onShop={onShop} />
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-3xl mb-2">👜</p>
-                <p className={`${emptyTextCls} text-xs`}>No accessories data available</p>
-              </div>
-            )}
+            <div className="space-y-2.5">
+              {(derivedAcc.jewellery || []).map((item, i) => (
+                <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <p className="text-purple-300 font-black text-sm">{item.title}</p>
+                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.type}</span>
+                  </div>
+                  {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Shades: {item.colors}</p>}
+                  {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
+                  <ShoppingLinks colorName={`${item.colors || ''} ${item.title}`} category={item.cat || 'accessory'} gender="female" onShop={onShop} />
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* FEMALE MAKEUP SUITE */}
+        {/* 2. BAGS & SHOES */}
+        {activeAccSection === 'bags_shoes' && (
+          <div className="space-y-3 fade-up">
+            <div className="flex items-center justify-between">
+              <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>👜 Handbags, Heels & Footwear</p>
+              <span className="text-[10px] font-bold text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded-full">
+                Head-to-Toe
+              </span>
+            </div>
+            <div className="space-y-2.5">
+              {(derivedAcc.bags_footwear || []).map((item, i) => (
+                <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-pink-500/30`}>
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <p className="text-pink-300 font-black text-sm">{item.title}</p>
+                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.type}</span>
+                  </div>
+                  {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Curated Colors: {item.colors}</p>}
+                  {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
+                  <ShoppingLinks colorName={`${item.colors || ''} ${item.title}`} category={item.cat || 'handbag'} gender="female" onShop={onShop} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 3. MAKEUP & FRAGRANCE */}
         {activeAccSection === 'makeup' && (
           <div className="space-y-3 fade-up">
             <div className="flex items-center justify-between">
-              <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>💄 Skin-Tone Matched Cosmetics</p>
+              <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>💄 Skin-Tone Matched Makeup & Perfumes</p>
               <span className="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full">
                 Personalized
               </span>
             </div>
-            {makeupSuggestions.length > 0 ? (
-              <div className="space-y-3">
-                {makeupSuggestions.map((item, i) => (
-                  <div key={i} className={`${isDark ? 'bg-white/5' : 'bg-white shadow-sm'} rounded-2xl p-4 border border-rose-500/20 transition-all hover:border-rose-500/40`}>
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <p className="text-rose-200 font-black text-sm">{item.product}</p>
-                      <span className="text-[10px] font-bold text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded-full">
-                        {item.shade || item.shades || 'Curated'}
-                      </span>
-                    </div>
-                    <p className={`${subCls} text-xs font-semibold`}>{item.shade || item.shades}</p>
-                    {item.brands && <p className={`${mutedCls} text-xs mt-0.5`}>Recommended Brands: <span className="text-white/60 font-medium">{item.brands}</span></p>}
-                    <MakeupShoppingLinks product={item.product} shade={item.shade || item.shades} onShop={onShop} />
-                    {item.tip && <p className={`${isDark ? 'text-white/50' : 'text-gray-500'} text-xs mt-2 italic border-t border-white/5 pt-2`}>💡 {item.tip}</p>}
+            <div className="space-y-3">
+              {(derivedAcc.makeup || []).map((item, i) => (
+                <div key={i} className={`${isDark ? 'bg-white/5' : 'bg-white shadow-sm'} rounded-2xl p-4 border border-rose-500/20 transition-all hover:border-rose-500/40`}>
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <p className="text-rose-200 font-black text-sm">{item.product}</p>
+                    <span className="text-[10px] font-bold text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded-full">
+                      {item.cat}
+                    </span>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-3xl mb-2">💄</p>
-                <p className={`${emptyTextCls} text-xs`}>No makeup suggestions available</p>
-              </div>
-            )}
+                  <p className={`${subCls} text-xs font-semibold`}>{item.shade}</p>
+                  {item.brands && <p className={`${mutedCls} text-xs mt-0.5`}>Recommended: <span className="text-white/80 font-medium">{item.brands}</span></p>}
+                  {item.tip && <p className={`${isDark ? 'text-white/50' : 'text-gray-500'} text-xs mt-1.5 italic`}>💡 {item.tip}</p>}
+                  <MakeupShoppingLinks product={item.product} shade={item.shade} onShop={onShop} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 4. BASICS & SHAPEWEAR */}
+        {activeAccSection === 'basics' && (
+          <div className="space-y-3 fade-up">
+            <div className="flex items-center justify-between">
+              <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>🩲 Basics, Bras & Saree Shapewear</p>
+              <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+                Tone-Matched Nudes
+              </span>
+            </div>
+            <div className="space-y-2.5">
+              {(derivedAcc.basics_shapewear || []).map((item, i) => (
+                <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <p className="text-purple-300 font-black text-sm">{item.title}</p>
+                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.type}</span>
+                  </div>
+                  {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Best Tone: {item.colors}</p>}
+                  {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
+                  <ShoppingLinks colorName={`${item.colors || ''} ${item.title}`} category={item.cat || 'shapewear'} gender="female" onShop={onShop} />
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
     );
   }
 
-  // Male Accessories View (Masculine & Zero Makeup)
+  // MALE ACCESSORIES SUITE (Masculine & Zero Makeup)
+  const maleSegments = [
+    { id: 'watches', label: '⌚ Watches & Chains' },
+    { id: 'shoes', label: '👞 Shoes & Belts' },
+    { id: 'wallets', label: '💼 Wallets & Eyewear' },
+    { id: 'grooming', label: '💈 Grooming & Fragrance' },
+    { id: 'basics', label: '🩲 Basics & Innerwear' },
+  ];
+
   return (
     <div className="space-y-4 fade-up">
-      <div className="flex items-center justify-between">
-        <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>⌚ Men's Essential Accessories</p>
-        <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
-          {accentColors.length} Items
-        </span>
+      {/* Horizontal Sub-segmenter for Men */}
+      <div className={`flex p-1 rounded-2xl border gap-1 overflow-x-auto scrollbar-hide ${
+        isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'
+      }`}>
+        {maleSegments.map((seg) => (
+          <button
+            key={seg.id}
+            onClick={() => setActiveAccSection(seg.id)}
+            className={`flex-1 min-w-[85px] py-2 px-2 rounded-xl text-[11px] font-bold transition-all text-center whitespace-nowrap ${
+              activeAccSection === seg.id
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
+                : isDark ? 'text-white/50 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+            }`}
+          >
+            {seg.label}
+          </button>
+        ))}
       </div>
 
-      {accentColors.length > 0 ? (
-        <div className="space-y-2.5">
-          {accentColors.map((item, i) => {
-            const typeLC = (item.type || '').toLowerCase();
-            const cat = getAccCat(typeLC, false);
-            const searchTerm = item.colors || item.name || item.suggestion || item.type;
-            return (
+      {/* 1. WATCHES & JEWELLERY */}
+      {activeAccSection === 'watches' && (
+        <div className="space-y-3 fade-up">
+          <div className="flex items-center justify-between">
+            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>⌚ Watches, Chains & Rings</p>
+            <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+              Masculine Accents
+            </span>
+          </div>
+          <div className="space-y-2.5">
+            {(derivedAcc.watches_jewellery || []).map((item, i) => (
               <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <p className="text-purple-300 font-black text-sm">{item.type}</p>
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{cat}</span>
+                  <p className="text-purple-300 font-black text-sm">{item.title}</p>
+                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.type}</span>
                 </div>
-                <p className={`${subCls} text-xs font-semibold`}>{item.name}</p>
+                {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Metal Finish: {item.colors}</p>}
                 {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
-                <ShoppingLinks colorName={searchTerm} category={cat} gender="male" onShop={onShop} />
+                <ShoppingLinks colorName={`${item.colors || ''} ${item.title}`} category={item.cat || 'watch'} gender="male" onShop={onShop} />
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
-      ) : (
-        <div className="text-center py-8">
-          <p className="text-3xl mb-2">⌚</p>
-          <p className={`${emptyTextCls} text-sm`}>No accessories data available for this profile</p>
+      )}
+
+      {/* 2. FOOTWEAR & BELTS */}
+      {activeAccSection === 'shoes' && (
+        <div className="space-y-3 fade-up">
+          <div className="flex items-center justify-between">
+            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>👞 Sneakers, Loafers, Boots & Belts</p>
+            <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+              Footwear Essentials
+            </span>
+          </div>
+          <div className="space-y-2.5">
+            {(derivedAcc.footwear_belts || []).map((item, i) => (
+              <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <p className="text-purple-300 font-black text-sm">{item.title}</p>
+                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.type}</span>
+                </div>
+                {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Color: {item.colors}</p>}
+                {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
+                <ShoppingLinks colorName={`${item.colors || ''} ${item.title}`} category={item.cat || 'shoes'} gender="male" onShop={onShop} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 3. WALLETS & EYEWEAR */}
+      {activeAccSection === 'wallets' && (
+        <div className="space-y-3 fade-up">
+          <div className="flex items-center justify-between">
+            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>💼 Leather Wallets, Bags & Sunglasses</p>
+            <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+              EDC Staples
+            </span>
+          </div>
+          <div className="space-y-2.5">
+            {(derivedAcc.wallets_bags || []).map((item, i) => (
+              <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <p className="text-purple-300 font-black text-sm">{item.title}</p>
+                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.type}</span>
+                </div>
+                {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Shade: {item.colors}</p>}
+                {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
+                <ShoppingLinks colorName={`${item.colors || ''} ${item.title}`} category={item.cat || 'wallet'} gender="male" onShop={onShop} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 4. GROOMING & FRAGRANCES */}
+      {activeAccSection === 'grooming' && (
+        <div className="space-y-3 fade-up">
+          <div className="flex items-center justify-between">
+            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>💈 Signature Colognes & Grooming</p>
+            <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+              Scent & Style
+            </span>
+          </div>
+          <div className="space-y-2.5">
+            {(derivedAcc.grooming || []).map((item, i) => (
+              <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <p className="text-purple-300 font-black text-sm">{item.product}</p>
+                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.cat}</span>
+                </div>
+                <p className={`${subCls} text-xs font-semibold`}>{item.title}</p>
+                {item.brands && <p className={`${mutedCls} text-xs mt-0.5`}>Recommended: <span className="text-white/80 font-medium">{item.brands}</span></p>}
+                {item.tip && <p className={`${isDark ? 'text-white/50' : 'text-gray-500'} text-xs mt-1.5 italic`}>💡 {item.tip}</p>}
+                <ShoppingLinks colorName={item.title} category={item.cat || 'cologne'} gender="male" onShop={onShop} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 5. BASICS & INNERWEAR */}
+      {activeAccSection === 'basics' && (
+        <div className="space-y-3 fade-up">
+          <div className="flex items-center justify-between">
+            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>🩲 Combed Cotton Ganjis, Boxers & Socks</p>
+            <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+              Daily Comfort
+            </span>
+          </div>
+          <div className="space-y-2.5">
+            {(derivedAcc.basics_innerwear || []).map((item, i) => (
+              <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <p className="text-purple-300 font-black text-sm">{item.title}</p>
+                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.type}</span>
+                </div>
+                {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Colors: {item.colors}</p>}
+                {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
+                <ShoppingLinks colorName={`${item.colors || ''} ${item.title}`} category={item.cat || 'vest'} gender="male" onShop={onShop} />
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -2113,6 +2393,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         {activeTab === 'colors' && (
           <ColorsTab
             recommendations={recommendations}
+            analysis={analysis}
             isFemale={isFemale}
             isSeasonal={isSeasonal}
             effectiveGender={effectiveGender}
@@ -2129,6 +2410,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         {activeTab === 'outfits' && (
           <OutfitsTab
             recommendations={recommendations}
+            analysis={analysis}
             isFemale={isFemale}
             isSeasonal={isSeasonal}
             seasonalGender={seasonalGender}
@@ -2151,6 +2433,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         {activeTab === 'accessories' && (
           <AccessoriesTab
             recommendations={recommendations}
+            analysis={analysis}
             isFemale={isFemale}
             makeupSuggestions={makeupSuggestions}
             isDark={isDark}

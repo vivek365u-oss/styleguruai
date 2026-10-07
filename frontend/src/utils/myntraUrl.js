@@ -49,14 +49,30 @@ const MYNTRA_PATHS = {
   cat_formal_shoe: { path: 'men-formal-shoes', kw: 'formal shoes men' },
   cat_sports_shoe: { path: 'men-sports-shoes', kw: 'sports shoes men' },
   cat_shoes: { path: 'men-footwear', kw: 'shoes men' },
+  cat_mojaris: { path: 'mojaris', kw: 'mojaris juttis men' },
 
-  // ── MALE ACCESSORIES ────────────────────────────────────────────────
+  // ── MALE INNERWEAR & BASICS ─────────────────────────────────────────
+  cat_vest: { path: 'men-innerwear', kw: 'vest ganji men' },
+  cat_ganji: { path: 'men-innerwear', kw: 'ganji banyan men' },
+  cat_boxers: { path: 'men-boxers', kw: 'boxers men' },
+  cat_briefs: { path: 'men-innerwear', kw: 'briefs men' },
+  cat_innerwear: { path: 'men-innerwear', kw: 'innerwear men' },
+  cat_socks: { path: 'socks', kw: 'socks men' },
+
+  // ── MALE ACCESSORIES & GROOMING ─────────────────────────────────────
   cat_watch: { path: 'watches', kw: 'watch men' },
   cat_wallet: { path: 'wallets', kw: 'wallet men' },
   cat_belt: { path: 'belts', kw: 'belt men' },
   cat_sunglasses: { path: 'men-sunglasses', kw: 'sunglasses men' },
   cat_backpack: { path: 'backpacks', kw: 'backpack men' },
   cat_accessory: { path: 'accessories', kw: 'men accessory' },
+  cat_cologne: { path: 'perfumes', kw: 'cologne perfume men' },
+  cat_perfume: { path: 'perfumes', kw: 'perfume men' },
+  cat_chain: { path: 'jewellery', kw: 'chain men' },
+  cat_bracelet: { path: 'jewellery', kw: 'bracelet kada men' },
+  cat_ring: { path: 'jewellery', kw: 'signet ring men' },
+  cat_bundi: { path: 'nehru-jackets', kw: 'nehru jacket bundi men' },
+  cat_pathani: { path: 'men-kurtas', kw: 'pathani kurta men' },
 
   // ── FEMALE ETHNIC ───────────────────────────────────────────────────
   cat_saree_silk: { path: 'sarees', kw: 'silk saree' },
@@ -67,12 +83,17 @@ const MYNTRA_PATHS = {
   cat_sharara: { path: 'sharara-suits', kw: 'sharara set' },
   cat_palazzo_suit: { path: 'palazzo-suits', kw: 'palazzo suit' },
   cat_saree: { path: 'sarees', kw: 'saree' },
+  cat_blouse: { path: 'blouses', kw: 'designer blouse women' },
 
-  // ── FEMALE TOPS ─────────────────────────────────────────────────────
+  // ── FEMALE TOPS & CO-ORDS ───────────────────────────────────────────
   cat_crop_top: { path: 'crop-tops', kw: 'crop top women' },
-  cat_blouse: { path: 'blouses', kw: 'blouse women' },
+  cat_croptop: { path: 'crop-tops', kw: 'crop top women' },
+  cat_corset: { path: 'tops', kw: 'corset top women' },
   cat_shirt_female: { path: 'tops', kw: 'shirt women' },
+  cat_satin_shirt: { path: 'tops', kw: 'satin shirt women' },
   cat_top: { path: 'tops', kw: 'top women' },
+  cat_coord: { path: 'co-ords', kw: 'coord set women' },
+  cat_jumpsuit: { path: 'jumpsuits', kw: 'jumpsuit women' },
   cat_sweater: { path: 'sweaters', kw: 'sweater women' },
 
   // ── FEMALE DRESSES ──────────────────────────────────────────────────
@@ -84,23 +105,39 @@ const MYNTRA_PATHS = {
   cat_jeans_female: { path: 'women-jeans', kw: 'jeans women' },
   cat_skirt: { path: 'skirts', kw: 'skirt women' },
   cat_palazzo_f: { path: 'palazzos', kw: 'palazzo pants' },
-  cat_bottom: { path: 'palazzos', kw: 'women trousers' },
+  cat_palazzo: { path: 'palazzos', kw: 'palazzo pants' },
+  cat_bottom: { path: 'women-trousers', kw: 'women trousers' },
+
+  // ── FEMALE INNERWEAR & SHAPEWEAR ────────────────────────────────────
+  cat_shapewear: { path: 'saree-shapewear', kw: 'saree shapewear' },
+  cat_bra: { path: 'bra', kw: 'bra women' },
+  cat_panty: { path: 'panties', kw: 'panties women' },
+  cat_camisole: { path: 'camisoles', kw: 'camisole women' },
 
   // ── FEMALE FOOTWEAR ─────────────────────────────────────────────────
   cat_heels: { path: 'heels', kw: 'heels women' },
   cat_flats: { path: 'flats', kw: 'flats women' },
+  cat_sandals: { path: 'flats', kw: 'sandals women' },
+  cat_juttis: { path: 'mojaris', kw: 'punjabi juttis women' },
   cat_sneakers_f: { path: 'women-sneakers', kw: 'sneakers women' },
 
   // ── FEMALE ACCESSORIES ──────────────────────────────────────────────
   cat_earrings: { path: 'earrings', kw: 'earrings' },
+  cat_jhumka: { path: 'earrings', kw: 'jhumkas women' },
   cat_necklace: { path: 'necklaces', kw: 'necklace' },
+  cat_choker: { path: 'necklaces', kw: 'choker necklace' },
   cat_bangles: { path: 'bangles', kw: 'bangles' },
+  cat_kadas: { path: 'bangles', kw: 'kadas women' },
+  cat_payal: { path: 'jewellery', kw: 'payal anklet women' },
   cat_handbag: { path: 'handbags', kw: 'handbag' },
+  cat_clutch: { path: 'clutches', kw: 'clutch women' },
+  cat_potli: { path: 'handbags', kw: 'potli bag women' },
+  cat_tote: { path: 'handbags', kw: 'tote bag women' },
   cat_belt_f: { path: 'belts', kw: 'belt women' },
   cat_sunglasses_f: { path: 'sunglasses', kw: 'sunglasses women' },
   cat_dupatta: { path: 'stoles-dupattas', kw: 'dupatta' },
 
-  // ── MAKEUP (FEMALE) ─────────────────────────────────────────────────
+  // ── MAKEUP & FRAGRANCE (FEMALE) ─────────────────────────────────────
   cat_foundation: { path: 'foundation', kw: 'foundation' },
   cat_lipstick: { path: 'lipstick', kw: 'lipstick' },
   cat_eyeshadow: { path: 'eyeshadow', kw: 'eyeshadow palette' },
