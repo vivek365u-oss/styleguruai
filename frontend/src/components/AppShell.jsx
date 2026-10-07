@@ -649,153 +649,316 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
         title="Profile" 
         trailing={
           <button 
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={() => setIsMenuOpen(true)}
+            title="Settings & Preferences"
             style={{ 
               background: isMenuOpen ? GRAD : C.glass2, 
               border: `1px solid ${isMenuOpen ? 'transparent' : C.border}`,
-              borderRadius: 12, width: 42, height: 42, display: 'flex', flexDirection: 'column', 
-              justifyContent: 'center', alignItems: 'center', gap: 4, cursor: 'pointer', transition: 'all 0.2s' 
+              borderRadius: 12, padding: '0 12px', height: 42, display: 'flex', 
+              alignItems: 'center', gap: 6, cursor: 'pointer', transition: 'all 0.2s',
+              color: isMenuOpen ? 'white' : C.text,
+              boxShadow: isMenuOpen ? '0 4px 14px rgba(139,92,246,0.3)' : 'none'
             }}
           >
-            <div style={{ width: 18, height: 2, background: isMenuOpen ? 'white' : C.text, borderRadius: 1 }} />
-            <div style={{ width: 18, height: 2, background: isMenuOpen ? 'white' : C.text, borderRadius: 1 }} />
-            <div style={{ width: 18, height: 2, background: isMenuOpen ? 'white' : C.text, borderRadius: 1 }} />
+            <span style={{ fontSize: '16px', lineHeight: 1 }}>⚙️</span>
+            <span style={{ fontSize: '12px', fontWeight: 700, fontFamily: PJS }}>Settings</span>
           </button>
         }
       />
 
-      {/* Settings Menu Overlay — Mobile Safe */}
-      {isMenuOpen && (
-        <div 
-          onClick={() => setIsMenuOpen(false)}
-          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', animation: 'fadeIn 0.2s ease' }}
-        >
-          <div 
-            onClick={e => e.stopPropagation()}
+      {/* ── Settings & Preferences Slide-Up Sheet ── */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div 
+            key="settings-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setIsMenuOpen(false)}
             style={{ 
-              position: 'absolute', top: 70, right: 16, left: 16,
-              maxWidth: 360, margin: '0 auto',
-              background: C.navBg, border: `1px solid ${C.border}`, borderRadius: 24,
-              boxShadow: '0 20px 50px rgba(0,0,0,0.35)', animation: 'slideDown 0.3s ease',
-              // Mobile safe: cap height so panel never goes off screen
-              maxHeight: 'calc(100dvh - 110px)',
-              display: 'flex', flexDirection: 'column', overflow: 'hidden'
+              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+              zIndex: 1000, 
+              background: 'rgba(0, 0, 0, 0.55)', 
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'center'
             }}
           >
-            {/* Scrollable content area */}
-            <div style={{ overflowY: 'auto', flex: 1, WebkitOverflowScrolling: 'touch' }}>
-              <div style={{ padding: '20px 24px 10px' }}>
-                 <p style={{ fontSize: '10px', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 700, margin: '0 0 16px' }}>Settings & Preferences</p>
+            <motion.div 
+              key="settings-sheet"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+              onClick={e => e.stopPropagation()}
+              style={{ 
+                width: '100%', maxWidth: 480,
+                background: C.isDark ? '#0F172A' : '#FFFFFF',
+                borderTop: `1px solid ${C.border}`,
+                borderLeft: `1px solid ${C.border}`,
+                borderRight: `1px solid ${C.border}`,
+                borderRadius: '26px 26px 0 0',
+                boxShadow: '0 -10px 40px rgba(0,0,0,0.35)',
+                maxHeight: '90dvh',
+                display: 'flex', flexDirection: 'column', overflow: 'hidden'
+              }}
+            >
+              {/* Handlebar */}
+              <div style={{ width: '100%', display: 'flex', justifyContent: 'center', paddingTop: 10, paddingBottom: 4 }}>
+                <div style={{ width: 40, height: 4, borderRadius: 2, background: C.isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)' }} />
               </div>
 
-              {/* Theme row */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 24px' }}>
-                <span style={{ fontSize: '20px' }}>{theme === 'dark' ? '🌙' : '☀️'}</span>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 500 }}>App Theme</p>
-                  <p style={{ fontSize: '10px', color: C.muted, margin: 0 }}>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</p>
-                </div>
-                <ThemeToggle theme={theme} onToggle={() => { toggleTheme(); onToast({ message: `Switched mode`, type: 'success' }); }} C={C} />
-              </div>
-
-              <div style={{ height: 1, background: C.divider, margin: '8px 24px' }} />
-
-              {/* Language row */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 24px' }}>
-                <span style={{ fontSize: '18px' }}>🌐</span>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: '13px', color: C.text, margin: '0 0 8px', fontFamily: PJS, fontWeight: 500 }}>Language</p>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    {LANGUAGES.map(lang => (
-                      <button key={lang.code}
-                        onClick={() => handleLangChange(lang.code)}
-                        style={{
-                          padding: '4px 12px', borderRadius: 20,
-                          background: language === lang.code ? GRAD : C.glass2,
-                          border: `1px solid ${language === lang.code ? 'transparent' : C.border}`,
-                          color: language === lang.code ? 'white' : C.muted,
-                          fontSize: '11px', fontWeight: language === lang.code ? 700 : 400,
-                          cursor: 'pointer', transition: 'all 0.2s', fontFamily: PJS
-                        }}>
-                        {lang.label}
-                      </button>
-                    ))}
+              {/* Sheet Header */}
+              <div style={{ padding: '10px 20px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.divider}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(139,92,246,0.12)', border: `1px solid rgba(139,92,246,0.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px' }}>
+                    ⚙️
+                  </div>
+                  <div>
+                    <h3 style={{ fontFamily: PDI, fontSize: '17px', fontWeight: 600, color: C.text, margin: 0 }}>Settings & Preferences</h3>
+                    <p style={{ fontFamily: PJS, fontSize: '11px', color: C.muted, margin: 0 }}>Configure your app & profile</p>
                   </div>
                 </div>
+                <button 
+                  onClick={() => setIsMenuOpen(false)}
+                  title="Close"
+                  style={{ 
+                    width: 32, height: 32, borderRadius: '50%',
+                    background: C.glass2, border: `1px solid ${C.border}`,
+                    color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', fontSize: '14px', transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.color = C.text; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = C.muted; }}
+                >
+                  ✕
+                </button>
               </div>
 
-              <div style={{ height: 1, background: C.divider, margin: '8px 24px' }} />
+              {/* Scrollable Content */}
+              <div style={{ overflowY: 'auto', flex: 1, padding: '16px 20px 24px', WebkitOverflowScrolling: 'touch' }}>
 
-              {/* Notification toggle */}
-              <div 
-                onClick={handleNotifToggle}
-                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 24px', cursor: 'pointer' }}
-              >
-                <span style={{ fontSize: '18px' }}>{notifOn ? '🔔' : '🔕'}</span>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 500 }}>Daily Style Notifications</p>
-                  <p style={{ fontSize: '10px', color: C.muted, margin: '2px 0 0', fontFamily: PJS, lineHeight: '1.4' }}>
-                    {notifOn 
-                      ? '🌅 Morning brief + 🔥 Streak guard active'
-                      : notif?.permission === 'denied' 
-                        ? '⚠️ Blocked — Allow in browser settings'
-                        : 'Tap to enable daily outfit briefs'}
-                  </p>
+                {/* ── GROUP 1: PREFERENCES ── */}
+                <p style={{ fontSize: '10px', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.14em', fontWeight: 700, margin: '0 0 8px 4px', fontFamily: PJS }}>
+                  App Experience
+                </p>
+                <div style={{ background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 16, overflow: 'hidden', marginBottom: 18 }}>
+                  
+                  {/* Theme Row */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: theme === 'dark' ? 'rgba(99,102,241,0.15)' : 'rgba(245,158,11,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                      {theme === 'dark' ? '🌙' : '☀️'}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>App Theme</p>
+                      <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</p>
+                    </div>
+                    <ThemeToggle theme={theme} onToggle={() => { toggleTheme(); onToast({ message: `Switched mode`, type: 'success' }); }} C={C} />
+                  </div>
+
+                  <div style={{ height: 1, background: C.divider, margin: '0 16px' }} />
+
+                  {/* Language Row */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(59,130,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                      🌐
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Language</p>
+                      <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>Choose dialect</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: 4, background: C.isDark ? 'rgba(0,0,0,0.25)' : 'rgba(0,0,0,0.06)', padding: 3, borderRadius: 20 }}>
+                      {LANGUAGES.map(lang => (
+                        <button key={lang.code}
+                          onClick={() => handleLangChange(lang.code)}
+                          style={{
+                            padding: '4px 10px', borderRadius: 14,
+                            background: language === lang.code ? GRAD : 'transparent',
+                            border: 'none',
+                            color: language === lang.code ? 'white' : C.muted,
+                            fontSize: '11px', fontWeight: language === lang.code ? 700 : 500,
+                            cursor: 'pointer', transition: 'all 0.2s', fontFamily: PJS,
+                            boxShadow: language === lang.code ? '0 2px 6px rgba(139,92,246,0.3)' : 'none'
+                          }}>
+                          {lang.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={{ height: 1, background: C.divider, margin: '0 16px' }} />
+
+                  {/* Notifications Row */}
+                  <div 
+                    onClick={handleNotifToggle}
+                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', cursor: 'pointer' }}
+                  >
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: notifOn ? 'rgba(16,185,129,0.15)' : 'rgba(148,163,184,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                      {notifOn ? '🔔' : '🔕'}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Daily Style Notifications</p>
+                      <p style={{ fontSize: '11px', color: C.muted, margin: '2px 0 0', fontFamily: PJS, lineHeight: '1.4' }}>
+                        {notifOn 
+                          ? '🌅 Morning brief + 🔥 Streak guard active'
+                          : notif?.permission === 'denied' 
+                            ? '⚠️ Blocked in browser settings'
+                            : 'Daily outfit briefs & reminders'}
+                      </p>
+                    </div>
+                    <div style={{ width: 38, height: 22, borderRadius: 11, background: notifOn ? 'linear-gradient(135deg,#8B5CF6,#6366F1)' : C.border, position: 'relative', flexShrink: 0, transition: 'background 0.3s' }}>
+                      <div style={{ position: 'absolute', top: 2, left: notifOn ? 18 : 2, width: 18, height: 18, borderRadius: '50%', background: 'white', transition: 'left 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
+                    </div>
+                  </div>
+
                 </div>
-                <div style={{ width: 36, height: 20, borderRadius: 10, background: notifOn ? 'linear-gradient(135deg,#8B5CF6,#6366F1)' : C.border, position: 'relative', flexShrink: 0, transition: 'background 0.3s' }}>
-                  <div style={{ position: 'absolute', top: 2, left: notifOn ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: 'white', transition: 'left 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
-                </div>
-              </div>
 
-              <div style={{ height: 1, background: C.divider, margin: '8px 24px' }} />
-
-              {/* Buttons list */}
-              <div style={{ padding: '8px 0' }}>
-                 {[
-                   { icon: '💬', label: 'Contact Support', action: () => window.open('mailto:StyleGuruAI.in.gmail@gmail.com', '_blank') },
-                   { icon: '⭐', label: 'Rate the App', action: () => window.open('https://play.google.com/store/apps/details?id=com.StyleGuruAI', '_blank') },
-                   { icon: '🗑️', label: 'Clear Local Data', danger: true, action: () => {
-                      if (window.confirm('Clear all local data?')) { 
-                        localStorage.clear(); onToast({ message: 'Data cleared', type: 'success' }); 
-                      }
-                   }},
-                   { icon: '🚪', label: 'Sign Out', action: onLogout },
-                   { icon: '⚠️', label: 'Delete Account Permanently', danger: true, action: handleDestroyAccount },
-                 ].map((item, i) => (
-                   <button 
-                    key={i} 
-                    onClick={item.action}
-                    style={{ 
-                      width: '100%', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12, 
+                {/* ── GROUP 2: HELP & FEEDBACK ── */}
+                <p style={{ fontSize: '10px', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.14em', fontWeight: 700, margin: '0 0 8px 4px', fontFamily: PJS }}>
+                  Help & Feedback
+                </p>
+                <div style={{ background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 16, overflow: 'hidden', marginBottom: 18 }}>
+                  
+                  {/* Contact Support */}
+                  <button
+                    onClick={() => window.open('mailto:StyleGuruAI.in.gmail@gmail.com', '_blank')}
+                    style={{
+                      width: '100%', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14,
                       background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s'
                     }}
                     onMouseEnter={e => e.currentTarget.style.background = C.glass}
                     onMouseLeave={e => e.currentTarget.style.background = 'none'}
-                   >
-                     <span style={{ fontSize: '18px' }}>{item.icon}</span>
-                     <span style={{ fontSize: '13px', color: item.danger ? C.warnText : C.text, fontFamily: PJS, fontWeight: 500 }}>{item.label}</span>
-                   </button>
-                 ))}
-              </div>
-            </div>
+                  >
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                      💬
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Contact Support</p>
+                      <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>StyleGuruAI.in.gmail@gmail.com</p>
+                    </div>
+                    <span style={{ fontSize: '14px', color: C.muted }}>→</span>
+                  </button>
 
-            {/* ── Sticky Close Button — Always visible at bottom ── */}
-            <button 
-              onClick={() => setIsMenuOpen(false)}
-              style={{ 
-                flexShrink: 0, width: '100%', padding: '16px', 
-                background: C.glass2, border: 'none', 
-                borderTop: `1px solid ${C.border}`, 
-                color: C.text, fontSize: '13px', fontWeight: 700, 
-                cursor: 'pointer', borderRadius: '0 0 24px 24px',
-                letterSpacing: '0.05em'
-              }}
-            >
-              ✕  Close
-            </button>
-          </div>
-        </div>
-      )}
+                  <div style={{ height: 1, background: C.divider, margin: '0 16px' }} />
+
+                  {/* Rate App */}
+                  <button
+                    onClick={() => window.open('https://play.google.com/store/apps/details?id=com.StyleGuruAI', '_blank')}
+                    style={{
+                      width: '100%', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14,
+                      background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = C.glass}
+                    onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                  >
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(245,158,11,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                      ⭐
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Rate StyleGuru AI</p>
+                      <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>Leave a review on Google Play</p>
+                    </div>
+                    <span style={{ fontSize: '13px', color: C.muted }}>↗</span>
+                  </button>
+
+                </div>
+
+                {/* ── GROUP 3: ACCOUNT & SESSION ── */}
+                <p style={{ fontSize: '10px', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.14em', fontWeight: 700, margin: '0 0 8px 4px', fontFamily: PJS }}>
+                  Account
+                </p>
+                <div style={{ background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 16, overflow: 'hidden', marginBottom: 18 }}>
+                  <button
+                    onClick={onLogout}
+                    style={{
+                      width: '100%', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14,
+                      background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = C.glass}
+                    onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                  >
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(148,163,184,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                      🚪
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Sign Out</p>
+                      <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>{user?.email || 'Current session'}</p>
+                    </div>
+                    <span style={{ fontSize: '14px', color: C.muted }}>→</span>
+                  </button>
+                </div>
+
+                {/* ── GROUP 4: DANGER ZONE ── */}
+                <p style={{ fontSize: '10px', color: C.dangerText, textTransform: 'uppercase', letterSpacing: '0.14em', fontWeight: 700, margin: '0 0 8px 4px', fontFamily: PJS }}>
+                  Danger Zone
+                </p>
+                <div style={{ background: C.dangerBg, border: `1px solid ${C.dangerBorder}`, borderRadius: 16, overflow: 'hidden' }}>
+                  
+                  {/* Clear Local Data */}
+                  <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(239,68,68,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                      🗑️
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: '13px', color: C.dangerText, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Clear Local Cache</p>
+                      <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>Resets offline saved cache</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Clear all local data?')) {
+                          localStorage.clear();
+                          onToast({ message: 'Local data cleared', type: 'success' });
+                        }
+                      }}
+                      style={{
+                        padding: '6px 12px', borderRadius: 8,
+                        background: 'rgba(239,68,68,0.12)', border: `1px solid ${C.dangerBorder}`,
+                        color: C.dangerText, fontSize: '11px', fontWeight: 600,
+                        cursor: 'pointer', fontFamily: PJS, transition: 'all 0.2s'
+                      }}
+                    >
+                      Clear
+                    </button>
+                  </div>
+
+                  <div style={{ height: 1, background: C.dangerBorder, margin: '0 16px' }} />
+
+                  {/* Delete Account Permanently */}
+                  <div style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                      ⚠️
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: '13px', color: C.dangerText, margin: 0, fontFamily: PJS, fontWeight: 700 }}>Delete Account</p>
+                      <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>Irreversible action</p>
+                    </div>
+                    <button
+                      disabled={destroying}
+                      onClick={handleDestroyAccount}
+                      style={{
+                        padding: '6px 12px', borderRadius: 8,
+                        background: 'linear-gradient(135deg, #EF4444, #DC2626)', border: 'none',
+                        color: 'white', fontSize: '11px', fontWeight: 700,
+                        cursor: destroying ? 'wait' : 'pointer', fontFamily: PJS, transition: 'all 0.2s',
+                        boxShadow: '0 2px 8px rgba(239,68,68,0.3)',
+                        opacity: destroying ? 0.6 : 1
+                      }}
+                    >
+                      {destroying ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
 
       {/* User Identity Card */}
@@ -955,38 +1118,49 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
          </div>
       </GlassCard>
 
-      {/* ── Quick Navigation to Tools & History in Profile ── */}
-      <GlassCard C={C} hoverable={false} style={{ padding: '20px', marginBottom: 16 }}>
-        <p style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: C.muted, fontFamily: PJS, marginBottom: 12, fontWeight: 700 }}>
-          Quick Navigation
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-          <button
-            onClick={() => onTabChange('tools')}
-            style={{ padding: '14px 6px', background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
-          >
-            <span style={{ fontSize: '20px', marginBottom: 4 }}>🛠️</span>
-            <span style={{ fontSize: '12px', fontWeight: 700, color: C.text, fontFamily: PJS }}>Tools</span>
-            <span style={{ fontSize: '10px', color: C.muted, fontFamily: PJS }}>6 Checkers</span>
-          </button>
-
-          <button
-            onClick={() => onTabChange('history')}
-            style={{ padding: '14px 6px', background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
-          >
-            <span style={{ fontSize: '20px', marginBottom: 4 }}>📜</span>
-            <span style={{ fontSize: '12px', fontWeight: 700, color: C.text, fontFamily: PJS }}>History</span>
-            <span style={{ fontSize: '10px', color: C.muted, fontFamily: PJS }}>Past Scans</span>
-          </button>
-
-          <button
-            onClick={() => onTabChange('lookbook')}
-            style={{ padding: '14px 6px', background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
-          >
-            <span style={{ fontSize: '20px', marginBottom: 4 }}>📖</span>
-            <span style={{ fontSize: '12px', fontWeight: 700, color: C.text, fontFamily: PJS }}>Lookbook</span>
-            <span style={{ fontSize: '10px', color: C.muted, fontFamily: PJS }}>Saved Looks</span>
-          </button>
+      {/* ── Settings & Preferences Direct Card (Bottom of Profile) ── */}
+      <GlassCard 
+        C={C} 
+        onClick={() => setIsMenuOpen(true)}
+        style={{ 
+          padding: '16px 20px', 
+          marginBottom: 16, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          cursor: 'pointer',
+          background: C.glass2,
+          border: `1px solid ${C.border}`,
+          borderRadius: 16,
+          transition: 'all 0.2s'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ 
+            width: 42, height: 42, borderRadius: 12, 
+            background: 'linear-gradient(135deg, rgba(139,92,246,0.18), rgba(99,102,241,0.12))', 
+            border: `1px solid rgba(139,92,246,0.25)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '20px'
+          }}>
+            ⚙️
+          </div>
+          <div>
+            <p style={{ fontFamily: PJS, fontSize: '14px', fontWeight: 700, color: C.text, margin: '0 0 2px' }}>
+              Settings & Preferences
+            </p>
+            <p style={{ fontFamily: PJS, fontSize: '11px', color: C.muted, margin: 0 }}>
+              Theme, language, alerts & account options
+            </p>
+          </div>
+        </div>
+        <div style={{ 
+          width: 30, height: 30, borderRadius: 8, 
+          background: C.glass, border: `1px solid ${C.border}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: C.muted, fontSize: '13px'
+        }}>
+          →
         </div>
       </GlassCard>
       <div style={{ paddingBottom: 80 }} />
