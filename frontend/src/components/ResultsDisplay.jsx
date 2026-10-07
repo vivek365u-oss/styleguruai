@@ -441,7 +441,7 @@ function DirectShopHeroCards({ recommendations, analysis, effectiveGender, userB
       query: `${primaryTop.name} ${isFemale ? 'kurti top' : 'shirt'}`,
       color: primaryTop.name,
       hex: primaryTop.hex,
-      note: `Engineered for ${analysis?.skin_tone?.category || 'your'} skin tone`,
+      note: `Engineered for ${analysis?.skin_tone?.category?.replace(/_/g, ' ') || 'your'} skin tone`,
       storeHint: 'Myntra • Amazon'
     },
     {
@@ -469,15 +469,15 @@ function DirectShopHeroCards({ recommendations, analysis, effectiveGender, userB
   ];
 
   return (
-    <div className="mt-4 space-y-3">
+    <div className="mt-3 space-y-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-          <h3 className={`text-sm font-black tracking-tight ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <h3 className={`text-xs sm:text-sm font-black tracking-tight ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
             Direct Shop 1-Click Matches
           </h3>
         </div>
-        <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
+        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
           isDark 
             ? 'bg-violet-950/40 border-violet-800/50 text-violet-300' 
             : 'bg-violet-50 border-violet-200 text-violet-700'
@@ -486,53 +486,54 @@ function DirectShopHeroCards({ recommendations, analysis, effectiveGender, userB
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {/* Horizontal Carousel on Mobile / 3-Col Grid on Desktop (Zero-Scroll!) */}
+      <div className="flex sm:grid sm:grid-cols-3 gap-2.5 overflow-x-auto pb-2 scrollbar-hide snap-x -mx-1 px-1">
         {cards.map(card => (
           <div
             key={card.id}
-            className={`rounded-2xl p-4 border transition-all duration-200 flex flex-col justify-between ${
+            className={`flex-shrink-0 w-[240px] sm:w-auto snap-center rounded-2xl p-3 border transition-all duration-200 flex flex-col justify-between ${
               isDark 
                 ? 'bg-[#111827] border-white/10 hover:border-violet-500/40 shadow-lg shadow-black/20' 
                 : 'bg-white border-slate-200 hover:border-violet-300 shadow-xs hover:shadow-md'
             }`}
           >
             <div>
-              <div className="flex items-center justify-between gap-2 mb-2.5">
-                <span className={`text-[11px] font-extrabold tracking-wider uppercase px-2 py-0.5 rounded-md ${
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className={`text-[10px] font-extrabold tracking-wider uppercase px-2 py-0.5 rounded-md ${
                   isDark ? 'bg-white/10 text-slate-300' : 'bg-slate-100 text-slate-700'
                 }`}>
                   {card.badge}
                 </span>
-                <span className="text-[11px] text-slate-400 font-medium">
+                <span className="text-[10px] text-slate-400 font-medium">
                   {card.storeHint}
                 </span>
               </div>
 
-              <div className="flex items-center gap-3 mb-2.5">
+              <div className="flex items-center gap-2.5 mb-2">
                 <div 
-                  className="w-8 h-8 rounded-xl border border-white/20 shadow-xs flex-shrink-0"
+                  className="w-7 h-7 rounded-lg border border-white/20 shadow-xs flex-shrink-0"
                   style={{ backgroundColor: card.hex }}
                 />
                 <div className="min-w-0 flex-1">
                   <p className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {card.color}
                   </p>
-                  <p className="text-[11px] text-slate-400 truncate">
+                  <p className="text-[10px] text-slate-400 truncate">
                     {card.category}
                   </p>
                 </div>
               </div>
 
-              <p className={`text-[11px] leading-snug mb-3.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              <p className={`text-[10px] leading-snug mb-2.5 line-clamp-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                 {card.note}
               </p>
             </div>
 
             <button
               onClick={() => onShop({ query: card.query, color: card.color, catId: card.catId }, userBudget === 'any' ? null : parseInt(userBudget, 10))}
-              className="w-full py-2.5 px-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-bold tracking-wide transition-all duration-150 active:scale-98 flex items-center justify-center gap-1.5 shadow-sm shadow-violet-600/20"
+              className="w-full py-2 px-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-[10px] font-black uppercase tracking-wider transition-all duration-150 active:scale-98 flex items-center justify-center gap-1 shadow-sm shadow-violet-600/20"
             >
-              <span>Shop on Myntra / Amazon</span>
+              <span>Instant Store Shop</span>
               <span>→</span>
             </button>
           </div>
@@ -708,7 +709,7 @@ function ProfileCard({ analysis, recommendations, uploadedImage, isFemale, isSea
             {isSeasonal ? 'Seasonal' : isFemale ? '👩 Female' : '👨 Male'} Profile
           </p>
           <h2 className={`${headingCls} text-2xl font-black capitalize`}>
-            {analysis.skin_tone.category} <span className={`${skinLabelCls} font-light text-lg`}>Skin</span>
+            {analysis.skin_tone.category?.replace(/_/g, ' ')} <span className={`${skinLabelCls} font-light text-lg`}>Skin</span>
           </h2>
           <div className="flex flex-wrap gap-1.5 mt-2">
             <span className={`text-xs px-2 py-0.5 rounded-full border capitalize ${isDark ? 'bg-purple-500/20 border-purple-500/30 text-purple-200' : 'bg-purple-100 border-purple-400 text-purple-800 font-semibold'}`}>{analysis.skin_tone.undertone}</span>
@@ -1815,12 +1816,13 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         </AnimatePresence>
       </section>
 
-      {/* NEW: Phase 3 Action Center */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+      {/* ── Quick Actions Command Hub (Compact 2x2 Grid — Zero Vertical Sprawl) ── */}
+      <div className="grid grid-cols-2 gap-2 mt-4">
+        {/* 1. Save to Lookbook */}
         <button
           onClick={async () => {
             const subjectName = window.prompt("Who is this Lookbook for? (e.g., Myself, Rahul, Sister)", "Myself");
-            if (subjectName === null) return; // User cancelled saving
+            if (subjectName === null) return;
 
             const btn = document.getElementById('save-lookbook-btn');
             if (btn) { btn.textContent = '⏳ Saving...'; btn.disabled = true; }
@@ -1890,9 +1892,9 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             };
 
             try {
-              const ok = await saveToLookbook(auth.currentUser.uid, lookData);
+              const ok = await saveToLookbook(auth.currentUser?.uid || 'anon', lookData);
               if (ok && btn) {
-                btn.textContent = '✅ Saved to Lookbook';
+                btn.textContent = '✅ Saved Lookbook';
                 btn.style.background = 'rgba(168,85,247,0.15)';
                 btn.style.borderColor = 'rgba(168,85,247,0.4)';
                 btn.disabled = false;
@@ -1912,176 +1914,144 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
             }
           }}
           id="save-lookbook-btn"
-          className={`flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-bold transition-all hover:scale-[1.02] ${isDark ? 'bg-white/5 border-white/10 text-white/70' : 'bg-gray-50 border-gray-200 text-gray-700'
-            }`}
+          className={`flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl border text-xs font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${
+            isDark ? 'bg-white/5 border-white/10 text-white/80 hover:bg-white/10 hover:border-purple-500/30' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 shadow-xs'
+          }`}
         >
-          <span>📖</span> Save to Lookbook
+          <span>📖</span>
+          <span className="truncate">Save Lookbook</span>
         </button>
 
+        {/* 2. Post to Community Feed */}
         <button
           onClick={async () => {
             const btn = document.getElementById('post-community-btn');
             if (btn) { btn.textContent = '⏳ Posting...'; btn.disabled = true; }
 
-            const palette = [
-              ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || []),
-            ].slice(0, 5);
-
-            const ok = await publishToCommunityFeed(auth.currentUser.uid, {
-              userName: auth.currentUser?.displayName || 'Elite User',
-              mission: activeMission,
-              palette,
-              score: Math.min(98, Math.max(55, Math.round((photo_quality?.score || 85) * 0.7 + (analysis.skin_tone.confidence === 'high' ? 10 : 5)))),
-              level: 'Premium Elite' // Fallback for now
+            await saveHistory({
+              skinTone: analysis.skin_tone.category,
             });
 
-            if (ok && btn) {
-              btn.textContent = '🚀 Posted to Feed!';
+            const palette = [
+              ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || recommendations.seasonal_colors || []),
+            ].slice(0, 5);
+
+            try {
+              await publishToCommunityFeed(auth.currentUser?.uid || 'anon', {
+                userName: auth.currentUser?.displayName || 'Elite Stylist',
+                mission: activeMission,
+                palette,
+                score: Math.min(98, Math.max(55, Math.round((photo_quality?.score || 85) * 0.7 + (analysis.skin_tone.confidence === 'high' ? 10 : 5)))),
+                level: 'Premium Elite',
+                skinHex: analysis.skin_color?.hex,
+                skinTone: analysis.skin_tone.category,
+                undertone: analysis.skin_tone.undertone || '',
+                colorSeason: analysis.skin_tone.color_season || '',
+                gender: analysis?.gender || (isFemale ? 'female' : 'male')
+              });
+
+              if (btn) {
+                btn.textContent = '🚀 Shared to Feed!';
+                btn.style.background = 'rgba(16,185,129,0.15)';
+                btn.style.borderColor = 'rgba(16,185,129,0.4)';
+                btn.style.color = '#10B981';
+                btn.disabled = false;
+                setTimeout(() => {
+                  btn.textContent = '🌍 Post Community';
+                  btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = '';
+                }, 3000);
+              }
+            } catch (err) {
+              console.error("Community post error:", err);
+              if (btn) {
+                btn.textContent = '🌍 Post Community';
+                btn.disabled = false;
+              }
+            }
+          }}
+          id="post-community-btn"
+          className={`flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl border text-xs font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${
+            isDark ? 'bg-purple-500/10 border-purple-500/20 text-purple-300 hover:bg-purple-500/20' : 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 shadow-xs'
+          }`}
+        >
+          <span>🌍</span>
+          <span className="truncate">Post Community</span>
+        </button>
+
+        {/* 3. Set as My Style DNA */}
+        <button
+          onClick={async () => {
+            const btn = document.getElementById('set-dna-btn');
+            if (btn) { btn.textContent = '⏳ Saving...'; btn.disabled = true; }
+
+            const dnaData = {
+              skinTone: analysis.skin_tone.category,
+              undertone: analysis.skin_tone.undertone,
+              colorSeason: analysis.skin_tone.color_season,
+              skinHex: analysis.skin_color?.hex || '#C68642',
+              gender: finalData.gender || (isFemale ? 'female' : 'male'),
+              bestColors: [
+                ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || []),
+              ].slice(0, 6),
+              skin_tone: { category: analysis.skin_tone.category, undertone: analysis.skin_tone.undertone, color_season: analysis.skin_tone.color_season },
+              updatedAt: new Date().toISOString(),
+            };
+
+            localStorage.setItem('sg_last_analysis', JSON.stringify(dnaData));
+
+            try {
+              if (auth.currentUser) {
+                await savePrimaryProfile(auth.currentUser.uid, dnaData);
+              }
+            } catch (e) {
+              console.error('[DNA] Firestore save failed:', e);
+            }
+
+            window.dispatchEvent(new CustomEvent('sg_dna_set', { detail: dnaData }));
+
+            if (btn) {
+              btn.textContent = '✅ Saved DNA!';
               btn.style.background = 'rgba(16,185,129,0.15)';
               btn.style.borderColor = 'rgba(16,185,129,0.4)';
               btn.style.color = '#10B981';
               btn.disabled = false;
               setTimeout(() => {
-                btn.textContent = '🌍 Post to Community';
-                btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = '';
+                btn.textContent = '🧬 Set Style DNA';
+                btn.style.background = '';
+                btn.style.borderColor = '';
+                btn.style.color = '';
               }, 3000);
             }
           }}
-          id="post-community-btn"
-          className={`flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-bold transition-all hover:scale-[1.02] ${isDark ? 'bg-purple-500/10 border-purple-500/20 text-purple-300' : 'bg-purple-50 border-purple-200 text-purple-700'
-            }`}
-        >
-          <span>🌍</span> Post to Community
-        </button>
-      </div>
-
-      {/* Style DNA Button — saves to BOTH localStorage AND Firestore */}
-      <button
-        onClick={async () => {
-          const btn = document.getElementById('set-dna-btn');
-          if (btn) { btn.textContent = '⏳ Saving...'; btn.disabled = true; }
-
-          const dnaData = {
-            skinTone: analysis.skin_tone.category,
-            undertone: analysis.skin_tone.undertone,
-            colorSeason: analysis.skin_tone.color_season,
-            skinHex: analysis.skin_color?.hex || '#C68642',
-            gender: finalData.gender || 'male',
-            bestColors: [
-              ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || []),
-            ].slice(0, 6),
-            // Extra fields for StyleNavigator compatibility
-            skin_tone: { category: analysis.skin_tone.category, undertone: analysis.skin_tone.undertone, color_season: analysis.skin_tone.color_season },
-            updatedAt: new Date().toISOString(),
-          };
-
-          // 1. Save to localStorage (instant, for StyleNavigator fallback)
-          localStorage.setItem('sg_last_analysis', JSON.stringify(dnaData));
-
-          // 2. Save to Firestore (persistent, cross-device)
-          try {
-            if (auth.currentUser) {
-              await savePrimaryProfile(auth.currentUser.uid, dnaData);
-            }
-          } catch (e) {
-            console.error('[DNA] Firestore save failed:', e);
-          }
-
-          // 3. Notify StyleNavigator to reload
-          window.dispatchEvent(new CustomEvent('sg_dna_set', { detail: dnaData }));
-
-          // 4. Visual feedback
-          if (btn) {
-            btn.textContent = '✅ Style DNA Saved!';
-            btn.style.background = 'rgba(16,185,129,0.15)';
-            btn.style.borderColor = 'rgba(16,185,129,0.4)';
-            btn.style.color = '#10B981';
-            btn.disabled = false;
-            setTimeout(() => {
-              btn.textContent = '🧬 Set as My Style DNA';
-              btn.style.background = '';
-              btn.style.borderColor = '';
-              btn.style.color = '';
-            }, 3000);
-          }
-        }}
-        id="set-dna-btn"
-        className={`w-full py-3 rounded-2xl border text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${isDark
-            ? 'bg-purple-500/10 border-purple-500/30 text-purple-300 hover:bg-purple-500/20'
-            : 'bg-purple-50 border-purple-300 text-purple-700 hover:bg-purple-100'
+          id="set-dna-btn"
+          className={`flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl border text-xs font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${
+            isDark ? 'bg-pink-500/10 border-pink-500/20 text-pink-300 hover:bg-pink-500/20' : 'bg-pink-50 border-pink-200 text-pink-700 hover:bg-pink-100 shadow-xs'
           }`}
-      >
-        🧬 Set as My Style DNA
-      </button>
+        >
+          <span>🧬</span>
+          <span className="truncate">Set Style DNA</span>
+        </button>
 
-      {/* Actions: Download / Share */}
-      <div className="flex flex-col sm:flex-row gap-2 mt-4">
+        {/* 4. Download Palette */}
         {(() => {
           const allColors = [
             ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || recommendations.seasonal_colors || []),
             ...(recommendations.best_pant_colors || []),
           ].slice(0, 7);
-          if (allColors.length === 0) return null;
           return (
             <button
-              onClick={() => downloadPalette(allColors, analysis.skin_tone.category)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-bold transition-all hover:scale-[1.02] ${isDark ? 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-purple-500/40' : 'bg-white border-gray-200 text-gray-600 hover:border-purple-400 shadow-sm'}`}
+              onClick={() => {
+                if (allColors.length > 0) downloadPalette(allColors, analysis.skin_tone.category);
+              }}
+              className={`flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl border text-xs font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                isDark ? 'bg-amber-500/10 border-amber-500/20 text-amber-300 hover:bg-amber-500/20' : 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100 shadow-xs'
+              }`}
             >
               <span>🎨</span>
-              <span>Download Palette</span>
+              <span className="truncate">Get Palette</span>
             </button>
           );
         })()}
-
-        <button
-          onClick={async () => {
-            // Always allow saving as user is now always authenticated
-            await saveHistory({
-              skinTone: analysis.skin_tone.category,
-            });
-            if (shareStatus === 'success') return;
-            setShareStatus('loading');
-            try {
-              const paletteData = {
-                skinHex: analysis.skin_color.hex,
-                skinTone: analysis.skin_tone.category,
-                undertone: analysis.skin_tone.undertone || '',
-                colorSeason: analysis.skin_tone.color_season || '',
-                gender: analysis?.gender || 'male',
-                bestColors: [
-                  ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || recommendations.seasonal_colors || []),
-                ].slice(0, 5)
-              };
-              await publishToCommunityFeed(auth.currentUser?.uid || 'anon', paletteData);
-              setShareStatus('success');
-            } catch {
-              setShareStatus('error');
-              setTimeout(() => setShareStatus(null), 3000);
-            }
-          }}
-          disabled={shareStatus === 'loading' || shareStatus === 'success'}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all hover:scale-[1.02] shadow-sm ${shareStatus === 'success'
-            ? 'bg-green-500 text-white border-green-500'
-            : shareStatus === 'error'
-              ? 'bg-red-500 text-white border-red-500'
-              : isDark
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white border-transparent hover:from-purple-500 hover:to-pink-500'
-                : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-transparent hover:from-purple-600 hover:to-pink-600'
-            }`}
-        >
-          {shareStatus === 'loading' ? (
-            <span className="animate-spin text-sm">↻</span>
-          ) : shareStatus === 'success' ? (
-            <span>✅ Shared!</span>
-          ) : shareStatus === 'error' ? (
-            <span>Error</span>
-          ) : (
-            <>
-              <span>🌍</span>
-              <span>Share to Community</span>
-            </>
-          )}
-        </button>
       </div>
 
       {/* Tab bar — equal distribution, all 4 tabs including Shop */}
