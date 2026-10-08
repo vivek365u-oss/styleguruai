@@ -247,12 +247,19 @@ function ColorCard({ color, category, gender, isDark, onShop, className = '' }) 
 function OutfitCard({ combo, index, isDark, onShop }) {
   const colors = ["purple", "pink", "blue", "emerald", "amber"];
   const color = colors[index % colors.length];
-  const colorMap = {
+  const colorMapDark = {
     purple: "from-purple-500/20 to-purple-600/10 border-purple-500/30",
     pink: "from-pink-500/20 to-pink-600/10 border-pink-500/30",
     blue: "from-blue-500/20 to-blue-600/10 border-blue-500/30",
     emerald: "from-emerald-500/20 to-emerald-600/10 border-emerald-500/30",
     amber: "from-amber-500/20 to-amber-600/10 border-amber-500/30",
+  };
+  const colorMapLight = {
+    purple: "bg-purple-50/80 border-purple-200/90 shadow-sm",
+    pink: "bg-pink-50/80 border-pink-200/90 shadow-sm",
+    blue: "bg-blue-50/80 border-blue-200/90 shadow-sm",
+    emerald: "bg-emerald-50/80 border-emerald-200/90 shadow-sm",
+    amber: "bg-amber-50/80 border-amber-200/90 shadow-sm",
   };
   const title = combo.name || combo.title || combo.upper || combo.shirt || combo.top || combo.dress || "Curated Ensemble";
   const upperItem = combo.upper || combo.shirt || combo.top || combo.dress || "";
@@ -260,21 +267,39 @@ function OutfitCard({ combo, index, isDark, onShop }) {
   const footwearItem = combo.shoes || combo.footwear || "";
   const accentItem = combo.accent || combo.dupatta || "";
 
-  const headingCls = isDark ? 'text-white' : 'text-gray-800';
-  const subCls = isDark ? 'text-white/60' : 'text-gray-500';
-  const badgeCls = isDark ? 'bg-white/10 text-white/80' : 'bg-white/60 text-gray-700';
-  const vibeCls = isDark ? 'text-white/40' : 'text-gray-400';
+  const cardStyle = isDark ? `bg-gradient-to-br ${colorMapDark[color]}` : colorMapLight[color];
+  const headingCls = isDark ? 'text-white' : 'text-slate-900 font-extrabold';
+  const labelCls = isDark ? 'text-white/60' : 'text-slate-600 font-medium';
+  const valCls = isDark ? 'text-white/90 font-semibold' : 'text-slate-900 font-bold';
+  const badgeCls = isDark ? 'bg-white/10 text-white/80' : 'bg-purple-100 text-purple-800 border border-purple-200';
+  const vibeCls = isDark ? 'text-white/45' : 'text-slate-500 font-medium';
 
   return (
-    <div className={`bg-gradient-to-br ${colorMap[color]} border rounded-2xl p-4`}>
+    <div className={`${cardStyle} border rounded-2xl p-4 transition-all hover:shadow-md`}>
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex-1">
-          <p className={`${headingCls} font-bold text-sm mb-1.5`}>{title}</p>
-          <div className="flex flex-col gap-1 text-xs">
-            {upperItem && upperItem !== title && <span className={subCls}>👕 Top: <strong className="font-semibold text-white/80">{upperItem}</strong></span>}
-            {lowerItem && <span className={subCls}>👖 Bottom: <strong className="font-semibold text-white/80">{lowerItem}</strong></span>}
-            {footwearItem && <span className={subCls}>👟 Footwear: <strong className="font-semibold text-white/80">{footwearItem}</strong></span>}
-            {accentItem && accentItem !== "-" && <span className={subCls}>✨ Accent: <strong className="font-semibold text-white/80">{accentItem}</strong></span>}
+          <p className={`${headingCls} font-bold text-sm mb-2`}>{title}</p>
+          <div className="flex flex-col gap-1.5 text-xs">
+            {upperItem && upperItem !== title && (
+              <span className={labelCls}>
+                👕 Top: <strong className={valCls}>{upperItem}</strong>
+              </span>
+            )}
+            {lowerItem && (
+              <span className={labelCls}>
+                👖 Bottom: <strong className={valCls}>{lowerItem}</strong>
+              </span>
+            )}
+            {footwearItem && (
+              <span className={labelCls}>
+                👟 Footwear: <strong className={valCls}>{footwearItem}</strong>
+              </span>
+            )}
+            {accentItem && accentItem !== "-" && (
+              <span className={labelCls}>
+                ✨ Accent: <strong className={valCls}>{accentItem}</strong>
+              </span>
+            )}
           </div>
         </div>
         <div className="text-right flex-shrink-0">
@@ -1210,11 +1235,11 @@ function OutfitsTab({ recommendations, analysis, isFemale, isSeasonal, seasonalG
     });
   }, [derivedSuites.combos, backendOutfits]);
 
-  const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
+  const sectionLabelCls = isDark ? 'text-white/50' : 'text-slate-700 font-bold';
   const cardBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
-  const bodyTextCls = isDark ? 'text-white/60' : 'text-gray-500';
-  const mutedCls = isDark ? 'text-white/30' : 'text-gray-400';
-  const tipTextCls = isDark ? 'text-white/70' : 'text-gray-700';
+  const bodyTextCls = isDark ? 'text-white/60' : 'text-slate-700 font-medium';
+  const mutedCls = isDark ? 'text-white/30' : 'text-slate-500';
+  const tipTextCls = isDark ? 'text-white/70' : 'text-slate-800 font-medium';
 
   // Mission-based Re-ranking Logic
   const scoredOutfits = useMemo(() => {
@@ -1267,17 +1292,17 @@ function OutfitsTab({ recommendations, analysis, isFemale, isSeasonal, seasonalG
   return (
     <div className="space-y-4">
       {/* Segmented switcher at the top — Zero-Scroll */}
-      <div className={`flex p-1 rounded-2xl border gap-1 overflow-x-auto scrollbar-hide ${
+      <div className={`flex items-center gap-1.5 p-1 rounded-2xl border overflow-x-auto scrollbar-hide ${
         isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'
       }`}>
         {segments.map((seg) => (
           <button
             key={seg.id}
             onClick={() => setActiveSection(seg.id)}
-            className={`flex-1 min-w-[85px] py-2 px-2.5 rounded-xl text-[11px] font-bold transition-all text-center whitespace-nowrap ${
+            className={`shrink-0 py-2 px-3.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
               activeSection === seg.id
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
-                : isDark ? 'text-white/50 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                : isDark ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
             }`}
           >
             {seg.label}
@@ -1530,7 +1555,7 @@ function OutfitsTab({ recommendations, analysis, isFemale, isSeasonal, seasonalG
                     isSelected ? 'border-2 border-purple-500/50 bg-purple-500/5' : ''
                   }`}>
                     <div className="flex items-center justify-between mb-1">
-                      <p className="text-purple-300 text-xs font-bold uppercase tracking-wide">{occasion}</p>
+                      <p className={`${isDark ? 'text-purple-300' : 'text-purple-900 font-extrabold'} text-xs uppercase tracking-wide`}>{occasion}</p>
                       {isSelected && <span className="text-[9px] font-black uppercase tracking-wider text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">Your Pick</span>}
                     </div>
                     <p className={`${bodyTextCls} text-sm leading-relaxed`}>{advice}</p>
@@ -1592,10 +1617,19 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
 
   const [activeAccSection, setActiveAccSection] = useState(isFemale ? 'jewellery' : 'watches');
 
-  const sectionLabelCls = isDark ? 'text-white/50' : 'text-gray-500';
+  const sectionLabelCls = isDark ? 'text-white/50' : 'text-slate-700 font-bold';
   const cardBgCls = isDark ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200 shadow-sm';
-  const subCls = isDark ? 'text-white/60' : 'text-gray-600';
-  const mutedCls = isDark ? 'text-white/40' : 'text-gray-400';
+  const subCls = isDark ? 'text-white/60' : 'text-slate-700 font-medium';
+  const mutedCls = isDark ? 'text-white/40' : 'text-slate-600';
+  const titleCls = isDark ? 'text-purple-300 font-black text-sm' : 'text-purple-900 font-black text-sm';
+  const pinkTitleCls = isDark ? 'text-pink-300 font-black text-sm' : 'text-pink-900 font-black text-sm';
+  const roseTitleCls = isDark ? 'text-rose-200 font-black text-sm' : 'text-rose-900 font-black text-sm';
+  const typeBadgeCls = isDark ? 'text-[10px] font-bold text-white/40 uppercase tracking-widest' : 'text-[10px] font-bold text-slate-500 uppercase tracking-widest';
+  const brandValCls = isDark ? 'text-white/80 font-medium' : 'text-slate-900 font-bold';
+  const accentBadgeCls = isDark ? 'text-purple-400 bg-purple-500/10' : 'text-purple-700 bg-purple-100 border border-purple-200';
+  const pinkBadgeCls = isDark ? 'text-pink-400 bg-pink-500/10' : 'text-pink-700 bg-pink-100 border border-pink-200';
+  const roseBadgeCls = isDark ? 'text-rose-400 bg-rose-500/10' : 'text-rose-700 bg-rose-100 border border-rose-200';
+  const valCls = isDark ? 'text-white/90' : 'text-slate-900';
 
   // FEMALE ACCESSORIES SUITE
   if (isFemale) {
@@ -1609,17 +1643,17 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
     return (
       <div className="space-y-4">
         {/* Horizontal Sub-segmenter for Women */}
-        <div className={`flex p-1 rounded-2xl border gap-1 overflow-x-auto scrollbar-hide ${
+        <div className={`flex items-center gap-1.5 p-1 rounded-2xl border overflow-x-auto scrollbar-hide ${
           isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'
         }`}>
           {femaleSegments.map((seg) => (
             <button
               key={seg.id}
               onClick={() => setActiveAccSection(seg.id)}
-              className={`flex-1 min-w-[85px] py-2 px-2.5 rounded-xl text-[11px] font-bold transition-all text-center whitespace-nowrap ${
+              className={`shrink-0 py-2 px-3.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                 activeAccSection === seg.id
                   ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
-                  : isDark ? 'text-white/50 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                  : isDark ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
               }`}
             >
               {seg.label}
@@ -1631,8 +1665,8 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
         {activeAccSection === 'jewellery' && (
           <div className="space-y-3 fade-up">
             <div className="flex items-center justify-between">
-              <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>💎 Skin-Tone Matched Jewellery</p>
-              <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+              <p className={`${sectionLabelCls} text-xs uppercase tracking-wide`}>💎 Skin-Tone Matched Jewellery</p>
+              <span className={`text-[10px] font-bold ${accentBadgeCls} px-2 py-0.5 rounded-full`}>
                 Curated Metals
               </span>
             </div>
@@ -1640,10 +1674,10 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
               {(derivedAcc.jewellery || []).map((item, i) => (
                 <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <p className="text-purple-300 font-black text-sm">{item.title}</p>
-                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.type}</span>
+                    <p className={titleCls}>{item.title}</p>
+                    <span className={typeBadgeCls}>{item.type}</span>
                   </div>
-                  {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Shades: {item.colors}</p>}
+                  {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Shades: <strong className={valCls}>{item.colors}</strong></p>}
                   {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
                   <ShoppingLinks colorName={`${item.colors || ''} ${item.title}`} category={item.cat || 'accessory'} gender="female" onShop={onShop} />
                 </div>
@@ -1656,8 +1690,8 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
         {activeAccSection === 'bags_shoes' && (
           <div className="space-y-3 fade-up">
             <div className="flex items-center justify-between">
-              <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>👜 Handbags, Heels & Footwear</p>
-              <span className="text-[10px] font-bold text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded-full">
+              <p className={`${sectionLabelCls} text-xs uppercase tracking-wide`}>👜 Handbags, Heels & Footwear</p>
+              <span className={`text-[10px] font-bold ${pinkBadgeCls} px-2 py-0.5 rounded-full`}>
                 Head-to-Toe
               </span>
             </div>
@@ -1665,10 +1699,10 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
               {(derivedAcc.bags_footwear || []).map((item, i) => (
                 <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-pink-500/30`}>
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <p className="text-pink-300 font-black text-sm">{item.title}</p>
-                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.type}</span>
+                    <p className={pinkTitleCls}>{item.title}</p>
+                    <span className={typeBadgeCls}>{item.type}</span>
                   </div>
-                  {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Curated Colors: {item.colors}</p>}
+                  {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Curated Colors: <strong className={valCls}>{item.colors}</strong></p>}
                   {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
                   <ShoppingLinks colorName={`${item.colors || ''} ${item.title}`} category={item.cat || 'handbag'} gender="female" onShop={onShop} />
                 </div>
@@ -1681,23 +1715,23 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
         {activeAccSection === 'makeup' && (
           <div className="space-y-3 fade-up">
             <div className="flex items-center justify-between">
-              <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>💄 Skin-Tone Matched Makeup & Perfumes</p>
-              <span className="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full">
+              <p className={`${sectionLabelCls} text-xs uppercase tracking-wide`}>💄 Skin-Tone Matched Makeup & Perfumes</p>
+              <span className={`text-[10px] font-bold ${roseBadgeCls} px-2 py-0.5 rounded-full`}>
                 Personalized
               </span>
             </div>
             <div className="space-y-3">
               {(derivedAcc.makeup || []).map((item, i) => (
-                <div key={i} className={`${isDark ? 'bg-white/5' : 'bg-white shadow-sm'} rounded-2xl p-4 border border-rose-500/20 transition-all hover:border-rose-500/40`}>
+                <div key={i} className={`${isDark ? 'bg-white/5 border border-rose-500/20' : 'bg-white border border-rose-200 shadow-sm'} rounded-2xl p-4 transition-all hover:border-rose-500/40`}>
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <p className="text-rose-200 font-black text-sm">{item.product}</p>
-                    <span className="text-[10px] font-bold text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded-full">
+                    <p className={roseTitleCls}>{item.product}</p>
+                    <span className={`text-[10px] font-bold ${roseBadgeCls} px-2 py-0.5 rounded-full`}>
                       {item.cat}
                     </span>
                   </div>
                   <p className={`${subCls} text-xs font-semibold`}>{item.shade}</p>
-                  {item.brands && <p className={`${mutedCls} text-xs mt-0.5`}>Recommended: <span className="text-white/80 font-medium">{item.brands}</span></p>}
-                  {item.tip && <p className={`${isDark ? 'text-white/50' : 'text-gray-500'} text-xs mt-1.5 italic`}>💡 {item.tip}</p>}
+                  {item.brands && <p className={`${mutedCls} text-xs mt-0.5`}>Recommended: <span className={brandValCls}>{item.brands}</span></p>}
+                  {item.tip && <p className={`${isDark ? 'text-white/50' : 'text-slate-600'} text-xs mt-1.5 italic`}>💡 {item.tip}</p>}
                   <MakeupShoppingLinks product={item.product} shade={item.shade} onShop={onShop} />
                 </div>
               ))}
@@ -1709,8 +1743,8 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
         {activeAccSection === 'basics' && (
           <div className="space-y-3 fade-up">
             <div className="flex items-center justify-between">
-              <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>🩲 Basics, Bras & Saree Shapewear</p>
-              <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+              <p className={`${sectionLabelCls} text-xs uppercase tracking-wide`}>🩲 Basics, Bras & Saree Shapewear</p>
+              <span className={`text-[10px] font-bold ${accentBadgeCls} px-2 py-0.5 rounded-full`}>
                 Tone-Matched Nudes
               </span>
             </div>
@@ -1718,10 +1752,10 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
               {(derivedAcc.basics_shapewear || []).map((item, i) => (
                 <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <p className="text-purple-300 font-black text-sm">{item.title}</p>
-                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.type}</span>
+                    <p className={titleCls}>{item.title}</p>
+                    <span className={typeBadgeCls}>{item.type}</span>
                   </div>
-                  {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Best Tone: {item.colors}</p>}
+                  {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Best Tone: <strong className={valCls}>{item.colors}</strong></p>}
                   {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
                   <ShoppingLinks colorName={`${item.colors || ''} ${item.title}`} category={item.cat || 'shapewear'} gender="female" onShop={onShop} />
                 </div>
@@ -1745,17 +1779,17 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
   return (
     <div className="space-y-4 fade-up">
       {/* Horizontal Sub-segmenter for Men */}
-      <div className={`flex p-1 rounded-2xl border gap-1 overflow-x-auto scrollbar-hide ${
+      <div className={`flex items-center gap-1.5 p-1 rounded-2xl border overflow-x-auto scrollbar-hide ${
         isDark ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'
       }`}>
         {maleSegments.map((seg) => (
           <button
             key={seg.id}
             onClick={() => setActiveAccSection(seg.id)}
-            className={`flex-1 min-w-[85px] py-2 px-2 rounded-xl text-[11px] font-bold transition-all text-center whitespace-nowrap ${
+            className={`shrink-0 py-2 px-3.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
               activeAccSection === seg.id
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
-                : isDark ? 'text-white/50 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                : isDark ? 'text-white/60 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:text-gray-900 hover:bg-white'
             }`}
           >
             {seg.label}
@@ -1767,8 +1801,8 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
       {activeAccSection === 'watches' && (
         <div className="space-y-3 fade-up">
           <div className="flex items-center justify-between">
-            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>⌚ Watches, Chains & Rings</p>
-            <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+            <p className={`${sectionLabelCls} text-xs uppercase tracking-wide`}>⌚ Watches, Chains & Rings</p>
+            <span className={`text-[10px] font-bold ${accentBadgeCls} px-2 py-0.5 rounded-full`}>
               Masculine Accents
             </span>
           </div>
@@ -1776,10 +1810,10 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
             {(derivedAcc.watches_jewellery || []).map((item, i) => (
               <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <p className="text-purple-300 font-black text-sm">{item.title}</p>
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.type}</span>
+                  <p className={titleCls}>{item.title}</p>
+                  <span className={typeBadgeCls}>{item.type}</span>
                 </div>
-                {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Metal Finish: {item.colors}</p>}
+                {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Metal Finish: <strong className={valCls}>{item.colors}</strong></p>}
                 {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
                 <ShoppingLinks colorName={`${item.colors || ''} ${item.title}`} category={item.cat || 'watch'} gender="male" onShop={onShop} />
               </div>
@@ -1792,8 +1826,8 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
       {activeAccSection === 'shoes' && (
         <div className="space-y-3 fade-up">
           <div className="flex items-center justify-between">
-            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>👞 Sneakers, Loafers, Boots & Belts</p>
-            <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+            <p className={`${sectionLabelCls} text-xs uppercase tracking-wide`}>👞 Sneakers, Loafers, Boots & Belts</p>
+            <span className={`text-[10px] font-bold ${accentBadgeCls} px-2 py-0.5 rounded-full`}>
               Footwear Essentials
             </span>
           </div>
@@ -1801,10 +1835,10 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
             {(derivedAcc.footwear_belts || []).map((item, i) => (
               <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <p className="text-purple-300 font-black text-sm">{item.title}</p>
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.type}</span>
+                  <p className={titleCls}>{item.title}</p>
+                  <span className={typeBadgeCls}>{item.type}</span>
                 </div>
-                {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Color: {item.colors}</p>}
+                {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Color: <strong className={valCls}>{item.colors}</strong></p>}
                 {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
                 <ShoppingLinks colorName={`${item.colors || ''} ${item.title}`} category={item.cat || 'shoes'} gender="male" onShop={onShop} />
               </div>
@@ -1817,8 +1851,8 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
       {activeAccSection === 'wallets' && (
         <div className="space-y-3 fade-up">
           <div className="flex items-center justify-between">
-            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>💼 Leather Wallets, Bags & Sunglasses</p>
-            <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+            <p className={`${sectionLabelCls} text-xs uppercase tracking-wide`}>💼 Leather Wallets, Bags & Sunglasses</p>
+            <span className={`text-[10px] font-bold ${accentBadgeCls} px-2 py-0.5 rounded-full`}>
               EDC Staples
             </span>
           </div>
@@ -1826,10 +1860,10 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
             {(derivedAcc.wallets_bags || []).map((item, i) => (
               <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <p className="text-purple-300 font-black text-sm">{item.title}</p>
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.type}</span>
+                  <p className={titleCls}>{item.title}</p>
+                  <span className={typeBadgeCls}>{item.type}</span>
                 </div>
-                {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Shade: {item.colors}</p>}
+                {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Shade: <strong className={valCls}>{item.colors}</strong></p>}
                 {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
                 <ShoppingLinks colorName={`${item.colors || ''} ${item.title}`} category={item.cat || 'wallet'} gender="male" onShop={onShop} />
               </div>
@@ -1842,8 +1876,8 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
       {activeAccSection === 'grooming' && (
         <div className="space-y-3 fade-up">
           <div className="flex items-center justify-between">
-            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>💈 Signature Colognes & Grooming</p>
-            <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+            <p className={`${sectionLabelCls} text-xs uppercase tracking-wide`}>💈 Signature Colognes & Grooming</p>
+            <span className={`text-[10px] font-bold ${accentBadgeCls} px-2 py-0.5 rounded-full`}>
               Scent & Style
             </span>
           </div>
@@ -1851,12 +1885,12 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
             {(derivedAcc.grooming || []).map((item, i) => (
               <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <p className="text-purple-300 font-black text-sm">{item.product}</p>
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.cat}</span>
+                  <p className={titleCls}>{item.product}</p>
+                  <span className={typeBadgeCls}>{item.cat}</span>
                 </div>
                 <p className={`${subCls} text-xs font-semibold`}>{item.title}</p>
-                {item.brands && <p className={`${mutedCls} text-xs mt-0.5`}>Recommended: <span className="text-white/80 font-medium">{item.brands}</span></p>}
-                {item.tip && <p className={`${isDark ? 'text-white/50' : 'text-gray-500'} text-xs mt-1.5 italic`}>💡 {item.tip}</p>}
+                {item.brands && <p className={`${mutedCls} text-xs mt-0.5`}>Recommended: <span className={brandValCls}>{item.brands}</span></p>}
+                {item.tip && <p className={`${isDark ? 'text-white/50' : 'text-slate-600'} text-xs mt-1.5 italic`}>💡 {item.tip}</p>}
                 <ShoppingLinks colorName={item.title} category={item.cat || 'cologne'} gender="male" onShop={onShop} />
               </div>
             ))}
@@ -1868,8 +1902,8 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
       {activeAccSection === 'basics' && (
         <div className="space-y-3 fade-up">
           <div className="flex items-center justify-between">
-            <p className={`${sectionLabelCls} text-xs font-semibold uppercase tracking-wide`}>🩲 Combed Cotton Ganjis, Boxers & Socks</p>
-            <span className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">
+            <p className={`${sectionLabelCls} text-xs uppercase tracking-wide`}>🩲 Combed Cotton Ganjis, Boxers & Socks</p>
+            <span className={`text-[10px] font-bold ${accentBadgeCls} px-2 py-0.5 rounded-full`}>
               Daily Comfort
             </span>
           </div>
@@ -1877,10 +1911,10 @@ function AccessoriesTab({ recommendations, analysis, isFemale, makeupSuggestions
             {(derivedAcc.basics_innerwear || []).map((item, i) => (
               <div key={i} className={`${cardBgCls} rounded-2xl p-3.5 transition-all hover:border-purple-500/30`}>
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <p className="text-purple-300 font-black text-sm">{item.title}</p>
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{item.type}</span>
+                  <p className={titleCls}>{item.title}</p>
+                  <span className={typeBadgeCls}>{item.type}</span>
                 </div>
-                {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Colors: {item.colors}</p>}
+                {item.colors && <p className={`${subCls} text-xs font-semibold`}>🎨 Colors: <strong className={valCls}>{item.colors}</strong></p>}
                 {item.reason && <p className={`${mutedCls} text-xs mt-1 leading-relaxed`}>{item.reason}</p>}
                 <ShoppingLinks colorName={`${item.colors || ''} ${item.title}`} category={item.cat || 'vest'} gender="male" onShop={onShop} />
               </div>
