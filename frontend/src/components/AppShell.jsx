@@ -43,6 +43,7 @@ const StyleNavigator = lazy(() => import('./StyleNavigator'));
 const ProfilePanel = lazy(() => import('./ProfilePanel'));
 const ColorScanner = lazy(() => import('./ColorScanner'));
 const LookbookPanel = lazy(() => import('./LookbookPanel'));
+const OutfitChecker = lazy(() => import('./OutfitChecker'));
 
 
 // ── Section Loader ──────────────────────────────────
@@ -1319,6 +1320,7 @@ export default function AppShell({ user, onLogout }) {
     { id: 'analyze', label: 'Analyze' },
     { id: 'navigator', label: 'Style Compass' },
     { id: 'wardrobe', label: 'Wardrobe' },
+    { id: 'checker', label: 'Outfit Checker' },
     { id: 'lookbook', label: 'Lookbook' },
     { id: 'history', label: 'History' },
     { id: 'tools', label: 'Tools' },
@@ -1330,7 +1332,7 @@ export default function AppShell({ user, onLogout }) {
     { id: 'navigator', icon: '🧭', label: 'Compass' },
     { id: 'analyze', icon: '📷', label: 'Scan', isPrimary: true },
     { id: 'wardrobe', icon: '👗', label: 'Wardrobe' },
-    { id: 'profile', icon: '👤', label: 'Profile' },
+    { id: 'checker', icon: '👔', label: 'Checker' },
   ];
 
   return (
@@ -1381,7 +1383,9 @@ export default function AppShell({ user, onLogout }) {
           </button>
           {/* Profile avatar with Pro Badge */}
           <button
-            onClick={() => handleTabChange('profile')}
+            onClick={() => handleTabChange(activeTab === 'profile' ? 'home' : 'profile')}
+            title="Profile & Settings"
+            aria-label="Profile and Settings"
             style={{ width: 36, height: 36, borderRadius: '50%', background: activeTab === 'profile' ? GRAD : C.glass2, border: `1px solid ${activeTab === 'profile' ? 'transparent' : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s', boxShadow: activeTab === 'profile' ? C.btnShadow : 'none', fontSize: '14px', fontWeight: 700, color: activeTab === 'profile' ? 'white' : C.text, fontFamily: PJS, position: 'relative' }}
           >
             {avatarLetter}
@@ -1567,6 +1571,18 @@ export default function AppShell({ user, onLogout }) {
             >
               <SectionHeader C={C} label="Style Vault" title="Your Wardrobe" subtitle="Manage and organize your saved outfits" />
               <WardrobePanel onShowResult={data => { setResults(data); handleTabChange('analyze'); }} gender={currentGender} />
+            </motion.div>
+          )}
+
+          {activeTab === 'checker' && (
+            <motion.div 
+              key="checker"
+              initial={{ opacity: 0, y: 12, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -12, filter: 'blur(8px)' }}
+              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+            >
+              <OutfitChecker />
             </motion.div>
           )}
 

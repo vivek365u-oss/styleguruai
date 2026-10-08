@@ -207,6 +207,7 @@ export function trackTabView(tabId) {
     analyze: 'view_analyze',
     history: 'view_history',
     wardrobe: 'view_wardrobe',
+    checker: 'view_outfit_checker',
     navigator: 'view_style_compass',
     tools: 'view_tools',
     scanner: 'view_color_scanner',
