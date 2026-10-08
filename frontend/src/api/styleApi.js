@@ -804,7 +804,7 @@ export const getWardrobeCount = async (uid) => {
 // Offline cache helpers
 const getCacheKey = (uid, collection) => `cache_${uid}_${collection}`;
 
-const getCachedColors = (uid) => {
+export const getCachedColors = (uid) => {
   try {
     const cached = localStorage.getItem(getCacheKey(uid, 'saved_colors'));
     return cached ? JSON.parse(cached) : [];

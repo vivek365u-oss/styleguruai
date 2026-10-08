@@ -337,7 +337,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       return;
     }
 
-    onLoadingStart();
+    if (onLoadingStart) onLoadingStart();
     const reader = new FileReader();
     reader.onload = (e) => { setPreview(e.target.result); onImageSelected(e.target.result); };
     reader.readAsDataURL(file);
@@ -390,7 +390,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       console.log("[UploadSection] Passing gender:", finalGender, "to ResultsDisplay");
       onAnalysisComplete(finalPayload);
       setShowProgress(false);
-    }, 200);
+    }, 450);
   };
 
   const handleCoupleAnalysis = async (pendingResult = null) => {
@@ -415,7 +415,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       return;
     }
 
-    onLoadingStart();
+    if (onLoadingStart) onLoadingStart();
     setShowProgress(true);
     startProgress();
 
@@ -463,7 +463,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       onImageSelected([partner1, partner2]);
       onAnalysisComplete(finalPayload);
       setShowProgress(false);
-    }, 200);
+    }, 450);
   };
 
   const handleDrop = (e) => {

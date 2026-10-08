@@ -19,7 +19,6 @@ import confetti from 'canvas-confetti';
 import { useNotifications } from '../hooks/useNotifications';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
-import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import { getLocalizedTip } from '../data/localTips';
 import { logEvent, EVENTS, trackTabView, trackTimeOnPage, markPageEnter } from '../utils/analytics';
 import StyleBot from './StyleBot';
@@ -31,10 +30,12 @@ import { DARK, LIGHT, GRAD, VIOLET, INDIGO, PJS, PDI, getThemeColors } from '../
 import { usePWA } from '../hooks/usePWA';
 import InstallPromptModal from './InstallPromptModal';
 
-// ── Lazy loaded feature sections ──────────────────
-const UploadSection = lazy(() => import('./UploadSection'));
-const ResultsDisplay = lazy(() => import('./ResultsDisplay'));
-const CoupleResults = lazy(() => import('./CoupleResults'));
+// ── Core feature sections (eagerly imported to eliminate secondary loading screen) ──
+import UploadSection from './UploadSection';
+import ResultsDisplay from './ResultsDisplay';
+import CoupleResults from './CoupleResults';
+
+// ── Lazy loaded secondary feature sections ──────────────────
 const HistoryPanel = lazy(() => import('./HistoryPanel'));
 const WardrobePanel = lazy(() => import('./WardrobePanel'));
 const ToolsTab = lazy(() => import('./ToolsTab'));
@@ -1171,9 +1172,7 @@ export default function AppShell({ user, onLogout }) {
   const [tabHistory, setTabHistory] = useState(['home']);
   const [results, setResults] = useState(null);
   const [adSkipped, setAdSkipped] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [currentGender, setCurrentGender] = useState(localStorage.getItem('sg_gender') || 'male');
   const [lastAnalysis, setLastAnalysis] = useState(() => {
@@ -1290,7 +1289,7 @@ export default function AppShell({ user, onLogout }) {
   }, [handleTabChange]);
 
   const handleAnalysisComplete = useCallback(async (data) => {
-    setLoading(false); setResults(data); setActiveTab('analyze');
+    setResults(data); setActiveTab('analyze');
     const entry = { ...data, timestamp: Date.now() };
     localStorage.setItem('sg_last_analysis', JSON.stringify(entry));
     setLastAnalysis(entry);
@@ -1465,7 +1464,7 @@ export default function AppShell({ user, onLogout }) {
               />
 
               {/* ── Ad-skipped state — no result, show helper message ── */}
-              {adSkipped && !results && !loading && (
+              {adSkipped && !results && (
                 <div style={{ textAlign: 'center', padding: '40px 24px', background: C.glass, backdropFilter: 'blur(16px)', border: `1px solid ${C.border}`, borderRadius: 20, marginBottom: 24 }}>
                   <p style={{ fontSize: '40px', marginBottom: 12 }}>🎬</p>
                   <p style={{ fontFamily: PJS, fontSize: '16px', fontWeight: 700, color: C.text, marginBottom: 8 }}>No result generated</p>
@@ -1484,33 +1483,28 @@ export default function AppShell({ user, onLogout }) {
               )}
 
               {/* ── Normal upload screen ── */}
-              {!results && !loading && !error && !adSkipped && (
+              {!results && !error && !adSkipped && (
                 <UploadSection
-                  onLoadingStart={() => setLoading(true)}
                   onAnalysisComplete={handleAnalysisComplete}
                   onError={(err) => {
                     // If 'skipped' signal arrives here (edge case), handle gracefully
                     if (err === '__ad_skipped__') {
-                      setLoading(false);
                       setAdSkipped(true);
                     } else {
-                      setLoading(false);
                       setError(err);
                     }
                   }}
                   onImageSelected={setUploadedImage}
-                  setUploadProgress={setUploadProgress}
                   currentGender={currentGender}
                   setCurrentGender={setCurrentGender}
                   isPro={isPro}
                   usage={usage}
                   coins={coins}
-                  onAdSkipped={() => { setLoading(false); setAdSkipped(true); }}
+                  onAdSkipped={() => { setAdSkipped(true); }}
                   onCoinEmpty={() => { }}
                 />
               )}
-              {loading && <LoadingScreenWithProgress progress={uploadProgress} />}
-              {error && !loading && (
+              {error && (
                 <div style={{ padding: '36px 24px', textAlign: 'center', background: C.dangerBg, backdropFilter: 'blur(16px)', border: `1px solid ${C.dangerBorder}`, borderRadius: 20, maxWidth: 520, margin: '0 auto 24px' }}>
                   <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '28px' }}>
                     👤❌

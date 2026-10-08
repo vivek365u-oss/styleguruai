@@ -4,7 +4,7 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { ThemeContext } from '../context/ThemeContext';
-import { publishToCommunityFeed, auth, saveSavedColor, getSavedColors, saveHistory, savePrimaryProfile, saveToLookbook } from '../api/styleApi';
+import { publishToCommunityFeed, auth, saveSavedColor, getSavedColors, getCachedColors, saveHistory, savePrimaryProfile, saveToLookbook } from '../api/styleApi';
 import { translateBackendObject } from '../i18n/backendTranslations';
 import ProductShowcase from './ProductShowcase';
 import ColorRecommendationsShop from './ColorRecommendationsShop';
@@ -111,6 +111,19 @@ function MakeupShoppingLinks({ product, shade, onShop }) {
   );
 }
 
+// ── Shared in-memory cache for saved colors across all ColorCards ──
+let _sharedSavedColorsPromise = null;
+let _sharedSavedColorsUid = null;
+
+const getSharedSavedColors = (uid) => {
+  if (_sharedSavedColorsUid === uid && _sharedSavedColorsPromise) {
+    return _sharedSavedColorsPromise;
+  }
+  _sharedSavedColorsUid = uid;
+  _sharedSavedColorsPromise = getSavedColors(uid).catch(() => getCachedColors(uid));
+  return _sharedSavedColorsPromise;
+};
+
 // ── Color Card (compact, tap to expand) ─────────────────────
 
 function ColorCard({ color, category, gender, isDark, onShop, className = '' }) {
@@ -123,28 +136,36 @@ function ColorCard({ color, category, gender, isDark, onShop, className = '' }) 
 
   // Load saved status when component mounts
   useEffect(() => {
-    const loadSavedStatus = async () => {
-      if (!isLoggedIn) {
-        setLoading(false);
-        return;
-      }
+    if (!isLoggedIn) {
+      setLoading(false);
+      return;
+    }
 
-      try {
-        const savedColors = await getSavedColors(auth.currentUser.uid);
-        // Check if this color hex is already saved
+    // Fast path: synchronous check from local cache (0ms)
+    const cached = getCachedColors(auth.currentUser.uid);
+    if (Array.isArray(cached) && cached.length > 0) {
+      const foundColor = cached.find(sc => sc.hex === color.hex);
+      if (foundColor) {
+        setSaved(true);
+        setSavedColorId(foundColor.id);
+        setLoading(false);
+      }
+    }
+
+    // Shared background fetch (single request for all ColorCards)
+    getSharedSavedColors(auth.currentUser.uid).then((savedColors) => {
+      if (Array.isArray(savedColors)) {
         const foundColor = savedColors.find(sc => sc.hex === color.hex);
         if (foundColor) {
           setSaved(true);
           setSavedColorId(foundColor.id);
+        } else {
+          setSaved(false);
+          setSavedColorId(null);
         }
-      } catch (err) {
-        console.error('Error loading saved color status:', err);
-      } finally {
-        setLoading(false);
       }
-    };
-
-    loadSavedStatus();
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, [color.hex, isLoggedIn]);
 
   const toggleSave = async (e) => {
