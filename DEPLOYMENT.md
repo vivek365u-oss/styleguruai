@@ -50,7 +50,7 @@ git commit -m "feat: frontend + backend improvements"
 git push origin main
 
 # 3. Verify both deployments
-# - Vercel: https://styleguruai.vercel.app (1-2 min)
+# - Vercel: https://styleguruai-nine.vercel.app (1-2 min)
 # - Render: Dashboard logs (2-5 min)
 ```
 
@@ -60,7 +60,7 @@ git push origin main
 
 ### Frontend Deployment
 - Check Vercel dashboard: https://vercel.com/vivek365u-oss/styleguruai
-- Or visit: https://styleguruai.vercel.app
+- Or visit: https://styleguruai-nine.vercel.app
 - Look for latest deployment timestamp
 
 ### Backend Deployment
@@ -103,7 +103,7 @@ git push origin main
 
 ## 📱 Current URLs
 
-- **Frontend App**: https://styleguruai.vercel.app
+- **Frontend App**: https://styleguruai-nine.vercel.app
 - **Backend API**: (Check Render dashboard for live URL)
 - **Repository**: https://github.com/vivek365u-oss/styleguruai
 
