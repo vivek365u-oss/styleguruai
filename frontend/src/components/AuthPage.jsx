@@ -1,15 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { registerUser, loginUser, saveAuth, googleLogin } from '../api/styleApi';
 import { auth } from '../firebase';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { useLanguage } from '../i18n/LanguageContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { trackSignUp, trackLogin } from '../utils/analytics';
 
 export default function AuthPage({ onLoginSuccess }) {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const [mode, setMode] = useState('login'); // 'login' | 'register'
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryMode = searchParams.get('mode');
+  const [mode, setMode] = useState(queryMode === 'register' ? 'register' : 'login');
+
+  useEffect(() => {
+    const qm = searchParams.get('mode');
+    if (qm === 'register' || qm === 'login') {
+      setMode(qm);
+    }
+  }, [searchParams]);
+
+  const switchMode = (newMode) => {
+    setMode(newMode);
+    setError('');
+    setSearchParams({ mode: newMode }, { replace: true });
+  };
   const [form, setForm] = useState({ email: '', password: '', full_name: '' });
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -233,7 +248,7 @@ export default function AuthPage({ onLoginSuccess }) {
               <div className="flex rounded-2xl bg-slate-100/90 p-1 mb-8 border border-slate-200/60">
                 <button
                   type="button"
-                  onClick={() => { setMode('login'); setError(''); }}
+                  onClick={() => switchMode('login')}
                   className={`flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border-none ${
                     mode === 'login'
                       ? 'bg-white text-slate-900 shadow-sm'
@@ -244,7 +259,7 @@ export default function AuthPage({ onLoginSuccess }) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setMode('register'); setError(''); }}
+                  onClick={() => switchMode('register')}
                   className={`flex-1 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer border-none ${
                     mode === 'register'
                       ? 'bg-white text-slate-900 shadow-sm'
@@ -271,7 +286,7 @@ export default function AuthPage({ onLoginSuccess }) {
               <button
                 onClick={handleGoogle}
                 disabled={googleLoading}
-                className="w-full py-3.5 px-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs sm:text-sm border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow transition-all flex items-center justify-center gap-3 cursor-pointer mb-6"
+                className="w-full py-3.5 px-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs sm:text-sm border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow transition-all flex items-center justify-center gap-3 cursor-pointer mb-2"
               >
                 {googleLoading ? (
                   <>
@@ -286,10 +301,13 @@ export default function AuthPage({ onLoginSuccess }) {
                       <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
                       <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                     </svg>
-                    <span>Continue with Google</span>
+                    <span>{mode === 'register' ? 'Sign Up Instantly with Google' : 'Continue with Google'}</span>
                   </>
                 )}
               </button>
+              <p className="text-[10px] text-center text-slate-400 font-medium mb-5">
+                ⚡ Fastest 1-Tap Access • No password needed
+              </p>
 
               {/* Or Divider */}
               <div className="flex items-center gap-3 mb-6">
@@ -412,7 +430,7 @@ export default function AuthPage({ onLoginSuccess }) {
                     Don't have an account yet?{' '}
                     <button
                       type="button"
-                      onClick={() => { setMode('register'); setError(''); }}
+                      onClick={() => switchMode('register')}
                       className="font-bold text-violet-600 hover:underline cursor-pointer bg-transparent border-none p-0"
                     >
                       Sign Up Free
@@ -423,7 +441,7 @@ export default function AuthPage({ onLoginSuccess }) {
                     Already registered?{' '}
                     <button
                       type="button"
-                      onClick={() => { setMode('login'); setError(''); }}
+                      onClick={() => switchMode('login')}
                       className="font-bold text-violet-600 hover:underline cursor-pointer bg-transparent border-none p-0"
                     >
                       Sign In here

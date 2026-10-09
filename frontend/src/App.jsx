@@ -98,7 +98,7 @@ function AppRoutes({ user, setUser, authLoading }) {
   return (
     <Suspense fallback={null}>
       <Routes>
-        <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage user={user} onLoginClick={() => navigate('/login')} onGetStarted={() => navigate('/login')} />} />
+        <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage user={user} onLoginClick={() => navigate('/login?mode=login')} onGetStarted={() => navigate('/login?mode=register')} />} />
         <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} />} />
         {/* MOBILE LOGIN FIX: While auth is still loading (profile fetch in progress),
             show a spinner on /dashboard instead of redirecting to "/".
