@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth, loadProfile } from '../api/styleApi';
+import { auth, loadProfile, loadPrimaryProfile } from '../api/styleApi';
 
 const INITIAL_STATE = {
   user: null,
@@ -49,43 +49,53 @@ export function useAuthState() {
           error: null,
         }));
 
-        // Load profile from Firestore — race against 5s timeout so a slow/offline
-        // Firestore never blocks the entire login flow indefinitely.
-        const profilePromise = loadProfile(firebaseUser.uid);
+        // Load profile and primary Style DNA from Firestore
+        const profilePromise = Promise.all([
+          loadProfile(firebaseUser.uid),
+          loadPrimaryProfile(firebaseUser.uid)
+        ]);
         const timeoutPromise = new Promise((resolve) =>
-          setTimeout(() => resolve(null), 5000)
+          setTimeout(() => resolve([null, null]), 5000)
         );
-        const profile = await Promise.race([profilePromise, timeoutPromise]);
+        const [profile, primaryDna] = await Promise.race([profilePromise, timeoutPromise]);
 
         if (!isMounted) return;
 
-        if (profile) {
+        const effectiveProfile = primaryDna || profile;
+
+        if (effectiveProfile) {
           // Sync to localStorage (as cache, but FIREBASE IS BOSS)
           try {
+            const rawGender = primaryDna?.gender || profile?.gender || profile?.gender_mode || 'male';
+            const normalizedGender = (typeof rawGender === 'string' && (rawGender.toLowerCase().includes('female') || rawGender.toLowerCase() === 'women')) ? 'female' : 'male';
+
             const firestoreEntry = {
-              skinTone: profile.skinTone || profile.skin_tone,
-              undertone: profile.undertone,
-              season: profile.season || profile.color_season,
-              skinHex: profile.skinHex || profile.skin_hex,
-              confidence: profile.confidence,
-              gender: profile.gender,
-              date: profile.date || new Date().toLocaleDateString('en-IN'),
-              timestamp: profile.timestamp || Date.now(),
-              fullData: profile.fullData || null,
+              skinTone: primaryDna?.skinTone || primaryDna?.skin_tone?.category || profile?.skinTone || profile?.skin_tone,
+              undertone: primaryDna?.undertone || primaryDna?.skin_tone?.undertone || profile?.undertone,
+              season: primaryDna?.colorSeason || primaryDna?.season || profile?.season || profile?.color_season,
+              skinHex: primaryDna?.skinHex || primaryDna?.skin_hex || profile?.skinHex || profile?.skin_hex,
+              confidence: primaryDna?.confidence || profile?.confidence,
+              gender: normalizedGender,
+              bestColors: primaryDna?.bestColors || [],
+              date: profile?.date || new Date().toLocaleDateString('en-IN'),
+              timestamp: primaryDna?.updatedAt || profile?.timestamp || Date.now(),
+              fullData: profile?.fullData || null,
             };
 
             // STRICT OVERWRITE: Firebase is the truth!
             localStorage.setItem('sg_last_analysis', JSON.stringify(firestoreEntry));
+            if (primaryDna) {
+              localStorage.setItem('sg_primary_profile', JSON.stringify({ ...primaryDna, gender: normalizedGender }));
+            }
 
             // Apply saved preferences globally
-            if (profile.gender) localStorage.setItem('sg_gender', profile.gender);
-            if (profile.gender_mode) localStorage.setItem('sg_gender', profile.gender_mode); // Backward compat
-            if (profile.language) localStorage.setItem('sg_language', profile.language);
+            localStorage.setItem('sg_gender', normalizedGender);
+            if (profile?.language) localStorage.setItem('sg_language', profile.language);
             
             // Sync true counts from Firebase root document (fetched securely in loadProfile)
-            localStorage.setItem('sg_analysis_count', (profile.analysisHistoryCount || 0).toString());
-            localStorage.setItem('sg_wardrobe_count', (profile.wardrobeCount || 0).toString());
-            localStorage.setItem('sg_colors_count', (profile.savedColorsCount || 0).toString());
+            localStorage.setItem('sg_analysis_count', (profile?.analysisHistoryCount || 0).toString());
+            localStorage.setItem('sg_wardrobe_count', (profile?.wardrobeCount || 0).toString());
+            localStorage.setItem('sg_colors_count', (profile?.savedColorsCount || 0).toString());
           } catch (localStorageErr) {
             console.warn('localStorage sync failed:', localStorageErr);
             // Don't fail auth for localStorage issues

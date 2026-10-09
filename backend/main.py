@@ -1918,6 +1918,8 @@ class NavigatorInsightsRequest(BaseModel):
     undertone: str
     wardrobe_items: List[Dict]
     lang: Optional[str] = "en"
+    lifestyle: Optional[str] = "other"
+    gender: Optional[str] = "male"
 
 @app.post("/api/v1/style/navigator/insights")
 async def get_navigator_insights(
@@ -1936,11 +1938,30 @@ async def get_navigator_insights(
             confidence="high" # Derived from profile
         )
         
+        recs = engine.get_recommendations(st_obj, lang=data.lang or "en")
         insights = engine.get_smart_wardrobe_insights(
             skin_tone=st_obj,
             wardrobe_items=data.wardrobe_items,
-            lang=data.lang
+            lang=data.lang or "en"
         )
+        
+        # Merge categorized palettes and isolate accessories so Belts/Watches never pollute clothing
+        insights.update({
+            "best_shirt_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.best_shirt_colors],
+            "best_tshirt_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.best_tshirt_colors],
+            "best_kurta_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.best_kurta_colors],
+            "best_saree_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.best_saree_colors],
+            "best_kurti_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.best_kurti_colors],
+            "best_blazer_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.best_blazer_colors],
+            "best_female_blazer_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.best_female_blazer_colors],
+            "best_hoodie_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.best_hoodie_colors],
+            "best_pant_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.best_pant_colors],
+            "best_bottom_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.best_bottom_colors],
+            "best_top_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.best_shirt_colors],
+            "accent_colors": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"], "type": c.get("type", "Accessory")} for c in recs.accent_colors],
+            "colors_to_avoid": [{"name": c["name"], "hex": c["hex"], "reason": c["reason"]} for c in recs.colors_to_avoid],
+            "gender": data.gender or "male",
+        })
         
         return {
             "success": True,

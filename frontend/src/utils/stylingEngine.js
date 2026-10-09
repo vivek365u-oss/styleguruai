@@ -41,13 +41,15 @@ export const MISSIONS = {
     }
 };
 
-export const scoreWardrobeItem = (item, context, profile, history = [], preferences = {}, lockedInsights = null) => {
+export const scoreWardrobeItem = (item, context, profile = {}, history = [], preferences = {}, lockedInsights = null) => {
     // 0. Gender Filter (Strict Wall)
-    // Priority: Locked DNA > Profile Mode > Item Gender
-    const activeGender = lockedInsights?.gender || profile.gender || profile.gender_mode;
+    // Priority: Locked DNA > Profile Mode > Preferences > Fallback
+    const rawGender = lockedInsights?.gender || profile?.gender || profile?.gender_mode || preferences?.gender || 'male';
+    const activeGender = (typeof rawGender === 'string' && (rawGender.toLowerCase().includes('female') || rawGender.toLowerCase() === 'women')) ? 'female' : 'male';
+    const itemGender = typeof item.gender === 'string' ? item.gender.toLowerCase() : '';
     
-    // If the item has a gender tag and it doesn't match the active user gender, reject immediately
-    if (activeGender && item.gender && item.gender !== activeGender) return 0;
+    // If the item has an explicit gender tag and it doesn't match the active user gender, reject immediately (allow unisex)
+    if (activeGender && itemGender && itemGender !== 'unisex' && itemGender !== activeGender) return 0;
     
     // ── CATEGORICAL GENDER WALL ──────────────────────────────────────────────
     // Built dynamically from FASHION_CATEGORIES — same source of truth as fashionCategories.js
@@ -91,9 +93,25 @@ export const scoreWardrobeItem = (item, context, profile, history = [], preferen
         'cat_watch','cat_wallet','cat_sunglasses','cat_backpack',
     ]);
 
-    // Apply strict gender wall using the comprehensive ID sets
-    if (activeGender === 'male'   && FEMALE_IDS.has(item.category)) return 0;
-    if (activeGender === 'female' && MALE_IDS.has(item.category))   return 0;
+    // Categorical Gender Wall
+    const STRICT_FEMALE_ONLY = new Set([
+        'cat_saree_silk','cat_saree_chiffon','cat_saree_cotton','cat_lehenga','cat_anarkali',
+        'cat_kurti','cat_kurti_set','cat_sharara','cat_palazzo_suit',
+        'cat_crop_top','cat_blouse','cat_corset','cat_dress_maxi','cat_dress_mini','cat_dress_midi',
+        'cat_bodycon','cat_shirt_dress','cat_skirt','cat_heels'
+    ]);
+    const STRICT_MALE_ONLY = new Set([
+        'cat_sherwani','cat_dhoti_kurta','cat_tuxedo'
+    ]);
+
+    if (itemGender === 'unisex') {
+        if (activeGender === 'male' && STRICT_FEMALE_ONLY.has(item.category)) return 0;
+        if (activeGender === 'female' && STRICT_MALE_ONLY.has(item.category)) return 0;
+    } else {
+        // Apply strict gender wall using the comprehensive ID sets
+        if (activeGender === 'male'   && FEMALE_IDS.has(item.category)) return 0;
+        if (activeGender === 'female' && MALE_IDS.has(item.category))   return 0;
+    }
 
     // Fallback keyword-based check for legacy/custom categories not in the above sets
     const femaleKeywords = ['saree','kurti','lehenga','maxi_dress','bodycon','blouse','dupatta','heels',

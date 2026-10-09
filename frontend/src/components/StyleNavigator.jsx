@@ -28,6 +28,7 @@ import { getThemeColors } from '../utils/themeColors';
 import { PRODUCT_LABEL_MAP, getShopData } from '../utils/shoppingUrls';
 import ShopActionSheet from './ShopActionSheet';
 import { getWeeklyForecast } from '../utils/weatherService';
+import { getCategoryGroup, getCategorySectionMeta } from '../constants/fashionCategories';
 
 // ── Skin tone → hex ─────────────────────────────────
 const TONE_HEX = {
@@ -287,6 +288,22 @@ export default function StyleNavigator({ user, onAnalyze }) {
   const [history,    setHistory]   = useState([]); // Store logs for rotation logic
   const [pendingShop, setPendingShop] = useState(null); // Choice between Dress/Top, Saree/Kurti etc.
   const [dnaMatches,  setDnaMatches]  = useState({}); // Store computed scores for trending items
+  const [selectedDnaProduct, setSelectedDnaProduct] = useState(null); // Modal details for trending DNA match
+
+  // Improvement 3: Real-Time Live Sync (Zero reload needed when clothes added/deleted/toggled)
+  useEffect(() => {
+    const handleWardrobeUpdate = async () => {
+      if (!auth.currentUser) return;
+      try {
+        const fresh = await getWardrobe(auth.currentUser.uid);
+        setWardrobe(fresh || []);
+      } catch (err) {
+        console.warn('[StyleCompass] Realtime wardrobe sync failed:', err);
+      }
+    };
+    window.addEventListener('sg_wardrobe_updated', handleWardrobeUpdate);
+    return () => window.removeEventListener('sg_wardrobe_updated', handleWardrobeUpdate);
+  }, []);
 
   const handleTabChange = (newTab) => {
     setTab(newTab);
@@ -313,7 +330,7 @@ export default function StyleNavigator({ user, onAnalyze }) {
           loadStyleInsights(uid),
           getWeeklyForecast(),
         ]);
-        const activeProfile = primary || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
+        const activeProfile = primary || JSON.parse(localStorage.getItem('sg_primary_profile') || 'null') || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
         setProfile(activeProfile);
         setPrefs(userPrefs);
         setWardrobe(userWardrobe || []);
@@ -480,15 +497,47 @@ const HEX_NAME_MAP = {
                   ? (gender === 'female' ? 'Cropped Tweed Jacket' : 'Structured Bomber Jacket')
                   : null;
 
-    // 4. Wardrobe Awareness
-    const matchingTops = wardrobe.filter(w => 
-      (w.main_category === 'Topwear' || w.category?.toLowerCase().includes('top') || w.category?.toLowerCase().includes('shirt')) &&
-      (w.color_name?.toLowerCase().includes(c1.toLowerCase()) || w.primary_color_hex === selectedPair[0]?.hex)
-    );
-    const matchingBottoms = wardrobe.filter(w => 
-      (w.main_category === 'Bottomwear' || w.category?.toLowerCase().includes('bottom') || w.category?.toLowerCase().includes('pant')) &&
-      (w.color_name?.toLowerCase().includes(c2.toLowerCase()) || w.primary_color_hex === selectedPair[1]?.hex)
-    );
+    // 4. Wardrobe Awareness (Improvement 1: Category Grouping + Improvement 2: Iron Gender & Laundry Shield)
+    const isAvailable = (w) => {
+      if (w.status === 'laundry' || w.status === 'dirty') return false;
+      const itemG = (w.gender || '').toLowerCase();
+      if (itemG && itemG !== 'unisex' && itemG !== gender) return false;
+      const score = scoreWardrobeItem(w, { weather: weather?.condition || 'sunny' }, profile, history, prefs || {}, insights);
+      return score > 0;
+    };
+
+    const isTopwear = (w) => {
+      const grp = getCategoryGroup(w.category);
+      if (['TOPS', 'CASUAL', 'FORMAL', 'ETHNIC', 'OUTERWEAR', 'UNISEX'].includes(grp)) {
+        if (['cat_formal_trouser', 'cat_dhoti_pants', 'cat_skirt', 'cat_palazzo_f'].includes(w.category)) return false;
+        return true;
+      }
+      const cat = (w.category || '').toLowerCase();
+      const name = (w.name || '').toLowerCase();
+      return cat.includes('top') || cat.includes('shirt') || cat.includes('tee') || cat.includes('kurta') || cat.includes('kurti') || cat.includes('polo') || cat.includes('hoodie') || cat.includes('blazer') || name.includes('shirt') || name.includes('polo') || name.includes('tee') || name.includes('blazer') || name.includes('kurta');
+    };
+
+    const isBottomwear = (w) => {
+      const grp = getCategoryGroup(w.category);
+      if (grp === 'BOTTOMS') return true;
+      const cat = (w.category || '').toLowerCase();
+      const name = (w.name || '').toLowerCase();
+      return cat.includes('bottom') || cat.includes('pant') || cat.includes('jean') || cat.includes('cargo') || cat.includes('chino') || cat.includes('short') || cat.includes('trouser') || cat.includes('skirt') || cat.includes('palazzo') || cat.includes('dhoti') || cat.includes('jogger') || name.includes('jean') || name.includes('pant') || name.includes('cargo') || name.includes('jogger') || name.includes('trouser') || name.includes('chino');
+    };
+
+    const isColorMatch = (w, targetColor) => {
+      if (!targetColor) return false;
+      const targetName = (targetColor.name || '').toLowerCase().trim();
+      const targetHex = (targetColor.hex || '').toLowerCase().trim();
+      const itemName = (w.color_name || w.name || '').toLowerCase().trim();
+      const itemHex = (w.hex || w.primary_color_hex || '').toLowerCase().trim();
+      if (targetHex && itemHex && targetHex === itemHex) return true;
+      if (targetName && itemName && (itemName.includes(targetName) || targetName.includes(itemName))) return true;
+      return false;
+    };
+
+    const matchingTops = wardrobe.filter(w => isAvailable(w) && isTopwear(w) && isColorMatch(w, selectedPair[0]));
+    const matchingBottoms = wardrobe.filter(w => isAvailable(w) && isBottomwear(w) && isColorMatch(w, selectedPair[1]));
 
     return {
       ...base,
@@ -501,7 +550,7 @@ const HEX_NAME_MAP = {
       layer,
       weatherTag: isCold ? 'Adaptive: Cold' : 'Adaptive: Normal'
     };
-  }, [bestColors, gender, mood, wardrobe, history, weather]);
+  }, [bestColors, gender, mood, wardrobe, history, weather, profile, prefs, insights]);
 
   // Wardrobe harmony score
   const harmonyScore = useMemo(() => {
@@ -547,6 +596,40 @@ const HEX_NAME_MAP = {
       setLogging(false);
     }
   }, [auth.currentUser, wornMoods, mood, outfit, logging, t]);
+
+  // Genuine Style DNA Synergy Evaluator for Trending Tab
+  const handleDnaClick = useCallback((product) => {
+    let baseScore = 88;
+    const whyLC = (product.why || '').toLowerCase();
+    if (undertone === 'warm' && (whyLC.includes('earth') || whyLC.includes('comfort') || whyLC.includes('vintage') || whyLC.includes('warm') || whyLC.includes('streetwear'))) baseScore += 6;
+    else if (undertone === 'cool' && (whyLC.includes('minimal') || whyLC.includes('clean') || whyLC.includes('fitted') || whyLC.includes('formal'))) baseScore += 6;
+
+    const hasPair = wardrobe.some(w => {
+      if (w.status === 'laundry' || w.status === 'dirty') return false;
+      const grp = getCategoryGroup(w.category);
+      if (product.catId === 'tshirt' || product.catId === 'shirt' || product.catId === 'hoodie' || product.catId === 'polo') {
+        return grp === 'BOTTOMS' || (w.category || '').toLowerCase().includes('jean');
+      }
+      if (product.catId === 'cargo' || product.catId === 'jeans' || product.catId === 'formal_trouser' || product.catId === 'track_pants') {
+        return ['TOPS', 'CASUAL', 'FORMAL'].includes(grp);
+      }
+      return true;
+    });
+
+    if (hasPair) baseScore += 5;
+    const finalScore = Math.min(98, Math.max(84, baseScore));
+    setDnaMatches(prev => ({ ...prev, [product.id]: finalScore }));
+
+    const suggested = (bestColors || []).slice(0, 3).map(c => c.name);
+    setSelectedDnaProduct({
+      ...product,
+      score: finalScore,
+      suggestedColors: suggested,
+      synergyReason: hasPair
+        ? `High Synergy: Directly matches pieces in your closet & flatters your ${toneKey} ${undertone} skin tone.`
+        : `Color-calibrated: Fits your ${season} Seasonal DNA palette. Flattering style for ${toneKey} complexion in ${suggested.join(', ')}.`
+    });
+  }, [undertone, wardrobe, toneKey, season, bestColors]);
 
   // ── Render helpers ─────────────────────────────────
   const card = (style) => ({
@@ -882,6 +965,21 @@ const HEX_NAME_MAP = {
 
           {/* DNA Match Statistics */}
           {(() => {
+             const isColorOwned = (col) => {
+                if (!col) return false;
+                const targetName = (col.name || '').toLowerCase().trim();
+                const targetHex = (col.hex || '').toLowerCase().trim();
+                return wardrobe.some(w => {
+                   const itemG = (w.gender || '').toLowerCase();
+                   if (itemG && itemG !== 'unisex' && itemG !== gender) return false;
+                   const wHex = (w.hex || w.primary_color_hex || '').toLowerCase().trim();
+                   const wName = (w.color_name || w.name || '').toLowerCase().trim();
+                   if (targetHex && wHex && targetHex === wHex) return true;
+                   if (targetName && wName && (wName.includes(targetName) || targetName.includes(wName))) return true;
+                   return false;
+                });
+             };
+
              const dnaColors = [
                 ...(insights?.best_tshirt_colors || []),
                 ...(insights?.best_shirt_colors || []),
@@ -891,9 +989,7 @@ const HEX_NAME_MAP = {
                 ...(insights?.best_pant_colors || [])
              ];
              const uniqueDNA = dnaColors.filter((c, i, a) => a.findIndex(x => x.hex === c.hex) === i);
-             const ownedDNA = uniqueDNA.filter(c => 
-                wardrobe.some(w => w.hex?.toLowerCase() === c.hex?.toLowerCase() || w.color_name?.toLowerCase() === c.name?.toLowerCase())
-             );
+             const ownedDNA = uniqueDNA.filter(c => isColorOwned(c));
              const score = uniqueDNA.length > 0 ? Math.round((ownedDNA.length / uniqueDNA.length) * 100) : 0;
 
              return (
@@ -911,6 +1007,21 @@ const HEX_NAME_MAP = {
 
           {/* Categorized Best Colors Render */}
           {(() => {
+            const isColorOwned = (col) => {
+               if (!col) return false;
+               const targetName = (col.name || '').toLowerCase().trim();
+               const targetHex = (col.hex || '').toLowerCase().trim();
+               return wardrobe.some(w => {
+                  const itemG = (w.gender || '').toLowerCase();
+                  if (itemG && itemG !== 'unisex' && itemG !== gender) return false;
+                  const wHex = (w.hex || w.primary_color_hex || '').toLowerCase().trim();
+                  const wName = (w.color_name || w.name || '').toLowerCase().trim();
+                  if (targetHex && wHex && targetHex === wHex) return true;
+                  if (targetName && wName && (wName.includes(targetName) || targetName.includes(wName))) return true;
+                  return false;
+               });
+            };
+
             const ColorGrid = ({ title, colors, searchFormat, catId, items }) => {
               if (!colors || !colors.length) return null;
               const displayColors = colors.slice(0, 3); 
@@ -923,10 +1034,7 @@ const HEX_NAME_MAP = {
                   </div>
                   <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
                     {displayColors.map((color, i) => {
-                      const isOwned = wardrobe.some(w => 
-                         w.hex?.toLowerCase() === color.hex?.toLowerCase() || 
-                         w.color_name?.toLowerCase() === color.name?.toLowerCase()
-                      );
+                      const isOwned = isColorOwned(color);
 
                       return (
                         <div key={i} style={{ ...card({ padding:0, overflow:'hidden', border: isOwned ? '1px solid rgba(16,185,129,0.3)' : `1px solid ${C.border}` }) }}>
@@ -995,6 +1103,9 @@ const HEX_NAME_MAP = {
                   <ColorGrid title="🥻 Ethnics & Sarees" colors={insights?.best_saree_colors || insights?.best_kurti_colors || getVarietyFallback(2)} catId="kurti" items={['Saree', 'Kurti']} searchFormat={(c) => `women ${c} saree ethnic`} />
                   <ColorGrid title="🧥 Blazers & Shrugs" colors={insights?.best_female_blazer_colors || getVarietyFallback(4)} catId="blazer" items={['Blazer', 'Shrug']} searchFormat={(c) => `women ${c} power blazer`} />
                   <ColorGrid title="👖 Pants & Palazzos" colors={insights?.best_bottom_colors || getVarietyFallback(1)} catId="pant" items={['Trouser', 'Palazzo']} searchFormat={(c) => `women ${c} trousers palazzo`} />
+                  {insights?.accent_colors && insights.accent_colors.length > 0 && (
+                    <ColorGrid title="💎 Accessories & Jewelry" colors={insights.accent_colors} catId="accessory" items={['Jewelry', 'Handbag']} searchFormat={(c) => `women ${c} accessory`} />
+                  )}
                 </>
               );
             } else {
@@ -1004,6 +1115,9 @@ const HEX_NAME_MAP = {
                   <ColorGrid title="👔 Shirts & Blazers" colors={insights?.best_shirt_colors || insights?.best_blazer_colors || getVarietyFallback(3)} catId="shirt" items={['Shirt', 'Blazer']} searchFormat={(c) => `men ${c} formal shirt blazer`} />
                   <ColorGrid title="🪔 Kurtas & Ethnic" colors={insights?.best_kurta_colors || getVarietyFallback(1)} catId="kurta" items={['Kurta', 'Pyjama']} searchFormat={(c) => `men ${c} kurta set`} />
                   <ColorGrid title="👖 Pants & Cargos" colors={insights?.best_pant_colors || getVarietyFallback(5)} catId="pant" items={['Pant', 'Cargo']} searchFormat={(c) => `men ${c} cargo pants chinos`} />
+                  {insights?.accent_colors && insights.accent_colors.length > 0 && (
+                    <ColorGrid title="⌚ Accessories & Accents" colors={insights.accent_colors} catId="accessory" items={['Belt', 'Watch']} searchFormat={(c) => `men ${c} accessory`} />
+                  )}
                 </>
               );
             }
@@ -1141,34 +1255,56 @@ const HEX_NAME_MAP = {
             )})}
           </div>
 
-          {/* Wardrobe items preview */}
-          {wardrobe.length > 0 && (
-            <>
-              <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>📦 Your Wardrobe Items</p>
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginBottom:16 }}>
-                {wardrobe.slice(0, 8).map((item, i) => {
-                  const score = scoreWardrobeItem(item, { weather:'sunny' }, profile, [], prefs || {}, insights);
-                  return (
-                    <div key={i} style={{ ...card({ padding:0, overflow:'hidden', textAlign:'center' }) }}>
-                      <div style={{ height:48, background:item.hex || C.glass2, position:'relative' }}>
-                        <div style={{ position:'absolute', bottom:4, right:4, background:score >= 80 ? '#10B981' : score >= 60 ? VIOLET : '#F59E0B', borderRadius:6, padding:'1px 5px', fontSize:'8px', color:'white', fontFamily:PJS, fontWeight:700 }}>
-                          {score}%
+          {/* Improvement 4: Wardrobe items preview with real photo thumbnails and gender filter */}
+          {(() => {
+            const genderFilteredWardrobe = wardrobe.filter(w => !w.gender || w.gender.toLowerCase() === 'unisex' || w.gender.toLowerCase() === gender.toLowerCase());
+            if (!genderFilteredWardrobe.length) return null;
+            return (
+              <>
+                <p style={{ fontSize:'9px', letterSpacing:'0.18em', textTransform:'uppercase', color:C.muted, fontFamily:PJS, margin:'0 0 10px' }}>📦 Your Wardrobe Items</p>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginBottom:16 }}>
+                  {genderFilteredWardrobe.slice(0, 8).map((item, i) => {
+                    const score = scoreWardrobeItem(item, { weather:'sunny' }, profile, [], prefs || {}, insights);
+                    const itemEmoji = getCategorySectionMeta(item.category)?.emoji || '👕';
+                    const hasPhoto = !!(item.image_url || item.image);
+
+                    return (
+                      <div key={item.id || i} style={{ ...card({ padding:0, overflow:'hidden', textAlign:'center', border:`1px solid ${C.border}` }) }}>
+                        <div style={{ height:58, background: item.hex || C.glass2, position:'relative', display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden' }}>
+                          {hasPhoto ? (
+                            <img src={item.image_url || item.image} alt={item.name || item.color_name} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                          ) : (
+                            <span style={{ fontSize:20, opacity:0.85, textShadow:'0 2px 8px rgba(0,0,0,0.2)' }}>{itemEmoji}</span>
+                          )}
+                          <div style={{ position:'absolute', bottom:4, right:4, background:score >= 80 ? '#10B981' : score >= 60 ? VIOLET : '#F59E0B', borderRadius:6, padding:'1px 5px', fontSize:'8px', color:'white', fontFamily:PJS, fontWeight:800, boxShadow:'0 2px 6px rgba(0,0,0,0.3)' }}>
+                            {score}%
+                          </div>
+                          {(item.status === 'laundry' || item.status === 'dirty') && (
+                            <div style={{ position:'absolute', top:4, left:4, background:'rgba(239,68,68,0.9)', color:'white', borderRadius:4, padding:'1px 4px', fontSize:'7px', fontWeight:900 }}>
+                              🧺 Laundry
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ padding:'6px 4px' }}>
+                          <p style={{ fontSize:'9px', color:C.text, fontFamily:PJS, fontWeight:700, margin:'0 0 2px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                            {item.name || item.color_name || 'Wardrobe Item'}
+                          </p>
+                          <p style={{ fontSize:'8px', color:C.muted, fontFamily:PJS, margin:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', opacity:0.75 }}>
+                            {item.color_name || item.category || 'Garment'}
+                          </p>
                         </div>
                       </div>
-                      <p style={{ fontSize:'8px', color:C.muted, fontFamily:PJS, margin:'6px 4px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                        {item.color_name || item.category || 'Item'}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-              {wardrobe.length > 8 && (
-                <p style={{ fontSize:'11px', color:C.muted, fontFamily:PJS, textAlign:'center', marginBottom:16 }}>
-                  +{wardrobe.length - 8} more items in wardrobe
-                </p>
-              )}
-            </>
-          )}
+                    );
+                  })}
+                </div>
+                {genderFilteredWardrobe.length > 8 && (
+                  <p style={{ fontSize:'11px', color:C.muted, fontFamily:PJS, textAlign:'center', marginBottom:16 }}>
+                    +{genderFilteredWardrobe.length - 8} more items in wardrobe
+                  </p>
+                )}
+              </>
+            );
+          })()}
 
           {wardrobe.length === 0 && (
             <div style={{ textAlign:'center', padding:'32px 20px' }}>
@@ -1254,13 +1390,29 @@ const HEX_NAME_MAP = {
                       🔥 {product.why}
                     </p>
 
-                    {/* Match Score Display (For PRO users) */}
+                    {/* Match Score Display (Clickable for full synergy breakdown) */}
                     {dnaMatches[product.id] && (
-                      <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, padding: '8px', marginBottom: '10px', textAlign: 'center' }}>
-                         <span style={{ fontSize: '10px', fontWeight: 900, color: '#10B981', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                            🔥 {dnaMatches[product.id]}% Match for {toneKey} Skin
+                      <button
+                        onClick={() => handleDnaClick(product)}
+                        style={{
+                          width: '100%',
+                          background: 'rgba(16,185,129,0.1)',
+                          border: '1px solid rgba(16,185,129,0.3)',
+                          borderRadius: 10,
+                          padding: '7px 8px',
+                          marginBottom: '10px',
+                          textAlign: 'center',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 4
+                        }}
+                      >
+                         <span style={{ fontSize: '10px', fontWeight: 900, color: '#10B981', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: PJS }}>
+                            🔥 {dnaMatches[product.id]}% Match for {toneKey} ⓘ
                          </span>
-                      </div>
+                      </button>
                     )}
 
                     {/* Action Buttons */}
@@ -1268,7 +1420,7 @@ const HEX_NAME_MAP = {
                       {/* Shop Button (Affiliate link is always free) */}
                       <button
                         onClick={() => {
-                          const shopData = getShopData({ query: product.name, catId: product.catId, gender: activeTG });
+                          const shopData = getShopData({ query: product.name, catId: product.catId, gender: (activeTG || gender) === 'female' ? 'women' : 'men' });
                           setShopItem(shopData);
                         }}
                         style={{ 
@@ -1289,10 +1441,7 @@ const HEX_NAME_MAP = {
                       {/* DNA Match Hook Button */}
                       {!dnaMatches[product.id] && (
                         <button
-                          onClick={() => {
-                            const score = Math.floor(Math.random() * 15) + 85; // Simulated 85-99 score
-                            setDnaMatches(prev => ({ ...prev, [product.id]: score }));
-                          }}
+                          onClick={() => handleDnaClick(product)}
                           style={{ 
                             flex: 1, padding:'10px', borderRadius:14, 
                             background: 'transparent', border:'1px solid rgba(139,92,246,0.5)', color: C.isDark ? '#E5E7EB' : '#111827', 
@@ -1367,6 +1516,73 @@ const HEX_NAME_MAP = {
                    Cancel
                 </button>
              </div>
+          </div>
+        </div>
+      )}
+
+      {/* DNA Match Breakdown Modal */}
+      {selectedDnaProduct && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', backdropFilter:'blur(8px)', zIndex:2000, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
+          <div style={{ background:C.bg, border:`1px solid ${C.border}`, borderRadius:24, width:'100%', maxWidth:360, padding:'24px', boxShadow:'0 20px 50px rgba(0,0,0,0.5)', animation:'scaleUp 0.3s ease' }}>
+            <div style={{ textAlign:'center', marginBottom:16 }}>
+              <span style={{ fontSize:40 }}>{selectedDnaProduct.emoji || '🧬'}</span>
+              <p style={{ fontSize:'10px', color:VIOLET, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.2em', margin:'8px 0 4px', fontFamily:PJS }}>Style DNA Synergy</p>
+              <h3 style={{ fontSize:'17px', color:C.text, fontFamily:PJS, fontWeight:800, margin:0 }}>{selectedDnaProduct.name}</h3>
+            </div>
+
+            <div style={{ background:'rgba(16,185,129,0.1)', border:'1px solid rgba(16,185,129,0.25)', borderRadius:16, padding:'14px', textAlign:'center', marginBottom:16 }}>
+              <p style={{ fontSize:'24px', fontWeight:900, color:'#10B981', margin:0, fontFamily:PJS }}>
+                {selectedDnaProduct.score}% Match
+              </p>
+              <p style={{ fontSize:'11px', color:C.text, fontFamily:PJS, margin:'6px 0 0', lineHeight:'1.5', opacity:0.9 }}>
+                {selectedDnaProduct.synergyReason}
+              </p>
+            </div>
+
+            {selectedDnaProduct.suggestedColors?.length > 0 && (
+              <div style={{ background:C.glass, border:`1px solid ${C.border}`, borderRadius:14, padding:'12px', marginBottom:18 }}>
+                <p style={{ fontSize:'9px', color:C.muted, textTransform:'uppercase', letterSpacing:'0.1em', fontWeight:700, margin:'0 0 8px', fontFamily:PJS }}>
+                  Recommended DNA Colors:
+                </p>
+                <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+                  {selectedDnaProduct.suggestedColors.map((cName, idx) => (
+                    <span key={idx} style={{ background:C.glass2, border:`1px solid ${C.border}`, borderRadius:8, padding:'3px 8px', fontSize:'10px', color:C.text, fontFamily:PJS, fontWeight:600 }}>
+                      ✨ {cName}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div style={{ display:'flex', gap:10 }}>
+              <button
+                onClick={() => {
+                  const shopData = getShopData({
+                    query: selectedDnaProduct.name,
+                    catId: selectedDnaProduct.catId,
+                    gender: (trendGender || gender) === 'female' ? 'women' : 'men'
+                  });
+                  setSelectedDnaProduct(null);
+                  setShopItem(shopData);
+                }}
+                style={{
+                  flex:1, padding:'12px', borderRadius:14, background:'#8B5CF6', border:'none', color:'white',
+                  cursor:'pointer', fontSize:'11px', fontFamily:PJS, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.1em',
+                  boxShadow:'0 8px 20px rgba(139,92,246,0.3)'
+                }}
+              >
+                Shop Style →
+              </button>
+              <button
+                onClick={() => setSelectedDnaProduct(null)}
+                style={{
+                  padding:'12px 16px', borderRadius:14, background:C.glass, border:`1px solid ${C.border}`, color:C.muted,
+                  cursor:'pointer', fontSize:'11px', fontFamily:PJS, fontWeight:700
+                }}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
