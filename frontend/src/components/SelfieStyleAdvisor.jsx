@@ -15,7 +15,7 @@
 import { useState, useCallback, useRef, useContext, useEffect } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { getThemeColors, GRAD, VIOLET, PJS } from '../utils/themeColors';
-import { analyzeSelfieStyle, saveSelfieStyleHistory, auth } from '../api/styleApi';
+import { analyzeSelfieStyle, saveSelfieStyleHistory, saveUserPreferences, auth } from '../api/styleApi';
 import { usePlan } from '../context/PlanContext';
 import ShopActionSheet from './ShopActionSheet';
 
@@ -699,11 +699,17 @@ function StyleResults({ data, previewUrl, gender, onReset, C }) {
 
   const toggleCard = (i) => setExpandedIdx(prev => prev === i ? -1 : i);
 
-  // Save history on mount
+  // Save history on mount and link face shape to profile preferences
   useEffect(() => {
     const uid = auth.currentUser?.uid;
-    if (uid) {
+    if (uid && data) {
       saveSelfieStyleHistory(uid, data).catch(() => { });
+      if (data.face_shape) {
+        saveUserPreferences(uid, {
+          face_shape: data.face_shape.shape || 'oval',
+          face_shape_display: data.face_shape.display || 'Oval',
+        }).catch(() => {});
+      }
     }
   }, [data]);
 
@@ -961,7 +967,7 @@ export default function SelfieStyleAdvisor() {
   const C = getThemeColors(theme);
   const { isPro } = usePlan();
 
-  const [gender, setGender] = useState(localStorage.getItem('sg_gender_pref') || 'male');
+  const [gender, setGender] = useState(() => localStorage.getItem('sg_gender') || localStorage.getItem('sg_gender_pref') || 'male');
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -1025,8 +1031,9 @@ export default function SelfieStyleAdvisor() {
     setProgress(0);
   }, []);
 
-  // Persist gender preference
+  // Persist gender preference (unify across entire app)
   useEffect(() => {
+    localStorage.setItem('sg_gender', gender);
     localStorage.setItem('sg_gender_pref', gender);
   }, [gender]);
 

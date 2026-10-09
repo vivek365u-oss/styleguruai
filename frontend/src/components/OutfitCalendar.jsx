@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { scoreWardrobeItem, getAccessoryAdvice, generateStylerBrief } from '../utils/stylingEngine';
 import { useLanguage } from '../i18n/LanguageContext';
-import { auth, getDailyOutfitLogs, loadUserPreferences, loadStyleInsights, logDailyOutfit } from '../api/styleApi';
+import { auth, getDailyOutfitLogs, loadUserPreferences, loadStyleInsights, logDailyOutfit, saveCalendarOverrides, loadCalendarOverrides } from '../api/styleApi';
 import { buildMyntraSearchUrl } from '../utils/myntraUrl';
 import { getWeeklyForecast } from '../utils/weatherService';
 
@@ -70,16 +70,19 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
       if (!uid) { setLoading(false); return; }
       
       try {
-        const [userLogs, prefs, dna, weather] = await Promise.all([
+        const [userLogs, prefs, dna, weather, savedCalendar] = await Promise.all([
           getDailyOutfitLogs(uid, 14),
           loadUserPreferences(uid),
           loadStyleInsights(uid),
-          getWeeklyForecast()
+          getWeeklyForecast(),
+          loadCalendarOverrides(uid)
         ]);
         setLogs(userLogs);
         if (prefs?.lifestyle) setLifestyle(prefs.lifestyle);
         if (dna) setLockedDNA(dna);
         setForecast(weather);
+        if (savedCalendar?.eventOverrides) setEventOverrides(savedCalendar.eventOverrides);
+        if (savedCalendar?.plannedOutfits) setPlannedOutfits(savedCalendar.plannedOutfits);
       } catch (e) {
         console.error('Failed to load calendar context:', e);
       } finally {
@@ -238,6 +241,15 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
     };
   };
 
+  const handleUpdateEventOverride = (typeId) => {
+    const updated = { ...eventOverrides, [selectedDay]: typeId };
+    setEventOverrides(updated);
+    const uid = auth.currentUser?.uid;
+    if (uid) {
+      saveCalendarOverrides(uid, { eventOverrides: updated, plannedOutfits }).catch(() => {});
+    }
+  };
+
   const handleSmartGenerate = async () => {
      setIsGenerating(true);
      setVarietySeed(Math.floor(Math.random() * 10)); // Trigger re-calculation
@@ -249,6 +261,10 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
         }
         setPlannedOutfits(newPlan);
         setIsGenerating(false);
+        const uid = auth.currentUser?.uid;
+        if (uid) {
+          saveCalendarOverrides(uid, { eventOverrides, plannedOutfits: newPlan }).catch(() => {});
+        }
      }, 1000);
   };
 
@@ -349,7 +365,7 @@ function OutfitCalendar({ bestColors, pantColors, isDark, onClose, wardrobe, pro
               {EVENT_TYPES.map(type => (
                   <button
                     key={type.id}
-                    onClick={() => setEventOverrides({...eventOverrides, [selectedDay]: type.id})}
+                    onClick={() => handleUpdateEventOverride(type.id)}
                     className={`flex-shrink-0 px-4 py-2.5 rounded-xl border text-[10px] font-bold flex items-center gap-2 transition-all ${
                         OCCASIONS[selectedDay].event === type.id
                             ? 'bg-purple-600 border-transparent text-white shadow-lg'

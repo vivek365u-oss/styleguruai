@@ -14,7 +14,7 @@
 import { useState, useEffect, useContext, lazy, Suspense, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
-import { logout, saveHistory, getHistory, auth, destroyUserAccount, updateDailyStreak, saveNotificationPreference, setupFCMToken } from '../api/styleApi';
+import { logout, saveHistory, getHistory, auth, destroyUserAccount, updateDailyStreak, saveNotificationPreference, setupFCMToken, syncWardrobeQueue } from '../api/styleApi';
 import confetti from 'canvas-confetti';
 import { useNotifications } from '../hooks/useNotifications';
 import { ThemeContext } from '../context/ThemeContext';
@@ -1191,6 +1191,9 @@ export default function AppShell({ user, onLogout }) {
   // ── Firestore sync on login ───────────────────────────────────
   useEffect(() => {
     if (!auth.currentUser) return;
+    // Auto-sync any queued offline wardrobe items
+    syncWardrobeQueue(auth.currentUser.uid).catch(() => {});
+
     getHistory(isPro ? 100 : 10).then(res => {
       const firestoreCount = res?.data?.history?.length || 0;
       const localCount = parseInt(localStorage.getItem('sg_analysis_count') || '0');

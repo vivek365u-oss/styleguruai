@@ -6,6 +6,7 @@ import { getToken } from 'firebase/messaging';
 import { compressImage, validateImageFile } from '../utils/imageCompression';
 import { retryRequest, startKeepAlive, healthCheck } from '../utils/apiRetry';
 import { messaging } from '../firebase';
+import { saveLocalWardrobeImage, getLocalWardrobeImage } from '../utils/indexedDB';
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
@@ -660,9 +661,12 @@ export const saveWardrobeItem = async (uid, item) => {
 
     const enhancedItem = {
       ...item,
-      // Backward Compatability Rules
+      // Backward Compatibility Rules
       tags: tags,
       gender: safetyGender, // Explicit override if category demands it
+      // Cross-Device Photo Thumbnail (Cloud synced)
+      thumbnail: item.thumbnail || null,
+      imageId: item.imageId || null,
       // Smart Schema Fields (Phase 2 DNA compatibility)
       main_category: item.category?.includes('top') || item.category?.includes('shirt') ? 'Topwear' : item.category?.includes('bottom') || item.category?.includes('pant') || item.category?.includes('jeans') ? 'Bottomwear' : 'Apparel',
       primary_color_name: item.color_name || 'Unknown',
@@ -670,7 +674,7 @@ export const saveWardrobeItem = async (uid, item) => {
       occasions: tags.map(t => t.replace('tag_', '')),
       seasons: seasons,
       formality_score: formality,
-      saved_at: new Date().toISOString(),
+      saved_at: item.saved_at || new Date().toISOString(),
     };
 
     const ref = await addDoc(collection(db, 'users', uid, 'wardrobe'), enhancedItem);
@@ -678,6 +682,12 @@ export const saveWardrobeItem = async (uid, item) => {
     await setDoc(doc(db, 'users', uid), {
       wardrobeCount: increment(1)
     }, { merge: true });
+
+    // Ensure local IndexedDB cache is populated if thumbnail exists
+    if (enhancedItem.imageId && enhancedItem.thumbnail) {
+      saveLocalWardrobeImage(enhancedItem.imageId, enhancedItem.thumbnail).catch(() => {});
+    }
+
     return ref.id;
   } catch (e) {
     handleFirestoreError('saveWardrobeItem', e);
@@ -695,12 +705,57 @@ const getCachedWardrobe = (uid) => {
 };
 
 const setCachedWardrobe = (uid, items) => {
-  // Disabled as per user requirement "nothing locally"
+  try {
+    // Only cache metadata (omit heavy base64 thumbnails from localStorage to avoid 5MB quota)
+    const lightweightItems = items.map(item => {
+      const { thumbnail, ...rest } = item;
+      return rest;
+    });
+    localStorage.setItem(getCacheKey(uid, 'wardrobe'), JSON.stringify(lightweightItems));
+  } catch (e) {
+    console.warn('[Cache] Could not cache wardrobe:', e);
+  }
+};
+
+/**
+ * Auto-syncs any offline queued wardrobe items to Firestore when back online
+ */
+export const syncWardrobeQueue = async (uid) => {
+  if (!uid) return;
+  try {
+    const queueRaw = localStorage.getItem('sg_wardrobe_queue');
+    if (!queueRaw) return;
+    const queue = JSON.parse(queueRaw);
+    if (!Array.isArray(queue) || queue.length === 0) return;
+
+    console.log(`[WardrobeSync] Found ${queue.length} unsynced items in queue. Uploading to Firestore...`);
+    const remaining = [];
+    for (const item of queue) {
+      try {
+        await saveWardrobeItem(uid, item);
+      } catch (err) {
+        console.warn('[WardrobeSync] Failed to upload queued item:', err);
+        remaining.push(item);
+      }
+    }
+
+    if (remaining.length === 0) {
+      localStorage.removeItem('sg_wardrobe_queue');
+      console.log('[WardrobeSync] ✅ All queued wardrobe items synced successfully!');
+    } else {
+      localStorage.setItem('sg_wardrobe_queue', JSON.stringify(remaining));
+    }
+  } catch (e) {
+    console.error('[WardrobeSync] Queue processing error:', e);
+  }
 };
 
 export const getWardrobe = async (uid) => {
   if (!auth.currentUser) return [];
   try {
+    // Background queue sync if any offline items exist
+    syncWardrobeQueue(uid).catch(() => {});
+
     const q = query(
       collection(db, 'users', uid, 'wardrobe'),
       orderBy('saved_at', 'desc')
@@ -734,6 +789,15 @@ export const getWardrobe = async (uid) => {
         }
       }
 
+      // Cross-device photo sync: auto-populate local IndexedDB if item has thumbnail from cloud
+      if (data.imageId && data.thumbnail) {
+        getLocalWardrobeImage(data.imageId).then(cached => {
+          if (!cached) {
+            saveLocalWardrobeImage(data.imageId, data.thumbnail).catch(() => {});
+          }
+        }).catch(() => {});
+      }
+
       return { id: d.id, ...data, status };
     });
 
@@ -742,7 +806,7 @@ export const getWardrobe = async (uid) => {
       Promise.all(updates).catch(e => console.error('[API] Auto-wash updates failed:', e));
     }
 
-    // Always update cache on successful fetch
+    // Always update lightweight cache on successful fetch
     setCachedWardrobe(uid, items);
     return items;
   } catch (e) {
@@ -1349,4 +1413,82 @@ export const loadNotificationPreference = async (uid) => {
     console.warn('[Notifications] Could not load preference:', e);
   }
   return localStorage.getItem('sg_notif_on') === 'true';
+};
+
+// ============================================
+// CALENDAR & PLANNING — FIRESTORE
+// ============================================
+
+/**
+ * Save weekly planned outfits and custom event overrides to Firestore
+ */
+export const saveCalendarOverrides = async (uid, data) => {
+  if (!uid || !auth.currentUser) return false;
+  try {
+    const calRef = doc(db, 'users', uid, 'profile', 'calendar');
+    await setDoc(calRef, {
+      ...data,
+      updated_at: new Date().toISOString()
+    }, { merge: true });
+    return true;
+  } catch (e) {
+    console.warn('[Calendar] Save overrides error:', e);
+    return false;
+  }
+};
+
+/**
+ * Load weekly planned outfits and custom event overrides from Firestore
+ */
+export const loadCalendarOverrides = async (uid) => {
+  if (!uid || !auth.currentUser) return null;
+  try {
+    const calRef = doc(db, 'users', uid, 'profile', 'calendar');
+    const snap = await getDoc(calRef);
+    if (snap.exists()) {
+      return snap.data();
+    }
+    return null;
+  } catch (e) {
+    console.warn('[Calendar] Load overrides error:', e);
+    return null;
+  }
+};
+
+// ============================================
+// SHOPPING CART — FIRESTORE (Logged-in User)
+// ============================================
+
+/**
+ * Sync shopping cart to Firestore for cross-device consistency
+ */
+export const saveCloudCart = async (uid, cartItems) => {
+  if (!uid || !auth.currentUser) return;
+  try {
+    const cartRef = doc(db, 'users', uid, 'profile', 'cart');
+    await setDoc(cartRef, {
+      items: cartItems,
+      updated_at: new Date().toISOString()
+    }, { merge: true });
+  } catch (e) {
+    console.warn('[Cart] Cloud save failed:', e);
+  }
+};
+
+/**
+ * Load shopping cart from Firestore on login
+ */
+export const loadCloudCart = async (uid) => {
+  if (!uid || !auth.currentUser) return [];
+  try {
+    const cartRef = doc(db, 'users', uid, 'profile', 'cart');
+    const snap = await getDoc(cartRef);
+    if (snap.exists() && Array.isArray(snap.data()?.items)) {
+      return snap.data().items;
+    }
+    return [];
+  } catch (e) {
+    console.warn('[Cart] Cloud load failed:', e);
+    return [];
+  }
 };

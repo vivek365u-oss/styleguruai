@@ -125,9 +125,19 @@ function OutfitChecker() {
     let file;
     let preview;
     
+    let base64 = null;
     if (item.imageId) {
-      const base64 = await getLocalWardrobeImage(item.imageId);
-      if (!base64) { setError("Could not load image from local storage."); return; }
+      base64 = await getLocalWardrobeImage(item.imageId);
+    }
+    // Cross-device fallback: If image is missing from local IndexedDB, use cloud thumbnail
+    if (!base64 && item.thumbnail) {
+      base64 = item.thumbnail;
+      if (item.imageId) {
+        saveLocalWardrobeImage(item.imageId, base64).catch(() => {});
+      }
+    }
+
+    if (base64) {
       file = dataURLtoFile(base64, 'wardrobe_item.jpg');
       preview = base64;
     } else if (item.hex) {
@@ -227,25 +237,46 @@ function OutfitChecker() {
   }
 
   // Helper component for thumbnails
-  function WardrobeThumbnail({ imageId }) {
-    const [src, setSrc] = useState(null);
-    const [loading, setLoading] = useState(true);
+  function WardrobeThumbnail({ imageId, thumbnail, fallbackColor }) {
+    const [src, setSrc] = useState(thumbnail || null);
+    const [loading, setLoading] = useState(!thumbnail);
 
     useEffect(() => {
+      if (thumbnail) {
+        setSrc(thumbnail);
+        setLoading(false);
+        if (imageId) {
+          import('../utils/indexedDB').then(({ saveLocalWardrobeImage }) => {
+            saveLocalWardrobeImage(imageId, thumbnail).catch(() => {});
+          });
+        }
+        return;
+      }
+
+      if (!imageId) {
+        setLoading(false);
+        return;
+      }
+
       import('../utils/indexedDB').then(({ getLocalWardrobeImage }) => {
         getLocalWardrobeImage(imageId).then(data => {
           setSrc(data);
           setLoading(false);
-        });
+        }).catch(() => setLoading(false));
       });
-    }, [imageId]);
+    }, [imageId, thumbnail]);
     
     if (loading) return <div className="w-full h-24 bg-purple-500/10 animate-pulse rounded-lg mb-2" />;
     
     return src ? (
       <img src={src} className="w-full h-24 object-cover rounded-lg mb-2 shadow-sm border border-white/10" alt="item" />
     ) : (
-      <div className="w-full h-24 bg-gray-200 rounded-lg mb-2 flex items-center justify-center text-[8px] opacity-30">ERR</div>
+      <div 
+        className="w-full h-24 rounded-lg mb-2 flex items-center justify-center text-xs shadow-inner border border-white/10"
+        style={{ backgroundColor: fallbackColor || '#888888' }}
+      >
+        <span>👗</span>
+      </div>
     );
   };
 
@@ -253,11 +284,12 @@ function OutfitChecker() {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
     setWardrobeSaving(true);
+    let base64 = null;
     try {
       const imageId = `outfit_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       try {
         if (outfitFile) {
-          const base64 = await compressImage(outfitFile, 400);
+          base64 = await compressImage(outfitFile, 300);
           await saveLocalWardrobeImage(imageId, base64);
         }
       } catch (e) {
@@ -274,6 +306,7 @@ function OutfitChecker() {
         mood: selectedMood,
         gender: result.gender || gender || 'male',
         imageId: imageId,
+        thumbnail: base64, // CLOUD CROSS-DEVICE THUMBNAIL
         hex: result.outfit_analysis?.dominant_color_hex || '#888888',
         color_name: result.outfit_analysis?.color_name || 'Detected Color',
         outfit_data: {
@@ -294,6 +327,7 @@ function OutfitChecker() {
           source: 'outfit_checker', 
           category: cat, 
           imageId: null, 
+          thumbnail: base64,
           hex: result.outfit_analysis?.dominant_color_hex || '#888888',
           color_name: result.outfit_analysis?.color_name || 'Detected Color',
           fit: selectedFit,
@@ -831,8 +865,8 @@ function OutfitChecker() {
                         onClick={() => selectWardrobeItem(item)}
                         className={`text-left rounded-xl p-3 border transition-all hover:scale-[1.02] active:scale-95 ${isDark ? 'bg-white/5 border-white/10 hover:border-purple-400/50' : 'bg-gray-50 border-gray-200 hover:border-purple-400'}`}
                       >
-                        {item.imageId ? (
-                          <WardrobeThumbnail imageId={item.imageId} />
+                        {item.imageId || item.thumbnail ? (
+                          <WardrobeThumbnail imageId={item.imageId} thumbnail={item.thumbnail} fallbackColor={item.hex} />
                         ) : (
                           <div className="w-full h-24 rounded-lg mb-2 shadow-inner border border-white/10 flex items-center justify-center" style={{ backgroundColor: item.hex }}>
                              <span className="text-white text-[8px] font-black opacity-30 uppercase tracking-tighter">Color Mode</span>
