@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import {
   getWardrobe,
   deleteWardrobeItem,
@@ -477,15 +478,20 @@ function ItemInspectModal({ item, onClose, handleToggleLaundry, handleDelete, ge
     window.open(url, '_blank');
   };
 
-  return (
-    <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+  const modalContent = (
+    <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4">
+      {/* Full-screen Backdrop */}
       <div
-        className={`w-full max-w-md rounded-3xl border shadow-2xl overflow-hidden flex flex-col ${
+        onClick={onClose}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+      />
+      <div
+        className={`relative z-10 w-full max-w-md rounded-3xl border shadow-2xl overflow-hidden flex flex-col ${
           isDark ? 'bg-[#0F172A] border-white/10 text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}
       >
         {/* Header Image */}
-        <div className="relative w-full aspect-video sm:aspect-[4/3] bg-black/30">
+        <div className="relative w-full aspect-video sm:aspect-[4/3] bg-black/10">
           <WardrobeImage
             imageId={item.imageId}
             fallbackColor={item.hex || item.skin_hex}
@@ -591,6 +597,10 @@ function ItemInspectModal({ item, onClose, handleToggleLaundry, handleDelete, ge
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined'
+    ? createPortal(modalContent, document.body)
+    : modalContent;
 }
 
 // ── Master WardrobePanel Component ───────────────────────────

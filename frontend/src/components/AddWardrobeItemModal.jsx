@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -389,16 +390,16 @@ export default function AddWardrobeItemModal({
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[999999] flex flex-col justify-end sm:justify-center items-center p-0 sm:p-4">
-        {/* Backdrop */}
+      <div className="fixed inset-0 z-[999999] flex flex-col justify-end sm:justify-center items-center p-0 sm:p-4 pointer-events-none">
+        {/* Full-screen Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-black/75 backdrop-blur-md"
+          className="pointer-events-auto fixed inset-0 bg-black/60 backdrop-blur-sm"
         />
 
         {/* Modal Window */}
@@ -407,7 +408,7 @@ export default function AddWardrobeItemModal({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.96 }}
           transition={{ type: 'spring', damping: 25, stiffness: 320 }}
-          className={`relative w-full max-w-xl max-h-[92vh] sm:rounded-3xl rounded-t-3xl border shadow-2xl flex flex-col overflow-hidden ${
+          className={`pointer-events-auto relative z-10 w-full max-w-xl max-h-[92vh] sm:rounded-3xl rounded-t-3xl border shadow-2xl flex flex-col overflow-hidden ${
             isDark ? 'bg-[#0F172A] border-white/10 text-slate-100' : 'bg-white border-purple-100 text-slate-900'
           }`}
         >
@@ -904,4 +905,8 @@ export default function AddWardrobeItemModal({
       </div>
     </AnimatePresence>
   );
+
+  return typeof document !== 'undefined'
+    ? createPortal(modalContent, document.body)
+    : modalContent;
 }

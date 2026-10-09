@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -46,7 +47,7 @@ function WardrobeClassifierModal({ isOpen, onClose, onSave, initialData = {} }) 
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <AnimatePresence>
       <div className="fixed inset-0 z-[999999] flex flex-col justify-end md:justify-center items-center p-4">
         <motion.div 
@@ -54,7 +55,7 @@ function WardrobeClassifierModal({ isOpen, onClose, onSave, initialData = {} }) 
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-black/80 backdrop-blur-md"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm"
         />
 
         <motion.div
@@ -205,6 +206,10 @@ function WardrobeClassifierModal({ isOpen, onClose, onSave, initialData = {} }) 
       </div>
     </AnimatePresence>
   );
+
+  return typeof document !== 'undefined'
+    ? createPortal(modalContent, document.body)
+    : modalContent;
 }
 
 export default WardrobeClassifierModal;
