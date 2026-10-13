@@ -1,110 +1,132 @@
 /**
- * Footer.jsx — StyleGuruAI Premium Footer v2
- * Glassmorphism design system
+ * Footer.jsx — StyleGuru AI Shared Public Footer
+ * Glassmorphic dark design system with compliant AdSense & trust links
  */
+import React from 'react';
 import { Link } from 'react-router-dom';
+import { CONTACT_EMAIL, APP_NAME } from '../constants/contact';
 
 const BG = '#080C17';
 const BORDER = 'rgba(255,255,255,0.06)';
 const TEXT = '#F9FAFB';
-const MUTED = '#6B7280';
-const SUBTLE = '#374151';
+const MUTED = '#9CA3AF';
+const SUBTLE = '#4B5563';
+const GOLD = '#C9A96E';
 const GRAD = 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%)';
 
 export default function Footer() {
-  const product = [
-    { label: 'Analyze',   href: '/' },
-    { label: 'History',   href: '/' },
-    { label: 'Wardrobe',  href: '/' },
-    { label: 'Tools',     href: '/' },
-    { label: 'Blog',      href: '/blog' },
+  const currentYear = new Date().getFullYear();
+
+  const publicLinks = [
+    { label: 'Home',             to: '/' },
+    { label: 'Fashion Blog',     to: '/blog' },
+    { label: 'About Us',         to: '/about' },
+    { label: 'Contact & Help',   to: '/contact' },
   ];
 
-  const company = [
-    { label: 'About',    href: '/about' },
-    { label: 'Contact',  href: '/contact' },
-    { label: 'Privacy',  href: '/privacy' },
-    { label: 'Terms',    href: '/terms' },
+  const legalLinks = [
+    { label: 'Privacy Policy',   to: '/privacy-policy' },
+    { label: 'Terms of Service', to: '/terms' },
+    { label: 'Disclaimer',       to: '/disclaimer' },
   ];
 
   return (
-    <footer style={{
-      background: BG,
-      borderTop: `1px solid ${BORDER}`,
-      padding: '56px 0 32px',
-      fontFamily: "'Plus Jakarta Sans','Inter','DM Sans',sans-serif",
-    }}>
+    <footer
+      style={{
+        background: BG,
+        borderTop: `1px solid ${BORDER}`,
+        padding: '56px 0 32px',
+        fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif",
+      }}
+      className="text-slate-300"
+    >
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
-
-        {/* Top grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 40, marginBottom: 48 }}>
-
-          {/* Brand */}
-          <div style={{ gridColumn: 'span 2' }}>
-            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 16 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <img src="/logo.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        {/* Top Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-12">
+          {/* Brand Info */}
+          <div className="md:col-span-5">
+            <Link to="/" className="inline-flex items-center gap-2.5 mb-4 no-underline">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center p-0.5 bg-gradient-to-tr from-violet-600 to-pink-500 shadow-md">
+                <img src="/logo.png" alt="StyleGuru AI Logo" className="w-full h-full object-contain rounded-md" />
               </div>
-              <span style={{ fontSize: '14px', fontWeight: 700 }}>
-                <span style={{ color: TEXT }}>StyleGuru AI </span>
+              <span className="text-base font-bold text-white tracking-tight">
+                {APP_NAME}
+              </span>
+              <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded" style={{ background: 'rgba(168, 85, 247, 0.15)', color: '#C084FC' }}>
+                Made in India 🇮🇳
               </span>
             </Link>
-            <p style={{ fontSize: '13px', color: MUTED, lineHeight: '1.7', maxWidth: 260, fontWeight: 400 }}>
-              AI-powered fashion intelligence for every skin tone. Made in India 🇮🇳
+
+            <p className="text-xs sm:text-sm leading-relaxed mb-4 max-w-sm" style={{ color: MUTED }}>
+              Intelligent skin-tone color analysis and personalized outfit recommendations tailored for Indian complexions, weather, and cultural celebrations.
             </p>
-            {/* Gradient divider */}
+
+            <p className="text-xs" style={{ color: SUBTLE }}>
+              Need support? Email us at{' '}
+              <a href={`mailto:${CONTACT_EMAIL}`} className="underline hover:text-white" style={{ color: GOLD }}>
+                {CONTACT_EMAIL}
+              </a>
+            </p>
+
             <div style={{ marginTop: 20, height: 2, width: 48, background: GRAD, borderRadius: 1 }} />
           </div>
 
-          {/* Product */}
-          <div>
-            <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: SUBTLE, marginBottom: 16, fontWeight: 700 }}>
-              Product
+          {/* Navigation Links */}
+          <div className="md:col-span-3 sm:col-span-6">
+            <p className="text-[10px] font-bold uppercase tracking-widest mb-4" style={{ color: GOLD }}>
+              Navigation
             </p>
-            {product.map(link => (
-              <div key={link.label} style={{ marginBottom: 10 }}>
-                <Link
-                  to={link.href}
-                  style={{ color: MUTED, fontSize: '13px', textDecoration: 'none', transition: 'color 0.15s', display: 'inline-block' }}
-                  onMouseEnter={e => e.target.style.color = TEXT}
-                  onMouseLeave={e => e.target.style.color = MUTED}
-                >
-                  {link.label}
-                </Link>
-              </div>
-            ))}
+            <ul className="space-y-2.5 list-none p-0 m-0 text-xs sm:text-sm">
+              {publicLinks.map((item) => (
+                <li key={item.to}>
+                  <Link
+                    to={item.to}
+                    className="no-underline transition-colors hover:text-white"
+                    style={{ color: MUTED }}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* Company */}
-          <div>
-            <p style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: SUBTLE, marginBottom: 16, fontWeight: 700 }}>
-              Company
+          {/* Legal & Trust */}
+          <div className="md:col-span-4 sm:col-span-6">
+            <p className="text-[10px] font-bold uppercase tracking-widest mb-4" style={{ color: GOLD }}>
+              Legal & Trust
             </p>
-            {company.map(link => (
-              <div key={link.label} style={{ marginBottom: 10 }}>
-                <Link
-                  to={link.href}
-                  style={{ color: MUTED, fontSize: '13px', textDecoration: 'none', transition: 'color 0.15s', display: 'inline-block' }}
-                  onMouseEnter={e => e.target.style.color = TEXT}
-                  onMouseLeave={e => e.target.style.color = MUTED}
-                >
-                  {link.label}
-                </Link>
-              </div>
-            ))}
+            <ul className="space-y-2.5 list-none p-0 m-0 text-xs sm:text-sm mb-4">
+              {legalLinks.map((item) => (
+                <li key={item.to}>
+                  <Link
+                    to={item.to}
+                    className="no-underline transition-colors hover:text-white"
+                    style={{ color: MUTED }}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <p className="text-[11px] leading-relaxed" style={{ color: SUBTLE }}>
+              Compliant with Google AdSense Publisher Policies, DPDP Act 2023, and Indian Consumer Guidelines.
+            </p>
           </div>
         </div>
 
         {/* Divider */}
         <div style={{ height: 1, background: BORDER, marginBottom: 24 }} />
 
-        {/* Bottom bar */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <p style={{ fontSize: '12px', color: SUBTLE }}>
-            © 2026 StyleGuru AI. All rights reserved.
+        {/* Bottom Bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs" style={{ color: SUBTLE }}>
+          <p className="m-0">
+            © {currentYear} {APP_NAME}. All rights reserved.
           </p>
-          <p style={{ fontSize: '11px', color: SUBTLE, letterSpacing: '0.03em' }}>
-            Designed for Indian skin tones · Built in India 🇮🇳
+          <p className="m-0 flex items-center gap-2">
+            <span>Founded by Vivek Kumar</span>
+            <span>•</span>
+            <span>Built with pride in India 🇮🇳</span>
           </p>
         </div>
       </div>

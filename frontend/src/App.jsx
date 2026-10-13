@@ -14,10 +14,12 @@ import AuthPage from './components/AuthPage';
 
 // Lazy loaded components for code splitting
 const Dashboard = lazy(() => import('./components/AppShell'));
+const PublicLayout = lazy(() => import('./layouts/PublicLayout'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
+const DisclaimerPage = lazy(() => import('./pages/DisclaimerPage'));
 const BlogListPage = lazy(() => import('./pages/BlogListPage'));
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
@@ -116,12 +118,16 @@ function AppRoutes({ user, setUser, authLoading }) {
           </PrivateRoute>
         } />
         <Route path="/settings" element={<Navigate to="/profile" replace />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/privacy" element={<PrivacyPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/terms" element={<TermsPage />} />
-        <Route path="/blog" element={<BlogListPage />} />
-        <Route path="/blog/:slug" element={<BlogPostPage />} />
+        <Route element={<PublicLayout />}>
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/disclaimer" element={<DisclaimerPage />} />
+          <Route path="/blog" element={<BlogListPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
+        </Route>
         <Route path="/admin" element={
           <PrivateRoute user={user}>
             <AdminDashboard />

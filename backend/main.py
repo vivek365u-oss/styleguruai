@@ -30,7 +30,7 @@ import firebase_admin
 from firebase_admin import credentials, auth as firebase_auth, firestore as firebase_firestore
 
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks, Request, Depends, Form, HTTPException, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
@@ -224,6 +224,11 @@ async def root():
 async def health():
     """Fast health check endpoint - returns immediately without DB calls"""
     return {"status": "ok", "timestamp": time.time(), "service": "styleguruai"}
+
+@app.get("/ads.txt", response_class=PlainTextResponse)
+async def ads_txt():
+    """Fallback ads.txt endpoint with exact publisher ID"""
+    return "google.com, pub-7408587005129335, DIRECT, f08c47fec0942fa0\n"
 
 image_processor = ImageProcessor()
 skin_classifier = SkinToneClassifier()

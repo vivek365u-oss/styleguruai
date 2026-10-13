@@ -20,6 +20,11 @@ export default function GoogleAd({
   className = '',
   showLabel = true,
 }) {
+  // If no active ad slot is provided, don't render empty placeholder boxes during review
+  if (!slot && !import.meta.env.VITE_ADSENSE_BANNER_SLOT) {
+    return null;
+  }
+
   const adRef = useRef(null);
   const pushedRef = useRef(false);
 

@@ -1,42 +1,193 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
 import SEOHead from '../components/SEOHead';
+import { CONTACT_EMAIL, APP_NAME, SITE_CANONICAL } from '../constants/contact';
 
-const C = { text: '#F0EDE6', muted: '#6B6B6B', border: '#242424', surface: '#141414', gold: '#C9A96E' };
+const C = {
+  bg: '#0B0F1A',
+  text: '#F9FAFB',
+  text2: '#E5E7EB',
+  muted: '#9CA3AF',
+  border: 'rgba(255, 255, 255, 0.08)',
+  surface: 'rgba(255, 255, 255, 0.03)',
+  surfaceHighlight: 'rgba(168, 85, 247, 0.06)',
+  accent: '#A855F7',
+  gold: '#C9A96E',
+};
 
-const terms = [
-  { title: 'Acceptance of Terms', body: "By accessing or using StyleGuru AI, you agree to be bound by these Terms and Conditions. Our platform provides AI-driven fashion advice, skin tone analysis, and shopping recommendations tailored for Indian complexions. If you do not agree to these terms, please discontinue use of the service." },
-  { title: 'Service Accuracy & Limitation', body: "While our AI models use advanced engineering to provide high-accuracy style advice, recommendations are for informational and aesthetic purposes only. Final fashion choices, including purchases through affiliate links, are at the user's discretion. StyleGuru AI is not liable for dissatisfaction with external products or analysis variance due to lighting/photo quality." },
-  { title: 'Intellectual Property', body: "The algorithms, UI design, branding, and generated content within StyleGuru AI are the exclusive property of our founders. You may use our style analysis for personal use but are prohibited from reverse-engineering or commercializing our AI recommendations without written consent." },
-  { title: 'User Responsibility', body: "Users are responsible for the quality of images uploaded. Clear, well-lit photos provide the most accurate ITA calculations. Any misuse of the platform or attempts to disrupt our AI services will result in immediate termination of access." },
-  { title: 'Affiliate Links', body: "StyleGuru AI earns commissions through affiliate links on Amazon, Myntra, and other retail partners. These commissions do not affect the pricing you pay, and we only recommend products we believe are relevant to your style profile." },
-];
+function TermsSection({ num, title, children }) {
+  return (
+    <section className="mb-10 pb-8 border-b" style={{ borderColor: C.border }}>
+      <h2
+        className="text-xl md:text-2xl font-serif font-normal mb-4"
+        style={{ color: C.text, fontFamily: "'Playfair Display', serif" }}
+      >
+        <span style={{ color: C.gold }} className="mr-2 font-sans text-sm font-semibold tracking-wider">
+          {num}.
+        </span>
+        {title}
+      </h2>
+      <div
+        className="text-sm md:text-base leading-relaxed space-y-4"
+        style={{ color: C.muted, fontFamily: "'Inter', sans-serif" }}
+      >
+        {children}
+      </div>
+    </section>
+  );
+}
 
 export default function TermsPage() {
+  const lastUpdated = 'October 13, 2026';
+
   return (
-    <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 24px 80px' }}>
-      <SEOHead title="Terms & Conditions — StyleGuru AI" description="Read the StyleGuru AI terms of use before using the service." />
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8" style={{ background: C.bg, color: C.text }}>
+      <SEOHead
+        title="Terms & Conditions — StyleGuru AI"
+        description="Terms and Conditions of Use for StyleGuru AI. Review our service terms, intellectual property policies, user responsibilities, and limitation of liability."
+      />
 
-      <p style={{ fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: C.gold, marginBottom: 12, fontFamily: "'Inter',sans-serif" }}>Legal</p>
-      <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(28px,5vw,44px)', fontWeight: 300, color: C.text, lineHeight: 1.2, marginBottom: 8 }}>
-        Terms & Conditions
-      </h1>
-      <p style={{ fontSize: '11px', color: C.muted, letterSpacing: '0.1em', marginBottom: 48, fontFamily: "'Inter',sans-serif" }}>
-        Last Modified: January 2025 · Standard Service Agreement
-      </p>
-
-      {terms.map((t, i) => (
-        <div key={i} style={{ marginBottom: 32, paddingBottom: 32, borderBottom: `1px solid ${C.border}` }}>
-          <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: '18px', fontWeight: 400, color: C.text, marginBottom: 10 }}>
-            {i + 1}. {t.title}
-          </h2>
-          <p style={{ fontSize: '14px', color: C.muted, lineHeight: '1.8', fontFamily: "'Inter',sans-serif" }}>{t.body}</p>
+      <main className="max-w-3xl mx-auto">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 mb-4 text-xs font-semibold tracking-widest uppercase" style={{ color: C.gold }}>
+          <span>Legal & Compliance</span>
+          <span>•</span>
+          <span>Terms of Service</span>
         </div>
-      ))}
 
-      <div style={{ padding: '20px 24px', background: C.surface, border: `1px solid ${C.border}` }}>
-        <p style={{ fontSize: '12px', color: C.muted, lineHeight: '1.7', fontFamily: "'Inter',sans-serif", fontStyle: 'italic' }}>
-          StyleGuru AI reserves the right to update these terms at any time. Your continued use constitutes acceptance of the latest version.
+        <h1
+          className="text-3xl sm:text-4xl md:text-5xl font-light mb-4"
+          style={{ fontFamily: "'Playfair Display', serif", color: C.text, lineHeight: 1.2 }}
+        >
+          Terms and Conditions
+        </h1>
+
+        <p className="text-xs sm:text-sm mb-10 pb-6 border-b" style={{ color: C.muted, borderColor: C.border }}>
+          Last Modified: <strong style={{ color: C.text2 }}>{lastUpdated}</strong> · Binding User Agreement
         </p>
-      </div>
+
+        {/* Introduction */}
+        <div className="p-6 rounded-2xl mb-12 border" style={{ background: C.surfaceHighlight, borderColor: 'rgba(168, 85, 247, 0.2)' }}>
+          <p className="text-sm leading-relaxed" style={{ color: C.text2 }}>
+            Welcome to {APP_NAME} (<a href={SITE_CANONICAL} className="underline" style={{ color: C.accent }}>{SITE_CANONICAL}</a>). By accessing, browsing, registering an account, or uploading images to our platform, you agree to be legally bound by these Terms and Conditions. If you do not agree to all terms outlined herein, please discontinue using the service immediately.
+          </p>
+        </div>
+
+        {/* Section 1: Acceptance & Eligibility */}
+        <TermsSection num="1" title="Acceptance of Terms & Eligibility">
+          <p>
+            By using this website, you represent and warrant that you are at least 13 years of age (or of legal age under Indian law or the jurisdiction of your residence to enter into a binding contract). If you are accessing {APP_NAME} on behalf of another entity, you represent that you possess the authority to bind that entity to these terms.
+          </p>
+        </TermsSection>
+
+        {/* Section 2: Description of Services */}
+        <TermsSection num="2" title="Description of Service">
+          <p>
+            {APP_NAME} provides an artificial-intelligence powered personal fashion advisory platform. Our features include:
+          </p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>Automated skin tone and undertone classification (evaluating ITA coordinates and RGB color spectrums).</li>
+            <li>Curated color palette recommendations matched to Indian complexions, cultural occasions, and regional climates.</li>
+            <li>Wardrobe planning utilities, outfit harmony checkers, and links to relevant fashion products.</li>
+          </ul>
+          <p>
+            We continually evolve our algorithms. We reserve the right to alter, upgrade, suspend, or discontinue any feature or service without prior liability.
+          </p>
+        </TermsSection>
+
+        {/* Section 3: Nature of Fashion Advice (Suggestions Only) */}
+        <TermsSection num="3" title="Nature of Advice: Informational & Aesthetic Suggestions">
+          <p>
+            <strong style={{ color: C.text2 }}>Suggestions Only:</strong> All color recommendations, wardrobe suggestions, and styling scores generated by {APP_NAME} are algorithmic aesthetic opinions designed purely for style inspiration. They do not constitute certified professional personal styling, dermatological, medical, or bespoke tailor advice.
+          </p>
+          <p>
+            Lighting conditions, smartphone camera sensors, ambient shadows, and display calibration can cause variations in detected skin tones. We encourage users to treat our insights as an empowering guide while making purchasing choices according to their personal taste, comfort, and budget.
+          </p>
+        </TermsSection>
+
+        {/* Section 4: User Accounts & Authentication */}
+        <TermsSection num="4" title="User Accounts & Security">
+          <p>
+            When you create an account via Firebase Authentication (using Google OAuth or email sign-in), you are responsible for maintaining the confidentiality of your login credentials and all activities that occur under your account.
+          </p>
+          <p>
+            You agree to notify us immediately at <a href={`mailto:${CONTACT_EMAIL}`} className="underline" style={{ color: C.gold }}>{CONTACT_EMAIL}</a> if you detect any unauthorized access to your account. We will not be liable for any loss resulting from compromised credentials.
+          </p>
+        </TermsSection>
+
+        {/* Section 5: Acceptable Use & Image Uploads */}
+        <TermsSection num="5" title="Acceptable Use & Image Upload Rules">
+          <p>
+            When uploading photographs for fashion or tone analysis, you expressly agree that:
+          </p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>You own the copyright or have express authorization to upload the photo.</li>
+            <li>You will not upload any content that is obscene, defamatory, unlawful, sexually suggestive, or depicts minors without parental consent.</li>
+            <li>You will not use automated scrapers, bots, or extraction scripts to reverse-engineer our recommendation endpoints or overwhelm our server infrastructure.</li>
+          </ul>
+          <p>
+            Any violation of these rules may lead to immediate suspension or termination of your account access without prior notice.
+          </p>
+        </TermsSection>
+
+        {/* Section 6: Intellectual Property */}
+        <TermsSection num="6" title="Intellectual Property Rights">
+          <p>
+            All code, proprietary recommendation logic, user interface designs, logos, graphics, color harmonies, and articles published on {APP_NAME} are the exclusive intellectual property of {APP_NAME} and founder Vivek Kumar, protected under Indian and international copyright and trademark laws.
+          </p>
+          <p>
+            You are granted a limited, revocable, non-exclusive license to use the service for personal, non-commercial fashion discovery. You may not copy, reproduce, resell, or distribute our platform assets without prior written consent.
+          </p>
+        </TermsSection>
+
+        {/* Section 7: Third-Party Advertising & Affiliate Links */}
+        <TermsSection num="7" title="Advertising & Third-Party Retail Links">
+          <p>
+            Our website displays third-party advertisements served by <strong style={{ color: C.text2 }}>Google AdSense</strong>. We do not endorse or control the products, claims, or services advertised in third-party banners. Your interactions with advertisers are governed strictly by the advertiser's individual terms and privacy policies.
+          </p>
+          <p>
+            {APP_NAME} may also provide curated shopping links to external e-commerce platforms (such as Amazon, Myntra, or brand storefronts). Some of these links may be affiliate links through which we earn a modest commission at no extra cost to you. We are not responsible for orders, product quality, returns, or shipping policies of third-party merchants.
+          </p>
+        </TermsSection>
+
+        {/* Section 8: Limitation of Liability */}
+        <TermsSection num="8" title="Limitation of Liability">
+          <p>
+            To the maximum extent permitted by applicable law, {APP_NAME}, its founder, and affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including loss of profits, data, or satisfaction resulting from:
+          </p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li>Your access to or inability to access the service.</li>
+            <li>Any clothing purchases made based on AI style suggestions.</li>
+            <li>Any technical downtime, server maintenance, or accuracy variance in analysis.</li>
+          </ul>
+        </TermsSection>
+
+        {/* Section 9: Governing Law & Jurisdiction */}
+        <TermsSection num="9" title="Governing Law & Dispute Resolution">
+          <p>
+            These Terms and Conditions shall be governed by and construed in accordance with the laws of the Republic of India. Any disputes arising out of or related to these terms shall be subject to the exclusive jurisdiction of the competent courts in India.
+          </p>
+        </TermsSection>
+
+        {/* Section 10: Contact Information */}
+        <TermsSection num="10" title="Contact Us Regarding Terms">
+          <p>
+            For any questions, legal notices, or inquiries regarding these Terms and Conditions, please contact us at:
+          </p>
+          <div className="p-6 rounded-2xl mt-4 border space-y-2" style={{ background: C.surface, borderColor: C.border }}>
+            <p className="font-semibold text-white">{APP_NAME} Legal Inquiries</p>
+            <p className="text-sm">
+              Email:{' '}
+              <a href={`mailto:${CONTACT_EMAIL}`} className="font-mono text-sm underline hover:text-white" style={{ color: C.gold }}>
+                {CONTACT_EMAIL}
+              </a>
+            </p>
+            <p className="text-xs text-slate-400 mt-2">
+              Also review our companion <Link to="/privacy-policy" className="underline hover:text-white" style={{ color: C.accent }}>Privacy Policy</Link> and <Link to="/disclaimer" className="underline hover:text-white" style={{ color: C.accent }}>Disclaimer</Link>.
+            </p>
+          </div>
+        </TermsSection>
+      </main>
     </div>
   );
 }

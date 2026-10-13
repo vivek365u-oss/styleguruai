@@ -5,6 +5,7 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { trackCTAClick } from '../utils/analytics';
 import { usePWA } from '../hooks/usePWA';
 import InstallPromptModal from './InstallPromptModal';
+import Footer from './Footer';
 import { LIGHT, GRAD } from '../utils/themeColors';
 
 /* ══════════════════════════════════════════════
@@ -301,13 +302,13 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
   };
 
   const navItems = [
+    { id: 'home', label: 'Home', action: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
     { id: 'features', label: 'Features', action: () => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }) },
-    { id: 'direct-shop', label: 'Direct Shop', action: () => document.getElementById('direct-shop')?.scrollIntoView({ behavior: 'smooth' }) },
     { id: 'how-it-works', label: 'How It Works', action: () => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }) },
-    { id: 'founder', label: 'Founder Story', action: () => document.getElementById('founder')?.scrollIntoView({ behavior: 'smooth' }) },
-    { id: 'app', label: 'Download App', action: () => handleDownloadAppClick() },
-    { id: 'contact', label: 'Contact', action: () => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }) },
     { id: 'blog', label: 'Blog', isLink: true, href: '/blog' },
+    { id: 'about', label: 'About', isLink: true, href: '/about' },
+    { id: 'contact', label: 'Contact', isLink: true, href: '/contact' },
+    { id: 'app', label: 'App', action: () => handleDownloadAppClick() },
   ];
 
   return (
@@ -1346,125 +1347,8 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════
-          11. LUXE FOOTER (All Links from Voice Note)
-          ════════════════════════════════════════ */}
-      <footer className="border-t border-slate-200 bg-white py-14">
-        <div className="max-w-7xl mx-auto px-6 sm:px-10">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
-            
-            {/* Brand column */}
-            <div className="md:col-span-2 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl p-0.5 bg-gradient-to-tr from-violet-600 to-pink-500">
-                  <img src="/logo.png" alt="StyleGuru AI" className="w-full h-full object-contain rounded-lg bg-white" />
-                </div>
-                <span className="text-base font-bold text-slate-900">
-                  StyleGuru <span className="text-violet-600">AI</span>
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 max-w-sm leading-relaxed">
-                AI-powered fashion intelligence calibrated for Indian skin tones. Built with love in India by Vivek Kumar 🇮🇳
-              </p>
-              
-              {/* Quick Social Badges */}
-              <div className="flex items-center gap-3 pt-1">
-                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-sm p-2 rounded-lg bg-slate-100 text-slate-600 hover:text-pink-600 transition-colors no-underline" title="Instagram">
-                  📸
-                </a>
-                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-sm p-2 rounded-lg bg-slate-100 text-slate-600 hover:text-blue-600 transition-colors no-underline" title="Facebook">
-                  📘
-                </a>
-                <a href="https://wa.me/?text=Hi%20StyleGuru%20AI" target="_blank" rel="noopener noreferrer" className="text-sm p-2 rounded-lg bg-slate-100 text-slate-600 hover:text-emerald-600 transition-colors no-underline" title="WhatsApp">
-                  💬
-                </a>
-                <a href="mailto:StyleGuruAI.in.gmail@gmail.com" className="text-sm p-2 rounded-lg bg-slate-100 text-slate-600 hover:text-red-600 transition-colors no-underline" title="Email">
-                  ✉️
-                </a>
-              </div>
-            </div>
-
-            {/* Product Links */}
-            <div>
-              <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest mb-4">Product</p>
-              <ul className="space-y-2.5 text-xs list-none p-0 m-0">
-                <li>
-                  <button onClick={() => handleFeatureClick('Skin Analysis', 'analysis')} className="text-slate-600 hover:text-violet-600 transition-colors cursor-pointer bg-transparent border-none p-0 text-xs">
-                    AI Skin Analysis
-                  </button>
-                </li>
-                <li>
-                  <a href="#direct-shop" className="text-violet-700 font-bold hover:underline transition-colors no-underline">
-                    🛍️ Direct Smart Shop
-                  </a>
-                </li>
-                <li>
-                  <button onClick={() => handleFeatureClick('History', 'history')} className="text-slate-600 hover:text-violet-600 transition-colors cursor-pointer bg-transparent border-none p-0 text-xs">
-                    Analysis History
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => handleFeatureClick('Wardrobe', 'wardrobe')} className="text-slate-600 hover:text-violet-600 transition-colors cursor-pointer bg-transparent border-none p-0 text-xs">
-                    Smart Wardrobe
-                  </button>
-                </li>
-                <li>
-                  <button onClick={() => handleFeatureClick('Style Tools', 'tools')} className="text-slate-600 hover:text-violet-600 transition-colors cursor-pointer bg-transparent border-none p-0 text-xs">
-                    Style Tools
-                  </button>
-                </li>
-                <li>
-                  <Link to="/blog" className="text-slate-600 hover:text-violet-600 transition-colors no-underline">
-                    Fashion Blog
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Company Links */}
-            <div>
-              <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest mb-4">Company</p>
-              <ul className="space-y-2.5 text-xs list-none p-0 m-0">
-                <li>
-                  <Link to="/about" className="text-slate-600 hover:text-violet-600 transition-colors no-underline">
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/contact" className="text-slate-600 hover:text-violet-600 transition-colors no-underline">
-                    Contact & Support
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/privacy" className="text-slate-600 hover:text-violet-600 transition-colors no-underline">
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/terms" className="text-slate-600 hover:text-violet-600 transition-colors no-underline">
-                    Terms & Conditions
-                  </Link>
-                </li>
-                <li>
-                  <button onClick={handleDownloadAppClick} className="text-violet-700 font-bold hover:underline cursor-pointer bg-transparent border-none p-0 text-xs">
-                    📱 Download Mobile App
-                  </button>
-                </li>
-              </ul>
-            </div>
-
-          </div>
-
-          <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-            <p className="m-0">© 2026 StyleGuru AI. All rights reserved.</p>
-            <p className="flex items-center gap-1.5 m-0">
-              <span>Made with pride in India 🇮🇳</span>
-              <span>•</span>
-              <span>by Vivek Kumar (Founder)</span>
-            </p>
-          </div>
-        </div>
-      </footer>
+      {/* Shared Unified Footer */}
+      <Footer />
     </div>
   );
 }

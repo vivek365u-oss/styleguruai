@@ -11,12 +11,14 @@ const BASE = 'https://www.styleguruai.in';
 
 // Static pages
 const staticPages = [
-  { loc: '/',        changefreq: 'weekly',  priority: '1.0' },
-  { loc: '/about',   changefreq: 'monthly', priority: '0.8' },
-  { loc: '/privacy', changefreq: 'monthly', priority: '0.7' },
-  { loc: '/contact', changefreq: 'monthly', priority: '0.7' },
-  { loc: '/terms',   changefreq: 'monthly', priority: '0.7' },
-  { loc: '/blog',    changefreq: 'daily',   priority: '0.9' },
+  { loc: '/',               changefreq: 'weekly',  priority: '1.0' },
+  { loc: '/about',          changefreq: 'monthly', priority: '0.8' },
+  { loc: '/privacy-policy', changefreq: 'monthly', priority: '0.8' },
+  { loc: '/privacy',        changefreq: 'monthly', priority: '0.5' },
+  { loc: '/contact',        changefreq: 'monthly', priority: '0.8' },
+  { loc: '/terms',          changefreq: 'monthly', priority: '0.8' },
+  { loc: '/disclaimer',     changefreq: 'monthly', priority: '0.8' },
+  { loc: '/blog',           changefreq: 'daily',   priority: '0.9' },
 ];
 
 function slugify(text) {
@@ -73,4 +75,8 @@ xml += `</urlset>
 `;
 
 fs.writeFileSync(OUTPUT, xml, 'utf-8');
-console.log(`✅ Sitemap written with ${staticPages.length + blogSlugs.length} URLs to ${OUTPUT}`);
+const DIST_OUTPUT = path.join(__dirname, 'dist', 'sitemap.xml');
+if (fs.existsSync(path.join(__dirname, 'dist'))) {
+  fs.writeFileSync(DIST_OUTPUT, xml, 'utf-8');
+}
+console.log(`✅ Sitemap written with ${staticPages.length + blogSlugs.length} URLs to ${OUTPUT} and dist/`);
