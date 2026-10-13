@@ -34,7 +34,7 @@ If you must wear contrasting colors, you can still cheat height by manipulating 
 
 Tonal dressing is a superpower, but if you execute a flawless Monochromatic Gray outfit and you have a Warm Golden undertone, the gray will completely wash your face out. You will look incredibly tall, but incredibly sick. 
 
-Do not guess your anchor colors. You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm your biology, our AI will provide the exact Tonal Color Families (Warm Earth or Cool Grays) that perfectly match your DNA, allowing you to execute the height-boosting aesthetic flawlessly.
+Do not guess your anchor colors. You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm your biology, our AI will provide the exact Tonal Color Families (Warm Earth or Cool Grays) that perfectly match your complexion, allowing you to execute the height-boosting aesthetic flawlessly.
 
 ---
 

@@ -27,7 +27,7 @@ Statistically, the average Indian height is slightly shorter than the Western av
 
 ## The Ultimate Solution to Your Styling Problems
 
-You don't have to spend hours Googling generic answers to highly specific biological problems. You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). Our AI instantly solves India’s biggest fashion problem by mapping your exact melanin profile and providing you with the exact colors tailored for your DNA.
+You don't have to spend hours Googling generic answers to highly specific biological problems. You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). Our AI instantly solves India’s biggest fashion problem by mapping your exact melanin profile and providing you with the exact colors tailored for your complexion.
 
 ---
 

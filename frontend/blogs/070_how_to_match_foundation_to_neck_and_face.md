@@ -8,8 +8,8 @@ The process of matching foundation for Indian skin is exceptionally difficult be
 
 ## The Fatal Mistake: Swatching on the Hand
 
-90% of people test foundation by smearing a stripe on the back of their hand or their inner wrist. 
-**Why this fails:** Because your arms are exposed to significantly more (or less) sunlight than your face, the skin on your hands is biologically irrelevant to the skin on your face. Furthermore, your wrists often show green/blue veins, heavily skewing your undertone perception. Testing foundation on your hand guarantees a mismatch.
+most people mistakenly test foundation by smearing a stripe on the back of their hand or their inner wrist. 
+**Why this fails:** Because your arms are exposed to significantly more (or less) sunlight than your face, the skin on your hands is biologically irrelevant to the skin on your face. Furthermore, your wrists often show green/blue veins, heavily skewing your undertone perception. Testing foundation on your hand frequently results in a shade mismatch.
 
 ## The Professional Method: The Jawline Strip Test
 
@@ -30,14 +30,14 @@ Indian women frequently suffer from an uneven canvas: the lower face (around the
 
 You can execute the jawline strip test flawlessly, but if you select three "Cool" foundations to test, and your undertone is actually "Warm Golden," all three will look gray and ashy on your jaw.
 
-Before you ever enter a cosmetics store, you must know your baseline. Do the math from home. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By executing advanced pixel analysis on a completely un-made-up selfie, the algorithm dictates your exact genetic undertone, guaranteeing you only ever swatch foundations that biologically match your DNA.
+Before you ever enter a cosmetics store, you must know your baseline. Do the math from home. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By executing advanced pixel analysis on a completely un-made-up selfie, the algorithm dictates your exact genetic undertone, helping you narrow down foundation shades that harmonize with your skin tone.
 
 ---
 
 ### Social Media Snippets & Backlinks
 
 **Pinterest Pin Description:**
-Stop getting the dreaded "Floating Head" makeup line! 🫣 Learn the professional "Jawline Strip Test" and discover why swatching foundation on your hand is a guaranteed way to buy the wrong shade. Save this pin to unlock flawless makeup matching at https://www.styleguruai.in/
+Stop getting the dreaded "Floating Head" makeup line! 🫣 Learn the professional "Jawline Strip Test" and discover why swatching foundation on your hand is a common cause of buying an uncomplimentary shade. Save this pin to unlock flawless makeup matching at https://www.styleguruai.in/
 
 **Instagram Reel Caption:**
 NEVER swatch foundation on your hand! 🛑 Your hand and your face are completely different colors! If you want to avoid the dreaded "Floating Head" (where your face is lighter than your neck), you MUST swatch foundation directly on your Jawline under natural daylight! Drop a 🔥 if you agree! Want an AI to mathematically tell you your exact foundation shade? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #MakeupTutorial #FoundationMatch #BrownGirlMakeup #BeautyHacks

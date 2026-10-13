@@ -28,7 +28,7 @@ The AI converts the RGB (Red, Green, Blue) pixels from your camera into the CIEL
 
 While AI is incredibly powerful, it still requires decent data to make the calculation flawless. The ultimate key to getting a 100% accurate result is to provide a photo taken in **indirect natural daylight**. 
 
-Stop relying on the flawed human eye and confusing at-home tests. You can securely [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding our advanced computer vision model a simple daylight selfie, the algorithm handles the complex pixel math and delivers a mathematically perfect color palette designed exclusively for your DNA.
+Stop relying on the flawed human eye and confusing at-home tests. You can securely [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding our advanced computer vision model a simple daylight selfie, the algorithm handles the complex pixel math and delivers a mathematically perfect color palette designed exclusively for your complexion.
 
 ---
 

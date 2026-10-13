@@ -32,7 +32,7 @@ If you are wearing an Emerald Green dress, place yourself in front of a backgrou
 
 You cannot control the background if you don't know the exact color metrics of your outfit. If the outfit clashes with your genetic skin tone, no background in the world will save the photograph. 
 
-Lock in your biology first. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm your precise parameters, our AI calculates the ultimate color palette guaranteed to flatter your skin, allowing you to venture out and confidently manipulate background contrast like an elite fashion photographer.
+Lock in your biology first. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm your precise parameters, our AI calculates the ultimate color palette tailored to flatter your skin, allowing you to venture out and confidently manipulate background contrast like an elite fashion photographer.
 
 ---
 

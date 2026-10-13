@@ -2,7 +2,7 @@
 
 On a dull, rainy Monday morning, you pull out a faded gray sweatshirt, slip into dark jeans, and shuffle to work. By noon, you feel invisible, lethargic, and disconnected. The next Monday, you force yourself to wear a bright, rich Emerald Green sweater. By noon, you notice you feel oddly energized, confident, and people are complimenting you.
 
-Is this a coincidence? Absolutely not. This is **Enclothed Cognition**—the scientifically proven phenomenon where the clothes you wear directly alter your cognitive processes, emotional state, and behavior. And the most powerful driver of this effect is **Color**.
+Is this a coincidence? Absolutely not. This is **Enclothed Cognition**—the well-documented psychological phenomenon where the clothes you wear directly alter your cognitive processes, emotional state, and behavior. And the most powerful driver of this effect is **Color**.
 
 ## The Neuroscience of Color and Mood
 

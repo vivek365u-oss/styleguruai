@@ -35,7 +35,7 @@ One critical variable: the groom's outfit must complement—not match—the brid
 
 A groom's outfit is a massive financial investment, and it will be immortalized in thousands of photographs. Getting the color wrong means decades of regret.
 
-Before shopping, lock down your biology. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI will determine your exact undertone and calculate the precise sherwani or bandhgala colors that guarantee you look like a Maharaja in every single wedding photo.
+Before shopping, lock down your biology. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI will determine your exact undertone and calculate the precise sherwani or bandhgala colors that help you look like a Maharaja in every single wedding photo.
 
 ---
 

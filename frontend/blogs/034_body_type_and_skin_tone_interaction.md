@@ -31,7 +31,7 @@ If you are a pear-shaped individual (wider hips, narrower shoulders) and you wan
 
 ## Mastering Both Variables
 
-Nailing both your geometrical fit and your precise color harmony guarantees you will look incredible in any room.
+Nailing both your geometrical fit and your precise color harmony helps ensure you look incredible in any room.
 
 But doing the math yourself is difficult. Allow algorithms to do the heavy lifting. You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the AI your exact parameters, it will generate a biological color palette that not only flatters your complexion but helps you strategically execute color blocking to optimize your physical silhouette. 
 

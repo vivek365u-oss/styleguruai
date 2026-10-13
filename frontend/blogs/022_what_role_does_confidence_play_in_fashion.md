@@ -26,9 +26,9 @@ Confidence in fashion is not pretending you are a supermodel. It is **removing t
 
 When you *guess* what looks good on you, anxiety creeps in. *Does this green look weird on my skin? Is this shirt too bright?* 
 
-When you rely on science, anxiety vanishes. If you scientifically know that you have a warm undertone and that Mustard Yellow is biologically proven to make your skin glow and your eyes look brighter, you don't have to guess. You step out of the house knowing you look striking.
+When you rely on science, anxiety vanishes. If you scientifically know that you have a warm undertone and that Mustard Yellow is biologically harmonious to make your skin glow and your eyes look brighter, you don't have to guess. You step out of the house knowing you look striking.
 
-You can instantly eliminate the anxiety of dressing yourself. Allow technology to mathematically prove what looks good on you. Simply [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) for free, and unlock a deeply personalized wardrobe protocol that replaces fashion insecurity with guaranteed sartorial dominance.
+You can instantly eliminate the anxiety of dressing yourself. Allow technology to use color science to clarify what looks best on you. Simply [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) for free, and unlock a deeply personalized wardrobe protocol that replaces fashion insecurity with lasting style clarity.
 
 ---
 

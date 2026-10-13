@@ -41,7 +41,7 @@ If you have a warm undertone but highly radiant, clear, bright features, you are
 
 ## Stop Guessing. Use Math.
 
-Self-diagnosing your season is notoriously prone to error because "soft" vs "clear" contrast is highly subjective. A single wrong guess means buying a closet full of clothes that clash with your DNA.
+Self-diagnosing your season is notoriously prone to error because "soft" vs "clear" contrast is highly subjective. A single wrong guess means buying a closet full of clothes that clash with your complexion.
 
 You can bypass the guesswork with absolute certainty. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By scanning your selfie, the AI extracts your exact CIELAB values, mathematically processes your hue and contrast, and definitively outputs your exact Season and perfect color palette.
 

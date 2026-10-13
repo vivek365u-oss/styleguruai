@@ -11,7 +11,7 @@ Different colors trigger deeply ingrained psychological and biological responses
 Every color has a psychological weight. By strategically incorporating these colors into your wardrobe, you can master your environment.
 
 ### 1. Blue (The Color of Trust and Logic)
-Blue is scientifically proven to lower heart rates. Psychologically, it signals stability, intelligence, and trustworthiness.
+Blue is widely recognized in color studies for its calming effect. Psychologically, it signals stability, intelligence, and trustworthiness.
 **How to use it:** This is why Navy Blue is the ultimate color for business suits and job interviews. If you need to appear reliable, capable, and calm under pressure, cool-toned blues are your strongest asset. 
 
 ### 2. Red (The Color of Power and Action)
@@ -32,7 +32,7 @@ Color psychology is useless if the color physically clashes with your skin. For 
 
 The ultimate dressing sense combines **Psychology (Message)** with **Biology (Skin Tone)**. A cool-toned person should wear an icy Ruby Red to project power; a warm-toned person should wear a fiery Brick Red. 
 
-To bridge this gap scientifically, you can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI will determine exactly which *shades* of these psychological colors perfectly match your DNA, allowing you to weaponize color theory flawlessly.
+To bridge this gap scientifically, you can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI will determine exactly which *shades* of these psychological colors perfectly match your complexion, allowing you to weaponize color theory flawlessly.
 
 ---
 

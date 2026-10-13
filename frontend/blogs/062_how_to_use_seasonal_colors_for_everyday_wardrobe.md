@@ -17,7 +17,7 @@ Every single seasonal palette—even the brightest Spring or deepest Winter—co
 - **Summers:** Slate Gray, soft Taupe, and muted Navy.
 - **Springs:** Warm Beige, light Tan, and warm Gray.
 
-Because 70% of your body is covered in a highly professional, understated neutral that *still matches your biological undertone*, you guarantee you look put-together without attracting aggressive attention.
+Because the majority of your body is covered in a professional, understated neutral that *still matches your biological undertone*, you help you look put-together without attracting aggressive attention.
 
 ### 30% Power Accents
 The remaining 30% of your closet is reserved for the loud, vibrant, highly saturated colors in your palette (the Mustard, the Emerald, the Magenta). 

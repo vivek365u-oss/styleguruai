@@ -34,7 +34,7 @@ If you have wheatish skin, here are the exact colors you need to eliminate from 
 
 Knowing exactly what colors to avoid saves you money and eliminates "bad outfit days." If you want to take your style to the absolute pinnacle, don't rely on guesswork. 
 
-You can [analyze your exact skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping your unique melanin and carotene levels, our AI generates a custom "Do Not Wear" list and curates a flawless palette guaranteed to make your wheatish skin radiate health, wealth, and elegance.
+You can [analyze your exact skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping your unique melanin and carotene levels, our AI generates a custom "Do Not Wear" list and curates a flawless palette tailored to help your wheatish skin radiate health, wealth, and elegance.
 
 ---
 
@@ -44,4 +44,4 @@ You can [analyze your exact skin tone with StyleGuru AI](https://www.styleguruai
 Do you have a Wheatish / Medium Indian skin tone? 🤎 Stop wearing icy pastels! Discover the exact colors that are making your gorgeous golden skin look ashy and dull, and learn what to wear instead. Save this pin and unlock your flawless color palette at https://www.styleguruai.in/
 
 **Instagram Reel Caption:**
-If you have Wheatish skin, THROW AWAY your icy pastels! 🛑🧊 Baby blues and frost pinks are scientifically proven to drain the golden warmth out of Medium skin tones, making you look ashy and tired. Swap neon for Mustard, and Stark White for Ivory! Drop a 🔥 if you agree! Want the AI to give you a personalized "Do Not Wear" list? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #WheatishSkin #BrownSkinMagic #ColorTheory #DesiStyle
+If you have Wheatish skin, THROW AWAY your icy pastels! 🛑🧊 Baby blues and frost pinks are consistently observed to drain the golden warmth out of Medium skin tones, making you look ashy and tired. Swap neon for Mustard, and Stark White for Ivory! Drop a 🔥 if you agree! Want the AI to give you a personalized "Do Not Wear" list? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #WheatishSkin #BrownSkinMagic #ColorTheory #DesiStyle

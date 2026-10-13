@@ -37,7 +37,7 @@ Cool-toned Indians must avoid the temptation of warm earth tones during summer, 
 
 ## Your Summer Palette
 
-To look breezy, light, and incredibly stylish all summer, you must know which light tones harmonize with your biology. You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will calculate your exact undertone and recommend the specific pastel-weight, summer-ready colors guaranteed to make you look cool under the burning sun.
+To look breezy, light, and incredibly stylish all summer, you must know which light tones harmonize with your biology. You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will calculate your exact undertone and recommend the specific pastel-weight, summer-ready colors curated to make you look cool under the burning sun.
 
 ---
 

@@ -28,7 +28,7 @@ Using a highly saturated, warm bronze powder blended heavily into the cheeks ins
 
 ## Colors Warm Skin Must Ruthlessly Avoid
 
-To guarantee your blush looks expensive, you must avoid:
+To ensure your blush looks effortlessly natural, you should avoid:
 - **Bubblegum Pink / Fuchsia:** These have severe blue/cool undertones. On warm skin, they look highly artificial and chalky.
 - **Icy Lavender / Plum:** Unless heavily warmed up with a bronzer, these cool purple tones can look like a literal bruise on golden skin.
 
@@ -36,7 +36,7 @@ To guarantee your blush looks expensive, you must avoid:
 
 Are you a delicately Warm tone who should be wearing Peach, or a deeply spiced Warm tone who requires Terracotta? The difference dictates your entire makeup aesthetic. 
 
-Stop buying blushes and hoping for the best. Accurately [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping the exact density of warmth embedded in your pixels, our algorithm will explicitly curate a perfect color palette, guaranteeing every blush you apply looks perfectly, biologically natural.
+Stop buying blushes and hoping for the best. Accurately [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping the exact density of warmth embedded in your pixels, our algorithm will explicitly curate a perfect color palette, helping ensure every blush you apply looks flattering and natural.
 
 ---
 

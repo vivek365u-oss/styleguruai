@@ -41,4 +41,4 @@ If you want to know for certain if your skin thrives in sapphire and emerald, al
 Why do Cool Undertones look expensive in Jewel Tones? 💎 Dive into the color theory of sapphire, emerald, and ruby, and learn why these saturated colors make cool skin look absolutely radiant. Save this pin and find your perfect colors at https://www.styleguruai.in/
 
 **Instagram Reel Caption:**
-Are Sapphire, Emerald, and Ruby your power colors? 💎 If you have a Cool Undertone, "Jewel Tones" are scientifically proven to make you look more vibrant and expensive. The deep, blue-based contrast perfectly frames your face! Drop a 🔥 if you agree! Want to find your perfect colors? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #JewelTones #CoolUndertone #StyleTips #ColorTheory
+Are Sapphire, Emerald, and Ruby your power colors? 💎 If you have a Cool Undertone, "Jewel Tones" are consistently observed to make you look more vibrant and expensive. The deep, blue-based contrast perfectly frames your face! Drop a 🔥 if you agree! Want to find your perfect colors? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #JewelTones #CoolUndertone #StyleTips #ColorTheory

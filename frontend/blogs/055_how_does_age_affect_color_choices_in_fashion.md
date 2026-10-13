@@ -36,7 +36,7 @@ For older men and women, relying heavily on Sage Greens, Dusty Mauves, and deep 
 
 Fashion is not frozen in time. What worked for you at 25 will actively harm you at 55. You must continuously calibrate your wardrobe to the current state of your optical physics. 
 
-Do not rely on outdated assumptions. You can instantly [analyze your current skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the AI a contemporary photo, our algorithm calculates your exact, present-day contrast ratio and melanin levels, curating the ultimate color palette guaranteed to ensure you look radiantly sophisticated at any age.
+Do not rely on outdated assumptions. You can instantly [analyze your current skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the AI a contemporary photo, our algorithm calculates your exact, present-day contrast ratio and melanin levels, curating the ultimate color palette curated to help ensure you look radiantly sophisticated at any age.
 
 ---
 

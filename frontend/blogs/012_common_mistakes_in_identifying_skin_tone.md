@@ -1,6 +1,6 @@
 # What Are Common Mistakes in Identifying Skin Tone?
 
-Building an expensive, elegant wardrobe requires one crucial piece of baseline data: knowing your exact skin tone and undertone. Unfortunately, up to 70% of people are dressing based on an entirely false premise. They misidentify their skin tone, leading to closets full of "dull" clothes, wasted money, and outfits that simply don't pop.
+Building an expensive, elegant wardrobe requires one crucial piece of baseline data: knowing your exact skin tone and undertone. Unfortunately, many shoppers unknowingly dress based on an inaccurate premise. They misidentify their skin tone, leading to closets full of "dull" clothes, wasted money, and outfits that simply don't pop.
 
 Particularly in India, where the melanin spectrum is incredibly complex, misdiagnoses are rampant. Here are the five most common mistakes people make when trying to identify their skin tone—and how to fix them.
 
@@ -11,7 +11,7 @@ The mistake: Assuming that because you are "Fair," you must be "Cool" toned. Or 
 *The Truth:* A very dark-skinned person can have a cool, bluish undertone (making them look amazing in silver and sapphire). A very fair person can have a warm, golden undertone (looking stunning in mustard yellow). Never assume your undertone based on how tan you are.
 
 ## 2. Using Artificial Indoor Lighting
-Testing your undertone under the fluorescent lights of an office or the warm bulbs of a bathroom vanity guarantees a wrong result.
+Testing your undertone under the fluorescent lights of an office or the warm bulbs of a bathroom vanity frequently leads to inaccurate results.
 *The Truth:* Warm bathroom bulbs will literally cast a yellow filter onto your face, making a cool-toned person believe they are warm. Always evaluate your skin next to a window in bright, indirect natural daylight.
 
 ## 3. Ignoring the Neck and Chest
@@ -40,4 +40,4 @@ You can instantly [analyze your skin tone with StyleGuru AI](https://www.stylegu
 Are you wearing the wrong colors because you misidentified your skin tone? 🤦🏽‍♀️ Discover the 5 biggest mistakes people make when testing their undertones (and why being "fair" doesn't mean you are "cool"!). Save this pin to fix your wardrobe, and analyze your true tone at https://www.styleguruai.in/
 
 **Instagram Reel Caption:**
-Stop dressing for the WRONG skin tone! 🛑 70% of people misidentify their undertone because of these 5 massive mistakes. (Mistake #1: Testing your face instead of your jawline!). Drop a 🔥 if you agree! Want the AI to give you a mathematically perfect analysis? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #SkinToneMistakes #ColorAnalysis #FashionStyling #DesiFit
+Stop dressing for the WRONG skin tone! 🛑 many people misidentify their undertone because of these 5 massive mistakes. (Mistake #1: Testing your face instead of your jawline!). Drop a 🔥 if you agree! Want the AI to give you a mathematically perfect analysis? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #SkinToneMistakes #ColorAnalysis #FashionStyling #DesiFit

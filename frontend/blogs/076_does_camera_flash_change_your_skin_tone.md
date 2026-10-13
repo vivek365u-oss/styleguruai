@@ -21,13 +21,13 @@ Physical sunscreens are formulated with Titanium Dioxide and Zinc Oxide. These i
 The second biggest culprit is transluscent "HD" contouring or setting powder. These powders are made from pure Silica. 
 To the naked eye, Silica is invisible, providing a beautiful, airbrushed matte finish. However, Silica is highly reflective under intense bursts of light. When the flash goes off, the invisible powder suddenly illuminates, creating bright, chalky white patches under your eyes and on your forehead. 
 
-## How to Guarantee You Look Flawless in Photos
+## How to help you look Flawless in Photos
 
 If you are attending a nighttime event where photos will be taken:
 1. **Never use a physical SPF (Zinc/Titanium Dioxide).** Switch to a chemical sunscreen, which absorbs UV light rather than reflecting it.
 2. **Avoid HD Silica powders.** Use tinted loose powders that match your biological undertone exactly. 
 
-To look expensive in photos, your foundation must inherently match your DNA. You can [analyze your skin tone effortlessly with StyleGuru AI](https://www.styleguruai.in/). The AI calculates your exact biological warmth and melanin depth, giving you the flawless fundamental baseline required to survive the harshest camera flash.
+To look expensive in photos, your foundation must inherently match your complexion. You can [analyze your skin tone effortlessly with StyleGuru AI](https://www.styleguruai.in/). The AI calculates your exact biological warmth and melanin depth, giving you the flawless fundamental baseline required to survive the harshest camera flash.
 
 ---
 

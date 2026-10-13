@@ -33,7 +33,7 @@ Your genetic undertone is exquisitely sensitive to this variable. If you have a 
 
 Do not settle for generic color names. A stylist who tells you "wear blue" without specifying the exact shade, tint, or tone is providing you dangerously vague advice.
 
-You deserve exact values. You can methodically [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By calculating your precise CIELAB coordinates, the AI doesn't just say "wear blue." It delivers the exact hex code of the specific blue guaranteed to harmonize with your unique biology.
+You deserve exact values. You can methodically [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By calculating your precise CIELAB coordinates, the AI doesn't just say "wear blue." It delivers the exact hex code of the specific blue tailored to harmonize with your unique complexion.
 
 ---
 

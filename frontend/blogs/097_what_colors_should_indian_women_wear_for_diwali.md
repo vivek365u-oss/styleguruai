@@ -36,14 +36,14 @@ Diwali outfits are overwhelmingly dominated by metallic embroidery and heavy jew
 
 Your Diwali outfit will be immortalized in hundreds of photos under warm, golden ambient lighting. If the color clashes with your biology under these conditions, there is no Photoshop filter in the world that will save you.
 
-Invest wisely. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) before shopping. Our AI calculates your biological undertone and maps it specifically to the warm-light conditions of festive environments, generating a photograph-proof Diwali palette guaranteed to make you glow in every single frame.
+Invest wisely. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) before shopping. Our AI calculates your biological undertone and maps it specifically to the warm-light conditions of festive environments, generating a photograph-proof Diwali palette curated to help you look radiant in festive lighting.
 
 ---
 
 ### Social Media Snippets & Backlinks
 
 **Pinterest Pin Description:**
-What should you wear for Diwali? 🪔 Discover how the warm, golden diya light affects your outfit's color, and learn the specific shades that make Warm and Cool Indian skin tones look royal under candlelight. Save this pin and guarantee a stunning Diwali at https://www.styleguruai.in/
+What should you wear for Diwali? 🪔 Discover how the warm, golden diya light affects your outfit's color, and learn the specific shades that make Warm and Cool Indian skin tones look royal under candlelight. Save this pin and achieve a stunning Diwali at https://www.styleguruai.in/
 
 **Instagram Reel Caption:**
 Diwali is the MOST photographed Indian festival! 🪔 If you wear the wrong color under warm diya light, you will look washed out in EVERY photo! For Warm skin, Deep Maroon + Gold jewelry is LETHAL. For Cool skin, Sapphire Blue + Diamond jewelry is ARISTOCRATIC. Plan your Diwali wardrobe using science! Drop a 🔥 if you agree! Want the AI to give you a Diwali-specific palette? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #DiwaliOutfit #FestiveFashion #DesiFashion #ColorTheory

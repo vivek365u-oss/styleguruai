@@ -26,11 +26,11 @@ While color is primary, it behaves differently across fabrics. An expensive colo
 
 However, when a color perfectly aligns with your skin tone *and* is placed on a matte or subtly textured fabric—like linen, high-grade cotton, or matte silk—the light absorption is smooth. It creates an aura of "quiet luxury."
 
-## How to Guarantee You Look Expensive
+## How to Create an Effortlessly Polished Aesthetic
 
 You don't need a massive bank account to look like a millionaire. You only need to ruthlessly eliminate the colors that clash with your biology. 
 
-If you aren't sure which colors look expensive on you, you can bypass the trial and error. Easily [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) today. By calculating your exact melanin levels and undertone, the AI generates a customized color palette guaranteed to make every outfit look like it was explicitly designed for your DNA.
+If you aren't sure which colors look expensive on you, you can bypass the trial and error. Easily [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) today. By calculating your exact melanin levels and undertone, the AI generates a customized color palette curated to make every outfit complement your natural complexion.
 
 ---
 

@@ -36,7 +36,7 @@ But if that same person switches to a deep, warm terracotta or rust orange, the 
 
 If you have a closet full of clothes that make you feel dull, it's time to stop shopping blind. You must build your wardrobe around your biological palette.
 
-Fortunately, modern AI can calculate this optical physics for you in seconds. You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) to generate a bespoke color palette mathematically guaranteed to harmonize with your complexion. By understanding the precise contrast, hue, and saturation levels that complement your face, you will never buy a dull color again.
+Fortunately, modern AI can calculate this optical physics for you in seconds. You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) to generate a bespoke color palette carefully designed to harmonize with your complexion. By understanding the precise contrast, hue, and saturation levels that complement your face, you will never buy a dull color again.
 
 ---
 

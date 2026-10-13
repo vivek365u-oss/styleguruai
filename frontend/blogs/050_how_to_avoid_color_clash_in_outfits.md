@@ -16,7 +16,7 @@ Instead of Bright Mustard and Bright Blue, pair a Bright Mustard shirt with a da
 
 ## Rule 2: The Anchor Neutral Strategy
 
-If you do not have an advanced degree in color theory, trying to mix three separate colors (e.g., a green shirt, a red blazer, and yellow shoes) is practically guaranteed to result in a clownish aesthetic.
+If you do not have an advanced degree in color theory, trying to mix three separate colors (e.g., a green shirt, a red blazer, and yellow shoes) is practically likely to result in a clownish aesthetic.
 
 **The Fix:** Rely aggressively on the "Anchor Neutral" rule. An outfit should never contain more than one "Action Color" unless separated by a massive buffer of neutrality. 
 If you want to wear a loud pink blouse, surround it with a Sea of Neutrals. Wear black trousers, a black belt, black shoes, and a black handbag. The pink is now safely "contained" by the black boundaries. The neutral void ensures the action color has nothing to chemically clash against.
@@ -32,7 +32,7 @@ This happens when you mix distinctly warm, earthy tones with distinctly cold, ar
 
 The most devastating clash of all is not a shirt clashing with pants. It is an outfit clashing with **your biological skin tone.** You can build a perfectly balanced outfit, but if its cool-toned temperature violently clashes with your warm, golden Asian skin, the entire system fails. 
 
-You must guarantee your baseline first. Accurately [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping the exact mathematical temperature of your melanin and undertones, our algorithm ensures every single garment you buy inherently belongs to the same biological color family—making accidental clashing mathematically impossible.
+You must establish your baseline first. Accurately [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping the exact mathematical temperature of your melanin and undertones, our algorithm ensures every single garment you buy inherently belongs to the same biological color family—helping ensure your garments naturally harmonize.
 
 ---
 

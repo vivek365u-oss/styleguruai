@@ -37,7 +37,7 @@ Pale mint green, icy lavender, and frosty baby blue have a severely cold, high-w
 
 While these rules apply to the vast majority of medium skin tones, there are rare exceptions (like the Medium Olive/Neutral profile). Are you one of them? 
 
-You don't need to guess. You can flawlessly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding our algorithms an unedited selfie, AI will mathematically calculate your exact melanin density and undertone temperature, delivering a bespoke color palette that guarantees your medium skin looks constantly radiant.
+You don't need to guess. You can flawlessly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding our algorithms an unedited selfie, AI will mathematically calculate your exact melanin density and undertone temperature, delivering a bespoke color palette that helps your medium skin look constantly radiant.
 
 ---
 

@@ -33,7 +33,7 @@ If a warm-toned individual wears a Saffron Kurta heavily embroidered with bright
 
 Buying heavy festive wear is a massive financial investment. Do not guess your undertone and risk looking washed out in hundreds of wedding photos. 
 
-You can rigorously [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm a single selfie in natural daylight, our AI maps your exact CIELAB color space coordinates, instantly generating your mathematically perfect festive palette and guaranteeing endless compliments at your next event.
+You can rigorously [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm a single selfie in natural daylight, our AI maps your exact CIELAB color space coordinates, instantly generating your mathematically perfect festive palette and creating a standout look at your next event.
 
 ---
 

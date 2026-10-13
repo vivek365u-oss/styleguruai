@@ -15,7 +15,7 @@ The problem? **Color Theory.**
 - **Heather Gray:** Gray is a distinctly cool-toned hue. If you are warm-skinned, a gray sweater will literally drain the life out of your face, making you look sick. 
 - **Black Blazer:** Black only flatters people with very "High Contrast" features. For low-to-medium contrast individuals, black introduces harsh shadows and ages them.
 
-Generic logic forces you to buy "basics" that biologically clash with your DNA. 
+Generic logic forces you to buy "basics" that biologically clash with your complexion. 
 
 ## 2. Ignoring Body Morphology
 
@@ -28,7 +28,7 @@ Generic advice ignores the profound importance of body geometry and proportion. 
 
 When 10 million people read the same article and buy the exact same beige trench coat and white sneakers, fashion ceases to be an expression of self. It becomes a sterile uniform. 
 
-True style is magnetic because it is unique. It relies on subtle rules tailored specifically to your personality, lifestyle, and biology. Generic advice is designed to offend the least amount of people possible, meaning it is guaranteed to make you look thoroughly average.
+True style is magnetic because it is unique. It relies on subtle rules tailored specifically to your personality, lifestyle, and biology. Generic advice is designed to offend the least amount of people possible, meaning it is likely to feel impersonal and uninspired.
 
 ## Stop Googling, Start Analyzing
 

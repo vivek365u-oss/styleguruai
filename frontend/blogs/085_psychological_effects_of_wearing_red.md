@@ -30,7 +30,7 @@ You can harness all the psychological power of Red, but it will shatter instantl
 - **If you have a WARM undertone (Golden skin):** You must wear Tomatoes, Bricks, and Rust Reds. If you wear an icy cool red, you look sick, and the powerful aura fails.
 - **If you have a COOL undertone (Pink/Blue skin):** You must wear deep Ruby, Burgundy, and Cherry Reds entirely devoid of orange.
 
-If you don't confidently know your correct biological red, you are playing a highly dangerous game. Secure your power first. [Analyze your exact skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping the precise temperature of your melanin, the algorithm calculates whether you are biologically built for Brick Red or Ruby Red, guaranteeing your psychological dominance never falters.
+If you don't confidently know your correct biological red, you are playing a highly dangerous game. Secure your power first. [Analyze your exact skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping the precise temperature of your melanin, the algorithm calculates whether you are biologically built for Brick Red or Ruby Red, ensuring your style statement feels intentional and empowered.
 
 ---
 

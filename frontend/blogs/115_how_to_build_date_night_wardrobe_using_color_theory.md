@@ -2,7 +2,7 @@
 
 A date night outfit has a singular, devastating objective: to make you look as magnetically attractive as biologically possible. 
 
-This is not the time for "safe" neutrals or corporate authority blues. Date night demands strategic deployment of colors scientifically proven to maximize perceived attractiveness, project confidence, and trigger psychological warmth in your date's brain. Here is the advanced color playbook for maximum romantic impact.
+This is not the time for "safe" neutrals or corporate authority blues. Date night demands strategic deployment of colors consistently observed to maximize perceived attractiveness, project confidence, and trigger psychological warmth in your date's brain. Here is the advanced color playbook for maximum romantic impact.
 
 ## 1. The Biological Attraction Colors
 
@@ -41,9 +41,9 @@ If you have a cool undertone, wearing a deep, cool Sapphire or Emerald near your
 
 ## Look Irresistible
 
-The ultimate romantic advantage is looking biologically flawless. When your outfit perfectly harmonizes with your skin, your face radiates health, and your date's brain registers you as deeply attractive.
+The ultimate romantic advantage is looking naturally balanced. When your outfit perfectly harmonizes with your skin, your face radiates health, and your date's brain registers you as deeply attractive.
 
-Lock in your biological weapon. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI will curate the exact "attraction palette"—the specific colors proven to make your face glow and your eyes sparkle—giving you the ultimate date-night advantage.
+Lock in your styling advantage. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI will curate the exact "attraction palette"—the specific colors curated to make your face glow and your eyes sparkle—giving you the ultimate date-night advantage.
 
 ---
 

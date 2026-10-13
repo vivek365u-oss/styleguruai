@@ -35,7 +35,7 @@ Never pair a loud shirt with a loud pant. The outfit will vibrate chaotically. T
 
 The ultimate variable in matching your shirt to your pants involves matching your shirt to your face. An outfit can be perfectly balanced internally, but if the shirt clashes with your genetic undertone, the whole system fails. 
 
-Remove the guesswork. You can mathematically [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will map your biological color temperature and provide you with hyper-precise shirt and pant combinations guaranteed to elevate your physique and your complexion.
+Remove the guesswork. You can mathematically [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will map your biological color temperature and provide you with hyper-precise shirt and pant combinations tailored to elevate your physique and your complexion.
 
 ---
 

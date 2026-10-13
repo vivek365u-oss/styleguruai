@@ -41,7 +41,7 @@ If a Warm-toned person introduces icy Silver or Platinum jewelry to their look, 
 
 Mistaking a Spring for an Autumn is a catastrophic failure. Putting an earthy Autumn person in bright Coral will make them look ridiculous; putting a clear Spring in heavy Brown will make them look exhausted.
 
-You must calculate your Contrast to know the truth. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By executing a rigorous CIELAB color math analysis, the algorithm separates the deep Autumns from the vibrant Springs, guaranteeing you invest in the exact Warm Palette matched to your DNA.
+You must calculate your Contrast to know the truth. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By executing a rigorous CIELAB color math analysis, the algorithm separates the deep Autumns from the vibrant Springs, helping you invest in the exact Warm Palette tailored to your complexion.
 
 ---
 

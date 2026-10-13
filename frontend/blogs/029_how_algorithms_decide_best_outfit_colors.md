@@ -35,7 +35,7 @@ It looks for colors that share your "warm" mathematical signature—locating spe
 
 Because the algorithm relies on physics rather than human opinion, the results are completely objective and foolproof. 
 
-You no longer need to stand in a dressing room debating whether a color works. You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). Our advanced algorithms process your CIELAB coordinates in milliseconds, delivering the exact mathematical color palette guaranteed to make you look incredible.
+You no longer need to stand in a dressing room debating whether a color works. You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). Our advanced algorithms process your CIELAB coordinates in milliseconds, delivering the exact mathematical color palette curated to make you look incredible.
 
 ---
 

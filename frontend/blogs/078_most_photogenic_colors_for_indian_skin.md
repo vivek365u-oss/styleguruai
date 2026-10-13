@@ -2,7 +2,7 @@
 
 Indian skin tones—ranging from fair wheatish to deep, glowing ebony—possess a complex, rich density of melanin. This melanin interacts with camera lenses and digital sensors completely differently than the pale skin tones often tested by global camera manufacturers.
 
-Because Indian skin is so deeply pigmented, it requires aggressive color anchoring to prevent the camera from "washing out" the face or sinking the features into shadow. If you want to absolutely guarantee a stunning photograph, you must rely on these three scientifically proven photogenic super-colors specifically optimized for Indian biology.
+Because Indian skin is so deeply pigmented, it requires aggressive color anchoring to prevent the camera from "washing out" the face or sinking the features into shadow. If you want to absolutely achieve a stunning photograph, you must rely on these three well-documented photogenic super-colors specifically optimized for Indian biology.
 
 ## 1. Deep Mustard / Ochre (The Golden Ringlight)
 
@@ -28,7 +28,7 @@ To remain photogenic, Indian skin must aggressively avoid cold, high-white paste
 
 These three colors dominate because they perfectly harmonize with the warm golden and olive undertones common in India. But what if you are the rare Indian **Cool Winter**? If you are Cool, Mustard will make you look terribly sick on camera. 
 
-Do not guess your undertone. You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping your exact CIELAB coordinate, our algorithm will mathematically prove your exact temperature, generating a customized, highly-photogenic color palette guaranteed to ensure you look breathtaking in every photo you ever take.
+Do not guess your undertone. You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping your exact CIELAB coordinate, our algorithm will mathematically prove your exact temperature, generating a customized, highly-photogenic color palette curated to help ensure you look breathtaking in every photo you ever take.
 
 ---
 

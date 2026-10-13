@@ -4,7 +4,7 @@ Corporate aesthetics have evolved significantly from the rigid gray suits of the
 
 Just like wearing a bright red suit to a corporate interview aggressively projects dominance and lack of restraint, arriving with heavily saturated, "party-style" makeup undermines your professional authority. 
 
-In a professional setting, makeup should be weaponized to signal one continuous message: **Meticulous Competence**. Here are the scientifically proven makeup colors that project maximum intelligence and trustworthiness in the office.
+In a professional setting, makeup should be weaponized to signal one continuous message: **Meticulous Competence**. Here are the well-documented makeup colors that project maximum intelligence and trustworthiness in the office.
 
 ## The Rule of "No-Makeup" Pigmentation
 
@@ -31,7 +31,7 @@ Loud, high-shine, glossy lips command aggressive attention and can sometimes be 
 
 Your "office neutral" aesthetic will completely fail if those muted neutral colors do not perfectly match your biological undertone. If a cool-toned woman uses a "professional" warm brown lipstick, it will still mathematically clash with her DNA and make her look sickly under the harsh office fluorescent lights. 
 
-Ensure your professional competence is never undermined by a bad color match. You can seamlessly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm your unedited parameters, the AI meticulously assigns the specific muted mauves and browns that biologically match your DNA, giving you the flawless corporate aesthetic guaranteed to accelerate your career.
+Ensure your professional competence is never undermined by a bad color match. You can seamlessly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm your unedited parameters, the AI meticulously assigns the specific muted mauves and browns that biologically match your complexion, giving you the flawless corporate aesthetic tailored to project polished competence.
 
 ---
 

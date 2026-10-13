@@ -34,7 +34,7 @@ If you insist on wearing a white kurta (the safest and most traditional option),
 
 A ₹10,000 Sherwani means nothing if it washes out your complexion in the warm, golden Diwali photographs.
 
-To guarantee maximum impact, determine your exact undertone before shopping. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm generates a Diwali-specific color strategy, ensuring that under the diyas and fairy lights, you look like absolute royalty.
+To achieve maximum impact, determine your exact undertone before shopping. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm generates a Diwali-specific color strategy, ensuring that under the diyas and fairy lights, you look like absolute royalty.
 
 ---
 

@@ -39,7 +39,7 @@ Now, apply your normal skin-matching foundation or a slightly brighter concealer
 
 You have neutralized your eyes, but if the foundation you use for Step 4 is the wrong undertone, the entire look still collapses. 
 
-To ensure maximum, expensive-looking harmony across your entire face, do the math. You can accurately [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping the exact density of warmth embedded in your pixels, our algorithm will curate your perfect foundation match, guaranteeing your face looks radiant, flawless, and completely gray-free.
+To ensure maximum, expensive-looking harmony across your entire face, do the math. You can accurately [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping the exact density of warmth embedded in your pixels, our algorithm will curate your perfect foundation match, ensuring your complexion looks radiant, balanced, and fresh.
 
 ---
 

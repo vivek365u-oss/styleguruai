@@ -4,7 +4,7 @@ Indian weddings are the ultimate fashion arena. They are multi-day, multi-event 
 
 Yet despite spending lakhs of rupees on wedding wardrobes, a devastating number of guests end up looking washed out, tired, or invisible in the photos. A gorgeous Lehenga or Sherwani becomes an expensive failure simply because the color was biologically wrong.
 
-To guarantee you command the wedding from Mehndi to Reception, you must deploy Color Theory as your ultimate strategic weapon. Here is the event-by-event guide.
+To help you effortlessly command the wedding from Mehndi to Reception, you must deploy Color Theory as your ultimate strategic weapon. Here is the event-by-event guide.
 
 ## Mehndi / Haldi (The Fun Events)
 
@@ -46,14 +46,14 @@ Indian wedding outfits are overwhelmingly dominated by metallic Zari embroidery.
 
 A Lehenga or Sherwani costing ₹50,000+ that washes you out in 500 photographs is an unacceptable investment failure. 
 
-Before shopping for a wedding, lock down your genetic baseline. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI will calculate your exact melanin profile and biological undertone, generating a definitive, event-specific wedding color guide that guarantees you look stunning from Mehndi to Bidaai.
+Before shopping for a wedding, identify your natural undertone profile. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI will calculate your exact melanin profile and biological undertone, generating a definitive, event-specific wedding color guide that helps you look stunning from Mehndi to Bidaai.
 
 ---
 
 ### Social Media Snippets & Backlinks
 
 **Pinterest Pin Description:**
-How to look STUNNING at every Indian wedding event! 💒 From Mehndi to Reception, learn the strict Color Theory rules for picking the perfect Lehenga or Sherwani based on your biological skin tone. Save this pin and guarantee a flawless wedding wardrobe at https://www.styleguruai.in/
+How to look STUNNING at every Indian wedding event! 💒 From Mehndi to Reception, learn the strict Color Theory rules for picking the perfect Lehenga or Sherwani based on your biological skin tone. Save this pin and create a harmonious wedding wardrobe at https://www.styleguruai.in/
 
 **Instagram Reel Caption:**
-Are you spending ₹50,000 on a Lehenga that will wash you out in 500 wedding photos?! 🛑 If you have a Cool Undertone, wearing the traditional Haldi Yellow will make you look SICK in every photo! You MUST pivot to Emerald or Teal for those events! Use Color Theory to guarantee you command the entire wedding from Mehndi to Reception! Drop a 🔥 if you agree! Want the AI to give you an event-by-event wedding color plan? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #IndianWedding #DesiBride #WeddingOutfit #ColorTheory
+Are you spending ₹50,000 on a Lehenga that will wash you out in 500 wedding photos?! 🛑 If you have a Cool Undertone, wearing the traditional Haldi Yellow will make you look SICK in every photo! You MUST pivot to Emerald or Teal for those events! Use Color Theory to help you effortlessly command the entire wedding from Mehndi to Reception! Drop a 🔥 if you agree! Want the AI to give you an event-by-event wedding color plan? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #IndianWedding #DesiBride #WeddingOutfit #ColorTheory

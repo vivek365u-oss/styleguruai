@@ -30,7 +30,7 @@ Based on the combination of those three metrics, you are mathematically assigned
 
 When you dress securely within your season, a powerful optical synergy occurs. Your skin clears up visually, dark circles recede, and your eyes look significantly brighter. You look healthier and more expensive. When you wear a color outside your season, the fabric chemically clashes with your undertone, creating visual fatigue and making you look exhausted.
 
-You no longer need to pay a stylist thousands of dollars to diagnose you. You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping your exact Hue, Value, and Chroma, our algorithmic engine will definitively assign you your Season and provide the ultimate color palette guaranteed to flatter your DNA.
+You no longer need to pay a stylist thousands of dollars to diagnose you. You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping your exact Hue, Value, and Chroma, our algorithmic engine will definitively assign you your Season and provide the ultimate color palette curated to flatter your natural complexion.
 
 ---
 

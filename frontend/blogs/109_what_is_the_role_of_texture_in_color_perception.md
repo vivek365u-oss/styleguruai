@@ -31,7 +31,7 @@ This allows you to wear the same color in drastically different contexts. A roug
 
 The ultimate outfit engineers all three variables: the correct color (matched to undertone), the correct tone (matched to contrast), and the correct texture (matched to the occasion and formality level).
 
-Start by locking in your biological color baseline. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). Once the AI provides your precise color palette, you can confidently experiment with textures, knowing the foundational color will always harmonize with your DNA.
+Start by locking in your biological color baseline. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). Once the AI provides your precise color palette, you can confidently experiment with textures, knowing the foundational color will always harmonize with your complexion.
 
 ---
 

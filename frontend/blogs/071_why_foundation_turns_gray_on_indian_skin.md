@@ -11,7 +11,7 @@ Indian skin is biologically distinct from the skin tones most Western cosmetics 
 Your skin possesses a deeply genetically ingrained undertone—typically warm golden, olive, or deep peach in India. 
 
 If you apply a foundation that has a **Cool (Pink or Blue) undertone**, you are painting a cool pigment over a warm genetic base. 
-**The Optical Math:** When a pink/blue pigment sits on top of a yellow/golden base, the colors chemically fight. They neutralize each other. In color theory, the complete neutralization of warm and cool results in **Gray**. Your skin literally turns gray because the foundation is violently clashing with your DNA.
+**The Optical Math:** When a pink/blue pigment sits on top of a yellow/golden base, the colors chemically fight. They neutralize each other. In color theory, the complete neutralization of warm and cool results in **Gray**. Your skin literally turns gray because the foundation is violently clashing with your complexion.
 *The Solution:* You must rigorously map your undertone. Ensure your foundation bottle is explicitly labeled "Warm," "Golden," or "W" to align with the carotene in your skin.
 
 ## 2. The Hyperpigmentation Trap (The "Hiding" Mistake)
@@ -33,7 +33,7 @@ When you apply foundation, these chemicals mix with your skin's natural oils, yo
 
 You can use the best primers in the world, but if the foundation is fundamentally the wrong undertone, you will always look ashy. 
 
-Stop playing a guessing game at the Sephora counter. You can explicitly [analyze your exact skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will calculate the precise algorithmic warmth or coolness of your skin, explicitly telling you the exact undertone foundation you need to buy to guarantee your face never turns gray again.
+Stop playing a guessing game at the Sephora counter. You can explicitly [analyze your exact skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will calculate the precise algorithmic warmth or coolness of your skin, explicitly telling you the exact undertone foundation you need to buy to prevent your makeup from appearing ashy or dull.
 
 ---
 

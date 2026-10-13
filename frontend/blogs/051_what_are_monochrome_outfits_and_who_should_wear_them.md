@@ -44,7 +44,7 @@ If you have a distinctly cool pink/blue undertone, earth tones will make you loo
 
 Executing a flawless monochromatic outfit requires precision. You must know your foundational parent color. 
 
-Eliminate the risk of guessing. You can scientifically [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By extracting the exact color physics of your skin, the AI identifies your ultimate biological "parent color," allowing you to execute flawless monochromatic looks that guarantee you look taller, leaner, and utterly unstoppable.
+Eliminate the risk of guessing. You can scientifically [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By extracting the exact color physics of your skin, the AI identifies your ultimate biological "parent color," allowing you to execute flawless monochromatic looks that help you look taller, leaner, and utterly unstoppable.
 
 ---
 

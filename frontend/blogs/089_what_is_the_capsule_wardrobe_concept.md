@@ -45,7 +45,7 @@ Because every single item shares the same biological temperature, any item from 
 
 Before you purge your closet and invest in a Capsule, you must definitively know your temperature. A single wrong diagnosis (e.g., building a Warm Capsule when you are actually Cool) will result in 25 biologically incompatible garments.
 
-Eliminate the risk. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI will mathematically assign your exact biological temperature, providing the precise color blueprint required to build a Capsule Wardrobe that guarantees you look expensive every single day for years.
+Eliminate the risk. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI will mathematically assign your exact biological temperature, providing the precise color blueprint required to build a Capsule Wardrobe that helps you look expensive every single day for years.
 
 ---
 

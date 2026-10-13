@@ -4,7 +4,7 @@ In the hierarchy of fashion, shoes are simultaneously the most overlooked and mo
 
 Yet most people buy shoes based on price or trend rather than color theory. The result? A brilliant outfit is completely undermined by shoes that optically disconnect the feet from the rest of the body, making the wearer look incoherent or cheaply styled.
 
-For the complex diversity of Indian skin tones, specific shoe colors have been proven to work universally or specifically. Here is the science of footwear chromatology.
+For the complex diversity of Indian skin tones, specific shoe colors have been observed to work universally or specifically. Here is the science of footwear chromatology.
 
 ## 1. The Universal King: Dark Brown / Espresso Leather
 

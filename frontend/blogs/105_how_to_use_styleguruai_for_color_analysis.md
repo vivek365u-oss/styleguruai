@@ -28,7 +28,7 @@ Navigate to [StyleGuru AI](https://www.styleguruai.in/) and upload your natural-
 ## Step 3: Receive Your Personalized Palette
 
 The AI outputs a comprehensive, visually rich color palette containing:
-- **Your Power Colors:** The specific hues guaranteed to make your face glow.
+- **Your Power Colors:** The specific hues curated to help your face glow.
 - **Your Neutrals:** The foundation colors for your capsule wardrobe.
 - **Colors to Avoid:** The specific hues that will clash with your biology.
 
@@ -38,7 +38,7 @@ Screenshot your palette and save it to your phone. Carry it to every shopping tr
 
 ## The Power of Objectivity
 
-StyleGuru AI doesn't care about trends, brand names, or celebrity endorsements. It operates purely on the unchangeable laws of optical physics. Your results are mathematically proven, biologically accurate, and universally applicable.
+StyleGuru AI doesn't care about trends, brand names, or celebrity endorsements. It operates purely on the unchangeable laws of optical physics. Your results are grounded in color theory, biologically accurate, and universally applicable.
 
 Start your transformation today. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) and unlock the definitive, permanent blueprint for looking incredible every single day.
 

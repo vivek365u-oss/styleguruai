@@ -8,7 +8,7 @@ Today, Artificial Intelligence is democratizing personal styling. By leveraging 
 
 The foundation of personalized fashion is biologically matching fabric to skin. Human eyes are subjective and frequently tricked by bad lighting, making it difficult to find your exact color palette. 
 
-AI eradicates this subjectivity. Through computer vision, an AI styling app can scan a selfie, ignore the background lighting, and extract the exact hex codes and CIELAB color space values of your skin pixels. It mathematically identifies your melanin density (surface tone) and your sub-surface hues (warm, cool, or neutral undertones). Once the AI identifies your exact biological parameters, it instantly references color theory databases to filter out any clothing color that will clash with your DNA.
+AI eradicates this subjectivity. Through computer vision, an AI styling app can scan a selfie, ignore the background lighting, and extract the exact hex codes and CIELAB color space values of your skin pixels. It mathematically identifies your melanin density (surface tone) and your sub-surface hues (warm, cool, or neutral undertones). Once the AI identifies your exact biological parameters, it instantly references color theory databases to filter out any clothing color that will clash with your complexion.
 
 ## 2. Body Morphology Mapping
 
