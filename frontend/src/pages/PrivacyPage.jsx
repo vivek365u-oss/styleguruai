@@ -62,7 +62,7 @@ export default function PrivacyPage() {
         </h1>
 
         <p className="text-xs sm:text-sm mb-10 pb-6 border-b" style={{ color: C.muted, borderColor: C.border }}>
-          Last Updated: <strong style={{ color: C.text2 }}>{lastUpdated}</strong> · Compliant with Digital Personal Data Protection (DPDP) Act & Global Privacy Standards
+          Last Updated: <strong style={{ color: C.text2 }}>{lastUpdated}</strong> · Transparent Privacy Standards
         </p>
 
         {/* Executive Summary Callout */}

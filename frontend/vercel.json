@@ -1,6 +1,13 @@
 {
   "buildCommand": "npm install && npm run build",
   "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/privacy",
+      "destination": "/privacy-policy",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!ads\\.txt|robots\\.txt|sitemap\\.xml|.*\\..*).*)",

@@ -43,8 +43,8 @@ export default function DisclaimerPage() {
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8" style={{ background: C.bg, color: C.text }}>
       <SEOHead
-        title="Disclaimer — StyleGuru AI | Fashion & Affiliate Disclosures"
-        description="Official Disclaimer for StyleGuru AI. Important disclosures regarding AI style suggestions, skin tone detection variance, affiliate links, and non-medical fashion advisory."
+        title="Disclaimer — StyleGuru AI | Fashion Advisory Disclosures"
+        description="Official Disclaimer for StyleGuru AI. Important disclosures regarding AI style suggestions, skin tone detection variance, external shopping links, and non-medical fashion advisory."
       />
 
       <main className="max-w-3xl mx-auto">
@@ -59,7 +59,7 @@ export default function DisclaimerPage() {
           className="text-3xl sm:text-4xl md:text-5xl font-light mb-4"
           style={{ fontFamily: "'Playfair Display', serif", color: C.text, lineHeight: 1.2 }}
         >
-          General Disclaimer & Affiliate Disclosure
+          General Disclaimer & Fashion Advisory Disclosures
         </h1>
 
         <p className="text-xs sm:text-sm mb-10 pb-6 border-b" style={{ color: C.muted, borderColor: C.border }}>
@@ -108,16 +108,13 @@ export default function DisclaimerPage() {
           </p>
         </DisclaimerSection>
 
-        {/* Section 4: Affiliate & Product Links Disclosure */}
-        <DisclaimerSection num="4" title="Affiliate Links & Commercial Disclosures">
+        {/* Section 4: External Product & Shopping Links */}
+        <DisclaimerSection num="4" title="External Product & Shopping Links">
           <p>
-            In compliance with consumer protection guidelines and advertising transparency standards:
+            {APP_NAME} may display keyword suggestions or links to third-party retail platforms (such as Amazon India, Myntra, Flipkart, or partner fashion labels) solely to assist users in discovering fabrics, shades, and styles matching their recommended color palette.
           </p>
           <p>
-            {APP_NAME} may include links to third-party retail websites (such as Amazon India, Myntra, Flipkart, or partner fashion labels). Some of these outbound links are affiliate links. This means that if you click on a recommended link and make a purchase on that retail site, {APP_NAME} may receive a small affiliate commission at <strong style={{ color: C.text2 }}>no additional cost to you</strong>.
-          </p>
-          <p>
-            We only recommend products, colorways, or categories that genuinely align with our color analysis algorithms. We do not accept payment to promote inferior clothing items, and your purchase price remains identical regardless of whether you use our link.
+            {APP_NAME} does not own, manufacture, sell, or ship any apparel or accessories. We do not charge users any referral fees, nor are we responsible for product quality, order fulfillment, delivery, pricing discrepancies, or return policies of third-party merchants.
           </p>
         </DisclaimerSection>
 
@@ -138,7 +135,7 @@ export default function DisclaimerPage() {
         {/* Section 7: Contact */}
         <DisclaimerSection num="7" title="Questions Regarding This Disclaimer">
           <p>
-            If you have any questions or require further clarification regarding our disclosures, affiliate relationships, or advice limitations, please contact:
+            If you have any questions or require further clarification regarding our disclosures, website terms, or advice limitations, please contact:
           </p>
           <div className="p-6 rounded-2xl mt-4 border space-y-2" style={{ background: C.surface, borderColor: C.border }}>
             <p className="font-semibold text-white">{APP_NAME} Transparency Desk</p>

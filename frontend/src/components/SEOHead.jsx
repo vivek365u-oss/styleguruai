@@ -1,7 +1,12 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-export default function SEOHead({ title, description, image = 'https://www.styleguruai.in/og-image.svg' }) {
+export default function SEOHead({
+  title,
+  description,
+  image = 'https://www.styleguruai.in/og-image.svg',
+  type = 'website'
+}) {
   const location = useLocation();
   const canonicalUrl = `https://www.styleguruai.in${location.pathname}`;
 
@@ -59,10 +64,12 @@ export default function SEOHead({ title, description, image = 'https://www.style
     // Apply Meta Tags
     const cleanups = [
       setMetaTag('name', 'description', description || ''),
+      setMetaTag('property', 'og:type', type),
       setMetaTag('property', 'og:title', title),
       setMetaTag('property', 'og:description', description || ''),
       setMetaTag('property', 'og:url', canonicalUrl),
       setMetaTag('property', 'og:image', image),
+      setMetaTag('name', 'twitter:card', 'summary_large_image'),
       setMetaTag('name', 'twitter:title', title),
       setMetaTag('name', 'twitter:description', description || ''),
       setMetaTag('name', 'twitter:image', image),
@@ -73,7 +80,7 @@ export default function SEOHead({ title, description, image = 'https://www.style
       document.title = prevTitle;
       cleanups.forEach((cleanup) => cleanup());
     };
-  }, [title, description, canonicalUrl, image]);
+  }, [title, description, canonicalUrl, image, type]);
 
   return null;
 }

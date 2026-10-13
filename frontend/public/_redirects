@@ -1,4 +1,5 @@
 /ads.txt    /ads.txt    200
 /robots.txt /robots.txt 200
 /sitemap.xml /sitemap.xml 200
+/privacy   /privacy-policy 301
 /*          /index.html 200

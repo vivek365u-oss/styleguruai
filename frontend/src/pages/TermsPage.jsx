@@ -140,13 +140,13 @@ export default function TermsPage() {
           </p>
         </TermsSection>
 
-        {/* Section 7: Third-Party Advertising & Affiliate Links */}
+        {/* Section 7: Third-Party Advertising & External Links */}
         <TermsSection num="7" title="Advertising & Third-Party Retail Links">
           <p>
             Our website displays third-party advertisements served by <strong style={{ color: C.text2 }}>Google AdSense</strong>. We do not endorse or control the products, claims, or services advertised in third-party banners. Your interactions with advertisers are governed strictly by the advertiser's individual terms and privacy policies.
           </p>
           <p>
-            {APP_NAME} may also provide curated shopping links to external e-commerce platforms (such as Amazon, Myntra, or brand storefronts). Some of these links may be affiliate links through which we earn a modest commission at no extra cost to you. We are not responsible for orders, product quality, returns, or shipping policies of third-party merchants.
+            {APP_NAME} may also display curated search terms or links to external retail platforms (such as Amazon, Myntra, or brand storefronts) to assist with style exploration. We do not charge referral fees, nor are we responsible for orders, product quality, returns, pricing changes, or shipping policies of third-party merchants.
           </p>
         </TermsSection>
 

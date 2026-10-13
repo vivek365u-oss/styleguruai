@@ -115,6 +115,7 @@ export default function BlogPostPage() {
       <SEOHead
         title={`${post.title} — StyleGuru AI`}
         description={post.description}
+        type="article"
       />
 
       {/* ─── Sticky Top Navigation ─── */}

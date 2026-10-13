@@ -110,7 +110,7 @@ export default function Footer() {
               ))}
             </ul>
             <p className="text-[11px] leading-relaxed" style={{ color: SUBTLE }}>
-              Compliant with Google AdSense Publisher Policies, DPDP Act 2023, and Indian Consumer Guidelines.
+              Compliant with Google AdSense Publisher Policies and Indian Consumer Protection Guidelines.
             </p>
           </div>
         </div>

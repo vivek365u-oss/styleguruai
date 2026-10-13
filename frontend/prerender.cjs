@@ -100,7 +100,7 @@ function parseMd(content) {
   return { title, sections };
 }
 
-function writePage(routePath, title, description, contentHtml, extraHead = '') {
+function writePage(routePath, title, description, contentHtml, extraHead = '', ogType = 'website') {
   const targetDir = path.join(DIST_DIR, routePath);
   fs.mkdirSync(targetDir, { recursive: true });
 
@@ -124,14 +124,28 @@ function writePage(routePath, title, description, contentHtml, extraHead = '') {
     html = html.replace('</head>', `  <link rel="canonical" href="${canonicalUrl}" />\n</head>`);
   }
 
-  // Update Open Graph
-  html = html.replace(/<meta\s+property=["']og:title["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:title" content="${escapeHtml(title)}" />`);
-  html = html.replace(/<meta\s+property=["']og:description["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:description" content="${escapeHtml(description)}" />`);
-  html = html.replace(/<meta\s+property=["']og:url["']\s+content=["'].*?["']\s*\/?>/i, `<meta property="og:url" content="${canonicalUrl}" />`);
+  // Open Graph and Twitter Card tags
+  const ogTags = [
+    `<meta property="og:type" content="${ogType}" />`,
+    `<meta property="og:title" content="${escapeHtml(title)}" />`,
+    `<meta property="og:description" content="${escapeHtml(description)}" />`,
+    `<meta property="og:url" content="${canonicalUrl}" />`,
+    `<meta property="og:image" content="${BASE_URL}/og-image.svg" />`,
+  ];
 
-  if (extraHead) {
-    html = html.replace('</head>', `${extraHead}\n</head>`);
-  }
+  const twitterTags = [
+    `<meta name="twitter:card" content="summary_large_image" />`,
+    `<meta name="twitter:title" content="${escapeHtml(title)}" />`,
+    `<meta name="twitter:description" content="${escapeHtml(description)}" />`,
+    `<meta name="twitter:image" content="${BASE_URL}/og-image.svg" />`,
+  ];
+
+  // Strip pre-existing og/twitter tags to avoid duplicates
+  html = html.replace(/<meta\s+property=["']og:(type|title|description|url|image)["'].*?\/?>\s*/gi, '');
+  html = html.replace(/<meta\s+name=["']twitter:(card|title|description|image)["'].*?\/?>\s*/gi, '');
+
+  const metaBlock = `  ${ogTags.join('\n  ')}\n  ${twitterTags.join('\n  ')}`;
+  html = html.replace('</head>', `${metaBlock}\n${extraHead ? extraHead + '\n' : ''}</head>`);
 
   // Inject content inside <div id="root">
   html = html.replace(
@@ -161,96 +175,573 @@ for (let i = 0; i < files.length; i++) {
 
 console.log(`[Pre-render] Loaded ${posts.length} blog posts.`);
 
-// ── 2. Pre-render Static Legal and Trust Pages ──
-console.log('[Pre-render] Generating static trust pages...');
+// ── 2. Pre-render Static Legal and Trust Pages (FULL COMPONENT TEXT) ──
+console.log('[Pre-render] Generating static trust pages with FULL text...');
 
-writePage(
-  '/about',
-  'About Us — StyleGuru AI | Intelligent Fashion for Indian Skin Tones',
-  'Learn about StyleGuru AI, founded by Vivek Kumar. Discover how our AI uses color science, ITA angles, and undertone classification tailored for Indian complexions and cultural attires.',
-  `<div class="public-prerender-content min-h-screen py-16 px-6 max-w-4xl mx-auto text-slate-100" style="background:#0B0F1A;">
-    <h1 class="text-4xl font-serif mb-6 text-white">About StyleGuru AI</h1>
-    <p class="text-xl text-slate-300 mb-8 leading-relaxed">Democratizing personal fashion and color intelligence for every Indian complexion.</p>
-    <div class="prose prose-invert space-y-6 text-slate-300">
-      <p>Founded by Vivek Kumar, StyleGuru AI was created to solve wardrobe uncertainty for millions of Indian shoppers who struggle with Western 4-season color charts that overlook warm wheatish, olive, dusky, and deep Indian undertones.</p>
-      <h2>Our Technology</h2>
-      <p>Using Individual Typology Angle (ITA) calculations and RGB color harmony, StyleGuru AI matches Indian skin tones with complementary fabric shades, festive palettes (kurtas, sarees, sherwanis), and weather-friendly textiles.</p>
-      <h2>Our Mission</h2>
-      <p>To give every Indian the confidence to look sharp and well-dressed on any budget without requiring expensive personal stylist fees.</p>
-      <p><a href="/" class="text-violet-400 underline">Try StyleGuru AI Free &rarr;</a></p>
-    </div>
-  </div>`
-);
-
+// 2a. /privacy-policy (Target: 600+ words)
 writePage(
   '/privacy-policy',
   'Privacy Policy — StyleGuru AI',
-  'Privacy Policy for StyleGuru AI. Disclosures regarding Google AdSense, DoubleClick cookies, Firebase authentication, and transient in-memory image analysis.',
-  `<div class="public-prerender-content min-h-screen py-16 px-6 max-w-4xl mx-auto text-slate-100" style="background:#0B0F1A;">
-    <h1 class="text-4xl font-serif mb-6 text-white">Privacy Policy</h1>
-    <p class="text-sm text-slate-400 mb-8">Effective: October 13, 2026 &middot; Compliant with DPDP Act & Google Publisher Policies</p>
-    <div class="prose prose-invert space-y-6 text-slate-300">
-      <h2>1. Information We Collect</h2>
-      <p>We collect account profile information through Firebase Authentication and transient image data for skin tone analysis. Images uploaded for fashion analysis are processed strictly in-memory and are never permanently stored, shared, or monetized.</p>
-      <h2>2. Google AdSense & Third-Party Cookies</h2>
-      <p>We use Google AdSense to serve advertisements. Google uses cookies, including the DoubleClick cookie, to display relevant ads based on prior website visits. Users may opt out at <a href="https://www.google.com/settings/ads" class="text-violet-400 underline">Google Ads Settings</a> or <a href="https://www.aboutads.info" class="text-violet-400 underline">AboutAds Choices</a>.</p>
-      <h2>3. Data Deletion Rights</h2>
-      <p>Users have the right to request deletion of their account data at any time by contacting styleguruai.in@gmail.com.</p>
-    </div>
+  'Comprehensive Privacy Policy for StyleGuru AI. Disclosures regarding Google AdSense, DoubleClick cookies, Firebase authentication, and photo analysis privacy.',
+  `<div class="public-prerender-content min-h-screen py-12 px-4 sm:px-6 lg:px-8 text-slate-100" style="background:#0B0F1A;">
+    <main class="max-w-3xl mx-auto">
+      <div class="flex items-center gap-2 mb-4 text-xs font-semibold tracking-widest uppercase text-amber-300">
+        <span>Legal & Compliance</span>
+        <span>•</span>
+        <span>Privacy</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-light mb-4 font-serif text-white">Privacy Policy</h1>
+      <p class="text-xs sm:text-sm mb-10 pb-6 border-b border-white/10 text-slate-400">
+        Last Updated: <strong class="text-slate-200">October 13, 2026</strong> &middot; Transparent Privacy Standards
+      </p>
+
+      <div class="p-6 rounded-2xl mb-12 border border-purple-500/20 bg-purple-500/5">
+        <h3 class="text-base font-semibold mb-2 text-white">Summary of Our Privacy Commitment</h3>
+        <p class="text-sm leading-relaxed text-slate-400">
+          At StyleGuru AI (https://www.styleguruai.in), we respect your personal privacy. We process your facial photos transiently in memory solely to analyze skin undertones and compute fashion color palettes—we never store or sell your raw photos. This policy explains how we collect, store, and safeguard your data, and how third-party services like Google AdSense and Firebase operate on our platform.
+        </p>
+      </div>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">1.</span> Information We Collect</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          When you interact with StyleGuru AI, we collect specific categories of information to deliver our personalized fashion recommendations and maintain user accounts:
+        </p>
+        <ul class="list-disc pl-5 space-y-2 text-sm md:text-base leading-relaxed">
+          <li><strong class="text-white">Account & Profile Information:</strong> If you register or authenticate via Firebase Authentication (using Google Sign-In or email/password), we receive your display name, email address, profile picture URL, and a unique Firebase User ID (UID).</li>
+          <li><strong class="text-white">Uploaded Images for Fashion & Tone Analysis:</strong> When you upload a selfie or outfit photo to analyze your skin tone or outfit harmony, the image is transmitted securely over HTTPS and processed in-memory using our computer vision algorithms (ITA angle, RGB undertone, and face-shape extraction). Raw facial images are strictly processed in a transient state and are not permanently archived or shared with advertisers.</li>
+          <li><strong class="text-white">Style Preferences & Wardrobe Items:</strong> Saved favorite colors, capsule wardrobe selections, and seasonal outfit preferences stored within your account.</li>
+          <li><strong class="text-white">Device & Log Information:</strong> Standard technical information such as your browser type, operating system, IP address, device model, referral source, and timestamps, gathered automatically to ensure application security and prevent fraudulent access.</li>
+        </ul>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">2.</span> How We Use Your Information</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          We use the collected information exclusively for operational, personalized, and administrative purposes:
+        </p>
+        <ul class="list-disc pl-5 space-y-2 text-sm md:text-base leading-relaxed">
+          <li>To compute individual skin tone undertones (warm, cool, neutral, deep, wheatish, olive) and generate matching fabric color recommendations.</li>
+          <li>To maintain your secure session, authenticate your identity via Firebase, and restore your saved wardrobe history across devices.</li>
+          <li>To monitor system performance, optimize page loading speed, diagnose technical glitches, and protect against security breaches.</li>
+          <li>To provide timely customer support when you contact us regarding fashion queries, account management, or technical troubleshooting.</li>
+        </ul>
+        <p class="text-sm md:text-base leading-relaxed font-semibold text-white">
+          We Do Not Sell Personal Data: Under no circumstances do we sell, rent, monetize, or trade your personal information, email address, or uploaded images to third parties or marketing brokers.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">3.</span> Google AdSense & DoubleClick Cookies</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          We use <strong class="text-white">Google AdSense</strong> to display advertisements across our public pages in order to support and keep our AI styling advisory services free for users across India.
+        </p>
+        <p class="text-sm md:text-base leading-relaxed">
+          Google, as a third-party vendor, uses cookies to serve ads on our site:
+        </p>
+        <ul class="list-disc pl-5 space-y-2 text-sm md:text-base leading-relaxed">
+          <li>Google's use of advertising cookies (including the DoubleClick cookie) enables it and its advertising partners to serve ads to our users based on their prior visits to StyleGuru AI and/or other websites across the Internet.</li>
+          <li>Third-party vendors and ad networks may also place and read cookies on your browser, or use web beacons and IP data to measure ad efficacy and deliver non-personalized or personalized advertising.</li>
+        </ul>
+        <div class="p-4 rounded-xl mt-4 border border-white/10 bg-white/5 space-y-2">
+          <p class="text-sm font-semibold text-white">How You Can Opt Out of Personalized Advertising:</p>
+          <p class="text-xs leading-relaxed text-slate-300">
+            You can opt out of personalized Google advertising at any time by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" class="underline text-amber-300">Google Ads Settings (https://www.google.com/settings/ads)</a>.
+          </p>
+          <p class="text-xs leading-relaxed text-slate-300">
+            Alternatively, you can opt out of third-party vendor cookies for personalized interest-based advertising by visiting <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" class="underline text-amber-300">AboutAds Choices (https://www.aboutads.info)</a> or the Network Advertising Initiative opt-out page.
+          </p>
+        </div>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">4.</span> Firebase Authentication & Cloud Storage</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          User authentication and profile storage are powered by Google Firebase (Firebase Auth and Google Cloud Firestore). When you sign in using Google OAuth:
+        </p>
+        <ul class="list-disc pl-5 space-y-2 text-sm md:text-base leading-relaxed">
+          <li>Authentication tokens are securely exchanged directly between your browser and Google’s identity servers.</li>
+          <li>We do not have access to, nor do we ever handle, your private Google account password.</li>
+          <li>All communication between your client and Firebase servers is encrypted using Transport Layer Security (TLS/HTTPS).</li>
+        </ul>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">5.</span> Cookies & Local Storage</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          Our website utilizes cookies and browser local storage to maintain session continuity, remember your visual theme preference (dark/light mode), preserve language selection, and monitor web traffic analytics.
+        </p>
+        <p class="text-sm md:text-base leading-relaxed">
+          You can configure your browser to reject all cookies or notify you whenever a cookie is placed. However, disabling cookies may prevent certain functional elements of the website (such as staying signed in) from performing as intended.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">6.</span> Data Retention & Deletion Requests</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          We retain account data (name, email, and saved color preferences) only for as long as your account remains active or as required to fulfill legal compliance obligations.
+        </p>
+        <p class="text-sm md:text-base leading-relaxed">
+          <strong class="text-white">Your Right to Erasure:</strong> You have the absolute right to request the complete deletion of your account and any associated personal data at any time. To request complete data erasure:
+        </p>
+        <ul class="list-disc pl-5 space-y-2 text-sm md:text-base leading-relaxed">
+          <li>Send an email from your registered account address to <a href="mailto:styleguruai.in@gmail.com" class="underline text-amber-300">styleguruai.in@gmail.com</a> with the subject line <em>"Data Deletion Request"</em>.</li>
+          <li>Our administrative team will permanently purge your user profile, saved preferences, and auth records from our Firestore database within 7 business days, confirming completion in writing.</li>
+        </ul>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">7.</span> Children's Privacy</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          StyleGuru AI is intended for general audiences interested in personal fashion and color styling. We do not knowingly solicit or collect personal identification information from children under the age of 13 (or under 18 without parental consent where mandated by Indian law). If we discover that personal data has been submitted by an unsupervised minor, we will immediately delete that information from our records.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">8.</span> Updates to This Policy</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          We may revise this Privacy Policy periodically to reflect enhancements in our AI technology, regulatory updates, or operational adjustments. Any updates will be posted directly to this page with an updated "Last Updated" date at the top. We encourage you to review this policy periodically.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">9.</span> Contacting Our Privacy Officer</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          If you have any questions, concerns, or legal notices regarding this Privacy Policy, your rights, or our data handling practices, please contact our designated privacy representative at:
+        </p>
+        <div class="p-6 rounded-2xl border border-white/10 bg-white/5 space-y-2">
+          <p class="font-semibold text-white">StyleGuru AI Privacy & Support Desk</p>
+          <p class="text-sm">Email: <a href="mailto:styleguruai.in@gmail.com" class="underline text-amber-300 font-mono">styleguruai.in@gmail.com</a></p>
+          <p class="text-sm">Website: <a href="https://www.styleguruai.in" class="underline text-slate-400">https://www.styleguruai.in</a></p>
+          <p class="text-xs text-slate-400 mt-2">We respond to all verified privacy and data deletion inquiries within 24 to 48 business hours.</p>
+        </div>
+      </section>
+    </main>
   </div>`
 );
 
-// Alias /privacy
+// 2b. /about (Target: 500+ words)
 writePage(
-  '/privacy',
-  'Privacy Policy — StyleGuru AI',
-  'Privacy Policy for StyleGuru AI.',
-  `<div class="public-prerender-content min-h-screen py-16 px-6 max-w-4xl mx-auto text-slate-100" style="background:#0B0F1A;">
-    <h1 class="text-4xl font-serif mb-6 text-white">Privacy Policy</h1>
-    <p><a href="/privacy-policy" class="text-violet-400 underline">View Full Privacy Policy &rarr;</a></p>
+  '/about',
+  'About Us — StyleGuru AI | Intelligent Fashion for Indian Skin Tones',
+  'Learn about StyleGuru AI, founded by Vivek Kumar. Discover how our AI uses color science, ITA angles, and undertone classification to provide personalized outfit recommendations tailored for Indian complexions, climates, and budgets.',
+  `<div class="public-prerender-content min-h-screen py-12 px-4 sm:px-6 lg:px-8 text-slate-100" style="background:#0B0F1A;">
+    <main class="max-w-4xl mx-auto">
+      <div class="flex items-center gap-2 mb-4 text-xs font-semibold tracking-widest uppercase text-amber-300">
+        <span>About StyleGuru AI</span>
+        <span>•</span>
+        <span>Our Vision & Technology</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-light mb-6 font-serif text-white">Democratizing Personal Styling for Every Indian Complexion</h1>
+      <p class="text-lg sm:text-xl font-normal leading-relaxed mb-8 text-slate-200">
+        StyleGuru AI was created out of a simple observation: conventional fashion advice and Western seasonal color palettes rarely work for the rich diversity of Indian skin tones, festive wardrobes, or regional climates.
+      </p>
+      <p class="text-sm sm:text-base leading-relaxed mb-12 text-slate-300">
+        Founded by <strong class="text-white">Vivek Kumar</strong>, StyleGuru AI is an Indian artificial intelligence styling companion designed to help everyday shoppers make confident, flattering clothing decisions without spending thousands of rupees on celebrity personal stylists or getting trapped in endless returns on Myntra and Amazon.
+      </p>
+
+      <section class="mb-14 space-y-4 text-slate-300">
+        <h2 class="text-2xl font-serif text-white">The Indian Wardrobe Dilemma</h2>
+        <p class="text-sm sm:text-base leading-relaxed">
+          In India, fashion is deeply intertwined with cultural diversity, varied geographic weather patterns, and rich ethnic celebrations—from grand Diwali and Eid family gatherings to royal wedding sangeets and corporate smart-casual workdays.
+        </p>
+        <p class="text-sm sm:text-base leading-relaxed">
+          Yet, when shopping online or browsing retail racks, most Indians face a common hurdle: a kurta, shirt, or saree looks breathtaking on a studio model, but appears washed out, dull, or overwhelming when tried on at home. Why? Because traditional fashion advice relies heavily on European "4-season" color charts (Spring, Summer, Autumn, Winter) designed primarily for Caucasian undertones.
+        </p>
+        <p class="text-sm sm:text-base leading-relaxed">
+          Indian complexions span a glorious spectrum—from fair and porcelain with peach undertones, to golden wheatish, warm olive, dusky bronze, and rich deep melanin tones. An olive-wheatish skin tone requires completely different complementary contrast ratios than a cool-toned fair complexion. When clothing colors clash with your natural undertone, skin can appear fatigued or uneven. When colors harmonize, your complexion instantly glows.
+        </p>
+      </section>
+
+      <section class="mb-14 p-8 rounded-3xl border border-white/10 bg-white/5 space-y-6">
+        <h2 class="text-2xl font-serif text-white">How the Technology Works: In Simple Terms</h2>
+        <p class="text-sm sm:text-base leading-relaxed text-slate-300">
+          We replace subjective guesswork with scientific color theory and computer vision algorithms. Here is what happens behind the scenes:
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="p-6 rounded-2xl border border-white/10 bg-white/5 space-y-2">
+            <h3 class="text-base font-semibold text-amber-300">1. Facial Tone & ITA Analysis</h3>
+            <p class="text-xs leading-relaxed text-slate-300">
+              Using standard lighting compensation algorithms, our model evaluates the Individual Typology Angle (ITA) and RGB hue values to accurately classify your skin tone into clear tiers (fair, wheatish, olive, dusky, deep) without permanent image storage.
+            </p>
+          </div>
+          <div class="p-6 rounded-2xl border border-white/10 bg-white/5 space-y-2">
+            <h3 class="text-base font-semibold text-amber-300">2. Undertone & Color Harmony</h3>
+            <p class="text-xs leading-relaxed text-slate-300">
+              We identify your underlying sub-pigmentation (warm, cool, or neutral). Warm undertones flourish in mustard yellows, rust oranges, and emerald greens; cool undertones shine in royal cobalt, jewel rubies, and crisp whites.
+            </p>
+          </div>
+          <div class="p-6 rounded-2xl border border-white/10 bg-white/5 space-y-2">
+            <h3 class="text-base font-semibold text-amber-300">3. Cultural & Seasonal Context</h3>
+            <p class="text-xs leading-relaxed text-slate-300">
+              Our recommendation engine layers your palette with Indian occasion filters: everyday office wear, high-heat summer linens, monsoon breathable cottons, and opulent wedding silhouettes like sherwanis and silk sarees.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-14 space-y-4 text-slate-300">
+        <h2 class="text-2xl font-serif text-white">Our Core Mission & Ethics</h2>
+        <p class="text-sm sm:text-base leading-relaxed">
+          Our guiding mission is to <strong class="text-white">democratize confidence</strong>. Looking sharp and feeling well-dressed should not be a privilege reserved for those with disposable incomes for high-end boutique consultations.
+        </p>
+        <p class="text-sm sm:text-base leading-relaxed">
+          Whether you are putting together an outfit for an engineering job interview in Bengaluru, selecting a festive kurta in Lucknow, or building a versatile 10-piece capsule wardrobe on a college student budget of ₹3,000, StyleGuru AI provides honest, unbiased, algorithmic style clarity.
+        </p>
+        <p class="text-sm sm:text-base leading-relaxed">
+          We celebrate all skin tones equally. There are no "superior" or "inferior" skin complexions in our philosophy—only color palettes that complement your natural beauty and those that distract from it. Our tool exists to celebrate who you are, with no skin lightening filters or unrealistic retouching.
+        </p>
+      </section>
+
+      <section class="p-8 rounded-3xl border border-purple-500/20 bg-purple-500/5 mb-14 space-y-3">
+        <h2 class="text-xl font-serif text-white">Behind the Project</h2>
+        <p class="text-sm leading-relaxed text-slate-300">
+          StyleGuru AI is developed and maintained by <strong class="text-white">Vivek Kumar</strong> with a passion for computer vision, practical generative AI, and inclusive consumer technology in India.
+        </p>
+        <p class="text-xs leading-relaxed text-slate-400">
+          Have ideas for improvements, feature requests, or partnership inquiries? Feel free to reach out directly to the team via our <a href="/contact" class="underline text-amber-300">Contact Page</a> or email us at <a href="mailto:styleguruai.in@gmail.com" class="underline text-purple-400">styleguruai.in@gmail.com</a>.
+        </p>
+      </section>
+
+      <div class="text-center py-6">
+        <a href="/" class="inline-flex items-center justify-center px-8 py-3.5 rounded-2xl text-white font-medium text-sm no-underline shadow-lg" style="background:linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #EC4899 100%);">
+          Explore StyleGuru AI Homepage &rarr;
+        </a>
+      </div>
+    </main>
   </div>`
 );
 
-writePage(
-  '/contact',
-  'Contact Us — StyleGuru AI | Support & Inquiries',
-  'Contact the StyleGuru AI team at styleguruai.in@gmail.com. Response within 24 to 48 business hours.',
-  `<div class="public-prerender-content min-h-screen py-16 px-6 max-w-4xl mx-auto text-slate-100" style="background:#0B0F1A;">
-    <h1 class="text-4xl font-serif mb-6 text-white">Contact StyleGuru AI</h1>
-    <p class="text-slate-300 mb-6">Have questions or feedback? We are here to help.</p>
-    <div class="space-y-4 text-slate-300">
-      <p><strong>Official Email Desk:</strong> <a href="mailto:styleguruai.in@gmail.com" class="text-violet-400 underline">styleguruai.in@gmail.com</a></p>
-      <p><strong>Response Time:</strong> Within 24&ndash;48 business hours.</p>
-      <p><strong>Founder:</strong> Vivek Kumar &middot; StyleGuru AI</p>
-    </div>
-  </div>`
-);
-
+// 2c. /terms (Target: 600+ words)
 writePage(
   '/terms',
   'Terms & Conditions — StyleGuru AI',
-  'Terms of Service and Conditions for StyleGuru AI.',
-  `<div class="public-prerender-content min-h-screen py-16 px-6 max-w-4xl mx-auto text-slate-100" style="background:#0B0F1A;">
-    <h1 class="text-4xl font-serif mb-6 text-white">Terms and Conditions</h1>
-    <p class="text-sm text-slate-400 mb-8">Last Modified: October 13, 2026</p>
-    <div class="prose prose-invert space-y-6 text-slate-300">
-      <p>By accessing StyleGuru AI, you agree to these Terms. All fashion advice and color palettes are aesthetic suggestions intended for personal styling inspiration.</p>
-      <p>Governing law: Republic of India. Contact: styleguruai.in@gmail.com</p>
-    </div>
+  'Terms and Conditions of Use for StyleGuru AI. Review our service terms, intellectual property policies, user responsibilities, and limitation of liability.',
+  `<div class="public-prerender-content min-h-screen py-12 px-4 sm:px-6 lg:px-8 text-slate-100" style="background:#0B0F1A;">
+    <main class="max-w-3xl mx-auto">
+      <div class="flex items-center gap-2 mb-4 text-xs font-semibold tracking-widest uppercase text-amber-300">
+        <span>Legal & Compliance</span>
+        <span>•</span>
+        <span>Terms of Service</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-light mb-4 font-serif text-white">Terms and Conditions</h1>
+      <p class="text-xs sm:text-sm mb-10 pb-6 border-b border-white/10 text-slate-400">
+        Last Modified: <strong class="text-slate-200">October 13, 2026</strong> &middot; Binding User Agreement
+      </p>
+
+      <div class="p-6 rounded-2xl mb-12 border border-purple-500/20 bg-purple-500/5">
+        <p class="text-sm leading-relaxed text-slate-300">
+          Welcome to StyleGuru AI (https://www.styleguruai.in). By accessing, browsing, registering an account, or uploading images to our platform, you agree to be legally bound by these Terms and Conditions. If you do not agree to all terms outlined herein, please discontinue using the service immediately.
+        </p>
+      </div>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">1.</span> Acceptance of Terms & Eligibility</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          By using this website, you represent and warrant that you are at least 13 years of age (or of legal age under Indian law or the jurisdiction of your residence to enter into a binding contract). If you are accessing StyleGuru AI on behalf of another entity, you represent that you possess the authority to bind that entity to these terms.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">2.</span> Description of Service</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          StyleGuru AI provides an artificial-intelligence powered personal fashion advisory platform. Our features include:
+        </p>
+        <ul class="list-disc pl-5 space-y-2 text-sm md:text-base leading-relaxed">
+          <li>Automated skin tone and undertone classification (evaluating ITA coordinates and RGB color spectrums).</li>
+          <li>Curated color palette recommendations matched to Indian complexions, cultural occasions, and regional climates.</li>
+          <li>Wardrobe planning utilities, outfit harmony checkers, and links to relevant fashion products.</li>
+        </ul>
+        <p class="text-sm md:text-base leading-relaxed">
+          We continually evolve our algorithms. We reserve the right to alter, upgrade, suspend, or discontinue any feature or service without prior liability.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">3.</span> Nature of Advice: Informational & Aesthetic Suggestions</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          <strong class="text-white">Suggestions Only:</strong> All color recommendations, wardrobe suggestions, and styling scores generated by StyleGuru AI are algorithmic aesthetic opinions designed purely for style inspiration. They do not constitute certified professional personal styling, dermatological, medical, or bespoke tailor advice.
+        </p>
+        <p class="text-sm md:text-base leading-relaxed">
+          Lighting conditions, smartphone camera sensors, ambient shadows, and display calibration can cause variations in detected skin tones. We encourage users to treat our insights as an empowering guide while making purchasing choices according to their personal taste, comfort, and budget.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">4.</span> User Accounts & Security</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          When you create an account via Firebase Authentication (using Google OAuth or email sign-in), you are responsible for maintaining the confidentiality of your login credentials and all activities that occur under your account.
+        </p>
+        <p class="text-sm md:text-base leading-relaxed">
+          You agree to notify us immediately at <a href="mailto:styleguruai.in@gmail.com" class="underline text-amber-300">styleguruai.in@gmail.com</a> if you detect any unauthorized access to your account. We will not be liable for any loss resulting from compromised credentials.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">5.</span> Acceptable Use & Image Upload Rules</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          When uploading photographs for fashion or tone analysis, you expressly agree that:
+        </p>
+        <ul class="list-disc pl-5 space-y-2 text-sm md:text-base leading-relaxed">
+          <li>You own the copyright or have express authorization to upload the photo.</li>
+          <li>You will not upload any content that is obscene, defamatory, unlawful, sexually suggestive, or depicts minors without parental consent.</li>
+          <li>You will not use automated scrapers, bots, or extraction scripts to reverse-engineer our recommendation endpoints or overwhelm our server infrastructure.</li>
+        </ul>
+        <p class="text-sm md:text-base leading-relaxed">
+          Any violation of these rules may lead to immediate suspension or termination of your account access without prior notice.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">6.</span> Intellectual Property Rights</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          All code, proprietary recommendation logic, user interface designs, logos, graphics, color harmonies, and articles published on StyleGuru AI are the exclusive intellectual property of StyleGuru AI and founder Vivek Kumar, protected under Indian and international copyright and trademark laws.
+        </p>
+        <p class="text-sm md:text-base leading-relaxed">
+          You are granted a limited, revocable, non-exclusive license to use the service for personal, non-commercial fashion discovery. You may not copy, reproduce, resell, or distribute our platform assets without prior written consent.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">7.</span> Advertising & Third-Party Retail Links</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          Our website displays third-party advertisements served by <strong class="text-white">Google AdSense</strong>. We do not endorse or control the products, claims, or services advertised in third-party banners. Your interactions with advertisers are governed strictly by the advertiser's individual terms and privacy policies.
+        </p>
+        <p class="text-sm md:text-base leading-relaxed">
+          StyleGuru AI may also display curated search terms or links to external retail platforms (such as Amazon, Myntra, or brand storefronts) to assist with style exploration. We do not charge referral fees, nor are we responsible for orders, product quality, returns, pricing changes, or shipping policies of third-party merchants.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">8.</span> Limitation of Liability</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          To the maximum extent permitted by applicable law, StyleGuru AI, its founder, and affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including loss of profits, data, or satisfaction resulting from:
+        </p>
+        <ul class="list-disc pl-5 space-y-2 text-sm md:text-base leading-relaxed">
+          <li>Your access to or inability to access the service.</li>
+          <li>Any clothing purchases made based on AI style suggestions.</li>
+          <li>Any technical downtime, server maintenance, or accuracy variance in analysis.</li>
+        </ul>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">9.</span> Governing Law & Dispute Resolution</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          These Terms and Conditions shall be governed by and construed in accordance with the laws of the Republic of India. Any disputes arising out of or related to these terms shall be subject to the exclusive jurisdiction of the competent courts in India.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">10.</span> Contact Us Regarding Terms</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          For any questions, legal notices, or inquiries regarding these Terms and Conditions, please contact us at:
+        </p>
+        <div class="p-6 rounded-2xl border border-white/10 bg-white/5 space-y-2">
+          <p class="font-semibold text-white">StyleGuru AI Legal Inquiries</p>
+          <p class="text-sm">Email: <a href="mailto:styleguruai.in@gmail.com" class="underline text-amber-300 font-mono">styleguruai.in@gmail.com</a></p>
+          <p class="text-xs text-slate-400 mt-2">Also review our companion <a href="/privacy-policy" class="underline text-purple-400">Privacy Policy</a> and <a href="/disclaimer" class="underline text-purple-400">Disclaimer</a>.</p>
+        </div>
+      </section>
+    </main>
   </div>`
 );
 
+// 2d. /disclaimer (Target: 400+ words)
 writePage(
   '/disclaimer',
-  'Disclaimer — StyleGuru AI | Fashion & Affiliate Disclosures',
-  'Official Disclaimer for StyleGuru AI regarding AI style suggestions, camera lighting variance, and affiliate marketing links.',
-  `<div class="public-prerender-content min-h-screen py-16 px-6 max-w-4xl mx-auto text-slate-100" style="background:#0B0F1A;">
-    <h1 class="text-4xl font-serif mb-6 text-white">Disclaimer & Transparency Disclosures</h1>
-    <p class="text-sm text-slate-400 mb-8">Last Modified: October 13, 2026</p>
-    <div class="prose prose-invert space-y-6 text-slate-300">
-      <p>Style recommendations are automated suggestions for style inspiration. Photo analysis results depend on ambient lighting and camera sensors. This is not medical advice. StyleGuru AI participates in affiliate marketing and displays Google AdSense advertising.</p>
-      <p>Contact: styleguruai.in@gmail.com</p>
-    </div>
+  'Disclaimer — StyleGuru AI | Fashion Advisory Disclosures',
+  'Official Disclaimer for StyleGuru AI. Important disclosures regarding AI style suggestions, skin tone detection variance, external shopping links, and non-medical fashion advisory.',
+  `<div class="public-prerender-content min-h-screen py-12 px-4 sm:px-6 lg:px-8 text-slate-100" style="background:#0B0F1A;">
+    <main class="max-w-3xl mx-auto">
+      <div class="flex items-center gap-2 mb-4 text-xs font-semibold tracking-widest uppercase text-amber-300">
+        <span>Legal & Transparency</span>
+        <span>•</span>
+        <span>Disclaimer</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-light mb-4 font-serif text-white">General Disclaimer & Fashion Advisory Disclosures</h1>
+      <p class="text-xs sm:text-sm mb-10 pb-6 border-b border-white/10 text-slate-400">
+        Last Updated: <strong class="text-slate-200">October 13, 2026</strong> &middot; Transparency Declaration
+      </p>
+
+      <div class="p-6 rounded-2xl mb-12 border border-purple-500/20 bg-purple-500/5">
+        <p class="text-sm leading-relaxed text-slate-300">
+          The information, color palettes, and outfit recommendations provided on StyleGuru AI (https://www.styleguruai.in) are offered in good faith for general lifestyle, aesthetic inspiration, and wardrobe guidance. Please read this disclaimer carefully to understand the scope and limitations of our automated tools.
+        </p>
+      </div>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">1.</span> Aesthetic Suggestions & Subjectivity</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          Style is deeply personal. All color harmony ratings, contrast suggestions, fabric recommendations, and capsule wardrobe formulas generated by StyleGuru AI are algorithmic calculations based on color theory and machine learning models.
+        </p>
+        <p class="text-sm md:text-base leading-relaxed">
+          They are intended as creative suggestions and style inspiration—not absolute rules or professional bespoke fashion consultations. What looks flattering or feels empowering depends on individual personality, cultural comfort, silhouette preference, and personal flair. We strongly encourage you to wear what makes you feel most confident.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">2.</span> Lighting, Sensor & Calibration Variance</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          Our computer vision model analyzes skin tone and undertones based on user-uploaded selfies. However, digital images are significantly influenced by external variables beyond our algorithmic control, including:
+        </p>
+        <ul class="list-disc pl-5 space-y-2 text-sm md:text-base leading-relaxed">
+          <li>Ambient lighting (harsh fluorescent indoor bulbs vs. natural golden-hour daylight vs. backlighting).</li>
+          <li>Smartphone camera sensor processing, automatic HDR retouching, and white balance calibration.</li>
+          <li>Display screen calibration, brightness levels, and night-shift / blue-light filter settings on your device.</li>
+        </ul>
+        <p class="text-sm md:text-base leading-relaxed">
+          Consequently, an analysis performed in dim yellow artificial lighting may produce different undertone metrics than one taken in indirect natural morning daylight. For best results, we always advise users to take photos in clear, indirect natural light without beauty filters.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">3.</span> Non-Medical / Non-Dermatological Advice</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          StyleGuru AI's skin tone classification (evaluating ITA angles and color RGB values) is strictly an aesthetic color-matching tool designed for clothing harmony.
+        </p>
+        <p class="text-sm md:text-base leading-relaxed">
+          It is <strong class="text-white">not</strong> a clinical, medical, or dermatological diagnostic tool. It should not be used to assess skin health, conditions, pigmentation disorders, or medical needs. If you have concerns regarding your skin health, always consult a qualified healthcare professional or certified dermatologist.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">4.</span> External Product & Shopping Links</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          StyleGuru AI may display keyword suggestions or links to third-party retail platforms (such as Amazon India, Myntra, Flipkart, or partner fashion labels) solely to assist users in discovering fabrics, shades, and styles matching their recommended color palette.
+        </p>
+        <p class="text-sm md:text-base leading-relaxed">
+          StyleGuru AI does not own, manufacture, sell, or ship any apparel or accessories. We do not charge users any referral fees, nor are we responsible for product quality, order fulfillment, delivery, pricing discrepancies, or return policies of third-party merchants.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">5.</span> Third-Party Advertising (Google AdSense)</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          This website displays third-party advertisements served through Google AdSense. These advertisements are labeled with "Advertisement" or similar disclosures. The presence of an advertisement on StyleGuru AI does not constitute an endorsement, recommendation, or warranty of the products or services offered by the advertiser.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">6.</span> External Links Disclaimer</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          StyleGuru AI may contain links to external websites that are not provided or maintained by or in any way affiliated with us. Please note that StyleGuru AI does not guarantee the accuracy, relevance, timeliness, or completeness of any information on external websites.
+        </p>
+      </section>
+
+      <section class="mb-10 pb-8 border-b border-white/10 space-y-4 text-slate-300">
+        <h2 class="text-xl md:text-2xl font-serif text-white"><span class="text-amber-300 mr-2 text-sm font-sans font-semibold">7.</span> Questions Regarding This Disclaimer</h2>
+        <p class="text-sm md:text-base leading-relaxed">
+          If you have any questions or require further clarification regarding our disclosures, website terms, or advice limitations, please contact:
+        </p>
+        <div class="p-6 rounded-2xl border border-white/10 bg-white/5 space-y-2">
+          <p class="font-semibold text-white">StyleGuru AI Transparency Desk</p>
+          <p class="text-sm">Email: <a href="mailto:styleguruai.in@gmail.com" class="underline text-amber-300 font-mono">styleguruai.in@gmail.com</a></p>
+          <p class="text-xs text-slate-400 mt-2">Learn more about our operational ethos on our <a href="/about" class="underline text-purple-400">About Us</a> page.</p>
+        </div>
+      </section>
+    </main>
+  </div>`
+);
+
+// 2e. /contact (Target: 300+ words)
+writePage(
+  '/contact',
+  'Contact Us — StyleGuru AI | Support & Inquiries',
+  'Have questions about skin tone analysis, color palettes, or feature partnerships? Contact the StyleGuru AI team directly. We respond within 24 to 48 hours.',
+  `<div class="public-prerender-content min-h-screen py-12 px-4 sm:px-6 lg:px-8 text-slate-100" style="background:#0B0F1A;">
+    <main class="max-w-4xl mx-auto">
+      <div class="flex items-center gap-2 mb-4 text-xs font-semibold tracking-widest uppercase text-amber-300">
+        <span>Support & Helpdesk</span>
+        <span>•</span>
+        <span>Contact</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-light mb-4 font-serif text-white">Get in Touch with Our Team</h1>
+      <p class="text-sm sm:text-base leading-relaxed mb-10 pb-6 border-b border-white/10 text-slate-400">
+        Whether you have feedback on outfit recommendations, want to report a bug, have questions about data privacy, or are exploring partnerships, we are here to help.
+      </p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
+        <div class="lg:col-span-5 space-y-6">
+          <div class="p-6 rounded-2xl border border-white/10 bg-white/5 space-y-4">
+            <h2 class="text-lg font-serif text-white">Official Communication Channel</h2>
+            <p class="text-xs sm:text-sm leading-relaxed text-slate-400">
+              We believe in direct, reliable support. Please send any inquiries to our primary email desk below:
+            </p>
+            <div class="p-4 rounded-xl border border-white/10 bg-white/5 space-y-1">
+              <p class="text-[10px] uppercase font-bold tracking-wider text-amber-300">Primary Email</p>
+              <a href="mailto:styleguruai.in@gmail.com" class="text-sm font-medium underline break-all text-slate-200">
+                styleguruai.in@gmail.com
+              </a>
+            </div>
+            <div class="p-4 rounded-xl border border-white/10 bg-white/5 space-y-1">
+              <p class="text-[10px] uppercase font-bold tracking-wider text-amber-300">Typical Response Time</p>
+              <p class="text-xs text-slate-400">Within 24 to 48 business hours (Monday – Saturday, IST)</p>
+            </div>
+          </div>
+
+          <div class="p-6 rounded-2xl border border-purple-500/20 bg-purple-500/5 space-y-2">
+            <h3 class="text-sm font-semibold text-white">Privacy & Data Deletion</h3>
+            <p class="text-xs leading-relaxed text-slate-400">
+              Need your account or uploaded history removed? Email <a href="mailto:styleguruai.in@gmail.com" class="underline text-purple-400 font-medium">styleguruai.in@gmail.com</a> with <em>"Data Deletion Request"</em> in the subject line, and we will purge your profile within 7 business days.
+            </p>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7">
+          <div class="p-6 sm:p-8 rounded-2xl border border-white/10 bg-white/5 space-y-4">
+            <h2 class="text-xl font-serif text-white">Direct Message Inquiries</h2>
+            <p class="text-xs text-slate-400">
+              You can reach out to our desk for any of the following topics:
+            </p>
+            <ul class="space-y-3 text-xs text-slate-300">
+              <li class="p-3 rounded-xl bg-white/5 border border-white/10"><strong>General Inquiry / Feedback:</strong> Platform impressions, usability suggestions, or compliments.</li>
+              <li class="p-3 rounded-xl bg-white/5 border border-white/10"><strong>Style or Skin Tone Question:</strong> Questions regarding color harmony, fabric textures, or undertone classification.</li>
+              <li class="p-3 rounded-xl bg-white/5 border border-white/10"><strong>Bug Report / Glitch:</strong> Technical glitches encountered during camera scanning or account sync.</li>
+              <li class="p-3 rounded-xl bg-white/5 border border-white/10"><strong>Partnership / Media:</strong> Collaborative projects, interviews, and brand synergies.</li>
+            </ul>
+            <p class="text-xs text-slate-400 pt-2">
+              To send a direct message, email us at <a href="mailto:styleguruai.in@gmail.com" class="underline text-amber-300">styleguruai.in@gmail.com</a> with your details.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <section class="p-8 rounded-3xl border border-white/10 bg-white/5 mb-8 space-y-6">
+        <h2 class="text-xl font-serif text-white">Frequently Asked Questions</h2>
+        <div class="space-y-4 text-sm text-slate-300">
+          <div>
+            <h3 class="font-semibold text-white mb-1">Is StyleGuru AI free to use?</h3>
+            <p class="text-slate-400 leading-relaxed text-xs sm:text-sm">
+              Yes! All core features—including selfie skin tone analysis, palette generation, and capsule wardrobe recommendations—are completely free for users.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-semibold text-white mb-1">Do you store my uploaded photos?</h3>
+            <p class="text-slate-400 leading-relaxed text-xs sm:text-sm">
+              No. Images uploaded for analysis are processed transiently in server memory to calculate color coordinates and are not permanently saved on our servers.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-semibold text-white mb-1">How can I suggest a new feature or festival outfit palette?</h3>
+            <p class="text-slate-400 leading-relaxed text-xs sm:text-sm">
+              We love hearing from our community! Simply email <a href="mailto:styleguruai.in@gmail.com" class="underline text-amber-300">styleguruai.in@gmail.com</a> with your suggestions.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-semibold text-white mb-1">How accurate is the AI skin tone and undertone detection?</h3>
+            <p class="text-slate-400 leading-relaxed text-xs sm:text-sm">
+              Our computer vision model uses Individual Typology Angle (ITA) calculations and RGB hue mapping calibrated specifically for diverse Indian complexions. For the most accurate classification, upload a clear selfie taken in indirect natural daylight without camera filters, heavy sunglasses, or harsh indoor artificial lighting.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-semibold text-white mb-1">How quickly will I receive a reply from customer support?</h3>
+            <p class="text-slate-400 leading-relaxed text-xs sm:text-sm">
+              Our team monitors the styleguruai.in@gmail.com desk from Monday through Saturday (10:00 AM – 7:00 PM IST). We provide an initial email acknowledgment within 24 business hours and aim to resolve all style queries and technical bug reports within 48 business hours.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>`
 );
 
@@ -286,7 +777,7 @@ writePage(
 );
 
 // ── 4. Pre-render All 116 Blog Article Pages (/blog/[slug]) ──
-console.log(`[Pre-render] Generating ${posts.length} static blog post HTML files...`);
+console.log(`[Pre-render] Generating ${posts.length} static blog post HTML files WITHOUT boilerplate...`);
 
 for (let i = 0; i < posts.length; i++) {
   const p = posts[i];
@@ -317,32 +808,6 @@ for (let i = 0; i < posts.length; i++) {
     `
     )
     .join('\n');
-
-  // Comprehensive expert styling advice added to ensure all articles exceed 800+ words
-  const proTipsHtml = `
-    <section class="my-10 p-8 rounded-3xl bg-gradient-to-br from-violet-50 to-pink-50/50 border border-violet-200">
-      <h3 class="text-xl font-bold font-serif text-slate-900 mb-3">StyleGuru AI Practical Styling & Wardrobe Framework</h3>
-      <p class="text-sm text-slate-700 leading-relaxed mb-4">
-        When applying color theory in daily Indian life, always evaluate the relationship between your sub-surface undertone (warm, cool, or neutral) and the lighting environment you are in. Daylight reveals true hue saturation, while warm evening indoor lighting softens contrasting shades.
-      </p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-700">
-        <div class="p-4 rounded-xl bg-white border border-slate-200/80">
-          <strong class="text-violet-800 block mb-1">Fabric & Texture Impact:</strong>
-          Natural Indian fabrics like pure cotton, raw silk, chanderi, and linen reflect light softly, enhancing warm and wheatish complexions without harsh synthetic glare.
-        </div>
-        <div class="p-4 rounded-xl bg-white border border-slate-200/80">
-          <strong class="text-violet-800 block mb-1">Occasion Balancing:</strong>
-          For festive events (Diwali, weddings, Eid), pair your dominant skin-flattering shade with metallic accents (gold for warm undertones, silver for cool undertones) to maximize visual harmony.
-        </div>
-      </div>
-      <div class="mt-6 pt-4 border-t border-violet-200/60 flex items-center justify-between flex-wrap gap-3">
-        <span class="text-xs font-semibold text-slate-600">Want an exact analysis of your facial undertone and ideal colors?</span>
-        <a href="/" class="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs shadow-md no-underline">
-          Scan Your Skin Tone Free &rarr;
-        </a>
-      </div>
-    </section>
-  `;
 
   const schemaJson = JSON.stringify({
     '@context': 'https://schema.org',
@@ -378,7 +843,6 @@ for (let i = 0; i < posts.length; i++) {
         </h1>
         <article class="prose max-w-none text-slate-800 space-y-6">
           ${sectionsHtml}
-          ${proTipsHtml}
         </article>
         <section class="mt-12 pt-8 border-t border-slate-200">
           <h3 class="text-lg font-serif font-bold text-slate-900 mb-4">Related Fashion Articles</h3>
@@ -390,7 +854,7 @@ for (let i = 0; i < posts.length; i++) {
     </div>
   `;
 
-  writePage(`/blog/${p.slug}`, `${p.title} — StyleGuru AI`, p.description, articleContentHtml, extraHead);
+  writePage(`/blog/${p.slug}`, `${p.title} — StyleGuru AI`, p.description, articleContentHtml, extraHead, 'article');
 }
 
 console.log(`✅ [Pre-render] Successfully generated all static pages and ${posts.length} blog articles into /dist!`);

@@ -246,6 +246,18 @@ export default function ContactPage() {
                 We love hearing from our community! Simply use the form above with the subject "Style Advice Question" or email {CONTACT_EMAIL}.
               </p>
             </div>
+            <div>
+              <h3 className="font-semibold text-white mb-1">How accurate is the AI skin tone and undertone detection?</h3>
+              <p style={{ color: C.muted }} className="leading-relaxed">
+                Our computer vision model uses Individual Typology Angle (ITA) calculations and RGB hue mapping calibrated specifically for diverse Indian complexions. For the most accurate classification, upload a clear selfie taken in indirect natural daylight without camera filters, heavy sunglasses, or harsh indoor artificial lighting.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-white mb-1">How quickly will I receive a reply from customer support?</h3>
+              <p style={{ color: C.muted }} className="leading-relaxed">
+                Our team monitors the {CONTACT_EMAIL} desk from Monday through Saturday (10:00 AM – 7:00 PM IST). We provide an initial email acknowledgment within 24 business hours and aim to resolve all style queries and technical bug reports within 48 business hours.
+              </p>
+            </div>
           </div>
         </section>
       </main>
