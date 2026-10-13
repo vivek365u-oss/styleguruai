@@ -2,4 +2,5 @@
 /robots.txt /robots.txt 200
 /sitemap.xml /sitemap.xml 200
 /privacy   /privacy-policy 301
+/blog/why-styleguru-ai-is-essential-for-smarter-shopping /blog 301
 /*          /index.html 200

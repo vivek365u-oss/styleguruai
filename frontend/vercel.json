@@ -6,6 +6,11 @@
       "source": "/privacy",
       "destination": "/privacy-policy",
       "permanent": true
+    },
+    {
+      "source": "/blog/why-styleguru-ai-is-essential-for-smarter-shopping",
+      "destination": "/blog",
+      "permanent": true
     }
   ],
   "rewrites": [
