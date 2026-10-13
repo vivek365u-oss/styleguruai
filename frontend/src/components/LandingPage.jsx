@@ -1068,6 +1068,9 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
                     <img
                       src="/logo.png"
                       alt="Vivek Kumar - Founder of StyleGuru AI"
+                      width="96"
+                      height="96"
+                      loading="lazy"
                       className="w-24 h-24 object-contain"
                     />
                   </div>

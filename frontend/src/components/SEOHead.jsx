@@ -1,71 +1,79 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-export default function SEOHead({ title, description }) {
+export default function SEOHead({ title, description, image = 'https://www.styleguruai.in/og-image.svg' }) {
   const location = useLocation();
   const canonicalUrl = `https://www.styleguruai.in${location.pathname}`;
 
   useEffect(() => {
+    // 1. Title
     const prevTitle = document.title;
     document.title = title;
-    return () => { document.title = prevTitle; };
-  }, [title]);
 
-  useEffect(() => {
-    let meta = document.querySelector('meta[name="description"]');
-    let created = false;
-    if (!meta) {
-      meta = document.createElement('meta');
-      meta.setAttribute('name', 'description');
-      document.head.appendChild(meta);
-      created = true;
-    }
-    const prevContent = meta.getAttribute('content');
-    meta.setAttribute('content', description);
-    return () => {
-      if (created) {
-        document.head.removeChild(meta);
-      } else {
-        meta.setAttribute('content', prevContent || '');
-      }
-    };
-  }, [description]);
+    // Helper to safely set or create a meta tag
+    const setMetaTag = (attribute, attrValue, content) => {
+      let element = document.querySelector(`meta[${attribute}="${attrValue}"]`);
+      let created = false;
+      const prevContent = element ? element.getAttribute('content') : null;
 
-  // Canonical link — critical for Google indexing of SPA pages
-  useEffect(() => {
-    let link = document.querySelector('link[rel="canonical"]');
-    let created = false;
-    if (!link) {
-      link = document.createElement('link');
-      link.setAttribute('rel', 'canonical');
-      document.head.appendChild(link);
-      created = true;
-    }
-    link.setAttribute('href', canonicalUrl);
-    return () => {
-      if (created && link.parentNode) {
-        document.head.removeChild(link);
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute(attribute, attrValue);
+        document.head.appendChild(element);
+        created = true;
       }
-    };
-  }, [canonicalUrl]);
+      element.setAttribute('content', content);
 
-  // OG URL meta tag
-  useEffect(() => {
-    let ogUrl = document.querySelector('meta[property="og:url"]');
-    let created = false;
-    if (!ogUrl) {
-      ogUrl = document.createElement('meta');
-      ogUrl.setAttribute('property', 'og:url');
-      document.head.appendChild(ogUrl);
-      created = true;
-    }
-    ogUrl.setAttribute('content', canonicalUrl);
-    return () => {
-      if (created && ogUrl.parentNode) {
-        document.head.removeChild(ogUrl);
-      }
+      return () => {
+        if (created && element.parentNode) {
+          document.head.removeChild(element);
+        } else if (element && prevContent !== null) {
+          element.setAttribute('content', prevContent);
+        }
+      };
     };
-  }, [canonicalUrl]);
+
+    // Helper to set or create a link tag
+    const setLinkTag = (rel, href) => {
+      let element = document.querySelector(`link[rel="${rel}"]`);
+      let created = false;
+      const prevHref = element ? element.getAttribute('href') : null;
+
+      if (!element) {
+        element = document.createElement('link');
+        element.setAttribute('rel', rel);
+        document.head.appendChild(element);
+        created = true;
+      }
+      element.setAttribute('href', href);
+
+      return () => {
+        if (created && element.parentNode) {
+          document.head.removeChild(element);
+        } else if (element && prevHref !== null) {
+          element.setAttribute('href', prevHref);
+        }
+      };
+    };
+
+    // Apply Meta Tags
+    const cleanups = [
+      setMetaTag('name', 'description', description || ''),
+      setMetaTag('property', 'og:title', title),
+      setMetaTag('property', 'og:description', description || ''),
+      setMetaTag('property', 'og:url', canonicalUrl),
+      setMetaTag('property', 'og:image', image),
+      setMetaTag('name', 'twitter:title', title),
+      setMetaTag('name', 'twitter:description', description || ''),
+      setMetaTag('name', 'twitter:image', image),
+      setLinkTag('canonical', canonicalUrl),
+    ];
+
+    return () => {
+      document.title = prevTitle;
+      cleanups.forEach((cleanup) => cleanup());
+    };
+  }, [title, description, canonicalUrl, image]);
 
   return null;
 }
