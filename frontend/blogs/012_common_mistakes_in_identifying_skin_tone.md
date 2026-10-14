@@ -30,7 +30,7 @@ Looking at your wrists to see if your veins are green or blue is the oldest tric
 
 If you have fallen victim to these mistakes, you probably have a disjointed wardrobe. Eliminate the guesswork and the subjective mirror-staring entirely.
 
-You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By snapping a photo in natural light, the AI strips away the noise, objectively evaluates the pixels, and provides a mathematically accurate breakdown of your exact skin tone, undertone, and personalized color palette. 
+You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By snapping a photo in natural light, the AI strips away the noise, objectively evaluates the pixels, and provides a in terms of colour theory accurate breakdown of your exact skin tone, undertone, and personalized color palette. 
 
 ---
 
@@ -40,4 +40,4 @@ You can instantly [analyze your skin tone with StyleGuru AI](https://www.stylegu
 Are you wearing the wrong colors because you misidentified your skin tone? 🤦🏽‍♀️ Discover the 5 biggest mistakes people make when testing their undertones (and why being "fair" doesn't mean you are "cool"!). Save this pin to fix your wardrobe, and analyze your true tone at https://www.styleguruai.in/
 
 **Instagram Reel Caption:**
-Stop dressing for the WRONG skin tone! 🛑 many people misidentify their undertone because of these 5 massive mistakes. (Mistake #1: Testing your face instead of your jawline!). Drop a 🔥 if you agree! Want the AI to give you a mathematically perfect analysis? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #SkinToneMistakes #ColorAnalysis #FashionStyling #DesiFit
+Stop dressing for the WRONG skin tone! 🛑 many people misidentify their undertone because of these 5 massive mistakes. (Mistake #1: Testing your face instead of your jawline!). Drop a 🔥 if you agree! Want the AI to give you a well-balanced analysis? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #SkinToneMistakes #ColorAnalysis #FashionStyling #DesiFit

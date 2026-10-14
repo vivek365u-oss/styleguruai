@@ -32,7 +32,7 @@ Walking into an Indian wedding or a festive gathering wearing the standard Weste
 
 Stop trying to force an aesthetic designed for a freezing climate and a different biology onto your life. To build a genuinely phenomenal wardrobe, you must tailor it to your exact Indian climate and genetic profile.
 
-You don't have to figure it out alone. You can mathematically [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). Our AI ignores generic Western advice and focuses purely on what makes *your* specific skin tone radiate under the Indian sun, giving you a wardrobe guide that actually makes sense.
+You don't have to figure it out alone. You can in terms of colour theory [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). Our AI ignores generic Western advice and focuses purely on what makes *your* specific skin tone radiate under the Indian sun, giving you a wardrobe guide that actually makes sense.
 
 ---
 

@@ -36,7 +36,7 @@ A deep, vibrant Emerald Green or rich Maroon absorbs light almost as effectively
 
 If you are hiding in black clothes every day because you think it is your only slimming option, you are crushing your aesthetic potential. 
 
-You must discover your biological heavy neutrals. You can rigorously [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping the depth of your melanin, our algorithm assigns you the absolute best "Slimming Palette"—explicitly detailing whether you should be hiding in Espresso, Charcoal, or Sapphire to look flawless.
+You must discover your biological heavy neutrals. You can rigorously [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping the depth of your melanin, our algorithm assigns you the absolute best "Slimming Palette"—explicitly detailing whether you should be hiding in Espresso, Charcoal, or Sapphire to look polished.
 
 ---
 

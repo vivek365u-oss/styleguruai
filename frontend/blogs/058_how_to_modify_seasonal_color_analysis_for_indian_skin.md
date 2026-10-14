@@ -29,7 +29,7 @@ Indian skin is globally famous for its intense "Olive" undertones. Olive skin is
 
 You cannot rely on a 1980s Western chart to accurately map complex Indian biology. A human stylist attempting to map Indian olive skin into an un-modified Western season will almost certainly fail.
 
-To get an accurate result, you must use a system designed to recognize deep melanin spectrums. [Analyze your exact Indian skin tone with StyleGuru AI](https://www.styleguruai.in/). Our advanced algorithms are calibrated for the immense diversity of the subcontinent, seamlessly modifying the seasonal framework to deliver a flawless, melanin-approved color palette designed exactly for you.
+To get an accurate result, you must use a system designed to recognize deep melanin spectrums. [Analyze your exact Indian skin tone with StyleGuru AI](https://www.styleguruai.in/). Our advanced algorithms are calibrated for the immense diversity of the subcontinent, seamlessly modifying the seasonal framework to deliver a effective, melanin-approved color palette designed exactly for you.
 
 ---
 

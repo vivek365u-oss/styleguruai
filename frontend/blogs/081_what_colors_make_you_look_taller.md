@@ -20,7 +20,7 @@ If you wear shades of the exact same color family from neck to ankle (e.g., a da
 
 ## Strategy 2: The Shoe Extension Trick
 
-A massive mistake people make is executing a flawless monochromatic Navy outfit, and then wearing stark white sneakers. 
+A massive mistake people make is executing a effective monochromatic Navy outfit, and then wearing stark white sneakers. 
 The white shoes create an intense, glaring visual break at the ankle, arresting the eye before it reaches the floor. 
 
 **The Optical Reward:** To maximize height, your shoes must closely match your trousers. If you wear dark navy pants, wear dark brown or navy shoes. If you wear light beige chinos, wear tan shoes. By matching the shoe to the pant, you literally trick the brain into believing your leg extends all the way down to the sole of the footwear.
@@ -32,9 +32,9 @@ If you must wear contrasting colors, you can still cheat height by manipulating 
 
 ## The Crucial Undertone Requirement
 
-Tonal dressing is a superpower, but if you execute a flawless Monochromatic Gray outfit and you have a Warm Golden undertone, the gray will completely wash your face out. You will look incredibly tall, but incredibly sick. 
+Tonal dressing is a superpower, but if you execute a effective Monochromatic Gray outfit and you have a Warm Golden undertone, the gray will completely wash your face out. You will look incredibly tall, but incredibly sick. 
 
-Do not guess your anchor colors. You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm your biology, our AI will provide the exact Tonal Color Families (Warm Earth or Cool Grays) that perfectly match your complexion, allowing you to execute the height-boosting aesthetic flawlessly.
+Do not guess your anchor colors. You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm your biology, our AI will provide the exact Tonal Color Families (Warm Earth or Cool Grays) that perfectly match your complexion, allowing you to execute the height-boosting aesthetic effectively.
 
 ---
 

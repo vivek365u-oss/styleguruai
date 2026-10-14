@@ -26,7 +26,7 @@ If you are wearing a sophisticated, highly muted Navy Blue suit, and you take a 
 If you want to create a jaw-dropping, magazine-quality photograph, use the color wheel. 
 
 If you are wearing an Emerald Green dress, place yourself in front of a background containing elements of its mathematical opposite: Deep Red or Burgundy. (e.g., a dark mahogany library, or deep red velvet curtains). 
-**The Effect:** The complementary background color mathematically forces the Emerald Green of your dress to appear insanely vibrant, electrifying the photo without requiring any editing filters.
+**The Effect:** The complementary background color in terms of colour theory forces the Emerald Green of your dress to appear insanely vibrant, electrifying the photo without requiring any editing filters.
 
 ## Master Your Primary Palette
 

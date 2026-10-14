@@ -23,10 +23,10 @@ If you want to wear a loud pink blouse, surround it with a Sea of Neutrals. Wear
 
 ## Rule 3: Eliminating Temperature Friction
 
-Many people unintentionally clash the *temperature* of their outfit. The outfit looks strange, but they can't mathematically identify why.
+Many people unintentionally clash the *temperature* of their outfit. The outfit looks strange, but they can't in terms of colour theory identify why.
 
 This happens when you mix distinctly warm, earthy tones with distinctly cold, artificial tones. Wearing a beautiful, natural, Warm Olive-Green pant with a Cold, icy-lavender shirt creates cognitive dissonance. The warm earth tone rejects the cold, synthetic ice tone. 
-**The Fix:** Restrict your outfit to a single temperature family. Warm colors (Mustards, Olive, Rust, Brick Red) mix flawlessly with each other. Cool colors (Sapphire, Amethyst, Emerald, Icy Gray) mix flawlessly together. Keep the sides of the spectrum segregated.
+**The Fix:** Restrict your outfit to a single temperature family. Warm colors (Mustards, Olive, Rust, Brick Red) mix effectively with each other. Cool colors (Sapphire, Amethyst, Emerald, Icy Gray) mix effectively together. Keep the sides of the spectrum segregated.
 
 ## The Ultimate Clash: Your Skin
 

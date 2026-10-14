@@ -36,7 +36,7 @@ When layering multiple colors, rely heavily on varied matte textures. A rough bl
 
 To ensure your layers perfectly harmonize with each other and with your skin, you must lock down your fundamental base palette. 
 
-Remove the guesswork from your morning routine. Simply [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will evaluate your exact biology and deliver the precisely unified color family you need to ensure every layer you put on your body mathematically matches, creating flawless dimensional style.
+Remove the guesswork from your morning routine. Simply [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will evaluate your exact biology and deliver the precisely unified color family you need to ensure every layer you put on your body in terms of colour theory matches, creating effective dimensional style.
 
 ---
 

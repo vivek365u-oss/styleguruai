@@ -1,7 +1,7 @@
 /**
  * colorTheoryEngine.js — Master Color Theory & Wardrobe Taxonomy Engine
  * ─────────────────────────────────────────────────────────────────────────────
- * Provides 100% scientifically accurate, skin-tone & undertone harmonized
+ * Provides color-science-based, skin-tone & undertone harmonized
  * palettes, head-to-toe outfit ensembles, and curated accessory suites
  * for Male and Female users across Indian ethnic, Western, streetwear,
  * basics, footwear, and grooming.

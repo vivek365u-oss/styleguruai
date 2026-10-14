@@ -6,7 +6,7 @@ The truth is, Diwali is the one time of year where Indian men are culturally enc
 
 ## The Warm-Light Amplification
 
-As established, Diwali evenings are bathed in warm, golden candlelight. This ambient glow amplifies warm colors and slightly mutes cool colors. Your outfit selection must account for this environmental filter.
+In colour science, Diwali evenings are bathed in warm, golden candlelight. This ambient glow amplifies warm colors and slightly mutes cool colors. Your outfit selection must account for this environmental filter.
 
 ## Colors for Warm-Toned Indian Men
 

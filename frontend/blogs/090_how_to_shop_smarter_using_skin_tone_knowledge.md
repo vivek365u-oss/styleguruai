@@ -27,7 +27,7 @@ You might see a cheap ₹500 neon shirt on sale and impulse-buy it. But because 
 
 Alternatively, you invest ₹3000 in a high-quality, Deep Olive linen shirt that perfectly matches your Autumn biology. You wear it 50 times over two years. Your Cost Per Wear = ₹60 per occasion. 
 
-The expensive shirt that matches your biology is mathematically cheaper than the bargain shirt that doesn't.
+The expensive shirt that matches your biology is in terms of colour theory cheaper than the bargain shirt that doesn't.
 
 ## 4. The Online Shopping Protocol
 

@@ -29,13 +29,13 @@ To combat beard shadowing, men should aggressively utilize "Warm Injectors." Wea
 When an older man's beard begins to turn silver or white, the optical physics reverse completely. 
 
 The introduction of white hair dramatically *lowers* his personal contrast. The stark blackness that once commanded his face is gone, replaced by a soft, pale silver. 
-**The Wardrobe Shift:** He can no longer lean heavily on stark black suits or aggressive neon colors. The harsh colors will completely overpower his soft silver presentation. He must immediately pivot to muted elegance—Slate grays, Camel, soft Navy, and Sage greens—to harmonize flawlessly with his new, delicate contrast ceiling.
+**The Wardrobe Shift:** He can no longer lean heavily on stark black suits or aggressive neon colors. The harsh colors will completely overpower his soft silver presentation. He must immediately pivot to muted elegance—Slate grays, Camel, soft Navy, and Sage greens—to harmonize effectively with his new, delicate contrast ceiling.
 
 ## Master Your Evolving Profile
 
 Your face is not a static canvas. As your facial hair grows, grays, or is shaven off, your optimal color geometry shifts wildly. 
 
-Do not rely on rules that worked for a version of yourself five years ago. You can instantly keep your wardrobe scientifically aligned by [analyzing your skin tone with StyleGuru AI](https://www.styleguruai.in/). Take a photo with your current beard, and the algorithmic engine will map the new optical weight of your facial hair, generating the specific high-contrast or muted palette you require to look flawlessly modern today.
+Do not rely on rules that worked for a version of yourself five years ago. You can instantly keep your wardrobe scientifically aligned by [analyzing your skin tone with StyleGuru AI](https://www.styleguruai.in/). Take a photo with your current beard, and the algorithmic engine will map the new optical weight of your facial hair, generating the specific high-contrast or muted palette you require to look effectively modern today.
 
 ---
 

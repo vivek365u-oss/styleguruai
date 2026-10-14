@@ -32,7 +32,7 @@ Your hair acts as the frame for a picture (your face). If the frame is heavy and
 
 Before you radically alter the heavy block of color on your head, or build an expensive wardrobe, you must ensure you have a mathematical understanding of your baseline skin biology. 
 
-Remove the dangerous guesswork. You can rigorously [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will decode the unchangeable genetic base of your skin, explicitly telling you your exact contrast limits. Armed with this algorithmic data, you can make flawless, risk-free choices about what color to dye your hair and what clothes belong in your closet.
+Remove the dangerous guesswork. You can rigorously [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will decode the unchangeable genetic base of your skin, explicitly telling you your exact contrast limits. Armed with this algorithmic data, you can make effective, risk-free choices about what color to dye your hair and what clothes belong in your closet.
 
 ---
 

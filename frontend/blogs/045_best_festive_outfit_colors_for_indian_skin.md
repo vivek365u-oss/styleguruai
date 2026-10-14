@@ -10,7 +10,7 @@ To ensure you look radiant, wealthy, and aristocratic at your next Divali party 
 
 The vast majority of the Indian population falls into the Warm or Olive undertone spectrums, possessing high melanin blended with yellow/golden carotene. For this demographic, festive wear should mirror the heat of the subcontinent.
 
-- **Mustard / Saffron (Haldi hues):** Deep, earthy yellows act as a literal mirror to golden skin. It illuminates the face flawlessly, projecting joy and regal energy without the harsh, sickening effect of "neon" primary yellow.
+- **Mustard / Saffron (Haldi hues):** Deep, earthy yellows act as a literal mirror to golden skin. It illuminates the face effectively, projecting joy and regal energy without the harsh, sickening effect of "neon" primary yellow.
 - **Deep Maroon / Brick Red:** True, bright "fire engine" red contains a cool, blue base that clashes with warm skin. Deep Maroon contains a brown/warm base. A maroon silk Kurta or Sari looks devastatingly expensive and deeply traditional.
 - **Burnt Orange / Terracotta:** A massively underrated festive color. It is highly vibrant but grounded in earth tones, making warm skin glow naturally.
 
@@ -33,7 +33,7 @@ If a warm-toned individual wears a Saffron Kurta heavily embroidered with bright
 
 Buying heavy festive wear is a massive financial investment. Do not guess your undertone and risk looking washed out in hundreds of wedding photos. 
 
-You can rigorously [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm a single selfie in natural daylight, our AI maps your exact CIELAB color space coordinates, instantly generating your mathematically perfect festive palette and creating a standout look at your next event.
+You can rigorously [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm a single selfie in natural daylight, our AI maps your exact CIELAB color space coordinates, instantly generating your well-balanced festive palette and creating a standout look at your next event.
 
 ---
 

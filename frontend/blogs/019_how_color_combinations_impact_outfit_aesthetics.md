@@ -34,7 +34,7 @@ This involves building a foundation of neutral tones (black, white, gray, beige,
 
 You can execute a perfect monochromatic or analogous combination, but if the foundational colors clash with your biological undertone, the entire aesthetic falls apart. An icy-blue monochromatic outfit will look expensive on a cool-toned person but cheap and sickly on a warm-toned person.
 
-Before you map out your clothing combinations, you must know your baseline. You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) to discover exactly which colors belong in your combinations. Once our AI tells you your best colors, combining them becomes mathematically easy.
+Before you map out your clothing combinations, you must know your baseline. You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) to discover exactly which colors belong in your combinations. Once our AI tells you your best colors, combining them becomes in terms of colour theory easy.
 
 ---
 

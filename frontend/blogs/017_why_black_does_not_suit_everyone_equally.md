@@ -27,7 +27,7 @@ For Winters, black looks incredibly sharp, tailored, and luxurious. It enhances 
 
 ## Who Should Avoid True Black?
 
-If you belong to the **Spring**, **Summer**, or **Autumn** color palettes, pure black is mathematically too heavy for you.
+If you belong to the **Spring**, **Summer**, or **Autumn** color palettes, pure black is in terms of colour theory too heavy for you.
 - **Summers (Cool, low contrast):** Black will wash you out entirely. You look significantly better in Navy Blue or Charcoal Gray.
 - **Autumns (Warm, earthy):** Because black has no warmth in it, it clashes with your golden undertones. You look dramatically better in Espresso Brown or deep Olive.
 - **Springs (Warm, bright):** Black is too heavy for your radiant, sunny complexion. Navy or deep Caramel is far superior.

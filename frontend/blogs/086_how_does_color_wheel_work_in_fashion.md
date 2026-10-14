@@ -38,7 +38,7 @@ Instead of using the direct opposite, you use the two colors flanking the opposi
 
 ## The Biological Overlay
 
-You can create the most mathematically perfect complementary outfit in the world, but if the colors clash with your biological skin undertone, you will look terrible. Your skin is the invisible "filter" overlaid on top of the Color Wheel. 
+You can create the most well-balanced complementary outfit in the world, but if the colors clash with your biological skin undertone, you will look terrible. Your skin is the invisible "filter" overlaid on top of the Color Wheel. 
 
 Before building any Color Wheel outfit, you must know your genetic anchor point. You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm maps your exact biological hue onto the Color Wheel, revealing which quadrant of the wheel you biologically belong to and which geometric combinations will make you look utterly unstoppable.
 

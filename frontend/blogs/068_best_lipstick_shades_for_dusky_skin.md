@@ -18,7 +18,7 @@ The biggest lie in makeup is the universal "nude." Standard peachy-beige nudes c
 For deep skin, a "nude" is not an absence of color; it is a deep, rich neutral. 
 
 - **Your Best Nudes:** Look for deep Chocolate Browns, rich Espresso, or dark Chestnut-pink mixes. 
-- **The Lip Liner Hack:** If you have a lipstick that is slightly too pale and washing you out, you do not need to throw it away. Outline your lips with a dark, rich brown lip liner, apply the pale lipstick strictly to the center, and blend them together. The dark border anchors the lipstick to your dark skin, creating a flawless ombre effect.
+- **The Lip Liner Hack:** If you have a lipstick that is slightly too pale and washing you out, you do not need to throw it away. Outline your lips with a dark, rich brown lip liner, apply the pale lipstick strictly to the center, and blend them together. The dark border anchors the lipstick to your dark skin, creating a effective ombre effect.
 
 ## 3. The Power Reds 
 
@@ -37,7 +37,7 @@ Because purple sits between red and blue on the color wheel, it perfectly stradd
 
 While deep berries and browns are universally flattering on dusky skin, whether you should buy the *Brick* Red or the *Blue* Red depends entirely on your exact biological undertone. 
 
-Don't buy fifty lipsticks trying to find the one that works. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mathematically diagnosing whether your dusky skin leans Warm, Cool, or Neutral, the AI explicitly gives you the exact hex-codes you need to match the perfect bold lipstick to your DNA.
+Don't buy fifty lipsticks trying to find the one that works. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By in terms of colour theory diagnosing whether your dusky skin leans Warm, Cool, or Neutral, the AI explicitly gives you the exact hex-codes you need to match the perfect bold lipstick to your DNA.
 
 ---
 

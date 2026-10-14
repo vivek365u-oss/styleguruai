@@ -29,9 +29,9 @@ Loud, high-shine, glossy lips command aggressive attention and can sometimes be 
 
 ## The Harmony Requirement
 
-Your "office neutral" aesthetic will completely fail if those muted neutral colors do not perfectly match your biological undertone. If a cool-toned woman uses a "professional" warm brown lipstick, it will still mathematically clash with her DNA and make her look sickly under the harsh office fluorescent lights. 
+Your "office neutral" aesthetic will completely fail if those muted neutral colors do not perfectly match your biological undertone. If a cool-toned woman uses a "professional" warm brown lipstick, it will still tend to clash with her DNA and make her look sickly under the harsh office fluorescent lights. 
 
-Ensure your professional competence is never undermined by a bad color match. You can seamlessly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm your unedited parameters, the AI meticulously assigns the specific muted mauves and browns that biologically match your complexion, giving you the flawless corporate aesthetic tailored to project polished competence.
+Ensure your professional competence is never undermined by a bad color match. You can seamlessly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm your unedited parameters, the AI meticulously assigns the specific muted mauves and browns that biologically match your complexion, giving you the polished corporate aesthetic tailored to project polished competence.
 
 ---
 

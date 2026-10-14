@@ -37,7 +37,7 @@ The color block closest to your face (your shirt, jacket, or scarf) **must** mat
 
 Color blocking is intimidating because if you guess the colors wrong, you look like a walking traffic light. You must know your genetic baseline. 
 
-You can remove the fear entirely by [analyzing your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping your exact biological hue and contrast ratio, our algorithms will provide you with the specific color combinations required to execute flawless, runway-ready color blocking.
+You can remove the fear entirely by [analyzing your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping your exact biological hue and contrast ratio, our algorithms will provide you with the specific color combinations required to execute effective, runway-ready color blocking.
 
 ---
 

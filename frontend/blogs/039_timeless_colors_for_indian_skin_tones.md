@@ -35,7 +35,7 @@ Pure bleached white is a clinical, cold modern invention.
 
 Investing thousands of rupees into a timeless garment only works if you select the specific timeless color tuned to your DNA. Is your optimal timeless color Emerald or Navy? 
 
-You can find out definitively. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) to algorithmically determine exactly which of these eternal colors flawlessly matches your unique biology, allowing you to build a wardrobe that outlives any trend.
+You can find out clearly. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) to algorithmically determine exactly which of these eternal colors effectively matches your unique biology, allowing you to build a wardrobe that outlives any trend.
 
 ---
 

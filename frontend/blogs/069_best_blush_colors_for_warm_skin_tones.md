@@ -11,7 +11,7 @@ To look naturally radiant and expensive, your blush must mimic the actual heat g
 If you have a fair to medium-warm skin tone (often categorized as Spring or Autumn), Peach is your ultimate weapon. 
 
 **Why it works:** Peach is a brilliant optical hybrid—it contains the warmth of orange, heavily diluted with the softness of pink. Because it has an underlying golden/orange base, it melts effortlessly into warm skin. It doesn’t look like makeup; it looks like you just stepped in from a sunny walk. 
-**The Execution:** For an everyday, "no-makeup" makeup look, a liquid or cream peach blush tapped lightly over the cheekbones provides a flawless, dewy finish.
+**The Execution:** For an everyday, "no-makeup" makeup look, a liquid or cream peach blush tapped lightly over the cheekbones provides a effective, dewy finish.
 
 ## 2. Rich Terracotta and Brick (For Medium to Dusky Skin)
 

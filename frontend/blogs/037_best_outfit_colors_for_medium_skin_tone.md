@@ -12,7 +12,7 @@ Medium Indian skin is almost universally defined by its rich underlying warmth (
 
 - **Mustard Yellow & Ochre:** These colors perfectly echo your skin's golden base. Slipping on a mustard top acts as a literal "ring light" for your face, illuminating it.
 - **Terracotta & Burnt Orange:** The exact color of sun-baked earth. These colors inject an instantaneous, healthy flush to your complexion without being as aggressive as primary red.
-- **Olive & Khaki Green:** A neutral green operates flawlessly against medium skin, offering a sophisticated, understated aesthetic perfect for everyday wear.
+- **Olive & Khaki Green:** A neutral green operates effectively against medium skin, offering a sophisticated, understated aesthetic perfect for everyday wear.
 
 ## 2. Deep Jewel Tones (The Luxury Contrast)
 
@@ -25,7 +25,7 @@ When it is time to look formal, striking, and expensive, you must pivot to high-
 
 How you build your foundational basics dictates the elegance of your wardrobe. 
 
-- **Cream over White:** Medium skin tones should avoid stark, clinical white. Pure white contains a cool, blue base that can make golden skin look slightly muddy. Instead, choose Ivory, Cream, or Off-White. The subtle yellow in cream harmonizes flawlessly with your undertone.
+- **Cream over White:** Medium skin tones should avoid stark, clinical white. Pure white contains a cool, blue base that can make golden skin look slightly muddy. Instead, choose Ivory, Cream, or Off-White. The subtle yellow in cream harmonizes effectively with your undertone.
 - **Camel over Gray:** While charcoal gray is acceptable, a rich Camel or Tan provides a stunning monochromatic aesthetic for medium skin, projecting the elusive "Old Money" style.
 
 ## Colors Medium Skin Should Avoid
@@ -37,7 +37,7 @@ Pale mint green, icy lavender, and frosty baby blue have a severely cold, high-w
 
 While these rules apply to the vast majority of medium skin tones, there are rare exceptions (like the Medium Olive/Neutral profile). Are you one of them? 
 
-You don't need to guess. You can flawlessly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding our algorithms an unedited selfie, AI will mathematically calculate your exact melanin density and undertone temperature, delivering a bespoke color palette that helps your medium skin look constantly radiant.
+You don't need to guess. You can effectively [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding our algorithms an unedited selfie, AI will estimate your exact melanin density and undertone temperature, delivering a bespoke color palette that helps your medium skin look constantly radiant.
 
 ---
 

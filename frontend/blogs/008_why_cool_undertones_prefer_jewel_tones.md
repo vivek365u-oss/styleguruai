@@ -1,8 +1,8 @@
 # Why Do Cool Undertones Look Better in Jewel Tones?
 
-Fashion experts unanimously agree: if you have a cool undertone, jewel tones are your absolute best friend. Sapphire blue, emerald green, amethyst purple, and ruby red have a near-magical ability to make cool-skinned individuals look expensive, vibrant, and strikingly elegant.
+Fashion experts generally agree: if you have a cool undertone, jewel tones are your absolute best friend. Sapphire blue, emerald green, amethyst purple, and ruby red have a near-magical ability to make cool-skinned individuals look expensive, vibrant, and strikingly elegant.
 
-But why exactly does this specific category of colors work so flawlessly with cool skin biology?
+But why exactly does this specific category of colors work so effectively with cool skin biology?
 
 ## The Nature of a Cool Undertone
 

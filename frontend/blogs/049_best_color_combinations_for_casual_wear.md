@@ -26,14 +26,14 @@ The problem with pure black in casual wear is that it often looks too severe—l
 
 ## 4. Monochrome Indigo (The Denim Engine)
 
-Double denim is terrifying for most people, but when executed via a monochromatic scale, it is flawless casual style. 
+Double denim is terrifying for most people, but when executed via a monochromatic scale, it is effective casual style. 
 **Why it works:** Pairing a light-wash chambray blue shirt with deep, unwashed indigo jeans creates a vertical tonal flow. The varying shades of blue keep the outfit cohesive and visually elongating. Because blue is universally associated with workwear and utility, it is the fundamental language of casual fashion.
 
 ## The Variable of You
 
 These four combinations are the pillars of casual style, but they must be fine-tuned to your specific genetics. A pristine "Resort" White might look glorious on a cool-toned person but ashy on an olive-toned person. 
 
-Stop guessing. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI will output your personalized CIELAB color framework, defining exactly which shades of Olive, Camel, and Indigo you should be buying for your flawless casual wardrobe.
+Stop guessing. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI will output your personalized CIELAB color framework, defining exactly which shades of Olive, Camel, and Indigo you should be buying for your effective casual wardrobe.
 
 ---
 

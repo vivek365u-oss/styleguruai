@@ -30,7 +30,7 @@ If you had Warm, fair skin and were advised to wear Cream instead of Stark White
 
 Your wardrobe should evolve with the seasons. The colors that served you in January may actively sabotage you in July.
 
-To keep your wardrobe perfectly synchronized with your current complexion, periodically [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). Take a fresh selfie after your sun exposure, and the AI will recalculate the precise depth and contrast of your current skin, adjusting your color palette to ensure you look flawless year-round.
+To keep your wardrobe perfectly synchronized with your current complexion, periodically [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). Take a fresh selfie after your sun exposure, and the AI will recalculate the precise depth and contrast of your current skin, adjusting your color palette to ensure you look polished year-round.
 
 ---
 

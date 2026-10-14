@@ -21,7 +21,7 @@ If you replace the Olive Green with an icy Mint Green (cool), the harmony shatte
 
 ### Law 2: Controlled Saturation
 For colors to harmonize, they must share a similar level of saturation (brightness/mutedness).
-Three deeply muted, dusty colors (like Slate Blue, Mauve, and Sage Green) harmonize flawlessly because they share the same "energy level."
+Three deeply muted, dusty colors (like Slate Blue, Mauve, and Sage Green) harmonize effectively because they share the same "energy level."
 If you inject a screaming neon yellow into that muted combination, the jarring difference in saturation breaks the harmony.
 
 ### Law 3: Value Transition (The Gradient)

@@ -1,6 +1,6 @@
 # How Does Outfit Color Clash With Makeup?
 
-You have established your perfect Seasonal Color Palette for your wardrobe. You are wearing a breathtakingly engineered outfit that perfectly matches your skin tone. You step out of the door, but something feels jarring. Despite the flawless outfit, your face looks disconnected, harsh, and cheap. 
+You have established your perfect Seasonal Color Palette for your wardrobe. You are wearing a breathtakingly engineered outfit that perfectly matches your skin tone. You step out of the door, but something feels jarring. Despite the effective outfit, your face looks disconnected, harsh, and cheap. 
 
 The culprit? **A Cosmetic Clash.**
 
@@ -27,7 +27,7 @@ A clash does not only happen via temperature; it happens via intensity.
 
 If you are terrified of your makeup clashing with your carefully styled outfit, the most powerful and expensive-looking aesthetic in the world is the **Monochromatic Match**.
 
-Look at how you styled your outfit. If the dress is Crimson Red, find a lipstick that is a near-identical Crimson Red. If the suit is a deep warm Camel, utilize a warm brown/camel bronzer and a deep mocha lip. By mathematically matching the exact color profile across the clothing and the cosmetics, you create a seamless, unbreakable vertical hierarchy. You will look unimaginably regal and organized. 
+Look at how you styled your outfit. If the dress is Crimson Red, find a lipstick that is a near-identical Crimson Red. If the suit is a deep warm Camel, utilize a warm brown/camel bronzer and a deep mocha lip. By in terms of colour theory matching the exact color profile across the clothing and the cosmetics, you create a seamless, unbreakable vertical hierarchy. You will look unimaginably regal and organized. 
 
 ## Synchronize Your Entire Biology
 

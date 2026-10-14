@@ -25,7 +25,7 @@ Cameras calculate exposure by trying to find "Middle Gray." When a massive block
 
 ## Harmonize With Your Undertone
 
-You can wear the perfect solid Emerald Green shirt, but if Emerald mathematically clashes with your unique biological skin undertone, the camera will ruthlessly capture that clash, highlighting the dark circles under your eyes. 
+You can wear the perfect solid Emerald Green shirt, but if Emerald tend to clashes with your unique biological skin undertone, the camera will ruthlessly capture that clash, highlighting the dark circles under your eyes. 
 
 Never guess your photogenic baseline. You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm your unedited parameters, the AI extracts your exact CIELAB color values, curating the ultimate photogenic color palette curated to help ensure you look striking holding any camera.
 

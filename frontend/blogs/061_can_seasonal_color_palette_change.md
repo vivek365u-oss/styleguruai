@@ -32,7 +32,7 @@ While rare, significant hormonal changes, certain medical treatments, or heavy d
 
 Your wardrobe is an investment, but if it is mapped to biology you no longer possess, you are wasting your money. You should re-assess your color palette every 5 to 10 years, or immediately following a significant change in hair color.
 
-You do not need to hire an expensive stylist every decade. You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) at any time. By uploading a current, unedited photo, our algorithm will mathematically plot your current contrast ratios and melanin levels, letting you know exactly if you are still the Season you were ten years ago, or if it is time to evolve your wardrobe.
+You do not need to hire an expensive stylist every decade. You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) at any time. By uploading a current, unedited photo, our algorithm will in terms of colour theory plot your current contrast ratios and melanin levels, letting you know exactly if you are still the Season you were ten years ago, or if it is time to evolve your wardrobe.
 
 ---
 

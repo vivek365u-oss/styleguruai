@@ -4,7 +4,7 @@ When building an elite wardrobe, people typically focus on two isolated variable
 
 Most style guides treat these two elements as completely separate conversations. However, in the highest echelons of professional styling, experts know that **color interacts intimately with physical geometry.** You cannot maximize your silhouette without using your color palette as a structural tool. 
 
-Here is exactly how body type interacts with skin tone, and how you can combine them for a flawless aesthetic.
+Here is exactly how body type interacts with skin tone, and how you can combine them for a effective aesthetic.
 
 ## The Illusion of Visual Weight (Light vs. Dark)
 
@@ -27,7 +27,7 @@ This is where skin tone harmony becomes crucial.
 
 Think of your "Power Colors"—the specific hues that perfectly match your undertone—as highlighters. They draw the observer's absolute attention.
 
-If you are a pear-shaped individual (wider hips, narrower shoulders) and you want to balance your proportions, wear your most vibrant, perfectly matched power color (e.g., a warm mustard or emerald green) on your upper body, and a darker neutral on your lower body. The flawless color alignment will instantly draw the eyes upward to your radiant face and chest, completely downplaying your lower half.
+If you are a pear-shaped individual (wider hips, narrower shoulders) and you want to balance your proportions, wear your most vibrant, perfectly matched power color (e.g., a warm mustard or emerald green) on your upper body, and a darker neutral on your lower body. The effective color alignment will instantly draw the eyes upward to your radiant face and chest, completely downplaying your lower half.
 
 ## Mastering Both Variables
 

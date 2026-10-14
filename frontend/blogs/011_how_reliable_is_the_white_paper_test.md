@@ -39,7 +39,7 @@ To make the White Paper Test work, you must execute it perfectly:
 
 If you squint at the paper and still feel confused, you are not alone. Human eyesight is subjective. If you want a perfectly reliable analysis without playing guessing games with office supplies, technology has the answer. 
 
-You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By taking a quick picture, our AI evaluates the hex codes of your pixels, bypassing environmental bias entirely to deliver an objective, mathematically precise undertone analysis and color palette. 
+You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By taking a quick picture, our AI evaluates the hex codes of your pixels, bypassing environmental bias entirely to deliver an objective, in terms of colour theory precise undertone analysis and color palette. 
 
 ---
 

@@ -41,7 +41,7 @@ To elevate your aesthetic, there are certain color bands that generally drain th
 
 ## Personalizing Your Palette
 
-Are you a Warm Dusky or a Cool Dusky? This tiny distinction dictates whether you should buy the Mustard Shirt or the Amethyst Shirt. Instead of guessing, you can scientifically [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). Just upload your photo, and our advanced AI will map your precise melanin density and undertone to confidently deliver your flawless color palette.
+Are you a Warm Dusky or a Cool Dusky? This tiny distinction dictates whether you should buy the Mustard Shirt or the Amethyst Shirt. Instead of guessing, you can scientifically [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). Just upload your photo, and our advanced AI will map your precise melanin density and undertone to confidently deliver your effective color palette.
 
 ---
 

@@ -16,7 +16,7 @@ Basic advice tells you *what* temperature to wear, but ignores *how intense* tha
 
 ## 2. Retail Lighting Manipulation
 
-Stores spend thousands of dollars engineering their lighting specifically to deceive you. Subconsciously, retailers use high-CRI (Color Rendering Index) lighting positioned directly above the mirrors to cast a flawless, shadow-free glow on your skin. 
+Stores spend thousands of dollars engineering their lighting specifically to deceive you. Subconsciously, retailers use high-CRI (Color Rendering Index) lighting positioned directly above the mirrors to cast a effective, shadow-free glow on your skin. 
 
 You try on a shirt, and the engineered lighting makes it look incredible. You buy it, step into the harsh, unengineered daylight of the real world, and the true color of the shirt clashes terribly with your actual skin tone. 
 

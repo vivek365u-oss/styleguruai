@@ -4,7 +4,7 @@ You apply your makeup perfectly in the bathroom, put on a shirt that makes you l
 
 You are a victim of **Metamerism**—the scientific phenomenon where lighting dictates color.
 
-Understanding how lighting alters your skin tone is the most critical factor in looking consistently flawless, whether you are in an office, on a date, or taking photos for Instagram.
+Understanding how lighting alters your skin tone is the most critical factor in looking consistently effective, whether you are in an office, on a date, or taking photos for Instagram.
 
 ## The Physics of Skin and Light
 

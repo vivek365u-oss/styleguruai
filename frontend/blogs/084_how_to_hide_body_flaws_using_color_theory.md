@@ -37,7 +37,7 @@ Wear a lighter color underneath (e.g., a white or cream t-shirt). Over the top, 
 
 You can try to use dark brown to hide your legs, but if dark brown chemically clashes with your genetic Indian skin tone, you simply trade one problem for another. 
 
-Ensure your diversion colors are mathematically sound. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By calculating the precise CIELAB values of your biology, our algorithm ensures your dark "void" neutrals and bright "diversion" colors harmonize perfectly with your complexion, allowing you to contour your body without sacrificing your facial glow.
+Ensure your diversion colors are in terms of colour theory sound. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By calculating the precise CIELAB values of your biology, our algorithm ensures your dark "void" neutrals and bright "diversion" colors harmonize perfectly with your complexion, allowing you to contour your body without sacrificing your facial glow.
 
 ---
 

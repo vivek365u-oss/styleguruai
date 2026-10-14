@@ -2,7 +2,7 @@
 
 In the framework of Seasonal Color Analysis, the "Winter" profile is the most dominant, commanding, and intimidating aesthetic in the fashion world. 
 
-If you have been mathematically categorized as a Winter, you possess a highly specific biological structure: a **Cool Undertone** (pink/bluish hemoglobin base) combined with **High Contrast** features (such as pale skin against jet-black hair, or very deep, cool-toned dusky skin). 
+If you have been in terms of colour theory categorized as a Winter, you possess a highly specific biological structure: a **Cool Undertone** (pink/bluish hemoglobin base) combined with **High Contrast** features (such as pale skin against jet-black hair, or very deep, cool-toned dusky skin). 
 
 Because your biology naturally creates extreme light/dark contrast, your wardrobe must mimic this extreme geometry. If a Winter wears soft, dusty pastels or warm earth tones, the clothing completely fails to balance their striking features; they look exhausted, yellowed, and muddy. 
 Winters require intensity. Here is the ultimate, scientifically backed color palette for the Winter profile.
@@ -36,9 +36,9 @@ Wearing Yellow Gold will violently clash with your cool skin, introducing a sick
 
 ## Verify Your Season
 
-While many Indians blindly assume they are Winters simply because they have black hair, true Winter biology requires a definitively Cool undertone. If you are actually a Warm Autumn who wears True Black, you are actively washing yourself out. 
+While many Indians blindly assume they are Winters simply because they have black hair, true Winter biology requires a clearly Cool undertone. If you are actually a Warm Autumn who wears True Black, you are actively washing yourself out. 
 
-Do not guess. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping your exact CIELAB coordinate, our AI mathematically proves whether you hold the sharp, cool authority of a True Winter, delivering the precise hex codes required to dominate every room you enter.
+Do not guess. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping your exact CIELAB coordinate, our AI suggests whether you hold the sharp, cool authority of a True Winter, delivering the precise hex codes required to dominate every room you enter.
 
 ---
 

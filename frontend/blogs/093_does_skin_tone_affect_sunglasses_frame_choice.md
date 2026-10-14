@@ -33,7 +33,7 @@ While this article focuses on color, shape also plays a role. Round faces suit a
 
 The next time you walk into a sunglasses store, don't just try on random shapes. Identify your skin temperature and contrast level first.
 
-You can definitively [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will tell you whether your biology demands the warm harmony of Tortoiseshell or the cool authority of sleek Black, ensuring that the dominant accessory on your face looks genetically synchronized.
+You can clearly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will tell you whether your biology demands the warm harmony of Tortoiseshell or the cool authority of sleek Black, ensuring that the dominant accessory on your face looks genetically synchronized.
 
 ---
 

@@ -43,7 +43,7 @@ If you have a warm undertone but highly radiant, clear, bright features, you are
 
 Self-diagnosing your season is notoriously prone to error because "soft" vs "clear" contrast is highly subjective. A single wrong guess means buying a closet full of clothes that clash with your complexion.
 
-You can bypass the guesswork with absolute certainty. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By scanning your selfie, the AI extracts your exact CIELAB values, mathematically processes your hue and contrast, and definitively outputs your exact Season and perfect color palette.
+You can bypass the guesswork with absolute certainty. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By scanning your selfie, the AI extracts your exact CIELAB values, in terms of colour theory processes your hue and contrast, and clearly outputs your exact Season and perfect color palette.
 
 ---
 
@@ -53,4 +53,4 @@ You can bypass the guesswork with absolute certainty. [Analyze your skin tone wi
 Are you a Winter, Spring, Summer, or Autumn? 🍁 Learn the simple 2-step process to perfectly diagnose your Seasonal Color palette! Find out what colors make you look radiant and which ones wash you out. Save this pin and map your perfect season at https://www.styleguruai.in/
 
 **Instagram Reel Caption:**
-Do you know your Fashion Season? 🤔 The secret to looking expensive is dressing for your Season! If you have a Cool undertone and High Contrast, you are a WINTER! If you have Warm, golden, earthy skin, you are an AUTUMN! Dressing outside your season literally makes you look exhausted. Drop a 🔥 if you agree! Want an AI to mathematically calculate your Season? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #SeasonalColor #WinterPalette #AutumnAesthetic #ColorAnalysis
+Do you know your Fashion Season? 🤔 The secret to looking expensive is dressing for your Season! If you have a Cool undertone and High Contrast, you are a WINTER! If you have Warm, golden, earthy skin, you are an AUTUMN! Dressing outside your season literally makes you look exhausted. Drop a 🔥 if you agree! Want an AI to estimate your Season? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #SeasonalColor #WinterPalette #AutumnAesthetic #ColorAnalysis

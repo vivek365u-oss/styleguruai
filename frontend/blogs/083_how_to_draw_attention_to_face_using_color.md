@@ -27,7 +27,7 @@ To keep the attention on your face, the bright color positioned near your chin m
 
 ## Remove the Guesswork
 
-If the color nearest your face doesn't mathematically match your undertone, drawing attention to your face is a terrible idea—you are simply highlighting your exhaustion.
+If the color nearest your face doesn't in terms of colour theory match your undertone, drawing attention to your face is a terrible idea—you are simply highlighting your exhaustion.
 
 You must secure your power colors before executing these hacks. Easily [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By generating your precise CIELAB mathematical hue map, our AI will provide the exact high-saturation colors that belong near your face, allowing you to manipulate human attention effortlessly.
 

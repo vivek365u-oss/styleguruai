@@ -28,7 +28,7 @@ You must deploy maximum drama. Deep Sapphire Blue, Rich Amethyst Purple, or a st
 
 ## Wedding Day / Reception (The Grand Finale)
 
-The main event demands maximum elegance and photographic flawlessness.
+The main event demands maximum elegance and photographic effectiveness.
 
 ### For Warm Undertones:
 While the bride traditionally wears red, guests should avoid bright red to prevent upstaging. Instead, channel regal warmth via Deep Emerald Green (which looks exceptionally Indian and royally expensive on warm skin), or Rich Plum/Aubergine.

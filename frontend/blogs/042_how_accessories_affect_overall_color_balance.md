@@ -22,7 +22,7 @@ If you are wearing a monochromatic deep Navy suit, and you add a rich Burgundy l
 ## 3. The Injection of Boldness
 
 Perhaps you love bright Cobalt Blue or Neon Pink, but wearing a full shirt in that color overpowers your low-contrast face. 
-Accessories solve this problem flawlessly. 
+Accessories solve this problem effectively. 
 
 You can wear a deeply harmonious, highly flattering Olive Green outfit (which makes your skin glow), but inject the "dangerous" color entirely through a handbag or a pocket square. Because the bold color is physically distanced from your face, it cannot cast an unflattering shadow onto your skin. You get the psychological benefit of the bold color without enduring the biological penalty.
 

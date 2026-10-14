@@ -11,14 +11,14 @@ Because their biology is gentle and muted, the severe, high-contrast colors of W
 If a Summer wears a thick, stark black suit, the harsh color creates heavy shadows on their delicate face, aging them significantly. A Summer must substitute all blacks for softer, nuanced grays and blues.
 
 - **Soft Navy / Indigo:** This is a Summer's version of black. It provides professional depth but possesses a soft, dusty quality that doesn't overpower the face.
-- **Slate Gray & Charcoal:** True grays (free from yellow) harmonize flawlessly with a Summer's cool biology. A monochromatic gray outfit on a Summer looks unimaginably luxurious.
+- **Slate Gray & Charcoal:** True grays (free from yellow) harmonize effectively with a Summer's cool biology. A monochromatic gray outfit on a Summer looks unimaginably luxurious.
 - **Taupe & Cocoa:** Summers cannot wear rich, warm brown. They must wear cool "mushroom" browns (Taupe) that contain a grayish undertaste.
 
 ## 2. The Dusty Elegance (Power Colors)
 
 Summers glow when they wear colors that look like they have been faded by the sun or mixed with a drop of gray. Highly saturated, neon colors will violently clash with their low-contrast skin. 
 
-- **Dusty Rose & Mauve:** Instead of a bright, aggressive pink, a muted, sophisticated Mauve flawlessly complements the pink undertones present in a Summer's skin. 
+- **Dusty Rose & Mauve:** Instead of a bright, aggressive pink, a muted, sophisticated Mauve effectively complements the pink undertones present in a Summer's skin. 
 - **Light Slate Blue & Periwinkle:** These soft, grayish-blues look breathtaking on a Summer, providing a highly serene, approachable, and calming aesthetic.
 - **Soft Lavender / Wisteria:** Cool purple, desaturated into a gentle lavender, brings an effortless royalty to a Summer's casual wardrobe.
 - **Sage Green:** The cool, grayish-green of a sage leaf acts as a stunning alternative to traditional earthy olive greens (which are too warm for a Summer).
@@ -38,7 +38,7 @@ When it comes to fabrics, Summers dramatically benefit from matte textures. Heav
 
 Differentiating between a soft Summer and a sharply contrasted Winter is the most common mistake made in DIY color analysis. A wrong guess leads to a closet full of clothes that overshadow you.
 
-You can instantly eliminate the error. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will calculate the exact degree of contrast residing in your hair and skin pixels, definitively proving whether you need the striking intensity of Winter or the dusty, luxurious elegance of a True Summer palette.
+You can instantly eliminate the error. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will calculate the exact degree of contrast residing in your hair and skin pixels, clearly proving whether you need the striking intensity of Winter or the dusty, luxurious elegance of a True Summer palette.
 
 ---
 

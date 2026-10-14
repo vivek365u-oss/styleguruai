@@ -4,7 +4,7 @@ Matching a shirt and pants seems like the most basic requirement of getting dres
 
 If you randomly pair a shirt and trousers based on what is clean, you run a high risk of visually cutting your body in half, looking shorter, or creating chaotic optical friction. Masterful color matching is not about matching exact shades; it is about managing contrast and visual transitions. 
 
-Here is the exact scientific framework for pairing your top and bottom halves flawlessly.
+Here is the exact scientific framework for pairing your top and bottom halves effectively.
 
 ## Rule 1: The Dark vs. Light Rule (Visual Weight)
 
@@ -35,7 +35,7 @@ Never pair a loud shirt with a loud pant. The outfit will vibrate chaotically. T
 
 The ultimate variable in matching your shirt to your pants involves matching your shirt to your face. An outfit can be perfectly balanced internally, but if the shirt clashes with your genetic undertone, the whole system fails. 
 
-Remove the guesswork. You can mathematically [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will map your biological color temperature and provide you with hyper-precise shirt and pant combinations tailored to elevate your physique and your complexion.
+Remove the guesswork. You can in terms of colour theory [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will map your biological color temperature and provide you with hyper-precise shirt and pant combinations tailored to elevate your physique and your complexion.
 
 ---
 

@@ -33,7 +33,7 @@ Rose Gold is fascinating because it sits at the mathematical center of the warm/
 
 Fine jewelry is a significant financial investment. Buying a ₹50,000 gold necklace that makes your complexion look sick is a devastating waste.
 
-Before you enter the jewelry store, know your metal. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI will definitively declare whether your biology demands Gold or Silver, ensuring every piece of jewelry you purchase enhances your beauty for decades.
+Before you enter the jewelry store, know your metal. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI will suggest whether your biology demands Gold or Silver, ensuring every piece of jewelry you purchase enhances your beauty for decades.
 
 ---
 

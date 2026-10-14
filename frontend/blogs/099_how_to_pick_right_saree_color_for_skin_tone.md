@@ -17,7 +17,7 @@ Fair-skinned Indian women must navigate a paradox: they can technically "see" ma
 Medium skin radiates immense versatility. This is the canvas that handles the most diverse palette.
 
 - **Best:** Warm Earth Tones. A Deep Mustard Patola silk, a rich Terracotta handloom, or a vibrant Coral Chiffon will make golden wheatish skin absolutely glow.
-- **Good:** Deep Greens (Emerald, Olive) and warm Reds (Brick Red, Deep Tomato). These provide flawless contrast without washing out the golden base.
+- **Good:** Deep Greens (Emerald, Olive) and warm Reds (Brick Red, Deep Tomato). These provide good contrast without washing out the golden base.
 - **Avoid:** Icy pastels without any warmth. A frost pink or icy lavender Georgette will drain the golden warmth from wheatish skin, making it look gray.
 
 ## For Dusky / Deep Skin (Type V-VI)

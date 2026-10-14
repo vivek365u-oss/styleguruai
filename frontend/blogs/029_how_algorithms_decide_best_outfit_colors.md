@@ -20,7 +20,7 @@ It then groups the millions of skin pixels and calculates the median RGB (Red, G
 Once the algorithm has plotted your exact biological coordinate on the CIELAB grid, it passes that coordinate into the **Color Theory Engine**. This engine is programmed with the unshakeable laws of physics and optics. 
 
 ### Contrast Calculation
-If your 'L' value indicates you are very fair, but your hair pixels register as very dark, the algorithm flags you as "High Contrast." It will immediately filter out low-contrast, monochromatic outfit recommendations (like beige on beige) because it mathematically knows it will wash out your facial contrast.
+If your 'L' value indicates you are very fair, but your hair pixels register as very dark, the algorithm flags you as "High Contrast." It will immediately filter out low-contrast, monochromatic outfit recommendations (like beige on beige) because it in terms of colour theory knows it will wash out your facial contrast.
 
 ### Temperature Matching
 If your 'B' value is heavily skewed towards yellow, the algorithm flags your undertone as "Warm." 
@@ -31,7 +31,7 @@ The algorithm is programmed with the law of *Simultaneous Contrast*, which state
 Finally, the algorithm takes your approved parameters (e.g., Medium Lightness, High Contrast, Warm Undertone) and searches its proprietary database of clothing colors. 
 It looks for colors that share your "warm" mathematical signature—locating specific hex codes for Mustard Yellow, Brick Red, and Olive Green—and compiles them into a seamless, highly cohesive digital palette. 
 
-## The Flawless Result
+## The effective Result
 
 Because the algorithm relies on physics rather than human opinion, the results are completely objective and foolproof. 
 

@@ -20,7 +20,7 @@ Red is a physiological stimulant. It captures attention faster than any other co
 
 ### 3. Green (The Color of Balance and Approachability)
 Green sits at the exact center of the visual color spectrum. Because human eyes don't have to strain to perceive it, green is deeply restful. It signals harmony, growth, and safety.
-**How to use it:** If you want to appear friendly, grounded, and approachable—such as on a first date, a casual networking event, or a weekend brunch—earthy greens (like olive or sage) are flawlessly effective.
+**How to use it:** If you want to appear friendly, grounded, and approachable—such as on a first date, a casual networking event, or a weekend brunch—earthy greens (like olive or sage) are effectively effective.
 
 ### 4. Black and White (Authority and Purity)
 - **Black** absorbs all light. It signals mystery, absolute authority, and high status (the "CEO" aesthetic). However, too much black can sometimes seem inaccessible or overly formal.
@@ -32,7 +32,7 @@ Color psychology is useless if the color physically clashes with your skin. For 
 
 The ultimate dressing sense combines **Psychology (Message)** with **Biology (Skin Tone)**. A cool-toned person should wear an icy Ruby Red to project power; a warm-toned person should wear a fiery Brick Red. 
 
-To bridge this gap scientifically, you can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI will determine exactly which *shades* of these psychological colors perfectly match your complexion, allowing you to weaponize color theory flawlessly.
+To bridge this gap scientifically, you can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI will determine exactly which *shades* of these psychological colors perfectly match your complexion, allowing you to weaponize color theory effectively.
 
 ---
 

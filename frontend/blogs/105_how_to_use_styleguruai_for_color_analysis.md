@@ -4,7 +4,7 @@ You have read dozens of articles about skin tones, undertones, seasonal palettes
 
 The fundamental problem with traditional, manual color analysis is that it relies on the most unreliable tool in existence: **the human eye**. Your eyes are biased by the lighting in the room, the colors of your walls, and even your emotional state. Two people can look at the exact same skin and disagree on the undertone.
 
-This is precisely why **StyleGuru AI** exists. It replaces the subjective, error-prone human eye with objective, mathematical precision. Here is a complete guide to using the platform for a flawless color analysis.
+This is precisely why **StyleGuru AI** exists. It replaces the subjective, error-prone human eye with objective, mathematical precision. Here is a complete guide to using the platform for a colour analysis.
 
 ## Step 1: Take the Perfect Photo
 
@@ -50,4 +50,4 @@ Start your transformation today. [Analyze your skin tone with StyleGuru AI](http
 The ultimate guide to using AI for perfect Color Analysis! 🤖 Learn the exact 4-step process to get a scientifically accurate skin tone analysis—from taking the perfect selfie to receiving your personalized power palette. Save this pin and start your transformation at https://www.styleguruai.in/
 
 **Instagram Reel Caption:**
-Stop guessing your skin tone! 🛑 The human eye is incredibly unreliable! StyleGuru AI uses CIELAB Color Science to mathematically extract your exact undertone from a selfie. No more confusion! Just upload a natural-light photo, and the AI gives you a precise, personalized color palette in seconds! Drop a 🔥 if you agree! Try it right now for free! Link in bio ➡️ @StyleGuruAI (styleguruai.in) #StyleGuruAI #ColorAnalysis #SkinToneTest #FashionTech
+Stop guessing your skin tone! 🛑 The human eye is incredibly unreliable! StyleGuru AI uses CIELAB Color Science to analyse your exact undertone from a selfie. No more confusion! Just upload a natural-light photo, and the AI gives you a precise, personalized color palette in seconds! Drop a 🔥 if you agree! Try it right now for free! Link in bio ➡️ @StyleGuruAI (styleguruai.in) #StyleGuruAI #ColorAnalysis #SkinToneTest #FashionTech

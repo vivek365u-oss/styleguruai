@@ -2,7 +2,7 @@
 
 For decades, the most exclusive personal stylists and high-end fashion houses have relied on a singular, strictly-guarded scientific framework to dress their elite clients. This framework is not based on fleeting trends or brand names. It is based on **Seasonal Color Analysis**.
 
-If you have ever bought a shirt in a color you loved, put it on, and realized it made you look sickly or washed out, it is because you unknowingly violated your "Season." Here is exactly what Seasonal Color Analysis is and how it mathematically maps the perfect wardrobe for your unique biology.
+If you have ever bought a shirt in a color you loved, put it on, and realized it made you look sickly or washed out, it is because you unknowingly violated your "Season." Here is exactly what Seasonal Color Analysis is and how it in terms of colour theory maps the perfect wardrobe for your unique biology.
 
 ## The Foundation: Art Meets Biology
 
@@ -19,7 +19,7 @@ To find your season, the system measures:
 
 ## The Four Seasons
 
-Based on the combination of those three metrics, you are mathematically assigned to one of the following palettes:
+Based on the combination of those three metrics, you are suggested to one of the following palettes:
 
 1. **Winter (Cool, Deep, Clear):** You have a cool undertone and high natural contrast. You look incredible in stark blacks, crisp whites, and intense jewel tones like Sapphire and striking Emerald.
 2. **Summer (Cool, Light, Muted):** You have a cool undertone but soft, low-contrast features. You look best in cool, dusty, muted hues like Slate gray, soft lavender, and powder blue.
@@ -30,7 +30,7 @@ Based on the combination of those three metrics, you are mathematically assigned
 
 When you dress securely within your season, a powerful optical synergy occurs. Your skin clears up visually, dark circles recede, and your eyes look significantly brighter. You look healthier and more expensive. When you wear a color outside your season, the fabric chemically clashes with your undertone, creating visual fatigue and making you look exhausted.
 
-You no longer need to pay a stylist thousands of dollars to diagnose you. You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping your exact Hue, Value, and Chroma, our algorithmic engine will definitively assign you your Season and provide the ultimate color palette curated to flatter your natural complexion.
+You no longer need to pay a stylist thousands of dollars to diagnose you. You can instantly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping your exact Hue, Value, and Chroma, our algorithmic engine will clearly assign you your Season and provide the ultimate color palette curated to flatter your natural complexion.
 
 ---
 

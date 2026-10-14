@@ -14,7 +14,7 @@ The most fundamental data point for any valid styling AI is your physical biolog
 
 ## 2. Psychological & Lifestyle Data
 
-A mathematically perfect tuxedo is useless advice for someone who works from home as a programmer. 
+A well-balanced tuxedo is useless advice for someone who works from home as a programmer. 
 
 - **Occasion and Environment context:** The AI must know the end goal. Is the outfit for a high-stakes corporate board meeting, a casual coffee date, or a summer wedding? 
 - **Comfort Threshold:** Data regarding your preferred fit (oversized, tailored, relaxed) ensures the algorithm doesn't recommend an outfit you will feel insecure wearing.
@@ -29,7 +29,7 @@ Once the AI knows everything about *you*, it must cross-reference your data agai
 
 You might think handing over a photo for biological mapping is invasive, but modern platforms process this data securely, running pixel-level analysis without storing your highly personal identity data. 
 
-If you want to experience the power of data-driven styling, you can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By providing just a single selfie, you feed the algorithm the precise biological data it needs to calculate your flawlessly personalized, scientifically-backed wardrobe.
+If you want to experience the power of data-driven styling, you can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By providing just a single selfie, you feed the algorithm the precise biological data it needs to calculate your effectively personalized, scientifically-backed wardrobe.
 
 ---
 

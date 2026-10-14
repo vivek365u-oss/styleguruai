@@ -8,7 +8,7 @@ The biggest hurdle following a Seasonal Analysis is translating high-fashion col
 
 ## 1. Segment Your Palette: The 70/30 Rule
 
-Your seasonal palette contains roughly 30 to 40 colors. Do not treat them as equals. You must mathematically divide your palette into two categories: **Anchor Neutrals** and **Power Accents**.
+Your seasonal palette contains roughly 30 to 40 colors. Do not treat them as equals. You must in terms of colour theory divide your palette into two categories: **Anchor Neutrals** and **Power Accents**.
 
 ### 70% Anchor Neutrals
 Every single seasonal palette—even the brightest Spring or deepest Winter—contains strict Neutral colors. These must make up 70% of your everyday closet (your suits, trousers, coats, and foundation shirts).
@@ -37,7 +37,7 @@ Keep all non-seasonal, clashing colors as far away from your face as possible. Y
 
 ## Automate Your Daily Style
 
-Building an interchangeable 70/30 wardrobe is mathematically beautiful once it is set up. To do it perfectly, you must establish your true Season. 
+Building an interchangeable 70/30 wardrobe is in terms of colour theory beautiful once it is set up. To do it perfectly, you must establish your true Season. 
 Don't guess which Neutrals belong to you. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will calculate your exact biological season and automatically divide your results into Anchor Neutrals and Power Colors, generating a customized blueprint for a daily wardrobe that works effortlessly.
 
 ---

@@ -1,6 +1,6 @@
 # How Does Lighting Affect Makeup Color Choice?
 
-You spend thirty minutes perfectly blending your foundation, contour, and eyeshadow in your bathroom mirror. You look flawless. But the moment you sit down in your office under the harsh fluorescent lights, or step outside into the glaring sun to take a selfie, your face looks completely different. Your foundation suddenly looks orange, your contour looks muddy, and your entire face looks slightly exhausted. 
+You spend thirty minutes perfectly blending your foundation, contour, and eyeshadow in your bathroom mirror. You look polished. But the moment you sit down in your office under the harsh fluorescent lights, or step outside into the glaring sun to take a selfie, your face looks completely different. Your foundation suddenly looks orange, your contour looks muddy, and your entire face looks slightly exhausted. 
 
 You haven't lost your makeup skills. You have fallen victim to **Metamerism**—the scientific phenomenon where lighting dictates color perception. 
 
@@ -24,20 +24,20 @@ Fluorescent lighting is the enemy of the human complexion.
 
 Sunlight at noon provides a full-spectrum blast of light. It contains every color wavelength in perfect balance. 
 **The Effect:** Daylight does not hide anything. It exposes the exact truth of your makeup pigments. 
-**The Fix:** If you are attending a daytime outdoor event (like a garden wedding), your makeup match must be mathematically flawless. You cannot hide bad blending or a wrong undertone match in the sun. Always check your foundation match by walking to a window and looking at your jawline in a hand mirror.
+**The Fix:** If you are attending a daytime outdoor event (like a garden wedding), your makeup match must be colour-harmonious. You cannot hide bad blending or a wrong undertone match in the sun. Always check your foundation match by walking to a window and looking at your jawline in a hand mirror.
 
 ## Stop Guessing Your Pigments
 
 Understanding lighting is only step two. Step one is ensuring the makeup pigments you are buying actually match your biological undertone in the first place. 
 
-If you don't know your exact undertone, your makeup will look terrible under *any* lighting. You can explicitly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will calculate your exact genetic temperature, cleanly diagnosing whether you need warm, cool, or neutral makeup pigments to build your flawless, bulletproof foundation.
+If you don't know your exact undertone, your makeup will look terrible under *any* lighting. You can explicitly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The algorithm will calculate your exact genetic temperature, cleanly diagnosing whether you need warm, cool, or neutral makeup pigments to build your effective, bulletproof foundation.
 
 ---
 
 ### Social Media Snippets & Backlinks
 
 **Pinterest Pin Description:**
-Why does your makeup look flawless at home, but terrible in the office? 💡 Learn the devastating science of how lighting changes your makeup color! Discover the dangers of bathroom vanity bulbs and how to survive fluorescent lights. Save this pin and find your perfect makeup match at https://www.styleguruai.in/
+Why does your makeup look polished at home, but terrible in the office? 💡 Learn the devastating science of how lighting changes your makeup color! Discover the dangers of bathroom vanity bulbs and how to survive fluorescent lights. Save this pin and find your perfect makeup match at https://www.styleguruai.in/
 
 **Instagram Reel Caption:**
 Your bathroom mirror is LYING to you! 🛑 If you apply your makeup under warm, yellow bathroom bulbs, you are essentially painting your face with a yellow filter on! When you step outside, your foundation looks completely wrong! ALWAYS check your blending next to a window in natural daylight. Drop a 🔥 if you agree! Want the AI to tell you exactly what foundation undertone to buy? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #MakeupTips #BeautyHacks #ColorTheory #MakeupMistakes

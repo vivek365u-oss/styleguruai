@@ -12,7 +12,7 @@ Because sunlight contains *all* colors, any object standing in sunlight has the 
 - A tomato looks perfectly red because the red waves from the sun hit it and bounce to your eye.
 - Your skin tone looks exactly exactly as your melanin genetics dictate. 
 
-In color science, daylight is assigned a **Color Rendering Index (CRI) of 100**. It is the absolute, flawless baseline for reality.
+In color science, daylight is assigned a **Color Rendering Index (CRI) of 100**. It is the absolute, effective baseline for reality.
 
 ## The Flaws of Artificial Light
 

@@ -1,6 +1,6 @@
 # What is Indian Skin Tone and How is it Scientifically Classified?
 
-Understanding your exact skin tone is the foundation of flawless fashion and makeup. For decades, the Indian beauty and fashion industries lacked a scientific approach to categorizing our diverse complexions, often relying on vague terms like "wheatish" or "dusky." But what exactly *is* the Indian skin tone, and how do dermatologists and color scientists classify it?
+Understanding your exact skin tone is the foundation of effective fashion and makeup. For decades, the Indian beauty and fashion industries lacked a scientific approach to categorizing our diverse complexions, often relying on vague terms like "wheatish" or "dusky." But what exactly *is* the Indian skin tone, and how do dermatologists and color scientists classify it?
 
 ## The Science of Skin Tone
 

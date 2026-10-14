@@ -9,7 +9,7 @@ Here is the deep psychological connection between customized styling and unshaka
 
 When you wear generic fashion trends or copy an outfit from a celebrity, you are wearing an identity that belongs to someone else. You are wearing a costume. Subconsciously, the brain recognizes this mismatch. This triggers a mild form of visual "imposter syndrome." You feel awkward, you constantly adjust your clothes, and you doubt your appearance because the outfit is not aligned with your biological reality.
 
-Personalized fashion removes the costume. When you wear colors that are mathematically calculated to match your specific skin tone and undertone, the clothing stops looking like a separate entity. It seamlessly extends *you*. Because the outfit is physically harmonious with your complexion, your brain relaxes. You stop worrying about how you look because you inherently know you look perfectly natural.
+Personalized fashion removes the costume. When you wear colors that are determined to match your specific skin tone and undertone, the clothing stops looking like a separate entity. It seamlessly extends *you*. Because the outfit is physically harmonious with your complexion, your brain relaxes. You stop worrying about how you look because you inherently know you look perfectly natural.
 
 ## 2. The Feedback Loop of Positivity
 
@@ -22,7 +22,7 @@ Because you look vibrant, people immediately react to you differently. You recei
 
 A major source of daily anxiety is "decision fatigue." Staring at a closet full of clothes and feeling like you have "nothing to wear" drains your mental energy before you even leave the house. 
 
-Personalized fashion operates on a strict set of scientific rules. If you know you are a Warm, High-Contrast profile, you instantly know that 80% of the mall is not for you. You don't waste time or energy debating a pastel blue sweater because you know it mathematically fails your criteria. Editing your wardrobe down to only perfectly personalized pieces reduces decision fatigue, allowing you to walk into every day with clear, focused energy.
+Personalized fashion operates on a strict set of scientific rules. If you know you are a Warm, High-Contrast profile, you instantly know that 80% of the mall is not for you. You don't waste time or energy debating a pastel blue sweater because you know it in terms of colour theory fails your criteria. Editing your wardrobe down to only perfectly personalized pieces reduces decision fatigue, allowing you to walk into every day with clear, focused energy.
 
 ## How to Get Your Personalized Protocol
 

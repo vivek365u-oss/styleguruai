@@ -1,6 +1,6 @@
 # What is Color Correcting in Makeup?
 
-For decades, women believed that the secret to flawless makeup was simply buying a thicker, heavier foundation. They would layer thick "full-coverage" makeup over their acne or dark circles, hoping to erase them. The result was almost always a heavy, cakey, uncomfortable mask that cracked within three hours. 
+For decades, women believed that the secret to effective makeup was simply buying a thicker, heavier foundation. They would layer thick "full-coverage" makeup over their acne or dark circles, hoping to erase them. The result was almost always a heavy, cakey, uncomfortable mask that cracked within three hours. 
 
 The most elite makeup artists do not use heavy foundation to hide flaws. They use optical physics. 
 
@@ -9,7 +9,7 @@ This technique is called **Color Correcting**. It allows you to use a microscopi
 ## The Core Concept: Neutralization
 
 Color Correcting relies entirely on the basic Color Wheel. 
-The absolute rule of the color wheel is **Simultaneous Neutralization**: Colors that sit on exact opposite ends of the color wheel mathematically cancel each other out. 
+The absolute rule of the color wheel is **Simultaneous Neutralization**: Colors that sit on exact opposite ends of the color wheel in terms of colour theory cancel each other out. 
 
 If you lay the complementary color over your flaw, both colors turn into a flat, invisible neutral. You do not need to "bury" the imperfection; you simply neutralize its wavelength. 
 
@@ -38,7 +38,7 @@ Color correctors are highly pigmented chemical agents. You must use exactly *one
 
 Before you can expertly color-correct your flaws, you must establish perfect harmony with your primary foundation. You cannot color correct a dark circle if your overall foundation is completely clashing with your neck. 
 
-Lock down your base. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping the precise hex codes of your genetic undertone, the AI establishes your ultimate foundational color palette, allowing you to build an expensive, flawless aesthetic.
+Lock down your base. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping the precise hex codes of your genetic undertone, the AI establishes your ultimate foundational color palette, allowing you to build an expensive, effective aesthetic.
 
 ---
 
@@ -48,4 +48,4 @@ Lock down your base. [Analyze your skin tone with StyleGuru AI](https://www.styl
 What is Color Correcting? 🎨 The ultimate makeup masterclass! Stop using heavy, cakey concealer to hide your acne and dark circles. Learn the optical physics of using Green to cancel Red, and Orange to cancel Blue. Save this pin and perfect your makeup at https://www.styleguruai.in/
 
 **Instagram Reel Caption:**
-Having trouble hiding your acne or dark circles? STOP using thick layers of concealer! 🛑 It just makes your makeup look cakey and heavily textured. Use Optical Physics instead! It's called Color Correcting. Apply a tiny dot of GREEN corrector on a red pimple to instantly neutralize the color completely! Then use a thin layer of foundation. Flawless! Drop a 🔥 if you agree! Want the AI to give you your flawless foundation match to finish the look? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #ColorCorrecting #MakeupHacks #FlawlessSkin #BeautyTips
+Having trouble hiding your acne or dark circles? STOP using thick layers of concealer! 🛑 It just makes your makeup look cakey and heavily textured. Use Optical Physics instead! It's called Color Correcting. Apply a tiny dot of GREEN corrector on a red pimple to instantly neutralize the color completely! Then use a thin layer of foundation. effective! Drop a 🔥 if you agree! Want the AI to give you your foundation match to finish the look? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #ColorCorrecting #MakeupHacks #effectiveSkin #BeautyTips

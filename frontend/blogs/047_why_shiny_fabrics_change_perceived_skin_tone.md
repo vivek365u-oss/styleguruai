@@ -28,7 +28,7 @@ A deep Sapphire Blue, a rich Emerald Green, or a dark Maroon silk absorbs signif
 
 ## Remove the Risk of Shine
 
-Before you spend thousands on a formal silk garment, you must ensure the color is mathematically identical to your biological undertone. Do not gamble with shiny fabrics. 
+Before you spend thousands on a formal silk garment, you must ensure the color is in terms of colour theory identical to your biological undertone. Do not gamble with shiny fabrics. 
 
 You can rigorously [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By mapping your exact CIELAB color coordinates, the algorithm will dictate the precise colors that belong in your formal wardrobe, ensuring that when you wear high-gloss fabrics, the reflected light acts as a beauty filter rather than a nightmare.
 

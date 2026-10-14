@@ -32,7 +32,7 @@ Occasionally, deep dusky skin possesses a warm undertone but has incredibly high
 
 For a dusky-skinned person, mistaking a "Deep Autumn" profile for a "Deep Winter" profile is a catastrophic wardrobe error. The deeply warm vs. deeply cool distinction dictates your entire aesthetic.
 
-Never risk washing out your luxurious melanin. You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the AI your selfie, it mathematically pierces through the melanin layer to identify your exact sub-surface temperature, cleanly categorizing you into your flawless seasonal palette.
+Never risk washing out your luxurious melanin. You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the AI your selfie, it in terms of colour theory pierces through the melanin layer to identify your exact sub-surface temperature, cleanly categorizing you into your effective seasonal palette.
 
 ---
 

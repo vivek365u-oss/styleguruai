@@ -24,7 +24,7 @@ Conversely, low-melanin skin (fair skin) reflects light strongly.
 
 A common style mistake is trying to wear colors that wage war against your biological melanin concentration. High-melanin "dusky" skin is often erroneously draped in muted, dusty pastels that make the skin look ashy or gray, instead of celebrating its rich depth with striking jewel tones.
 
-You don't need a biology degree to get it right. You can [analyze your exact skin tone at StyleGuru AI](https://www.styleguruai.in/). By mathematically analyzing your melanin levels and undertones, our AI prescribes the exact color palette required to make your biological complexion glow.
+You don't need a biology degree to get it right. You can [analyze your exact skin tone at StyleGuru AI](https://www.styleguruai.in/). By in terms of colour theory analyzing your melanin levels and undertones, our AI prescribes the exact color palette required to make your biological complexion glow.
 
 ---
 

@@ -15,7 +15,7 @@ If an Autumn wears a bright, neon color, the fabric will brutally overpower thei
 
 ### The Core Autumn Colors:
 - **Terracotta & Rust:** These are Autumn's version of bright red. Deep, burnt-oranges and reddish-browns act as an optical highlighter for golden skin, granting a phenomenally wealthy glow.
-- **Mustard Yellow / Ochre:** Primary yellow is too bright, but the deepened, earthy Mustard harmonizes flawlessly with the carotene in Indian Autumn skin.
+- **Mustard Yellow / Ochre:** Primary yellow is too bright, but the deepened, earthy Mustard harmonizes effectively with the carotene in Indian Autumn skin.
 - **Olive & Forest Green:** The ultimate Autumn neutral. Olive green provides a sophisticated, rugged alternative to the stark severity of black.
 - **Espresso Brown:** Autumns should universally replace their black formal-wear with rich, dark Chocolate or Espresso brown to maintain their warm visual continuity.
 
@@ -51,4 +51,4 @@ You must calculate your Contrast to know the truth. [Analyze your skin tone with
 Are you an Autumn or a Spring? 🍂🌸 Both seasons have a Warm Undertone, but their optimal colors are totally opposite! Discover whether you should be wearing deep Spiced Terracotta (Autumn) or vibrant Bright Coral (Spring) to make your skin glow. Save this pin and map your perfect season at https://www.styleguruai.in/
 
 **Instagram Reel Caption:**
-All Warm skin tones are NOT the same! 🛑 If you have golden skin, you are either a Spring or an Autumn. An Autumn is earthy—they look incredibly wealthy in deep Mustard and rich Espresso Brown. 🍂 But a Spring is bright and clear—they look glowing in vibrant Coral and Teal! 🌸 Wear the wrong one and you look totally muddy! Drop a 🔥 if you agree! Want the AI to definitively calculate your season? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #AutumnColorPalette #SpringColors #ColorAnalysis #StyleGuruAI
+All Warm skin tones are NOT the same! 🛑 If you have golden skin, you are either a Spring or an Autumn. An Autumn is earthy—they look incredibly wealthy in deep Mustard and rich Espresso Brown. 🍂 But a Spring is bright and clear—they look glowing in vibrant Coral and Teal! 🌸 Wear the wrong one and you look totally muddy! Drop a 🔥 if you agree! Want the AI to clearly calculate your season? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #AutumnColorPalette #SpringColors #ColorAnalysis #StyleGuruAI

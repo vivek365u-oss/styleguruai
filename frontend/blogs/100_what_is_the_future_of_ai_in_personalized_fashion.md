@@ -26,7 +26,7 @@ As AI systems accumulate historical data—tracking your style purchases, your s
 
 The fast fashion industry produces 92 million tons of textile waste annually. A massive contributor to this waste is people buying clothes that don't suit them and discarding them after one wear.
 
-**The Vision:** If every individual has an AI-powered biological color profile that helps them select garments they will actually wear repeatedly, the impulse-buy → discard cycle is mathematically broken. AI-driven personalization is inherently sustainable.
+**The Vision:** If every individual has an AI-powered biological color profile that helps them select garments they will actually wear repeatedly, the impulse-buy → discard cycle is disrupted. AI-driven personalization is inherently sustainable.
 
 ## 5. Cultural Intelligence
 

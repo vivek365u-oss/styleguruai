@@ -23,7 +23,7 @@ Webcams have incredibly primitive "Auto-Exposure" engines. They frantically adju
 
 If you wear a screaming neon pink or incredibly bright safety-orange shirt on a webcam with bad lighting, the compression algorithm will fail to contain the vibrant color. 
 **The Physics:** The neon color will digitally "bleed" out of the shirt's boundaries, casting a highly artificial pink or orange glow directly up onto your neck and chin, making you look sick.
-**The Fix:** Stick to deeply saturated but non-neon Jewel Tones. Emerald Green, Sapphire Blue, and Deep Plum absorb light and remain mathematically stable on cheap sensors. 
+**The Fix:** Stick to deeply saturated but non-neon Jewel Tones. Emerald Green, Sapphire Blue, and Deep Plum absorb light and remain relatively stable on cheap sensors. 
 
 ## 4. The Undertone Washout
 
@@ -31,7 +31,7 @@ Webcam lenses natively cast a slightly cool, bluish-gray hue over the image. If 
 
 You must combat this blue filter by aggressively wearing your Warm power colors. Wear Mustard, Terracotta, or warm Olive on camera to manually inject the warmth the camera is stealing from you. 
 
-Don't guess what your power colors are. You can accurately [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm your selfie, it mathematically calculates whether you are Warm or Cool, ensuring you know exactly what biological color to put on before joining your next high-stakes video call.
+Don't guess what your power colors are. You can accurately [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By feeding the algorithm your selfie, it estimates whether you are Warm or Cool, ensuring you know exactly what biological color to put on before joining your next high-stakes video call.
 
 ---
 
@@ -41,4 +41,4 @@ Don't guess what your power colors are. You can accurately [analyze your skin to
 Why do you look exhausted on Zoom calls? 💻 Learn the digital physics of Webcams! Discover why wearing tiny stripes glitches the camera, and why a bright white shirt is secretly plunging your face into dark shadows. Save this pin and fix your WFH wardrobe at https://www.styleguruai.in/
 
 **Instagram Reel Caption:**
-Never wear WHITE on a Zoom call! 💻 Webcams have terrible auto-exposure. If you wear a giant stark white shirt, the camera thinks the room is too bright and automatically darkens your entire screen—plunging your face into total darkness! Swap stark white for Ivory or pale blue to fix your lighting instantly! Drop a 🔥 if you agree! Want an AI to give you your flawless WFH color palette? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #WFH #ZoomHacks #VideoCall #ProfessionalStyle
+Never wear WHITE on a Zoom call! 💻 Webcams have terrible auto-exposure. If you wear a giant stark white shirt, the camera thinks the room is too bright and automatically darkens your entire screen—plunging your face into total darkness! Swap stark white for Ivory or pale blue to fix your lighting instantly! Drop a 🔥 if you agree! Want an AI to give you your WFH colour palette? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #WFH #ZoomHacks #VideoCall #ProfessionalStyle

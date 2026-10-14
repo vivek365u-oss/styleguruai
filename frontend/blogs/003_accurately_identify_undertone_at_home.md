@@ -37,7 +37,7 @@ How does your skin instinctively react when exposed to the sun for prolonged per
 
 Analyzing your own skin is subjective. It’s incredibly common for people to misdiagnose their undertone because our eyes play tricks on us. If you want 100% scientific certainty without staring at your veins for an hour, technology can provide the answer. 
 
-You can accurately [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By snapping a quick selfie, the AI’s color-grading algorithm will extract the exact hex codes of your skin, map it against the CIELAB color space, and tell you definitively whether you are warm, cool, or neutral—plus exactly which color palettes you should be buying.
+You can accurately [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By snapping a quick selfie, the AI’s color-grading algorithm will extract the exact hex codes of your skin, map it against the CIELAB color space, and tell you clearly whether you are warm, cool, or neutral—plus exactly which color palettes you should be buying.
 
 Stop guessing. Run the tests, leverage the AI tools, and start building a wardrobe that fundamentally works for your biology.
 

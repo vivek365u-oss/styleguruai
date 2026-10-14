@@ -34,7 +34,7 @@ Some Indian Olive skin tones sit at absolute center-0 on the temperature scale. 
 
 Self-diagnosing Olive skin is a nightmare. Looking at your veins or holding a white paper to your face will just yield confusing, conflicting results. 
 
-You must utilize algorithmic precision. You can objectively [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By extracting the exact CIELAB coordinate of your pixels, our AI calculates the precise ratio of yellow to blue occurring beneath your epidermis, definitively telling you whether you belong to the Autumn or Winter olive family. 
+You must utilize algorithmic precision. You can objectively [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By extracting the exact CIELAB coordinate of your pixels, our AI calculates the precise ratio of yellow to blue occurring beneath your epidermis, clearly telling you whether you belong to the Autumn or Winter olive family. 
 
 ---
 

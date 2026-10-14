@@ -29,7 +29,7 @@ Foundations are chemical mixtures containing iron oxides and titanium dioxide (w
 When you apply foundation, these chemicals mix with your skin's natural oils, your sweat, and the oxygen in the environment. This causes an aggressive chemical reaction called **Oxidation**. The foundation literally "rusts" on your face, causing the pigment to darken and often shift into a dull, orange-gray hue within 60 minutes.
 *The Solution:* Always use a silicone or water-based primer before applying foundation. The primer acts as an impenetrable chemical shield, preventing your skin oils from ever touching the foundation and halting oxidation completely.
 
-## The Flawless Fix
+## The effective Fix
 
 You can use the best primers in the world, but if the foundation is fundamentally the wrong undertone, you will always look ashy. 
 
@@ -43,4 +43,4 @@ Stop playing a guessing game at the Sephora counter. You can explicitly [analyze
 Why does your foundation ALWAYS turn gray an hour after you apply it?! 😡 Learn the exact science of the "Ashy Effect" on Indian skin! Discover how Pink Undertones and Hyperpigmentation scientifically turn your makeup gray. Save this pin and fix your makeup routine at https://www.styleguruai.in/
 
 **Instagram Reel Caption:**
-Is your foundation turning GRAY on your face?! 👻 Here is the brutal scientific truth: You are using the wrong undertone! If you put a Cool "Pink" foundation over a Warm "Golden" Indian skin tone, the colors neutralize each other, leaving you with pure GRAY! Or worse... you are putting pale foundation directly over your dark circles! Stop guessing your shades! Drop a 🔥 if you agree! Want an AI to find your flawless foundation match? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #AshyMakeup #MakeupMistakes #FoundationHacks #DesiGirlMakeup
+Is your foundation turning GRAY on your face?! 👻 Here is the brutal scientific truth: You are using the wrong undertone! If you put a Cool "Pink" foundation over a Warm "Golden" Indian skin tone, the colors neutralize each other, leaving you with pure GRAY! Or worse... you are putting pale foundation directly over your dark circles! Stop guessing your shades! Drop a 🔥 if you agree! Want an AI to find your foundation match? Link in bio ➡️ @StyleGuruAI (styleguruai.in) #AshyMakeup #MakeupMistakes #FoundationHacks #DesiGirlMakeup

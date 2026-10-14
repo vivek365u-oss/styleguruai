@@ -24,13 +24,13 @@ When your clothing exists on the same temperature spectrum as your skin, your fa
 
 Conversely, consider what happens when a warm-toned person wears a deeply cool color, like Frost Blue or Icy Lavender.
 
-According to the rule of *Simultaneous Contrast*, placing a definitively cool color next to a definitively warm surface creates sharp visual friction. The coolness of the fabric actively drains the perceived warmth from the face. Instead of looking healthily golden, the skin can appear sallow, jaundiced, or unnaturally yellow/gray. The outfit looks disconnected from the wearer.
+According to the rule of *Simultaneous Contrast*, placing a clearly cool color next to a clearly warm surface creates sharp visual friction. The coolness of the fabric actively drains the perceived warmth from the face. Instead of looking healthily golden, the skin can appear sallow, jaundiced, or unnaturally yellow/gray. The outfit looks disconnected from the wearer.
 
 ## How to Build Your Earthy Wardrobe
 
 If you suspect you have a warm undertone, your wardrobe should pivot toward nature. Think of a thick forest in autumn: copper, burnt orange, rich brown, sage green, and warm cream (instead of stark white). 
 
-Not sure if your undertone is definitively warm? You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) to remove the guesswork entirely. Our AI will map your exact undertone and curate your flawless earthy color palette. 
+Not sure if your undertone is clearly warm? You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) to remove the guesswork entirely. Our AI will map your exact undertone and curate your effective earthy color palette. 
 
 ---
 

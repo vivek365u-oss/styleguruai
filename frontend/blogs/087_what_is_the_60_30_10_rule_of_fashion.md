@@ -30,7 +30,7 @@ By creating an overwhelming majority of one color (60%), you provide the eye wit
 
 The critical variable is ensuring all three colors match your biological undertone. The 60% neutral *must* be one of your Season's anchor neutrals (Camel for Autumns, Charcoal for Winters). The 10% accent *must* be your genetic Power Color (Mustard for Warm, Sapphire for Cool). If you mix temperatures across the three layers, the mathematical harmony of the ratio is destroyed.
 
-To execute the 60-30-10 rule flawlessly, you must first establish your biological temperature. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) to lock in the exact three color tiers curated to work harmoniously with your features.
+To execute the 60-30-10 rule effectively, you must first establish your biological temperature. [Analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/) to lock in the exact three color tiers curated to work harmoniously with your features.
 
 ---
 

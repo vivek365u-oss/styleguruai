@@ -26,7 +26,7 @@ When a dusky-skinned Indian person buys a "nude" undershirt or shoe, the stark b
 
 You must stop letting Eurocentric fashion trends dictate your wardrobe. A trend is entirely useless if it destroys your natural glow. Your goal shouldn’t be to look trendy; your goal should be to look spectacular. 
 
-Instead of letting magazines tell you what to wear, let your DNA dictate it. You can flawlessly [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). Our AI ignores arbitrary global trends and instead mathematically maps your unique Indian melanin and undertones, generating a hyper-personalized wardrobe protocol that celebrates your biological beauty.
+Instead of letting magazines tell you what to wear, let your DNA dictate it. You can effectively [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). Our AI ignores arbitrary global trends and instead in terms of colour theory maps your unique Indian melanin and undertones, generating a hyper-personalized wardrobe protocol that celebrates your biological beauty.
 
 ---
 
