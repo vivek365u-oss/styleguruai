@@ -8,7 +8,7 @@ Here is the exact scientific framework for pairing your top and bottom halves ef
 
 ## Rule 1: The Dark vs. Light Rule (Visual Weight)
 
-The most foolproof matching strategy relies on establishing a clear difference in visual weight. In optical physics, the human eye is instantly drawn to lighter objects, while darker objects recede into the background.
+The most reliable matching strategy relies on establishing a clear difference in visual weight. In optical physics, the human eye is instantly drawn to lighter objects, while darker objects recede into the background.
 
 - **Option A (Light Top, Dark Bottom):** This is the ultimate classic format (e.g., White shirt, Navy trousers). The dark pants ground the outfit visually, while the light shirt draws the observer's eye directly up to your chest and face. It makes the shoulders look broader and the person look approachable.
 - **Option B (Dark Top, Light Bottom):** (e.g., Navy shirt, Beige chinos). This is highly stylistic and slightly more aggressive. It creates a bold, modern look, but be warned: a dark top visual shrinks the upper body. It works exceptionally well for individuals who want to appear leaner on top. 

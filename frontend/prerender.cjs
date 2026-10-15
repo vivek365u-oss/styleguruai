@@ -44,7 +44,9 @@ function parseMd(content) {
   let currentBody = [];
 
   for (const line of lines) {
-    if (line.trim() === '---') break;
+    // Stop at the social media snippets section
+    if (line.trim().startsWith('### Social Media') || line.trim().startsWith('## Social Media')) break;
+    if (line.trim() === '---') continue;
 
     if (line.startsWith('# ') && !title) {
       title = line.replace(/^#\s+/, '').trim();

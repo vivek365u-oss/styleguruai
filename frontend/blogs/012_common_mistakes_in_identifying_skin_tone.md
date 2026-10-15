@@ -26,7 +26,7 @@ Many believe that because they tan exceptionally well, they must have a warm und
 Looking at your wrists to see if your veins are green or blue is the oldest trick in the book. But for many Indian skin types, the melanin is so thick that the veins are completely obscured, leading to massive confusion. 
 *The Truth:* If you can't clearly see your veins, the test is useless for you. Don't force a result. Move on to the White Paper Test or the Jewelry Test.
 
-## The Foolproof Solution
+## A Structured, Methodical Approach
 
 If you have fallen victim to these mistakes, you probably have a disjointed wardrobe. Eliminate the guesswork and the subjective mirror-staring entirely.
 

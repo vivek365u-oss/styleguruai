@@ -26,8 +26,9 @@ function parseMd(content) {
   let currentBody = [];
 
   for (const line of lines) {
-    // Stop at the social media snippets divider
-    if (line.trim() === '---') break;
+    // Stop at the social media snippets section
+    if (line.trim().startsWith('### Social Media') || line.trim().startsWith('## Social Media')) break;
+    if (line.trim() === '---') continue;
 
     // H1 = title
     if (line.startsWith('# ') && !title) {

@@ -30,7 +30,7 @@ This is why you often see celebrities wearing unexpected, bold choices (like a b
 
 You don't need a Bollywood budget to dress like a star. The exact same Color Theory that a celebrity's stylist uses is available to you algorithmically.
 
-You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). The AI performs the identical biological mapping that a ₹50,000/day celebrity stylist performs—diagnosing your exact undertone, contrast, and seasonal palette—in seconds, for free.
+You can [analyze your skin tone with StyleGuru AI](https://www.styleguruai.in/). By combining computer vision landmark detection with classic colorimetry, StyleGuru AI evaluates your skin tone and undertone to suggest complementary clothing palettes—giving you structured color harmony guidance without the steep fees of a private consultant.
 
 ---
 

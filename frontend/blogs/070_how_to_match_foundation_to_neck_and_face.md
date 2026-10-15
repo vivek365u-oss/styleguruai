@@ -4,7 +4,7 @@ It is the most dreaded aesthetic failure in modern fashion: the "Floating Head."
 
 You apply your foundation, step outside, and realize your face is a completely different color than your neck. This harsh line of demarcation instantly ruins even the most expensive outfit, signaling to everyone that you are wearing a heavy mask of cosmetics. 
 
-The process of matching foundation for Indian skin is exceptionally difficult because Indian genetics often lead to extreme hyperpigmentation—meaning the face, neck, and chest are frequently three completely different shades. Here is the professional, foolproof method for effectively matching your foundation every time.
+The process of matching foundation for Indian skin is exceptionally difficult because Indian genetics often lead to extreme hyperpigmentation—meaning the face, neck, and chest are frequently three completely different shades. Here is the professional, systematic method for effectively matching your foundation every time.
 
 ## The Fatal Mistake: Swatching on the Hand
 

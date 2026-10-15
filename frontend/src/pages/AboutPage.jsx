@@ -92,7 +92,7 @@ export default function AboutPage() {
                 1. Facial Tone & ITA Analysis
               </h3>
               <p className="text-xs leading-relaxed" style={{ color: C.muted }}>
-                Using standard lighting compensation algorithms, our model evaluates the Individual Typology Angle (ITA) and RGB hue values to accurately classify your skin tone into clear tiers (fair, wheatish, olive, dusky, deep) without permanent image storage.
+                Using automated photo quality checks and facial landmark sampling, our system calculates the Individual Typology Angle (ITA) in CIELAB color space to classify skin tone across inclusive tiers without permanent image storage.
               </p>
             </div>
 
@@ -148,7 +148,7 @@ export default function AboutPage() {
             Behind the Project
           </h2>
           <p className="text-sm leading-relaxed mb-4" style={{ color: C.muted }}>
-            {APP_NAME} is developed and maintained by <strong>Vivek Kumar</strong> with a passion for computer vision, practical generative AI, and inclusive consumer technology in India.
+            {APP_NAME} is developed and maintained by <strong>Vivek Kumar</strong> with a passion for computer vision, applied machine learning, and inclusive consumer technology in India.
           </p>
           <p className="text-xs leading-relaxed" style={{ color: C.muted }}>
             Have ideas for improvements, feature requests, or partnership inquiries? Feel free to reach out directly to the team via our{' '}

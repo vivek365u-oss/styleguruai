@@ -669,7 +669,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
             Your Complete AI Fashion Ecosystem
           </h2>
           <p className="text-sm sm:text-base text-slate-600 mt-3 leading-relaxed">
-            Everything you need to dress sharper, shop with 100% confidence, and never ask "does this suit me?" again.
+            Everything you need to dress sharper, shop with genuine confidence, and make informed choices on what suits you.
           </p>
         </div>
 
@@ -682,7 +682,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
               </div>
               <span className="text-[10px] font-bold text-violet-600 uppercase tracking-widest block mb-1">Pillar 01</span>
               <h3 className="text-xl font-bold text-slate-900 font-serif mb-2.5">
-                Precision Skin & Undertone Analysis
+                Objective Skin & Undertone Analysis
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed mb-6">
                 Upload a single selfie. Our algorithm isolates facial pixels, eliminates shadow bias, and determines whether you need warm, cool, or neutral palettes.
@@ -838,7 +838,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
                 Ever bought a trending outfit online that looked amazing on the model, but when you wore it, your face looked dull or washed out?
               </p>
               <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                <strong>That ends today.</strong> StyleGuru AI maps your facial undertone, contrast, and body proportions directly to curated clothes with <strong>1-Click Buy links on India's top fashion stores</strong> — so you only buy clothes guaranteed to suit your real complexion.
+                <strong>That ends today.</strong> StyleGuru AI maps your facial undertone, contrast, and body proportions directly to curated clothes with <strong>1-Click Buy links on India's top fashion stores</strong> — so you buy clothes chosen to harmonize with your real complexion.
               </p>
 
               {/* 4 Feature Bullet Points */}
@@ -989,7 +989,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
                   </div>
                 </div>
 
-                {/* Micro Trust Guarantee */}
+                {/* Micro Trust Notice */}
                 <div className="pt-2 text-center text-[11px] text-slate-400 border-t border-slate-100">
                   <span>⚡ Real-time store search • Pre-filtered to your exact best colors</span>
                 </div>
@@ -1294,7 +1294,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
               },
               {
                 q: 'What if I take a selfie in poor or dim lighting?',
-                a: 'Our built-in image quality gate detects underexposure and lighting color cast. If lighting is skewed, the AI will provide a warning and suggest standing in front of soft window daylight for 100% accuracy.'
+                a: 'Our built-in image quality gate detects underexposure and lighting color cast. If lighting is skewed, the system warns you and suggests standing in front of soft window daylight for the most reliable color sampling.'
               },
               {
                 q: 'Can I install this as an app on my phone?',
