@@ -110,12 +110,46 @@ export default function BlogPostPage() {
     }
   };
 
+  const articleJsonLd = useMemo(() => {
+    if (!post) return null;
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': `https://www.styleguruai.in/blog/${post.slug}`,
+      },
+      headline: post.title,
+      description: post.description,
+      image: ['https://www.styleguruai.in/og-image.png'],
+      author: {
+        '@type': 'Person',
+        name: 'Vivek Kumar',
+        jobTitle: 'Founder & AI Stylist',
+        url: 'https://www.styleguruai.in/about',
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'StyleGuru AI',
+        url: 'https://www.styleguruai.in',
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://www.styleguruai.in/logo.png',
+        },
+      },
+      datePublished: '2025-04-01T08:00:00+05:30',
+      dateModified: '2026-10-15T08:00:00+05:30',
+      inLanguage: 'en-IN',
+    };
+  }, [post]);
+
   return (
     <div className="min-h-screen bg-[#FAFAFC] text-slate-900 font-sans antialiased selection:bg-violet-500 selection:text-white">
       <SEOHead
         title={`${post.title} — StyleGuru AI`}
         description={post.description}
         type="article"
+        jsonLd={articleJsonLd}
       />
 
       {/* ─── Sticky Top Navigation ─── */}

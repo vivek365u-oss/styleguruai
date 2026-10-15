@@ -106,7 +106,7 @@ function writePage(routePath, title, description, contentHtml, extraHead = '', o
   const targetDir = path.join(DIST_DIR, routePath);
   fs.mkdirSync(targetDir, { recursive: true });
 
-  const canonicalUrl = `${BASE_URL}${routePath === '/' ? '' : routePath}`;
+  const canonicalUrl = `${BASE_URL}${routePath === '/' ? '/' : routePath}`;
 
   let html = template;
 
@@ -132,14 +132,17 @@ function writePage(routePath, title, description, contentHtml, extraHead = '', o
     `<meta property="og:title" content="${escapeHtml(title)}" />`,
     `<meta property="og:description" content="${escapeHtml(description)}" />`,
     `<meta property="og:url" content="${canonicalUrl}" />`,
-    `<meta property="og:image" content="${BASE_URL}/og-image.svg" />`,
+    `<meta property="og:image" content="${BASE_URL}/og-image.png" />`,
+    `<meta property="og:image:type" content="image/png" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
   ];
 
   const twitterTags = [
     `<meta name="twitter:card" content="summary_large_image" />`,
     `<meta name="twitter:title" content="${escapeHtml(title)}" />`,
     `<meta name="twitter:description" content="${escapeHtml(description)}" />`,
-    `<meta name="twitter:image" content="${BASE_URL}/og-image.svg" />`,
+    `<meta name="twitter:image" content="${BASE_URL}/og-image.png" />`,
   ];
 
   // Strip pre-existing og/twitter tags to avoid duplicates
@@ -495,12 +498,15 @@ ${sharedFooter}`;
     `  <meta property="og:title" content="StyleGuru AI — AI Fashion &amp; Colour Intelligence for Every Indian Skin Tone" />`,
     `  <meta property="og:description" content="Free AI skin tone analysis and personalised outfit colour guide for Indian complexions. Upload a selfie, get your wardrobe palette." />`,
     `  <meta property="og:url" content="${canonicalUrl}" />`,
-    `  <meta property="og:image" content="${BASE_URL}/og-image.svg" />`,
+    `  <meta property="og:image" content="${BASE_URL}/og-image.png" />`,
+    `  <meta property="og:image:type" content="image/png" />`,
+    `  <meta property="og:image:width" content="1200" />`,
+    `  <meta property="og:image:height" content="630" />`,
     `  <meta name="twitter:card" content="summary_large_image" />`,
     `  <meta name="twitter:url" content="${canonicalUrl}" />`,
     `  <meta name="twitter:title" content="StyleGuru AI — AI Fashion &amp; Colour Intelligence" />`,
     `  <meta name="twitter:description" content="Free AI skin tone analysis and personalised outfit colour guide for Indian complexions." />`,
-    `  <meta name="twitter:image" content="${BASE_URL}/og-image.svg" />`,
+    `  <meta name="twitter:image" content="${BASE_URL}/og-image.png" />`,
   ].join('\n');
   html = html.replace('</head>', `${ogBlock}\n${extraHead}\n</head>`);
   // Inject body content
@@ -728,7 +734,7 @@ writePage(
           <div class="p-6 rounded-2xl border border-white/10 bg-white/5 space-y-2">
             <h3 class="text-base font-semibold text-amber-300">1. Facial Tone & ITA Analysis</h3>
             <p class="text-xs leading-relaxed text-slate-300">
-              Using standard lighting compensation algorithms, our model evaluates the Individual Typology Angle (ITA) and RGB hue values to accurately classify your skin tone into clear tiers (fair, wheatish, olive, dusky, deep) without permanent image storage.
+              Using facial landmark sampling, our model evaluates the Individual Typology Angle (ITA in CIELAB color space) and RGB undertone distribution to classify skin tone across inclusive tiers without permanent image storage. For highest accuracy, natural indirect daylight is recommended.
             </p>
           </div>
           <div class="p-6 rounded-2xl border border-white/10 bg-white/5 space-y-2">
@@ -1203,20 +1209,31 @@ for (let i = 0; i < posts.length; i++) {
   const schemaJson = JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${BASE_URL}/blog/${p.slug}`
+    },
     headline: p.title,
     description: p.description,
+    image: [`${BASE_URL}/og-image.png`],
     author: {
       '@type': 'Person',
       name: 'Vivek Kumar',
-      jobTitle: 'Founder & AI Stylist'
+      jobTitle: 'Founder & AI Stylist',
+      url: `${BASE_URL}/about`
     },
     publisher: {
       '@type': 'Organization',
       name: 'StyleGuru AI',
       url: BASE_URL,
-      logo: `${BASE_URL}/logo.png`
+      logo: {
+        '@type': 'ImageObject',
+        url: `${BASE_URL}/logo.png`
+      }
     },
-    mainEntityOfPage: `${BASE_URL}/blog/${p.slug}`
+    datePublished: '2025-04-01T08:00:00+05:30',
+    dateModified: '2026-10-15T08:00:00+05:30',
+    inLanguage: 'en-IN'
   });
 
   const extraHead = `  <script type="application/ld+json">${schemaJson}</script>`;

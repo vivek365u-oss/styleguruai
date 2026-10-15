@@ -4,11 +4,13 @@ import { useLocation } from 'react-router-dom';
 export default function SEOHead({
   title,
   description,
-  image = 'https://www.styleguruai.in/og-image.svg',
-  type = 'website'
+  image = 'https://www.styleguruai.in/og-image.png',
+  type = 'website',
+  jsonLd = null,
 }) {
   const location = useLocation();
-  const canonicalUrl = `https://www.styleguruai.in${location.pathname}`;
+  const canonicalPath = location.pathname === '/' ? '/' : location.pathname.replace(/\/+$/, '');
+  const canonicalUrl = `https://www.styleguruai.in${canonicalPath}`;
 
   useEffect(() => {
     // 1. Title
@@ -69,6 +71,9 @@ export default function SEOHead({
       setMetaTag('property', 'og:description', description || ''),
       setMetaTag('property', 'og:url', canonicalUrl),
       setMetaTag('property', 'og:image', image),
+      setMetaTag('property', 'og:image:type', 'image/png'),
+      setMetaTag('property', 'og:image:width', '1200'),
+      setMetaTag('property', 'og:image:height', '630'),
       setMetaTag('name', 'twitter:card', 'summary_large_image'),
       setMetaTag('name', 'twitter:title', title),
       setMetaTag('name', 'twitter:description', description || ''),
@@ -76,11 +81,23 @@ export default function SEOHead({
       setLinkTag('canonical', canonicalUrl),
     ];
 
+    // Optional JSON-LD script injection
+    let jsonLdScript = null;
+    if (jsonLd) {
+      jsonLdScript = document.createElement('script');
+      jsonLdScript.type = 'application/ld+json';
+      jsonLdScript.text = typeof jsonLd === 'string' ? jsonLd : JSON.stringify(jsonLd);
+      document.head.appendChild(jsonLdScript);
+    }
+
     return () => {
       document.title = prevTitle;
       cleanups.forEach((cleanup) => cleanup());
+      if (jsonLdScript && jsonLdScript.parentNode) {
+        document.head.removeChild(jsonLdScript);
+      }
     };
-  }, [title, description, canonicalUrl, image, type]);
+  }, [title, description, canonicalUrl, image, type, jsonLd]);
 
   return null;
 }
