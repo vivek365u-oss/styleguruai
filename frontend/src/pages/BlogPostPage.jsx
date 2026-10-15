@@ -56,6 +56,40 @@ export default function BlogPostPage() {
     return related;
   }, [post]);
 
+  // Structured Data Schema for Article
+  const articleJsonLd = useMemo(() => {
+    if (!post) return null;
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': `https://www.styleguruai.in/blog/${post.slug}`,
+      },
+      headline: post.title,
+      description: post.description,
+      image: ['https://www.styleguruai.in/og-image.png'],
+      author: {
+        '@type': 'Person',
+        name: 'Vivek Kumar',
+        jobTitle: 'Founder & AI Stylist',
+        url: 'https://www.styleguruai.in/about',
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'StyleGuru AI',
+        url: 'https://www.styleguruai.in',
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://www.styleguruai.in/logo.png',
+        },
+      },
+      datePublished: '2025-04-01T08:00:00+05:30',
+      dateModified: '2026-10-15T08:00:00+05:30',
+      inLanguage: 'en-IN',
+    };
+  }, [post]);
+
   if (!post) return <Navigate to="/404" replace />;
 
   const words = post.sections
@@ -109,39 +143,6 @@ export default function BlogPostPage() {
       tip: 'Flattered by soft, muted shades from both warm and cool palettes.'
     }
   };
-
-  const articleJsonLd = useMemo(() => {
-    if (!post) return null;
-    return {
-      '@context': 'https://schema.org',
-      '@type': 'BlogPosting',
-      mainEntityOfPage: {
-        '@type': 'WebPage',
-        '@id': `https://www.styleguruai.in/blog/${post.slug}`,
-      },
-      headline: post.title,
-      description: post.description,
-      image: ['https://www.styleguruai.in/og-image.png'],
-      author: {
-        '@type': 'Person',
-        name: 'Vivek Kumar',
-        jobTitle: 'Founder & AI Stylist',
-        url: 'https://www.styleguruai.in/about',
-      },
-      publisher: {
-        '@type': 'Organization',
-        name: 'StyleGuru AI',
-        url: 'https://www.styleguruai.in',
-        logo: {
-          '@type': 'ImageObject',
-          url: 'https://www.styleguruai.in/logo.png',
-        },
-      },
-      datePublished: '2025-04-01T08:00:00+05:30',
-      dateModified: '2026-10-15T08:00:00+05:30',
-      inLanguage: 'en-IN',
-    };
-  }, [post]);
 
   return (
     <div className="min-h-screen bg-[#FAFAFC] text-slate-900 font-sans antialiased selection:bg-violet-500 selection:text-white">
