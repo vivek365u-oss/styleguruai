@@ -33,3 +33,6 @@ Thumbs.db
 # Deployment
 .vercel/
 .render/
+
+# Scratch & Temporary Testing
+scratch/
