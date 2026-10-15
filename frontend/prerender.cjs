@@ -141,8 +141,8 @@ function writePage(routePath, title, description, contentHtml, extraHead = '', o
   ];
 
   // Strip pre-existing og/twitter tags to avoid duplicates
-  html = html.replace(/<meta\s+property=["']og:(type|title|description|url|image)["'].*?\/?>\s*/gi, '');
-  html = html.replace(/<meta\s+name=["']twitter:(card|title|description|image)["'].*?\/?>\s*/gi, '');
+  html = html.replace(/<meta\s+property=["']og:(type|title|description|url|image)["'][^>]*>\s*/gi, '');
+  html = html.replace(/<meta\s+name=["']twitter:(card|title|description|image|url)["'][^>]*>\s*/gi, '');
 
   const metaBlock = `  ${ogTags.join('\n  ')}\n  ${twitterTags.join('\n  ')}`;
   html = html.replace('</head>', `${metaBlock}\n${extraHead ? extraHead + '\n' : ''}</head>`);
@@ -154,6 +154,12 @@ function writePage(routePath, title, description, contentHtml, extraHead = '', o
   );
 
   fs.writeFileSync(path.join(targetDir, 'index.html'), html, 'utf-8');
+  if (routePath !== '/') {
+    const cleanRel = routePath.replace(/^\//, '');
+    const flatFile = path.join(DIST_DIR, `${cleanRel}.html`);
+    fs.mkdirSync(path.dirname(flatFile), { recursive: true });
+    fs.writeFileSync(flatFile, html, 'utf-8');
+  }
 }
 
 // ── 1. Read All Blogs ──
@@ -223,58 +229,65 @@ const recentArticles = posts.slice(0, 6).map(p => `
     <p class="text-xs text-slate-500 mt-0.5 leading-snug">${escapeHtml(p.description.slice(0, 100))}…</p>
   </li>`).join('\n');
 
-const homepageNav = `
-  <nav class="w-full bg-white border-b border-slate-200 py-4 px-6 flex items-center justify-between flex-wrap gap-3" style="position:sticky;top:0;z-index:100;">
-    <a href="/" class="flex items-center gap-2 no-underline">
+const sharedHeader = `
+  <header class="w-full bg-white border-b border-slate-200 py-4 px-6 flex items-center justify-between flex-wrap gap-4" style="position:sticky;top:0;z-index:100;">
+    <a href="/" class="flex items-center gap-2.5 no-underline">
       <img src="/logo.png" alt="StyleGuru AI Logo" width="36" height="36" class="rounded-xl" loading="eager" />
       <span class="text-lg font-black text-slate-900">StyleGuru <span style="background:linear-gradient(90deg,#6366F1,#8B5CF6,#EC4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">AI</span></span>
-      <span class="text-[9px] font-bold text-violet-700 bg-violet-100 px-1.5 py-0.5 rounded-md uppercase tracking-wide">Made in India 🇮🇳</span>
+      <span class="text-[9px] font-bold text-violet-700 bg-violet-100 px-2 py-0.5 rounded-md uppercase tracking-wide">Made in India 🇮🇳</span>
     </a>
-    <div class="flex flex-wrap gap-4 text-xs font-semibold text-slate-600">
-      <a href="/blog"           class="hover:text-violet-600 no-underline">Blog</a>
-      <a href="/about"          class="hover:text-violet-600 no-underline">About</a>
-      <a href="/contact"        class="hover:text-violet-600 no-underline">Contact</a>
-      <a href="/privacy-policy" class="hover:text-violet-600 no-underline">Privacy Policy</a>
-      <a href="/terms"          class="hover:text-violet-600 no-underline">Terms</a>
-      <a href="/disclaimer"     class="hover:text-violet-600 no-underline">Disclaimer</a>
-    </div>
-  </nav>`;
+    <nav class="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-600">
+      <a href="/"               class="hover:text-violet-600 no-underline text-slate-700">Home</a>
+      <a href="/blog"           class="hover:text-violet-600 no-underline text-slate-700">Blog</a>
+      <a href="/about"          class="hover:text-violet-600 no-underline text-slate-700">About</a>
+      <a href="/contact"        class="hover:text-violet-600 no-underline text-slate-700">Contact</a>
+      <a href="/privacy-policy" class="hover:text-violet-600 no-underline text-slate-700">Privacy Policy</a>
+      <a href="/terms"          class="hover:text-violet-600 no-underline text-slate-700">Terms</a>
+      <a href="/disclaimer"     class="hover:text-violet-600 no-underline text-slate-700">Disclaimer</a>
+    </nav>
+  </header>`;
 
-const homepageFooter = `
-  <footer class="bg-slate-900 text-slate-300 py-12 px-6 mt-16">
+const sharedFooter = `
+  <footer class="bg-slate-900 text-slate-300 py-12 px-6 mt-16 border-t border-slate-800">
     <div class="max-w-5xl mx-auto">
       <div class="flex flex-wrap gap-8 justify-between mb-8">
         <div>
           <a href="/" class="flex items-center gap-2 no-underline mb-3">
-            <img src="/logo.png" alt="StyleGuru AI" width="32" height="32" class="rounded-lg" loading="lazy" />
+            <img src="/logo.png" alt="StyleGuru AI Logo" width="32" height="32" class="rounded-lg" loading="lazy" />
             <span class="text-white font-bold text-lg">StyleGuru AI</span>
           </a>
           <p class="text-xs text-slate-400 max-w-xs leading-relaxed">AI-powered colour and fashion intelligence for every Indian skin tone. Free, privacy-first, made in India.</p>
         </div>
         <div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Explore</p>
-          <ul class="space-y-2 text-xs">
-            <li><a href="/"      class="hover:text-white no-underline text-slate-300">Home</a></li>
-            <li><a href="/blog"  class="hover:text-white no-underline text-slate-300">Fashion Blog</a></li>
-            <li><a href="/about" class="hover:text-white no-underline text-slate-300">About Us</a></li>
-            <li><a href="/contact" class="hover:text-white no-underline text-slate-300">Contact</a></li>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Navigation</p>
+          <ul class="space-y-2 text-xs list-none p-0 m-0">
+            <li><a href="/"               class="hover:text-white no-underline text-slate-300">Home</a></li>
+            <li><a href="/blog"           class="hover:text-white no-underline text-slate-300">Blog</a></li>
+            <li><a href="/about"          class="hover:text-white no-underline text-slate-300">About</a></li>
+            <li><a href="/contact"        class="hover:text-white no-underline text-slate-300">Contact</a></li>
           </ul>
         </div>
         <div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Legal</p>
-          <ul class="space-y-2 text-xs">
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Legal &amp; Policies</p>
+          <ul class="space-y-2 text-xs list-none p-0 m-0">
             <li><a href="/privacy-policy" class="hover:text-white no-underline text-slate-300">Privacy Policy</a></li>
-            <li><a href="/terms"          class="hover:text-white no-underline text-slate-300">Terms &amp; Conditions</a></li>
+            <li><a href="/terms"          class="hover:text-white no-underline text-slate-300">Terms</a></li>
             <li><a href="/disclaimer"     class="hover:text-white no-underline text-slate-300">Disclaimer</a></li>
           </ul>
         </div>
       </div>
-      <p class="text-xs text-slate-500 border-t border-slate-800 pt-6">&copy; 2024–2026 StyleGuru AI. All rights reserved. Contact: <a href="mailto:styleguruai.in@gmail.com" class="underline text-slate-400">styleguruai.in@gmail.com</a></p>
+      <div class="flex flex-wrap justify-between items-center text-xs text-slate-500 border-t border-slate-800 pt-6">
+        <p class="m-0">&copy; 2024–2026 StyleGuru AI. All rights reserved. Founded by Vivek Kumar 🇮🇳.</p>
+        <p class="m-0">Contact: <a href="mailto:styleguruai.in@gmail.com" class="underline text-slate-400">styleguruai.in@gmail.com</a></p>
+      </div>
     </div>
   </footer>`;
 
+const homepageNav = sharedHeader;
+const homepageFooter = sharedFooter;
+
 const homepageContent = `
-${homepageNav}
+${sharedHeader}
 <main class="bg-[#FAFAFC] text-slate-900 font-sans" style="font-family:system-ui,sans-serif;">
 
   <!-- HERO -->
@@ -284,16 +297,16 @@ ${homepageNav}
       Stop Guessing. Wear Colors That Make You <span style="background:linear-gradient(90deg,#6366F1,#8B5CF6,#EC4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Radiate</span>.
     </h1>
     <p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto mb-8">
-      StyleGuru AI analyses your skin tone using ITA colorimetry and RGB undertone mapping to recommend outfit colours, fabrics, and wardrobe combinations that suit you — calibrated specifically for Indian complexions from fair to deep.
+      Calibrated specifically for rich Indian skin tones. In 10 seconds, our AI calculates your exact ITA skin angle, undertone, and curates a personalized wardrobe guide.
     </p>
     <div class="flex flex-wrap items-center justify-center gap-3 mb-6">
-      <a href="/login" class="px-8 py-4 rounded-2xl text-white font-bold text-sm shadow-lg no-underline" style="background:linear-gradient(135deg,#6366F1,#8B5CF6,#EC4899);">📷 Analyse My Style Free →</a>
+      <a href="/login" class="px-8 py-4 rounded-2xl text-white font-bold text-sm shadow-lg no-underline" style="background:linear-gradient(135deg,#6366F1,#8B5CF6,#EC4899);">📷 Analyze My Style Free →</a>
       <a href="/blog"  class="px-7 py-4 rounded-2xl text-slate-800 font-bold text-sm bg-white border border-slate-200 hover:border-violet-300 shadow-sm no-underline">Read Fashion Guides</a>
     </div>
     <div class="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500 font-medium">
       <span class="text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">✓ 100% Free Forever</span>
       <span>✓ No Credit Card Needed</span>
-      <span>✓ Zero Photos Stored</span>
+      <span>✓ Privacy First (Zero Photos Stored)</span>
     </div>
   </section>
 
@@ -307,24 +320,53 @@ ${homepageNav}
     </div>
   </section>
 
-  <!-- FEATURES -->
+  <!-- FEATURES (6 Pillars) -->
   <section id="features" class="py-20 px-6 max-w-5xl mx-auto">
     <div class="text-center mb-12">
       <span class="text-xs font-bold uppercase tracking-widest text-violet-700 bg-violet-100 px-3 py-1 rounded-full border border-violet-200">Engineered Capabilities</span>
       <h2 class="text-3xl sm:text-4xl font-black text-slate-900 font-serif mt-3 mb-3">Your Complete AI Fashion Ecosystem</h2>
-      <p class="text-sm text-slate-600 leading-relaxed max-w-2xl mx-auto">Everything you need to dress better, shop smarter, and stop asking "does this suit me?" — built for India's wide range of skin tones.</p>
+      <p class="text-sm text-slate-600 leading-relaxed max-w-2xl mx-auto">Everything you need to dress sharper, shop with confidence, and never ask &quot;does this suit me?&quot; again — built for India's wide range of skin tones.</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       ${featureCards}
     </div>
   </section>
 
+  <!-- DIRECT SMART SHOPPING (From React Landing Page) -->
+  <section id="direct-shop" class="py-16 px-6 bg-slate-50 border-t border-slate-200">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-10">
+        <span class="text-xs font-bold uppercase tracking-widest text-pink-700 bg-pink-100 px-3 py-1 rounded-full border border-pink-200">Direct Smart Shopping</span>
+        <h2 class="text-3xl font-black text-slate-900 font-serif mt-3 mb-2">Buy Clothes That Make Your Face &amp; Body Glow</h2>
+        <p class="text-sm text-slate-600 max-w-xl mx-auto">StyleGuru AI maps your facial undertone, contrast, and body proportions directly to curated clothes with 1-Click Buy links on India's top fashion stores — Myntra, Amazon India, Ajio, and Nykaa.</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <p class="text-lg font-bold text-slate-900 mb-1">🎯 Face &amp; Complexion Harmony</p>
+          <p class="text-xs text-slate-600">Eliminates colors that cause dullness, accentuating your natural radiance.</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <p class="text-lg font-bold text-slate-900 mb-1">👗 Silhouette &amp; Fit Match</p>
+          <p class="text-xs text-slate-600">Cuts, necklines, and fits tailored to flatter your exact physical proportions.</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <p class="text-lg font-bold text-slate-900 mb-1">⚡ 1-Click Integrated Stores</p>
+          <p class="text-xs text-slate-600">Direct buy links on Myntra, Amazon India, Ajio, Nykaa, and Flipkart.</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <p class="text-lg font-bold text-slate-900 mb-1">💰 Filter by Your Budget</p>
+          <p class="text-xs text-slate-600">Find high-flattery styles under ₹999, everyday casuals, or festive luxury.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- SKIN TONE COLOUR GUIDE -->
-  <section class="py-16 px-6 bg-slate-50 border-y border-slate-200">
+  <section class="py-16 px-6 bg-white border-y border-slate-200">
     <div class="max-w-5xl mx-auto">
       <div class="text-center mb-10">
         <h2 class="text-3xl font-black text-slate-900 font-serif mb-2">Colour Guide by Indian Skin Tone</h2>
-        <p class="text-sm text-slate-600 max-w-xl mx-auto">A reference for the six most common Indian complexion types — from fair cool to deep warm. Click "Analyse My Style Free" above for your personalised result.</p>
+        <p class="text-sm text-slate-600 max-w-xl mx-auto">A reference for the six most common Indian complexion types — from fair cool to deep warm. Click &quot;Analyze My Style Free&quot; above for your personalised result.</p>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         ${skinToneCards}
@@ -332,27 +374,59 @@ ${homepageNav}
     </div>
   </section>
 
-  <!-- HOW IT WORKS -->
+  <!-- HOW IT WORKS (3 Simple Steps from React Landing Page) -->
   <section id="how-it-works" class="py-20 px-6 max-w-4xl mx-auto">
     <div class="text-center mb-12">
-      <h2 class="text-3xl font-black text-slate-900 font-serif mb-3">How StyleGuru AI Works</h2>
+      <span class="text-xs font-bold uppercase tracking-widest text-violet-700">Simple Process</span>
+      <h2 class="text-3xl font-black text-slate-900 font-serif mt-2 mb-3">Three Steps to Your Style Guide</h2>
       <p class="text-sm text-slate-600 max-w-xl mx-auto">Three steps. Ten seconds. A personal colour guide built for your complexion.</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       <div class="text-center p-6 bg-white rounded-3xl border border-slate-200 shadow-sm">
-        <div class="text-4xl mb-4">📷</div>
-        <h3 class="text-lg font-bold text-slate-900 mb-2">1. Upload a Selfie</h3>
-        <p class="text-xs text-slate-600 leading-relaxed">Take a clear photo in natural daylight, without filters. The app reads your pixel values to calculate skin tone and undertone.</p>
+        <div class="text-4xl mb-4">📸</div>
+        <h3 class="text-lg font-bold text-slate-900 mb-2">1. Snap a Clear Selfie</h3>
+        <p class="text-xs text-slate-600 leading-relaxed">Take a quick photo in natural daylight without heavy filters or makeup. Don't want to upload? You can also use our manual style quiz.</p>
       </div>
       <div class="text-center p-6 bg-white rounded-3xl border border-slate-200 shadow-sm">
-        <div class="text-4xl mb-4">🔬</div>
-        <h3 class="text-lg font-bold text-slate-900 mb-2">2. AI Analyses Your Tone</h3>
-        <p class="text-xs text-slate-600 leading-relaxed">The algorithm computes your ITA angle and RGB spectrum to determine whether you are warm, cool, or neutral and which depth category you fall into.</p>
+        <div class="text-4xl mb-4">🧬</div>
+        <h3 class="text-lg font-bold text-slate-900 mb-2">2. AI Analyzes Your Tone</h3>
+        <p class="text-xs text-slate-600 leading-relaxed">Our engine extracts facial landmarks, calculates your skin melanin density and undertone, and maps your profile to our scientific Indian color charts.</p>
       </div>
       <div class="text-center p-6 bg-white rounded-3xl border border-slate-200 shadow-sm">
-        <div class="text-4xl mb-4">👗</div>
-        <h3 class="text-lg font-bold text-slate-900 mb-2">3. Get Your Colour Palette</h3>
-        <p class="text-xs text-slate-600 leading-relaxed">Receive a curated set of flattering kurta, saree, sherwani, and everyday outfit colours with shades to avoid — priced for every budget from ₹500 to ₹5,000+.</p>
+        <div class="text-4xl mb-4">✨</div>
+        <h3 class="text-lg font-bold text-slate-900 mb-2">3. Get Your Style DNA</h3>
+        <p class="text-xs text-slate-600 leading-relaxed">Receive your complete color palette, outfit pairings for top and bottom, colors to avoid, and direct budget shopping links tailored for you.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEET THE FOUNDER & MADE IN INDIA STORY (From React Landing Page) -->
+  <section id="founder" class="py-20 px-6 max-w-5xl mx-auto">
+    <div class="rounded-3xl p-8 sm:p-12 border border-violet-100 bg-gradient-to-br from-violet-50 via-white to-pink-50 shadow-sm">
+      <div class="flex flex-col md:flex-row gap-8 items-center">
+        <div class="text-center md:text-left flex-shrink-0">
+          <img src="/logo.png" alt="Vivek Kumar - Founder of StyleGuru AI" width="112" height="112" class="w-28 h-28 rounded-full mx-auto p-1 bg-gradient-to-tr from-violet-600 to-pink-500 bg-white object-contain shadow-lg" loading="lazy" />
+          <h3 class="text-xl font-bold text-slate-900 font-serif mt-4 mb-0.5">Vivek Kumar</h3>
+          <p class="text-xs font-semibold text-violet-700 m-0">Founder &amp; Creator, StyleGuru AI</p>
+          <p class="text-[11px] text-slate-500 m-0">Engineered with pride in India 🇮🇳</p>
+        </div>
+        <div class="space-y-3">
+          <span class="inline-block text-xs font-bold text-violet-800 bg-violet-100 px-3 py-1 rounded-full uppercase tracking-wide">Our Founding Mission</span>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 font-serif leading-snug">
+            &ldquo;Fashion Advice Shouldn't Cost ₹5,000 or Rely on Western Color Charts That Ignore Indian Skin Tones.&rdquo;
+          </h2>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            Most global fashion styling tools were built on European skin tone classifications that completely fail when applied to the rich, warm, and multifaceted spectrum of Indian complexions.
+          </p>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            I founded <strong>StyleGuru AI</strong> to bridge this gap. By combining computer vision with proven colorimetry (ITA individual typology angle), we built an algorithm that understands every Indian undertone — from Kashmir to Kanyakumari. Our promise is simple: <strong>high-tier style intelligence, zero subscription paywalls, and complete data privacy.</strong>
+          </p>
+          <div class="flex flex-wrap gap-3 pt-2 text-xs font-semibold text-slate-700">
+            <span class="bg-white px-3 py-1.5 rounded-xl border border-slate-200">🎯 100% Free For Every Indian</span>
+            <span class="bg-white px-3 py-1.5 rounded-xl border border-slate-200">🔒 Zero Photo Storage Policy</span>
+            <span class="bg-white px-3 py-1.5 rounded-xl border border-slate-200">🚀 Constantly Evolving AI Model</span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -362,7 +436,7 @@ ${homepageNav}
     <div class="max-w-4xl mx-auto">
       <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
         <h2 class="text-2xl font-black text-slate-900 font-serif">Latest from the Fashion Blog</h2>
-        <a href="/blog" class="text-xs font-bold text-violet-600 hover:text-violet-800 no-underline">View All 115 Articles →</a>
+        <a href="/blog" class="text-xs font-bold text-violet-600 hover:text-violet-800 no-underline">View All ${posts.length} Articles →</a>
       </div>
       <ul class="grid grid-cols-1 sm:grid-cols-2 gap-6 list-none p-0">
         ${recentArticles}
@@ -371,7 +445,7 @@ ${homepageNav}
   </section>
 
 </main>
-${homepageFooter}`;
+${sharedFooter}`;
 
 // Write the homepage. writePage() injects into <div id="root"> and patches all meta tags.
 // We call it with routePath '/' — the function resolves this to dist/index.html.
@@ -398,8 +472,6 @@ ${homepageFooter}`;
   });
   const extraHead = `  <script type="application/ld+json">${homepageSchemaJson}</script>\n  <script type="application/ld+json">${orgSchemaJson}</script>`;
 
-  // writePage writes to dist/<routePath>/index.html.
-  // For '/', it would write dist//index.html — so we directly patch dist/index.html instead.
   const canonicalUrl = BASE_URL + '/';
   let html = template;
   html = html.replace(/<title>.*?<\/title>/i, `<title>StyleGuru AI — AI Fashion &amp; Colour Intelligence for Every Indian Skin Tone</title>`);
@@ -414,8 +486,8 @@ ${homepageFooter}`;
     html = html.replace('</head>', `  <link rel="canonical" href="${canonicalUrl}" />\n</head>`);
   }
   // Strip old og/twitter from template then re-inject
-  html = html.replace(/<meta\s+property=["']og:(type|title|description|url|image)['"]\s.*?\/?\>\s*/gi, '');
-  html = html.replace(/<meta\s+name=["']twitter:(card|title|description|image|url)['"]\s.*?\/?\>\s*/gi, '');
+  html = html.replace(/<meta\s+property=["']og:(type|title|description|url|image)["'][^>]*>\s*/gi, '');
+  html = html.replace(/<meta\s+name=["']twitter:(card|title|description|image|url)["'][^>]*>\s*/gi, '');
   const ogBlock = [
     `  <meta property="og:type" content="website" />`,
     `  <meta property="og:title" content="StyleGuru AI — AI Fashion &amp; Colour Intelligence for Every Indian Skin Tone" />`,
@@ -1042,33 +1114,58 @@ console.log('[Pre-render] Generating /blog index page...');
 const blogListCards = posts
   .map(
     (p, idx) => `
-    <article class="p-6 rounded-2xl border border-white/10 bg-white/5 space-y-3 mb-6">
-      <span class="text-xs uppercase tracking-widest text-violet-400 font-bold">Article #${idx + 1}</span>
-      <h2 class="text-xl font-bold text-white"><a href="/blog/${p.slug}" class="hover:text-violet-300 underline">${escapeHtml(p.title)}</a></h2>
-      <p class="text-sm text-slate-300 leading-relaxed">${escapeHtml(p.description)}</p>
-      <a href="/blog/${p.slug}" class="inline-block text-xs font-semibold text-violet-400 hover:text-white pt-2">Read Complete Guide &rarr;</a>
-    </article>
-`
+    <article class="p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-3 flex flex-col justify-between">
+      <div class="space-y-2">
+        <span class="text-xs uppercase tracking-widest text-violet-600 font-bold block">Article #${idx + 1}</span>
+        <h2 class="text-xl font-bold text-slate-900 leading-snug">
+          <a href="/blog/${p.slug}" class="hover:text-violet-600 no-underline text-slate-900">${escapeHtml(p.title)}</a>
+        </h2>
+        <p class="text-sm text-slate-600 leading-relaxed">${escapeHtml(p.description)}</p>
+      </div>
+      <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+        <span class="text-xs font-medium text-slate-400">Published guide</span>
+        <a href="/blog/${p.slug}" class="text-xs font-bold text-violet-600 hover:text-violet-800 no-underline">Read Complete Guide &rarr;</a>
+      </div>
+    </article>`
   )
   .join('\n');
+
+const blogCategoriesNav = `
+  <nav class="max-w-5xl mx-auto px-6 mb-10 flex flex-wrap items-center justify-center gap-2 text-xs font-bold" aria-label="Blog Categories">
+    <span class="px-4 py-2 rounded-full bg-slate-900 text-white">All Articles (${posts.length})</span>
+    <span class="px-4 py-2 rounded-full bg-white text-slate-700 border border-slate-200">🧬 Skin Tone Science</span>
+    <span class="px-4 py-2 rounded-full bg-white text-slate-700 border border-slate-200">🎨 Color Theory &amp; Palettes</span>
+    <span class="px-4 py-2 rounded-full bg-white text-slate-700 border border-slate-200">👗 Outfits &amp; Styling</span>
+    <span class="px-4 py-2 rounded-full bg-white text-slate-700 border border-slate-200">🛍️ Shopping &amp; Wardrobe</span>
+  </nav>`;
+
+const blogIndexContent = `
+${sharedHeader}
+<div class="public-prerender-content min-h-screen bg-[#FAFAFC] text-slate-900 font-sans">
+  <header class="py-16 px-6 max-w-5xl mx-auto text-center">
+    <span class="inline-block text-xs uppercase tracking-widest text-violet-700 bg-violet-100 px-3 py-1 rounded-full border border-violet-200 font-bold mb-3">StyleGuru AI Knowledge Hub</span>
+    <h1 class="text-4xl md:text-5xl font-serif font-black text-slate-900 mb-4">Fashion &amp; Color Intelligence Blog</h1>
+    <p class="text-slate-600 text-base max-w-2xl mx-auto leading-relaxed">
+      ${posts.length} in-depth guides covering Indian skin tones, undertones, festival wear, wedding styling, and color coordination calibrated specifically for Indian complexions.
+    </p>
+  </header>
+  ${blogCategoriesNav}
+  <main class="max-w-5xl mx-auto px-6 pb-20">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      ${blogListCards}
+    </div>
+  </main>
+</div>
+${sharedFooter}`;
 
 writePage(
   '/blog',
   'Fashion & Color Intelligence Blog — StyleGuru AI',
-  'Explore comprehensive styling guides, color theory breakdowns, and wardrobe advice calibrated for Indian skin tones, festive occasions, and seasonal weather.',
-  `<div class="public-prerender-content min-h-screen py-16 px-6 max-w-5xl mx-auto text-slate-100" style="background:#0B0F1A;">
-    <header class="mb-12 text-center">
-      <span class="text-xs uppercase tracking-widest text-violet-400 font-bold block mb-2">StyleGuru AI Knowledge Base</span>
-      <h1 class="text-4xl md:text-5xl font-serif font-black text-white mb-4">Fashion & Color Intelligence Blog</h1>
-      <p class="text-slate-300 max-w-2xl mx-auto">116 in-depth guides covering Indian skin tones, undertones, festival wear, wedding styling, and color coordination.</p>
-    </header>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      ${blogListCards}
-    </div>
-  </div>`
+  `Explore comprehensive styling guides, color theory breakdowns, and wardrobe advice calibrated for Indian skin tones, festive occasions, and seasonal weather. Featuring ${posts.length} articles.`,
+  blogIndexContent
 );
 
-// ── 4. Pre-render All 116 Blog Article Pages (/blog/[slug]) ──
+// ── 4. Pre-render All Blog Article Pages (/blog/[slug]) ──
 console.log(`[Pre-render] Generating ${posts.length} static blog post HTML files WITHOUT boilerplate...`);
 
 for (let i = 0; i < posts.length; i++) {
@@ -1123,6 +1220,7 @@ for (let i = 0; i < posts.length; i++) {
   const extraHead = `  <script type="application/ld+json">${schemaJson}</script>`;
 
   const articleContentHtml = `
+    ${sharedHeader}
     <div class="min-h-screen bg-[#FAFAFC] text-slate-900 font-sans py-12 px-6">
       <main class="max-w-3xl mx-auto">
         <nav class="mb-8 text-xs font-bold text-slate-500">
@@ -1144,6 +1242,7 @@ for (let i = 0; i < posts.length; i++) {
         </section>
       </main>
     </div>
+    ${sharedFooter}
   `;
 
   writePage(`/blog/${p.slug}`, `${p.title} — StyleGuru AI`, p.description, articleContentHtml, extraHead, 'article');
