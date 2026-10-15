@@ -1,3 +1,6 @@
+
+
+
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import SEOHead from '../components/SEOHead';
@@ -54,40 +57,6 @@ export default function BlogPostPage() {
       related.push(blogPosts[nextIndex]);
     }
     return related;
-  }, [post]);
-
-  // Structured Data Schema for Article
-  const articleJsonLd = useMemo(() => {
-    if (!post) return null;
-    return {
-      '@context': 'https://schema.org',
-      '@type': 'BlogPosting',
-      mainEntityOfPage: {
-        '@type': 'WebPage',
-        '@id': `https://www.styleguruai.in/blog/${post.slug}`,
-      },
-      headline: post.title,
-      description: post.description,
-      image: ['https://www.styleguruai.in/og-image.png'],
-      author: {
-        '@type': 'Person',
-        name: 'Vivek Kumar',
-        jobTitle: 'Founder & AI Stylist',
-        url: 'https://www.styleguruai.in/about',
-      },
-      publisher: {
-        '@type': 'Organization',
-        name: 'StyleGuru AI',
-        url: 'https://www.styleguruai.in',
-        logo: {
-          '@type': 'ImageObject',
-          url: 'https://www.styleguruai.in/logo.png',
-        },
-      },
-      datePublished: '2025-04-01T08:00:00+05:30',
-      dateModified: '2026-10-15T08:00:00+05:30',
-      inLanguage: 'en-IN',
-    };
   }, [post]);
 
   if (!post) return <Navigate to="/404" replace />;
@@ -150,7 +119,6 @@ export default function BlogPostPage() {
         title={`${post.title} — StyleGuru AI`}
         description={post.description}
         type="article"
-        jsonLd={articleJsonLd}
       />
 
       {/* ─── Sticky Top Navigation ─── */}
@@ -193,7 +161,7 @@ export default function BlogPostPage() {
 
       {/* ─── Article Container ─── */}
       <main className="max-w-3xl mx-auto px-6 sm:px-8 pt-12 pb-24">
-        
+
         {/* Category Pill & Reading Time */}
         <div className="flex items-center gap-3 mb-4 text-xs font-bold">
           <span className="px-3 py-1 rounded-full bg-violet-100 text-violet-800 uppercase tracking-wider text-[10px]">
@@ -232,7 +200,7 @@ export default function BlogPostPage() {
         {/* ─── Social Share Bar ─── */}
         <div className="flex items-center gap-2 mb-10 pb-6 border-b border-slate-100">
           <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2">Share:</span>
-          
+
           <a
             href={`https://wa.me/?text=${encodeURIComponent(shareTitle + ' — ' + shareUrl)}`}
             target="_blank"
@@ -303,11 +271,10 @@ export default function BlogPostPage() {
                             key={u.id}
                             type="button"
                             onClick={() => setSelectedUndertone(u.id)}
-                            className={`py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-                              selectedUndertone === u.id
-                                ? 'bg-violet-600 text-white border-violet-600 shadow-md'
-                                : 'bg-white text-slate-700 border-slate-200 hover:border-violet-300'
-                            }`}
+                            className={`py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition-all cursor-pointer border ${selectedUndertone === u.id
+                              ? 'bg-violet-600 text-white border-violet-600 shadow-md'
+                              : 'bg-white text-slate-700 border-slate-200 hover:border-violet-300'
+                              }`}
                           >
                             {u.label}
                           </button>
