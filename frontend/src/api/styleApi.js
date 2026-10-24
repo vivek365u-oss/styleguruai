@@ -27,12 +27,12 @@ API.interceptors.request.use(async (config) => {
       console.error('[API] Failed to get auth token', e);
     }
   } else {
-    // Only warn if it's NOT the health check or a public route
-    const isPublic = config.url === '/health' || config.url === '/';
+    // Only warn if it's NOT the health check or a public / guest analysis route
+    const isPublic = config.url === '/health' || config.url === '/' || config.url?.startsWith('/api/analyze') || config.url?.startsWith('/api/outfit');
     if (!isPublic) {
       console.warn(`[API] Request to ${config.url} sent without authentication!`);
     } else {
-      console.log(`[API] Public request: ${config.url}`);
+      console.log(`[API] Public / Guest request: ${config.url}`);
     }
   }
   return config;

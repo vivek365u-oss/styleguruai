@@ -665,14 +665,19 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
   }, [wardrobeLimit]);
 
   const fetchWardrobe = async () => {
+    if (!auth.currentUser) {
+      setItems([]);
+      setLoading(false);
+      return;
+    }
     try {
       const [data, prefs] = await Promise.all([
         getWardrobe(auth.currentUser.uid),
         loadUserPreferences(auth.currentUser.uid)
       ]);
-      setItems(data);
+      setItems(data || []);
       if (prefs?.laundry_cycle) setLaundryCycle(prefs.laundry_cycle);
-      if (data.length >= wardrobeLimit) setCapWarning(true);
+      if ((data || []).length >= wardrobeLimit) setCapWarning(true);
       else setCapWarning(false);
     } catch {
       setError(t('somethingWrong') || 'Could not load your wardrobe');
@@ -803,6 +808,13 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
   };
 
   const handleOpenAddModal = (presetCategory = '') => {
+    if (!auth.currentUser) {
+      showToast('Please sign in to save outfits to your personal wardrobe');
+      setTimeout(() => {
+        window.location.href = '/login?mode=login';
+      }, 1500);
+      return;
+    }
     setAddModalInitialCategory(presetCategory);
     setIsAddModalOpen(true);
   };
@@ -1085,6 +1097,25 @@ function WardrobePanel({ onShowResult, gender = 'male' }) {
             );
           })}
       </div>
+
+      {/* ── GUEST EXPLORER BANNER ── */}
+      {!auth.currentUser && (
+        <div className="mb-6 p-4 rounded-2xl border border-purple-500/30 bg-purple-500/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">✨</span>
+            <div>
+              <p className="text-xs font-bold text-purple-700 dark:text-purple-300 m-0">Guest Mode Active</p>
+              <p className="text-[11px] opacity-70 m-0">Sign in with Google to permanently save outfits & sync your closet across all devices.</p>
+            </div>
+          </div>
+          <a
+            href="/login?mode=login"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs whitespace-nowrap shadow transition-all no-underline"
+          >
+            Sign In with Google
+          </a>
+        </div>
+      )}
 
       {/* ── WARDROBE CONTENT AREA ────────────────────────────── */}
       {items.length === 0 ? (

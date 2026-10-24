@@ -317,7 +317,12 @@ export default function StyleNavigator({ user, onAnalyze }) {
   };
 
   useEffect(() => {
-    if (!auth.currentUser) { setLoading(false); return; }
+    if (!auth.currentUser) {
+      const localProfile = JSON.parse(localStorage.getItem('sg_primary_profile') || 'null') || JSON.parse(localStorage.getItem('sg_last_analysis') || 'null');
+      setProfile(localProfile);
+      setLoading(false);
+      return;
+    }
     const uid = auth.currentUser.uid;
 
     (async () => {

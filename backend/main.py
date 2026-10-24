@@ -97,6 +97,19 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 # AUTH SETUP
 # ============================================
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="auth/login", auto_error=False)
+
+async def get_optional_user(token: Optional[str] = Depends(oauth2_scheme_optional)):
+    if not token or not FIREBASE_INITIALIZED:
+        return None
+    try:
+        decoded = firebase_auth.verify_id_token(token)
+        uid = decoded["uid"]
+        email = decoded.get("email", "")
+        name = decoded.get("name", email)
+        return {"uid": uid, "email": email, "full_name": name}
+    except Exception:
+        return None
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     if not FIREBASE_INITIALIZED:
@@ -925,7 +938,7 @@ async def analyze_image(
     request: Request,
     file: UploadFile = File(...),
     lang: str = "en",
-    current_user: dict = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_user)
 ):
     start_time = time.time()
     try:
@@ -983,7 +996,7 @@ async def analyze_image(
 async def analyze_image_female(
     file: UploadFile = File(...),
     lang: str = "en",
-    current_user: dict = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_user)
 ):
     start_time = time.time()
     try:
@@ -1047,7 +1060,7 @@ async def analyze_seasonal(
     season: str = "summer",
     lang: str = "en",
     gender: str = "male",
-    current_user: dict = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_user)
 ):
     start_time = time.time()
     try:
@@ -1097,7 +1110,7 @@ async def check_outfit_compatibility(
     lang: str = "en",
     gender: str = Form(default="male"),
     clothing_type: str = Form(default="top"),
-    current_user: dict = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_user)
 ):
     start_time = time.time()
     selfie_path = None
@@ -2040,7 +2053,7 @@ async def analyze_selfie_style(
     gender: str = "male",
     texture: str = "straight",
     lang: str = "en",
-    current_user: dict = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_user)
 ):
     """
     Full selfie analysis — unlimited for all users.

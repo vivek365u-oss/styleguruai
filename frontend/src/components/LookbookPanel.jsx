@@ -24,7 +24,10 @@ function LookbookPanel() {
 
   useEffect(() => {
     async function fetchData() {
-      if (!auth.currentUser) return;
+      if (!auth.currentUser) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       const data = await getLookbook(auth.currentUser.uid);
       setItems(data);

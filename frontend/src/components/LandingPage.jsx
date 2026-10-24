@@ -90,7 +90,7 @@ const FEATURE_PREVIEWS = {
   }
 };
 
-function FeaturePreviewModal({ featureData, onClose, onLogin }) {
+function FeaturePreviewModal({ featureData, onClose, onTryFeature, onLogin }) {
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
@@ -175,17 +175,24 @@ function FeaturePreviewModal({ featureData, onClose, onLogin }) {
         {/* Action Buttons */}
         <div className="space-y-2.5">
           <button
-            onClick={onLogin}
+            onClick={onTryFeature}
             className="w-full py-3.5 px-6 rounded-2xl text-white font-semibold text-xs sm:text-sm transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-lg shadow-violet-500/25 flex items-center justify-center gap-2 cursor-pointer border-none"
             style={{ background: GRAD }}
           >
-            <span>Analyze My Style (Personalized Free Profile)</span>
+            <span>Launch Feature Live (Free Guest Access)</span>
             <span>→</span>
           </button>
 
           <button
+            onClick={onLogin}
+            className="w-full py-2.5 px-4 rounded-xl text-slate-700 bg-slate-100 hover:bg-slate-200 font-semibold text-xs transition-colors cursor-pointer border-none"
+          >
+            Sign In with Google / Email
+          </button>
+
+          <button
             onClick={onClose}
-            className="w-full text-center text-xs text-slate-500 hover:text-slate-800 transition-colors py-2 font-medium cursor-pointer bg-transparent border-none"
+            className="w-full text-center text-xs text-slate-400 hover:text-slate-700 transition-colors py-1.5 font-medium cursor-pointer bg-transparent border-none"
           >
             Continue Exploring Homepage & Color Lab
           </button>
@@ -449,6 +456,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
         <FeaturePreviewModal
           featureData={gateFeature}
           onClose={() => setGateFeature(null)}
+          onTryFeature={() => { setGateFeature(null); onGetStarted(); }}
           onLogin={() => { setGateFeature(null); onLoginClick(); }}
         />
       )}

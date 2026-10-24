@@ -97,19 +97,18 @@ function AppRoutes({ user, setUser, authLoading }) {
   };
 
 
+  const GUEST_USER = React.useMemo(() => ({ name: 'Guest Explorer', email: null, isGuest: true }), []);
+
   return (
     <Suspense fallback={null}>
       <Routes>
-        <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage user={user} onLoginClick={() => navigate('/login?mode=login')} onGetStarted={() => navigate('/login?mode=register')} />} />
+        <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage user={user} onLoginClick={() => navigate('/login?mode=login')} onGetStarted={() => navigate('/dashboard?tab=analyze')} />} />
         <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage onLoginSuccess={setUser} />} />
-        {/* MOBILE LOGIN FIX: While auth is still loading (profile fetch in progress),
-            show a spinner on /dashboard instead of redirecting to "/".
-            Without this, navigate('/dashboard') right after Google login hits this route
-            with user=null (auth still loading) and bounces back to landing page → login loop. */}
+        {/* Guest Mode enabled: Non-logged-in visitors get instant access to Dashboard & Tools */}
         <Route path="/dashboard" element={
-          authLoading
+          authLoading && !!localStorage.getItem('tonefit_user')
             ? <div className="min-h-screen bg-[#050816] flex items-center justify-center"><div className="w-8 h-8 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" /></div>
-            : user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />
+            : <Dashboard user={user || GUEST_USER} onLogout={handleLogout} />
         } />
         {/* OrderSuccess route removed */}
         <Route path="/profile" element={

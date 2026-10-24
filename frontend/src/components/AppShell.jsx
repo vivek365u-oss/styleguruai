@@ -612,7 +612,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
   const archetype = personality.primary;
   const secondary = personality.secondary;
 
-  const avatarLetter = (displayName?.[0] || user?.email?.[0] || 'U').toUpperCase();
+  const avatarLetter = user?.isGuest ? '👤' : (displayName?.[0] || user?.email?.[0] || 'U').toUpperCase();
   const analysisCount = usage?.analysisHistoryCount || personalityData.analysisCount; // Fallback to personalityData
   const streak = usage?.streak ?? personalityData.streak ?? parseInt(localStorage.getItem('sg_streak_count') || '0');
   const wardrobeCount = usage?.wardrobeCount ?? personalityData.wardrobeCount;
@@ -887,7 +887,13 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
                   </p>
                   <div style={{ background: C.glass2, border: `1px solid ${C.border}`, borderRadius: 16, overflow: 'hidden', marginBottom: 18 }}>
                     <button
-                      onClick={onLogout}
+                      onClick={() => {
+                        if (user?.isGuest) {
+                          window.location.href = '/login?mode=login';
+                        } else {
+                          onLogout();
+                        }
+                      }}
                       style={{
                         width: '100%', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14,
                         background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s'
@@ -895,12 +901,12 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
                       onMouseEnter={e => e.currentTarget.style.background = C.glass}
                       onMouseLeave={e => e.currentTarget.style.background = 'none'}
                     >
-                      <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(148,163,184,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
-                        🚪
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: user?.isGuest ? 'rgba(124,58,237,0.15)' : 'rgba(148,163,184,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                        {user?.isGuest ? '✨' : '🚪'}
                       </div>
                       <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>Sign Out</p>
-                        <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>{user?.email || 'Current session'}</p>
+                        <p style={{ fontSize: '13px', color: C.text, margin: 0, fontFamily: PJS, fontWeight: 600 }}>{user?.isGuest ? 'Sign In / Register' : 'Sign Out'}</p>
+                        <p style={{ fontSize: '11px', color: C.muted, margin: '1px 0 0', fontFamily: PJS }}>{user?.isGuest ? 'Sync profile to cloud' : (user?.email || 'Current session')}</p>
                       </div>
                       <span style={{ fontSize: '14px', color: C.muted }}>→</span>
                     </button>
@@ -1004,7 +1010,7 @@ function ProfileSection({ user, onLogout, onTabChange, onToast, C, theme, toggle
                 <button onClick={() => setEditingName(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted, fontSize: '13px', padding: '2px 4px', borderRadius: 4 }} title="Edit name">✏️</button>
               </div>
             )}
-            <p style={{ fontSize: '12px', color: C.muted, fontFamily: PJS, margin: '0 0 8px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</p>
+            <p style={{ fontSize: '12px', color: C.muted, fontFamily: PJS, margin: '0 0 8px', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.isGuest ? 'Guest Explorer (Not Logged In)' : user?.email}</p>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: `${level.color}18`, border: `1px solid ${level.color}30`, borderRadius: 20, padding: '3px 10px' }}>
               <div style={{ width: 6, height: 6, borderRadius: '50%', background: level.color }} />
               <span style={{ fontSize: '9px', color: level.color, fontFamily: PJS, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{level.label}</span>
@@ -1316,7 +1322,7 @@ export default function AppShell({ user, onLogout }) {
     onLogout();
   }, [onLogout]);
 
-  const avatarLetter = (user?.name?.[0] || user?.email?.[0] || 'U').toUpperCase();
+  const avatarLetter = user?.isGuest ? '👤' : (user?.name?.[0] || user?.email?.[0] || 'U').toUpperCase();
 
   const desktopTabs = [
     { id: 'home', label: 'Home' },
@@ -1374,6 +1380,32 @@ export default function AppShell({ user, onLogout }) {
 
         {/* Right — Theme quick toggle + Avatar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginLeft: 'auto' }}>
+          {user?.isGuest && (
+            <a
+              href="/login?mode=login"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                background: GRAD,
+                color: '#FFFFFF',
+                padding: '6px 14px',
+                borderRadius: 20,
+                fontSize: '12px',
+                fontWeight: 700,
+                textDecoration: 'none',
+                boxShadow: '0 4px 12px rgba(124, 58, 237, 0.35)',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                whiteSpace: 'nowrap',
+                fontFamily: PJS
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+            >
+              <span>👤</span>
+              <span>Sign In</span>
+            </a>
+          )}
           {/* Quick theme toggle button */}
           <button
             onClick={() => { toggleTheme(); setToast({ message: `${theme === 'dark' ? 'Light' : 'Dark'} Mode`, type: 'success' }); }}
