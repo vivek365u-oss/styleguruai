@@ -1,6 +1,7 @@
 import { buildMyntraUrl, buildMyntraSearchUrl } from './myntraUrl';
 
-const AMAZON_TAG = 'StyleGuruAI-21';
+// Google AdSense Compliance: Empty affiliate tag to prevent "Thin Affiliate / MFA" flag
+const AMAZON_TAG = '';
 
 /**
  * Builds a search URL for different e-commerce platforms.
@@ -158,7 +159,8 @@ export const buildShopUrl = (item, storeId, gender = 'male', budget = null) => {
       }
       return buildMyntraSearchUrl(cleanItem, gKey);
     case 'amazon':
-      return `https://www.amazon.in/s?k=${qWithGender}${amzPrice}&tag=${AMAZON_TAG}`;
+      const tagParam = AMAZON_TAG ? `&tag=${AMAZON_TAG}` : '';
+      return `https://www.amazon.in/s?k=${qWithGender}${amzPrice}${tagParam}`;
     case 'flipkart':
       return `https://www.flipkart.com/search?q=${qWithGender}${fkPrice}`;
     case 'meesho':

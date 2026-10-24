@@ -1,6 +1,4 @@
 
-
-
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import SEOHead from '../components/SEOHead';
@@ -334,43 +332,41 @@ export default function BlogPostPage() {
                   />
                 )}
 
-                {/* ── Hook 2: Direct Smart Shopping Spotlight (Inserted after Section 4) ── */}
+                {/* ── Hook 2: Editorial Color Science & Styling Tip (AdSense Quality Compliant) ── */}
                 {idx === 3 && (
-                  <div className="my-10 p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/90 shadow-lg space-y-4">
+                  <div className="my-10 p-6 sm:p-7 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-pink-100 to-violet-100 text-pink-600 flex items-center justify-center text-xl font-bold flex-shrink-0">
-                        🛍️
+                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-100 to-indigo-100 text-violet-700 flex items-center justify-center text-xl font-bold flex-shrink-0">
+                        💡
                       </div>
                       <div>
-                        <span className="text-[10px] font-bold text-pink-600 uppercase tracking-widest block">
-                          Core Problem Solved
+                        <span className="text-[10px] font-bold text-violet-600 uppercase tracking-widest block">
+                          Practical Styling Methodology
                         </span>
                         <h4 className="text-base sm:text-lg font-bold text-slate-900 font-serif">
-                          Buy Clothes in Colors That Flatter Your Face & Body
+                          Testing Undertone Harmony with Natural Light
                         </h4>
                       </div>
                     </div>
 
                     <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                      Knowing your skin tone is only half the battle. StyleGuru AI connects your analyzed tone to <strong>1-click direct shopping links on Myntra, Amazon India, Ajio & Nykaa</strong> — pre-filtered so you never waste money on clothes that wash out your complexion.
+                      When choosing clothing colors to complement your skin tone, always evaluate fabric swatches under indirect, natural morning or late afternoon daylight. Overhead commercial store spotlights often distort golden and olive undertones, causing colors to look different when worn outdoors.
                     </p>
 
-                    <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-slate-100">
                       <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-                        <span>✓ Myntra</span>
+                        <span>✓ Natural Daylight Test</span>
                         <span>•</span>
-                        <span>✓ Amazon</span>
+                        <span>✓ Contrast Balancing</span>
                         <span>•</span>
-                        <span>✓ Ajio</span>
-                        <span>•</span>
-                        <span>✓ Nykaa</span>
+                        <span>✓ Color Season Verification</span>
                       </div>
 
                       <Link
-                        to="/#direct-shop"
+                        to="/#features"
                         className="text-xs font-bold text-violet-600 hover:text-violet-700 flex items-center gap-1 no-underline"
                       >
-                        <span>Explore Direct Smart Shop</span>
+                        <span>Learn More in Color Guide</span>
                         <span>→</span>
                       </Link>
                     </div>

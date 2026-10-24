@@ -83,14 +83,15 @@ function AffiliateLink({
 
   return (
     <a
-      href="#"
+      href={href || "#"}
       onClick={(e) => {
-        e.preventDefault();
+        // If href is valid, track click and let the browser or handler proceed
+        if (e && e.preventDefault) e.preventDefault();
         trackClick();
       }}
       className={className}
       target="_blank"
-      rel="noopener noreferrer"
+      rel="nofollow noopener noreferrer"
       style={{ opacity: loading ? 0.6 : 1, cursor: loading ? 'wait' : 'pointer' }}
     >
       {children}

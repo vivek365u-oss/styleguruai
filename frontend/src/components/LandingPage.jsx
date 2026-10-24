@@ -9,13 +9,104 @@ import Footer from './Footer';
 import { LIGHT, GRAD } from '../utils/themeColors';
 
 /* ══════════════════════════════════════════════
-   LOGIN GATE MODAL (Light Mode Luxe)
+   FEATURE PREVIEW & DEMO MODAL (AdSense Compliant - No Hard Gate)
    ══════════════════════════════════════════════ */
-function LoginGateModal({ feature, onClose, onLogin }) {
+const FEATURE_PREVIEWS = {
+  analysis: {
+    title: 'Objective Skin & Undertone Analysis',
+    badge: 'Live Colorimetry Engine',
+    icon: '🔬',
+    summary: 'Calibrated colorimetry that analyzes facial landmarks and melanin distribution to determine exact ITA skin tone and undertone balance.',
+    sampleTitle: 'Sample Result: Wheatish Warm (Type IV)',
+    details: [
+      { label: 'Skin ITA Angle', val: '28.4° (Medium Wheatish Complexion)' },
+      { label: 'Undertone Bias', val: 'Warm Golden (b* > 18.2)' },
+      { label: 'Recommended Palette', val: 'Terracotta, Deep Teal, Rich Amber, Forest Green' },
+      { label: 'Colors to Avoid', val: 'Icy Silver, Bleached White, Neon Lime' },
+    ]
+  },
+  couple: {
+    title: 'Couple Color & Event Harmony',
+    badge: 'Multi-Person Color Matching',
+    icon: '👫',
+    summary: 'Harmonizes clothing palettes across couples for weddings, sangeets, festive pujas, and formal evenings.',
+    sampleTitle: 'Sample Pair: Festive Wedding Palette',
+    details: [
+      { label: 'Partner 1 Palette', val: 'Regal Wine Kurta (#701A75) + Warm Cream Dupatta' },
+      { label: 'Partner 2 Palette', val: 'Dusty Peach Sherwani + Rose Gold Zari Accents' },
+      { label: 'Color Contrast Ratio', val: '4.8 : 1 (High Flattery Index)' },
+      { label: 'Occasion Suitability', val: 'Diwali, Sangeet & Reception Evenings' },
+    ]
+  },
+  wardrobe: {
+    title: 'Smart Capsule Wardrobe Vault',
+    badge: 'Digital Closet Organization',
+    icon: '👗',
+    summary: 'Organize your physical wardrobe digitally, track laundry rotation, and prevent repeating outfits.',
+    sampleTitle: 'Sample Closet Capsule: 24 Core Essentials',
+    details: [
+      { label: 'Formal / Workwear', val: '4 Crisp Cotton Shirts, 3 Tailored Chinos (Navy, Khaki, Charcoal)' },
+      { label: 'Festive & Ethnic', val: '2 Silk Kurtas, 1 Nehru Jacket (Bundi) in Mustard Ochre' },
+      { label: 'Laundry Tracker', val: '18 Ready to Wear • 4 In Wash • 2 Dry Clean' },
+      { label: 'Cost-Per-Wear Metric', val: 'Average ₹42 per wear across capsule' },
+    ]
+  },
+  tools: {
+    title: 'On-The-Go Style Toolkit',
+    badge: 'Real-Time Color Tools',
+    icon: '🛠️',
+    summary: 'Live camera scanner, outfit contrast compatibility checker, and color wheel balance tester.',
+    sampleTitle: 'Live Test: Shirt + Trouser Contrast Checker',
+    details: [
+      { label: 'Top Shade', val: 'Cobalt Blue (#1D4ED8)' },
+      { label: 'Bottom Shade', val: 'Stone Khaki (#D4A574)' },
+      { label: 'Visual Balance Score', val: '94 / 100 (Optimal Optical Contrast)' },
+      { label: 'Stylist Verdict', val: 'Balanced casual-formal contrast suitable for Indian complexions' },
+    ]
+  },
+  shop: {
+    title: 'Skin-Tone Fashion & Outfit Guide',
+    badge: 'Curated Fashion Recommendations',
+    icon: '🛍️',
+    summary: 'Curated clothing color palettes mapped directly to Indian undertones, fabrics, and regional weather.',
+    sampleTitle: 'Sample Recommendations for Warm Undertones',
+    details: [
+      { label: 'Tops & Kurtas', val: 'Olive Green, Rust Orange, Burnt Sienna, Mustard' },
+      { label: 'Bottoms & Trousers', val: 'Warm Beige, Dark Chocolate Brown, Charcoal' },
+      { label: 'Ethnic Silhouettes', val: 'Tussar Silk, Raw Khadi, Breathable Linen' },
+      { label: 'Footwear & Accents', val: 'Tan Leather Mojaris, Antique Brass Watches' },
+    ]
+  },
+  bot: {
+    title: 'AI StyleBot Stylist',
+    badge: 'Conversational Fashion Intelligence',
+    icon: '🤖',
+    summary: 'Instant personalized guidance for styling dilemmas, dress codes, and occasion dressing.',
+    sampleTitle: 'Sample Stylist Consultation',
+    details: [
+      { label: 'User Question', val: '"Can I wear a black shirt to a daytime summer outdoor wedding?"' },
+      { label: 'StyleBot Advice', val: '"Black absorbs high solar radiation in Indian summer heat. Choose Deep Navy or Forest Green instead—they deliver equal elegance without washing out your complexion under midday sunlight."' },
+    ]
+  }
+};
+
+function FeaturePreviewModal({ featureData, onClose, onLogin }) {
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
   }, []);
+
+  const preview = FEATURE_PREVIEWS[featureData?.id] || {
+    title: featureData?.name || 'Feature Preview',
+    badge: 'Style Intelligence Tool',
+    icon: '✨',
+    summary: 'Interactive feature designed for personalized Indian fashion and color matching.',
+    sampleTitle: 'Interactive Preview',
+    details: [
+      { label: 'Compatibility', val: 'All Indian skin tones (Fair, Wheatish, Dusky)' },
+      { label: 'Algorithm', val: 'Scientific Colorimetry & Undertone Analysis' },
+    ]
+  };
 
   return (
     <div
@@ -24,7 +115,7 @@ function LoginGateModal({ feature, onClose, onLogin }) {
       onClick={onClose}
     >
       <div
-        className="w-full sm:max-w-md text-center rounded-3xl p-8 sm:p-10 shadow-2xl transition-all"
+        className="w-full sm:max-w-lg text-left rounded-3xl p-6 sm:p-8 shadow-2xl transition-all max-h-[90vh] overflow-y-auto"
         style={{
           background: '#FFFFFF',
           border: '1px solid rgba(139, 92, 246, 0.2)',
@@ -32,38 +123,73 @@ function LoginGateModal({ feature, onClose, onLogin }) {
         }}
         onClick={e => e.stopPropagation()}
       >
-        <div className="w-12 h-12 rounded-2xl mx-auto mb-5 flex items-center justify-center text-2xl"
-          style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(236,72,153,0.12))', border: '1px solid rgba(139,92,246,0.2)' }}>
-          ✨
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-violet-50 text-violet-700 flex items-center justify-center text-2xl flex-shrink-0">
+              {preview.icon}
+            </div>
+            <div>
+              <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-violet-600 block">
+                {preview.badge}
+              </span>
+              <h3 className="text-lg font-bold text-slate-900 font-serif leading-tight">
+                {preview.title}
+              </h3>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors flex items-center justify-center text-sm cursor-pointer border-none"
+          >
+            ✕
+          </button>
         </div>
 
-        <span className="text-[10px] font-bold tracking-[0.2em] uppercase px-3 py-1 rounded-full text-violet-700 bg-violet-50 border border-violet-200 inline-block mb-3">
-          100% Free Access
-        </span>
-
-        <h3 className="text-2xl font-bold text-slate-900 mb-2 font-serif">
-          Access {feature}
-        </h3>
-
-        <p className="text-sm text-slate-600 mb-8 leading-relaxed">
-          Sign in with one click to unlock personalized skin tone palettes, wardrobe management, and AI outfit recommendations.
+        {/* Summary */}
+        <p className="text-xs sm:text-sm text-slate-600 mb-5 leading-relaxed">
+          {preview.summary}
         </p>
 
-        <button
-          onClick={onLogin}
-          className="w-full py-3.5 px-6 rounded-2xl text-white font-semibold text-sm transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-lg shadow-violet-500/25 flex items-center justify-center gap-2 mb-3 cursor-pointer"
-          style={{ background: GRAD }}
-        >
-          <span>Continue with Google / Email</span>
-          <span>→</span>
-        </button>
+        {/* Live Sample Card */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80 mb-6 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+              {preview.sampleTitle}
+            </span>
+            <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-100 text-emerald-800">
+              Sample Data
+            </span>
+          </div>
 
-        <button
-          onClick={onClose}
-          className="text-xs text-slate-500 hover:text-slate-800 transition-colors py-2 font-medium cursor-pointer bg-transparent border-none"
-        >
-          Explore More Features First
-        </button>
+          <div className="space-y-2 pt-1 border-t border-slate-200/60">
+            {preview.details.map((d, i) => (
+              <div key={i} className="text-xs flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-0.5 sm:gap-4 py-1 border-b border-slate-100 last:border-b-0">
+                <span className="text-slate-500 font-medium sm:w-2/5">{d.label}:</span>
+                <span className="text-slate-900 font-semibold sm:w-3/5 sm:text-right">{d.val}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="space-y-2.5">
+          <button
+            onClick={onLogin}
+            className="w-full py-3.5 px-6 rounded-2xl text-white font-semibold text-xs sm:text-sm transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-lg shadow-violet-500/25 flex items-center justify-center gap-2 cursor-pointer border-none"
+            style={{ background: GRAD }}
+          >
+            <span>Analyze My Style (Personalized Free Profile)</span>
+            <span>→</span>
+          </button>
+
+          <button
+            onClick={onClose}
+            className="w-full text-center text-xs text-slate-500 hover:text-slate-800 transition-colors py-2 font-medium cursor-pointer bg-transparent border-none"
+          >
+            Continue Exploring Homepage & Color Lab
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -281,7 +407,7 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
     if (user) {
       onGetStarted();
     } else {
-      setGateFeature(feature);
+      setGateFeature({ name: feature, id });
     }
   };
 
@@ -318,10 +444,10 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
         description="Discover your best colors, tailored outfits, and style guide with AI skin analysis. Made in India for every skin tone."
       />
 
-      {/* ─── Login Gate Modal ─── */}
+      {/* ─── Feature Preview & Demo Modal (AdSense Compliant - No Hard Login Gate) ─── */}
       {gateFeature && (
-        <LoginGateModal
-          feature={gateFeature}
+        <FeaturePreviewModal
+          featureData={gateFeature}
           onClose={() => setGateFeature(null)}
           onLogin={() => { setGateFeature(null); onLoginClick(); }}
         />
@@ -502,11 +628,20 @@ export default function LandingPage({ user, onGetStarted, onLoginClick }) {
                 </button>
 
                 <button
+                  onClick={() => handleFeatureClick('AI Skin Analysis', 'analysis')}
+                  className="w-full sm:w-auto px-6 py-4 rounded-2xl text-violet-700 font-bold text-sm bg-violet-50 hover:bg-violet-100/80 border border-violet-200 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  title="View complete sample analysis report without signing in"
+                >
+                  <span>🔬</span>
+                  <span>Sample Analysis Demo</span>
+                </button>
+
+                <button
                   onClick={handleDownloadAppClick}
-                  className="w-full sm:w-auto px-7 py-4 rounded-2xl text-slate-800 font-bold text-sm bg-white border border-slate-200 hover:border-violet-300 hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto px-6 py-4 rounded-2xl text-slate-800 font-bold text-sm bg-white border border-slate-200 hover:border-violet-300 hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span>📲</span>
-                  <span>Install App on Mobile</span>
+                  <span>Install App</span>
                 </button>
               </div>
 

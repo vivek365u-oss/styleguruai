@@ -341,9 +341,9 @@ ${sharedHeader}
   <section id="direct-shop" class="py-16 px-6 bg-slate-50 border-t border-slate-200">
     <div class="max-w-5xl mx-auto">
       <div class="text-center mb-10">
-        <span class="text-xs font-bold uppercase tracking-widest text-pink-700 bg-pink-100 px-3 py-1 rounded-full border border-pink-200">Direct Smart Shopping</span>
-        <h2 class="text-3xl font-black text-slate-900 font-serif mt-3 mb-2">Buy Clothes That Make Your Face &amp; Body Glow</h2>
-        <p class="text-sm text-slate-600 max-w-xl mx-auto">StyleGuru AI maps your facial undertone, contrast, and body proportions directly to curated clothes with 1-Click Buy links on India's top fashion stores — Myntra, Amazon India, Ajio, and Nykaa.</p>
+        <span class="text-xs font-bold uppercase tracking-widest text-violet-700 bg-violet-100 px-3 py-1 rounded-full border border-violet-200">Personalized Wardrobe Intelligence</span>
+        <h2 class="text-3xl font-black text-slate-900 font-serif mt-3 mb-2">Curate Outfits That Flatter Your Natural Complexion</h2>
+        <p class="text-sm text-slate-600 max-w-xl mx-auto">StyleGuru AI maps your facial undertone, contrast, and body proportions to tailored color palettes, fabric textures, and silhouette recommendations calibrated for Indian weather and celebrations.</p>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
         <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
@@ -355,12 +355,12 @@ ${sharedHeader}
           <p class="text-xs text-slate-600">Cuts, necklines, and fits tailored to flatter your exact physical proportions.</p>
         </div>
         <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <p class="text-lg font-bold text-slate-900 mb-1">⚡ 1-Click Integrated Stores</p>
-          <p class="text-xs text-slate-600">Direct buy links on Myntra, Amazon India, Ajio, Nykaa, and Flipkart.</p>
+          <p class="text-lg font-bold text-slate-900 mb-1">⚡ Fabric &amp; Climate Guide</p>
+          <p class="text-xs text-slate-600">Breathable cottons, silks, and linens tailored for Indian seasonal heat and festive wear.</p>
         </div>
         <div class="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <p class="text-lg font-bold text-slate-900 mb-1">💰 Filter by Your Budget</p>
-          <p class="text-xs text-slate-600">Find high-flattery styles under ₹999, everyday casuals, or festive luxury.</p>
+          <p class="text-lg font-bold text-slate-900 mb-1">💰 Smart Capsule Wardrobe</p>
+          <p class="text-xs text-slate-600">Build high-impact combinations with fewer pieces to maximize outfit versatility.</p>
         </div>
       </div>
     </div>
