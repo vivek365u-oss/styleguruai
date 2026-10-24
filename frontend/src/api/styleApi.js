@@ -102,7 +102,7 @@ export const googleLogin = async () => {
       is_pro: isReferred || false,
     });
   }
-  return { name: user.displayName, email: user.email };
+  return { name: user.displayName, email: user.email, uid: user.uid };
 };
 
 

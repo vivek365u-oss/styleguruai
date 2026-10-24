@@ -14,6 +14,7 @@ import AffiliateLink from './AffiliateLink';
 import { buildMyntraUrl } from '../utils/myntraUrl';
 import { PRODUCT_LABEL_MAP } from '../utils/shoppingUrls';
 import ShopActionSheet from './ShopActionSheet';
+import AuthPromptModal from './AuthPromptModal';
 import {
   deriveCategoryColors,
   deriveOutfitSuites,
@@ -171,7 +172,28 @@ function ColorCard({ color, category, gender, isDark, onShop, className = '' }) 
   const toggleSave = async (e) => {
     e.stopPropagation();
     if (!isLoggedIn) {
-      alert('Please login to save colors');
+      window.dispatchEvent(new CustomEvent('sg_open_auth_prompt', {
+        detail: {
+          title: "Save Color to Palette",
+          subtitle: "Sign in with Google to bookmark your favorite colors and build your custom wardrobe palette.",
+          icon: "🎨",
+          actionBadge: "Color Library",
+          onSuccess: async (loggedInUser) => {
+            const uid = loggedInUser?.uid || auth.currentUser?.uid;
+            if (uid) {
+              await saveSavedColor(uid, {
+                name: color.name,
+                hex: color.hex,
+                category,
+                gender,
+                reason: color.reason || '',
+                date: new Date().toISOString(),
+              });
+              setSaved(true);
+            }
+          }
+        }
+      }));
       return;
     }
 
@@ -224,9 +246,9 @@ function ColorCard({ color, category, gender, isDark, onShop, className = '' }) 
         </div>
         <button
           onClick={toggleSave}
-          disabled={!isLoggedIn || savingColor || loading}
-          className={`text-lg transition-transform hover:scale-125 ${!isLoggedIn ? 'opacity-30 cursor-not-allowed' : (saved ? 'text-pink-400' : isDark ? 'text-white/20 hover:text-pink-400' : 'text-gray-300 hover:text-pink-400')} ${savingColor ? 'opacity-50' : ''}`}
-          title={!isLoggedIn ? 'Login to save colors' : (saved ? 'Remove from saved' : 'Save color')}
+          disabled={savingColor || loading}
+          className={`text-lg transition-transform hover:scale-125 ${saved ? 'text-pink-400' : isDark ? 'text-white/40 hover:text-pink-400' : 'text-gray-400 hover:text-pink-400'} ${savingColor ? 'opacity-50' : ''}`}
+          title={!isLoggedIn ? 'Sign in to save color' : (saved ? 'Remove from saved' : 'Save color')}
         >
           {saved ? '❤️' : '🤍'}
         </button>
@@ -1945,6 +1967,20 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
     return isFirst;
   });
   const [shareStatus, setShareStatus] = useState(null);
+  const [authModalConfig, setAuthModalConfig] = useState(null);
+
+  useEffect(() => {
+    const handleAuthPromptEvent = (e) => {
+      if (e.detail) {
+        setAuthModalConfig({
+          isOpen: true,
+          ...e.detail
+        });
+      }
+    };
+    window.addEventListener('sg_open_auth_prompt', handleAuthPromptEvent);
+    return () => window.removeEventListener('sg_open_auth_prompt', handleAuthPromptEvent);
+  }, []);
 
   // Normalize data to handle both { analysis: { skin_tone } } and { skin_tone } root formats
   const normalizedData = useMemo(() => {
@@ -2029,6 +2065,253 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
     { id: 'outfits', label: 'Outfits', emoji: '👔' },
     { id: 'accessories', label: 'Accessories', emoji: '✨' },
   ];
+
+  // ── 1. Save Lookbook Handler ──
+  const executeSaveLookbook = async (loggedInUser) => {
+    const targetUid = loggedInUser?.uid || auth.currentUser?.uid;
+    if (!targetUid) return;
+
+    const subjectName = window.prompt("Who is this Lookbook for? (e.g., Myself, Rahul, Sister)", "Myself");
+    if (subjectName === null) return;
+
+    const btn = document.getElementById('save-lookbook-btn');
+    if (btn) { btn.textContent = '⏳ Saving...'; btn.disabled = true; }
+
+    const mission = Object.values(MISSIONS).find(m => m.id === activeMission);
+    const hexMap = {
+      gold: '#FFD700', maroon: '#800000', emerald: '#50C878', royal_blue: '#4169E1', red: '#FF0000',
+      navy: '#000080', charcoal: '#36454F', white: '#f8fafc', grey: '#808080', black: '#0f172a',
+      dark_grey: '#A9A9A9', olive: '#808000',
+      yellow: '#FFFF00', ivory: '#FFFFF0', saffron: '#F4C430', light_pink: '#FFB6C1',
+      wine: '#722F37', crimson: '#DC143C', midnight_blue: '#191970', champagne: '#F7E7CE'
+    };
+
+    const missionColors = mission ? mission.colors.map(c => ({
+      name: c.replace('_', ' '),
+      hex: hexMap[c] || '#888888'
+    })) : [
+      ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || []),
+    ].map(c => typeof c === 'string' ? { name: c, hex: '#888888' } : c).slice(0, 5);
+
+    let expertAdvice = "";
+    if (activeMission === 'wedding') expertAdvice = "For your Wedding Elite mission, we've prioritized high-contrast silk combinations. Aim for jewel tones that complement your deep premium luminosity.";
+    else if (activeMission === 'office') expertAdvice = "Focusing on Corporate Power. We've filtered for crisp cottons and structured silhouettes in your core neutral palette for maximum authority.";
+    else if (activeMission === 'monsoon') expertAdvice = "Monsoon Minimal mode active. Stick to darker saturated tones to maintain a sharp profile even in overcast lighting.";
+    else if (activeMission === 'pooja') expertAdvice = "Traditional Morning Pooja DNA detected. Opt for saffron and ivory tones to reflect serenity while keeping your natural brightness front and center.";
+    else if (activeMission === 'date') expertAdvice = "Entering Date Night mode. Soft satin finishes in deep wine or midnight blue will interact perfectly with evening ambient light.";
+    else expertAdvice = "Relaxed daily mode. Focus on comfort within your seasonal spectrum — keeping it effortless yet curated.";
+
+    // --- BUILD THE OUTFIT ---
+    let outfits = [];
+    if (isSeasonal) outfits = seasonalGender === 'female' ? (recommendations.female_outfits || []) : (recommendations.male_outfits || []);
+    else if (isFemale) outfits = recommendations.outfit_combos || [];
+    else outfits = recommendations.outfit_combinations || recommendations.outfit_combos || [];
+
+    let bestOutfit = outfits[0] || null;
+    if (mission && outfits.length > 0) {
+      const scored = outfits.map(o => {
+        let s = 0;
+        const txt = `${o.upper || ''} ${o.lower || ''} ${o.description || ''} ${o.name || ''} ${o.shirt || o.top || ''} ${o.pant || o.bottom || ''}`.toLowerCase();
+        mission.boost.forEach(b => { if (txt.includes(b.replace('cat_', '').replace('_', ' '))) s += 30; });
+        mission.colors.forEach(c => { if (txt.includes(c.replace('_', ' '))) s += 20; });
+        mission.fabric.forEach(f => { if (txt.includes(f)) s += 10; });
+        return { ...o, s };
+      }).sort((a, b) => b.s - a.s);
+      bestOutfit = scored[0];
+    }
+
+    const outfitToSave = bestOutfit ? {
+      top: bestOutfit.shirt || bestOutfit.top || bestOutfit.dress || "Stylist Recommended Top",
+      bottom: bestOutfit.pant || bestOutfit.bottom || "",
+      shoes: bestOutfit.shoes || "",
+      dupatta: bestOutfit.dupatta || "",
+      occasion: bestOutfit.occasion || activeMission,
+      vibe: bestOutfit.vibe || ""
+    } : null;
+
+    const lookData = {
+      missionId: activeMission,
+      subjectName: subjectName || "Myself",
+      expertAdvice: expertAdvice,
+      analysis: { skin_tone: analysis.skin_tone },
+      gender: finalData.gender || (isFemale ? 'female' : 'male'),
+      colors: missionColors.slice(0, 5),
+      outfit: outfitToSave,
+      score: Math.min(98, Math.max(55, Math.round((photo_quality?.score || 85) * 0.7 + (analysis.skin_tone.confidence === 'high' ? 10 : 5)))),
+      timestamp: new Date().toISOString()
+    };
+
+    try {
+      const ok = await saveToLookbook(targetUid, lookData);
+      if (ok && btn) {
+        btn.textContent = '✅ Saved Lookbook';
+        btn.style.background = 'rgba(168,85,247,0.15)';
+        btn.style.borderColor = 'rgba(168,85,247,0.4)';
+        btn.disabled = false;
+        setTimeout(() => {
+          btn.textContent = '📖 Save to Lookbook';
+          btn.style.background = ''; btn.style.borderColor = '';
+        }, 3000);
+      } else if (btn) {
+        btn.disabled = false;
+      }
+    } catch (err) {
+      console.error("Lookbook error:", err);
+      if (btn) {
+        btn.textContent = '📖 Save to Lookbook';
+        btn.disabled = false;
+      }
+    }
+  };
+
+  const handleSaveLookbookClick = () => {
+    if (!auth.currentUser) {
+      setAuthModalConfig({
+        isOpen: true,
+        title: "Save to Digital Lookbook",
+        subtitle: "Sign in with Google to save custom lookbooks and outfits to your style gallery across all devices.",
+        icon: "📖",
+        actionBadge: "Cloud Lookbook",
+        onSuccess: async (loggedInUser) => {
+          await executeSaveLookbook(loggedInUser);
+        }
+      });
+      return;
+    }
+    executeSaveLookbook();
+  };
+
+  // ── 2. Post to Community Feed Handler ──
+  const executePostCommunity = async (loggedInUser) => {
+    const targetUid = loggedInUser?.uid || auth.currentUser?.uid;
+    if (!targetUid) return;
+
+    const btn = document.getElementById('post-community-btn');
+    if (btn) { btn.textContent = '⏳ Posting...'; btn.disabled = true; }
+
+    const targetName = loggedInUser?.name || auth.currentUser?.displayName || 'Elite Stylist';
+
+    await saveHistory({
+      skinTone: analysis.skin_tone.category,
+    });
+
+    const palette = [
+      ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || recommendations.seasonal_colors || []),
+    ].slice(0, 5);
+
+    try {
+      await publishToCommunityFeed(targetUid, {
+        userName: targetName,
+        mission: activeMission,
+        palette,
+        score: Math.min(98, Math.max(55, Math.round((photo_quality?.score || 85) * 0.7 + (analysis.skin_tone.confidence === 'high' ? 10 : 5)))),
+        level: 'Premium Elite',
+        skinHex: analysis.skin_color?.hex,
+        skinTone: analysis.skin_tone.category,
+        undertone: analysis.skin_tone.undertone || '',
+        colorSeason: analysis.skin_tone.color_season || '',
+        gender: analysis?.gender || (isFemale ? 'female' : 'male')
+      });
+
+      if (btn) {
+        btn.textContent = '🚀 Shared to Feed!';
+        btn.style.background = 'rgba(16,185,129,0.15)';
+        btn.style.borderColor = 'rgba(16,185,129,0.4)';
+        btn.style.color = '#10B981';
+        btn.disabled = false;
+        setTimeout(() => {
+          btn.textContent = '🌍 Post Community';
+          btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = '';
+        }, 3000);
+      }
+    } catch (err) {
+      console.error("Community post error:", err);
+      if (btn) {
+        btn.textContent = '🌍 Post Community';
+        btn.disabled = false;
+      }
+    }
+  };
+
+  const handlePostCommunityClick = () => {
+    if (!auth.currentUser) {
+      setAuthModalConfig({
+        isOpen: true,
+        title: "Post to Community Feed",
+        subtitle: "Sign in with Google to share your styling palette and join the StyleGuru community feed.",
+        icon: "🌍",
+        actionBadge: "Community Sharing",
+        onSuccess: async (loggedInUser) => {
+          await executePostCommunity(loggedInUser);
+        }
+      });
+      return;
+    }
+    executePostCommunity();
+  };
+
+  // ── 3. Set Style DNA Handler ──
+  const executeSetDna = async (loggedInUser) => {
+    const btn = document.getElementById('set-dna-btn');
+    if (btn) { btn.textContent = '⏳ Saving...'; btn.disabled = true; }
+
+    const dnaData = {
+      skinTone: analysis.skin_tone.category,
+      undertone: analysis.skin_tone.undertone,
+      colorSeason: analysis.skin_tone.color_season,
+      skinHex: analysis.skin_color?.hex || '#C68642',
+      gender: finalData.gender || (isFemale ? 'female' : 'male'),
+      bestColors: [
+        ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || []),
+      ].slice(0, 6),
+      skin_tone: { category: analysis.skin_tone.category, undertone: analysis.skin_tone.undertone, color_season: analysis.skin_tone.color_season },
+      updatedAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem('sg_last_analysis', JSON.stringify(dnaData));
+
+    const targetUid = loggedInUser?.uid || auth.currentUser?.uid;
+    if (targetUid) {
+      try {
+        await savePrimaryProfile(targetUid, dnaData);
+      } catch (e) {
+        console.error('[DNA] Firestore save failed:', e);
+      }
+    }
+
+    window.dispatchEvent(new CustomEvent('sg_dna_set', { detail: dnaData }));
+
+    if (btn) {
+      btn.textContent = '✅ Saved DNA!';
+      btn.style.background = 'rgba(16,185,129,0.15)';
+      btn.style.borderColor = 'rgba(16,185,129,0.4)';
+      btn.style.color = '#10B981';
+      btn.disabled = false;
+      setTimeout(() => {
+        btn.textContent = '🧬 Set Style DNA';
+        btn.style.background = '';
+        btn.style.borderColor = '';
+        btn.style.color = '';
+      }, 3000);
+    }
+  };
+
+  const handleSetDnaClick = async () => {
+    if (!auth.currentUser) {
+      setAuthModalConfig({
+        isOpen: true,
+        title: "Save Your Style DNA",
+        subtitle: "Sign in with Google to set and permanently save your Style DNA to your profile across all your devices.",
+        icon: "🧬",
+        actionBadge: "Permanent Style DNA",
+        onSuccess: async (loggedInUser) => {
+          await executeSetDna(loggedInUser);
+        }
+      });
+      return;
+    }
+    await executeSetDna();
+  };
 
   const tabBarBg = isDark ? 'bg-white/5 border border-white/10' : 'bg-gray-100 border border-gray-200';
   const inactiveTabCls = isDark ? 'text-white/40 hover:text-white/70' : 'text-gray-400 hover:text-gray-600';
@@ -2155,99 +2438,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
       <div className="grid grid-cols-2 gap-2 mt-4">
         {/* 1. Save to Lookbook */}
         <button
-          onClick={async () => {
-            const subjectName = window.prompt("Who is this Lookbook for? (e.g., Myself, Rahul, Sister)", "Myself");
-            if (subjectName === null) return;
-
-            const btn = document.getElementById('save-lookbook-btn');
-            if (btn) { btn.textContent = '⏳ Saving...'; btn.disabled = true; }
-
-            const mission = Object.values(MISSIONS).find(m => m.id === activeMission);
-            const hexMap = {
-              gold: '#FFD700', maroon: '#800000', emerald: '#50C878', royal_blue: '#4169E1', red: '#FF0000',
-              navy: '#000080', charcoal: '#36454F', white: '#f8fafc', grey: '#808080', black: '#0f172a',
-              dark_grey: '#A9A9A9', olive: '#808000',
-              yellow: '#FFFF00', ivory: '#FFFFF0', saffron: '#F4C430', light_pink: '#FFB6C1',
-              wine: '#722F37', crimson: '#DC143C', midnight_blue: '#191970', champagne: '#F7E7CE'
-            };
-
-            const missionColors = mission ? mission.colors.map(c => ({
-              name: c.replace('_', ' '),
-              hex: hexMap[c] || '#888888'
-            })) : [
-              ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || []),
-            ].map(c => typeof c === 'string' ? { name: c, hex: '#888888' } : c).slice(0, 5);
-
-            let expertAdvice = "";
-            if (activeMission === 'wedding') expertAdvice = "For your Wedding Elite mission, we've prioritized high-contrast silk combinations. Aim for jewel tones that complement your deep premium luminosity.";
-            else if (activeMission === 'office') expertAdvice = "Focusing on Corporate Power. We've filtered for crisp cottons and structured silhouettes in your core neutral palette for maximum authority.";
-            else if (activeMission === 'monsoon') expertAdvice = "Monsoon Minimal mode active. Stick to darker saturated tones to maintain a sharp profile even in overcast lighting.";
-            else if (activeMission === 'pooja') expertAdvice = "Traditional Morning Pooja DNA detected. Opt for saffron and ivory tones to reflect serenity while keeping your natural brightness front and center.";
-            else if (activeMission === 'date') expertAdvice = "Entering Date Night mode. Soft satin finishes in deep wine or midnight blue will interact perfectly with evening ambient light.";
-            else expertAdvice = "Relaxed daily mode. Focus on comfort within your seasonal spectrum — keeping it effortless yet curated.";
-
-            // --- BUILD THE OUTFIT ---
-            let outfits = [];
-            if (isSeasonal) outfits = seasonalGender === 'female' ? (recommendations.female_outfits || []) : (recommendations.male_outfits || []);
-            else if (isFemale) outfits = recommendations.outfit_combos || [];
-            else outfits = recommendations.outfit_combinations || recommendations.outfit_combos || [];
-
-            let bestOutfit = outfits[0] || null;
-            if (mission && outfits.length > 0) {
-              const scored = outfits.map(o => {
-                let s = 0;
-                const txt = `${o.upper || ''} ${o.lower || ''} ${o.description || ''} ${o.name || ''} ${o.shirt || o.top || ''} ${o.pant || o.bottom || ''}`.toLowerCase();
-                mission.boost.forEach(b => { if (txt.includes(b.replace('cat_', '').replace('_', ' '))) s += 30; });
-                mission.colors.forEach(c => { if (txt.includes(c.replace('_', ' '))) s += 20; });
-                mission.fabric.forEach(f => { if (txt.includes(f)) s += 10; });
-                return { ...o, s };
-              }).sort((a, b) => b.s - a.s);
-              bestOutfit = scored[0];
-            }
-
-            const outfitToSave = bestOutfit ? {
-              top: bestOutfit.shirt || bestOutfit.top || bestOutfit.dress || "Stylist Recommended Top",
-              bottom: bestOutfit.pant || bestOutfit.bottom || "",
-              shoes: bestOutfit.shoes || "",
-              dupatta: bestOutfit.dupatta || "",
-              occasion: bestOutfit.occasion || activeMission,
-              vibe: bestOutfit.vibe || ""
-            } : null;
-
-            const lookData = {
-              missionId: activeMission,
-              subjectName: subjectName || "Myself",
-              expertAdvice: expertAdvice,
-              analysis: { skin_tone: analysis.skin_tone },
-              gender: finalData.gender || (isFemale ? 'female' : 'male'),
-              colors: missionColors.slice(0, 5),
-              outfit: outfitToSave,
-              score: Math.min(98, Math.max(55, Math.round((photo_quality?.score || 85) * 0.7 + (analysis.skin_tone.confidence === 'high' ? 10 : 5)))),
-              timestamp: new Date().toISOString()
-            };
-
-            try {
-              const ok = await saveToLookbook(auth.currentUser?.uid || 'anon', lookData);
-              if (ok && btn) {
-                btn.textContent = '✅ Saved Lookbook';
-                btn.style.background = 'rgba(168,85,247,0.15)';
-                btn.style.borderColor = 'rgba(168,85,247,0.4)';
-                btn.disabled = false;
-                setTimeout(() => {
-                  btn.textContent = '📖 Save to Lookbook';
-                  btn.style.background = ''; btn.style.borderColor = '';
-                }, 3000);
-              } else if (btn) {
-                btn.disabled = false;
-              }
-            } catch (err) {
-              console.error("Lookbook error:", err);
-              if (btn) {
-                btn.textContent = '📖 Save to Lookbook';
-                btn.disabled = false;
-              }
-            }
-          }}
+          onClick={handleSaveLookbookClick}
           id="save-lookbook-btn"
           className={`flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl border text-xs font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${
             isDark ? 'bg-white/5 border-white/10 text-white/80 hover:bg-white/10 hover:border-purple-500/30' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 shadow-xs'
@@ -2259,51 +2450,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
 
         {/* 2. Post to Community Feed */}
         <button
-          onClick={async () => {
-            const btn = document.getElementById('post-community-btn');
-            if (btn) { btn.textContent = '⏳ Posting...'; btn.disabled = true; }
-
-            await saveHistory({
-              skinTone: analysis.skin_tone.category,
-            });
-
-            const palette = [
-              ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || recommendations.seasonal_colors || []),
-            ].slice(0, 5);
-
-            try {
-              await publishToCommunityFeed(auth.currentUser?.uid || 'anon', {
-                userName: auth.currentUser?.displayName || 'Elite Stylist',
-                mission: activeMission,
-                palette,
-                score: Math.min(98, Math.max(55, Math.round((photo_quality?.score || 85) * 0.7 + (analysis.skin_tone.confidence === 'high' ? 10 : 5)))),
-                level: 'Premium Elite',
-                skinHex: analysis.skin_color?.hex,
-                skinTone: analysis.skin_tone.category,
-                undertone: analysis.skin_tone.undertone || '',
-                colorSeason: analysis.skin_tone.color_season || '',
-                gender: analysis?.gender || (isFemale ? 'female' : 'male')
-              });
-
-              if (btn) {
-                btn.textContent = '🚀 Shared to Feed!';
-                btn.style.background = 'rgba(16,185,129,0.15)';
-                btn.style.borderColor = 'rgba(16,185,129,0.4)';
-                btn.style.color = '#10B981';
-                btn.disabled = false;
-                setTimeout(() => {
-                  btn.textContent = '🌍 Post Community';
-                  btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = '';
-                }, 3000);
-              }
-            } catch (err) {
-              console.error("Community post error:", err);
-              if (btn) {
-                btn.textContent = '🌍 Post Community';
-                btn.disabled = false;
-              }
-            }
-          }}
+          onClick={handlePostCommunityClick}
           id="post-community-btn"
           className={`flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl border text-xs font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${
             isDark ? 'bg-purple-500/10 border-purple-500/20 text-purple-300 hover:bg-purple-500/20' : 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100 shadow-xs'
@@ -2315,49 +2462,7 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
 
         {/* 3. Set as My Style DNA */}
         <button
-          onClick={async () => {
-            const btn = document.getElementById('set-dna-btn');
-            if (btn) { btn.textContent = '⏳ Saving...'; btn.disabled = true; }
-
-            const dnaData = {
-              skinTone: analysis.skin_tone.category,
-              undertone: analysis.skin_tone.undertone,
-              colorSeason: analysis.skin_tone.color_season,
-              skinHex: analysis.skin_color?.hex || '#C68642',
-              gender: finalData.gender || (isFemale ? 'female' : 'male'),
-              bestColors: [
-                ...(recommendations.best_shirt_colors || recommendations.best_dress_colors || []),
-              ].slice(0, 6),
-              skin_tone: { category: analysis.skin_tone.category, undertone: analysis.skin_tone.undertone, color_season: analysis.skin_tone.color_season },
-              updatedAt: new Date().toISOString(),
-            };
-
-            localStorage.setItem('sg_last_analysis', JSON.stringify(dnaData));
-
-            try {
-              if (auth.currentUser) {
-                await savePrimaryProfile(auth.currentUser.uid, dnaData);
-              }
-            } catch (e) {
-              console.error('[DNA] Firestore save failed:', e);
-            }
-
-            window.dispatchEvent(new CustomEvent('sg_dna_set', { detail: dnaData }));
-
-            if (btn) {
-              btn.textContent = '✅ Saved DNA!';
-              btn.style.background = 'rgba(16,185,129,0.15)';
-              btn.style.borderColor = 'rgba(16,185,129,0.4)';
-              btn.style.color = '#10B981';
-              btn.disabled = false;
-              setTimeout(() => {
-                btn.textContent = '🧬 Set Style DNA';
-                btn.style.background = '';
-                btn.style.borderColor = '';
-                btn.style.color = '';
-              }, 3000);
-            }
-          }}
+          onClick={handleSetDnaClick}
           id="set-dna-btn"
           className={`flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl border text-xs font-bold transition-all hover:scale-[1.02] active:scale-[0.98] ${
             isDark ? 'bg-pink-500/10 border-pink-500/20 text-pink-300 hover:bg-pink-500/20' : 'bg-pink-50 border-pink-200 text-pink-700 hover:bg-pink-100 shadow-xs'
@@ -2550,6 +2655,20 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
         gender={shopItem?.gender || effectiveGender}
         budget={shopBudget}
       />
+
+      {/* ── Guest Auth Prompt Modal for Cloud Saving ── */}
+      {authModalConfig && (
+        <AuthPromptModal
+          isOpen={authModalConfig.isOpen}
+          onClose={() => setAuthModalConfig(null)}
+          title={authModalConfig.title}
+          subtitle={authModalConfig.subtitle}
+          icon={authModalConfig.icon}
+          actionBadge={authModalConfig.actionBadge}
+          onSuccess={authModalConfig.onSuccess}
+          isDark={isDark}
+        />
+      )}
     </div>
   );
 }
