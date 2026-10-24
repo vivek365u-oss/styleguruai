@@ -1,9 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export default function InstallPromptModal({ onInstall, onDismiss, platform, nativePromptAvailable, C }) {
   const [installing, setInstalling] = useState(false);
   const [installedSuccess, setInstalledSuccess] = useState(false);
   const [infoMessage, setInfoMessage] = useState('');
+
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
 
   const bg = C?.isDark ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.98)';
   const border = C?.isDark ? 'rgba(139, 92, 246, 0.3)' : 'rgba(226, 232, 240, 0.9)';
@@ -63,19 +72,23 @@ export default function InstallPromptModal({ onInstall, onDismiss, platform, nat
     }
   };
 
-  return (
+  const modalJSX = (
     <div 
       style={{
         position: 'fixed',
-        inset: 0,
-        zIndex: 9999,
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        zIndex: 999999,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '16px',
-        backgroundColor: 'rgba(15, 23, 42, 0.6)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
+        boxSizing: 'border-box',
+        backgroundColor: 'rgba(5, 8, 22, 0.88)',
+        backdropFilter: 'blur(5px)',
+        WebkitBackdropFilter: 'blur(5px)',
         animation: 'fadeIn 0.2s ease-out'
       }}
       onClick={(e) => {
@@ -331,4 +344,8 @@ export default function InstallPromptModal({ onInstall, onDismiss, platform, nat
       `}</style>
     </div>
   );
+
+  return typeof document !== 'undefined'
+    ? createPortal(modalJSX, document.body)
+    : modalJSX;
 }

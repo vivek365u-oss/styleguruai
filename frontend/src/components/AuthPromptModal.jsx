@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { googleLogin, saveAuth } from '../api/styleApi';
 import { trackLogin } from '../utils/analytics';
 
@@ -15,10 +16,21 @@ export default function AuthPromptModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    if (isOpen) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
+  if (typeof document === 'undefined') return null;
 
   const bg = isDark ? '#111827' : '#FFFFFF';
-  const border = isDark ? 'rgba(139, 92, 246, 0.3)' : 'rgba(226, 232, 240, 0.9)';
+  const border = isDark ? 'rgba(139, 92, 246, 0.35)' : 'rgba(226, 232, 240, 0.9)';
   const text = isDark ? '#F9FAFB' : '#0F172A';
   const muted = isDark ? '#9CA3AF' : '#64748B';
   const grad = 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #EC4899 100%)';
@@ -47,20 +59,24 @@ export default function AuthPromptModal({
     }
   };
 
-  return (
+  const modalJSX = (
     <div
       style={{
         position: 'fixed',
-        inset: 0,
-        zIndex: 99999,
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        zIndex: 999999,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '16px',
-        backgroundColor: 'rgba(15, 23, 42, 0.7)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        animation: 'fadeIn 0.2s ease-out'
+        boxSizing: 'border-box',
+        backgroundColor: 'rgba(5, 8, 22, 0.88)',
+        backdropFilter: 'blur(5px)',
+        WebkitBackdropFilter: 'blur(5px)',
+        animation: 'authBackdropFadeIn 0.2s ease-out'
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget && !loading) onClose();
@@ -71,7 +87,7 @@ export default function AuthPromptModal({
           background: bg,
           border: `1px solid ${border}`,
           borderRadius: 24,
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(124, 58, 237, 0.15)',
+          boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.55), 0 0 30px rgba(124, 58, 237, 0.2)',
           padding: '28px 24px 22px',
           maxWidth: 420,
           width: '100%',
@@ -81,8 +97,10 @@ export default function AuthPromptModal({
           textAlign: 'center',
           position: 'relative',
           overflow: 'hidden',
-          animation: 'modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+          animation: 'authModalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+          boxSizing: 'border-box'
         }}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Ambient Top Glow */}
         <div
@@ -93,7 +111,7 @@ export default function AuthPromptModal({
             transform: 'translateX(-50%)',
             width: 220,
             height: 100,
-            background: 'radial-gradient(circle, rgba(124, 58, 237, 0.22) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(124, 58, 237, 0.25) 0%, transparent 70%)',
             pointerEvents: 'none'
           }}
         />
@@ -308,11 +326,11 @@ export default function AuthPromptModal({
       </div>
 
       <style>{`
-        @keyframes fadeIn {
+        @keyframes authBackdropFadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
         }
-        @keyframes modalSlideUp {
+        @keyframes authModalSlideUp {
           from { opacity: 0; transform: translateY(16px) scale(0.97); }
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
@@ -322,4 +340,6 @@ export default function AuthPromptModal({
       `}</style>
     </div>
   );
+
+  return createPortal(modalJSX, document.body);
 }

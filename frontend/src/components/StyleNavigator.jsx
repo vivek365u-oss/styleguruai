@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useEffect, useContext, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
 import { usePlan } from '../context/PlanContext';
@@ -289,6 +290,17 @@ export default function StyleNavigator({ user, onAnalyze }) {
   const [pendingShop, setPendingShop] = useState(null); // Choice between Dress/Top, Saree/Kurti etc.
   const [dnaMatches,  setDnaMatches]  = useState({}); // Store computed scores for trending items
   const [selectedDnaProduct, setSelectedDnaProduct] = useState(null); // Modal details for trending DNA match
+
+  // Lock body scroll when any modal is open
+  useEffect(() => {
+    if (pendingShop || selectedDnaProduct) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [pendingShop, selectedDnaProduct]);
 
   // Improvement 3: Real-Time Live Sync (Zero reload needed when clothes added/deleted/toggled)
   useEffect(() => {
@@ -1485,11 +1497,44 @@ const HEX_NAME_MAP = {
       />
 
       {/* Choice Modal for multi-item categories */}
-      {pendingShop && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', backdropFilter:'blur(8px)', zIndex:2000, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
-          <div style={{ background:C.bg, border:`1px solid ${C.border}`, borderRadius:24, width:'100%', maxWidth:340, padding:'24px', boxShadow:'0 20px 50px rgba(0,0,0,0.5)', animation:'scaleUp 0.3s ease' }}>
-             <p style={{ fontSize:'10px', color:VIOLET, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.2em', textAlign:'center', marginBottom:8 }}>Which one to shop?</p>
-             <p style={{ fontSize:'16px', color:C.text, fontWeight:700, textAlign:'center', marginBottom:20 }}>Complete your {pendingShop.color.name} look</p>
+      {typeof document !== 'undefined' && pendingShop && createPortal(
+        <div 
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            width: '100vw', 
+            height: '100vh', 
+            zIndex: 999999, 
+            background: 'rgba(5, 8, 22, 0.88)', 
+            backdropFilter: 'blur(5px)', 
+            WebkitBackdropFilter: 'blur(5px)',
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            padding: 16,
+            boxSizing: 'border-box'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setPendingShop(null);
+          }}
+        >
+          <div 
+            style={{ 
+              background: C.bg, 
+              border: `1px solid ${C.border}`, 
+              borderRadius: 24, 
+              width: '100%', 
+              maxWidth: 360, 
+              padding: '28px 24px 22px', 
+              boxShadow: '0 25px 60px -10px rgba(0,0,0,0.65), 0 0 30px rgba(139,92,246,0.2)', 
+              position: 'relative',
+              boxSizing: 'border-box'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+             <p style={{ fontSize:'10px', color:VIOLET, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.2em', textAlign:'center', marginBottom:8, fontFamily:PJS }}>Which one to shop?</p>
+             <p style={{ fontSize:'16px', color:C.text, fontWeight:700, textAlign:'center', marginBottom:20, fontFamily:PJS }}>Complete your {pendingShop.color.name} look</p>
              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
                 {pendingShop.items.map(item => (
                   <button
@@ -1522,36 +1567,125 @@ const HEX_NAME_MAP = {
                 </button>
              </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* DNA Match Breakdown Modal */}
-      {selectedDnaProduct && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', backdropFilter:'blur(8px)', zIndex:2000, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
-          <div style={{ background:C.bg, border:`1px solid ${C.border}`, borderRadius:24, width:'100%', maxWidth:360, padding:'24px', boxShadow:'0 20px 50px rgba(0,0,0,0.5)', animation:'scaleUp 0.3s ease' }}>
+      {typeof document !== 'undefined' && selectedDnaProduct && createPortal(
+        <div 
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            width: '100vw', 
+            height: '100vh', 
+            zIndex: 999999, 
+            background: 'rgba(5, 8, 22, 0.88)', 
+            backdropFilter: 'blur(5px)', 
+            WebkitBackdropFilter: 'blur(5px)',
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            padding: 16,
+            boxSizing: 'border-box'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedDnaProduct(null);
+          }}
+        >
+          <div 
+            style={{ 
+              background: C.bg, 
+              border: `1px solid ${C.border}`, 
+              borderRadius: 24, 
+              width: '100%', 
+              maxWidth: 380, 
+              padding: '28px 24px 22px', 
+              boxShadow: '0 25px 60px -10px rgba(0,0,0,0.65), 0 0 30px rgba(124, 58, 237, 0.25)', 
+              position: 'relative',
+              overflow: 'hidden',
+              boxSizing: 'border-box'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Ambient Top Glow */}
+            <div
+              style={{
+                position: 'absolute',
+                top: -40,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: 220,
+                height: 100,
+                background: 'radial-gradient(circle, rgba(124, 58, 237, 0.25) 0%, transparent 70%)',
+                pointerEvents: 'none'
+              }}
+            />
+
+            {/* Close Button */}
+            <button
+              onClick={() => setSelectedDnaProduct(null)}
+              style={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                background: 'transparent',
+                border: 'none',
+                color: C.muted,
+                fontSize: '18px',
+                cursor: 'pointer',
+                padding: '6px',
+                borderRadius: '50%',
+                lineHeight: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+              aria-label="Close"
+            >
+              ✕
+            </button>
+
             <div style={{ textAlign:'center', marginBottom:16 }}>
-              <span style={{ fontSize:40 }}>{selectedDnaProduct.emoji || '🧬'}</span>
-              <p style={{ fontSize:'10px', color:VIOLET, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.2em', margin:'8px 0 4px', fontFamily:PJS }}>Style DNA Synergy</p>
-              <h3 style={{ fontSize:'17px', color:C.text, fontFamily:PJS, fontWeight:800, margin:0 }}>{selectedDnaProduct.name}</h3>
+              <div 
+                style={{ 
+                  width: 58, 
+                  height: 58, 
+                  borderRadius: 18, 
+                  background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #EC4899 100%)', 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  fontSize: 28, 
+                  boxShadow: '0 10px 25px -5px rgba(124, 58, 237, 0.4)',
+                  marginBottom: 10,
+                  color: '#fff'
+                }}
+              >
+                {selectedDnaProduct.emoji || '🧬'}
+              </div>
+              <p style={{ fontSize:'10px', color:VIOLET, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.2em', margin:'4px 0', fontFamily:PJS }}>Style DNA Synergy</p>
+              <h3 style={{ fontSize:'18px', color:C.text, fontFamily:PJS, fontWeight:800, margin:0, letterSpacing: '-0.02em' }}>{selectedDnaProduct.name}</h3>
             </div>
 
-            <div style={{ background:'rgba(16,185,129,0.1)', border:'1px solid rgba(16,185,129,0.25)', borderRadius:16, padding:'14px', textAlign:'center', marginBottom:16 }}>
+            <div style={{ background:'rgba(16,185,129,0.12)', border:'1px solid rgba(16,185,129,0.3)', borderRadius:18, padding:'14px', textAlign:'center', marginBottom:16 }}>
               <p style={{ fontSize:'24px', fontWeight:900, color:'#10B981', margin:0, fontFamily:PJS }}>
                 {selectedDnaProduct.score}% Match
               </p>
-              <p style={{ fontSize:'11px', color:C.text, fontFamily:PJS, margin:'6px 0 0', lineHeight:'1.5', opacity:0.9 }}>
+              <p style={{ fontSize:'12px', color:C.text, fontFamily:PJS, margin:'6px 0 0', lineHeight:'1.5', opacity:0.92 }}>
                 {selectedDnaProduct.synergyReason}
               </p>
             </div>
 
             {selectedDnaProduct.suggestedColors?.length > 0 && (
-              <div style={{ background:C.glass, border:`1px solid ${C.border}`, borderRadius:14, padding:'12px', marginBottom:18 }}>
-                <p style={{ fontSize:'9px', color:C.muted, textTransform:'uppercase', letterSpacing:'0.1em', fontWeight:700, margin:'0 0 8px', fontFamily:PJS }}>
+              <div style={{ background:C.glass, border:`1px solid ${C.border}`, borderRadius:16, padding:'12px 14px', marginBottom:18 }}>
+                <p style={{ fontSize:'10px', color:C.muted, textTransform:'uppercase', letterSpacing:'0.1em', fontWeight:800, margin:'0 0 8px', fontFamily:PJS }}>
                   Recommended DNA Colors:
                 </p>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
                   {selectedDnaProduct.suggestedColors.map((cName, idx) => (
-                    <span key={idx} style={{ background:C.glass2, border:`1px solid ${C.border}`, borderRadius:8, padding:'3px 8px', fontSize:'10px', color:C.text, fontFamily:PJS, fontWeight:600 }}>
+                    <span key={idx} style={{ background:C.glass2, border:`1px solid ${C.border}`, borderRadius:10, padding:'4px 10px', fontSize:'11px', color:C.text, fontFamily:PJS, fontWeight:600 }}>
                       ✨ {cName}
                     </span>
                   ))}
@@ -1571,9 +1705,12 @@ const HEX_NAME_MAP = {
                   setShopItem(shopData);
                 }}
                 style={{
-                  flex:1, padding:'12px', borderRadius:14, background:'#8B5CF6', border:'none', color:'white',
-                  cursor:'pointer', fontSize:'11px', fontFamily:PJS, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.1em',
-                  boxShadow:'0 8px 20px rgba(139,92,246,0.3)'
+                  flex:1, padding:'14px', borderRadius:16, 
+                  background:'linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)', 
+                  border:'none', color:'white',
+                  cursor:'pointer', fontSize:'12px', fontFamily:PJS, fontWeight:800, textTransform:'uppercase', letterSpacing:'0.08em',
+                  boxShadow:'0 10px 25px -5px rgba(124, 58, 237, 0.45)',
+                  transition: 'transform 0.15s ease'
                 }}
               >
                 Shop Style →
@@ -1581,15 +1718,16 @@ const HEX_NAME_MAP = {
               <button
                 onClick={() => setSelectedDnaProduct(null)}
                 style={{
-                  padding:'12px 16px', borderRadius:14, background:C.glass, border:`1px solid ${C.border}`, color:C.muted,
-                  cursor:'pointer', fontSize:'11px', fontFamily:PJS, fontWeight:700
+                  padding:'14px 18px', borderRadius:16, background:C.glass, border:`1px solid ${C.border}`, color:C.muted,
+                  cursor:'pointer', fontSize:'12px', fontFamily:PJS, fontWeight:700
                 }}
               >
                 Close
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

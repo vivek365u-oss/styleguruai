@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
+import { createPortal } from 'react-dom';
 import { getHistory, getSavedColors, deleteSavedColor, auth, db } from '../api/styleApi';
 import { doc, deleteDoc } from 'firebase/firestore';
 import { useAuthState } from '../hooks/useAuthState';
@@ -11,10 +12,10 @@ import { FashionIcons, IconRenderer } from './Icons';
 // ── Skin preview lightbox modal ─────────────────────────────────
 function ImageModal({ src, onClose }) {
   if (!src) return null;
-  return (
+  const modalContent = (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
+      className="fixed inset-0 z-[999999] flex items-center justify-center"
+      style={{ background: 'rgba(5, 8, 22, 0.88)', backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)' }}
       onClick={onClose}
     >
       <div className="relative max-w-sm w-full mx-4" onClick={e => e.stopPropagation()}>
@@ -32,6 +33,7 @@ function ImageModal({ src, onClose }) {
       </div>
     </div>
   );
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 }
 
 function HistoryPanel({ onShowResult }) {

@@ -1,4 +1,5 @@
 import { useState, useRef, useContext, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { checkOutfitCompatibility, saveWardrobeItem, auth, consumeUserLimit, getWardrobe } from '../api/styleApi';
 import { ThemeContext } from '../context/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -839,9 +840,14 @@ function OutfitChecker() {
       )}
 
       {/* Wardrobe Picker Overlay */}
-      {showWardrobePicker && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-          <div className={`w-full max-w-md rounded-3xl overflow-hidden flex flex-col max-h-[85vh] ${isDark ? 'bg-gray-900 border border-white/10' : 'bg-white shadow-2xl'}`}>
+      {typeof document !== 'undefined' && showWardrobePicker && createPortal(
+        <div 
+          className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowWardrobePicker(false);
+          }}
+        >
+          <div className={`w-full max-w-md rounded-3xl overflow-hidden flex flex-col max-h-[85vh] ${isDark ? 'bg-gray-900 border border-white/10' : 'bg-white shadow-2xl'}`} onClick={e => e.stopPropagation()}>
             <div className={`p-4 border-b flex justify-between items-center ${isDark ? 'border-white/10' : 'border-gray-100'}`}>
               <div>
                 <h3 className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>Smart Closet</h3>
@@ -885,7 +891,8 @@ function OutfitChecker() {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* PaywallModal removed */}

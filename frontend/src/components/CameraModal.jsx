@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { FiCamera, FiRefreshCw, FiX, FiCheck, FiAlertCircle, FiImage } from 'react-icons/fi';
 
 /**
@@ -190,8 +191,8 @@ export default function CameraModal({
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+  const modalJSX = (
+    <div className="fixed inset-0 z-[999999] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
       {/* Visual Flash Effect */}
       {flashActive && (
         <div className="absolute inset-0 bg-white z-50 pointer-events-none transition-opacity duration-200" />
@@ -405,4 +406,6 @@ export default function CameraModal({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalJSX, document.body) : modalJSX;
 }
