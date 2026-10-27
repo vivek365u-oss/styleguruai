@@ -6,7 +6,6 @@ import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import { useAnalysisProgress } from '../hooks/useAnalysisProgress';
 import { FashionIcons, IconRenderer } from './Icons';
 import { compressImage } from '../utils/imageCompressor';
-import CameraModal from './CameraModal';
 
 // ── Skin Tone Quiz ────────────────────────────────────────────
 function SkinToneQuiz({ isDark, onResult, gender }) {
@@ -283,16 +282,12 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   const occasion = 'casual';
   const budget = 'any';
   const [eyeColor, setEyeColor] = useState('brown');
-  const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
-  const handleOpenSelfieCamera = () => {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      setIsCameraModalOpen(true);
-    } else {
-      cameraInputRef.current?.click();
-    }
+  const handleOpenSelfieCamera = (e) => {
+    if (e) e.stopPropagation();
+    cameraInputRef.current?.click();
   };
 
   // Couple Mode States
@@ -719,7 +714,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/jpeg,image/png,image/webp"
+                    accept="image/*"
                     onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
                     className="hidden"
                   />
@@ -753,14 +748,21 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                       <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto" onClick={e => e.stopPropagation()}>
                         <button
                           type="button"
-                          onClick={handleOpenSelfieCamera}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            cameraInputRef.current?.click();
+                          }}
                           className="flex-1 py-3.5 px-6 rounded-2xl text-sm font-bold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-lg shadow-purple-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                         >
                           <span className="text-base">📸</span>
                           <span>Take Selfie (Camera)</span>
                         </button>
                         <button
-                          onClick={() => fileInputRef.current?.click()}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            fileInputRef.current?.click();
+                          }}
                           className={`flex-1 py-3.5 px-6 rounded-2xl text-sm font-bold border transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${
                             isDark
                               ? 'bg-white/5 border-white/15 text-white/90 hover:bg-white/10'
@@ -820,16 +822,6 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           <SkinToneQuiz isDark={isDark} onResult={onAnalysisComplete} gender={gender} />
         </>
       )}
-
-      {/* Live Selfie Camera Modal */}
-      <CameraModal
-        isOpen={isCameraModalOpen}
-        onClose={() => setIsCameraModalOpen(false)}
-        onCapture={(capturedFile) => handleFile(capturedFile)}
-        onFallbackNativeCamera={() => cameraInputRef.current?.click()}
-        onFallbackGallery={() => fileInputRef.current?.click()}
-        isDark={isDark}
-      />
     </div>
   );
 }
