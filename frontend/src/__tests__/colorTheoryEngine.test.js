@@ -3,6 +3,7 @@ import {
   deriveCategoryColors,
   deriveOutfitSuites,
   deriveAccessoriesSuite,
+  deriveOccasionAdvice,
   normalizeSkinProfile,
   MASTER_COLORS
 } from '../utils/colorTheoryEngine';
@@ -119,5 +120,40 @@ describe('colorTheoryEngine Tests', () => {
     expect(allMaleText).not.toContain('jhumka');
     expect(allMaleText).not.toContain('t-shirt bra');
     expect(allMaleText).not.toContain('petticoat');
+  });
+
+  it('derives rich occasion advice for normal mode and every seasonal mode', () => {
+    const analysis = { skin_tone: { category: 'medium', undertone: 'warm' } };
+    
+    // Normal mode advice
+    const normalAdvice = deriveOccasionAdvice('male', analysis, null);
+    expect(Object.keys(normalAdvice).length).toBeGreaterThanOrEqual(4);
+    expect(normalAdvice['College Daily']).toBeDefined();
+    expect(normalAdvice['Job Interview']).toBeDefined();
+
+    // Summer season
+    const summerAdvice = deriveOccasionAdvice('female', analysis, 'summer');
+    expect(Object.keys(summerAdvice).length).toBeGreaterThanOrEqual(4);
+    expect(summerAdvice['Office / Work']).toContain('linen');
+
+    // Monsoon season
+    const monsoonAdvice = deriveOccasionAdvice('male', analysis, 'monsoon');
+    expect(Object.keys(monsoonAdvice).length).toBeGreaterThanOrEqual(4);
+    expect(monsoonAdvice['Office / Work']).toContain('Dark');
+
+    // Winter season
+    const winterAdvice = deriveOccasionAdvice('female', analysis, 'winter');
+    expect(Object.keys(winterAdvice).length).toBeGreaterThanOrEqual(4);
+    expect(winterAdvice['Office / Work']).toContain('blazer');
+
+    // Festive season
+    const festiveAdvice = deriveOccasionAdvice('male', analysis, 'festive');
+    expect(Object.keys(festiveAdvice).length).toBeGreaterThanOrEqual(4);
+    expect(festiveAdvice['Diwali / Puja']).toContain('silk');
+
+    // College season
+    const collegeAdvice = deriveOccasionAdvice('female', analysis, 'college');
+    expect(Object.keys(collegeAdvice).length).toBeGreaterThanOrEqual(4);
+    expect(collegeAdvice['Campus Daily']).toBeDefined();
   });
 });

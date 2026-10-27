@@ -216,7 +216,10 @@ export const saveHistory = async (rawDetails) => {
   // Normalize data for UI consistency
   const skinToneObj = rawDetails.analysis?.skin_tone || rawDetails.skin_tone;
   const skinColorObj = rawDetails.analysis?.skin_color || rawDetails.skin_color;
-  const gender = rawDetails.gender || localStorage.getItem('sg_gender') || 'male';
+  let gender = rawDetails.gender;
+  if (gender !== 'male' && gender !== 'female') {
+    gender = rawDetails.seasonalGender === 'female' ? 'female' : (localStorage.getItem('sg_gender') === 'female' ? 'female' : 'male');
+  }
 
   const historyEntry = {
     skinTone: skinToneObj?.category || 'medium',

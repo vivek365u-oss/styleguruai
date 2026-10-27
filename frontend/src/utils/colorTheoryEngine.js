@@ -781,3 +781,69 @@ export function deriveAccessoriesSuite(gender, analysis) {
     ],
   };
 }
+
+// ── OCCASION ADVICE ENGINE ──────────────────────────────────────────────────
+export function deriveOccasionAdvice(gender, analysis, season = null) {
+  const isFemale = gender === 'female' || gender === 'women';
+  const { category, undertone } = normalizeSkinProfile(analysis);
+  const baseColor = ['ultra_fair', 'fair', 'light'].includes(category) ? 'Navy or Burgundy' : 'Royal Blue or White';
+
+  if (season) {
+    const s = season.toLowerCase();
+    if (s.includes('summer')) {
+      return {
+        'Office / Work': 'Breathable linen or fine cotton in crisp off-white or sky blue + lightweight beige chinos. Stays sharp while beating the summer heat.',
+        'College / Daily': `Relaxed cotton tee or kurti in ${undertone === 'warm' ? 'peach or mint' : 'powder blue or lavender'} + light denim or palazzo + white canvas sneakers.`,
+        'Casual / Weekend': 'Breezy printed cotton shirt or sundress + linen shorts / culottes + open sandals for effortless summer vibes.',
+        'Brunch / Outing': 'Light pastel top in fresh tones + crisp white bottoms + stylish sunglasses.',
+        'Festival / Function': 'Lightweight Chanderi or Mulmul kurta in ivory or soft gold with delicate embroidery.',
+      };
+    }
+    if (s.includes('monsoon')) {
+      return {
+        'Office / Work': 'Dark navy or charcoal polo / tailored shirt + quick-dry dark trousers + waterproof loafers. Dark colors prevent rain splash marks.',
+        'College / Daily': 'Dark cotton tee or kurti + ankle-length dark jeans or leggings + anti-slip rubber-sole sneakers.',
+        'Casual / Outing': 'Water-resistant windbreaker or dark teal tee + quick-dry shorts / dark joggers + waterproof slides.',
+        'Rainy Date / Evening': 'Deep maroon or forest green shirt / wrap dress + black slim chinos + Chelsea boots.',
+        'Festival / Function': 'Rich jewel-toned quick-dry silk blend kurta with dark churidar to look festive yet rain-safe.',
+      };
+    }
+    if (s.includes('winter')) {
+      return {
+        'Office / Work': 'Structured navy blazer or charcoal merino sweater over a crisp shirt + wool trousers + leather oxfords.',
+        'College / Daily': 'Cozy knit sweater or hoodie in burgundy / rust + dark wash denim + sturdy leather boots.',
+        'Casual / Weekend': 'Layered jacket (bomber or denim) over a warm inner + black jeans + clean sneakers with a scarf.',
+        'Date Night': 'Fitted overcoat or turtleneck in deep wine / emerald + tailored trousers + Chelsea boots.',
+        'Wedding / Festive': 'Rich velvet or brocade sherwani / saree in royal jewel tones with a warm stole.',
+      };
+    }
+    if (s.includes('festive') || s.includes('festival')) {
+      return {
+        'Diwali / Puja': 'Raw silk or embroidered kurta / Banarasi saree in regal maroon, royal blue, or mustard gold + ivory churidar + juttis.',
+        'Wedding Guest': 'Brocade Nehru jacket over contrast silk kurta / embellished lehenga + embroidered mojaris.',
+        'Sangeet / Party': 'Vibrant Indo-Western fusion set in emerald green or royal blue + polished dress shoes.',
+        'Reception / Formal': 'Deep jewel-toned bandhgala or velvet gown / saree with metallic accents.',
+        'Casual Festive': 'Short linen or cotton-silk kurta with rolled sleeves + dark slim jeans + Kolhapuris.',
+      };
+    }
+    if (s.includes('college')) {
+      return {
+        'Campus Daily': 'Graphic tee or breathable kurti + comfortable slim-fit jeans + versatile white sneakers + backpack.',
+        'Presentation / Seminar': 'Smart polo or casual button-down shirt + neat chinos + casual loafers for an effortlessly sharp look.',
+        'College Fest / Events': 'Casual blazer or denim jacket over a graphic tee / stylish co-ord set + statement sneakers.',
+        'Sports / Practical': 'Athletic hoodie or performance tee + tapered joggers + running shoes.',
+        'Hangout / Canteen': 'Oversized trendy streetwear tee / crop top + wide-leg cargo pants + low-top sneakers.',
+      };
+    }
+  }
+
+  // Normal mode occasion advice
+  return {
+    'College Daily': `Well-fitted ${isFemale ? 'kurti or tee' : 't-shirt'} in ${baseColor} + dark jeans + clean sneakers.`,
+    'Job Interview': 'Crisp white or light blue formal shirt + charcoal/navy trousers + leather shoes. Stick to classics.',
+    'First Date': `Smart casual: A flattering ${isFemale ? 'chic top or dress' : 'button-down shirt'} in your best tone + tailored chinos/pants. Shows effort without trying too hard.`,
+    'Wedding/Festival': 'Go ethnic! Rich fabrics in deep jewel tones like maroon, emerald or royal blue.',
+    "Friend's Party": 'Your boldest flattering color + dark jeans + statement shoes. Time to stand out!',
+  };
+}
+

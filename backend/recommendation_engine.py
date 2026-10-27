@@ -1134,7 +1134,54 @@ class RecommendationEngine:
             "female_outfits": season_info["female_outfits"],
             "base_shirt_colors": base_shirt,
             "base_pant_colors": base_pant,
+            "occasion_advice": self._get_seasonal_occasion_advice(season, category, undertone, gender),
         }
+
+    def _get_seasonal_occasion_advice(self, season: str, category: str, undertone: str, gender: str = "male") -> dict:
+        season_lower = (season or "summer").lower()
+        
+        advice_map = {
+            "summer": {
+                "Office / Work": "Breathable linen or crisp fine cotton shirt in white, sky blue or mint + light beige chinos / trousers. Stays sharp while beating the summer heat.",
+                "College / Daily": f"Relaxed cotton tee or kurti in {'peach or mint' if undertone == 'warm' else 'powder blue or lavender'} + light denim / palazzo + white canvas sneakers.",
+                "Casual / Weekend": "Breezy printed cotton shirt or sundress + linen shorts / culottes + open sandals for effortless summer vibes.",
+                "Brunch / Outing": "Light pastel top in peach or mint + crisp white bottoms + stylish sunglasses.",
+                "Festival / Function": "Lightweight Chanderi or Mulmul cotton kurta in ivory or soft gold with delicate embroidery.",
+            },
+            "monsoon": {
+                "Office / Work": "Dark navy or charcoal polo / tailored shirt + quick-dry dark trousers + waterproof loafers. Dark colors prevent rain splash marks.",
+                "College / Daily": "Dark cotton tee or kurti + ankle-length dark jeans or leggings + anti-slip rubber-sole sneakers.",
+                "Casual / Outing": "Water-resistant windbreaker or dark teal tee + quick-dry shorts / dark joggers + waterproof slides.",
+                "Rainy Date / Evening": "Deep maroon or forest green shirt / wrap dress + black slim chinos + Chelsea boots.",
+                "Festival / Function": "Rich jewel-toned quick-dry silk blend kurta with dark churidar to look festive yet rain-safe.",
+            },
+            "winter": {
+                "Office / Work": "Structured navy blazer or charcoal merino sweater over a crisp shirt + wool trousers + leather oxfords.",
+                "College / Daily": "Cozy knit sweater or hoodie in burgundy / rust + dark wash denim + sturdy leather boots.",
+                "Casual / Weekend": "Layered jacket (bomber or denim) over a warm inner + black jeans + clean sneakers with a scarf.",
+                "Date Night": "Fitted overcoat or turtleneck in deep wine / emerald + tailored trousers + Chelsea boots.",
+                "Wedding / Festive": "Rich velvet or brocade sherwani / saree in royal jewel tones with a warm stole.",
+            },
+            "festive": {
+                "Diwali / Puja": "Raw silk or embroidered kurta / Banarasi saree in regal maroon, royal blue, or mustard gold + ivory churidar + juttis.",
+                "Wedding Guest": "Brocade Nehru jacket over contrast silk kurta / embellished lehenga + embroidered mojaris.",
+                "Sangeet / Party": "Vibrant Indo-Western fusion set in emerald green or royal blue + polished dress shoes.",
+                "Reception / Formal": "Deep jewel-toned bandhgala or velvet gown / saree with metallic accents.",
+                "Casual Festive": "Short linen or cotton-silk kurta with rolled sleeves + dark slim jeans + Kolhapuris.",
+            },
+            "college": {
+                "Campus Daily": "Graphic tee or breathable kurti + comfortable slim-fit jeans + versatile white sneakers + backpack.",
+                "Presentation / Seminar": "Smart polo or casual button-down shirt + neat chinos + casual loafers for an effortlessly sharp look.",
+                "College Fest / Events": "Casual blazer or denim jacket over a graphic tee / stylish co-ord set + statement sneakers.",
+                "Sports / Practical": "Athletic hoodie or performance tee + tapered joggers + running shoes.",
+                "Hangout / Canteen": "Oversized trendy streetwear tee / crop top + wide-leg cargo pants + low-top sneakers.",
+            },
+        }
+        
+        for k in advice_map:
+            if k in season_lower:
+                return advice_map[k]
+        return advice_map["summer"]
 
     def check_outfit_compatibility(self, skin_tone: SkinToneResult, outfit_color: dict, gender: str = "male", clothing_type: str = "top", lang: str = "en") -> dict:
         self.lang = lang if lang in MESSAGES else "en"

@@ -19,6 +19,7 @@ import {
   deriveCategoryColors,
   deriveOutfitSuites,
   deriveAccessoriesSuite,
+  deriveOccasionAdvice,
   normalizeSkinProfile
 } from '../utils/colorTheoryEngine';
 
@@ -977,20 +978,22 @@ function ColorsTab({ recommendations, analysis, isFemale, isSeasonal, effectiveG
 
   if (isSeasonal) {
     const seasonalColors = recommendations.seasonal_colors || [];
-    return (
-      <div className="space-y-4">
-        <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl p-4">
-          <p className="text-amber-200 font-bold text-sm mb-1">{recommendations.title}</p>
-          <p className="text-amber-100/50 text-xs">{recommendations.description}</p>
-          <div className="flex flex-wrap gap-2 mt-3">
-            {(recommendations.fabrics_recommended || []).map((f, i) => <span key={i} className="bg-green-500/20 text-green-200 text-xs px-2 py-0.5 rounded-full">{f}</span>)}
+    if (seasonalColors.length > 0) {
+      return (
+        <div className="space-y-4">
+          <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl p-4">
+            <p className="text-amber-200 font-bold text-sm mb-1">{recommendations.title || 'Seasonal Palette'}</p>
+            <p className="text-amber-100/50 text-xs">{recommendations.description || 'Colors curated specifically for your skin tone this season'}</p>
+            <div className="flex flex-wrap gap-2 mt-3">
+              {(recommendations.fabrics_recommended || []).map((f, i) => <span key={i} className="bg-green-500/20 text-green-200 text-xs px-2 py-0.5 rounded-full">{f}</span>)}
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-2">
+            {seasonalColors.map((color, i) => <ColorCard key={i} color={color} category={shirtCategory} gender={effectiveGender} isDark={isDark} onShop={onShop} />)}
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-2">
-          {seasonalColors.map((color, i) => <ColorCard key={i} color={color} category={shirtCategory} gender={effectiveGender} isDark={isDark} onShop={onShop} />)}
-        </div>
-      </div>
-    );
+      );
+    }
   }
 
   if (isFemale) {
@@ -2031,9 +2034,16 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
   const analysis = finalData.analysis;
   const recommendations = finalData.recommendations || {};
   const photo_quality = finalData.photo_quality || { score: 80, warnings: [] };
-  const isFemale = finalData.gender === "female";
-  const isSeasonal = finalData.gender === "seasonal";
-  const seasonalGender = data.seasonalGender || "male";
+  const isSeasonal = Boolean(
+    finalData.isSeasonal ||
+    finalData.mode === "seasonal" ||
+    finalData.gender === "seasonal" ||
+    finalData.season ||
+    (recommendations.seasonal_colors && recommendations.seasonal_colors.length > 0)
+  );
+  const seasonalGender = finalData.seasonalGender || (finalData.gender === "female" ? "female" : "male");
+  const effectiveGender = isSeasonal ? seasonalGender : (finalData.gender === "female" ? "female" : "male");
+  const isFemale = effectiveGender === "female";
   const bodyType = data.bodyType || null;
   const userOccasion = data.occasion || 'casual';
   const userBudget = data.budget || 'any';
@@ -2048,11 +2058,13 @@ function ResultsDisplay({ data, uploadedImage, onReset }) {
     plus: ['Dark colors and vertical patterns create a slimming effect', 'Well-fitted clothes look better than very loose or very tight', 'High-waist bottoms define your waist beautifully'],
   };
   const bodyTypeTips = bodyType ? BODY_TYPE_TIPS[bodyType] || [] : [];
-  const effectiveGender = isSeasonal ? seasonalGender : (isFemale ? 'female' : 'male');
   const shirtCategory = effectiveGender === 'female' ? "dress" : "shirt";
   const pantCategory = effectiveGender === 'female' ? "bottom" : "pant";
   const styleTips = isSeasonal ? (recommendations.outfit_tips || []) : (recommendations.style_tips || []);
-  const occasionAdvice = recommendations.occasion_advice || {};
+  const rawOccasionAdvice = recommendations.occasion_advice || {};
+  const occasionAdvice = Object.keys(rawOccasionAdvice).length > 0
+    ? rawOccasionAdvice
+    : deriveOccasionAdvice(effectiveGender, analysis, isSeasonal ? (finalData.season || 'summer') : null);
   const sareeSuggestions = recommendations.saree_suggestions || [];
   const [shopItem, setShopItem] = useState(null);
   const [shopBudget, setShopBudget] = useState(null);

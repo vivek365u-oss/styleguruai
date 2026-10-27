@@ -269,7 +269,14 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   const [uploadProgress, setUploadProgress_internal] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
   const { progress, startProgress, completeProgress } = useAnalysisProgress();
-  const [gender, setGender] = useState(() => localStorage.getItem('sg_gender') || 'male');
+  const [gender, setGender] = useState(() => {
+    const saved = localStorage.getItem('sg_gender');
+    if (saved === 'female') return 'female';
+    if (saved !== 'male') {
+      localStorage.setItem('sg_gender', 'male');
+    }
+    return 'male';
+  });
   const [mode, setMode] = useState('normal');
   const [season, setSeason] = useState('summer');
   const bodyType = 'average';
@@ -303,16 +310,17 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   };
 
   const handleGenderChange = (newGender) => {
-    setGender(newGender);
+    const validGender = newGender === 'female' ? 'female' : 'male';
+    setGender(validGender);
     // Keep localStorage as quick cache
-    localStorage.setItem('sg_gender', newGender);
+    localStorage.setItem('sg_gender', validGender);
     // Also persist to Firestore for cross-device sync
     if (auth.currentUser) {
-      saveUserPreferences(auth.currentUser.uid, { gender: newGender }).catch(err =>
+      saveUserPreferences(auth.currentUser.uid, { gender: validGender }).catch(err =>
         console.warn('[UploadSection] Failed to sync gender to Firestore:', err)
       );
     }
-    if (onGenderChange) onGenderChange(newGender);
+    if (onGenderChange) onGenderChange(validGender);
   };
 
   const handleFile = async (file, pendingResult = null) => {
@@ -382,12 +390,23 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
       return; // Stop here! No limit consumed.
     }
 
-    const finalGender = mode === 'seasonal' ? 'seasonal' : gender;
-    const finalPayload = { ...res.data, gender: finalGender, seasonalGender: mode === 'seasonal' ? gender : 'male', bodyType, occasion, budget, eyeColor };
+    const activeGender = gender === 'female' ? 'female' : 'male';
+    const finalPayload = { 
+      ...res.data, 
+      gender: activeGender, 
+      mode: mode,
+      isSeasonal: mode === 'seasonal',
+      season: mode === 'seasonal' ? season : undefined,
+      seasonalGender: activeGender, 
+      bodyType, 
+      occasion, 
+      budget, 
+      eyeColor 
+    };
     console.log("[UploadSection] Analysis successful!");
     completeProgress();
     setTimeout(() => {
-      console.log("[UploadSection] Passing gender:", finalGender, "to ResultsDisplay");
+      console.log("[UploadSection] Passing gender:", activeGender, "mode:", mode, "to ResultsDisplay");
       onAnalysisComplete(finalPayload);
       setShowProgress(false);
     }, 450);

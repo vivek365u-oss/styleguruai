@@ -1181,7 +1181,7 @@ export default function AppShell({ user, onLogout }) {
   const [adSkipped, setAdSkipped] = useState(false);
   const [error, setError] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
-  const [currentGender, setCurrentGender] = useState(localStorage.getItem('sg_gender') || 'male');
+  const [currentGender, setCurrentGender] = useState(() => (localStorage.getItem('sg_gender') === 'female' ? 'female' : 'male'));
   const [lastAnalysis, setLastAnalysis] = useState(() => {
     try { return JSON.parse(localStorage.getItem('sg_last_analysis') || 'null'); } catch { return null; }
   });
@@ -1536,6 +1536,7 @@ export default function AppShell({ user, onLogout }) {
                   onImageSelected={setUploadedImage}
                   currentGender={currentGender}
                   setCurrentGender={setCurrentGender}
+                  onGenderChange={setCurrentGender}
                   isPro={isPro}
                   usage={usage}
                   coins={coins}
