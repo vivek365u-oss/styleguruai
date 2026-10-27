@@ -6,6 +6,7 @@ import { LoadingScreenWithProgress } from './LoadingScreenWithProgress';
 import { useAnalysisProgress } from '../hooks/useAnalysisProgress';
 import { FashionIcons, IconRenderer } from './Icons';
 import { compressImage } from '../utils/imageCompressor';
+import CameraModal from './CameraModal';
 
 // ── Skin Tone Quiz ────────────────────────────────────────────
 function SkinToneQuiz({ isDark, onResult, gender }) {
@@ -282,12 +283,13 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
   const occasion = 'casual';
   const budget = 'any';
   const [eyeColor, setEyeColor] = useState('brown');
+  const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
   const handleOpenSelfieCamera = (e) => {
     if (e) e.stopPropagation();
-    cameraInputRef.current?.click();
+    setIsCameraModalOpen(true);
   };
 
   // Couple Mode States
@@ -748,10 +750,7 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
                       <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto" onClick={e => e.stopPropagation()}>
                         <button
                           type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            cameraInputRef.current?.click();
-                          }}
+                          onClick={handleOpenSelfieCamera}
                           className="flex-1 py-3.5 px-6 rounded-2xl text-sm font-bold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-lg shadow-purple-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                         >
                           <span className="text-base">📸</span>
@@ -822,6 +821,16 @@ function UploadSection({ onLoadingStart, onAnalysisComplete, onError, onImageSel
           <SkinToneQuiz isDark={isDark} onResult={onAnalysisComplete} gender={gender} />
         </>
       )}
+
+      {/* Live Selfie Camera Modal */}
+      <CameraModal
+        isOpen={isCameraModalOpen}
+        onClose={() => setIsCameraModalOpen(false)}
+        onCapture={(capturedFile) => handleFile(capturedFile)}
+        onFallbackNativeCamera={() => cameraInputRef.current?.click()}
+        onFallbackGallery={() => fileInputRef.current?.click()}
+        isDark={isDark}
+      />
     </div>
   );
 }

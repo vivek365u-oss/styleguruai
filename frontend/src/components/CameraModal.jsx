@@ -1,17 +1,18 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { FiCamera, FiRefreshCw, FiX, FiCheck, FiAlertCircle, FiImage } from 'react-icons/fi';
+import { FiCamera, FiRefreshCw, FiX, FiCheck, FiImage, FiLock, FiSmartphone } from 'react-icons/fi';
 
 /**
  * CameraModal
- * A premium, full-featured live camera viewfinder for capturing high-quality selfies.
+ * A resilient, premium live camera viewfinder for capturing high-quality selfies.
  * Supports:
- * - Live front (selfie) & back camera stream via getUserMedia
- * - Mirroring for natural front-facing selfie feel
- * - Oval face alignment guide
- * - Shutter click flash animation
+ * - Multi-tier progressive stream constraints (ideal 720p -> facingMode -> basic video)
+ * - Automatic webcam recovery on laptop / desktop browsers without facingMode
+ * - Live permission change detection (auto-recovers when user unblocks in address bar)
+ * - Step-by-step bilingual guidance when camera permission is blocked
+ * - Oval face alignment guide & visual flash animation
  * - Instant photo review (Retake / Use Photo)
- * - Safe fallback to native camera & gallery if permissions are denied
+ * - Fallbacks to native mobile camera and photo gallery
  */
 export default function CameraModal({
   isOpen,
@@ -28,7 +29,7 @@ export default function CameraModal({
   const [capturedImage, setCapturedImage] = useState(null);
   const [cameraError, setCameraError] = useState(null);
   const [flashActive, setFlashActive] = useState(false);
-  const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
+  const [hasMultipleCameras, setHasMultipleCameras] = useState(true);
 
   // Stop camera tracks safely
   const stopStream = useCallback(() => {
@@ -53,13 +54,15 @@ export default function CameraModal({
     if (!navigator.mediaDevices?.enumerateDevices) return;
     navigator.mediaDevices.enumerateDevices().then((devices) => {
       const videoDevices = devices.filter((d) => d.kind === 'videoinput');
-      setHasMultipleCameras(videoDevices.length > 1);
+      if (videoDevices.length > 0) {
+        setHasMultipleCameras(videoDevices.length > 1);
+      }
     }).catch(() => {
       setHasMultipleCameras(true); // default to allowing flip
     });
-  }, []);
+  }, [isStreaming]);
 
-  // Start camera stream
+  // Start camera stream with multi-tier progressive fallback
   const startCamera = useCallback(async (mode = facingMode) => {
     stopStream();
     setCameraError(null);
@@ -68,52 +71,108 @@ export default function CameraModal({
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setCameraError({
         type: 'unsupported',
+        title: 'Camera Not Supported',
         message: 'Direct camera access is not supported by your browser or connection (HTTPS is required).',
       });
       return;
     }
 
-    try {
-      const constraints = {
+    let stream = null;
+    let lastError = null;
+
+    // Constraint attempt tiers:
+    // 1. High resolution with requested facingMode
+    // 2. FacingMode only (relaxed resolution)
+    // 3. Fallback video: true (universal support for any webcam / laptop / mobile)
+    const constraintTiers = [
+      {
         video: {
           facingMode: mode,
           width: { ideal: 1280 },
           height: { ideal: 720 },
         },
         audio: false,
-      };
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      streamRef.current = stream;
+      },
+      {
+        video: {
+          facingMode: mode,
+        },
+        audio: false,
+      },
+      {
+        video: true,
+        audio: false,
+      },
+    ];
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current
-            .play()
-            .then(() => setIsStreaming(true))
-            .catch((playErr) => console.warn('Video play error:', playErr));
-        };
+    for (const constraints of constraintTiers) {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        if (stream) break;
+      } catch (err) {
+        lastError = err;
+        // If the user actively blocked permission, don't keep churning through tiers
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          break;
+        }
       }
-    } catch (err) {
-      console.error('Camera stream error:', err);
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+    }
+
+    if (!stream) {
+      console.warn('Camera stream acquisition failed:', lastError);
+      if (lastError?.name === 'NotAllowedError' || lastError?.name === 'PermissionDeniedError') {
         setCameraError({
           type: 'permission',
-          message: 'Camera permission denied. Please allow camera access in browser settings to take a selfie directly.',
+          title: 'Camera Access Blocked',
+          message: 'Camera permission is blocked in your browser.',
         });
-      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+      } else if (lastError?.name === 'NotFoundError' || lastError?.name === 'DevicesNotFoundError') {
         setCameraError({
           type: 'not_found',
+          title: 'No Camera Found',
           message: 'No camera hardware found on this device.',
         });
       } else {
         setCameraError({
           type: 'generic',
-          message: 'Unable to start camera viewfinder. You can use your device camera or pick from gallery.',
+          title: 'Camera Unavailable',
+          message: 'Unable to start camera stream. Please check camera permissions or use your device camera.',
         });
+      }
+      return;
+    }
+
+    streamRef.current = stream;
+
+    // Attach stream to video DOM element
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.muted = true;
+      try {
+        await videoRef.current.play();
+        setIsStreaming(true);
+      } catch (playErr) {
+        console.warn('Direct play error, attaching onloadedmetadata listener:', playErr);
+        videoRef.current.onloadedmetadata = () => {
+          if (!videoRef.current) return;
+          videoRef.current.muted = true;
+          videoRef.current
+            .play()
+            .then(() => setIsStreaming(true))
+            .catch((err) => console.warn('Video play error on metadata:', err));
+        };
       }
     }
   }, [facingMode, stopStream]);
+
+  // Keep videoRef in sync if it mounts after stream is acquired
+  useEffect(() => {
+    if (isOpen && streamRef.current && videoRef.current && !videoRef.current.srcObject) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.muted = true;
+      videoRef.current.play().then(() => setIsStreaming(true)).catch((e) => console.warn('Sync play error:', e));
+    }
+  }, [isOpen, cameraError, isStreaming]);
 
   // Launch camera when modal opens, clean up on close
   useEffect(() => {
@@ -129,7 +188,21 @@ export default function CameraModal({
     return () => {
       stopStream();
     };
-  }, [isOpen, facingMode, startCamera, stopStream]);
+  }, [isOpen]);
+
+  // Auto-recover when user toggles permission in browser address bar
+  useEffect(() => {
+    if (!isOpen || isStreaming) return;
+    if (typeof navigator !== 'undefined' && navigator.permissions?.query) {
+      navigator.permissions.query({ name: 'camera' }).then((status) => {
+        status.onchange = () => {
+          if (status.state === 'granted') {
+            startCamera(facingMode);
+          }
+        };
+      }).catch(() => {});
+    }
+  }, [isOpen, isStreaming, facingMode, startCamera]);
 
   // Switch facing mode (front / back)
   const toggleFacingMode = () => {
@@ -206,12 +279,12 @@ export default function CameraModal({
               <FiCamera className="w-4 h-4" />
             </span>
             <span className="text-sm font-bold tracking-tight">
-              {capturedImage ? 'Review Selfie' : 'Instant AI Selfie'}
+              {capturedImage ? 'Review Selfie' : 'Instant AI Camera'}
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            {!capturedImage && hasMultipleCameras && (
+            {!capturedImage && hasMultipleCameras && !cameraError && (
               <button
                 type="button"
                 onClick={toggleFacingMode}
@@ -237,13 +310,51 @@ export default function CameraModal({
         {/* Viewfinder / Review Area */}
         <div className="relative flex-1 min-h-[380px] sm:min-h-[440px] bg-black flex items-center justify-center overflow-hidden">
           {cameraError ? (
-            /* Error State */
-            <div className="p-6 text-center text-white max-w-xs space-y-4">
-              <div className="w-14 h-14 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto text-2xl">
-                <FiAlertCircle />
+            /* Error State with Clear Actionable Steps */
+            <div className="p-5 text-center text-white max-w-sm mx-auto space-y-4 animate-fadeIn">
+              <div className="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-2xl border border-amber-500/30 shadow-lg">
+                <FiLock />
               </div>
-              <p className="text-sm font-semibold">{cameraError.message}</p>
-              <div className="space-y-2 pt-2">
+              
+              <div>
+                <h4 className="text-base font-black text-white mb-1">
+                  {cameraError.title || 'Camera Access Blocked'}
+                </h4>
+                <p className="text-xs text-amber-300 font-semibold mb-3">
+                  कैमरा परमिशन ब्लॉक है — 5 सेकंड में चालू करें:
+                </p>
+
+                {cameraError.type === 'permission' ? (
+                  <div className="bg-white/[0.07] rounded-2xl p-3.5 text-left border border-white/10 space-y-2 text-xs">
+                    <div className="flex items-start gap-2">
+                      <span className="w-5 h-5 rounded-full bg-purple-500/30 text-purple-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
+                      <span className="text-white/80">Browser ke top address bar me <b>🔒 Lock</b> ya <b>Site Settings</b> icon dabayein.</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="w-5 h-5 rounded-full bg-purple-500/30 text-purple-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
+                      <span className="text-white/80"><b>Permissions</b> me jaakar <b>Camera</b> ko <b>Allow</b> karein.</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="w-5 h-5 rounded-full bg-purple-500/30 text-purple-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
+                      <span className="text-white/80">Niche <b>"Try Camera Again"</b> dabayein.</span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-white/70 bg-white/5 p-3 rounded-xl border border-white/10">
+                    {cameraError.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => startCamera(facingMode)}
+                  className="w-full py-3 px-4 rounded-xl text-xs sm:text-sm font-black text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-lg shadow-purple-500/30 transition-all active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <FiRefreshCw className="w-4 h-4" /> Try Camera Again / फिर से कोशिश करें
+                </button>
+
                 {onFallbackNativeCamera && (
                   <button
                     type="button"
@@ -251,11 +362,12 @@ export default function CameraModal({
                       onClose();
                       onFallbackNativeCamera();
                     }}
-                    className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-md transition-all active:scale-95"
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-white/10 hover:bg-white/15 border border-white/10 transition-all active:scale-95 flex items-center justify-center gap-1.5"
                   >
-                    📸 Open System Camera
+                    <FiSmartphone className="w-3.5 h-3.5" /> 📸 Use Phone Camera App
                   </button>
                 )}
+
                 {onFallbackGallery && (
                   <button
                     type="button"
@@ -263,18 +375,11 @@ export default function CameraModal({
                       onClose();
                       onFallbackGallery();
                     }}
-                    className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white/90 bg-white/10 hover:bg-white/15 border border-white/10 transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-medium text-white/60 hover:text-white transition-all flex items-center justify-center gap-1.5"
                   >
-                    <FiImage className="w-3.5 h-3.5" /> Browse Gallery Instead
+                    <FiImage className="w-3.5 h-3.5" /> 🖼️ Browse Gallery Instead
                   </button>
                 )}
-                <button
-                  type="button"
-                  onClick={() => startCamera(facingMode)}
-                  className="w-full py-2 px-4 rounded-xl text-xs font-medium text-white/60 hover:text-white transition-all"
-                >
-                  Try Camera Again
-                </button>
               </div>
             </div>
           ) : capturedImage ? (
