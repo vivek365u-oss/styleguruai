@@ -1,18 +1,18 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { FiCamera, FiRefreshCw, FiX, FiCheck, FiImage, FiLock, FiSmartphone } from 'react-icons/fi';
+import { FiCamera, FiRefreshCw, FiX, FiCheck, FiImage, FiLock, FiSmartphone, FiAlertCircle } from 'react-icons/fi';
 
 /**
  * CameraModal
- * A resilient, premium live camera viewfinder for capturing high-quality selfies.
- * Supports:
- * - Multi-tier progressive stream constraints (ideal 720p -> facingMode -> basic video)
- * - Automatic webcam recovery on laptop / desktop browsers without facingMode
- * - Live permission change detection (auto-recovers when user unblocks in address bar)
- * - Step-by-step bilingual guidance when camera permission is blocked
- * - Oval face alignment guide & visual flash animation
- * - Instant photo review (Retake / Use Photo)
- * - Fallbacks to native mobile camera and photo gallery
+ * A resilient, production-grade camera viewfinder for taking selfies on both Desktop & Mobile.
+ * 
+ * Key Features:
+ * - Differentiates Desktop (ASUS / PC webcams) from Mobile (Android / iOS):
+ *   Desktop uses universal video constraints (avoids OverconstrainedError on webcams without facingMode).
+ * - Exact Error Diagnostics (Permission Blocked vs Camera Busy/In-Use vs Hardware Disabled).
+ * - Actionable Bilingual Guidance (Hindi & English) for each failure scenario.
+ * - Concurrency guard to prevent stream race conditions.
+ * - Smooth visual loading state, oval face guide, flash effect, and photo review.
  */
 export default function CameraModal({
   isOpen,
@@ -24,14 +24,19 @@ export default function CameraModal({
 }) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+  const inProgressRef = useRef(false);
+
   const [facingMode, setFacingMode] = useState('user');
   const [isStreaming, setIsStreaming] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
   const [cameraError, setCameraError] = useState(null);
   const [flashActive, setFlashActive] = useState(false);
-  const [hasMultipleCameras, setHasMultipleCameras] = useState(true);
+  const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
 
-  // Stop camera tracks safely
+  // Check if current device is mobile
+  const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  // Safely stop all active media stream tracks
   const stopStream = useCallback(() => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => {
@@ -49,30 +54,34 @@ export default function CameraModal({
     setIsStreaming(false);
   }, []);
 
-  // Check available cameras
+  // Inspect available cameras on mobile to toggle front/back
   useEffect(() => {
-    if (!navigator.mediaDevices?.enumerateDevices) return;
+    if (!isMobile || !navigator.mediaDevices?.enumerateDevices) return;
     navigator.mediaDevices.enumerateDevices().then((devices) => {
       const videoDevices = devices.filter((d) => d.kind === 'videoinput');
-      if (videoDevices.length > 0) {
-        setHasMultipleCameras(videoDevices.length > 1);
-      }
+      setHasMultipleCameras(videoDevices.length > 1);
     }).catch(() => {
-      setHasMultipleCameras(true); // default to allowing flip
+      setHasMultipleCameras(true);
     });
-  }, [isStreaming]);
+  }, [isMobile, isStreaming]);
 
-  // Start camera stream with multi-tier progressive fallback
+  // Start camera stream with progressive fallback tiers
   const startCamera = useCallback(async (mode = facingMode) => {
+    if (inProgressRef.current) return;
+    inProgressRef.current = true;
+
     stopStream();
     setCameraError(null);
     setIsStreaming(false);
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      inProgressRef.current = false;
       setCameraError({
         type: 'unsupported',
         title: 'Camera Not Supported',
         message: 'Direct camera access is not supported by your browser or connection (HTTPS is required).',
+        rawName: 'NotSupportedError',
+        rawMessage: 'navigator.mediaDevices.getUserMedia is unavailable.',
       });
       return;
     }
@@ -80,30 +89,19 @@ export default function CameraModal({
     let stream = null;
     let lastError = null;
 
-    // Constraint attempt tiers:
-    // 1. High resolution with requested facingMode
-    // 2. FacingMode only (relaxed resolution)
-    // 3. Fallback video: true (universal support for any webcam / laptop / mobile)
-    const constraintTiers = [
-      {
-        video: {
-          facingMode: mode,
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-        audio: false,
-      },
-      {
-        video: {
-          facingMode: mode,
-        },
-        audio: false,
-      },
-      {
-        video: true,
-        audio: false,
-      },
-    ];
+    // Constraint Tiers:
+    // On Desktop: do NOT use facingMode because PC webcams (e.g. ASUS HD webcam) fail on facingMode.
+    // On Mobile: use facingMode ('user' for front selfie, 'environment' for rear).
+    const constraintTiers = isMobile
+      ? [
+          { video: { facingMode: mode, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+          { video: { facingMode: mode }, audio: false },
+          { video: true, audio: false },
+        ]
+      : [
+          { video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+          { video: true, audio: false },
+        ];
 
     for (const constraints of constraintTiers) {
       try {
@@ -111,34 +109,66 @@ export default function CameraModal({
         if (stream) break;
       } catch (err) {
         lastError = err;
-        // If the user actively blocked permission, don't keep churning through tiers
+        // If permission was strictly denied by user, stop trying more tiers
         if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
           break;
         }
       }
     }
 
+    inProgressRef.current = false;
+
     if (!stream) {
       console.warn('Camera stream acquisition failed:', lastError);
-      if (lastError?.name === 'NotAllowedError' || lastError?.name === 'PermissionDeniedError') {
-        setCameraError({
-          type: 'permission',
-          title: 'Camera Access Blocked',
-          message: 'Camera permission is blocked in your browser.',
-        });
-      } else if (lastError?.name === 'NotFoundError' || lastError?.name === 'DevicesNotFoundError') {
-        setCameraError({
-          type: 'not_found',
-          title: 'No Camera Found',
-          message: 'No camera hardware found on this device.',
-        });
-      } else {
-        setCameraError({
-          type: 'generic',
-          title: 'Camera Unavailable',
-          message: 'Unable to start camera stream. Please check camera permissions or use your device camera.',
-        });
+      const errName = lastError?.name || 'CameraError';
+      const errMsg = lastError?.message || String(lastError || '');
+
+      let errorType = 'generic';
+      let errorTitle = 'Camera Unavailable';
+      let errorDesc = 'Unable to start camera stream.';
+
+      if (
+        errName === 'NotAllowedError' ||
+        errName === 'PermissionDeniedError' ||
+        errName === 'SecurityError' ||
+        errMsg.toLowerCase().includes('denied') ||
+        errMsg.toLowerCase().includes('permission') ||
+        errMsg.toLowerCase().includes('not allowed')
+      ) {
+        errorType = 'permission';
+        errorTitle = 'Camera Permission Blocked';
+        errorDesc = 'Browser me camera permission blocked hai.';
+      } else if (
+        errName === 'NotReadableError' ||
+        errName === 'TrackStartError' ||
+        errMsg.toLowerCase().includes('could not start video source') ||
+        errMsg.toLowerCase().includes('in use') ||
+        errMsg.toLowerCase().includes('busy')
+      ) {
+        errorType = 'in_use';
+        errorTitle = 'Camera In Use or Hardware Disabled';
+        errorDesc = 'Webcam kisi aur app me open hai ya laptop camera switch band hai.';
+      } else if (
+        errName === 'NotFoundError' ||
+        errName === 'DevicesNotFoundError' ||
+        errMsg.toLowerCase().includes('not found')
+      ) {
+        errorType = 'not_found';
+        errorTitle = 'No Camera Device Found';
+        errorDesc = 'Device par koi camera hardware nahi mila.';
+      } else if (errName === 'OverconstrainedError') {
+        errorType = 'overconstrained';
+        errorTitle = 'Camera Resolution Conflict';
+        errorDesc = 'Camera requested settings support nahi karta.';
       }
+
+      setCameraError({
+        type: errorType,
+        title: errorTitle,
+        message: errorDesc,
+        rawName: errName,
+        rawMessage: errMsg,
+      });
       return;
     }
 
@@ -152,18 +182,18 @@ export default function CameraModal({
         await videoRef.current.play();
         setIsStreaming(true);
       } catch (playErr) {
-        console.warn('Direct play error, attaching onloadedmetadata listener:', playErr);
+        console.warn('Direct play error, attaching metadata handler:', playErr);
         videoRef.current.onloadedmetadata = () => {
           if (!videoRef.current) return;
           videoRef.current.muted = true;
           videoRef.current
             .play()
             .then(() => setIsStreaming(true))
-            .catch((err) => console.warn('Video play error on metadata:', err));
+            .catch((err) => console.warn('Play error on metadata:', err));
         };
       }
     }
-  }, [facingMode, stopStream]);
+  }, [facingMode, isMobile, stopStream]);
 
   // Keep videoRef in sync if it mounts after stream is acquired
   useEffect(() => {
@@ -204,7 +234,7 @@ export default function CameraModal({
     }
   }, [isOpen, isStreaming, facingMode, startCamera]);
 
-  // Switch facing mode (front / back)
+  // Switch facing mode (front / back) - Mobile only
   const toggleFacingMode = () => {
     const nextMode = facingMode === 'user' ? 'environment' : 'user';
     setFacingMode(nextMode);
@@ -227,7 +257,7 @@ export default function CameraModal({
     setTimeout(() => setFlashActive(false), 200);
 
     // Front camera is displayed mirrored, so mirror it horizontally before drawing
-    if (facingMode === 'user') {
+    if (facingMode === 'user' || !isMobile) {
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
     }
@@ -279,7 +309,7 @@ export default function CameraModal({
               <FiCamera className="w-4 h-4" />
             </span>
             <span className="text-sm font-bold tracking-tight">
-              {capturedImage ? 'Review Selfie' : 'Instant AI Camera'}
+              {capturedImage ? 'Review Selfie' : (isMobile ? 'Instant AI Camera' : 'Webcam Selfie')}
             </span>
           </div>
 
@@ -310,40 +340,75 @@ export default function CameraModal({
         {/* Viewfinder / Review Area */}
         <div className="relative flex-1 min-h-[380px] sm:min-h-[440px] bg-black flex items-center justify-center overflow-hidden">
           {cameraError ? (
-            /* Error State with Clear Actionable Steps */
+            /* Error State with Precise Actionable Guidance */
             <div className="p-5 text-center text-white max-w-sm mx-auto space-y-4 animate-fadeIn">
               <div className="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-2xl border border-amber-500/30 shadow-lg">
-                <FiLock />
+                {cameraError.type === 'permission' ? <FiLock /> : <FiAlertCircle />}
               </div>
               
               <div>
                 <h4 className="text-base font-black text-white mb-1">
-                  {cameraError.title || 'Camera Access Blocked'}
+                  {cameraError.title}
                 </h4>
-                <p className="text-xs text-amber-300 font-semibold mb-3">
-                  कैमरा परमिशन ब्लॉक है — 5 सेकंड में चालू करें:
-                </p>
 
-                {cameraError.type === 'permission' ? (
-                  <div className="bg-white/[0.07] rounded-2xl p-3.5 text-left border border-white/10 space-y-2 text-xs">
-                    <div className="flex items-start gap-2">
-                      <span className="w-5 h-5 rounded-full bg-purple-500/30 text-purple-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
-                      <span className="text-white/80">Browser ke top address bar me <b>🔒 Lock</b> ya <b>Site Settings</b> icon dabayein.</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="w-5 h-5 rounded-full bg-purple-500/30 text-purple-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
-                      <span className="text-white/80"><b>Permissions</b> me jaakar <b>Camera</b> ko <b>Allow</b> karein.</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="w-5 h-5 rounded-full bg-purple-500/30 text-purple-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
-                      <span className="text-white/80">Niche <b>"Try Camera Again"</b> dabayein.</span>
+                {/* Scenario 1: Permission Blocked */}
+                {cameraError.type === 'permission' && (
+                  <div className="space-y-2 mt-2">
+                    <p className="text-xs text-amber-300 font-semibold">
+                      कैमरा परमिशन ब्लॉक है — 5 सेकंड में चालू करें:
+                    </p>
+                    <div className="bg-white/[0.07] rounded-2xl p-3.5 text-left border border-white/10 space-y-2 text-xs">
+                      <div className="flex items-start gap-2">
+                        <span className="w-5 h-5 rounded-full bg-purple-500/30 text-purple-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
+                        <span className="text-white/80">Browser ke top address bar me <b>🔒 Lock</b> ya <b>Site Settings</b> icon dabayein.</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="w-5 h-5 rounded-full bg-purple-500/30 text-purple-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
+                        <span className="text-white/80"><b>Camera</b> permission ko <b>Allow</b> karein.</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="w-5 h-5 rounded-full bg-purple-500/30 text-purple-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
+                        <span className="text-white/80">Niche <b>"Try Camera Again"</b> dabayein.</span>
+                      </div>
                     </div>
                   </div>
-                ) : (
-                  <p className="text-xs text-white/70 bg-white/5 p-3 rounded-xl border border-white/10">
-                    {cameraError.message}
-                  </p>
                 )}
+
+                {/* Scenario 2: Camera In Use / Hardware Disabled (Common on ASUS / PC) */}
+                {cameraError.type === 'in_use' && (
+                  <div className="space-y-2 mt-2">
+                    <p className="text-xs text-amber-300 font-semibold">
+                      कैमरा किसी और ऐप में व्यस्त है या बंद है:
+                    </p>
+                    <div className="bg-white/[0.07] rounded-2xl p-3.5 text-left border border-white/10 space-y-2 text-xs">
+                      <div className="flex items-start gap-2">
+                        <span className="w-5 h-5 rounded-full bg-amber-500/30 text-amber-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
+                        <span className="text-white/80">Zoom, Google Meet, Teams ya Windows Camera app open ho toh <b>close karein</b>.</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="w-5 h-5 rounded-full bg-amber-500/30 text-amber-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
+                        <span className="text-white/80">Laptop camera slider / shutter open karein ya keyboard pe <b>Fn + F10</b> dabayein.</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="w-5 h-5 rounded-full bg-amber-500/30 text-amber-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
+                        <span className="text-white/80">Dusre browser tabs jo camera use kar rahe hon unhe close karein.</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Scenario 3: Generic / Device Not Found */}
+                {cameraError.type !== 'permission' && cameraError.type !== 'in_use' && (
+                  <div className="mt-2 bg-white/[0.07] p-3 rounded-2xl border border-white/10 text-xs text-white/80">
+                    <p className="mb-1 font-semibold">{cameraError.message}</p>
+                    <p className="text-[11px] text-white/50">Kripya photo file upload karke bhi style analysis kar sakte hain.</p>
+                  </div>
+                )}
+
+                {/* Technical Diagnostics Tag */}
+                <div className="mt-3 px-2 py-1 rounded-lg bg-black/40 border border-white/5 inline-block text-[10px] text-white/40 font-mono">
+                  {cameraError.rawName}: {cameraError.rawMessage}
+                </div>
               </div>
 
               <div className="space-y-2 pt-1">
@@ -355,7 +420,7 @@ export default function CameraModal({
                   <FiRefreshCw className="w-4 h-4" /> Try Camera Again / फिर से कोशिश करें
                 </button>
 
-                {onFallbackNativeCamera && (
+                {isMobile && onFallbackNativeCamera && (
                   <button
                     type="button"
                     onClick={() => {
@@ -375,9 +440,9 @@ export default function CameraModal({
                       onClose();
                       onFallbackGallery();
                     }}
-                    className="w-full py-2.5 px-4 rounded-xl text-xs font-medium text-white/60 hover:text-white transition-all flex items-center justify-center gap-1.5"
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-medium text-white/70 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all flex items-center justify-center gap-1.5"
                   >
-                    <FiImage className="w-3.5 h-3.5" /> 🖼️ Browse Gallery Instead
+                    <FiImage className="w-3.5 h-3.5" /> 📁 {isMobile ? 'Browse Gallery Instead' : 'Upload Photo from Computer'}
                   </button>
                 )}
               </div>
@@ -399,13 +464,21 @@ export default function CameraModal({
           ) : (
             /* Live Camera Stream with Oval Guide */
             <div className="relative w-full h-full flex items-center justify-center">
+              {!isStreaming && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-10 gap-3">
+                  <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                  <p className="text-xs text-white/70 font-semibold animate-pulse">Connecting to camera...</p>
+                </div>
+              )}
+
               <video
                 ref={videoRef}
                 playsInline
                 autoPlay
                 muted
+                onCanPlay={() => setIsStreaming(true)}
                 style={{
-                  transform: facingMode === 'user' ? 'scaleX(-1)' : 'none',
+                  transform: facingMode === 'user' || !isMobile ? 'scaleX(-1)' : 'none',
                 }}
                 className="w-full h-full object-cover min-h-[380px] sm:min-h-[440px]"
               />
@@ -468,10 +541,10 @@ export default function CameraModal({
                   if (onFallbackGallery) onFallbackGallery();
                 }}
                 className="p-3 rounded-2xl bg-white/10 hover:bg-white/15 text-white/80 hover:text-white transition-all text-xs font-semibold flex flex-col items-center gap-1 active:scale-95"
-                title="Browse Gallery"
+                title={isMobile ? 'Browse Gallery' : 'Upload File'}
               >
                 <FiImage className="w-4 h-4" />
-                <span className="text-[10px]">Gallery</span>
+                <span className="text-[10px]">{isMobile ? 'Gallery' : 'Upload'}</span>
               </button>
 
               {/* Shutter Button */}
@@ -491,8 +564,8 @@ export default function CameraModal({
                 </div>
               </button>
 
-              {/* Switch Camera */}
-              {hasMultipleCameras ? (
+              {/* Switch Camera (Mobile only) */}
+              {isMobile && hasMultipleCameras ? (
                 <button
                   type="button"
                   onClick={toggleFacingMode}
